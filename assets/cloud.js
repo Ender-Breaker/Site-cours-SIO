@@ -1,0 +1,272 @@
+/* Étude Facile — compte Firebase : connexion (Google / e-mail), pseudo, synchronisation de la progression.
+   Chargé automatiquement par app.js si data/firebase-config.js contient une configuration.
+   Firestore :
+     prives/{uid}   → { sync: { "ef-progress": "…json…", … }, maj }          (lecture/écriture : soi seul)
+     profils/{uid}  → { pseudo, stats: { chapitres, missions, score }, maj }  (lecture : tous — leaderboard)
+     pseudos/{pseudo en minuscules} → { uid }                                 (réservation d'un pseudo unique) */
+const V = "13.2.0";
+const SDK = window.EF_FIREBASE_SDK || `https://www.gstatic.com/firebasejs/${V}/`;
+const [{ initializeApp }, A, F] = await Promise.all([
+  import(SDK + "firebase-app.js"), import(SDK + "firebase-auth.js"), import(SDK + "firebase-firestore.js")
+]);
+
+const app = initializeApp(window.EF_FIREBASE_CONFIG);
+const auth = A.getAuth(app);
+auth.languageCode = "fr";
+const db = F.getFirestore(app);
+const EF = window.EtudeFacile;
+const esc = EF.esc;
+
+const CLES = ["ef-progress", "ef-best", "ef-labo-terminal", "ef-labo-html", "ef-labo-php", "ef-labo-python"];
+let user = null, profil = null, etat = "", synchroPrete = false;
+
+/* ---------- interface : bouton de compte dans la barre du haut ---------- */
+const slot = document.createElement("div");
+slot.className = "compte";
+function place() {
+  const w = document.querySelector(".topbar .wrap");
+  if (w && !w.contains(slot)) w.appendChild(slot);
+  return !!w;
+}
+if (!place()) {
+  const mo = new MutationObserver(() => { if (place()) mo.disconnect(); });
+  mo.observe(document.documentElement, { childList: true, subtree: true });
+}
+
+function rendu() {
+  if (!user) {
+    slot.innerHTML = `<button type="button" class="compte-btn" data-a="ouvrir">Se connecter</button>`;
+    return;
+  }
+  const nom = profil && profil.pseudo ? profil.pseudo : "…";
+  slot.innerHTML = `<button type="button" class="compte-btn moi" data-a="menu" aria-haspopup="true" aria-expanded="false">
+      <span class="avatar">${esc(nom.charAt(0).toUpperCase())}</span><span class="nom">${esc(nom)}</span></button>
+    <div class="compte-menu" hidden>
+      <div class="cm-tete"><b>${esc(nom)}</b><span>${esc(user.email || "")}</span></div>
+      <div class="cm-etat">${esc(etat || "Progression synchronisée")}</div>
+      ${profil && profil.stats ? `<div class="cm-stats"><span><b>${profil.stats.chapitres}</b> chapitres</span><span><b>${profil.stats.missions}</b> missions</span><span><b>${profil.stats.score}</b> pts</span></div>` : ""}
+      <button type="button" data-a="pseudo">Changer de pseudo</button>
+      <button type="button" data-a="sortir">Se déconnecter</button>
+    </div>`;
+}
+slot.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-a]"); if (!b) return;
+  const a = b.dataset.a, menu = slot.querySelector(".compte-menu");
+  if (a === "ouvrir") modale("connexion");
+  else if (a === "menu") { menu.hidden = !menu.hidden; b.setAttribute("aria-expanded", String(!menu.hidden)); }
+  else if (a === "sortir") { A.signOut(auth); }
+  else if (a === "pseudo") { menu.hidden = true; modale("pseudo"); }
+});
+document.addEventListener("click", (e) => {
+  const m = slot.querySelector(".compte-menu");
+  if (m && !m.hidden && !slot.contains(e.target)) m.hidden = true;
+});
+
+/* ---------- fenêtre de connexion / pseudo ---------- */
+const dlg = document.createElement("dialog");
+dlg.className = "compte-dlg";
+document.body.appendChild(dlg);
+dlg.addEventListener("click", (e) => { if (e.target === dlg && !dlg.dataset.bloque) dlg.close(); });
+dlg.addEventListener("cancel", (e) => { if (dlg.dataset.bloque) e.preventDefault(); });
+
+const ERREURS = {
+  "auth/invalid-credential": "E-mail ou mot de passe incorrect.",
+  "auth/wrong-password": "Mot de passe incorrect.",
+  "auth/user-not-found": "Aucun compte avec cet e-mail.",
+  "auth/invalid-email": "Adresse e-mail invalide.",
+  "auth/email-already-in-use": "Un compte existe déjà avec cet e-mail : connecte-toi.",
+  "auth/weak-password": "Mot de passe trop faible : au moins 6 caractères.",
+  "auth/missing-password": "Saisis un mot de passe.",
+  "auth/too-many-requests": "Trop de tentatives. Réessaie dans quelques minutes.",
+  "auth/network-request-failed": "Pas de connexion réseau.",
+  "auth/popup-blocked": "La fenêtre Google a été bloquée par le navigateur.",
+  "auth/unauthorized-domain": "Ce site n'est pas autorisé dans Firebase (Authentication › Paramètres › Domaines autorisés).",
+  "auth/operation-not-allowed": "Cette méthode de connexion n'est pas activée dans Firebase.",
+  "auth/account-exists-with-different-credential": "Cet e-mail est déjà utilisé avec une autre méthode de connexion."
+};
+const msgErreur = (err) => ERREURS[err && err.code] || ("Erreur : " + ((err && (err.code || err.message)) || err));
+
+function modale(type, info) {
+  delete dlg.dataset.bloque;
+  if (type === "connexion" || type === "inscription") {
+    const insc = type === "inscription";
+    dlg.innerHTML = `<form method="dialog" class="cd-form" novalidate>
+      <button type="button" class="cd-x" data-a="fermer" aria-label="Fermer">×</button>
+      <h2>${insc ? "Créer un compte" : "Connexion"}</h2>
+      <p class="cd-sub">Retrouve ta progression sur tous tes appareils et apparais dans le classement.</p>
+      <button type="button" class="btn cd-google" data-a="google">${EF.icon("user") || ""} Continuer avec Google</button>
+      <div class="cd-ou"><span>ou avec ton e-mail</span></div>
+      <label>E-mail<input type="email" name="email" autocomplete="email" required></label>
+      <label>Mot de passe<input type="password" name="mdp" autocomplete="${insc ? "new-password" : "current-password"}" minlength="6" required></label>
+      ${insc ? "" : `<button type="button" class="cd-lien" data-a="oubli">Mot de passe oublié ?</button>`}
+      <p class="cd-err" role="alert"></p>
+      <button type="submit" class="btn primary">${insc ? "Créer mon compte" : "Se connecter"}</button>
+      <p class="cd-bas">${insc ? "Déjà un compte ?" : "Pas encore de compte ?"} <button type="button" class="cd-lien" data-a="${insc ? "connexion" : "inscription"}">${insc ? "Se connecter" : "Créer un compte"}</button></p>
+    </form>`;
+    const f = dlg.querySelector("form"), err = dlg.querySelector(".cd-err");
+    const occupe = (on) => f.querySelectorAll("button, input").forEach((x) => { x.disabled = on; });
+    f.addEventListener("submit", async (e) => {
+      e.preventDefault(); err.textContent = "";
+      const email = f.email.value.trim(), mdp = f.mdp.value;
+      occupe(true);
+      try {
+        if (insc) await A.createUserWithEmailAndPassword(auth, email, mdp);
+        else await A.signInWithEmailAndPassword(auth, email, mdp);
+        dlg.close();
+      } catch (x) { err.textContent = msgErreur(x); }
+      occupe(false);
+    });
+    f.addEventListener("click", async (e) => {
+      const b = e.target.closest("[data-a]"); if (!b) return;
+      const a = b.dataset.a; err.textContent = "";
+      if (a === "fermer") dlg.close();
+      else if (a === "connexion" || a === "inscription") modale(a);
+      else if (a === "google") {
+        occupe(true);
+        try { await A.signInWithPopup(auth, new A.GoogleAuthProvider()); dlg.close(); }
+        catch (x) {
+          if (x && x.code === "auth/popup-blocked") { await A.signInWithRedirect(auth, new A.GoogleAuthProvider()); return; }
+          if (!(x && (x.code === "auth/popup-closed-by-user" || x.code === "auth/cancelled-popup-request"))) err.textContent = msgErreur(x);
+        }
+        occupe(false);
+      } else if (a === "oubli") {
+        const email = f.email.value.trim();
+        if (!email) { err.textContent = "Saisis d'abord ton e-mail ci-dessus."; return; }
+        try { await A.sendPasswordResetEmail(auth, email); err.textContent = "E-mail de réinitialisation envoyé (pense aux spams)."; err.classList.add("ok"); }
+        catch (x) { err.textContent = msgErreur(x); }
+      }
+    });
+  } else if (type === "pseudo") {
+    const premier = !(profil && profil.pseudo);
+    if (premier) dlg.dataset.bloque = "1";
+    dlg.innerHTML = `<form method="dialog" class="cd-form" novalidate>
+      ${premier ? "" : `<button type="button" class="cd-x" data-a="fermer" aria-label="Fermer">×</button>`}
+      <h2>${premier ? "Choisis ton pseudo" : "Changer de pseudo"}</h2>
+      <p class="cd-sub">C'est le nom affiché dans le classement. 3 à 20 caractères : lettres, chiffres, tiret ou souligné.</p>
+      <label>Pseudo<input name="pseudo" maxlength="20" autocomplete="nickname" required value="${esc((profil && profil.pseudo) || info || "")}"></label>
+      <p class="cd-err" role="alert"></p>
+      <button type="submit" class="btn primary">Valider</button>
+      ${premier ? `<p class="cd-bas"><button type="button" class="cd-lien" data-a="sortir">Annuler et se déconnecter</button></p>` : ""}
+    </form>`;
+    const f = dlg.querySelector("form"), err = dlg.querySelector(".cd-err");
+    f.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-a]"); if (!b) return;
+      if (b.dataset.a === "fermer") dlg.close();
+      if (b.dataset.a === "sortir") { delete dlg.dataset.bloque; dlg.close(); A.signOut(auth); }
+    });
+    f.addEventListener("submit", async (e) => {
+      e.preventDefault(); err.textContent = "";
+      const p = f.pseudo.value.trim();
+      if (!/^[\p{L}\p{N}_-]{3,20}$/u.test(p)) { err.textContent = "3 à 20 caractères : lettres, chiffres, - ou _ (sans espace)."; return; }
+      f.querySelector("[type=submit]").disabled = true;
+      try { await choisirPseudo(p); delete dlg.dataset.bloque; dlg.close(); }
+      catch (x) { err.textContent = x.message === "pris" ? "Ce pseudo est déjà pris." : msgErreur(x); }
+      f.querySelector("[type=submit]").disabled = false;
+    });
+  }
+  if (!dlg.open) dlg.showModal();
+  const champ = dlg.querySelector("input"); if (champ) champ.focus();
+}
+
+/* ---------- pseudo unique (transaction : réserve le nouveau, libère l'ancien) ---------- */
+async function choisirPseudo(p) {
+  const uid = user.uid, cle = p.toLowerCase(), ancien = profil && profil.pseudo;
+  await F.runTransaction(db, async (t) => {
+    const ref = F.doc(db, "pseudos", cle), s = await t.get(ref);
+    if (s.exists() && s.data().uid !== uid) throw new Error("pris");
+    if (ancien && ancien.toLowerCase() !== cle) t.delete(F.doc(db, "pseudos", ancien.toLowerCase()));
+    t.set(ref, { uid });
+    t.set(F.doc(db, "profils", uid), { pseudo: p, stats: stats(), maj: F.serverTimestamp() }, { merge: true });
+  });
+  profil = Object.assign({}, profil, { pseudo: p, stats: stats() });
+  rendu();
+}
+
+/* ---------- statistiques (pour le classement) ---------- */
+function lit(k) { try { return JSON.parse(localStorage.getItem(k)) || {}; } catch (e) { return {}; } }
+function stats() {
+  const prog = lit("ef-progress");
+  const chapitres = Object.keys(prog).reduce((n, m) => n + (prog[m] || []).length, 0);
+  const missions = CLES.slice(2).reduce((n, k) => n + Object.keys(lit(k).done || {}).length, 0);
+  return { chapitres, missions, score: chapitres * 100 + missions * 20 };
+}
+
+/* ---------- fusion local ⇄ cloud ---------- */
+function fusion(k, loc, nuage) {
+  if (k === "ef-progress") {
+    const r = {};
+    new Set([...Object.keys(loc), ...Object.keys(nuage)]).forEach((m) => {
+      r[m] = [...new Set([...(nuage[m] || []), ...(loc[m] || [])])];
+    });
+    return r;
+  }
+  if (k === "ef-best") {
+    const r = Object.assign({}, nuage);
+    Object.keys(loc).forEach((c) => { if (typeof r[c] !== "number" || loc[c] > r[c]) r[c] = loc[c]; });
+    return r;
+  }
+  /* labos : missions réussies = union ; brouillons de code : le local prime */
+  return Object.assign({}, nuage, loc, {
+    done: Object.assign({}, nuage.done || {}, loc.done || {}),
+    code: Object.assign({}, nuage.code || {}, loc.code || {})
+  });
+}
+
+const setItemOrig = Storage.prototype.setItem;
+let minuteur = null;
+async function pousser() {
+  if (!user || !synchroPrete) return;
+  const sync = {};
+  CLES.forEach((k) => { const v = localStorage.getItem(k); if (v !== null) sync[k] = v; });
+  etat = "Synchronisation…"; rendu();
+  try {
+    const st = stats();
+    await F.setDoc(F.doc(db, "prives", user.uid), { sync, maj: F.serverTimestamp() }, { merge: true });
+    if (profil && profil.pseudo) {
+      await F.setDoc(F.doc(db, "profils", user.uid), { pseudo: profil.pseudo, stats: st, maj: F.serverTimestamp() }, { merge: true });
+      profil.stats = st;
+    }
+    etat = "Progression synchronisée";
+  } catch (x) { etat = "Synchronisation impossible (hors ligne ?)"; }
+  rendu();
+}
+Storage.prototype.setItem = function (k, v) {
+  setItemOrig.call(this, k, v);
+  if (this === localStorage && CLES.includes(k) && user) { clearTimeout(minuteur); minuteur = setTimeout(pousser, 1500); }
+};
+
+async function synchroniser() {
+  synchroPrete = false;
+  etat = "Récupération de ta progression…"; rendu();
+  const s = await F.getDoc(F.doc(db, "prives", user.uid));
+  const nuage = (s.exists() && s.data().sync) || {};
+  let change = false;
+  CLES.forEach((k) => {
+    let n = {}; try { n = JSON.parse(nuage[k] || "{}") || {}; } catch (e) { /* ignoré */ }
+    const avant = localStorage.getItem(k), loc = lit(k);
+    const res = JSON.stringify(fusion(k, loc, n));
+    if (res !== "{}" && res !== avant) { setItemOrig.call(localStorage, k, res); if (res !== JSON.stringify(loc)) change = true; }
+  });
+  synchroPrete = true;
+  await pousser();
+  /* la page affiche peut-être une progression périmée : on la recharge une fois */
+  if (change && !sessionStorage.getItem("ef-sync-recharge")) { sessionStorage.setItem("ef-sync-recharge", "1"); location.reload(); }
+  else sessionStorage.removeItem("ef-sync-recharge");
+}
+
+A.getRedirectResult(auth).catch(() => {});
+A.onAuthStateChanged(auth, async (u) => {
+  user = u; profil = null; synchroPrete = false; etat = "";
+  rendu();
+  if (!u) return;
+  try {
+    const p = await F.getDoc(F.doc(db, "profils", u.uid));
+    profil = p.exists() ? p.data() : {};
+    rendu();
+    await synchroniser();
+    if (!profil.pseudo) modale("pseudo", (u.displayName || "").split(" ")[0].replace(/[^\p{L}\p{N}_-]/gu, "").slice(0, 20));
+  } catch (x) { etat = "Erreur Firebase : " + (x.code || x.message); rendu(); }
+});
+
+window.EFCloud = { auth, db, F, A, user: () => user, profil: () => profil, stats, ouvrir: () => modale("connexion") };
+document.dispatchEvent(new CustomEvent("ef-cloud-pret"));

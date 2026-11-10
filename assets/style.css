@@ -455,3 +455,37 @@ pre .cm { color: #9aa0b8; font-style: italic; }
 .py-in { display: grid; gap: 4px; padding: 8px 12px; border-bottom: 1.5px solid var(--encre); background: var(--papier); font-size: .78rem; font-weight: 700; }
 .py-in textarea { font: .85rem/1.5 var(--mono); border: 1.5px solid var(--encre); border-radius: var(--r1); padding: 6px 8px; resize: vertical; background: var(--surface); }
 .py-console { margin: 0; min-height: 220px; max-height: 340px; overflow: auto; padding: 12px; background: var(--encre); color: #e8e4d8; font: .85rem/1.55 var(--mono); white-space: pre-wrap; word-break: break-word; }
+/* ===================== Compte (Firebase) ===================== */
+.topbar .wrap { gap: var(--s2); }
+.top-stat { margin-left: auto; }
+.compte { position: relative; }
+.compte-btn { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 4px 14px; border: var(--trait); border-radius: 99px; background: var(--safran); color: var(--encre); font-weight: 800; font-size: .88rem; box-shadow: 2px 2px 0 var(--encre); cursor: pointer; transition: transform var(--vite) var(--ease); }
+.compte-btn:hover { transform: translate(-1px, -1px); }
+.compte-btn.moi { background: var(--surface); padding: 3px 12px 3px 3px; }
+.compte-btn .avatar { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--cobalt); color: #fff; font-family: var(--titre); font-size: .9rem; border: 1.5px solid var(--encre); }
+.compte-btn .nom { max-width: 12ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.compte-menu { position: absolute; right: 0; top: calc(100% + 8px); width: 260px; background: var(--surface); color: var(--encre); border: var(--trait); border-radius: var(--r2); box-shadow: var(--ombre-2); padding: 8px; z-index: 30; display: grid; gap: 4px; }
+.compte-menu[hidden] { display: none; }
+.cm-tete { display: grid; padding: 6px 8px 8px; border-bottom: 1.5px dashed #b9b2a2; }
+.cm-tete span { font-size: .78rem; color: var(--discret); overflow: hidden; text-overflow: ellipsis; }
+.cm-etat { font-size: .78rem; font-weight: 700; color: var(--ok); padding: 4px 8px; }
+.cm-stats { display: flex; gap: 10px; padding: 2px 8px 6px; font-size: .78rem; }
+.compte-menu button { text-align: left; background: none; border: 0; padding: 8px; border-radius: var(--r1); font-weight: 700; cursor: pointer; color: var(--encre); }
+.compte-menu button:hover { background: var(--safran-clair); }
+.compte-dlg { border: var(--trait); border-radius: var(--r2); padding: 0; width: min(420px, 100% - 32px); box-shadow: var(--ombre-2); background: var(--surface); color: var(--encre); }
+.compte-dlg::backdrop { background: rgba(22, 24, 43, .55); }
+.cd-form { display: grid; gap: 12px; padding: var(--s3); position: relative; }
+.cd-form h2 { font-size: 1.8rem; margin: 0; }
+.cd-sub { margin: 0; font-size: .9rem; color: var(--discret); }
+.cd-form label { display: grid; gap: 4px; font-weight: 700; font-size: .88rem; }
+.cd-form input { font: inherit; font-weight: 500; padding: 10px 12px; border: var(--trait); border-radius: var(--r1); background: var(--papier); }
+.cd-form input:focus { outline: 3px solid var(--safran); outline-offset: 1px; }
+.cd-google { width: 100%; }
+.cd-ou { display: flex; align-items: center; gap: 10px; font-size: .78rem; color: var(--discret); font-weight: 700; }
+.cd-ou::before, .cd-ou::after { content: ""; flex: 1; border-top: 1.5px solid #c9c2b2; }
+.cd-lien { background: none; border: 0; padding: 0; color: var(--cobalt); font-weight: 700; text-decoration: underline; cursor: pointer; justify-self: start; font-size: .85rem; }
+.cd-err { margin: 0; min-height: 1.2em; color: var(--ko); font-weight: 700; font-size: .85rem; }
+.cd-err.ok { color: var(--ok); }
+.cd-bas { margin: 0; font-size: .85rem; text-align: center; }
+.cd-x { position: absolute; top: 10px; right: 12px; width: 32px; height: 32px; border: var(--trait); border-radius: 50%; background: var(--papier); font-size: 1.1rem; font-weight: 800; line-height: 1; cursor: pointer; }
+@media (max-width: 560px) { .top-stat { display: none; } .compte-btn .nom { display: none; } .compte-btn.moi { padding: 3px; } }

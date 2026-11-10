@@ -1,0 +1,31 @@
+rules_version = '2';
+// Règles de sécurité Firestore d'Étude Facile — à coller dans la console Firebase › Firestore › Règles.
+service cloud.firestore {
+  match /databases/{db}/documents {
+
+    // Progression privée (chapitres, scores, missions, brouillons de code) : seul le propriétaire y accède.
+    match /prives/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Profil public pour le classement : pseudo + statistiques.
+    match /profils/{uid} {
+      allow read: if true;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['pseudo', 'stats', 'maj'])
+        && request.resource.data.pseudo is string
+        && request.resource.data.pseudo.matches('^[\\p{L}\\p{N}_-]{3,20}$')
+        && getAfter(/databases/$(db)/documents/pseudos/$(request.resource.data.pseudo.lower())).data.uid == uid;
+      allow delete: if false;
+    }
+
+    // Réservation des pseudos (unicité, insensible à la casse).
+    match /pseudos/{pseudo} {
+      allow read: if true;
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.keys().hasOnly(['uid']);
+      allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
+      allow update: if false;
+    }
+  }
+}
