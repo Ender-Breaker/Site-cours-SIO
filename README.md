@@ -43,6 +43,13 @@ PHP et Python sont embarqués dans `assets/vendor/` (aucun CDN nécessaire).
 - **Forum** (`forum.html`) : questions par matière, réponses en fil, votes ▲/▼, meilleure réponse, tri (populaires, récentes, mieux notées, sans réponse) et recherche. Firestore : `posts`, `posts/{id}/reponses`, `votes/{uid}`.
 - **Classement** (`classement.html`) : général (100 pts par chapitre, 20 par mission, + meilleurs points d'évaluation) ou par épreuve.
 
+## RGPD
+
+- Pages `mentions-legales.html`, `confidentialite.html`, `conditions.html` (coordonnées dans `data/site.js`) ; liens dans le pied de page de toutes les pages.
+- Aucun traceur non nécessaire : simple bandeau d'information (pas de consentement requis pour les stockages strictement nécessaires).
+- Aucune ressource tierce au chargement : polices (`assets/fonts/`) et SDK Firebase (`assets/vendor/firebase/`) hébergés sur le site.
+- Inscription : acceptation des conditions (date et version enregistrées). Menu du compte › « Mes données » : export JSON et suppression du compte.
+
 ## Lancer en local
 
 Aucune installation : c'est un site statique (HTML, CSS, JavaScript).

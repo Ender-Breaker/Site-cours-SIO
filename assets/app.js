@@ -3,9 +3,30 @@
   "use strict";
 
   /* ---------- compte Firebase (facultatif) : chargé seulement si data/firebase-config.js est rempli ---------- */
+  var RACINE = (function () { try { return new URL("../", document.currentScript.src).href; } catch (e) { return ""; } })();
+
+  /* ---------- pied de page (liens légaux) + bandeau d'information sur les stockages ---------- */
+  function piedDePage() {
+    if (!document.body || document.querySelector(".pied")) return;
+    var f = document.createElement("footer"); f.className = "pied";
+    f.innerHTML = '<div class="wrap"><span>Étude Facile · site de révision BTS SIO, gratuit et sans publicité</span>' +
+      '<nav><a href="' + RACINE + 'mentions-legales.html">Mentions légales</a><a href="' + RACINE + 'confidentialite.html">Confidentialité et cookies</a>' +
+      '<a href="' + RACINE + 'conditions.html">Conditions d\'utilisation</a></nav></div>';
+    document.body.appendChild(f);
+    var vu = null; try { vu = localStorage.getItem("ef-info-stockage"); } catch (e) { vu = "1"; }
+    if (!vu) {
+      var b = document.createElement("div"); b.className = "bandeau-info"; b.setAttribute("role", "region"); b.setAttribute("aria-label", "Information sur les cookies");
+      b.innerHTML = '<p><b>Pas de cookie publicitaire ni de mesure d\'audience.</b> Le site enregistre seulement dans ton navigateur ce qui est nécessaire à son fonctionnement (ta progression et, si tu te connectes, ta session). ' +
+        '<a href="' + RACINE + 'confidentialite.html">En savoir plus</a></p><button type="button" class="btn">J\'ai compris</button>';
+      b.querySelector("button").onclick = function () { try { localStorage.setItem("ef-info-stockage", new Date().toISOString().slice(0, 10)); } catch (e) { /* rien */ } b.remove(); };
+      document.body.appendChild(b);
+    }
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { setTimeout(piedDePage, 0); });
+  else setTimeout(piedDePage, 0);
+
   (function () {
-    var me = document.currentScript, root;
-    try { root = new URL("../", me.src).href; } catch (e) { return; }
+    var root = RACINE; if (!root) return;
     var c = document.createElement("script");
     c.src = root + "data/firebase-config.js";
     c.onload = function () {
@@ -69,6 +90,7 @@
 
     /* Évaluations chronométrées : on garde le meilleur résultat (en points) et un petit historique.
        cle = "<module>_<type>"  (type : questionnaire | textuel | pratique) */
+    racine: RACINE,
     getEvals: function () { return read(EVALS); },
     saveEval: function (cle, r) {
       var e = read(EVALS), cur = e[cle];

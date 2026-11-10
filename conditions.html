@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Conditions d'utilisation — Étude Facile</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<main class="wrap page legal">
+<nav class="crumbs"><a href="index.html">Accueil</a><span>›</span><span>Conditions d'utilisation</span></nav>
+<h1>Conditions d'utilisation</h1>
+<p class="maj">Dernière mise à jour : <span data-site="majLegal"></span></p>
+
+<div class="resume"><b>En bref</b>
+<ul>
+  <li>Le site est gratuit, sans publicité, et fait pour réviser le BTS SIO.</li>
+  <li>Sur le forum et dans ton pseudo : respect, pas de contenu illégal, pas de données personnelles d'autrui, pas de triche organisée.</li>
+  <li>La modération peut supprimer un contenu ou bloquer un compte qui ne respecte pas ces règles.</li>
+  <li>Les contenus de révision peuvent comporter des erreurs : ils ne remplacent pas tes cours.</li>
+</ul></div>
+
+<h2>1. Objet</h2>
+<p>Les présentes conditions encadrent l'utilisation du site <b>Étude Facile</b> (<span data-site="url"></span>) : fiches de cours, exercices, labos, évaluations, classement et forum. Utiliser le site ou créer un compte implique de les accepter.</p>
+
+<h2>2. Accès au site</h2>
+<p>Le site est gratuit et accessible sans compte pour les cours, exercices, labos et évaluations. Un compte est nécessaire pour synchroniser ta progression, apparaître au classement et participer au forum. Le site est fourni « en l'état », par un éditeur bénévole : il peut être interrompu, modifié ou fermé à tout moment, sans préavis.</p>
+
+<h2>3. Compte</h2>
+<ul>
+  <li>Un seul compte par personne. Les informations fournies doivent être exactes.</li>
+  <li>Tu es responsable de la confidentialité de ton mot de passe et de l'activité réalisée depuis ton compte.</li>
+  <li>Ton pseudo ne doit pas usurper l'identité d'une autre personne, ni être injurieux, discriminatoire ou contenir des données personnelles (nom complet, numéro…).</li>
+  <li>Tu peux supprimer ton compte à tout moment (menu du compte › Mes données).</li>
+</ul>
+
+<h2>4. Règles du forum</h2>
+<p>Le forum sert à poser des questions et à s'entraider sur les matières du BTS SIO. Il est interdit d'y publier :</p>
+<ul>
+  <li>des propos injurieux, harcelants, discriminatoires, violents ou diffamatoires ;</li>
+  <li>des contenus illégaux, pornographiques, ou portant atteinte aux droits d'autrui (droit d'auteur, droit à l'image…) ;</li>
+  <li>des informations personnelles sur une autre personne (nom, adresse, photo, identifiants…) ;</li>
+  <li>des mots de passe, clés d'API ou autres secrets (pense à les retirer de ton code avant de le publier) ;</li>
+  <li>des sujets d'examen ou corrigés obtenus de façon frauduleuse, ou toute aide à la triche pendant une épreuve ;</li>
+  <li>de la publicité, du spam, des liens malveillants, ou du code destiné à nuire (virus, attaques).</li>
+</ul>
+<p>Les questions doivent avoir un titre clair et être publiées dans la bonne matière. Les votes servent à faire remonter les réponses utiles : la manipulation des votes (comptes multiples…) est interdite.</p>
+
+<h2>5. Contenus publiés par les utilisateurs</h2>
+<p>Tu restes propriétaire de tes messages. En les publiant, tu autorises leur affichage public et gratuit sur le site, pour la durée de leur publication. Tu es seul responsable de ce que tu publies.</p>
+<p>Tu peux signaler un contenu contraire à ces règles : <span data-contact></span>. Conformément à la loi, l'éditeur retire promptement les contenus manifestement illicites qui lui sont signalés.</p>
+
+<h2>6. Modération</h2>
+<p>La modération peut, sans préavis, supprimer un message, épingler ou verrouiller une discussion, et suspendre ou supprimer un compte en cas de non-respect de ces conditions.</p>
+
+<h2>7. Classement et évaluations</h2>
+<p>Le classement est un jeu entre utilisateurs, sans récompense ni valeur officielle. Toute tentative de fausser les scores (modification des données, automatisation…) peut entraîner la remise à zéro ou la suppression du compte. Les résultats des évaluations sont indicatifs et ne préjugent pas de tes notes au BTS.</p>
+
+<h2>8. Exactitude des contenus</h2>
+<p>Les contenus de révision sont rédigés avec soin mais peuvent contenir des erreurs ou ne pas refléter exactement le programme de ton établissement. Ils complètent tes cours sans les remplacer. La correction automatique des évaluations (en particulier des questions ouvertes) est approximative. Tu peux signaler une erreur sur le forum.</p>
+
+<h2>9. Responsabilité</h2>
+<p>L'éditeur ne saurait être tenu responsable d'une indisponibilité du site, d'une perte de données de progression, ni des contenus publiés par les utilisateurs. Les liens vers des sites extérieurs sont fournis pour information ; l'éditeur n'est pas responsable de leur contenu.</p>
+
+<h2>10. Données personnelles</h2>
+<p>Voir la page <a href="confidentialite.html">Confidentialité et cookies</a>.</p>
+
+<h2>11. Modification des conditions</h2>
+<p>Ces conditions peuvent être modifiées. La date de mise à jour figure en haut de la page ; en cas de changement important, il pourra t'être demandé de les accepter à nouveau.</p>
+
+<h2>12. Droit applicable</h2>
+<p>Les présentes conditions sont soumises au droit français. En cas de litige, une solution amiable sera recherchée en priorité.</p>
+</main>
+  <script src="data/modules.js"></script>
+  <script src="data/site.js"></script>
+  <script src="assets/app.js"></script>
+  <script>
+    document.body.insertBefore(window.EtudeFacile.header(""), document.body.firstChild);
+    document.querySelectorAll("[data-site]").forEach(function (e) { e.textContent = window.EF_SITE[e.dataset.site] || ""; });
+    document.querySelectorAll("[data-contact]").forEach(function (e) {
+      var c = window.EF_SITE.contact;
+      e.innerHTML = c ? 'par e-mail à <a href="mailto:' + c + '">' + c + '</a>' : 'en écrivant à la modération sur le <a href="forum.html">forum</a> (catégorie « Général »)';
+    });
+  </script>
+</body>
+</html>

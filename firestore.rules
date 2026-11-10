@@ -16,7 +16,7 @@ service cloud.firestore {
         && request.resource.data.pseudo is string
         && request.resource.data.pseudo.matches('^[\\p{L}\\p{N}_-]{3,20}$')
         && getAfter(/databases/$(db)/documents/pseudos/$(request.resource.data.pseudo.lower())).data.uid == uid;
-      allow delete: if false;
+      allow delete: if request.auth != null && request.auth.uid == uid;
     }
 
     // ===================== Forum =====================
@@ -81,6 +81,11 @@ service cloud.firestore {
               && request.resource.data.texte == '' && request.resource.data.supprime == true && request.resource.data.modere == true));
         allow delete: if false;
       }
+    }
+
+    // Lecture de toutes les réponses d'un auteur (export et suppression de compte : requête « collection group »)
+    match /{chemin=**}/reponses/{rep} {
+      allow read: if true;
     }
 
     // Liste des modérateurs : lisible seulement par un modérateur (sert au site à savoir s'il doit afficher les outils).

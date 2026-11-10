@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Mentions légales — Étude Facile</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<main class="wrap page legal">
+<nav class="crumbs"><a href="index.html">Accueil</a><span>›</span><span>Mentions légales</span></nav>
+<h1>Mentions légales</h1>
+<p class="maj">Dernière mise à jour : <span data-site="majLegal"></span></p>
+
+<h2>Éditeur du site</h2>
+<p><b>Étude Facile</b> (<span data-site="url"></span>) est un site personnel, gratuit et non commercial, créé et édité par un étudiant de BTS SIO à titre privé, pour aider les étudiants de BTS SIO à réviser.</p>
+<p>Conformément à l'article 6, III, 2 de la loi n° 2004-575 du 21 juin 2004 pour la confiance dans l'économie numérique, l'éditeur, agissant à titre non professionnel, a choisi de ne pas publier son identité ; ses coordonnées ont été communiquées à l'hébergeur. Contact : <span data-contact></span>.</p>
+<p>Directeur de la publication : l'éditeur du site.</p>
+
+<h2>Hébergement</h2>
+<p><b>Site web :</b> Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis — <a href="https://vercel.com" rel="noopener">vercel.com</a>.</p>
+<p><b>Comptes, classement et forum :</b> Firebase (Authentication et Cloud Firestore), service de Google. Pour les utilisateurs de l'Union européenne : Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irlande.</p>
+
+<h2>Propriété intellectuelle</h2>
+<p>Les fiches de cours, exercices, labos et évaluations du site ont été rédigés pour Étude Facile à partir du programme du BTS SIO. Ils peuvent être utilisés librement pour réviser ; leur reproduction à des fins commerciales est interdite.</p>
+<p>Les messages publiés sur le forum restent la propriété de leurs auteurs (voir les <a href="conditions.html">conditions d'utilisation</a>). Les marques et logiciels cités (Linux, PHP, Python, etc.) appartiennent à leurs propriétaires respectifs.</p>
+<p>Composants libres utilisés : polices Bricolage Grotesque et Hanken Grotesk (SIL Open Font License), icônes Lucide (licence ISC), PHP via php-wasm (Apache 2.0 / GPL 2.0), Python via Pyodide (MPL 2.0), SDK Firebase (Apache 2.0).</p>
+
+<h2>Données personnelles et cookies</h2>
+<p>Voir la page <a href="confidentialite.html">Confidentialité et cookies</a>.</p>
+</main>
+  <script src="data/modules.js"></script>
+  <script src="data/site.js"></script>
+  <script src="assets/app.js"></script>
+  <script>
+    document.body.insertBefore(window.EtudeFacile.header(""), document.body.firstChild);
+    document.querySelectorAll("[data-site]").forEach(function (e) { e.textContent = window.EF_SITE[e.dataset.site] || ""; });
+    document.querySelectorAll("[data-contact]").forEach(function (e) {
+      var c = window.EF_SITE.contact;
+      e.innerHTML = c ? 'par e-mail à <a href="mailto:' + c + '">' + c + '</a>' : 'en écrivant à la modération sur le <a href="forum.html">forum</a> (catégorie « Général »)';
+    });
+  </script>
+</body>
+</html>
