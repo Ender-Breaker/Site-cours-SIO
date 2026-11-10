@@ -19,7 +19,8 @@
   })();
 
   var KEY = "ef-progress"; // { moduleId: [chapitreId, ...] }
-  var BEST = "ef-best";    // { "moduleId/chapitreId": pourcentage }
+  var BEST = "ef-best";
+  var EVALS = "ef-evals";    // { "moduleId/chapitreId": pourcentage }
 
   function read(key) {
     try { return JSON.parse(localStorage.getItem(key)) || {}; } catch (e) { return {}; }
@@ -39,7 +40,7 @@
     return e;
   }
 
-  var ICONS = {"user": "<path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\" /><circle cx=\"12\" cy=\"7\" r=\"4\" />", "play": "<polygon points=\"6 3 20 12 6 21 6 3\" />", "code": "<polyline points=\"16 18 22 12 16 6\" /><polyline points=\"8 6 2 12 8 18\" />", "book-open": "<path d=\"M12 5v16\" /><path d=\"M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z\" />", "pencil-line": "<path d=\"M13 21h8\" /><path d=\"m15 5 4 4\" /><path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\" />", "zap": "<path d=\"M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z\" />", "flame": "<path d=\"M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4\" />", "trophy": "<path d=\"M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2\" /><path d=\"M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2\" /><path d=\"M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3\" /><path d=\"M4 22h16\" /><path d=\"M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z\" /><path d=\"M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3\" />", "sprout": "<path d=\"M14 9.536V7a4 4 0 0 1 4-4h1.5a.5.5 0 0 1 .5.5V5a4 4 0 0 1-4 4 4 4 0 0 0-4 4c0 2 1 3 1 5a5 5 0 0 1-1 3\" /><path d=\"M4 9a5 5 0 0 1 8 4 5 5 0 0 1-8-4\" /><path d=\"M5 21h14\" />", "check": "<path d=\"M20 6 9 17l-5-5\" />", "lightbulb": "<path d=\"M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5\" /><path d=\"M9 18h6\" /><path d=\"M10 22h4\" />", "rotate-ccw": "<path d=\"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\" /><path d=\"M3 3v5h5\" />"};
+  var ICONS = {"timer": "<line x1=\"10\" x2=\"14\" y1=\"2\" y2=\"2\" /><line x1=\"12\" x2=\"15\" y1=\"14\" y2=\"11\" /><circle cx=\"12\" cy=\"14\" r=\"8\" />", "user": "<path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\" /><circle cx=\"12\" cy=\"7\" r=\"4\" />", "play": "<polygon points=\"6 3 20 12 6 21 6 3\" />", "code": "<polyline points=\"16 18 22 12 16 6\" /><polyline points=\"8 6 2 12 8 18\" />", "book-open": "<path d=\"M12 5v16\" /><path d=\"M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z\" />", "pencil-line": "<path d=\"M13 21h8\" /><path d=\"m15 5 4 4\" /><path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\" />", "zap": "<path d=\"M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z\" />", "flame": "<path d=\"M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4\" />", "trophy": "<path d=\"M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2\" /><path d=\"M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2\" /><path d=\"M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3\" /><path d=\"M4 22h16\" /><path d=\"M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z\" /><path d=\"M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3\" />", "sprout": "<path d=\"M14 9.536V7a4 4 0 0 1 4-4h1.5a.5.5 0 0 1 .5.5V5a4 4 0 0 1-4 4 4 4 0 0 0-4 4c0 2 1 3 1 5a5 5 0 0 1-1 3\" /><path d=\"M4 9a5 5 0 0 1 8 4 5 5 0 0 1-8-4\" /><path d=\"M5 21h14\" />", "check": "<path d=\"M20 6 9 17l-5-5\" />", "lightbulb": "<path d=\"M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5\" /><path d=\"M9 18h6\" /><path d=\"M10 22h4\" />", "rotate-ccw": "<path d=\"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\" /><path d=\"M3 3v5h5\" />"};
   function icon(n) { return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true">' + ICONS[n] + '</svg>'; }
 
   var EF = window.EtudeFacile = {
@@ -66,11 +67,76 @@
     },
     reset: function () { write(KEY, {}); write(BEST, {}); },
 
+    /* Évaluations chronométrées : on garde le meilleur résultat (en points) et un petit historique.
+       cle = "<module>_<type>"  (type : questionnaire | textuel | pratique) */
+    getEvals: function () { return read(EVALS); },
+    saveEval: function (cle, r) {
+      var e = read(EVALS), cur = e[cle];
+      r.date = r.date || new Date().toISOString().slice(0, 10);
+      var hist = (cur && cur.hist) || [];
+      hist.unshift({ pct: r.pct, points: r.points, duree: r.duree, date: r.date });
+      var best = (!cur || r.points > cur.points) ? { pct: r.pct, points: r.points, duree: r.duree, date: r.date } : { pct: cur.pct, points: cur.points, duree: cur.duree, date: cur.date };
+      best.hist = hist.slice(0, 10);
+      e[cle] = best; write(EVALS, e);
+      return { record: !cur || r.points > cur.points, best: best };
+    },
+    /* Épreuve pratique dans un labo : barre avec chronomètre. Renvoie { el, restant(), stop() }. */
+    examChrono: function (titre, duree, onFin) {
+      var bar = el("div", "ev-bar exam-bar");
+      bar.innerHTML = '<div><b>Évaluation pratique</b> · ' + esc(titre) + ' · <span class="ex-pos"></span></div>' +
+        '<div class="ev-chrono">' + icon("timer") + ' <b></b><i></i></div>';
+      var fin = Date.now() + duree * 1000, t = null;
+      function restant() { return Math.max(0, (fin - Date.now()) / 1000); }
+      function tick() {
+        var r = restant(), s = Math.round(r);
+        bar.querySelector(".ev-chrono b").textContent = Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2);
+        bar.querySelector(".ev-chrono i").style.width = (100 * r / duree) + "%";
+        bar.querySelector(".ev-chrono").classList.toggle("urgent", r <= 60);
+        if (r <= 0) { clearInterval(t); t = null; window.onbeforeunload = null; onFin(true); }
+      }
+      t = setInterval(tick, 250); setTimeout(tick, 0);
+      window.onbeforeunload = function () { return "Ton évaluation est en cours."; };
+      return { el: bar, restant: restant, stop: function () { clearInterval(t); t = null; window.onbeforeunload = null; },
+        pos: function (txt) { bar.querySelector(".ex-pos").textContent = txt; } };
+    },
+    /* Écran de résultat d'une épreuve pratique (et enregistrement). missions : [{ titre, ok, solution (texte) }] */
+    examResultat: function (box, o) {
+      var reussies = o.missions.filter(function (m) { return m.ok; }).length, pct = reussies / o.missions.length;
+      var duree = Math.round(o.duree - o.restant), pts = EF.points(pct, o.coef, o.restant, o.duree);
+      var sv = EF.saveEval(o.mid + "_pratique", { pct: Math.round(pct * 1000) / 1000, points: pts, duree: duree });
+      var connecte = window.EFCloud && window.EFCloud.user();
+      box.innerHTML = '<div class="ev-res c-' + (o.couleur || "") + '"><div class="lb-kicker">' + esc(o.titre) + ' · Évaluation pratique</div>' +
+        '<div class="ev-score"><b>' + reussies + '<small>/' + o.missions.length + '</small></b><div><span class="ev-pts">' + pts + ' pts</span>' +
+        '<span>' + icon("timer") + ' ' + Math.floor(duree / 60) + ':' + ("0" + (duree % 60)).slice(-2) + (o.restant <= 0 ? " (temps écoulé)" : "") + '</span>' +
+        (sv.record ? '<span class="ev-record">Nouveau record !</span>' : '<span>Record : ' + sv.best.points + ' pts</span>') + '</div></div>' +
+        (window.EF_FIREBASE_CONFIG && !connecte ? '<p class="ev-login">Connecte-toi pour que ce résultat compte dans le classement. <button type="button" class="btn" data-ex="login">Se connecter</button></p>' : '') +
+        '<div class="btns"><button type="button" class="btn primary" data-ex="rejouer">' + icon("rotate-ccw") + ' Recommencer</button>' +
+        '<a class="btn" href="' + o.racine + 'evaluation.html">Autre évaluation</a><a class="btn" href="' + o.racine + 'classement.html">' + icon("trophy") + ' Classement</a>' +
+        '<a class="btn" href="' + (o.retour || "#") + '">Retour au labo</a></div></div>' +
+        '<h2 class="ev-h2">Correction</h2><div class="ev-detail">' + o.missions.map(function (m) {
+          return '<details class="ev-corr ' + (m.ok ? "ok" : "ko") + '"' + (m.ok ? "" : " open") + '><summary><span class="ck">' + (m.ok ? "✓" : "✗") + '</span>' + esc(m.titre) + '</summary>' +
+            '<p><b>Une solution possible :</b></p><pre>' + esc(m.solution) + '</pre></details>';
+        }).join("") + '</div>';
+      box.addEventListener("click", function (e) {
+        var b = e.target.closest("[data-ex]"); if (!b) return;
+        if (b.dataset.ex === "rejouer") o.rejouer();
+        if (b.dataset.ex === "login" && window.EFCloud) window.EFCloud.ouvrir();
+      });
+      window.scrollTo(0, 0);
+    },
+    /* points = % de réussite × coefficient + bonus de rapidité (si au moins 50 % de réussite) */
+    points: function (pct, coef, restant, total) {
+      var bonus = pct >= 0.5 && total ? Math.round(coef * 0.2 * Math.max(0, restant) / total) : 0;
+      return Math.round(pct * coef) + bonus;
+    },
+
     /* Barre du haut commune. prefix = chemin vers la racine ("", "../../") */
     header: function (prefix) {
       var h = el("header", "topbar");
       h.innerHTML = '<div class="wrap"><a class="logo" href="' + prefix + 'index.html">' +
         '<span class="logo-mark">&gt;_</span> Étude Facile</a>' +
+        '<nav class="top-nav"><a href="' + prefix + 'evaluation.html">' + icon("timer") + '<span>Évaluation</span></a>' +
+        '<a href="' + prefix + 'classement.html">' + icon("trophy") + '<span>Classement</span></a></nav>' +
         '<div class="top-stat"><b>' + total().done + '</b> chapitres validés</div></div>';
       return h;
     },
@@ -95,6 +161,13 @@
 
   var grid = document.getElementById("grid");
   if (!grid) return; // pas sur la page d'accueil
+  (function () {
+    var w = document.querySelector(".topbar .wrap"), logo = w && w.querySelector(".logo");
+    if (!logo || w.querySelector(".top-nav")) return;
+    var n = document.createElement("nav"); n.className = "top-nav";
+    n.innerHTML = '<a href="evaluation.html">' + icon("timer") + '<span>Évaluation</span></a><a href="classement.html">' + icon("trophy") + '<span>Classement</span></a>';
+    logo.insertAdjacentElement("afterend", n);
+  })();
 
   var state = { option: "TOUS", q: "" };
   var LABEL = { SLAM: "SLAM", SISR: "SISR", COMMUN: "Commun" };

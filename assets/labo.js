@@ -57,7 +57,7 @@
       fs: fs, modes: modes, owners: owners, cwd: (m && m.cwd) || HOME,
       banner: m ? "Mission : " + m.titre + " — tape tes commandes ici (help = liste des commandes)." :
         "Bac à sable : expérimente librement. help liste les commandes, tree montre l'arborescence.",
-      onCommand: function () { renderTree(); if (mode === "guide") evaluate(); }
+      onCommand: function () { renderTree(); if (mode !== "libre") evaluate(); }
     });
     (m && m.prep || []).forEach(function (c) { term.sh.run(c); });
     ["hist", "cmds", "outs"].forEach(function (k) { term.sh.S[k].length = 0; });
@@ -177,6 +177,7 @@
     $("lb-reset").onclick = function () { open(m, true); };
   }
   function evaluate() {
+    if (mode === "examen") return evalExamen();
     var before = cur.objectifs.every(function (o, i) { return okSet[i]; }), changed = false;
     cur.objectifs.forEach(function (o, i) {
       if (!okSet[i] && EFTerm.check(term.sh, o.r)) { okSet[i] = true; changed = true; }
@@ -218,8 +219,69 @@
     startTerm(null); renderLecons();
   }
 
+  /* ---------- évaluation pratique (#examen) ---------- */
+  var E = null, MID = document.body.dataset.module || "sisr";
+  function hasard(a) { return a[Math.floor(Math.random() * a.length)]; }
+  function examen() {
+    mode = "examen"; main.classList.add("en-examen");
+    var lecons = LAB.lecons.slice().sort(function () { return Math.random() - 0.5; }).slice(0, 3);
+    E = { list: lecons.map(function (l) { return hasard(l.missions); }), i: 0, ok: [], fini: false };
+    E.chrono = EF.examChrono("Labo terminal", 900, function () { finExamen(); });
+    main.querySelector(".labo-grid").insertAdjacentElement("beforebegin", E.chrono.el);
+    examOpen(0);
+  }
+  function examOpen(i) {
+    E.i = i; cur = E.list[i]; okSet = {};
+    E.chrono.pos("mission " + (i + 1) + "/" + E.list.length);
+    startTerm(cur); examBrief(); term.focus();
+  }
+  function examBrief() {
+    var der = E.i + 1 >= E.list.length, ok = E.ok[E.i];
+    brief.innerHTML = '<div class="lb-kicker">Mission ' + (E.i + 1) + ' sur ' + E.list.length + '</div><h2>' + esc(cur.titre) + '</h2>' +
+      '<h3>Objectifs</h3>' + goals() +
+      (ok ? '<div class="box retenir lb-win"><b>Mission réussie</b><p>' + (der ? "C'était la dernière." : "Passage à la suivante…") + '</p></div>'
+        : '<p class="lb-small" style="margin-top:10px">Pas d\'indice ni de solution pendant l\'épreuve. La mission est validée dès que tous les objectifs sont atteints. <code>help</code> liste les commandes.</p>') +
+      '<div class="lb-actions">' + (der ? '' : '<button class="btn" id="ex-next" type="button">' + (ok ? "Mission suivante →" : "Passer cette mission →") + '</button>') +
+      '<button class="btn' + (der ? ' primary' : '') + '" id="ex-fin" type="button">Terminer l\'évaluation</button></div>';
+    if ($("ex-next")) $("ex-next").onclick = function () { examOpen(E.i + 1); };
+    $("ex-fin").onclick = function () {
+      var reste = E.list.length - E.ok.filter(Boolean).length;
+      if (reste && !window.confirm("Terminer maintenant ? Les missions non réussies compteront comme ratées.")) return;
+      finExamen();
+    };
+  }
+  function evalExamen() {
+    if (E.fini || E.ok[E.i]) return;
+    var changed = false;
+    cur.objectifs.forEach(function (o, i) { if (!okSet[i] && EFTerm.check(term.sh, o.r)) { okSet[i] = true; changed = true; } });
+    if (!changed) return;
+    if (cur.objectifs.every(function (o, i) { return okSet[i]; })) {
+      E.ok[E.i] = true; termBox.classList.add("done");
+      var i = E.i;
+      setTimeout(function () {
+        if (E.fini || E.i !== i) return;
+        if (E.ok.filter(Boolean).length === E.list.length) finExamen();
+        else if (i + 1 < E.list.length) examOpen(i + 1);
+      }, 1300);
+    }
+    examBrief(); term.focus();
+  }
+  function finExamen() {
+    if (E.fini) return; E.fini = true;
+    var rest = E.chrono.restant(); E.chrono.stop(); E.chrono.el.remove();
+    var box = main.querySelector(".labo-grid"); box.className = "labo-resultat";
+    EF.examResultat(box, {
+      mid: MID, titre: "Labo terminal", couleur: "emerald", racine: "../../", duree: 900, coef: 150, restant: rest,
+      retour: location.pathname.split("/").pop(),
+      missions: E.list.map(function (m, i) { return { titre: m.titre, ok: !!E.ok[i], solution: m.solution.join("\n") }; }),
+      rejouer: function () { location.hash = "#examen"; location.reload(); }
+    });
+  }
+
   /* ---------- routage ---------- */
   function route() {
+    if (/^#examen/.test(location.hash)) { if (!E) examen(); return; }
+    if (E) { location.reload(); return; }
     var hsh = location.hash, m = /#m=([\w-]+)/.exec(hsh);
     mode = hsh === "#libre" ? "libre" : "guide";
     main.querySelectorAll(".labo-mode .chip").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.mode === mode)); });

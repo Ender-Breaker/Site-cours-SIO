@@ -16,8 +16,10 @@ auth.languageCode = "fr";
 const db = F.getFirestore(app);
 const EF = window.EtudeFacile;
 const esc = EF.esc;
+const racine = new URL("../", import.meta.url).href;
 
-const CLES = ["ef-progress", "ef-best", "ef-labo-terminal", "ef-labo-html", "ef-labo-php", "ef-labo-python"];
+const CLES = ["ef-progress", "ef-best", "ef-labo-terminal", "ef-labo-html", "ef-labo-php", "ef-labo-python", "ef-evals"];
+const LABOS = ["ef-labo-terminal", "ef-labo-html", "ef-labo-php", "ef-labo-python"];
 let user = null, profil = null, etat = "", synchroPrete = false;
 
 /* ---------- interface : bouton de compte dans la barre du haut ---------- */
@@ -45,6 +47,7 @@ function rendu() {
       <div class="cm-tete"><b>${esc(nom)}</b><span>${esc(user.email || "")}</span></div>
       <div class="cm-etat">${esc(etat || "Progression synchronisée")}</div>
       ${profil && profil.stats ? `<div class="cm-stats"><span><b>${profil.stats.chapitres}</b> chapitres</span><span><b>${profil.stats.missions}</b> missions</span><span><b>${profil.stats.score}</b> pts</span></div>` : ""}
+      <a class="cm-lien" href="${racine}classement.html">Voir le classement</a>
       <button type="button" data-a="pseudo">Changer de pseudo</button>
       <button type="button" data-a="sortir">Se déconnecter</button>
     </div>`;
@@ -195,7 +198,7 @@ async function choisirPseudo(p) {
     if (s.exists() && s.data().uid !== uid) throw new Error("pris");
     if (ancien && ancien.toLowerCase() !== cle) t.delete(F.doc(db, "pseudos", ancien.toLowerCase()));
     t.set(ref, { uid });
-    t.set(F.doc(db, "profils", uid), { pseudo: p, stats: stats(), maj: F.serverTimestamp() }, { merge: true });
+    t.set(F.doc(db, "profils", uid), { pseudo: p, stats: stats(), evals: evalsPubliques(), maj: F.serverTimestamp() }, { merge: true });
   });
   profil = Object.assign({}, profil, { pseudo: p, stats: stats() });
   rendu();
@@ -206,8 +209,14 @@ function lit(k) { try { return JSON.parse(localStorage.getItem(k)) || {}; } catc
 function stats() {
   const prog = lit("ef-progress");
   const chapitres = Object.keys(prog).reduce((n, m) => n + (prog[m] || []).length, 0);
-  const missions = CLES.slice(2).reduce((n, k) => n + Object.keys(lit(k).done || {}).length, 0);
-  return { chapitres, missions, score: chapitres * 100 + missions * 20 };
+  const missions = LABOS.reduce((n, k) => n + Object.keys(lit(k).done || {}).length, 0);
+  const ev = lit("ef-evals"), evals = Object.keys(ev).reduce((n, k) => n + (ev[k].points || 0), 0);
+  return { chapitres, missions, evals, score: chapitres * 100 + missions * 20 + evals };
+}
+function evalsPubliques() {
+  const ev = lit("ef-evals"), r = {};
+  Object.keys(ev).forEach((k) => { if (/^[a-z0-9-]+_(questionnaire|textuel|pratique)$/.test(k)) r[k] = { points: ev[k].points, pct: ev[k].pct, duree: ev[k].duree, date: ev[k].date }; });
+  return r;
 }
 
 /* ---------- fusion local ⇄ cloud ---------- */
@@ -222,6 +231,11 @@ function fusion(k, loc, nuage) {
   if (k === "ef-best") {
     const r = Object.assign({}, nuage);
     Object.keys(loc).forEach((c) => { if (typeof r[c] !== "number" || loc[c] > r[c]) r[c] = loc[c]; });
+    return r;
+  }
+  if (k === "ef-evals") {
+    const r = Object.assign({}, nuage);
+    Object.keys(loc).forEach((c) => { if (!r[c] || (loc[c].points || 0) >= (r[c].points || 0)) r[c] = loc[c]; });
     return r;
   }
   /* labos : missions réussies = union ; brouillons de code : le local prime */
@@ -242,7 +256,7 @@ async function pousser() {
     const st = stats();
     await F.setDoc(F.doc(db, "prives", user.uid), { sync, maj: F.serverTimestamp() }, { merge: true });
     if (profil && profil.pseudo) {
-      await F.setDoc(F.doc(db, "profils", user.uid), { pseudo: profil.pseudo, stats: st, maj: F.serverTimestamp() }, { merge: true });
+      await F.setDoc(F.doc(db, "profils", user.uid), { pseudo: profil.pseudo, stats: st, evals: evalsPubliques(), maj: F.serverTimestamp() }, { merge: true });
       profil.stats = st;
     }
     etat = "Progression synchronisée";

@@ -12,7 +12,7 @@ service cloud.firestore {
     match /profils/{uid} {
       allow read: if true;
       allow create, update: if request.auth != null && request.auth.uid == uid
-        && request.resource.data.keys().hasOnly(['pseudo', 'stats', 'maj'])
+        && request.resource.data.keys().hasOnly(['pseudo', 'stats', 'evals', 'maj'])
         && request.resource.data.pseudo is string
         && request.resource.data.pseudo.matches('^[\\p{L}\\p{N}_-]{3,20}$')
         && getAfter(/databases/$(db)/documents/pseudos/$(request.resource.data.pseudo.lower())).data.uid == uid;

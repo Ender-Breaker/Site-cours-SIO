@@ -29,6 +29,16 @@ Site de révision pour le BTS SIO (1re année, option SLAM). Chaque matière est
 Les labos de code partagent le moteur `assets/labo-code.js` ; les missions sont générées dans les pages `modules/*/labo-*.html`.
 PHP et Python sont embarqués dans `assets/vendor/` (aucun CDN nécessaire).
 
+## Comptes, évaluations et classement
+
+- **Comptes** (Firebase Auth : Google ou e-mail) : pseudo unique, progression synchronisée entre appareils (`assets/cloud.js`, configuration dans `data/firebase-config.js`, règles de sécurité dans `firestore.rules`).
+- **Évaluation** (`evaluation.html`) : épreuves chronométrées par matière.
+  - *Questionnaire* : 10 questions tirées dans les exercices des chapitres, 6 min.
+  - *Textuel* : 3 questions ouvertes (`data/eval-textes.js`), 12 min, correction par notions attendues + corrigé.
+  - *Pratique* : 3 missions de labo sans indice (`labo-*.html#examen`), 15 min.
+  - Points = coefficient × réussite + bonus de rapidité (si ≥ 50 %). Le meilleur résultat de chaque épreuve est conservé.
+- **Classement** (`classement.html`) : général (100 pts par chapitre, 20 par mission, + meilleurs points d'évaluation) ou par épreuve.
+
 ## Lancer en local
 
 Aucune installation : c'est un site statique (HTML, CSS, JavaScript).

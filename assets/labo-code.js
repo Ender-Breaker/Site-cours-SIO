@@ -69,6 +69,7 @@
   function draft() {
     gutter();
     clearTimeout(saveT);
+    if (mode === "examen") return;
     saveT = setTimeout(function () { prog.code[cur ? cur.id : "__libre"] = src.value; save(); }, 300);
   }
   src.addEventListener("input", draft);
@@ -320,6 +321,7 @@
     var btn = $("lc-run"), code = src.value, req = PY ? { stdin: stdinLines() } : cur ? { method: cur.post ? "post" : "get", get: cur.get || {}, post: cur.post || {} } : {};
     btn.disabled = true; notice("");
     execute(code, req).then(function (out) { return render(out, req); }).then(function () {
+      if (mode === "examen") return evalExamen(code);
       if (mode !== "guide" || !cur) return;
       if (PY && /TimeoutError: temps dépassé/.test(current.out)) { results = cur.objectifs.map(function () { return false; }); renderBrief(false); return; }
       return checkAll(cur, code).then(function (res) {
@@ -414,8 +416,80 @@
     execute(src.value, {}).then(function (out) { return render(out, {}); }).catch(function () {});
   }
 
+  /* ---------- évaluation pratique (#examen) ---------- */
+  var E = null, MID = document.body.dataset.module;
+  function hasard(a) { return a[Math.floor(Math.random() * a.length)]; }
+  function examen() {
+    mode = "examen"; main.classList.add("en-examen");
+    var lecons = CFG.lecons.slice().sort(function () { return Math.random() - 0.5; }).slice(0, 3);
+    E = { list: lecons.map(function (l) { return hasard(l.missions); }), i: 0, ok: [], fini: false };
+    E.chrono = EF.examChrono(CFG.titre, 900, function () { finExamen(); });
+    main.querySelector(".labo-grid").insertAdjacentElement("beforebegin", E.chrono.el);
+    examOpen(0);
+  }
+  function examOpen(i) {
+    E.i = i; cur = E.list[i]; results = null;
+    E.chrono.pos("mission " + (i + 1) + "/" + E.list.length);
+    setCode(cur.depart); notice(""); $("lc-err").innerHTML = "";
+    if (PY) { $("lc-stdin").value = (cur.stdin || []).join("\n"); $("lc-console").textContent = "Clique sur Exécuter pour lancer ton programme."; }
+    else {
+      var req = { method: cur.post ? "post" : "get", get: cur.get || {}, post: cur.post || {} };
+      execute(src.value, req).then(function (out) { return render(out, req); }).catch(function () {});
+    }
+    examBrief(); src.focus();
+  }
+  function examBrief() {
+    var der = E.i + 1 >= E.list.length, ok = E.ok[E.i];
+    brief.innerHTML = '<div class="lb-kicker">Mission ' + (E.i + 1) + ' sur ' + E.list.length + '</div><h2>' + esc(cur.titre) + '</h2>' +
+      '<div class="lb-texte">' + cur.texte + '</div>' +
+      '<h3>Objectifs</h3><ul class="labo-goals">' + cur.objectifs.map(function (o, i) {
+        var st = results ? (results[i] ? "ok" : "ko") : "";
+        return '<li class="' + st + '"><span class="ck">' + (st === "ok" ? "✓" : st === "ko" ? "✗" : "") + '</span><span class="gt">' + o.txt + '</span></li>';
+      }).join("") + '</ul>' +
+      (ok ? '<div class="box retenir lb-win"><b>Mission réussie</b><p>' + (der ? "C'était la dernière." : "Passage à la suivante…") + '</p></div>'
+        : '<p class="lb-small" style="margin-top:10px">Pas d\'indice ni de solution pendant l\'épreuve. Clique sur <b>Exécuter</b> pour faire vérifier ton code.</p>') +
+      '<div class="lb-actions">' + (der ? '' : '<button class="btn" id="ex-next" type="button">' + (ok ? "Mission suivante →" : "Passer cette mission →") + '</button>') +
+      '<button class="btn' + (der ? ' primary' : '') + '" id="ex-fin" type="button">Terminer l\'évaluation</button></div>';
+    if ($("ex-next")) $("ex-next").onclick = function () { examOpen(E.i + 1); };
+    $("ex-fin").onclick = function () {
+      if (E.ok.filter(Boolean).length < E.list.length && !window.confirm("Terminer maintenant ? Les missions non réussies compteront comme ratées.")) return;
+      finExamen();
+    };
+  }
+  function evalExamen(code) {
+    if (E.fini) return;
+    if (PY && /TimeoutError: temps dépassé/.test(current.out)) { results = cur.objectifs.map(function () { return false; }); examBrief(); return; }
+    var i = E.i;
+    return checkAll(cur, code).then(function (res) {
+      if (E.fini || E.i !== i) return;
+      results = res;
+      if (res.every(Boolean) && !E.ok[i]) {
+        E.ok[i] = true;
+        setTimeout(function () {
+          if (E.fini || E.i !== i) return;
+          if (E.ok.filter(Boolean).length === E.list.length) finExamen();
+          else if (i + 1 < E.list.length) examOpen(i + 1);
+        }, 1300);
+      }
+      examBrief();
+    });
+  }
+  function finExamen() {
+    if (E.fini) return; E.fini = true;
+    var rest = E.chrono.restant(); E.chrono.stop(); E.chrono.el.remove();
+    var box = main.querySelector(".labo-grid"); box.className = "labo-resultat";
+    EF.examResultat(box, {
+      mid: MID, titre: CFG.titre, couleur: CFG.couleur, racine: "../../", duree: 900, coef: 150, restant: rest,
+      retour: location.pathname.split("/").pop(),
+      missions: E.list.map(function (m, i) { return { titre: m.titre, ok: !!E.ok[i], solution: m.solution }; }),
+      rejouer: function () { location.hash = "#examen"; location.reload(); }
+    });
+  }
+
   /* ---------- routage ---------- */
   function route() {
+    if (/^#examen/.test(location.hash)) { if (!E) examen(); return; }
+    if (E) { location.reload(); return; }
     var hsh = location.hash, m = /#m=([\w-]+)/.exec(hsh);
     mode = hsh === "#libre" ? "libre" : "guide";
     main.querySelectorAll(".labo-mode .chip").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.mode === mode)); });
