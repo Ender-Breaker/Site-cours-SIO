@@ -50,6 +50,7 @@ window.EF_MODULES = [
     option: "SISR",
     couleur: "emerald",
     description: "Réseaux, Linux, Windows Server, virtualisation, services : administrer une infrastructure.",
+    labos: [{ href: "labo-terminal.html", ico: ">_", titre: "Labo terminal Linux", texte: "40 missions guidées sur un vrai faux système de fichiers : ls, cd, grep, chmod, pipes, sudo, tar… plus un bac à sable." }],
     chapitres: [
       { id: "presentation-blocs", titre: "Présentation des Blocs 1 et 3", niveau: "facile" },
       { id: "linux-shell-bases", titre: "Linux : le shell et l'arborescence", niveau: "facile" },

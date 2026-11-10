@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Labo terminal — SISR — Étude Facile</title>
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="sisr">
+<script>
+window.EF_LABO = {
+  /* ---------- système de fichiers de départ ---------- */
+  fs: {
+    "/home/etu/": null,
+    "/home/etu/.bashrc": "alias ll='ls -l'\nexport EDITOR=nano\n",
+    "/home/etu/.config/": null,
+    "/home/etu/.config/theme.conf": "sombre\n",
+    "/home/etu/notes.txt": "Linux est sensible à la casse\nle shell interprète les commandes\nTab complète les noms\n",
+    "/home/etu/courses.txt": "pomme\nbanane\ncerise\nbanane\nabricot\npomme\n",
+    "/home/etu/secret.txt": "code wifi : 1234-SIO\n",
+    "/home/etu/Documents/": null,
+    "/home/etu/Documents/cours-linux.txt": "Introduction à Linux\nLinux est un système libre\nle noyau linux a été créé en 1991\nUNIX a inspiré LINUX\nles commandes se tapent dans le shell\n",
+    "/home/etu/Documents/rapport.txt": "Rapport de stage — brouillon\n",
+    "/home/etu/Documents/eleves.csv": "Durand;Alice;17\nMartin;Bob;18\nLeroy;Chloé;17\nBernard;David;19\nPetit;Emma;18\n",
+    "/home/etu/Images/": null,
+    "/home/etu/Images/vacances.png": "(image PNG)\n",
+    "/home/etu/Images/logo.png": "(image PNG)\n",
+    "/home/etu/Images/plage.jpg": "(image JPEG)\n",
+    "/home/etu/projet/": null,
+    "/home/etu/projet/index.html": "<h1>Mon site</h1>\n",
+    "/home/etu/projet/style.css": "h1 { color: navy; }\n",
+    "/home/etu/projet/script.sh": "#!/bin/bash\necho \"Bonjour $USER\"\n",
+    "/home/etu/logs/": null,
+    "/home/etu/logs/serveur.log": "08:00 INFO démarrage du serveur\n08:05 INFO connexion de etu\n08:12 ERROR disque presque plein\n08:20 WARN mémoire élevée\n08:31 ERROR service nginx arrêté\n08:40 INFO redémarrage de nginx\n",
+    "/home/etu/logs/rotation.sh": "#!/bin/bash\n# archive les anciens logs\n",
+    "/tmp/": null
+  },
+
+  lecons: [
+  /* ======================= 1 ======================= */
+  { id: "reperer", titre: "Se repérer", missions: [
+    { id: "pwd", titre: "Où suis-je ?",
+      texte: "<p>Dans un terminal, tu es toujours <b>dans un dossier</b> : le dossier courant. La commande <code>pwd</code> (<i>print working directory</i>) l'affiche.</p><p>Regarde aussi l'invite : <code>etu@lab:~$</code>. Le <code>~</code> est un raccourci pour ton dossier personnel.</p>",
+      syntaxe: ["pwd"],
+      objectifs: [{ txt: "Affiche le chemin du dossier courant", r: [{ cmd: "^pwd$" }] }],
+      indice: "Tape simplement les trois lettres <code>pwd</code> puis Entrée.",
+      solution: ["pwd"], bravo: "Tu es dans <code>/home/etu</code> : c'est ton dossier personnel, noté <code>~</code>." },
+    { id: "ls", titre: "Voir ce qu'il y a ici",
+      texte: "<p><code>ls</code> (<i>list</i>) affiche le contenu du dossier courant. Tu peux aussi lui donner un chemin : <code>ls Images</code> liste le dossier Images sans y aller.</p>",
+      syntaxe: ["ls", "ls dossier"],
+      objectifs: [
+        { txt: "Liste le contenu de ton dossier personnel", r: [{ cmd: "^ls\\s*$" }] },
+        { txt: "Liste le contenu du dossier <code>Images</code> sans t'y déplacer", r: [{ anyout: "plage\\.jpg" }, { cwd: "/home/etu" }] }],
+      indice: "Pour le deuxième objectif, mets le nom du dossier après <code>ls</code>.",
+      solution: ["ls", "ls Images"] },
+    { id: "ls-a", titre: "Les fichiers cachés",
+      texte: "<p>Sous Linux, un fichier dont le nom commence par un <b>point</b> est caché (souvent des fichiers de configuration). <code>ls</code> ne les montre pas : il faut l'option <code>-a</code> (<i>all</i>).</p><p>Tu verras aussi <code>.</code> (le dossier courant) et <code>..</code> (le dossier parent).</p>",
+      syntaxe: ["ls -a"],
+      objectifs: [{ txt: "Affiche tous les fichiers, y compris les cachés", r: [{ anyout: "\\.bashrc" }] }],
+      indice: "Ajoute <code>-a</code> après <code>ls</code>, séparé par un espace.",
+      solution: ["ls -a"], bravo: "Tu as trouvé <code>.bashrc</code> et <code>.config</code>. Coche « fichiers cachés » dans l'explorateur pour les voir aussi." },
+    { id: "cd", titre: "Entrer dans un dossier",
+      texte: "<p><code>cd</code> (<i>change directory</i>) te déplace dans un autre dossier. L'invite change pour te montrer où tu es.</p><p>Astuce : tape <code>cd Doc</code> puis la touche <b>Tab</b>, le shell complète le nom tout seul.</p>",
+      syntaxe: ["cd dossier"],
+      objectifs: [
+        { txt: "Déplace-toi dans le dossier <code>Documents</code>", r: [{ cwd: "/home/etu/Documents" }] },
+        { txt: "Affiche son contenu", r: [{ cwd: "/home/etu/Documents" }, { out: "cours-linux\\.txt" }] }],
+      indice: "<code>cd Documents</code>, puis <code>ls</code>.",
+      solution: ["cd Documents", "ls"] },
+    { id: "cd-chemins", titre: "Chemins relatifs et absolus",
+      texte: "<p>Tu commences dans <code>~/projet</code>.</p><ul><li><code>..</code> désigne le dossier parent : <code>cd ..</code> remonte d'un cran.</li><li>Un chemin <b>absolu</b> commence par <code>/</code> (la racine) : <code>cd /tmp</code> marche d'où que tu sois.</li><li><code>cd</code> seul (ou <code>cd ~</code>) te ramène chez toi.</li></ul>",
+      syntaxe: ["cd ..", "cd /chemin/absolu", "cd ~"], cwd: "/home/etu/projet",
+      objectifs: [
+        { txt: "Remonte d'un niveau avec <code>cd ..</code>", r: [{ cmd: "^cd\\s+\\.\\.\\/?$" }, { cwd: "/home/etu" }] },
+        { txt: "Va dans <code>/tmp</code> avec un chemin absolu", r: [{ cwd: "/tmp" }] },
+        { txt: "Reviens dans ton dossier personnel avec <code>cd</code> ou <code>cd ~</code>", r: [{ cmd: "^cd(\\s+~\\/?)?$" }, { cwd: "/home/etu" }] }],
+      indice: "Trois commandes : <code>cd ..</code>, <code>cd /tmp</code>, puis <code>cd</code>.",
+      solution: ["cd ..", "cd /tmp", "cd ~"] },
+    { id: "ls-l", titre: "La vue détaillée",
+      texte: "<p><code>ls -l</code> (<i>long</i>) affiche une ligne par fichier : droits, propriétaire, groupe, taille, date et nom. Les options se combinent : <code>ls -la</code> = détaillé + cachés.</p>",
+      syntaxe: ["ls -l", "ls -la", "ls -l dossier"],
+      objectifs: [
+        { txt: "Affiche la liste détaillée du dossier <code>Documents</code>", r: [{ anyout: "^-rw.*eleves\\.csv" }] },
+        { txt: "Affiche la liste détaillée de ton dossier personnel <b>avec</b> les fichiers cachés", r: [{ anyout: "^-rw.*\\.bashrc" }] }],
+      indice: "<code>ls -l Documents</code>, puis <code>ls -la</code> depuis <code>~</code>.",
+      solution: ["ls -l Documents", "ls -la"] }
+  ]},
+
+  /* ======================= 2 ======================= */
+  { id: "organiser", titre: "Créer et organiser", missions: [
+    { id: "mkdir", titre: "Créer un dossier",
+      texte: "<p><code>mkdir</code> (<i>make directory</i>) crée un dossier. Regarde l'explorateur à droite : il se met à jour à chaque commande.</p>",
+      syntaxe: ["mkdir nom"],
+      objectifs: [{ txt: "Crée un dossier <code>tp1</code> dans ton dossier personnel", r: [{ exists: "/home/etu/tp1" }] }],
+      indice: "<code>mkdir tp1</code>", solution: ["mkdir tp1"] },
+    { id: "mkdir-p", titre: "Créer toute une arborescence",
+      texte: "<p>Essaie <code>mkdir bts/sio/sisr</code> : erreur, car <code>bts</code> n'existe pas encore. L'option <code>-p</code> (<i>parents</i>) crée tous les dossiers intermédiaires d'un coup.</p>",
+      syntaxe: ["mkdir -p a/b/c", "tree"],
+      objectifs: [
+        { txt: "Crée l'arborescence <code>bts/sio/sisr</code> en une seule commande", r: [{ exists: "/home/etu/bts/sio/sisr" }] },
+        { txt: "Vérifie avec <code>tree bts</code>", r: [{ cmd: "^tree" }, { anyout: "sisr" }] }],
+      indice: "<code>mkdir -p bts/sio/sisr</code>", solution: ["mkdir -p bts/sio/sisr", "tree bts"] },
+    { id: "touch", titre: "Créer des fichiers vides",
+      texte: "<p><code>touch</code> crée un fichier vide (ou met à jour la date d'un fichier existant). On peut en créer plusieurs d'un coup en les séparant par des espaces.</p>",
+      syntaxe: ["touch fichier", "touch f1 f2"], fs: { "/home/etu/tp1/": null },
+      objectifs: [{ txt: "Crée <code>todo.txt</code> et <code>idees.txt</code> dans le dossier <code>tp1</code>", r: [{ exists: "/home/etu/tp1/todo.txt" }, { exists: "/home/etu/tp1/idees.txt" }] }],
+      indice: "Tu peux rester dans <code>~</code> et écrire le chemin : <code>touch tp1/todo.txt tp1/idees.txt</code>.",
+      solution: ["touch tp1/todo.txt tp1/idees.txt"] },
+    { id: "cp", titre: "Copier",
+      texte: "<p><code>cp source destination</code> copie un fichier. Si la destination est un dossier, la copie y est placée avec le même nom. L'original reste en place.</p>",
+      syntaxe: ["cp source destination"],
+      objectifs: [{ txt: "Copie <code>notes.txt</code> dans le dossier <code>Documents</code>", r: [{ exists: "/home/etu/Documents/notes.txt" }, { exists: "/home/etu/notes.txt" }] }],
+      indice: "<code>cp notes.txt Documents/</code>", solution: ["cp notes.txt Documents/"] },
+    { id: "mv-renommer", titre: "Renommer",
+      texte: "<p>Linux n'a pas de commande « renommer » : on <b>déplace</b> le fichier vers un nouveau nom avec <code>mv</code> (<i>move</i>).</p>",
+      syntaxe: ["mv ancien nouveau"],
+      objectifs: [{ txt: "Renomme <code>Documents/rapport.txt</code> en <code>rapport-final.txt</code>", r: [{ exists: "/home/etu/Documents/rapport-final.txt" }, { absent: "/home/etu/Documents/rapport.txt" }] }],
+      indice: "Pense à garder le dossier dans les deux chemins : <code>mv Documents/rapport.txt Documents/rapport-final.txt</code>.",
+      solution: ["mv Documents/rapport.txt Documents/rapport-final.txt"] },
+    { id: "mv-deplacer", titre: "Déplacer",
+      texte: "<p>Avec un dossier comme destination, <code>mv</code> déplace le fichier sans le renommer. Contrairement à <code>cp</code>, l'original disparaît.</p>",
+      syntaxe: ["mv fichier dossier/"],
+      objectifs: [{ txt: "Déplace <code>Images/logo.png</code> dans le dossier <code>projet</code>", r: [{ exists: "/home/etu/projet/logo.png" }, { absent: "/home/etu/Images/logo.png" }] }],
+      indice: "<code>mv Images/logo.png projet/</code>", solution: ["mv Images/logo.png projet/"] },
+    { id: "rm", titre: "Supprimer",
+      texte: "<p><code>rm</code> supprime un fichier <b>définitivement</b> : pas de corbeille dans le terminal ! <code>rmdir</code> supprime un dossier, mais seulement s'il est vide.</p>",
+      syntaxe: ["rm fichier", "rmdir dossier"], prep: ["touch brouillon.txt", "mkdir vide"],
+      objectifs: [
+        { txt: "Supprime le fichier <code>brouillon.txt</code>", r: [{ absent: "/home/etu/brouillon.txt" }] },
+        { txt: "Supprime le dossier vide <code>vide</code> avec <code>rmdir</code>", r: [{ absent: "/home/etu/vide" }, { cmd: "^rmdir" }] }],
+      indice: "<code>rm brouillon.txt</code> puis <code>rmdir vide</code>.", solution: ["rm brouillon.txt", "rmdir vide"] },
+    { id: "rm-r", titre: "Supprimer un dossier plein",
+      texte: "<p>Le dossier <code>ancien</code> contient des fichiers : <code>rmdir</code> refuse. <code>rm -r</code> (<i>récursif</i>) supprime le dossier et tout son contenu. À manier avec précaution.</p>",
+      syntaxe: ["rm -r dossier"], prep: ["mkdir -p ancien/v1", "touch ancien/a.txt ancien/v1/b.txt"],
+      objectifs: [
+        { txt: "Essaie <code>rmdir ancien</code> et lis l'erreur", r: [{ anyout: "pas vide" }] },
+        { txt: "Supprime <code>ancien</code> et tout son contenu", r: [{ absent: "/home/etu/ancien" }] }],
+      indice: "<code>rm -r ancien</code>", solution: ["rmdir ancien", "rm -r ancien"] },
+    { id: "jokers", titre: "Les jokers",
+      texte: "<p>Le joker <code>*</code> remplace « n'importe quelle suite de caractères ». <code>*.png</code> désigne tous les fichiers qui finissent par <code>.png</code>. Le shell remplace le motif par la liste des fichiers avant de lancer la commande.</p>",
+      syntaxe: ["ls *.txt", "cp dossier/*.png destination/"],
+      objectifs: [
+        { txt: "Crée un dossier <code>png</code>", r: [{ exists: "/home/etu/png" }] },
+        { txt: "Copie <b>uniquement</b> les images <code>.png</code> de <code>Images</code> dans <code>png</code>, en une commande avec <code>*</code>", r: [{ exists: "/home/etu/png/vacances.png" }, { exists: "/home/etu/png/logo.png" }, { absent: "/home/etu/png/plage.jpg" }, { cmd: "\\*\\.png" }] }],
+      indice: "<code>mkdir png</code>, puis <code>cp Images/*.png png/</code>.", solution: ["mkdir png", "cp Images/*.png png/"] }
+  ]},
+
+  /* ======================= 3 ======================= */
+  { id: "lire", titre: "Lire et chercher", missions: [
+    { id: "cat", titre: "Afficher un fichier",
+      texte: "<p><code>cat</code> affiche tout le contenu d'un fichier texte dans le terminal.</p>",
+      syntaxe: ["cat fichier"],
+      objectifs: [{ txt: "Affiche le contenu de <code>Documents/cours-linux.txt</code>", r: [{ anyout: "noyau linux" }] }],
+      indice: "<code>cat Documents/cours-linux.txt</code> (Tab t'aide à compléter le nom).", solution: ["cat Documents/cours-linux.txt"] },
+    { id: "head-tail", titre: "Le début et la fin",
+      texte: "<p>Pour un gros fichier, <code>head</code> affiche les premières lignes et <code>tail</code> les dernières (10 par défaut). <code>-n 3</code> choisit le nombre de lignes. Très utile pour lire la fin d'un journal (log).</p>",
+      syntaxe: ["head -n 2 fichier", "tail -n 3 fichier"],
+      objectifs: [
+        { txt: "Affiche les 2 premières lignes de <code>logs/serveur.log</code>", r: [{ cmd: "^head" }, { anyout: "^08:00.*\\n08:05[^\\n]*\\n?$" }] },
+        { txt: "Affiche les 3 dernières lignes du même fichier", r: [{ cmd: "^tail" }, { anyout: "^08:20.*\\n08:31.*\\n08:40[^\\n]*\\n?$" }] }],
+      indice: "<code>head -n 2 logs/serveur.log</code> et <code>tail -n 3 logs/serveur.log</code>.",
+      solution: ["head -n 2 logs/serveur.log", "tail -n 3 logs/serveur.log"] },
+    { id: "wc", titre: "Compter",
+      texte: "<p><code>wc</code> (<i>word count</i>) compte les lignes, mots et caractères. <code>wc -l</code> ne donne que le nombre de lignes.</p>",
+      syntaxe: ["wc fichier", "wc -l fichier"],
+      objectifs: [{ txt: "Affiche le nombre de lignes de <code>Documents/eleves.csv</code>", r: [{ cmd: "^wc\\s+-l" }, { anyout: "^\\s*5\\b" }] }],
+      indice: "<code>wc -l Documents/eleves.csv</code>", solution: ["wc -l Documents/eleves.csv"], bravo: "5 lignes, donc 5 élèves dans le fichier." },
+    { id: "grep", titre: "Chercher dans un fichier",
+      texte: "<p><code>grep motif fichier</code> n'affiche que les lignes qui contiennent le motif. C'est l'outil n°1 pour fouiller dans les journaux d'un serveur.</p>",
+      syntaxe: ["grep motif fichier", "grep -n motif fichier"],
+      objectifs: [
+        { txt: "Affiche les lignes contenant <code>ERROR</code> dans <code>logs/serveur.log</code>", r: [{ cmd: "^grep" }, { anyout: "^08:12 ERROR.*\\n08:31 ERROR[^\\n]*\\n?$" }] },
+        { txt: "Recommence en affichant les numéros de ligne (<code>-n</code>)", r: [{ anyout: "^3:08:12 ERROR" }] }],
+      indice: "<code>grep ERROR logs/serveur.log</code>, puis ajoute <code>-n</code>.",
+      solution: ["grep ERROR logs/serveur.log", "grep -n ERROR logs/serveur.log"] },
+    { id: "grep-options", titre: "grep : casse et comptage",
+      texte: "<p>Par défaut, <code>grep</code> respecte la casse : <code>linux</code> ≠ <code>Linux</code>. Options utiles :</p><ul><li><code>-i</code> ignore la casse ;</li><li><code>-c</code> compte les lignes au lieu de les afficher ;</li><li><code>-v</code> inverse : lignes qui <b>ne</b> contiennent <b>pas</b> le motif.</li></ul>",
+      syntaxe: ["grep -i motif fichier", "grep -ic motif fichier", "grep -v motif fichier"],
+      objectifs: [
+        { txt: "Compte les lignes de <code>Documents/cours-linux.txt</code> qui contiennent « linux », <b>quelle que soit la casse</b>", r: [{ cmd: "^grep\\s.*-\\w*i" }, { anyout: "^4$" }] },
+        { txt: "Affiche les lignes du log qui ne contiennent <b>pas</b> <code>INFO</code>", r: [{ cmd: "-\\w*v" }, { anyout: "^08:12 ERROR.*\\n08:20 WARN.*\\n08:31 ERROR[^\\n]*\\n?$" }] }],
+      indice: "<code>grep -ic linux Documents/cours-linux.txt</code> puis <code>grep -v INFO logs/serveur.log</code>.",
+      solution: ["grep -ic linux Documents/cours-linux.txt", "grep -v INFO logs/serveur.log"] },
+    { id: "find", titre: "Retrouver un fichier",
+      texte: "<p><code>find</code> cherche des fichiers dans une arborescence. <code>find . -name \"*.sh\"</code> cherche à partir du dossier courant (<code>.</code>) tous les fichiers dont le nom finit par <code>.sh</code>. Mets le motif entre guillemets.</p>",
+      syntaxe: ["find dossier -name \"motif\"", "find . -type d"],
+      objectifs: [{ txt: "Trouve tous les scripts <code>.sh</code> de ton dossier personnel", r: [{ cmd: "^find" }, { anyout: "script\\.sh" }, { anyout: "rotation\\.sh" }] }],
+      indice: "Depuis <code>~</code> : <code>find . -name \"*.sh\"</code>", solution: ["find . -name \"*.sh\""] }
+  ]},
+
+  /* ======================= 4 ======================= */
+  { id: "pipes", titre: "Redirections et pipes", missions: [
+    { id: "redir", titre: "Écrire dans un fichier",
+      texte: "<p><code>echo</code> affiche du texte. Avec <code>&gt;</code>, la sortie part dans un fichier au lieu de l'écran. <b>Attention :</b> <code>&gt;</code> écrase le fichier s'il existe déjà.</p>",
+      syntaxe: ["echo \"texte\" > fichier"],
+      objectifs: [{ txt: "Crée <code>memo.txt</code> contenant exactement <code>Réviser Linux</code>", r: [{ equals: ["/home/etu/memo.txt", "Réviser Linux"] }] }],
+      indice: "<code>echo \"Réviser Linux\" &gt; memo.txt</code>, puis vérifie avec <code>cat memo.txt</code>.", solution: ["echo \"Réviser Linux\" > memo.txt"] },
+    { id: "append", titre: "Ajouter à la fin",
+      texte: "<p><code>&gt;&gt;</code> ajoute à la fin du fichier sans effacer ce qu'il contient. <code>memo.txt</code> contient déjà « Réviser Linux ».</p>",
+      syntaxe: ["echo \"texte\" >> fichier"], prep: ["echo \"Réviser Linux\" > memo.txt"],
+      objectifs: [{ txt: "Ajoute la ligne <code>Faire le TP</code> à la fin de <code>memo.txt</code>", r: [{ equals: ["/home/etu/memo.txt", "Réviser Linux\nFaire le TP"] }] }],
+      indice: "Deux chevrons : <code>echo \"Faire le TP\" &gt;&gt; memo.txt</code>. Si tu as écrasé le fichier, clique sur Recommencer.",
+      solution: ["echo \"Faire le TP\" >> memo.txt", "cat memo.txt"] },
+    { id: "redir-cmd", titre: "Sauvegarder un résultat",
+      texte: "<p>On peut rediriger la sortie de <b>n'importe quelle</b> commande. Pratique pour garder la trace d'une recherche.</p>",
+      syntaxe: ["commande > fichier"],
+      objectifs: [{ txt: "Enregistre les lignes <code>ERROR</code> du log dans <code>erreurs.txt</code>", r: [{ equals: ["/home/etu/erreurs.txt", "08:12 ERROR disque presque plein\n08:31 ERROR service nginx arrêté"] }] }],
+      indice: "<code>grep ERROR logs/serveur.log &gt; erreurs.txt</code>", solution: ["grep ERROR logs/serveur.log > erreurs.txt"] },
+    { id: "pipe-sort", titre: "Enchaîner avec un pipe",
+      texte: "<p>Le pipe <code>|</code> envoie la sortie d'une commande à l'entrée de la suivante. <code>sort</code> trie les lignes, <code>uniq</code> supprime les doublons <b>consécutifs</b> (d'où le tri avant). <code>uniq -c</code> compte chaque occurrence.</p>",
+      syntaxe: ["cat fichier | sort", "sort fichier | uniq", "sort fichier | uniq -c"],
+      objectifs: [
+        { txt: "Affiche <code>courses.txt</code> trié, sans doublons", r: [{ cmd: "sort.*\\|\\s*uniq\\s*$" }, { anyout: "^abricot\\nbanane\\ncerise\\npomme\\n?$" }] },
+        { txt: "Affiche combien de fois chaque article apparaît", r: [{ anyout: "2 banane" }] }],
+      indice: "<code>sort courses.txt | uniq</code>, puis <code>sort courses.txt | uniq -c</code>.",
+      solution: ["sort courses.txt | uniq", "sort courses.txt | uniq -c"] },
+    { id: "pipe-wc", titre: "Compter avec un pipe",
+      texte: "<p>Dans <code>Documents/eleves.csv</code>, chaque ligne est <code>Nom;Prénom;Âge</code>. Combine <code>grep</code> et <code>wc -l</code> pour compter des lignes qui correspondent à un critère.</p><p>Le motif <code>;17$</code> veut dire « finit par ;17 » (<code>$</code> = fin de ligne).</p>",
+      syntaxe: ["grep motif fichier | wc -l"],
+      objectifs: [{ txt: "Affiche le nombre d'élèves qui ont 17 ans", r: [{ cmd: "\\|\\s*wc\\s+-l" }, { anyout: "^2$" }] }],
+      indice: "<code>grep \";17$\" Documents/eleves.csv | wc -l</code>", solution: ["grep \";17$\" Documents/eleves.csv | wc -l"] },
+    { id: "cut", titre: "Extraire une colonne",
+      texte: "<p><code>cut -d\";\" -f2</code> découpe chaque ligne selon le séparateur <code>;</code> et garde le 2<sup>e</sup> champ. Parfait pour les fichiers CSV.</p>",
+      syntaxe: ["cut -d\";\" -f2 fichier"],
+      objectifs: [{ txt: "Enregistre la liste des prénoms dans <code>prenoms.txt</code>", r: [{ equals: ["/home/etu/prenoms.txt", "Alice\nBob\nChloé\nDavid\nEmma"] }] }],
+      indice: "<code>cut -d\";\" -f2 Documents/eleves.csv &gt; prenoms.txt</code>", solution: ["cut -d\";\" -f2 Documents/eleves.csv > prenoms.txt"] }
+  ]},
+
+  /* ======================= 5 ======================= */
+  { id: "droits", titre: "Les droits", missions: [
+    { id: "lire-droits", titre: "Lire les droits",
+      texte: "<p>Dans <code>-rwxr-xr--</code> : le 1<sup>er</sup> caractère est le type (<code>-</code> fichier, <code>d</code> dossier), puis trois groupes de 3 : <b>u</b>tilisateur propriétaire, <b>g</b>roupe, <b>o</b>thers (les autres). <code>r</code> lecture, <code>w</code> écriture, <code>x</code> exécution.</p><p>Tu vois aussi les droits dans l'explorateur, à côté de chaque nom.</p>",
+      syntaxe: ["ls -l dossier"],
+      objectifs: [{ txt: "Affiche les droits des fichiers du dossier <code>projet</code>", r: [{ anyout: "^-rw-r--r--.*script\\.sh" }] }],
+      indice: "<code>ls -l projet</code>", solution: ["ls -l projet"], bravo: "<code>script.sh</code> est en <code>rw-r--r--</code> : personne ne peut l'exécuter pour l'instant." },
+    { id: "chmod-x", titre: "Rendre un script exécutable",
+      texte: "<p><code>chmod</code> change les droits. En mode symbolique : <code>u</code>/<code>g</code>/<code>o</code>/<code>a</code>, puis <code>+</code> (ajouter) ou <code>-</code> (retirer), puis <code>r</code>/<code>w</code>/<code>x</code>. Exemple : <code>chmod u+x</code> donne le droit d'exécution au propriétaire.</p>",
+      syntaxe: ["chmod u+x fichier", "chmod go-w fichier"],
+      objectifs: [
+        { txt: "Rends <code>projet/script.sh</code> exécutable pour toi seulement", r: [{ mode: ["/home/etu/projet/script.sh", "744"] }] },
+        { txt: "Vérifie avec <code>ls -l</code>", r: [{ anyout: "^-rwxr--r--.*script\\.sh" }] }],
+      indice: "<code>chmod u+x projet/script.sh</code> puis <code>ls -l projet</code>.", solution: ["chmod u+x projet/script.sh", "ls -l projet"] },
+    { id: "chmod-octal", titre: "La notation octale",
+      texte: "<p>Chaque droit a une valeur : <b>r = 4</b>, <b>w = 2</b>, <b>x = 1</b>. On additionne pour chaque groupe :</p><ul><li><code>6</code> = rw-, <code>4</code> = r--, <code>0</code> = ---</li><li><code>chmod 640</code> → <code>rw-r-----</code></li></ul>",
+      syntaxe: ["chmod 640 fichier"],
+      objectifs: [{ txt: "Mets <code>Documents/eleves.csv</code> en <code>rw-r-----</code> (lecture-écriture pour toi, lecture pour le groupe, rien pour les autres)", r: [{ mode: ["/home/etu/Documents/eleves.csv", "640"] }] }],
+      indice: "6 pour toi, 4 pour le groupe, 0 pour les autres : <code>chmod 640 Documents/eleves.csv</code>.", solution: ["chmod 640 Documents/eleves.csv"] },
+    { id: "chmod-prive", titre: "Un fichier privé",
+      texte: "<p><code>secret.txt</code> contient le code du wifi et il est lisible par tout le monde (<code>rw-r--r--</code>). Rends-le privé : toi seul dois pouvoir le lire et le modifier.</p>",
+      syntaxe: ["chmod 600 fichier", "chmod go-r fichier"],
+      objectifs: [{ txt: "Mets <code>secret.txt</code> en <code>rw-------</code>", r: [{ mode: ["/home/etu/secret.txt", "600"] }] }],
+      indice: "En octal : 6 pour toi, 0 pour le groupe et les autres.", solution: ["chmod 600 secret.txt"] },
+    { id: "chmod-dossier", titre: "Les droits d'un dossier",
+      texte: "<p>Sur un dossier, <code>r</code> permet de lister son contenu, <code>w</code> d'y créer/supprimer des fichiers et <code>x</code> d'y <b>entrer</b> (cd). Un dossier se met donc souvent en <code>755</code> ou <code>750</code>.</p>",
+      syntaxe: ["chmod 750 dossier"],
+      objectifs: [{ txt: "Mets le dossier <code>projet</code> en <code>rwxr-x---</code> (les autres n'y ont plus accès)", r: [{ mode: ["/home/etu/projet", "750"] }] }],
+      indice: "rwx = 7, r-x = 5, --- = 0.", solution: ["chmod 750 projet"] },
+    { id: "sudo", titre: "Permission refusée et sudo",
+      texte: "<p>Le fichier <code>admin.txt</code> appartient à <b>root</b> (l'administrateur) et est en <code>rw-------</code>. Tu ne peux pas le lire. <code>sudo</code> lance une commande avec les droits de root.</p>",
+      syntaxe: ["sudo commande"],
+      fs: { "/home/etu/admin.txt": "Mot de passe du routeur : R0ut3ur!\n" }, modes: { "/home/etu/admin.txt": "600" }, owners: { "/home/etu/admin.txt": "root:root" },
+      objectifs: [
+        { txt: "Essaie de lire <code>admin.txt</code> avec <code>cat</code> et observe l'erreur", r: [{ anyout: "Permission non accordée" }] },
+        { txt: "Lis-le en tant qu'administrateur", r: [{ cmd: "^sudo\\s+cat" }, { anyout: "R0ut3ur" }] }],
+      indice: "Ajoute <code>sudo</code> devant ta commande : <code>sudo cat admin.txt</code>.", solution: ["cat admin.txt", "sudo cat admin.txt"] },
+    { id: "chown", titre: "Changer le propriétaire",
+      texte: "<p><code>chown utilisateur:groupe fichier</code> change le propriétaire et le groupe. Seul root peut le faire, donc avec <code>sudo</code>. Sur un serveur web, les fichiers du site appartiennent souvent à <code>www-data</code>.</p>",
+      syntaxe: ["sudo chown user:groupe fichier"],
+      objectifs: [{ txt: "Donne <code>projet/index.html</code> à l'utilisateur et au groupe <code>www-data</code>", r: [{ owner: ["/home/etu/projet/index.html", "www-data"] }, { group: ["/home/etu/projet/index.html", "www-data"] }] }],
+      indice: "<code>sudo chown www-data:www-data projet/index.html</code>", solution: ["sudo chown www-data:www-data projet/index.html", "ls -l projet"] }
+  ]},
+
+  /* ======================= 6 ======================= */
+  { id: "admin", titre: "Administrer", missions: [
+    { id: "useradd", titre: "Créer un utilisateur",
+      texte: "<p><code>useradd</code> crée un compte. L'option <code>-m</code> crée aussi son dossier personnel dans <code>/home</code>. Il faut être root.</p>",
+      syntaxe: ["sudo useradd -m nom", "cat /etc/passwd"],
+      objectifs: [
+        { txt: "Crée l'utilisateur <code>alice</code> avec son dossier personnel", r: [{ user: "alice" }, { exists: "/home/alice" }] },
+        { txt: "Vérifie qu'elle apparaît dans <code>/etc/passwd</code>", r: [{ anyout: "^alice:x:" }] }],
+      indice: "<code>sudo useradd -m alice</code> puis <code>cat /etc/passwd</code> (ou <code>grep alice /etc/passwd</code>).",
+      solution: ["sudo useradd -m alice", "grep alice /etc/passwd"] },
+    { id: "groupes", titre: "Groupes",
+      texte: "<p><code>groupadd</code> crée un groupe ; <code>usermod -aG groupe utilisateur</code> ajoute (<code>-a</code>, <i>append</i>) l'utilisateur au groupe sans le retirer des autres. <code>id</code> ou <code>groups</code> affichent les groupes.</p>",
+      syntaxe: ["sudo groupadd nom", "sudo usermod -aG groupe user", "groups user"],
+      objectifs: [
+        { txt: "Crée le groupe <code>sio</code>", r: [{ cmd: "groupadd\\s+sio" }, { anyout: "^$" }] },
+        { txt: "Ajoute l'utilisateur <code>etu</code> au groupe <code>sio</code>", r: [{ ingroup: ["etu", "sio"] }] },
+        { txt: "Vérifie avec <code>groups etu</code> ou <code>id etu</code>", r: [{ anyout: "sio" }, { cmd: "^(groups|id)" }] }],
+      indice: "<code>sudo groupadd sio</code>, <code>sudo usermod -aG sio etu</code>, puis <code>groups etu</code>.",
+      solution: ["sudo groupadd sio", "sudo usermod -aG sio etu", "groups etu"] },
+    { id: "tar-c", titre: "Archiver et compresser",
+      texte: "<p><code>tar</code> regroupe des fichiers dans une archive. Options à retenir : <code>c</code> créer, <code>x</code> extraire, <code>t</code> lister, <code>z</code> compresser en gzip, <code>v</code> verbeux, <code>f</code> nom du fichier (toujours en dernier).</p>",
+      syntaxe: ["tar -czf archive.tar.gz dossier", "tar -tzf archive.tar.gz"],
+      objectifs: [
+        { txt: "Crée l'archive compressée <code>sauvegarde.tar.gz</code> du dossier <code>Documents</code>", r: [{ exists: "/home/etu/sauvegarde.tar.gz" }, { cmd: "tar\\s+-?\\w*c" }] },
+        { txt: "Liste le contenu de l'archive sans l'extraire", r: [{ cmd: "tar\\s+-?\\w*t" }, { anyout: "eleves\\.csv" }] }],
+      indice: "<code>tar -czf sauvegarde.tar.gz Documents</code> puis <code>tar -tzf sauvegarde.tar.gz</code>.",
+      solution: ["tar -czf sauvegarde.tar.gz Documents", "tar -tzf sauvegarde.tar.gz"] },
+    { id: "tar-x", titre: "Restaurer une sauvegarde",
+      texte: "<p>Oups : le dossier <code>projet</code> a été supprimé ! Heureusement, il reste <code>projet.tar.gz</code>. Extrais l'archive pour le retrouver.</p>",
+      syntaxe: ["tar -xzf archive.tar.gz"], prep: ["tar -czf projet.tar.gz projet", "rm -r projet"],
+      objectifs: [{ txt: "Restaure le dossier <code>projet</code> depuis <code>projet.tar.gz</code>", r: [{ exists: "/home/etu/projet/index.html" }, { exists: "/home/etu/projet/script.sh" }] }],
+      indice: "<code>x</code> pour extraire : <code>tar -xzf projet.tar.gz</code>.", solution: ["tar -xzf projet.tar.gz", "ls projet"] },
+    { id: "processus", titre: "Processus",
+      texte: "<p>Un processus <code>sleep</code> tourne en arrière-plan et bloque une ressource. <code>ps</code> liste les processus avec leur <b>PID</b> (numéro), <code>jobs</code> les tâches de fond du terminal. <code>kill PID</code> (ou <code>kill %1</code>) arrête un processus.</p>",
+      syntaxe: ["ps", "jobs", "kill PID", "kill %1"], prep: ["sleep 900 &"],
+      objectifs: [
+        { txt: "Affiche les processus et repère le PID de <code>sleep</code>", r: [{ cmd: "^(ps|jobs)\\b" }, { anyout: "sleep 900" }] },
+        { txt: "Arrête le processus <code>sleep</code>", r: [{ jobs: 0 }] }],
+      indice: "<code>ps</code> te donne le PID (4200), puis <code>kill 4200</code>.", solution: ["ps", "kill 4200"] },
+    { id: "variables", titre: "Variables d'environnement",
+      texte: "<p>Une variable stocke une valeur : <code>$HOME</code>, <code>$USER</code>, <code>$PATH</code>… <code>export NOM=valeur</code> crée une variable d'environnement (sans espaces autour du <code>=</code>), <code>echo $NOM</code> l'affiche.</p>",
+      syntaxe: ["echo $HOME", "export NOM=valeur", "echo $NOM"],
+      objectifs: [
+        { txt: "Affiche la valeur de <code>$HOME</code>", r: [{ cmd: "^echo\\s+\\$HOME" }] },
+        { txt: "Crée la variable d'environnement <code>ROLE</code> valant <code>admin</code>", r: [{ env: ["ROLE", "admin"] }] },
+        { txt: "Affiche-la avec <code>echo</code>", r: [{ cmd: "^echo\\s+\"?\\$ROLE" }, { anyout: "^admin$" }] }],
+      indice: "<code>echo $HOME</code>, <code>export ROLE=admin</code>, puis <code>echo $ROLE</code>.",
+      solution: ["echo $HOME", "export ROLE=admin", "echo $ROLE"], bravo: "Tu as terminé le dernier thème du parcours." }
+  ]}
+  ],
+
+  /* ---------- aide-mémoire du bac à sable ---------- */
+  aide: [
+    { titre: "Se déplacer", cmds: [["pwd", "dossier courant"], ["ls -la", "tout lister, en détail"], ["cd dossier", "entrer dans un dossier"], ["cd ..", "remonter d'un niveau"], ["cd ~", "revenir chez soi"], ["tree", "arborescence"]] },
+    { titre: "Fichiers et dossiers", cmds: [["mkdir -p a/b", "créer des dossiers"], ["touch f.txt", "créer un fichier vide"], ["cp src dest", "copier (-r pour un dossier)"], ["mv src dest", "déplacer ou renommer"], ["rm fichier", "supprimer (-r pour un dossier)"], ["rmdir dossier", "supprimer un dossier vide"]] },
+    { titre: "Lire et chercher", cmds: [["cat fichier", "afficher"], ["head -n 5 fichier", "début"], ["tail -n 5 fichier", "fin"], ["wc -l fichier", "nombre de lignes"], ["grep -in motif fichier", "chercher"], ["find . -name \"*.txt\"", "trouver des fichiers"]] },
+    { titre: "Redirections et pipes", cmds: [["echo texte > f", "écrire (écrase)"], ["echo texte >> f", "ajouter à la fin"], ["sort f | uniq -c", "trier et compter"], ["cut -d\";\" -f2 f", "extraire une colonne"]] },
+    { titre: "Droits et utilisateurs", cmds: [["chmod u+x f", "ajouter un droit"], ["chmod 640 f", "droits en octal"], ["sudo chown user:grp f", "changer le propriétaire"], ["sudo useradd -m nom", "créer un utilisateur"], ["sudo usermod -aG grp nom", "ajouter à un groupe"], ["id", "mes identifiants et groupes"]] },
+    { titre: "Système", cmds: [["tar -czf a.tar.gz dossier", "archiver"], ["tar -xzf a.tar.gz", "extraire"], ["ps", "processus"], ["kill PID", "arrêter un processus"], ["export X=1", "variable d'environnement"], ["history", "commandes tapées"]] }
+  ]
+};
+</script>
+  <script src="../../data/modules.js"></script>
+  <script src="../../assets/app.js"></script>
+  <script src="../../assets/terminal.js"></script>
+  <script src="../../assets/labo.js"></script>
+</body>
+</html>

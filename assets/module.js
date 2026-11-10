@@ -25,6 +25,11 @@
       '<div class="bar c-' + mod.couleur + '" style="margin-top:16px"><i style="width:' + s.pct + '%"></i></div>' +
       '<div class="sub" style="margin-top:6px">' + s.done + ' / ' + s.total + ' chapitre' + (s.total > 1 ? 's' : '') + ' validé' + (s.done > 1 ? 's' : '') + '</div>';
 
+    (mod.labos || []).forEach(function (l) {
+      html += '<a class="labo-promo" href="' + esc(l.href) + '"><div class="lp-ico">' + esc(l.ico) + '</div><div><h3>' + esc(l.titre) + '</h3><p>' + esc(l.texte) + '</p></div>' +
+        '<span class="btn primary">Ouvrir le labo →</span></a>';
+    });
+
     if (!mod.chapitres.length) {
       html += '<div class="box" style="margin-top:22px"><b>Bientôt disponible</b><p>Les chapitres de cette matière arrivent prochainement.</p></div>';
       main.innerHTML = html;

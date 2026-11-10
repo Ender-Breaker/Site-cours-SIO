@@ -307,7 +307,10 @@
     };
     C.uniq = function (a, inp) {
       var r = opts(a), l = lines(src1(r.a, inp, "uniq")), o = [];
-      l.forEach(function (x, i) { if (i === 0 || x !== l[i - 1]) o.push(x); });
+      var cnt = [];
+      l.forEach(function (x, i) { if (i === 0 || x !== l[i - 1]) { o.push(x); cnt.push(1); } else cnt[cnt.length - 1]++; });
+      if (r.o.d) o = o.filter(function (x, i) { return cnt[i] > 1; });
+      else if (r.o.c) o = o.map(function (x, i) { return ("      " + cnt[i]).slice(-7) + " " + x; });
       return nl(o);
     };
     C.cut = function (a, inp) {
@@ -349,6 +352,22 @@
         out += (i && n.t === "d" ? "\n" : "") + lsOne(ap, p, multi && n.t === "d");
       });
       return out;
+    };
+    C.tree = function (a) {
+      var r = opts(a), p = r.a[0] || ".", ap = resolve(p), n = get(ap), nd = 0, nf = 0;
+      if (!n) throw p + " [erreur à l'ouverture du dossier]";
+      if (n.t !== "d") return p + "\n\n0 directories, 1 file\n";
+      function walk(d, pre) {
+        var names = Object.keys(d.kids).sort(cmpName).filter(function (x) { return r.o.a || x.charAt(0) !== "."; }), o = "";
+        names.forEach(function (x, i) {
+          var k = d.kids[x], last = i === names.length - 1;
+          o += pre + (last ? "└── " : "├── ") + x + (k.t === "d" ? "/" : "") + "\n";
+          if (k.t === "d") { nd++; if (can(k, 4)) o += walk(k, pre + (last ? "    " : "│   ")); } else nf++;
+        });
+        return o;
+      }
+      var body = walk(n, "");
+      return p + "\n" + body + "\n" + nd + " dossier" + (nd > 1 ? "s" : "") + ", " + nf + " fichier" + (nf > 1 ? "s" : "") + "\n";
     };
     C.file = function (a) {
       return a.map(function (p) {
@@ -561,8 +580,12 @@
     C.set = function () { return C.env() + Object.keys(shellVars).map(function (k) { return k + "=" + shellVars[k]; }).join("\n") + (Object.keys(shellVars).length ? "\n" : ""); };
     C.export = function (a) { a.forEach(function (x) { var i = x.indexOf("="); if (i > 0) S.env[x.slice(0, i)] = x.slice(i + 1); else if (shellVars[x] !== undefined) S.env[x] = shellVars[x]; }); return ""; };
     C.unset = function (a) { a.forEach(function (x) { delete S.env[x]; delete shellVars[x]; }); return ""; };
+    C.help = function () {
+      return "Commandes disponibles (simulées) :\n" + Object.keys(C).filter(function (k) { return k !== "help"; }).sort().join("  ") +
+        "\n\nAstuces : Tab complète, ↑ rappelle la commande précédente, `whatis cmd` explique une commande, Ctrl+L efface l'écran.\n";
+    };
     var MAN = {
-      ls: "liste le contenu d'un dossier", cd: "change de dossier", pwd: "affiche le dossier courant", cp: "copie des fichiers", mv: "déplace ou renomme",
+      ls: "liste le contenu d'un dossier", tree: "affiche l'arborescence d'un dossier", cd: "change de dossier", pwd: "affiche le dossier courant", cp: "copie des fichiers", mv: "déplace ou renomme",
       rm: "supprime des fichiers", mkdir: "crée des dossiers", rmdir: "supprime des dossiers vides", cat: "affiche des fichiers", grep: "cherche un motif dans des fichiers",
       chmod: "change les droits d'accès", chown: "change le propriétaire", sort: "trie des lignes", wc: "compte lignes, mots et caractères", head: "affiche le début d'un fichier",
       tail: "affiche la fin d'un fichier", cut: "extrait des champs", tar: "crée ou extrait des archives", echo: "affiche un texte", ps: "liste les processus", kill: "termine un processus",
