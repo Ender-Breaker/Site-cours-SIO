@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>HTML : les bases — Étude Facile</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="slam" data-chapter="html-bases">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<p><b>HTML5</b> (HyperText Markup Language) est le langage qui décrit la <b>structure</b> d&#x27;une page web. Un texte « seul » s&#x27;affiche mal dans un navigateur : il faut lui ajouter des informations, appelées <b>balises</b>, que le navigateur comprend.</p>
+<h2>1. Ta première page</h2>
+<pre>
+&lt;!doctype html&gt;
+&lt;html lang=&quot;fr&quot;&gt;
+  &lt;head&gt;
+    &lt;meta charset=&quot;utf-8&quot;&gt;
+    &lt;title&gt;Ma première page&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;Bienvenue&lt;/h1&gt;
+    &lt;p&gt;Mon premier paragraphe.&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<table><tr><th>Élément</th><th>Rôle</th></tr><tr><td><code>&lt;!doctype html&gt;</code></td><td>indique au navigateur qu&#x27;il s&#x27;agit d&#x27;une page HTML5</td></tr><tr><td><code>&lt;head&gt;</code></td><td>instructions pour le navigateur et les moteurs de recherche (titre, jeu de caractères…) : <b>non affiché</b></td></tr><tr><td><code>&lt;title&gt;</code></td><td>titre affiché dans l&#x27;onglet du navigateur</td></tr><tr><td><code>&lt;body&gt;</code></td><td>contenu de la page : tout ce qu&#x27;on veut visualiser (texte, image, vidéo…)</td></tr><tr><td><code>&lt;meta charset=&quot;utf-8&quot;&gt;</code></td><td>jeu de caractères : permet d&#x27;écrire les accents sans code spécial</td></tr></table>
+<p>Les outils : un <b>éditeur</b> pour coder (éditeur de texte comme Visual Studio Code, ou éditeur WYSIWYG) et un <b>navigateur</b> pour exécuter et voir le résultat. Il suffit d&#x27;enregistrer le fichier, puis de recharger la page.</p>
+<h2>2. Anatomie d&#x27;un élément</h2>
+<pre>
+&lt;p class=&quot;intro&quot;&gt;Un paragraphe&lt;/p&gt;
+</pre>
+<ul><li><code>&lt;p&gt;</code> est la <b>balise ouvrante</b>, <code>&lt;/p&gt;</code> la <b>balise fermante</b>.</li><li><code>class=&quot;intro&quot;</code> est un <b>attribut</b> (un nom et une valeur entre guillemets).</li><li>Le texte entre les deux balises est le <b>contenu</b>.</li></ul>
+<h3>Un code bien formé</h3>
+<ul><li>Les balises s&#x27;<b>imbriquent</b> sans jamais se chevaucher : on referme toujours la dernière balise ouverte. <code>&lt;b&gt;&lt;i&gt;texte&lt;/i&gt;&lt;/b&gt;</code> est correct, <code>&lt;b&gt;&lt;i&gt;texte&lt;/b&gt;&lt;/i&gt;</code> ne l&#x27;est pas.</li><li>On <b>indente</b> pour visualiser l&#x27;imbrication.</li><li><b>Jamais de texte isolé</b> sans balise : un paragraphe est toujours dans <code>&lt;p&gt;</code>.</li></ul>
+<div class="box retenir"><b>Les exceptions : balises sans fermeture</b><p><code>&lt;br&gt;</code> (saut de ligne), <code>&lt;hr&gt;</code> (ligne horizontale) et <code>&lt;img&gt;</code> (image) n&#x27;encadrent aucun texte : elles n&#x27;ont pas de balise fermante.</p></div>
+<h2>3. Titres, paragraphes et mise en forme</h2>
+<table><tr><th>Balise</th><th>Effet</th></tr><tr><td><code>&lt;h1&gt;</code> … <code>&lt;h6&gt;</code></td><td>titres, du plus grand (h1) au plus petit (h6)</td></tr><tr><td><code>&lt;p&gt;</code></td><td>paragraphe</td></tr><tr><td><code>&lt;b&gt;</code> / <code>&lt;strong&gt;</code></td><td>texte en gras</td></tr><tr><td><code>&lt;i&gt;</code> / <code>&lt;em&gt;</code></td><td>texte en italique</td></tr><tr><td><code>&lt;br&gt;</code></td><td>saut de ligne</td></tr><tr><td><code>&lt;hr&gt;</code></td><td>trace une ligne horizontale</td></tr><tr><td><code>&lt;pre&gt;</code></td><td>reproduit le texte tel qu&#x27;il est codé (espaces et sauts de ligne conservés)</td></tr></table>
+<div class="box attention"><b>Espaces et sauts de ligne</b><p>Quel que soit le nombre d&#x27;espaces à la suite, le navigateur n&#x27;en affiche <b>qu&#x27;un seul</b>. Pour en forcer plusieurs : <code>&amp;nbsp;</code> (espace insécable).</p><p>Les sauts de ligne du code sont ignorés : il faut <code>&lt;br&gt;</code> pour en forcer un.</p></div>
+<h2>4. Listes</h2>
+<pre>
+&lt;ul&gt;                      &lt;!-- liste à puces (non ordonnée) --&gt;
+  &lt;li&gt;Réseaux&lt;/li&gt;
+  &lt;li&gt;Programmation&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;ol&gt;                      &lt;!-- liste numérotée (ordonnée) --&gt;
+  &lt;li&gt;Étape 1&lt;/li&gt;
+  &lt;li&gt;Étape 2&lt;/li&gt;
+&lt;/ol&gt;
+</pre>
+<p>Chaque élément est un <code>&lt;li&gt;</code>. Pour faire une <b>sous-liste</b>, on imbrique un <code>&lt;ul&gt;</code> ou <code>&lt;ol&gt;</code> dans un <code>&lt;li&gt;</code>.</p>
+<h2>5. Liens et images</h2>
+<pre>
+&lt;a href=&quot;https://www.cisco.com/&quot;&gt;Le site de Cisco&lt;/a&gt;
+
+&lt;img src=&quot;cisco.jpg&quot; alt=&quot;Logo Cisco&quot; /&gt;
+
+&lt;!-- image cliquable : on met l&#x27;image dans un lien --&gt;
+&lt;a href=&quot;https://www.cisco.com/&quot;&gt;&lt;img src=&quot;cisco.jpg&quot; alt=&quot;Logo Cisco&quot; /&gt;&lt;/a&gt;
+</pre>
+<ul><li><code>&lt;a&gt;</code> crée un lien ; l&#x27;attribut <b><code>href</code></b> donne la cible. Le texte entre les balises devient cliquable.</li><li><code>&lt;img&gt;</code> insère une image ; l&#x27;attribut <b><code>src</code></b> donne son emplacement (le fichier doit être dans le bon dossier). <code>alt</code> décrit l&#x27;image.</li><li>Pour une image cliquable, on place <code>&lt;img&gt;</code> <b>dans</b> une balise <code>&lt;a&gt;</code>.</li></ul>
+<h2>6. Tableaux</h2>
+<pre>
+&lt;table border=&quot;1&quot;&gt;
+  &lt;caption&gt;Notes&lt;/caption&gt;
+  &lt;tr&gt;
+    &lt;th&gt;Matière&lt;/th&gt;&lt;th&gt;Note&lt;/th&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td&gt;Maths&lt;/td&gt;&lt;td&gt;14&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+</pre>
+<table><tr><th>Balise</th><th>Rôle</th></tr><tr><td><code>&lt;table&gt;</code></td><td>le tableau (<code>border</code> : épaisseur de la bordure)</td></tr><tr><td><code>&lt;caption&gt;</code></td><td>titre du tableau</td></tr><tr><td><code>&lt;tr&gt;</code></td><td>une ligne (table row)</td></tr><tr><td><code>&lt;td&gt;</code></td><td>une cellule de données</td></tr><tr><td><code>&lt;th&gt;</code></td><td>une cellule d&#x27;en-tête</td></tr></table>
+<div class="box retenir"><b>À retenir</b><p>Ajouter une cellule à une ligne revient à ajouter une <b>colonne</b> au tableau entier. Les cellules d&#x27;une même colonne ont la même largeur : celle de la plus grande donnée.</p></div>
+<h2>7. Structurer l&#x27;espace : div et span</h2>
+<table><tr><th>Balise</th><th>Rôle</th></tr><tr><td><code>&lt;div&gt;</code></td><td><b>division</b> : bloc qui occupe toute la largeur, sert à regrouper et organiser la page</td></tr><tr><td><code>&lt;span&gt;</code></td><td>portion de texte <b>dans une ligne</b>, sert à mettre en forme quelques mots</td></tr></table>
+<details open><summary>Résumé express</summary>
+<ul><li>Squelette : <code>&lt;!doctype html&gt;</code>, <code>&lt;html&gt;</code>, <code>&lt;head&gt;</code> (+ <code>&lt;title&gt;</code>), <code>&lt;body&gt;</code>.</li><li>Balises ouvrantes/fermantes, bien imbriquées ; <code>&lt;br&gt;</code>, <code>&lt;hr&gt;</code>, <code>&lt;img&gt;</code> sans fermeture.</li><li><code>&lt;h1&gt;</code>–<code>&lt;h6&gt;</code>, <code>&lt;p&gt;</code>, <code>&lt;ul&gt;/&lt;ol&gt;/&lt;li&gt;</code>, <code>&lt;a href&gt;</code>, <code>&lt;img src&gt;</code>, <code>&lt;table&gt;/&lt;tr&gt;/&lt;td&gt;/&lt;th&gt;</code>.</li><li><code>&lt;div&gt;</code> structure en blocs, <code>&lt;span&gt;</code> met en forme dans une ligne.</li></ul>
+</details>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle balise contient le contenu affiché dans la page ?",
+  "options": [
+   "<head>",
+   "<body>",
+   "<title>",
+   "<meta>"
+  ],
+  "answer": 1,
+  "explication": "`<body>` contient tout ce qu'on veut visualiser."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que contient la balise `<head>` ?",
+  "options": [
+   "Le texte principal de la page",
+   "Des instructions pour le navigateur et les moteurs de recherche",
+   "Les images",
+   "Les liens du menu"
+  ],
+  "answer": 1,
+  "explication": "`<head>` contient le titre, le jeu de caractères… : rien n'y est affiché dans la page."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle balise donne le titre affiché dans l'onglet du navigateur ?",
+  "options": [
+   "<h1>",
+   "<head>",
+   "<title>",
+   "<caption>"
+  ],
+  "answer": 2,
+  "explication": "`<title>`, placée dans `<head>`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel attribut permet d'écrire les accents sans code spécial ?",
+  "options": [
+   "lang",
+   "charset",
+   "alt",
+   "href"
+  ],
+  "answer": 1,
+  "explication": "`<meta charset=\"utf-8\">` choisit l'ensemble de caractères."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "Un texte peut rester seul dans le `<body>`, sans balise autour.",
+  "answer": false,
+  "explication": "Jamais de texte isolé sans balise : un paragraphe doit être dans `<p>`."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "`<br>` et `<img>` ont une balise fermante.",
+  "answer": false,
+  "explication": "Ce sont des balises sans fermeture : elles n'encadrent pas de texte."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Laquelle de ces imbrications est correcte ?",
+  "options": [
+   "<b><i>texte</b></i>",
+   "<b><i>texte</i></b>",
+   "<b><i>texte</b>",
+   "</b><i>texte</i><b>"
+  ],
+  "answer": 1,
+  "explication": "On referme toujours en premier la dernière balise ouverte."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle balise crée un saut de ligne ?",
+  "options": [
+   "<hr>",
+   "<br>",
+   "<p>",
+   "<pre>"
+  ],
+  "answer": 1,
+  "explication": "`<br>` (break) force un saut de ligne."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle balise trace une ligne horizontale ?",
+  "options": [
+   "<hr>",
+   "<br>",
+   "<line>",
+   "<tr>"
+  ],
+  "answer": 0,
+  "explication": "`<hr>` trace une ligne."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Comment forcer l'affichage de plusieurs espaces à la suite ?",
+  "options": [
+   "Avec plusieurs espaces dans le code",
+   "Avec `&nbsp;`",
+   "Avec `<space>`",
+   "Avec `<br>`"
+  ],
+  "answer": 1,
+  "explication": "Le navigateur n'affiche qu'un seul espace : `&nbsp;` est un espace insécable."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle balise crée un titre de taille moyenne (niveau 3) ?",
+  "options": [
+   "<h3>",
+   "<t3>",
+   "<title3>",
+   "<head3>"
+  ],
+  "answer": 0,
+  "explication": "Les titres vont de `<h1>` (le plus grand) à `<h6>`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle balise crée une liste numérotée ?",
+  "options": [
+   "<ul>",
+   "<ol>",
+   "<li>",
+   "<nl>"
+  ],
+  "answer": 1,
+  "explication": "`<ol>` : ordered list. `<ul>` donne une liste à puces."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle balise définit un élément d'une liste ?",
+  "options": [
+   "<li>",
+   "<ul>",
+   "<item>",
+   "<td>"
+  ],
+  "answer": 0,
+  "explication": "Chaque élément de liste est un `<li>`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel attribut donne la cible d'un lien `<a>` ?",
+  "options": [
+   "src",
+   "href",
+   "alt",
+   "target_url"
+  ],
+  "answer": 1,
+  "explication": "`<a href=\"adresse\">texte</a>`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel attribut donne le fichier d'une image `<img>` ?",
+  "options": [
+   "href",
+   "src",
+   "link",
+   "file"
+  ],
+  "answer": 1,
+  "explication": "`<img src=\"photo.jpg\" />`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Comment rendre une image cliquable ?",
+  "options": [
+   "Mettre `<img>` à l'intérieur d'une balise `<a>`",
+   "Ajouter `click=true` à `<img>`",
+   "Utiliser `<button>` uniquement",
+   "C'est impossible en HTML"
+  ],
+  "answer": 0,
+  "explication": "On intègre `<img>` dans `<a href=\"...\">`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle balise crée une ligne dans un tableau ?",
+  "options": [
+   "<td>",
+   "<tr>",
+   "<th>",
+   "<table>"
+  ],
+  "answer": 1,
+  "explication": "`<tr>` = table row (ligne)."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle balise crée une cellule d'en-tête ?",
+  "options": [
+   "<td>",
+   "<th>",
+   "<tr>",
+   "<caption>"
+  ],
+  "answer": 1,
+  "explication": "`<th>` est une cellule d'en-tête."
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "Ajouter une cellule `<td>` à une seule ligne revient à ajouter une colonne au tableau entier.",
+  "answer": true,
+  "explication": "Le tableau s'adapte au nombre maximum de colonnes."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle balise regroupe des éléments dans un bloc pour organiser la page ?",
+  "options": [
+   "<div>",
+   "<span>",
+   "<br>",
+   "<hr>"
+  ],
+  "answer": 0,
+  "explication": "`<div>` structure la page en blocs ; `<span>` agit dans une ligne."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle balise reproduit le texte tel qu'il est codé, avec ses espaces et ses sauts de ligne ?",
+  "options": [
+   "<p>",
+   "<pre>",
+   "<code>",
+   "<br>"
+  ],
+  "answer": 1,
+  "explication": "`<pre>` = texte préformaté."
+ },
+ {
+  "type": "associer",
+  "niveau": "facile",
+  "q": "Associe chaque balise à son rôle.",
+  "paires": [
+   [
+    "<a>",
+    "lien"
+   ],
+   [
+    "<img>",
+    "image"
+   ],
+   [
+    "<ul>",
+    "liste à puces"
+   ],
+   [
+    "<table>",
+    "tableau"
+   ]
+  ],
+  "explication": "`<a>` lien, `<img>` image, `<ul>` liste à puces, `<table>` tableau."
+ },
+ {
+  "type": "associer",
+  "niveau": "moyen",
+  "q": "Associe chaque balise de tableau à son rôle.",
+  "paires": [
+   [
+    "<tr>",
+    "ligne"
+   ],
+   [
+    "<td>",
+    "cellule de données"
+   ],
+   [
+    "<th>",
+    "cellule d'en-tête"
+   ],
+   [
+    "<caption>",
+    "titre du tableau"
+   ]
+  ],
+  "explication": "Ligne, cellule, en-tête, titre."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

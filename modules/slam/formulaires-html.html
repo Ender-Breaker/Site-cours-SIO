@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>HTML : les formulaires de saisie — Étude Facile</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="slam" data-chapter="formulaires-html">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<p>Un <b>formulaire</b> sert à collecter les informations de l&#x27;utilisateur. Il est composé de champs de saisie appelés aussi <b>contrôles graphiques</b> ou <b>widgets</b>. Chaque contrôle est identifié par un <b>nom</b>. Ce chapitre couvre le côté HTML ; le traitement côté PHP est dans le chapitre « PHP : formulaires » du Bloc 1.</p>
+<h2>1. La balise form</h2>
+<pre>
+&lt;form action=&quot;calcul.php&quot; method=&quot;get&quot;&gt;
+    ...contrôles...
+    &lt;input type=&quot;submit&quot; value=&quot;CALCULER&quot; name=&quot;BOvalider&quot; /&gt;
+&lt;/form&gt;
+</pre>
+<table><tr><th>Attribut</th><th>Rôle</th></tr><tr><td><code>action</code></td><td>fichier à exécuter quand on clique sur le bouton d&#x27;envoi (<code>type=&quot;submit&quot;</code>)</td></tr><tr><td><code>method</code></td><td>mode de passage des paramètres : <code>get</code> (dans l&#x27;URL) ou <code>post</code></td></tr></table>
+<h2>2. Label et input</h2>
+<pre>
+&lt;label for=&quot;hauteur&quot;&gt;Hauteur :&lt;/label&gt;
+&lt;input type=&quot;text&quot; id=&quot;hauteur&quot; name=&quot;TXTHauteur&quot; value=&quot;10&quot; /&gt;
+</pre>
+<ul><li><code>&lt;label&gt;</code> est juste un <b>texte affiché</b> (une étiquette).</li><li><code>&lt;input&gt;</code> est un contrôle de saisie. Propriétés communes : <b><code>type</code></b> (famille du contrôle), <b><code>name</code></b> (nom, utile pour récupérer la valeur saisie), <b><code>value</code></b> (valeur par défaut), <b><code>id</code></b> (identifiant du document, pour CSS et JavaScript).</li><li>Un bouton <code>type=&quot;submit&quot;</code> termine le formulaire : c&#x27;est lui qui lance le programme PHP associé à <code>&lt;form&gt;</code>.</li></ul>
+<div class="box retenir"><b>À retenir</b><p>Le <code>name</code> est indispensable : c&#x27;est la <b>clé</b> qu&#x27;on retrouve ensuite dans <code>$_GET</code> ou <code>$_POST</code>.</p></div>
+<h2>3. Les familles de contrôles</h2>
+<table><tr><th>Contrôle</th><th>Usage</th><th>Balise</th></tr><tr><td>Libellé</td><td>affichage seul</td><td><code>&lt;label&gt;</code></td></tr><tr><td>Zone de texte</td><td>saisie de texte</td><td><code>&lt;input type=&quot;text&quot;&gt;</code></td></tr><tr><td>Bouton radio</td><td><b>un seul</b> choix parmi plusieurs</td><td><code>&lt;input type=&quot;radio&quot;&gt;</code></td></tr><tr><td>Case à cocher</td><td>valeur oui/non</td><td><code>&lt;input type=&quot;checkbox&quot;&gt;</code></td></tr><tr><td>Liste déroulante</td><td>un choix parmi plusieurs</td><td><code>&lt;select&gt;</code> + <code>&lt;option&gt;</code></td></tr><tr><td>Zone de texte multiligne</td><td>texte sur plusieurs lignes</td><td><code>&lt;textarea&gt;</code></td></tr><tr><td>Bouton</td><td>déclenche une action (envoi)</td><td><code>&lt;input type=&quot;submit&quot;&gt;</code></td></tr></table>
+<pre>
+&lt;!-- boutons radio : même name = un seul choix possible --&gt;
+&lt;input type=&quot;radio&quot; name=&quot;carte&quot; value=&quot;Visa&quot; /&gt; Visa
+&lt;input type=&quot;radio&quot; name=&quot;carte&quot; value=&quot;Mastercard&quot; /&gt; Mastercard
+
+&lt;!-- case à cocher --&gt;
+&lt;input type=&quot;checkbox&quot; name=&quot;newsletter&quot; value=&quot;oui&quot; /&gt; Newsletter
+
+&lt;!-- liste déroulante --&gt;
+&lt;select name=&quot;mois&quot;&gt;
+    &lt;option value=&quot;01&quot;&gt;Janvier&lt;/option&gt;
+    &lt;option value=&quot;02&quot;&gt;Février&lt;/option&gt;
+&lt;/select&gt;
+
+&lt;!-- texte sur plusieurs lignes --&gt;
+&lt;textarea name=&quot;message&quot; rows=&quot;4&quot; cols=&quot;30&quot;&gt;&lt;/textarea&gt;
+</pre>
+<div class="box attention"><b>Boutons radio</b><p>Pour qu&#x27;un seul choix soit possible, tous les boutons radio d&#x27;un même groupe doivent avoir le <b>même <code>name</code></b>. Principe : <b>1 donnée = 1 seul <code>name</code></b>, avec plusieurs options possibles.</p></div>
+<h2>4. Exemple complet : le rectangle</h2>
+<pre>
+&lt;!-- formulaire.html --&gt;
+&lt;form action=&quot;calcul.php&quot; method=&quot;get&quot;&gt;
+    Hauteur : &lt;input type=&quot;text&quot; name=&quot;TXTHauteur&quot; /&gt;
+    Largeur : &lt;input type=&quot;text&quot; name=&quot;TXTLargeur&quot; /&gt;
+    &lt;input type=&quot;submit&quot; name=&quot;BOvalider&quot; value=&quot;CALCULER&quot; /&gt;
+&lt;/form&gt;
+</pre>
+<pre>
+&lt;?php
+// calcul.php?TXTHauteur=10&amp;TXTLargeur=5&amp;BOvalider=CALCULER
+$hauteur = $_GET[&quot;TXTHauteur&quot;];
+$largeur = $_GET[&quot;TXTLargeur&quot;];
+
+$perimetre = 2 * ($hauteur + $largeur);
+$surface   = $hauteur * $largeur;
+
+echo &quot;Périmètre : $perimetre &lt;br /&gt; Surface : $surface&quot;;
+</pre>
+<p>L&#x27;URL transporte les données saisies : <code>calcul.php?TXTHauteur=10&amp;TXTLargeur=5&amp;BOvalider=CALCULER</code>. Avec 10 et 5, on obtient un périmètre de 30 et une surface de 50.</p>
+<details open><summary>Résumé express</summary>
+<ul><li><code>&lt;form action=&quot;…&quot; method=&quot;get|post&quot;&gt;</code> ; le bouton <code>submit</code> envoie le formulaire.</li><li><code>&lt;input&gt;</code> : <code>type</code>, <code>name</code> (clé côté PHP), <code>value</code>, <code>id</code>.</li><li>radio (un choix, même <code>name</code>), checkbox (oui/non), <code>&lt;select&gt;</code> (liste), <code>&lt;textarea&gt;</code> (multiligne).</li><li>Côté PHP : <code>$_GET[&quot;name&quot;]</code> ou <code>$_POST[&quot;name&quot;]</code>.</li></ul>
+</details>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "À quoi sert un formulaire ?",
+  "options": [
+   "À collecter les informations de l'utilisateur",
+   "À afficher des images",
+   "À créer des tableaux",
+   "À relier une feuille de style"
+  ],
+  "answer": 0,
+  "explication": "Il sert à collecter des données saisies par l'utilisateur."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel attribut de `<form>` indique le fichier exécuté à l'envoi ?",
+  "options": [
+   "action",
+   "method",
+   "name",
+   "id"
+  ],
+  "answer": 0,
+  "explication": "`action` désigne le programme (par exemple `calcul.php`)."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel attribut de `<form>` indique le mode de passage des paramètres ?",
+  "options": [
+   "action",
+   "method",
+   "type",
+   "value"
+  ],
+  "answer": 1,
+  "explication": "`method` vaut `get` ou `post`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle propriété de `<input>` sert à récupérer la valeur saisie côté PHP ?",
+  "options": [
+   "id",
+   "name",
+   "value",
+   "type"
+  ],
+  "answer": 1,
+  "explication": "Le `name` est la clé dans `$_GET`/`$_POST`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que contient la propriété `value` d'un `<input>` ?",
+  "options": [
+   "La valeur par défaut",
+   "Le nom du champ",
+   "L'identifiant CSS",
+   "Le type de champ"
+  ],
+  "answer": 0,
+  "explication": "`value` = valeur par défaut."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel `type` crée une zone de saisie de texte ?",
+  "options": [
+   "text",
+   "string",
+   "input",
+   "zone"
+  ],
+  "answer": 0,
+  "explication": "`<input type=\"text\">`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel `type` de bouton envoie le formulaire ?",
+  "options": [
+   "send",
+   "submit",
+   "go",
+   "validate"
+  ],
+  "answer": 1,
+  "explication": "`type=\"submit\"`."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "Un `<label>` permet de saisir du texte.",
+  "answer": false,
+  "explication": "Un `<label>` n'est qu'un texte affiché (une étiquette)."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel contrôle permet de choisir **une seule** option parmi plusieurs ?",
+  "options": [
+   "Bouton radio",
+   "Case à cocher",
+   "Zone de texte",
+   "Libellé"
+  ],
+  "answer": 0,
+  "explication": "Bouton radio : un seul choix."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel contrôle correspond à une valeur oui/non ?",
+  "options": [
+   "Bouton radio",
+   "Case à cocher",
+   "Liste déroulante",
+   "Libellé"
+  ],
+  "answer": 1,
+  "explication": "Case à cocher."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle balise crée une liste déroulante ?",
+  "options": [
+   "<select>",
+   "<list>",
+   "<dropdown>",
+   "<option-list>"
+  ],
+  "answer": 0,
+  "explication": "`<select>` contient des `<option>`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle balise crée une zone de texte sur plusieurs lignes ?",
+  "options": [
+   "<input type=\"text\">",
+   "<textarea>",
+   "<textbox>",
+   "<multiline>"
+  ],
+  "answer": 1,
+  "explication": "`<textarea>`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Comment faire pour que trois boutons radio forment un seul groupe de choix ?",
+  "options": [
+   "Leur donner le même `name`",
+   "Leur donner le même `id`",
+   "Les mettre dans un `<div>`",
+   "Leur donner le même `value`"
+  ],
+  "answer": 0,
+  "explication": "Un même `name` pour toutes les options d'un groupe."
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "Plusieurs éléments d'une même page peuvent avoir le même `id`.",
+  "answer": false,
+  "explication": "Un `id` est unique. Pour grouper des radios, on utilise le même `name`."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Avec `method=\"get\"`, comment récupère-t-on en PHP le champ `name=\"TXTHauteur\"` ?",
+  "answers": [
+   "$_GET[\"TXTHauteur\"]",
+   "$_GET['TXTHauteur']"
+  ],
+  "explication": "Superglobale `$_GET` avec le `name` comme clé."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Hauteur 10 et largeur 5 : quel est le périmètre du rectangle ?",
+  "answers": [
+   "30"
+  ],
+  "explication": "2 × (10 + 5) = 30."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Hauteur 10 et largeur 5 : quelle est la surface du rectangle ?",
+  "answers": [
+   "50"
+  ],
+  "explication": "10 × 5 = 50."
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Quelle est l'URL (page et paramètres) pour hauteur 10, largeur 5, bouton CALCULER, avec `TXTHauteur`, `TXTLargeur`, `BOvalider` ?",
+  "answers": [
+   "calcul.php?TXTHauteur=10&TXTLargeur=5&BOvalider=CALCULER"
+  ],
+  "explication": "Les paramètres sont les couples clé=valeur séparés par `&`."
+ },
+ {
+  "type": "associer",
+  "niveau": "moyen",
+  "q": "Associe chaque besoin au bon contrôle.",
+  "paires": [
+   [
+    "choisir Visa ou Mastercard",
+    "boutons radio"
+   ],
+   [
+    "s'abonner à la newsletter (oui/non)",
+    "case à cocher"
+   ],
+   [
+    "choisir un mois dans une liste",
+    "liste déroulante"
+   ],
+   [
+    "écrire un long message",
+    "textarea"
+   ]
+  ],
+  "explication": "Radio pour un choix unique, case à cocher pour oui/non, select pour une liste, textarea pour un long texte."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

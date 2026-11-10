@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Numération et conversions de base — Étude Facile</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="maths" data-chapter="numeration-conversions">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<p>Un nombre s&#x27;écrit toujours dans une <b>base</b> p (entier ≥ 2). En informatique : base 2 (binaire), base 8 (octal), base 16 (hexadécimal).</p>
+<h2>1. Écriture dans une base</h2>
+<p>Dans la base p, un nombre s&#x27;écrit avec des chiffres ai compris entre 0 et p−1 : <code>N = an×p^n + … + a1×p + a0</code>.</p>
+<pre>
+4725 = 4×10³ + 7×10² + 2×10¹ + 5×10⁰   (base 10)
+10111₂ = 1×2⁴ + 0×2³ + 1×2² + 1×2¹ + 1×2⁰ = 23
+</pre>
+<div class="box retenir"><b>Chiffres de la base 16</b><p>0 à 9 puis A=10, B=11, C=12, D=13, E=14, F=15. On note la base en indice : 10111₂ = 23 = 17₁₆ (on n&#x27;écrit <b>jamais</b> 23 = 10111 = 17).</p></div>
+<h2>2. Base p → base 10</h2>
+<p>On développe selon les puissances de la base. Exemple : 7DE₁₆ = 7×16² + 13×16 + 14 = 1792 + 208 + 14 = <b>2014</b>.</p>
+<h2>3. Base 10 → base p : divisions successives</h2>
+<ol><li>Diviser le nombre par p, garder le reste.</li><li>Recommencer avec le quotient, jusqu&#x27;à obtenir un quotient nul.</li><li>Lire les restes <b>du dernier au premier</b>.</li></ol>
+<pre>
+75 = 2×37 + 1
+37 = 2×18 + 1
+18 = 2×9  + 0
+ 9 = 2×4  + 1
+ 4 = 2×2  + 0
+ 2 = 2×1  + 0
+ 1 = 2×0  + 1      → 75 = 1001011₂
+</pre>
+<h2>4. Passer de la base 2 à la base 16 (et inversement)</h2>
+<p>Comme 16 = 2⁴, on groupe les bits <b>par paquets de 4</b> en partant de la droite. 1001011₂ → 0100 | 1011 → 4B₁₆. Pour la base 8 (8 = 2³) on groupe par 3.</p>
+<table><tr><th>Hexa</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th></tr><tr><td>Binaire</td><td>0000</td><td>0001</td><td>0010</td><td>0011</td><td>0100</td><td>0101</td><td>0110</td><td>0111</td><td>1000</td><td>1001</td><td>1010</td><td>1011</td><td>1100</td><td>1101</td><td>1110</td><td>1111</td></tr></table>
+<h2>5. Opérations en binaire</h2>
+<p>Addition : 0+0=0, 0+1=1, 1+1=10 (on pose 0 et on retient 1). Exemple : 1011₂ + 110₂ = 10001₂ (11 + 6 = 17).</p>
+<div class="box attention"><b>Nombre de chiffres</b><p>Avec n bits on représente les entiers de 0 à 2ⁿ−1. Sur 8 bits : 0 à 255 ; sur 16 bits : 0 à 65535.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que vaut 1011₂ en base 10 ?",
+  "options": [
+   "9",
+   "11",
+   "13",
+   "15"
+  ],
+  "answer": 1,
+  "explication": "8 + 0 + 2 + 1 = 11."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Combien de chiffres différents utilise la base 16 ?",
+  "options": [
+   "8",
+   "10",
+   "16",
+   "15"
+  ],
+  "answer": 2,
+  "explication": "0 à 9 puis A à F : 16 chiffres."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "Dans un nombre écrit en base 2, on peut trouver le chiffre 2.",
+  "answer": false,
+  "explication": "Les chiffres vont de 0 à p−1 = 1."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que vaut le chiffre E en hexadécimal ?",
+  "options": [
+   "12",
+   "13",
+   "14",
+   "15"
+  ],
+  "answer": 2,
+  "explication": "A=10, B=11, C=12, D=13, E=14."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Convertis 75 en binaire.",
+  "answers": [
+   "1001011"
+  ],
+  "explication": "Divisions successives : restes lus de bas en haut → 1001011."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Convertis 1101₂ en base 10.",
+  "answers": [
+   "13"
+  ],
+  "explication": "8+4+0+1 = 13."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Convertis 255 en hexadécimal (lettres majuscules).",
+  "answers": [
+   "FF",
+   "ff"
+  ],
+  "explication": "255 = 15×16 + 15 → FF."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Convertis 2014 en hexadécimal (majuscules).",
+  "answers": [
+   "7DE",
+   "7de"
+  ],
+  "explication": "2014 = 7×256 + 13×16 + 14 → 7DE."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Convertis A5₁₆ en base 10.",
+  "answers": [
+   "165"
+  ],
+  "explication": "10×16 + 5 = 165."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Convertis 11010110₂ en hexadécimal (majuscules).",
+  "answers": [
+   "D6",
+   "d6"
+  ],
+  "explication": "1101 | 0110 → D | 6."
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Convertis 3C₁₆ en binaire (sans zéros inutiles).",
+  "answers": [
+   "111100"
+  ],
+  "explication": "3 = 0011 et C = 1100 → 00111100 = 111100."
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Calcule 1011₂ + 110₂ en binaire.",
+  "answers": [
+   "10001"
+  ],
+  "explication": "11 + 6 = 17 = 10001₂."
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Combien vaut le plus grand entier représentable sur 8 bits ?",
+  "answers": [
+   "255"
+  ],
+  "explication": "2⁸ − 1 = 255."
+ },
+ {
+  "type": "associer",
+  "niveau": "facile",
+  "q": "Associe chaque nombre à son écriture.",
+  "paires": [
+   [
+    "10₂",
+    "2"
+   ],
+   [
+    "10₈",
+    "8"
+   ],
+   [
+    "10₁₆",
+    "16"
+   ],
+   [
+    "F₁₆",
+    "15"
+   ]
+  ],
+  "explication": "Dans toute base p, « 10 » vaut p. F₁₆ = 15."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

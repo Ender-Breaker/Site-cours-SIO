@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Étude Facile — Révisions BTS SIO</title>
+  <meta name="description" content="Fiches de synthèse, quiz et suivi de progression pour le BTS SIO (SLAM & SISR).">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <a class="logo" href="index.html"><span class="logo-mark">&gt;_</span> Étude Facile</a>
+      <div class="top-stat"><b id="top-done">0</b> chapitres validés</div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <h1>Révise ton <span>BTS SIO</span> sans prise de tête.</h1>
+      <p>Fiches synthétiques, mini-quiz et badges à débloquer. Choisis une matière et c'est parti.</p>
+
+      <div class="modes">
+        <div class="mode"><b><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v16" /><path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z" /></svg> Cours</b><span>Des fiches claires, avec code à copier et vocabulaire expliqué.</span></div>
+        <div class="mode"><b><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 21h8" /><path d="m15 5 4 4" /><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /></svg> S'entraîner</b><span>QCM, vrai/faux, réponses à saisir : gagne de l'XP et valide tes chapitres.</span></div>
+      </div>
+
+      <div class="global">
+        <div class="panel">
+          <h2>Progression globale</h2>
+          <div class="big" id="g-pct">0 %</div>
+          <div class="bar"><i id="g-bar"></i></div>
+          <div class="sub" id="g-count" style="margin-top:8px">0 / 0 chapitres terminés</div>
+        </div>
+        <div class="panel">
+          <h2>Matières ouvertes</h2>
+          <div class="big" id="g-modules">0 / 0</div>
+          <div class="sub" style="margin-top:8px">Ajoutées au fil des cours</div>
+        </div>
+        <div class="panel">
+          <h2>Badges</h2>
+          <div class="badges" id="g-badges"></div>
+        </div>
+      </div>
+    </section>
+
+    <section aria-label="Matières">
+      <div class="tools">
+        <div class="chips" id="chips" role="group" aria-label="Filtrer par option">
+          <button class="chip" data-opt="TOUS" aria-pressed="true">Tout</button>
+          <button class="chip" data-opt="SLAM" aria-pressed="false">SLAM</button>
+          <button class="chip" data-opt="SISR" aria-pressed="false">SISR</button>
+          <button class="chip" data-opt="COMMUN" aria-pressed="false">Commun</button>
+        </div>
+        <input class="search" id="search" type="search" placeholder="Rechercher une matière…" aria-label="Rechercher une matière">
+      </div>
+      <div class="grid" id="grid"></div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <span>Étude Facile · BTS SIO</span>
+      <button class="link-btn" id="reset" type="button">Réinitialiser ma progression</button>
+    </div>
+  </footer>
+
+  <script src="data/modules.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

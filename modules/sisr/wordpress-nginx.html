@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>WordPress sur un serveur LEMP (Nginx) — Étude Facile</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="sisr" data-chapter="wordpress-nginx">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<p>Objectif : mettre en ligne un <b>portfolio WordPress</b> sur un serveur <b>LEMP</b> (Linux, Nginx, MariaDB/MySQL, PHP). Ce chapitre suit la méthode d&#x27;installation du cours, étape par étape. Les commandes sont exécutées en <b>root</b> (invite <code>#</code>).</p>
+<div class="box attention"><b>Mots de passe</b><p>Dans les exemples, les mots de passe sont des <b>espaces réservés</b> (<code>MonMotDePasseSQL</code>). Utilise toujours des mots de passe forts et <b>différents</b> pour : le compte root Unix, le root SQL, l&#x27;utilisateur SQL du site et l&#x27;administrateur WordPress.</p></div>
+<h2>1. L&#x27;architecture LEMP</h2>
+<table><tr><th>Lettre</th><th>Brique</th><th>Rôle</th></tr><tr><td>L</td><td><b>L</b>inux</td><td>système d&#x27;exploitation du serveur</td></tr><tr><td>E</td><td>N<b>E</b>ginx (« engine x »)</td><td>serveur web : reçoit les requêtes HTTP</td></tr><tr><td>M</td><td><b>M</b>ariaDB / MySQL</td><td>base de données (contenu et réglages du site)</td></tr><tr><td>P</td><td><b>P</b>HP</td><td>langage dans lequel WordPress est écrit</td></tr></table>
+<p>Un site WordPress, c&#x27;est donc deux choses à sauvegarder : les <b>fichiers</b> (le dossier <code>wordpress/</code>) et la <b>base de données</b> (SQL + contenu).</p>
+<h2>2. Étape 1 — Récupérer WordPress</h2>
+<pre>
+cd /var/www/
+wget https://fr.wordpress.org/latest-fr_FR.tar.gz   # dernière version française
+tar xvzf latest-fr_FR.tar.gz                        # extrait → dossier wordpress/
+</pre>
+<p>Le serveur web tourne sous l&#x27;utilisateur <b><code>www-data</code></b>. Il faut lui donner la propriété du dossier pour qu&#x27;il puisse y lire et écrire :</p>
+<pre>
+chown -R www-data:www-data wordpress/
+ls -l      # le dossier wordpress doit appartenir à www-data
+</pre>
+<div data-terminal></div>
+<h2>3. Étape 2 — Configurer Nginx</h2>
+<p>Par défaut, Nginx sert <code>/var/www/html</code>. On crée un <b>site</b> qui pointe vers <code>wordpress</code>.</p>
+<pre>
+cd /etc/nginx/sites-available/
+cp default wordpress          # copie du modèle
+nano wordpress                # remplacer :  root /var/www/html;
+                              # par       :  root /var/www/wordpress;
+</pre>
+<pre>
+server {
+    listen 80 default_server;
+    root /var/www/wordpress;
+    index index.html index.php;
+    server_name _;
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
+</pre>
+<ul><li><code>root</code> : le <b>dossier racine</b> du site. <code>index</code> : les pages servies par défaut.</li><li>Derrière un proxy, on récupère l&#x27;<b>IP réelle</b> du visiteur avec <code>set_real_ip_from</code>, <code>real_ip_header X-Real-IP</code> et <code>real_ip_recursive on</code> (déjà fournis dans les *snippets* du TP).</li><li>La page de connexion <code>wp-login.php</code> peut être protégée en n&#x27;autorisant que certaines adresses IP.</li></ul>
+<h3>Activer le site</h3>
+<pre>
+ln -s /etc/nginx/sites-available/wordpress /etc/nginx/sites-enabled/wordpress
+cd ../sites-enabled/ ; ls -l     # wordpress -&gt; /etc/nginx/sites-available/wordpress
+rm default                       # on retire le site par défaut
+nginx -t                         # teste la configuration
+service nginx restart            # recharge Nginx
+</pre>
+<table><tr><th>Dossier</th><th>Rôle</th></tr><tr><td><code>sites-available/</code></td><td>tous les sites <b>disponibles</b> (fichiers de configuration)</td></tr><tr><td><code>sites-enabled/</code></td><td>les sites <b>activés</b> : des <b>liens symboliques</b> vers <code>sites-available</code></td></tr></table>
+<div class="box retenir"><b>Toujours tester</b><p><code>nginx -t</code> vérifie la syntaxe <b>avant</b> de redémarrer : une erreur de configuration coupe le site.</p></div>
+<h2>4. Étape 3 — La base de données</h2>
+<pre>
+mysql -u root -p     # le mot de passe « root SQL » est différent de root Unix
+
+create database portfolio;
+CREATE USER &#x27;mon_user&#x27;@&#x27;localhost&#x27; IDENTIFIED BY &#x27;MonMotDePasseSQL&#x27;;
+GRANT ALL PRIVILEGES ON portfolio.* TO &#x27;mon_user&#x27;@&#x27;localhost&#x27;;
+FLUSH PRIVILEGES;
+quit;
+</pre>
+<table><tr><th>Instruction</th><th>Rôle</th></tr><tr><td><code>create database</code></td><td>crée la base <code>portfolio</code></td></tr><tr><td><code>CREATE USER</code></td><td>crée l&#x27;utilisateur SQL du site (≠ root SQL)</td></tr><tr><td><code>GRANT ALL PRIVILEGES ON portfolio.*</code></td><td>lui donne tous les droits <b>sur cette base uniquement</b></td></tr><tr><td><code>FLUSH PRIVILEGES</code></td><td>applique (propage) les droits</td></tr></table>
+<p>Principe du <b>moindre privilège</b> : le site n&#x27;utilise jamais le compte root SQL, seulement un utilisateur limité à sa propre base.</p>
+<h2>5. Étape 4 — Personnaliser wp-config</h2>
+<pre>
+cd /var/www/wordpress/
+cp wp-config-sample.php wp-config-sample.php.save   # TOUJOURS une sauvegarde d&#x27;abord !
+nano wp-config-sample.php
+</pre>
+<pre>
+// Boostage des capacités de WP
+define(&#x27;WP_MEMORY_LIMIT&#x27;,&#x27;256M&#x27;);
+
+// Utilisation derrière un proxy
+if ($_SERVER[&#x27;HTTP_X_FORWARDED_PROTO&#x27;] == &#x27;https&#x27;)
+    $_SERVER[&#x27;HTTPS&#x27;]=&#x27;on&#x27;;
+</pre>
+<p>Puis <code>service nginx restart</code>. Le second bloc indique à WordPress qu&#x27;il est servi en HTTPS par un <b>proxy</b> placé devant le serveur.</p>
+<h2>6. Étape 5 — Finaliser dans le navigateur</h2>
+<ol><li>Ouvre ton domaine dans le navigateur.</li><li>Renseigne l&#x27;accès à la base : nom <code>portfolio</code>, identifiant <code>mon_user</code>, mot de passe SQL, hôte <code>localhost</code>, préfixe de tables (ex. <code>folio_</code>).</li><li>Renseigne le site : titre, identifiant et mot de passe <b>d&#x27;administrateur WordPress</b> (sans rapport avec root / mon_user), e-mail.</li><li>Lance l&#x27;installation : c&#x27;est fait en quelques minutes.</li></ol>
+<details open><summary>Résumé express</summary>
+<ul><li>LEMP = Linux + Nginx + MariaDB/MySQL + PHP.</li><li><code>wget</code> + <code>tar xvzf</code> → <code>chown -R www-data:www-data wordpress/</code>.</li><li>Nginx : <code>cp default wordpress</code>, <code>root /var/www/wordpress;</code>, <code>ln -s</code> vers <code>sites-enabled</code>, <code>rm default</code>, <code>nginx -t</code>, <code>service nginx restart</code>.</li><li>SQL : <code>create database</code>, <code>CREATE USER</code>, <code>GRANT … ON base.*</code>, <code>FLUSH PRIVILEGES</code>.</li><li><code>wp-config</code> : sauvegarde <code>.save</code> d&#x27;abord, puis <code>WP_MEMORY_LIMIT</code> et réglage proxy HTTPS.</li></ul>
+</details>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que signifie LEMP ?",
+  "options": [
+   "Linux, Nginx, MariaDB/MySQL, PHP",
+   "Linux, Apache, MySQL, PHP",
+   "Local, Edge, Mail, Proxy",
+   "Linux, Nginx, MongoDB, Python"
+  ],
+  "answer": 0,
+  "explication": "Le E vient de la prononciation « engine x »."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle brique de LEMP stocke le contenu du site ?",
+  "options": [
+   "Nginx",
+   "PHP",
+   "MariaDB / MySQL",
+   "Linux"
+  ],
+  "answer": 2,
+  "explication": "La base de données."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que sauvegarde-t-on pour un site WordPress ?",
+  "options": [
+   "Uniquement les fichiers",
+   "Uniquement la base SQL",
+   "Les fichiers et la base de données",
+   "Rien : WordPress se sauvegarde seul"
+  ],
+  "answer": 2,
+  "explication": "Fichiers (`wordpress/`) **et** base SQL."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que fait `wget URL` ?",
+  "options": [
+   "Télécharge le fichier à cette adresse",
+   "Ouvre la page dans le navigateur",
+   "Compresse un fichier",
+   "Teste la connexion"
+  ],
+  "answer": 0,
+  "explication": "`wget` télécharge depuis le web."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle commande extrait `latest-fr_FR.tar.gz` ?",
+  "options": [
+   "tar xvzf latest-fr_FR.tar.gz",
+   "gunzip latest-fr_FR.tar.gz.tar",
+   "tar -c latest-fr_FR.tar.gz",
+   "cp latest-fr_FR.tar.gz wordpress"
+  ],
+  "answer": 0,
+  "explication": "`x` extrait, `z` décompresse, `f` désigne le fichier."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Pourquoi faire `chown -R www-data:www-data wordpress/` ?",
+  "options": [
+   "Pour que le serveur web puisse lire et écrire dans le dossier",
+   "Pour cacher le dossier",
+   "Pour compresser le dossier",
+   "Pour changer le mot de passe root"
+  ],
+  "answer": 0,
+  "explication": "Nginx/PHP tournent sous `www-data`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel est le dossier racine servi par défaut par Nginx dans le TP ?",
+  "options": [
+   "/var/www/html",
+   "/etc/nginx",
+   "/home",
+   "/var/www/wordpress"
+  ],
+  "answer": 0,
+  "explication": "On le remplace par `/var/www/wordpress` dans le nouveau site."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle directive Nginx indique le dossier du site ?",
+  "options": [
+   "root",
+   "listen",
+   "index",
+   "server_name"
+  ],
+  "answer": 0,
+  "explication": "`root /var/www/wordpress;`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que contient `sites-enabled/` ?",
+  "options": [
+   "Les sites activés (liens symboliques)",
+   "Tous les modèles de sites",
+   "Les journaux",
+   "Les certificats"
+  ],
+  "answer": 0,
+  "explication": "Des liens vers les fichiers de `sites-available/`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle commande crée un lien symbolique ?",
+  "options": [
+   "ln -s cible lien",
+   "link cible lien",
+   "cp -l cible lien",
+   "mklink cible lien"
+  ],
+  "answer": 0,
+  "explication": "`ln -s`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Pourquoi lancer `nginx -t` avant de redémarrer ?",
+  "options": [
+   "Pour vérifier la syntaxe de la configuration",
+   "Pour télécharger Nginx",
+   "Pour créer la base",
+   "Pour vider le cache"
+  ],
+  "answer": 0,
+  "explication": "Une erreur de configuration pourrait couper le site."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que fait `FLUSH PRIVILEGES;` ?",
+  "options": [
+   "Applique les droits qu'on vient de modifier",
+   "Supprime les utilisateurs",
+   "Efface la base",
+   "Redémarre MariaDB"
+  ],
+  "answer": 0,
+  "explication": "Il propage les droits."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Pourquoi créer un utilisateur SQL dédié plutôt que d'utiliser root SQL ?",
+  "options": [
+   "Moindre privilège : le site n'a accès qu'à sa base",
+   "C'est plus rapide",
+   "Root SQL n'existe pas",
+   "WordPress l'interdit"
+  ],
+  "answer": 0,
+  "explication": "Si le site est compromis, seul `portfolio` est exposé."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Pourquoi copier `wp-config-sample.php` en `.save` avant de le modifier ?",
+  "options": [
+   "Pour pouvoir revenir en arrière en cas d'erreur",
+   "Pour accélérer WordPress",
+   "Pour que le fichier soit exécuté",
+   "C'est obligatoire pour PHP"
+  ],
+  "answer": 0,
+  "explication": "Toujours une sauvegarde avant modification."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "À quoi sert `define('WP_MEMORY_LIMIT','256M');` ?",
+  "options": [
+   "Augmenter la mémoire disponible pour WordPress",
+   "Limiter l'espace disque",
+   "Créer la base de données",
+   "Activer HTTPS"
+  ],
+  "answer": 0,
+  "explication": "Il « booste » les capacités de WP."
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "Le mot de passe root SQL est le même que celui de root Unix.",
+  "answer": false,
+  "explication": "Ce sont deux comptes différents, avec des mots de passe qui doivent être différents."
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "Pour WordPress, l'identifiant d'administrateur du site est le même que l'utilisateur SQL `mon_user`.",
+  "answer": false,
+  "explication": "Ce sont des comptes sans rapport : root, mon_user, admin WordPress."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Quelle commande teste la configuration de Nginx ?",
+  "answers": [
+   "nginx -t"
+  ],
+  "explication": "`nginx -t`."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quelle commande se connecte à MariaDB en tant que root ?",
+  "answers": [
+   "mysql -u root -p"
+  ],
+  "explication": "`-u` : utilisateur, `-p` : demande le mot de passe."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quelle instruction SQL crée la base `portfolio` ?",
+  "answers": [
+   "create database portfolio;",
+   "CREATE DATABASE portfolio;"
+  ],
+  "explication": "`create database portfolio;`."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quelle valeur de `root` faut-il écrire dans le fichier Nginx pour servir WordPress ? (le chemin)",
+  "answers": [
+   "/var/www/wordpress",
+   "/var/www/wordpress;",
+   "root /var/www/wordpress;"
+  ],
+  "explication": "`root /var/www/wordpress;`."
+ },
+ {
+  "type": "terminal",
+  "niveau": "facile",
+  "q": "Télécharge la dernière version française de WordPress : `https://fr.wordpress.org/latest-fr_FR.tar.gz`.",
+  "checks": [
+   {
+    "exists": "/var/www/latest-fr_FR.tar.gz"
+   }
+  ],
+  "solution": "wget https://fr.wordpress.org/latest-fr_FR.tar.gz",
+  "explication": "",
+  "fs": {
+   "/var/www/html/index.nginx-debian.html": "<h1>Welcome to nginx!</h1>\n",
+   "/etc/nginx/sites-available/default": "server {\n    listen 80 default_server;\n    root /var/www/html;\n}\n",
+   "/etc/nginx/sites-enabled/default": "server {\n    listen 80 default_server;\n    root /var/www/html;\n}\n",
+   "/var/www/wordpress/wp-config-sample.php": "<?php\ndefine('DB_NAME', 'nom_de_la_base');\n",
+   "/var/www/wordpress/index.php": "<?php\n"
+  },
+  "cwd": "/var/www",
+  "user": "root"
+ },
+ {
+  "type": "terminal",
+  "niveau": "moyen",
+  "q": "Télécharge puis **extrais** l'archive pour obtenir le dossier `wordpress` avec `index.php`.",
+  "checks": [
+   {
+    "exists": "/var/www/wordpress/wp-login.php"
+   },
+   {
+    "cmd": "^tar\\s+x"
+   }
+  ],
+  "solution": "wget https://fr.wordpress.org/latest-fr_FR.tar.gz\ntar xvzf latest-fr_FR.tar.gz",
+  "explication": "",
+  "fs": {
+   "/var/www/html/index.nginx-debian.html": "x\n",
+   "/etc/nginx/sites-available/default": "server { root /var/www/html; }\n",
+   "/etc/nginx/sites-enabled/default": "server { root /var/www/html; }\n"
+  },
+  "cwd": "/var/www",
+  "user": "root"
+ },
+ {
+  "type": "terminal",
+  "niveau": "moyen",
+  "q": "Donne la propriété de `wordpress` et de **tout son contenu** à `www-data` (utilisateur et groupe).",
+  "checks": [
+   {
+    "owner": [
+     "/var/www/wordpress",
+     "www-data"
+    ]
+   },
+   {
+    "owner": [
+     "/var/www/wordpress/index.php",
+     "www-data"
+    ]
+   },
+   {
+    "group": [
+     "/var/www/wordpress/index.php",
+     "www-data"
+    ]
+   }
+  ],
+  "solution": "chown -R www-data:www-data wordpress/",
+  "explication": "",
+  "fs": {
+   "/var/www/html/index.nginx-debian.html": "<h1>Welcome to nginx!</h1>\n",
+   "/etc/nginx/sites-available/default": "server {\n    listen 80 default_server;\n    root /var/www/html;\n}\n",
+   "/etc/nginx/sites-enabled/default": "server {\n    listen 80 default_server;\n    root /var/www/html;\n}\n",
+   "/var/www/wordpress/wp-config-sample.php": "<?php\ndefine('DB_NAME', 'nom_de_la_base');\n",
+   "/var/www/wordpress/index.php": "<?php\n"
+  },
+  "cwd": "/var/www",
+  "user": "root"
+ },
+ {
+  "type": "terminal",
+  "niveau": "facile",
+  "q": "Dans `sites-available`, crée le site `wordpress` en copiant le modèle `default`.",
+  "checks": [
+   {
+    "exists": "/etc/nginx/sites-available/wordpress"
+   },
+   {
+    "exists": "/etc/nginx/sites-available/default"
+   }
+  ],
+  "solution": "cp default wordpress",
+  "explication": "",
+  "fs": {
+   "/var/www/html/index.nginx-debian.html": "x\n",
+   "/etc/nginx/sites-available/default": "server { root /var/www/html; }\n",
+   "/etc/nginx/sites-enabled/default": "server { root /var/www/html; }\n"
+  },
+  "cwd": "/etc/nginx/sites-available",
+  "user": "root"
+ },
+ {
+  "type": "terminal",
+  "niveau": "moyen",
+  "q": "Active le site : crée dans `sites-enabled` un lien symbolique `wordpress` vers `/etc/nginx/sites-available/wordpress`.",
+  "checks": [
+   {
+    "exists": "/etc/nginx/sites-enabled/wordpress"
+   },
+   {
+    "cmd": "ln\\s+-s"
+   }
+  ],
+  "solution": "ln -s /etc/nginx/sites-available/wordpress /etc/nginx/sites-enabled/wordpress",
+  "explication": "",
+  "fs": {
+   "/var/www/html/index.nginx-debian.html": "x\n",
+   "/etc/nginx/sites-available/default": "server { root /var/www/html; }\n",
+   "/etc/nginx/sites-enabled/default": "server { root /var/www/html; }\n",
+   "/etc/nginx/sites-available/wordpress": "server { root /var/www/wordpress; }\n"
+  },
+  "cwd": "/etc/nginx",
+  "user": "root"
+ },
+ {
+  "type": "terminal",
+  "niveau": "difficile",
+  "q": "Active le site `wordpress` (lien symbolique dans `sites-enabled`) **et** supprime le site `default` activé.",
+  "checks": [
+   {
+    "exists": "/etc/nginx/sites-enabled/wordpress"
+   },
+   {
+    "absent": "/etc/nginx/sites-enabled/default"
+   }
+  ],
+  "solution": "ln -s /etc/nginx/sites-available/wordpress /etc/nginx/sites-enabled/wordpress\nrm /etc/nginx/sites-enabled/default",
+  "explication": "",
+  "fs": {
+   "/var/www/html/index.nginx-debian.html": "x\n",
+   "/etc/nginx/sites-available/default": "server { root /var/www/html; }\n",
+   "/etc/nginx/sites-enabled/default": "server { root /var/www/html; }\n",
+   "/etc/nginx/sites-available/wordpress": "server { root /var/www/wordpress; }\n"
+  },
+  "cwd": "/etc/nginx",
+  "user": "root"
+ },
+ {
+  "type": "terminal",
+  "niveau": "facile",
+  "q": "Teste la configuration de Nginx.",
+  "checks": [
+   {
+    "cmd": "^nginx\\s+-t$"
+   },
+   {
+    "out": "successful"
+   }
+  ],
+  "solution": "nginx -t",
+  "explication": "",
+  "fs": {
+   "/var/www/html/index.nginx-debian.html": "x\n",
+   "/etc/nginx/sites-available/default": "server { root /var/www/html; }\n",
+   "/etc/nginx/sites-enabled/default": "server { root /var/www/html; }\n"
+  },
+  "user": "root"
+ },
+ {
+  "type": "terminal",
+  "niveau": "facile",
+  "q": "Fais une copie de sauvegarde `wp-config-sample.php.save` du fichier `wp-config-sample.php` (tu es dans `/var/www/wordpress`).",
+  "checks": [
+   {
+    "exists": "/var/www/wordpress/wp-config-sample.php.save"
+   },
+   {
+    "exists": "/var/www/wordpress/wp-config-sample.php"
+   }
+  ],
+  "solution": "cp wp-config-sample.php wp-config-sample.php.save",
+  "explication": "",
+  "fs": {
+   "/var/www/html/index.nginx-debian.html": "<h1>Welcome to nginx!</h1>\n",
+   "/etc/nginx/sites-available/default": "server {\n    listen 80 default_server;\n    root /var/www/html;\n}\n",
+   "/etc/nginx/sites-enabled/default": "server {\n    listen 80 default_server;\n    root /var/www/html;\n}\n",
+   "/var/www/wordpress/wp-config-sample.php": "<?php\ndefine('DB_NAME', 'nom_de_la_base');\n",
+   "/var/www/wordpress/index.php": "<?php\n"
+  },
+  "cwd": "/var/www/wordpress",
+  "user": "root"
+ },
+ {
+  "type": "terminal",
+  "niveau": "difficile",
+  "q": "Ajoute la ligne `define('WP_MEMORY_LIMIT','256M');` à la fin de `wp-config-sample.php`.",
+  "checks": [
+   {
+    "contains": [
+     "/var/www/wordpress/wp-config-sample.php",
+     "WP_MEMORY_LIMIT"
+    ]
+   },
+   {
+    "contains": [
+     "/var/www/wordpress/wp-config-sample.php",
+     "DB_NAME"
+    ]
+   }
+  ],
+  "solution": "echo \"define('WP_MEMORY_LIMIT','256M');\" >> wp-config-sample.php",
+  "explication": "",
+  "indice": "echo \"…\" >> fichier",
+  "fs": {
+   "/var/www/html/index.nginx-debian.html": "<h1>Welcome to nginx!</h1>\n",
+   "/etc/nginx/sites-available/default": "server {\n    listen 80 default_server;\n    root /var/www/html;\n}\n",
+   "/etc/nginx/sites-enabled/default": "server {\n    listen 80 default_server;\n    root /var/www/html;\n}\n",
+   "/var/www/wordpress/wp-config-sample.php": "<?php\ndefine('DB_NAME', 'nom_de_la_base');\n",
+   "/var/www/wordpress/index.php": "<?php\n"
+  },
+  "cwd": "/var/www/wordpress",
+  "user": "root"
+ },
+ {
+  "type": "associer",
+  "niveau": "moyen",
+  "q": "Associe chaque étape à sa commande.",
+  "paires": [
+   [
+    "télécharger WordPress",
+    "wget"
+   ],
+   [
+    "extraire l'archive",
+    "tar xvzf"
+   ],
+   [
+    "activer un site Nginx",
+    "ln -s"
+   ],
+   [
+    "tester la configuration",
+    "nginx -t"
+   ]
+  ],
+  "explication": "Les étapes d'installation."
+ },
+ {
+  "type": "associer",
+  "niveau": "moyen",
+  "q": "Associe chaque instruction SQL à son rôle.",
+  "paires": [
+   [
+    "create database",
+    "crée la base"
+   ],
+   [
+    "CREATE USER",
+    "crée l'utilisateur"
+   ],
+   [
+    "GRANT",
+    "donne des droits"
+   ],
+   [
+    "FLUSH PRIVILEGES",
+    "applique les droits"
+   ]
+  ],
+  "explication": "Préparation de la base."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

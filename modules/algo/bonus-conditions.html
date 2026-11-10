@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Conditions : if, elif, else — Étude Facile</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="algo" data-chapter="bonus-conditions">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<div class="box retenir"><b>Chapitre bonus</b><p>Ce chapitre est un complément créé pour Étude Facile (il ne vient pas d&#x27;un support de cours). Les exemples sont à tester dans un terminal Python ou sur un éditeur en ligne.</p></div>
+<p>Une <b>condition</b> permet d&#x27;exécuter des instructions seulement si un test est vrai. Le test donne un booléen : <code>True</code> ou <code>False</code>.</p>
+<h2>1. Comparaisons</h2>
+<table><tr><th>Opérateur</th><th>Signification</th></tr><tr><td><code>==</code></td><td>égal à</td></tr><tr><td><code>!=</code></td><td>différent de</td></tr><tr><td><code>&lt;</code> <code>&gt;</code></td><td>inférieur, supérieur</td></tr><tr><td><code>&lt;=</code> <code>&gt;=</code></td><td>inférieur ou égal, supérieur ou égal</td></tr></table>
+<div class="box attention"><b>= ou == ?</b><p><code>=</code> <b>affecte</b> une valeur, <code>==</code> <b>compare</b>. Écrire <code>if x = 3:</code> est une erreur de syntaxe.</p></div>
+<h2>2. if / elif / else</h2>
+<pre>
+note = 14
+if note &gt;= 16:
+    print(&#x27;Très bien&#x27;)
+elif note &gt;= 10:
+    print(&#x27;Admis&#x27;)
+else:
+    print(&#x27;Refusé&#x27;)
+</pre>
+<ul><li>Chaque test se termine par <code>:</code>.</li><li>Le bloc est <b>indenté</b> (4 espaces) : l&#x27;indentation fait partie de la syntaxe.</li><li>Seul le <b>premier</b> bloc dont le test est vrai s&#x27;exécute ; <code>else</code> est le cas par défaut.</li></ul>
+<h2>3. Opérateurs logiques</h2>
+<table><tr><th>Opérateur</th><th>Vrai quand…</th></tr><tr><td><code>a and b</code></td><td>a <b>et</b> b sont vrais</td></tr><tr><td><code>a or b</code></td><td>au moins l&#x27;un des deux est vrai</td></tr><tr><td><code>not a</code></td><td>a est faux</td></tr></table>
+<pre>
+age = 20
+if age &gt;= 18 and age &lt; 65:
+    print(&#x27;Actif&#x27;)
+</pre>
+<p>Test d&#x27;appartenance : <code>3 in [1, 2, 3]</code> donne <code>True</code>. Parité : <code>n % 2 == 0</code> est vrai si n est pair.</p>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel opérateur teste l'égalité ?",
+  "options": [
+   "=",
+   "==",
+   "!=",
+   "=>"
+  ],
+  "answer": 1,
+  "explication": "== compare, = affecte."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "Dans un if, le bloc d'instructions doit être indenté.",
+  "answer": true,
+  "explication": "L'indentation délimite le bloc."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que donne `7 % 2` ?",
+  "options": [
+   "3",
+   "1",
+   "0",
+   "3,5"
+  ],
+  "answer": 1,
+  "explication": "Reste de 7 par 2 : 1."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "`True and False` vaut…",
+  "options": [
+   "True",
+   "False",
+   "None",
+   "erreur"
+  ],
+  "answer": 1,
+  "explication": "and est vrai seulement si les deux sont vrais."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Qu'affiche ce code ?",
+  "answers": [
+   "Admis"
+  ],
+  "explication": "14 n'est pas >= 16 mais >= 10.",
+  "code": "note = 14\nif note >= 16:\n    print('Tres bien')\nelif note >= 10:\n    print('Admis')\nelse:\n    print('Refuse')"
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Qu'affiche ce code ?",
+  "answers": [
+   "pair"
+  ],
+  "explication": "10 % 2 == 0.",
+  "code": "n = 10\nif n % 2 == 0:\n    print('pair')\nelse:\n    print('impair')"
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Qu'affiche ce code ?",
+  "answers": [
+   "A"
+  ],
+  "explication": "12 > 10 est vrai : on affiche A et on ignore le reste.",
+  "code": "x = 12\nif x > 10:\n    print('A')\nelif x > 5:\n    print('B')\nelse:\n    print('C')"
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Qu'affiche ce code ? (une seule réponse)",
+  "answers": [
+   "C"
+  ],
+  "explication": "x=3 n'est ni > 10 ni > 5 : else.",
+  "code": "x = 3\nif x > 10:\n    print('A')\nelif x > 5:\n    print('B')\nelse:\n    print('C')"
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Que vaut a à la fin ?",
+  "answers": [
+   "2"
+  ],
+  "explication": "Les deux ifs sont indépendants : a=0, +1 (x>0), +1 (x>1) = 2.",
+  "code": "x = 5\na = 0\nif x > 0:\n    a += 1\nif x > 1:\n    a += 1"
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Que vaut a à la fin ?",
+  "answers": [
+   "1"
+  ],
+  "explication": "Avec elif, un seul bloc s'exécute.",
+  "code": "x = 5\na = 0\nif x > 0:\n    a += 1\nelif x > 1:\n    a += 1"
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Qu'affiche ce code ?",
+  "answers": [
+   "False"
+  ],
+  "explication": "not (3 > 2) est False.",
+  "code": "print(not (3 > 2))"
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

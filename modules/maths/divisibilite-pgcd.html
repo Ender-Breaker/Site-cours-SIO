@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Divisibilité, nombres premiers et PGCD — Étude Facile</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="maths" data-chapter="divisibilite-pgcd">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<p>L&#x27;arithmétique étudie les nombres entiers : divisibilité, nombres premiers, PGCD. Elle sert en informatique (cryptographie, clés de contrôle…).</p>
+<h2>1. Division euclidienne</h2>
+<p>Pour a entier et b &gt; 0, il existe un unique couple (q ; r) tel que <code>a = b×q + r</code> avec <code>0 ≤ r &lt; b</code>. Exemple : 53 = 6×8 + 5.</p>
+<p><b>b divise a</b> (b | a) si le reste est 0, c&#x27;est-à-dire si a = b×k avec k entier. On dit aussi que a est un <b>multiple</b> de b.</p>
+<h2>2. Critères de divisibilité</h2>
+<table><tr><th>Par</th><th>Critère</th></tr><tr><td>2</td><td>dernier chiffre pair</td></tr><tr><td>3</td><td>somme des chiffres divisible par 3</td></tr><tr><td>5</td><td>finit par 0 ou 5</td></tr><tr><td>9</td><td>somme des chiffres divisible par 9</td></tr><tr><td>10</td><td>finit par 0</td></tr><tr><td>4</td><td>les deux derniers chiffres forment un multiple de 4</td></tr></table>
+<h2>3. Nombres premiers</h2>
+<p>Un entier ≥ 2 est <b>premier</b> s&#x27;il n&#x27;a que deux diviseurs : 1 et lui-même (2, 3, 5, 7, 11, 13…). Pour tester n : il suffit d&#x27;essayer les nombres premiers p avec p² ≤ n.</p>
+<p>Tout entier ≥ 2 se décompose de façon <b>unique</b> en produit de nombres premiers. Exemple : 360 = 2³ × 3² × 5.</p>
+<h2>4. PGCD</h2>
+<p>Le <b>PGCD</b> de a et b est le plus grand diviseur commun. Avec les décompositions : on prend les facteurs communs avec le plus petit exposant. Exemple : 360 = 2³×3²×5 et 84 = 2²×3×7 → PGCD = 2²×3 = 12.</p>
+<h3>Algorithme d&#x27;Euclide</h3>
+<p>PGCD(a ; b) = PGCD(b ; r) où r est le reste de a par b. On s&#x27;arrête quand le reste est nul : le PGCD est le <b>dernier reste non nul</b>.</p>
+<pre>
+PGCD(252 ; 198)
+252 = 198×1 + 54
+198 = 54×3 + 36
+ 54 = 36×1 + 18
+ 36 = 18×2 + 0   → PGCD = 18
+</pre>
+<div class="box retenir"><b>Nombres premiers entre eux</b><p>a et b sont <b>premiers entre eux</b> si PGCD(a ; b) = 1. Fraction irréductible : on divise numérateur et dénominateur par leur PGCD. PPCM(a ; b) = a×b / PGCD(a ; b).</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel est le reste de la division euclidienne de 53 par 6 ?",
+  "options": [
+   "3",
+   "5",
+   "8",
+   "9"
+  ],
+  "answer": 1,
+  "explication": "53 = 6×8 + 5."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "Le nombre 1 est premier.",
+  "answer": false,
+  "explication": "Un nombre premier a exactement deux diviseurs ; 1 n'en a qu'un."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "Un nombre est divisible par 3 si la somme de ses chiffres l'est.",
+  "answer": true,
+  "explication": "Critère de divisibilité par 3."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Lequel de ces nombres est premier ?",
+  "options": [
+   "21",
+   "27",
+   "29",
+   "33"
+  ],
+  "answer": 2,
+  "explication": "29 n'est divisible ni par 2, 3 ni 5 (et 7² > 29)."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Quel est le reste de la division de 1893 par 11 ?",
+  "answers": [
+   "1"
+  ],
+  "explication": "1893 = 11×172 + 1."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Décompose 60 : 60 = 2^a × 3 × 5. Que vaut a ?",
+  "answers": [
+   "2"
+  ],
+  "explication": "60 = 4×15 = 2²×3×5."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Calcule PGCD(48 ; 36).",
+  "answers": [
+   "12"
+  ],
+  "explication": "48 = 36 + 12 ; 36 = 3×12 → 12."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Calcule PGCD(252 ; 198).",
+  "answers": [
+   "18"
+  ],
+  "explication": "Algorithme d'Euclide : restes 54, 36, 18, 0."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Calcule PGCD(1071 ; 462).",
+  "answers": [
+   "21"
+  ],
+  "explication": "1071=2×462+147 ; 462=3×147+21 ; 147=7×21 → 21."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Rends la fraction 252/198 irréductible : donne le numérateur.",
+  "answers": [
+   "14"
+  ],
+  "explication": "PGCD = 18 : 252/18 = 14 et 198/18 = 11."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Combien de nombres premiers y a-t-il entre 1 et 30 ?",
+  "answers": [
+   "10"
+  ],
+  "explication": "2, 3, 5, 7, 11, 13, 17, 19, 23, 29."
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Calcule le PPCM de 12 et 18.",
+  "answers": [
+   "36"
+  ],
+  "explication": "12×18 / PGCD(12;18)=216/6 = 36."
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Décompose 504 : donne la somme des exposants (504 = 2^a×3^b×7^c, donne a+b+c).",
+  "answers": [
+   "6"
+  ],
+  "explication": "504 = 2³×3²×7 → 3+2+1 = 6."
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Calcule PGCD(2014 ; 1989).",
+  "answers": [
+   "1"
+  ],
+  "explication": "2014 = 1989+25 ; 1989 = 79×25 + 14 ; 25=14+11 ; 14=11+3 ; 11=3×3+2 ; 3=2+1 → 1."
+ },
+ {
+  "type": "associer",
+  "niveau": "facile",
+  "q": "Associe chaque couple à son PGCD.",
+  "paires": [
+   [
+    "(24 ; 36)",
+    "12"
+   ],
+   [
+    "(17 ; 5)",
+    "1"
+   ],
+   [
+    "(100 ; 75)",
+    "25"
+   ],
+   [
+    "(21 ; 14)",
+    "7"
+   ]
+  ],
+  "explication": "Calcule avec Euclide ou les décompositions."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

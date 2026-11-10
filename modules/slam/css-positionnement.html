@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>CSS : positionnement et flex — Étude Facile</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="slam" data-chapter="css-positionnement">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<p>Pour réaliser une mise en page (colonnes, menu, pied de page), on <b>positionne les éléments</b> avec CSS. Les propriétés clés : <code>display</code>, les marges, <code>float</code>, <code>position</code> et surtout <b>flex</b>.</p>
+<h2>1. La propriété display</h2>
+<p><code>display</code> règle le comportement d&#x27;une <code>&lt;div&gt;</code> dans la page.</p>
+<table><tr><th>Valeur</th><th>Effet</th></tr><tr><td><code>block</code></td><td>les blocs sont <b>superposés</b> (l&#x27;un sous l&#x27;autre)</td></tr><tr><td><code>inline-block</code></td><td>les blocs sont placés <b>en ligne</b>, avec leur taille</td></tr><tr><td><code>inline</code></td><td>les éléments prennent la taille de leur contenu</td></tr><tr><td><code>none</code></td><td>pas d&#x27;affichage, et la place est libérée pour les autres éléments</td></tr><tr><td><code>flex</code></td><td>blocs <b>flexibles</b> sur un axe : ils s&#x27;adaptent à l&#x27;espace (écran de PC ou de téléphone)</td></tr><tr><td><code>grid</code></td><td>blocs flexibles sur une <b>grille</b></td></tr></table>
+<div class="box retenir"><b>Responsive</b><p>Un bloc flexible s&#x27;adapte à l&#x27;espace de visualisation, sur PC comme sur téléphone : on dit qu&#x27;il est <b>responsive</b>.</p></div>
+<h2>2. Le modèle de boîte : marges</h2>
+<p>Chaque élément est une <b>boîte</b>. De l&#x27;intérieur vers l&#x27;extérieur : le <b>contenu</b>, le <b>padding</b> (marge intérieure), la <b>bordure</b> (<code>border</code>) et la <b>marge</b> extérieure (<code>margin</code>).</p>
+<pre>
+div {
+    margin: 10px;           /* espace autour de la boîte */
+    padding: 5px;           /* espace entre le contenu et la bordure */
+    border: 1px solid #333;
+}
+.collee { margin: 0; }      /* si la valeur est nulle : 0 et non 0px */
+</pre>
+<p>Les valeurs négatives sont autorisées pour les marges.</p>
+<h2>3. Positionnement flottant : float</h2>
+<p><code>float</code> « sort » un élément du flux normal : son parent ne le prend plus en compte pour calculer sa taille, et les autres éléments viennent l&#x27;<b>entourer</b>. <code>clear: both</code> dans un autre élément annule ce comportement.</p>
+<pre>
+img { float: left; }
+footer { clear: both; }
+</pre>
+<h2>4. La propriété position</h2>
+<table><tr><th>Valeur</th><th>Comportement</th></tr><tr><td><code>static</code></td><td>valeur <b>par défaut</b> : flux normal</td></tr><tr><td><code>relative</code></td><td>positionné par rapport à sa position normale, avec <code>top</code>, <code>left</code>…</td></tr><tr><td><code>absolute</code></td><td>positionné avec <code>top</code>/<code>left</code> par rapport au parent positionné ; sans parent positionné, par rapport à l&#x27;élément <code>html</code></td></tr><tr><td><code>fixed</code></td><td>comme absolute, mais <b>par rapport à la fenêtre</b> : l&#x27;élément reste en place même quand on fait défiler la page</td></tr></table>
+<h2>5. Conteneur flexible : display flex</h2>
+<p>Pour créer un <b>conteneur flexible</b>, on met <code>display: flex</code> sur le parent. Ses enfants directs deviennent des <b>éléments flexibles</b> (flex items).</p>
+<pre>
+.conteneur {
+    display: flex;
+}
+.item { margin: 1em; padding: 0.5em; width: 110px; }
+
+/* répartir l&#x27;espace entre éléments */
+.un   { flex: 1; }
+.deux { flex: 2; }   /* prend 2 fois plus de place que .un */
+</pre>
+<p>Comportement par défaut d&#x27;un conteneur flex :</p>
+<ul><li>les éléments s&#x27;affichent en <b>ligne horizontale</b> (<code>flex-direction: row</code>) ;</li><li>ils sont placés depuis le <b>début</b> de l&#x27;axe principal ;</li><li>ils ne s&#x27;étirent pas sur l&#x27;axe principal mais <b>peuvent rétrécir</b> ;</li><li>ils sont <b>étirés sur l&#x27;axe secondaire</b> ;</li><li><code>flex-wrap: nowrap</code> : tous les éléments restent sur <b>une seule ligne</b>.</li></ul>
+<p>Les valeurs de <code>flex</code> (comme <code>flex: 1</code>, <code>flex: 2</code>, <code>flex: auto</code>, <code>flex: none</code>) règlent la part d&#x27;espace que prend chaque élément.</p>
+<div class="box retenir"><b>Mise en page en colonnes (TP3)</b><p>On crée trois <code>&lt;div&gt;</code> : <code>divMenu</code>, <code>divGauche</code>, <code>divDroite</code>, puis on code leur positionnement dans la feuille CSS — par exemple en mettant <code>display: flex</code> sur le conteneur.</p></div>
+<details open><summary>Résumé express</summary>
+<ul><li><code>display</code> : <code>block</code> (empilés), <code>inline-block</code> (en ligne), <code>none</code> (masqué), <code>flex</code>/<code>grid</code> (flexibles, responsive).</li><li>Boîte : contenu, <code>padding</code>, <code>border</code>, <code>margin</code> (0 sans unité).</li><li><code>float</code> sort du flux, <code>clear</code> l&#x27;annule. <code>position</code> : static (défaut), relative, absolute, fixed.</li><li><code>display: flex</code> : enfants flexibles, en ligne par défaut, <code>flex: 1/2…</code> pour répartir l&#x27;espace.</li></ul>
+</details>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle propriété CSS règle le positionnement par blocs des `<div>` ?",
+  "options": [
+   "display",
+   "color",
+   "font",
+   "align"
+  ],
+  "answer": 0,
+  "explication": "C'est `display`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "`display: block` donne…",
+  "options": [
+   "Des blocs superposés",
+   "Des blocs en ligne",
+   "Aucun affichage",
+   "Une grille"
+  ],
+  "answer": 0,
+  "explication": "Les blocs sont l'un sous l'autre."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "`display: inline-block` donne…",
+  "options": [
+   "Des blocs superposés",
+   "Des blocs en ligne, avec leur taille",
+   "Aucun affichage",
+   "Un seul bloc"
+  ],
+  "answer": 1,
+  "explication": "Les blocs sont placés les uns à côté des autres."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "`display: none` fait…",
+  "options": [
+   "Cacher l'élément et libérer sa place",
+   "Réduire l'élément à un point",
+   "Rendre l'élément transparent mais garder sa place",
+   "Supprimer le fichier"
+  ],
+  "answer": 0,
+  "explication": "Pas d'affichage et la place est libérée pour d'autres éléments."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que signifie qu'une mise en page est « responsive » ?",
+  "options": [
+   "Elle répond aux e-mails",
+   "Elle s'adapte à l'espace de visualisation (PC, téléphone)",
+   "Elle charge plus vite",
+   "Elle utilise des images"
+  ],
+  "answer": 1,
+  "explication": "Un bloc flexible s'adapte à l'écran."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle valeur de `display` crée un conteneur flexible sur un axe ?",
+  "options": [
+   "flex",
+   "block",
+   "inline",
+   "none"
+  ],
+  "answer": 0,
+  "explication": "`display: flex`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle valeur de `display` permet une disposition sur une grille ?",
+  "options": [
+   "grid",
+   "flex",
+   "table-grid",
+   "inline"
+  ],
+  "answer": 0,
+  "explication": "`display: grid`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Comment s'écrit une marge nulle ?",
+  "options": [
+   "margin: 0;",
+   "margin: 0px;",
+   "margin: none;",
+   "margin: null;"
+  ],
+  "answer": 0,
+  "explication": "Si la valeur est nulle, on indique `0` et non `0px`."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "Les valeurs négatives sont autorisées pour les marges.",
+  "answer": true,
+  "explication": "On peut utiliser des marges négatives."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Dans l'ordre, de l'intérieur vers l'extérieur d'une boîte :",
+  "options": [
+   "contenu, padding, bordure, marge",
+   "marge, bordure, padding, contenu",
+   "contenu, marge, padding, bordure",
+   "bordure, contenu, marge, padding"
+  ],
+  "answer": 0,
+  "explication": "Contenu → padding → bordure (border) → marge (margin)."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que fait `float: left` sur une image ?",
+  "options": [
+   "La sort du flux : les autres éléments l'entourent",
+   "La cache",
+   "La centre",
+   "Elle redimensionne la page"
+  ],
+  "answer": 0,
+  "explication": "L'élément flottant est sorti du flux normal ; le texte vient l'entourer."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle propriété annule le positionnement flottant ?",
+  "options": [
+   "clear: both",
+   "float: none-all",
+   "position: reset",
+   "display: stop"
+  ],
+  "answer": 0,
+  "explication": "`clear: both` dans un autre élément annule le float."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle est la valeur par défaut de `position` ?",
+  "options": [
+   "static",
+   "relative",
+   "absolute",
+   "fixed"
+  ],
+  "answer": 0,
+  "explication": "`static` : flux normal."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle valeur de `position` garde l'élément en place même quand on fait défiler la page ?",
+  "options": [
+   "static",
+   "relative",
+   "absolute",
+   "fixed"
+  ],
+  "answer": 3,
+  "explication": "`fixed` se positionne par rapport à la fenêtre du navigateur."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Par rapport à quoi se positionne un élément `absolute` dont le parent n'a pas de position définie ?",
+  "options": [
+   "Son frère précédent",
+   "L'élément html",
+   "La fenêtre uniquement",
+   "Il ne se positionne pas"
+  ],
+  "answer": 1,
+  "explication": "Sans parent positionné, la référence est l'élément `html`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quel est le sens par défaut des éléments dans un conteneur `display: flex` ?",
+  "options": [
+   "En colonne",
+   "En ligne horizontale",
+   "En grille",
+   "En diagonale"
+  ],
+  "answer": 1,
+  "explication": "`flex-direction: row` par défaut."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Par défaut, les éléments d'un conteneur flex…",
+  "options": [
+   "Passent à la ligne automatiquement",
+   "Restent sur une seule ligne (nowrap)",
+   "Sont superposés",
+   "Disparaissent"
+  ],
+  "answer": 1,
+  "explication": "`flex-wrap: nowrap` : une seule ligne."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Dans un conteneur flex, un élément avec `flex: 2` et un autre avec `flex: 1`…",
+  "options": [
+   "Ont la même taille",
+   "Le premier prend 2 fois plus de place",
+   "Le second prend 2 fois plus de place",
+   "Sont superposés"
+  ],
+  "answer": 1,
+  "explication": "`flex: 2` reçoit deux parts, `flex: 1` une part."
+ },
+ {
+  "type": "associer",
+  "niveau": "moyen",
+  "q": "Associe chaque valeur de `position` à son comportement.",
+  "paires": [
+   [
+    "static",
+    "flux normal (défaut)"
+   ],
+   [
+    "relative",
+    "décalé par rapport à sa place normale"
+   ],
+   [
+    "absolute",
+    "placé avec top/left par rapport à un parent positionné"
+   ],
+   [
+    "fixed",
+    "fixé par rapport à la fenêtre"
+   ]
+  ],
+  "explication": "Static, relative, absolute et fixed."
+ },
+ {
+  "type": "associer",
+  "niveau": "moyen",
+  "q": "Associe chaque valeur de `display` à son effet.",
+  "paires": [
+   [
+    "block",
+    "blocs superposés"
+   ],
+   [
+    "inline-block",
+    "blocs en ligne"
+   ],
+   [
+    "none",
+    "pas d'affichage"
+   ],
+   [
+    "flex",
+    "blocs flexibles sur un axe"
+   ]
+  ],
+  "explication": "Les valeurs de `display`."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

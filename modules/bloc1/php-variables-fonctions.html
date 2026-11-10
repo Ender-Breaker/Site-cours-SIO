@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>PHP : variables, constantes et fonctions — Étude Facile</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="bloc1" data-chapter="php-variables-fonctions">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<p>PHP est un langage exécuté <b>sur le serveur</b> : il produit du HTML que le navigateur affiche. Ce chapitre couvre les bases : écrire un programme, utiliser des variables et des constantes, et appeler des fonctions.</p>
+<h2>1. Un premier programme</h2>
+<pre>
+&lt;?php
+ini_set(&quot;display_errors&quot;, 1);   // affiche les erreurs (utile pour apprendre)
+
+echo &quot;Bonjour&quot;;                 // affiche du texte
+?&gt;
+</pre>
+<ul><li>Le code PHP se place entre <code>&lt;?php</code> et <code>?&gt;</code> (la balise fermante est facultative si le fichier ne contient que du PHP).</li><li>Chaque instruction se termine par un <b>point-virgule</b> <code>;</code>.</li><li><code>echo</code> affiche du texte ou du HTML dans la page.</li><li>Commentaires : <code>// une ligne</code> ou <code>/* plusieurs lignes */</code>.</li></ul>
+<h2>2. Variables et constantes</h2>
+<pre>
+&lt;?php
+// constantes : valeur fixe, jamais modifiée
+define(&quot;maxi&quot;, 100);
+define(&quot;mini&quot;, 0);
+
+// variables : elles commencent par $
+$jour = 4;
+$mois = 6;
+$annee = 2026;
+
+$nom = &quot;DURAND&quot;;       // chaîne de caractères
+$prenom = &quot;Jean&quot;;
+$monbool = true;       // booléen
+</pre>
+<table><tr><th>Élément</th><th>Syntaxe</th><th>Remarque</th></tr><tr><td>Variable</td><td><code>$nom = &quot;Jean&quot;;</code></td><td>commence par <code>$</code>, <b>sensible à la casse</b> (<code>$nom</code> ≠ <code>$Nom</code>)</td></tr><tr><td>Constante</td><td><code>define(&quot;maxi&quot;, 100);</code></td><td>valeur fixe, sans <code>$</code></td></tr><tr><td>Entier</td><td><code>$a = 12;</code></td><td>type <code>int</code></td></tr><tr><td>Chaîne</td><td><code>$s = &quot;texte&quot;;</code></td><td>entre guillemets simples ou doubles</td></tr><tr><td>Booléen</td><td><code>$b = true;</code></td><td><code>true</code> ou <code>false</code></td></tr></table>
+<div class="box retenir"><b>À retenir</b><p>En PHP on n&#x27;écrit pas le type : il est déduit de la valeur. <code>=</code> sert à <b>affecter</b> une valeur à une variable.</p></div>
+<h2>3. Afficher et concaténer</h2>
+<p>Pour coller des morceaux de texte, PHP utilise le point <code>.</code> (et non le <code>+</code>).</p>
+<pre>
+&lt;?php
+echo &quot;&lt;h1&gt;&quot; . $nom . &quot; &quot; . $prenom . &quot; né le &quot; . $jour . &quot;/&quot; . $mois . &quot;/&quot; . $annee . &quot;&lt;/h1&gt;&quot;;
+// affiche : DURAND Jean né le 4/6/2026
+</pre>
+<div class="box attention"><b>Guillemets simples ou doubles ?</b><p>Avec des guillemets <b>doubles</b>, les variables sont remplacées par leur valeur : <code>&quot;Bonjour $prenom&quot;</code>.</p><p>Avec des guillemets <b>simples</b>, le texte est affiché tel quel : <code>&#x27;Bonjour $prenom&#x27;</code> affiche <code>$prenom</code>.</p></div>
+<h2>4. Quelques fonctions utiles</h2>
+<table><tr><th>Fonction</th><th>Rôle</th><th>Exemple</th></tr><tr><td><code>strlen($ch)</code></td><td>longueur d&#x27;une chaîne</td><td><code>strlen(&quot;Bonjour&quot;)</code> → 7</td></tr><tr><td><code>ord($c)</code></td><td>code <span class="tip" data-tip="Table qui associe un numéro à chaque caractère : A = 65, a = 97.">ASCII</span> d&#x27;un caractère</td><td><code>ord(&#x27;A&#x27;)</code> → 65</td></tr><tr><td><code>chr($n)</code></td><td>caractère correspondant à un code</td><td><code>chr(97)</code> → a</td></tr><tr><td><code>var_dump($x)</code></td><td>affiche le type et la valeur</td><td><code>var_dump(&quot;1234&quot;)</code> → string(4) &quot;1234&quot;</td></tr></table>
+<pre>
+&lt;?php
+$unechaine = &quot;Bonjour&quot;;
+$taille = strlen($unechaine);
+echo &quot;Taille de la chaine \&quot;$unechaine\&quot; : &quot; . $taille;
+
+$moncarac = &#x27;A&#x27;;
+echo &quot;&lt;br /&gt;Code ASCII du &#x27;&quot; . $moncarac . &quot;&#x27; : &quot; . ord($moncarac);
+
+$monentier = 97;
+echo &quot;&lt;br /&gt;Caractère correspondant au &quot; . $monentier . &quot; : &quot; . chr($monentier);
+</pre>
+<h2>5. Convertir un type</h2>
+<p>On peut forcer le type d&#x27;une valeur avec un <b>cast</b> : <code>(integer)</code>, <code>(string)</code>…</p>
+<pre>
+&lt;?php
+$machaine = &quot;1234&quot;;
+var_dump($machaine);                // string(4) &quot;1234&quot;
+echo (integer)$machaine + 1;        // 1235
+
+$monentier = 1234;
+echo (string)$monentier . &quot;1&quot;;      // 12341 (concaténation)
+</pre>
+<details open><summary>Résumé express</summary>
+<ul><li>Programme entre <code>&lt;?php</code> … <code>?&gt;</code>, instructions terminées par <code>;</code>.</li><li>Variables : <code>$nom</code> (casse sensible). Constantes : <code>define(&quot;NOM&quot;, valeur)</code>.</li><li><code>.</code> concatène ; <code>echo</code> affiche ; guillemets doubles → variables remplacées.</li><li><code>strlen</code>, <code>ord</code>, <code>chr</code>, <code>var_dump</code> ; casts <code>(integer)</code>, <code>(string)</code>.</li></ul>
+</details>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel symbole commence le nom d'une variable PHP ?",
+  "options": [
+   "#",
+   "$",
+   "@",
+   "&"
+  ],
+  "answer": 1,
+  "explication": "Toutes les variables PHP commencent par `$`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel opérateur permet de concaténer (coller) deux chaînes en PHP ?",
+  "options": [
+   "+",
+   "&",
+   ".",
+   ","
+  ],
+  "answer": 2,
+  "explication": "En PHP, la concaténation se fait avec le point `.`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "À quoi sert `echo` ?",
+  "options": [
+   "À déclarer une variable",
+   "À afficher du texte dans la page",
+   "À définir une constante",
+   "À commenter du code"
+  ],
+  "answer": 1,
+  "explication": "`echo` affiche du texte ou du HTML."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "`$nom` et `$Nom` désignent la même variable.",
+  "answer": false,
+  "explication": "Les noms de variables sont sensibles à la casse : ce sont deux variables différentes."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "Une constante se déclare avec `define(\"maxi\", 100);`.",
+  "answer": true,
+  "explication": "`define` crée une constante, sans `$`."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "Avec des guillemets simples, `'Bonjour $prenom'` remplace `$prenom` par sa valeur.",
+  "answer": false,
+  "explication": "Seuls les guillemets doubles remplacent les variables."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que fait `ini_set(\"display_errors\", 1);` ?",
+  "options": [
+   "Supprime les erreurs",
+   "Affiche les erreurs PHP dans la page",
+   "Arrête le programme",
+   "Crée une variable"
+  ],
+  "answer": 1,
+  "explication": "Cette ligne active l'affichage des erreurs, pratique pour déboguer."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Que renvoie ceci ?",
+  "answers": [
+   "7"
+  ],
+  "explication": "`strlen` compte les caractères : B-o-n-j-o-u-r = 7.",
+  "code": "echo strlen(\"Bonjour\");"
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Que renvoie ceci ?",
+  "answers": [
+   "0"
+  ],
+  "explication": "La chaîne vide ne contient aucun caractère.",
+  "code": "echo strlen(\"\");"
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Que renvoie ceci ?",
+  "answers": [
+   "65"
+  ],
+  "explication": "Le code ASCII de la lettre A est 65.",
+  "code": "echo ord('A');"
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Que renvoie ceci ?",
+  "answers": [
+   "a"
+  ],
+  "explication": "Le code 97 correspond à la lettre a minuscule.",
+  "code": "echo chr(97);"
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Que renvoie ceci ?",
+  "answers": [
+   "Bonjour Jean"
+  ],
+  "explication": "Les trois morceaux sont collés par le point `.`.",
+  "code": "echo \"Bonjour\" . \" \" . \"Jean\";"
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Que renvoie ceci ?",
+  "answers": [
+   "4/6/2026"
+  ],
+  "explication": "On concatène les variables et les `/`.",
+  "code": "$jour = 4; $mois = 6; $annee = 2026;\necho $jour . \"/\" . $mois . \"/\" . $annee;"
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Que renvoie ceci ?",
+  "answers": [
+   "7"
+  ],
+  "explication": "`+=` ajoute 2 à la valeur actuelle : 5 + 2 = 7.",
+  "code": "$a = 5;\n$a += 2;\necho $a;"
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Que renvoie ceci ?",
+  "answers": [
+   "1235"
+  ],
+  "explication": "`(integer)` convertit la chaîne en entier, puis on ajoute 1.",
+  "code": "$machaine = \"1234\";\necho (integer)$machaine + 1;"
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Que renvoie ceci ?",
+  "answers": [
+   "12341"
+  ],
+  "explication": "Avec `.` c'est une concaténation : `\"1234\"` et `\"1\"` sont collés.",
+  "code": "$monentier = 1234;\necho (string)$monentier . \"1\";"
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Que renvoie ceci ?",
+  "answers": [
+   "53"
+  ],
+  "explication": "Le point concatène : `\"5\"` et `\"3\"` donnent `53`.",
+  "code": "echo \"5\" . 3;"
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Que renvoie ceci ?",
+  "answers": [
+   "8"
+  ],
+  "explication": "Avec `+`, PHP convertit la chaîne `\"5\"` en nombre : 5 + 3 = 8.",
+  "code": "echo \"5\" + 3;"
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Que renvoie ceci ?",
+  "answers": [
+   "1"
+  ],
+  "explication": "`%` donne le reste de la division : 10 = 3 × 3 + 1.",
+  "code": "$x = 10;\n$x = $x % 3;\necho $x;"
+ },
+ {
+  "type": "associer",
+  "niveau": "facile",
+  "q": "Associe chaque fonction à son rôle.",
+  "paires": [
+   [
+    "strlen",
+    "longueur d'une chaîne"
+   ],
+   [
+    "ord",
+    "code ASCII d'un caractère"
+   ],
+   [
+    "chr",
+    "caractère d'un code ASCII"
+   ],
+   [
+    "var_dump",
+    "type et valeur d'une variable"
+   ]
+  ],
+  "explication": "`strlen` mesure, `ord` donne le code, `chr` fait l'inverse, `var_dump` montre type et valeur."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

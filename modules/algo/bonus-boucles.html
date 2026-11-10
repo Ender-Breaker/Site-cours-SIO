@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Boucles : for et while — Étude Facile</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="algo" data-chapter="bonus-boucles">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<div class="box retenir"><b>Chapitre bonus</b><p>Ce chapitre est un complément créé pour Étude Facile (il ne vient pas d&#x27;un support de cours). Les exemples sont à tester dans un terminal Python ou sur un éditeur en ligne.</p></div>
+<p>Une <b>boucle</b> répète des instructions. Python en propose deux : <code>for</code> (nombre de tours connu) et <code>while</code> (tant qu&#x27;une condition est vraie).</p>
+<h2>1. La boucle for et range</h2>
+<pre data-repl>
+&gt;&gt;&gt; for i in range(4):
+...     print(i)
+0
+1
+2
+3
+</pre>
+<table><tr><th>Écriture</th><th>Valeurs de i</th></tr><tr><td><code>range(4)</code></td><td>0, 1, 2, 3</td></tr><tr><td><code>range(1, 5)</code></td><td>1, 2, 3, 4</td></tr><tr><td><code>range(0, 10, 3)</code></td><td>0, 3, 6, 9</td></tr><tr><td><code>range(5, 0, -1)</code></td><td>5, 4, 3, 2, 1</td></tr></table>
+<div class="box retenir"><b>Bornes</b><p><code>range(a, b)</code> <b>inclut a</b> mais <b>exclut b</b>.</p></div>
+<h2>2. La boucle while</h2>
+<pre>
+n = 1
+while n &lt; 100:
+    n = n * 2
+print(n)   # 128
+</pre>
+<div class="box attention"><b>Boucle infinie</b><p>Si la condition ne devient jamais fausse, le programme tourne sans fin (arrêt : Ctrl+C). Vérifie que la variable testée évolue.</p></div>
+<h2>3. Accumulateur et compteur</h2>
+<pre>
+total = 0
+for i in range(1, 6):
+    total += i
+print(total)   # 15
+</pre>
+<p>On initialise l&#x27;accumulateur <b>avant</b> la boucle, puis on le met à jour à chaque tour. On peut aussi parcourir une liste : <code>for x in [3, 5, 8]:</code>.</p>
+<p><code>break</code> sort de la boucle, <code>continue</code> passe directement au tour suivant.</p>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelles valeurs prend i dans `range(3)` ?",
+  "options": [
+   "1, 2, 3",
+   "0, 1, 2",
+   "0, 1, 2, 3",
+   "1, 2"
+  ],
+  "answer": 1,
+  "explication": "De 0 à 2."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelles valeurs prend i dans `range(1, 4)` ?",
+  "options": [
+   "1, 2, 3",
+   "1, 2, 3, 4",
+   "0, 1, 2, 3",
+   "2, 3"
+  ],
+  "answer": 0,
+  "explication": "Borne haute exclue."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "Une boucle while peut ne jamais s'exécuter.",
+  "answer": true,
+  "explication": "Si la condition est fausse dès le départ."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle boucle choisir quand on connaît le nombre de tours ?",
+  "options": [
+   "while",
+   "for",
+   "if",
+   "def"
+  ],
+  "answer": 1,
+  "explication": "for avec range."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Que vaut s à la fin ?",
+  "answers": [
+   "10"
+  ],
+  "explication": "0+1+2+3+4 = 10.",
+  "code": "s = 0\nfor i in range(5):\n    s += i"
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Combien de fois la boucle s'exécute-t-elle ?",
+  "answers": [
+   "4"
+  ],
+  "explication": "range(2, 6) → 2, 3, 4, 5.",
+  "code": "for i in range(2, 6):\n    print(i)"
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Que vaut n à la fin ?",
+  "answers": [
+   "16"
+  ],
+  "explication": "1 → 2 → 4 → 8 → 16 (16 n'est plus < 10).",
+  "code": "n = 1\nwhile n < 10:\n    n = n * 2"
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Que vaut c à la fin ?",
+  "answers": [
+   "3"
+  ],
+  "explication": "i=0,3,6 → 3 tours ; range(0, 9, 3).",
+  "code": "c = 0\nfor i in range(0, 9, 3):\n    c += 1"
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Que vaut p à la fin ?",
+  "answers": [
+   "120"
+  ],
+  "explication": "5! = 1×2×3×4×5.",
+  "code": "p = 1\nfor i in range(1, 6):\n    p *= i"
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Que vaut s à la fin ?",
+  "answers": [
+   "30"
+  ],
+  "explication": "2+4+6+8+10 = 30.",
+  "code": "s = 0\nfor i in range(1, 11):\n    if i % 2 == 0:\n        s += i"
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Que vaut i à la fin ?",
+  "answers": [
+   "3"
+  ],
+  "explication": "break sort de la boucle quand i == 3.",
+  "code": "for i in range(10):\n    if i == 3:\n        break"
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Que vaut n à la fin ?",
+  "answers": [
+   "0"
+  ],
+  "explication": "n décroît de 3 : 9, 6, 3, 0 (0 n'est plus > 0).",
+  "code": "n = 9\nwhile n > 0:\n    n -= 3"
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

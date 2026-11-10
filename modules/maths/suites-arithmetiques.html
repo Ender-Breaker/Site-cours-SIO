@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Suites arithmétiques — Étude Facile</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="maths" data-chapter="suites-arithmetiques">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<p>Une <b>suite</b> (uₙ) est une liste de nombres indexés par n. Elle est <b>arithmétique</b> si on passe d&#x27;un terme au suivant en ajoutant toujours le même nombre r, la <b>raison</b>.</p>
+<h2>1. Définition et terme général</h2>
+<pre>
+u(n+1) = u(n) + r
+u(n) = u(0) + n×r        (suite indexée à partir de 0)
+u(n) = u(p) + (n − p)×r   (formule générale)
+</pre>
+<p>Pour montrer qu&#x27;une suite est arithmétique, on calcule <code>u(n+1) − u(n)</code> : si le résultat est <b>constant</b>, c&#x27;est gagné. Exemple : −2, 5, 12 → 5−(−2) = 12−5 = 7 : raison 7.</p>
+<h3>Variations</h3>
+<ul><li>r &gt; 0 : suite <b>croissante</b></li><li>r &lt; 0 : suite <b>décroissante</b></li><li>r = 0 : suite constante</li></ul>
+<h2>2. Somme de termes consécutifs</h2>
+<pre>
+S = nombre de termes × (premier terme + dernier terme) / 2
+</pre>
+<p>Le nombre de termes de u(p) à u(n) est <code>n − p + 1</code>. Exemple : un athlète court 3000 m le jour 0 puis 150 m de plus chaque jour. u(n) = 3000 + 150n. Du jour 0 au jour 15 : 16 termes, u(15) = 5250, somme = 16 × (3000+5250)/2 = <b>66 000 m</b>.</p>
+<h2>3. Moyenne arithmétique</h2>
+<p>La moyenne arithmétique de a et b est (a+b)/2. Dans une suite arithmétique, tout terme est la moyenne de ses deux voisins : <code>u(n) = (u(n−1) + u(n+1))/2</code>.</p>
+<div class="box retenir"><b>Applications</b><p>Épargne avec versement fixe, loyer qui augmente d&#x27;un montant fixe, nombre de lignes d&#x27;un fichier qui grandit régulièrement…</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "La suite 2 ; 5 ; 8 ; 11 est arithmétique.",
+  "answer": true,
+  "explication": "Raison 3."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle est la raison de la suite 10 ; 7 ; 4 ; 1 ?",
+  "options": [
+   "3",
+   "−3",
+   "7",
+   "−7"
+  ],
+  "answer": 1,
+  "explication": "7 − 10 = −3."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Si r < 0, la suite arithmétique est…",
+  "options": [
+   "croissante",
+   "décroissante",
+   "constante",
+   "alternée"
+  ],
+  "answer": 1,
+  "explication": "On retire à chaque pas."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "u₀ = 4 et r = 3. Calcule u₁₀.",
+  "answers": [
+   "34"
+  ],
+  "explication": "u₁₀ = 4 + 10×3 = 34."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "u₀ = 3000 et r = 150. Calcule u₈.",
+  "answers": [
+   "4200"
+  ],
+  "explication": "3000 + 8×150 = 4200."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "u₁ = 5 et r = 2. Calcule u₇ (indexée à partir de 1).",
+  "answers": [
+   "17"
+  ],
+  "explication": "u₇ = u₁ + 6×2 = 17."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Une suite arithmétique a u₃ = 11 et u₇ = 27. Quelle est la raison ?",
+  "answers": [
+   "4"
+  ],
+  "explication": "(27−11)/(7−3) = 4."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Combien de termes y a-t-il de u₈ à u₁₂ ?",
+  "answers": [
+   "5"
+  ],
+  "explication": "12 − 8 + 1 = 5."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Calcule la somme 1 + 2 + 3 + … + 100.",
+  "answers": [
+   "5050"
+  ],
+  "explication": "100 × 101 / 2 = 5050."
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "u₀ = 3000, r = 150 : calcule la somme u₀ + … + u₁₅.",
+  "answers": [
+   "66000"
+  ],
+  "explication": "16 × (3000+5250)/2 = 66000."
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Calcule la moyenne arithmétique de −3 et 19.",
+  "answers": [
+   "8"
+  ],
+  "explication": "(−3+19)/2 = 8."
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "u₀ = 20 et r = −3. À partir de quel rang n a-t-on uₙ < 0 ? (plus petit n)",
+  "answers": [
+   "7"
+  ],
+  "explication": "20 − 3n < 0 ⇔ n > 6,67 → n = 7."
+ },
+ {
+  "type": "associer",
+  "niveau": "facile",
+  "q": "Associe chaque suite à sa raison.",
+  "paires": [
+   [
+    "5 ; 9 ; 13",
+    "4"
+   ],
+   [
+    "20 ; 15 ; 10",
+    "−5"
+   ],
+   [
+    "7 ; 7 ; 7",
+    "0"
+   ],
+   [
+    "−2 ; 5 ; 12",
+    "7"
+   ]
+  ],
+  "explication": "r = u(n+1) − u(n)."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

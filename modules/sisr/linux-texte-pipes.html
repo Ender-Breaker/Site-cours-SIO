@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Linux : texte, redirections et pipes — Étude Facile</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="sisr" data-chapter="linux-texte-pipes">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<p>Linux sait lire, filtrer, trier et transformer du texte avec de petites commandes qu&#x27;on <b>enchaîne</b>. C&#x27;est la force du shell : chaque commande fait une chose, et les <b>redirections</b> et <b>pipes</b> les assemblent.</p>
+<div data-terminal></div>
+<h2>1. Lire un fichier</h2>
+<table><tr><th>Commande</th><th>Effet</th></tr><tr><td><code>cat f</code></td><td>affiche tout le fichier</td></tr><tr><td><code>less f</code></td><td>page par page : espace = suite, <code>q</code> = quitter, <code>/mot</code> puis <code>n</code> pour chercher</td></tr><tr><td><code>head f</code> · <code>head -5 f</code></td><td>les 10 (ou 5) premières lignes</td></tr><tr><td><code>tail f</code> · <code>tail -15 f</code></td><td>les 10 (ou 15) dernières lignes</td></tr><tr><td><code>wc -l f</code></td><td>nombre de <b>lignes</b> (<code>-w</code> : mots, <code>-c</code> : caractères)</td></tr></table>
+<h2>2. Chercher avec grep</h2>
+<pre>
+grep mot fichier          # lignes contenant « mot » (sensible à la casse)
+grep -i mot fichier       # ignore la casse
+grep -v mot fichier       # lignes qui NE correspondent PAS
+grep -n mot fichier       # préfixe par le numéro de ligne
+grep -c mot fichier       # compte les lignes trouvées
+grep -i &#x27;deux mots&#x27; f     # phrase entre apostrophes
+</pre>
+<h2>3. Redirections</h2>
+<p>Par défaut, une commande lit le clavier et écrit à l&#x27;écran. On peut changer ça :</p>
+<table><tr><th>Syntaxe</th><th>Effet</th></tr><tr><td><code>cmd &gt; f</code></td><td>écrit la sortie dans <code>f</code> (<b>écrase</b> le contenu)</td></tr><tr><td><code>cmd &gt;&gt; f</code></td><td><b>ajoute</b> à la fin de <code>f</code></td></tr><tr><td><code>cmd &lt; f</code></td><td>l&#x27;entrée vient du fichier <code>f</code></td></tr><tr><td><code>cat f1 f2 &gt; f0</code></td><td>concatène <code>f1</code> et <code>f2</code> dans <code>f0</code></td></tr></table>
+<div class="box attention"><b>&gt; écrase !</b><p><code>echo bonjour &gt; notes.txt</code> <b>remplace</b> tout le contenu de <code>notes.txt</code>. Pour conserver l&#x27;existant, utilise <code>&gt;&gt;</code>.</p></div>
+<h2>4. Les pipes</h2>
+<p>Le <b>pipe</b> <code>|</code> envoie la sortie d&#x27;une commande vers l&#x27;entrée de la suivante : <code>cmd1 | cmd2</code>.</p>
+<pre>
+who | wc -l                         # nombre d&#x27;utilisateurs connectés
+grep banane liste.txt | wc -l       # combien de lignes avec « banane »
+sort liste.txt | head -3            # les 3 premières après tri
+</pre>
+<h2>5. Trier et extraire</h2>
+<table><tr><th>Commande</th><th>Effet</th></tr><tr><td><code>sort</code></td><td>tri alphabétique (<code>-r</code> inverse, <code>-n</code> numérique, <code>-u</code> supprime les doublons)</td></tr><tr><td><code>cut -d&#x27;;&#x27; -f1 f.csv</code></td><td>garde le champ n° 1, séparateur <code>;</code></td></tr><tr><td><code>cut -d&#x27;;&#x27; -f1,3 f.csv</code></td><td>champs 1 et 3</td></tr><tr><td><code>cut -d: -f1 /etc/passwd</code></td><td>exemple : les noms des comptes</td></tr></table>
+<h3>Exemple complet</h3>
+<pre>
+# noms des élèves, triés à l&#x27;envers, enregistrés dans un fichier
+cut -d&#x27;;&#x27; -f1 eleves.csv | sort -r &gt; res.txt
+wc -l res.txt      # vérifie le nombre de lignes
+cat res.txt        # contrôle visuel
+</pre>
+<details open><summary>Résumé express</summary>
+<ul><li>Lire : <code>cat</code>, <code>less</code>, <code>head</code>, <code>tail</code>, <code>wc</code>.</li><li>Filtrer : <code>grep</code> (<code>-i -v -n -c</code>).</li><li>Rediriger : <code>&gt;</code> écrase, <code>&gt;&gt;</code> ajoute, <code>&lt;</code> lit un fichier.</li><li>Chaîner : <code>cmd1 | cmd2</code>.</li><li>Trier/extraire : <code>sort</code> (<code>-r -n -u</code>), <code>cut -d&#x27;;&#x27; -f1</code>.</li></ul>
+</details>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle commande affiche les 10 dernières lignes d'un fichier ?",
+  "options": [
+   "head",
+   "tail",
+   "cat",
+   "less"
+  ],
+  "answer": 1,
+  "explication": "`tail`. `head` donne le début."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que compte `wc -l fichier` ?",
+  "options": [
+   "Les mots",
+   "Les lignes",
+   "Les caractères",
+   "Les fichiers"
+  ],
+  "answer": 1,
+  "explication": "`-l` : lines."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Comment quitter `less` ?",
+  "options": [
+   "Ctrl+X",
+   "q",
+   "Échap",
+   "Entrée"
+  ],
+  "answer": 1,
+  "explication": "`q` quitte `less`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que fait `grep -v erreur journal.txt` ?",
+  "options": [
+   "Les lignes contenant erreur",
+   "Les lignes qui ne contiennent pas erreur",
+   "Compte les erreurs",
+   "Supprime les erreurs"
+  ],
+  "answer": 1,
+  "explication": "`-v` inverse la sélection."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle option de `grep` ignore la casse ?",
+  "options": [
+   "-c",
+   "-i",
+   "-n",
+   "-v"
+  ],
+  "answer": 1,
+  "explication": "`-i` : insensitive."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle option de `grep` affiche le numéro de chaque ligne trouvée ?",
+  "options": [
+   "-n",
+   "-c",
+   "-l",
+   "-i"
+  ],
+  "answer": 0,
+  "explication": "`-n` : numéros de ligne."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle option de `grep` compte les lignes trouvées ?",
+  "options": [
+   "-n",
+   "-c",
+   "-v",
+   "-w"
+  ],
+  "answer": 1,
+  "explication": "`-c` : count."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle redirection **ajoute** à la fin d'un fichier ?",
+  "options": [
+   ">",
+   ">>",
+   "<",
+   "|"
+  ],
+  "answer": 1,
+  "explication": "`>>` ajoute ; `>` écrase."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que fait `echo salut > f.txt` si `f.txt` existe déjà ?",
+  "options": [
+   "Ajoute salut à la fin",
+   "Remplace tout le contenu",
+   "Refuse de s'exécuter",
+   "Crée f.txt2"
+  ],
+  "answer": 1,
+  "explication": "`>` écrase."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "À quoi sert le caractère `|` ?",
+  "options": [
+   "Envoyer la sortie d'une commande vers l'entrée d'une autre",
+   "Écrire dans un fichier",
+   "Lancer une commande en arrière-plan",
+   "Séparer deux commandes sans lien"
+  ],
+  "answer": 0,
+  "explication": "C'est le pipe."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que fait `who | wc -l` ?",
+  "options": [
+   "Liste les utilisateurs",
+   "Compte les utilisateurs connectés",
+   "Supprime les utilisateurs",
+   "Trie les utilisateurs"
+  ],
+  "answer": 1,
+  "explication": "`who` liste, `wc -l` compte les lignes."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle commande trie à l'envers ?",
+  "options": [
+   "sort -r",
+   "sort -n",
+   "sort -u",
+   "sort -i"
+  ],
+  "answer": 0,
+  "explication": "`-r` : reverse."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle option de `sort` supprime les doublons ?",
+  "options": [
+   "-d",
+   "-u",
+   "-r",
+   "-x"
+  ],
+  "answer": 1,
+  "explication": "`-u` : unique."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quelle commande extrait le champ n° 1 de `f.csv` (séparateur `;`) ?",
+  "answers": [
+   "cut -d';' -f1 f.csv",
+   "cut -d; -f1 f.csv",
+   "cut -f1 -d';' f.csv",
+   "cut -d\";\" -f1 f.csv"
+  ],
+  "explication": "`cut -d';' -f1 f.csv`."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quelle commande ajoute la ligne `fin` à `notes.txt` sans effacer l'existant ?",
+  "answers": [
+   "echo fin >> notes.txt"
+  ],
+  "explication": "`>>` ajoute."
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "`cat f1 f2 > f0` crée dans `f0` la concaténation de `f1` et `f2`.",
+  "answer": true,
+  "explication": "Les deux contenus sont écrits l'un après l'autre dans `f0`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que fait `sort < f > g` ?",
+  "options": [
+   "Trie f et écrit le résultat dans g",
+   "Copie g dans f",
+   "Trie g et affiche",
+   "Supprime f"
+  ],
+  "answer": 0,
+  "explication": "Entrée depuis `f`, sortie dans `g`."
+ },
+ {
+  "type": "terminal",
+  "niveau": "facile",
+  "q": "Affiche les 2 premières lignes de `docs/liste.txt`.",
+  "checks": [
+   {
+    "cmd": "^head\\s+(-n\\s*2|-2)\\s+docs/liste\\.txt"
+   },
+   {
+    "out": "^pomme\\nbanane\\n$"
+   }
+  ],
+  "solution": "head -2 docs/liste.txt",
+  "explication": "",
+  "fs": {
+   "/home/etu/notes.txt": "Linux est sensible à la casse\nle shell interprète les commandes\nTab complète les noms\nLinux est libre\n",
+   "/home/etu/.bashrc": "# configuration du shell\n",
+   "/home/etu/docs/": null,
+   "/home/etu/docs/liste.txt": "pomme\nbanane\ncerise\nbanane\nabricot\n",
+   "/home/etu/docs/eleves.csv": "Durand;Alice;17\nMartin;Bob;18\nLeroy;Chloé;17\nBernard;David;19\n",
+   "/home/etu/docs/rapport.csv": "x;1\ny;2\n",
+   "/tmp/": null
+  }
+ },
+ {
+  "type": "terminal",
+  "niveau": "facile",
+  "q": "Compte les lignes de `docs/liste.txt` qui contiennent `banane`.",
+  "checks": [
+   {
+    "cmd": "^grep\\s+-c"
+   },
+   {
+    "out": "^2$"
+   }
+  ],
+  "solution": "grep -c banane docs/liste.txt",
+  "explication": "",
+  "fs": {
+   "/home/etu/notes.txt": "Linux est sensible à la casse\nle shell interprète les commandes\nTab complète les noms\nLinux est libre\n",
+   "/home/etu/.bashrc": "# configuration du shell\n",
+   "/home/etu/docs/": null,
+   "/home/etu/docs/liste.txt": "pomme\nbanane\ncerise\nbanane\nabricot\n",
+   "/home/etu/docs/eleves.csv": "Durand;Alice;17\nMartin;Bob;18\nLeroy;Chloé;17\nBernard;David;19\n",
+   "/home/etu/docs/rapport.csv": "x;1\ny;2\n",
+   "/tmp/": null
+  }
+ },
+ {
+  "type": "terminal",
+  "niveau": "moyen",
+  "q": "Affiche les lignes de `notes.txt` qui **ne contiennent pas** `Linux`.",
+  "checks": [
+   {
+    "cmd": "^grep\\s+-v"
+   },
+   {
+    "out": "^le shell interprète les commandes\\nTab complète les noms\\n$"
+   }
+  ],
+  "solution": "grep -v Linux notes.txt",
+  "explication": "",
+  "fs": {
+   "/home/etu/notes.txt": "Linux est sensible à la casse\nle shell interprète les commandes\nTab complète les noms\nLinux est libre\n",
+   "/home/etu/.bashrc": "# configuration du shell\n",
+   "/home/etu/docs/": null,
+   "/home/etu/docs/liste.txt": "pomme\nbanane\ncerise\nbanane\nabricot\n",
+   "/home/etu/docs/eleves.csv": "Durand;Alice;17\nMartin;Bob;18\nLeroy;Chloé;17\nBernard;David;19\n",
+   "/home/etu/docs/rapport.csv": "x;1\ny;2\n",
+   "/tmp/": null
+  }
+ },
+ {
+  "type": "terminal",
+  "niveau": "moyen",
+  "q": "Ajoute la ligne `fin` à la fin de `notes.txt` (sans effacer le reste).",
+  "checks": [
+   {
+    "contains": [
+     "/home/etu/notes.txt",
+     "Linux est libre\nfin"
+    ]
+   },
+   {
+    "contains": [
+     "/home/etu/notes.txt",
+     "Tab complète"
+    ]
+   }
+  ],
+  "solution": "echo fin >> notes.txt",
+  "explication": "",
+  "fs": {
+   "/home/etu/notes.txt": "Linux est sensible à la casse\nle shell interprète les commandes\nTab complète les noms\nLinux est libre\n",
+   "/home/etu/.bashrc": "# configuration du shell\n",
+   "/home/etu/docs/": null,
+   "/home/etu/docs/liste.txt": "pomme\nbanane\ncerise\nbanane\nabricot\n",
+   "/home/etu/docs/eleves.csv": "Durand;Alice;17\nMartin;Bob;18\nLeroy;Chloé;17\nBernard;David;19\n",
+   "/home/etu/docs/rapport.csv": "x;1\ny;2\n",
+   "/tmp/": null
+  }
+ },
+ {
+  "type": "terminal",
+  "niveau": "moyen",
+  "q": "Trie `docs/liste.txt` sans doublons et enregistre le résultat dans `docs/tri.txt`.",
+  "checks": [
+   {
+    "equals": [
+     "/home/etu/docs/tri.txt",
+     "abricot\nbanane\ncerise\npomme\n"
+    ]
+   }
+  ],
+  "solution": "sort -u docs/liste.txt > docs/tri.txt",
+  "explication": "",
+  "fs": {
+   "/home/etu/notes.txt": "Linux est sensible à la casse\nle shell interprète les commandes\nTab complète les noms\nLinux est libre\n",
+   "/home/etu/.bashrc": "# configuration du shell\n",
+   "/home/etu/docs/": null,
+   "/home/etu/docs/liste.txt": "pomme\nbanane\ncerise\nbanane\nabricot\n",
+   "/home/etu/docs/eleves.csv": "Durand;Alice;17\nMartin;Bob;18\nLeroy;Chloé;17\nBernard;David;19\n",
+   "/home/etu/docs/rapport.csv": "x;1\ny;2\n",
+   "/tmp/": null
+  }
+ },
+ {
+  "type": "terminal",
+  "niveau": "difficile",
+  "q": "Extrais les **noms** (1ᵉʳ champ, séparateur `;`) de `docs/eleves.csv`, triés à l'envers, dans `noms.txt`.",
+  "checks": [
+   {
+    "equals": [
+     "/home/etu/noms.txt",
+     "Martin\nLeroy\nDurand\nBernard\n"
+    ]
+   }
+  ],
+  "solution": "cut -d';' -f1 docs/eleves.csv | sort -r > noms.txt",
+  "explication": "",
+  "indice": "cut puis un pipe vers sort -r puis >",
+  "fs": {
+   "/home/etu/notes.txt": "Linux est sensible à la casse\nle shell interprète les commandes\nTab complète les noms\nLinux est libre\n",
+   "/home/etu/.bashrc": "# configuration du shell\n",
+   "/home/etu/docs/": null,
+   "/home/etu/docs/liste.txt": "pomme\nbanane\ncerise\nbanane\nabricot\n",
+   "/home/etu/docs/eleves.csv": "Durand;Alice;17\nMartin;Bob;18\nLeroy;Chloé;17\nBernard;David;19\n",
+   "/home/etu/docs/rapport.csv": "x;1\ny;2\n",
+   "/tmp/": null
+  }
+ },
+ {
+  "type": "terminal",
+  "niveau": "difficile",
+  "q": "Affiche seulement les **prénoms** (2ᵉ champ) des élèves de 17 ans de `docs/eleves.csv`.",
+  "checks": [
+   {
+    "cmd": "grep.*\\|.*cut"
+   },
+   {
+    "out": "^Alice\\nChloé\\n$"
+   }
+  ],
+  "solution": "grep ';17' docs/eleves.csv | cut -d';' -f2",
+  "explication": "",
+  "indice": "grep filtre les lignes, cut garde le champ",
+  "fs": {
+   "/home/etu/notes.txt": "Linux est sensible à la casse\nle shell interprète les commandes\nTab complète les noms\nLinux est libre\n",
+   "/home/etu/.bashrc": "# configuration du shell\n",
+   "/home/etu/docs/": null,
+   "/home/etu/docs/liste.txt": "pomme\nbanane\ncerise\nbanane\nabricot\n",
+   "/home/etu/docs/eleves.csv": "Durand;Alice;17\nMartin;Bob;18\nLeroy;Chloé;17\nBernard;David;19\n",
+   "/home/etu/docs/rapport.csv": "x;1\ny;2\n",
+   "/tmp/": null
+  }
+ },
+ {
+  "type": "associer",
+  "niveau": "moyen",
+  "q": "Associe chaque symbole à son effet.",
+  "paires": [
+   [
+    ">",
+    "écrit dans un fichier (écrase)"
+   ],
+   [
+    ">>",
+    "ajoute à la fin d'un fichier"
+   ],
+   [
+    "<",
+    "lit l'entrée depuis un fichier"
+   ],
+   [
+    "|",
+    "relie deux commandes"
+   ]
+  ],
+  "explication": "Redirections et pipe."
+ },
+ {
+  "type": "associer",
+  "niveau": "moyen",
+  "q": "Associe chaque commande à son rôle.",
+  "paires": [
+   [
+    "head",
+    "début d'un fichier"
+   ],
+   [
+    "tail",
+    "fin d'un fichier"
+   ],
+   [
+    "wc -l",
+    "compter les lignes"
+   ],
+   [
+    "grep",
+    "chercher un motif"
+   ]
+  ],
+  "explication": "Lecture et filtrage."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Données : types et opérations — Étude Facile</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="algo" data-chapter="types-operations">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+
+  <p>En algorithmique, on manipule des <span class="tip" data-tip="Une information : nombre, texte, vrai/faux, liste…">données</span>.
+  Chaque donnée a un <b>type</b> qui décide de ce qu'on peut faire avec elle.</p>
+
+  <h2>1. Les types de données</h2>
+  <table>
+    <tr><th>Type</th><th>Nom Python</th><th>Exemples</th></tr>
+    <tr><td>Booléen</td><td><code>bool</code></td><td><code>True</code>, <code>False</code></td></tr>
+    <tr><td>Entier</td><td><code>int</code></td><td><code>-3</code>, <code>0</code>, <code>42</code></td></tr>
+    <tr><td>Réel</td><td><code>float</code></td><td><code>5.37</code>, <code>15.0</code>, <code>-14.001</code></td></tr>
+    <tr><td>Chaîne de caractères</td><td><code>str</code></td><td><code>'Bonjour'</code>, <code>'41n5K6'</code></td></tr>
+    <tr><td>Liste (tableau)</td><td><code>list</code></td><td><code>['az',2,True,[2,4,5]]</code></td></tr>
+  </table>
+
+  <h3>Connaître le type : <code>type(x)</code></h3>
+  <div class="codebox-src">
+<pre data-repl>
+>>> type(7.34)
+&lt;class 'float'&gt;
+>>> type('43')
+&lt;class 'str'&gt;
+</pre></div>
+
+  <div class="box attention">
+    <b>Attention aux pièges</b>
+    <ul>
+      <li><code>43</code> est un entier, mais <code>43.0</code> est un réel et <code>'43'</code> est une chaîne.</li>
+      <li><code>[43]</code> est une liste (à un seul élément). <code>[]</code> est la liste vide, <code>''</code> la chaîne vide.</li>
+      <li>Une liste peut contenir d'autres listes : <code>[[1],[2,3]]</code>.</li>
+    </ul>
+  </div>
+
+  <h2>2. Opérations sur les nombres</h2>
+<pre data-repl>
+>>> 2*3
+6
+>>> 2**3
+8
+>>> 25/4
+6.25
+>>> 25//4
+6
+>>> 25%4
+1
+</pre>
+  <table>
+    <tr><th>Opération</th><th>Python</th></tr>
+    <tr><td>Addition, soustraction</td><td><code>a+b</code>, <code>a-b</code></td></tr>
+    <tr><td>Multiplication</td><td><code>a*b</code></td></tr>
+    <tr><td>Puissance (a<sup>b</sup>)</td><td><code>a**b</code></td></tr>
+    <tr><td>Division décimale</td><td><code>a/b</code></td></tr>
+    <tr><td>Quotient de la <span class="tip" data-tip="La division « à l'école primaire » : 25 = 4 × 6 + 1 → quotient 6, reste 1.">division euclidienne</span></td><td><code>a//b</code></td></tr>
+    <tr><td>Reste de la division euclidienne</td><td><code>a%b</code></td></tr>
+  </table>
+  <div class="box retenir">
+    <b>À retenir</b>
+    <p><code>25//4</code> donne le quotient (<code>6</code>), <code>25%4</code> donne le reste (<code>1</code>), et <code>25/4</code> donne le résultat décimal (<code>6.25</code>).</p>
+  </div>
+
+  <h2>3. Comparer des nombres</h2>
+  <p>Une comparaison renvoie toujours un <b>booléen</b> : <code>True</code> ou <code>False</code>.</p>
+<pre data-repl>
+>>> 4 == 4
+True
+>>> 3 == 7
+False
+>>> 2 != 3
+True
+>>> 2 &lt;= 5
+True
+>>> 2 &gt;= 5
+False
+</pre>
+  <table>
+    <tr><th>Signification</th><th>Python</th></tr>
+    <tr><td>égal à</td><td><code>==</code></td></tr>
+    <tr><td>différent de</td><td><code>!=</code></td></tr>
+    <tr><td>strictement inférieur / supérieur</td><td><code>&lt;</code> / <code>&gt;</code></td></tr>
+    <tr><td>inférieur ou égal / supérieur ou égal</td><td><code>&lt;=</code> / <code>&gt;=</code></td></tr>
+  </table>
+  <div class="box attention">
+    <b><code>=</code> n'est pas <code>==</code></b>
+    <p><code>=</code> sert à <i>donner une valeur</i> à une variable. <code>==</code> sert à <i>tester</i> l'égalité de deux valeurs.</p>
+  </div>
+
+  <h2>4. Opérations sur les booléens</h2>
+<pre data-repl>
+>>> not(2 == 3)
+True
+>>> 2 &lt; 3 and 3 &lt; 2
+False
+>>> 2 &lt; 3 or 3 &lt; 2
+True
+</pre>
+  <table>
+    <tr><th>Logique</th><th>Python</th><th>Vrai quand…</th></tr>
+    <tr><td>non A</td><td><code>not(A)</code></td><td>A est faux</td></tr>
+    <tr><td>A et B</td><td><code>A and B</code></td><td>A et B sont tous les deux vrais</td></tr>
+    <tr><td>A ou B</td><td><code>A or B</code></td><td>au moins l'un des deux est vrai</td></tr>
+    <tr><td>A ⇒ B</td><td><code>A &lt;= B</code></td><td>sauf si A vrai et B faux</td></tr>
+    <tr><td>A ⇔ B</td><td><code>A == B</code></td><td>A et B ont la même valeur</td></tr>
+  </table>
+
+  <details>
+    <summary>Exemples avec l'implication et l'équivalence</summary>
+<pre data-repl>
+>>> (2 &lt; 3) &lt;= (1 &lt; 2)
+True
+>>> (5 &lt; 3) == (5 == 7)
+True
+</pre>
+    <p>Dans le second cas, <code>5 &lt; 3</code> est faux et <code>5 == 7</code> est faux aussi : les deux ont la même valeur, donc l'équivalence est vraie.</p>
+  </details>
+
+  <h2>5. Opérations sur les chaînes de caractères</h2>
+  <p>Une chaîne se place entre guillemets simples ou doubles : <code>'bonjour'</code> ou <code>"bonjour"</code>.</p>
+
+  <h3>Concaténation, longueur, répétition</h3>
+<pre data-repl>
+>>> '11'+'32'
+'1132'
+>>> len('bonjour')
+7
+>>> 3*'bonjour'+'23'
+'bonjourbonjourbonjour23'
+</pre>
+
+  <h3>Accéder aux caractères</h3>
+  <p>Les caractères sont numérotés <b>à partir de 0</b> (l'<span class="tip" data-tip="La position d'un élément. Le premier est à l'indice 0.">indice</span>).</p>
+  <table>
+    <tr><th>Caractère</th><td>b</td><td>o</td><td>n</td><td>j</td><td>o</td><td>u</td><td>r</td></tr>
+    <tr><th>Indice</th><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td></tr>
+  </table>
+<pre data-repl>
+>>> 'bonjour'[0]
+'b'
+>>> 'bonjour'[2:4]
+'nj'
+>>> 'bonjour'[0:4]
+'bonj'
+</pre>
+  <div class="box retenir">
+    <b>À retenir</b>
+    <p><code>ch[i:j]</code> prend les caractères des indices <b>i inclus</b> jusqu'à <b>j exclu</b>.</p>
+  </div>
+
+  <h2>6. Opérations sur les listes</h2>
+  <p>Une liste stocke plusieurs données. Comme pour les chaînes, les éléments sont numérotés à partir de 0.</p>
+<pre data-repl>
+>>> [1,3,5,7][0]
+1
+>>> [1,3,5,7,9][1:4]
+[3, 5, 7]
+>>> [1,[3,5],7,9][1]
+[3, 5]
+>>> [1,[3,5],7,9][1][0]
+3
+</pre>
+
+  <h3>Ajouter un élément : <code>append</code></h3>
+<pre data-repl>
+>>> L = [1,3,5]
+>>> L.append(7)
+>>> L
+[1, 3, 5, 7]
+</pre>
+  <p>L'élément est ajouté à la <b>fin</b> de la liste.</p>
+
+  <h2>7. Convertir des données</h2>
+  <table>
+    <tr><th>Fonction</th><th>Effet</th></tr>
+    <tr><td><code>str(x)</code></td><td>transforme x en chaîne de caractères</td></tr>
+    <tr><td><code>int(ch)</code></td><td>transforme la chaîne en entier (si possible)</td></tr>
+    <tr><td><code>float(ch)</code></td><td>transforme la chaîne en réel (si possible)</td></tr>
+  </table>
+<pre data-repl>
+>>> str(15)
+'15'
+>>> str(True)
+'True'
+>>> int('53')
+53
+>>> float('68.2')
+68.2
+</pre>
+
+  <h2>Résumé express</h2>
+  <details open>
+    <summary>Les 6 points à connaître par cœur</summary>
+    <ul>
+      <li>5 types : <code>bool</code>, <code>int</code>, <code>float</code>, <code>str</code>, <code>list</code>.</li>
+      <li><code>//</code> = quotient, <code>%</code> = reste, <code>**</code> = puissance.</li>
+      <li>Une comparaison donne un booléen ; <code>==</code> teste, <code>=</code> affecte.</li>
+      <li><code>not</code>, <code>and</code>, <code>or</code> combinent des booléens.</li>
+      <li>Indices à partir de 0 ; <code>[i:j]</code> exclut j.</li>
+      <li><code>str()</code>, <code>int()</code>, <code>float()</code> convertissent.</li>
+    </ul>
+  </details>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+  /* --- Types --- */
+  { type: "qcm", niveau: "facile", q: "Quel est le type de la donnée `43.0` ?",
+    options: ["int", "float", "str", "bool"], answer: 1,
+    explication: "Dès qu'il y a une virgule (un point en Python), c'est un réel : `float`." },
+  { type: "qcm", niveau: "facile", q: "Quel est le type de `'43'` ?",
+    options: ["int", "float", "str", "list"], answer: 2,
+    explication: "Entre guillemets, c'est du texte : une chaîne de caractères (`str`)." },
+  { type: "vf", niveau: "facile", q: "La chaîne vide `''` est de type `list`.", answer: false,
+    explication: "`''` est une chaîne vide (`str`). La liste vide s'écrit `[]`." },
+  { type: "qcm", niveau: "facile", q: "Quel est le type de `[43]` ?",
+    options: ["int", "list", "str", "float"], answer: 1,
+    explication: "Les crochets font une liste, même avec un seul élément." },
+  { type: "associer", niveau: "facile", q: "Associe chaque donnée à son type.",
+    paires: [["12", "int"], ["12.0", "float"], ["'Python'", "str"], ["True", "bool"], ["[2,5,8]", "list"]],
+    explication: "`12` entier, `12.0` réel, `'Python'` chaîne, `True` booléen, `[2,5,8]` liste." },
+
+  /* --- Nombres --- */
+  { type: "associer", niveau: "facile", q: "Associe chaque opération à son symbole Python.",
+    paires: [["Puissance", "**"], ["Quotient euclidien", "//"], ["Reste euclidien", "%"], ["Division décimale", "/"]],
+    explication: "`**` puissance, `//` quotient, `%` reste, `/` division décimale." },
+  { type: "saisie", niveau: "facile", q: "Que renvoie Python pour ceci ?", code: ">>> 2**5", answers: ["32"],
+    explication: "2⁵ = 32." },
+  { type: "saisie", niveau: "facile", q: "Que renvoie Python pour ceci ?", code: ">>> 17//4", answers: ["4"],
+    explication: "17 = 4 × 4 + 1 : le quotient est 4." },
+  { type: "saisie", niveau: "facile", q: "Que renvoie Python pour ceci ?", code: ">>> 17%4", answers: ["1"],
+    explication: "17 = 4 × 4 + 1 : le reste est 1." },
+  { type: "saisie", niveau: "facile", q: "Que renvoie Python pour ceci ?", code: ">>> 17/4", answers: ["4.25"],
+    explication: "`/` donne la division décimale." },
+  { type: "saisie", niveau: "moyen", q: "Que renvoie Python pour ceci ?", code: ">>> 50//6", answers: ["8"],
+    explication: "50 = 6 × 8 + 2 : quotient 8." },
+  { type: "saisie", niveau: "moyen", q: "Que renvoie Python pour ceci ?", code: ">>> 50%6", answers: ["2"],
+    explication: "50 = 6 × 8 + 2 : reste 2." },
+  { type: "saisie", niveau: "moyen", q: "Que renvoie Python pour ceci ?", code: ">>> 2+3*4", answers: ["14"],
+    explication: "La multiplication est prioritaire : 3×4 = 12, puis 2+12 = 14." },
+  { type: "saisie", niveau: "moyen", q: "Que renvoie Python pour ceci ?", code: ">>> 3**4", answers: ["81"],
+    explication: "3⁴ = 3×3×3×3 = 81." },
+
+  /* --- Comparaisons --- */
+  { type: "qcm", niveau: "facile", q: "Quel opérateur teste l'égalité de deux valeurs ?",
+    options: ["=", "==", "!=", "<="], answer: 1,
+    explication: "`==` teste l'égalité ; `=` donne une valeur à une variable." },
+  { type: "vf", niveau: "facile", q: "`7 != 7` renvoie `True`.", answer: false,
+    explication: "7 est égal à 7, donc « 7 différent de 7 » est faux." },
+  { type: "saisie", niveau: "facile", q: "Que renvoie Python ?", code: ">>> 4 <= 4", answers: ["True"],
+    explication: "4 est inférieur ou égal à 4 : vrai." },
+  { type: "saisie", niveau: "facile", q: "Que renvoie Python ?", code: ">>> 10 >= 13", answers: ["False"],
+    explication: "10 n'est pas supérieur ou égal à 13." },
+
+  /* --- Booléens --- */
+  { type: "saisie", niveau: "moyen", q: "Que renvoie Python ?", code: ">>> not(5 < 3)", answers: ["True"],
+    explication: "`5 < 3` est faux, donc `not(...)` donne vrai." },
+  { type: "saisie", niveau: "moyen", q: "Que renvoie Python ?", code: ">>> 4 < 8 and 7 < 2", answers: ["False"],
+    explication: "`and` exige que les deux soient vrais, or `7 < 2` est faux." },
+  { type: "saisie", niveau: "moyen", q: "Que renvoie Python ?", code: ">>> 10 < 3 or 5 == 5", answers: ["True"],
+    explication: "`or` suffit d'un seul vrai : `5 == 5` est vrai." },
+  { type: "saisie", niveau: "difficile", q: "Avec `A = True` et `B = False`, que vaut `A <= B` ?", answers: ["False"],
+    explication: "`A <= B` correspond à « A ⇒ B » : vrai ⇒ faux est faux." },
+  { type: "saisie", niveau: "difficile", q: "Avec `A = True` et `B = False`, que vaut `A == B` ?", answers: ["False"],
+    explication: "A et B n'ont pas la même valeur, donc l'équivalence est fausse." },
+  { type: "saisie", niveau: "difficile", q: "Que renvoie Python ?", code: ">>> (8 < 4) == (6 > 10)", answers: ["True"],
+    explication: "Les deux comparaisons sont fausses : même valeur, donc `==` donne vrai." },
+
+  /* --- Chaînes --- */
+  { type: "saisie", niveau: "facile", q: "Que renvoie Python ?", code: ">>> 'bon'+'jour'", answers: ["'bonjour'", "bonjour"],
+    explication: "`+` concatène (met bout à bout) deux chaînes." },
+  { type: "saisie", niveau: "moyen", q: "Que renvoie Python ?", code: ">>> '10'+'5'", answers: ["'105'", "105"],
+    explication: "Ce sont des chaînes : on les colle, on n'additionne pas. Résultat `'105'`." },
+  { type: "saisie", niveau: "facile", q: "Que renvoie Python ?", code: ">>> 3*'A'", answers: ["'AAA'", "AAA"],
+    explication: "`*` répète la chaîne." },
+  { type: "saisie", niveau: "facile", q: "Que renvoie Python ?", code: ">>> len('bonjour')", answers: ["7"],
+    explication: "`len` compte les caractères : b-o-n-j-o-u-r = 7." },
+  { type: "vf", niveau: "facile", q: "`'bonjour'[0]` renvoie `'b'`.", answer: true,
+    explication: "La numérotation commence à 0, donc l'indice 0 est le premier caractère." },
+  { type: "saisie", niveau: "moyen", q: "Que renvoie Python ?", code: ">>> 'bonjour'[2:4]", answers: ["'nj'", "nj"],
+    explication: "Indices 2 et 3 (le 4 est exclu) : `n` et `j`." },
+  { type: "qcm", niveau: "moyen", q: "Quels caractères sélectionne `ch[2:5]` ?",
+    options: ["Indices 2 à 5 inclus", "Indices 2, 3 et 4", "Indices 3, 4 et 5", "Indices 2 et 5 seulement"], answer: 1,
+    explication: "`ch[i:j]` va de i inclus à j exclu : 2, 3 et 4." },
+  { type: "saisie", niveau: "difficile", q: "Que renvoie Python ?", code: ">>> 4*('11'+'5')+'AA'", answers: ["'115115115115AA'", "115115115115AA"],
+    explication: "`'11'+'5'` = `'115'`, répété 4 fois, puis on colle `'AA'`." },
+
+  /* --- Listes --- */
+  { type: "saisie", niveau: "moyen", q: "Que renvoie Python ?", code: ">>> [1,3,5,7,9][1:4]", answers: ["[3,5,7]"],
+    explication: "Indices 1, 2, 3 : les valeurs 3, 5 et 7." },
+  { type: "saisie", niveau: "difficile", q: "Que renvoie Python ?", code: ">>> [1,[3,5],7,9][1][0]", answers: ["3"],
+    explication: "`[1]` donne la sous-liste `[3,5]`, puis `[0]` prend son premier élément : 3." },
+  { type: "qcm", niveau: "facile", q: "Après `L = [1,3,5]` puis `L.append(7)`, que vaut `L` ?",
+    options: ["[7,1,3,5]", "[1,3,5,7]", "[1,3,5]", "[8,3,5]"], answer: 1,
+    explication: "`append` ajoute l'élément à la fin de la liste." },
+
+  /* --- Conversions --- */
+  { type: "saisie", niveau: "facile", q: "Que renvoie Python ?", code: ">>> str(56.8)", answers: ["'56.8'", "56.8"],
+    explication: "`str` transforme le réel en chaîne : `'56.8'`." },
+  { type: "saisie", niveau: "moyen", q: "Que renvoie Python ?", code: ">>> int('53')+1", answers: ["54"],
+    explication: "`int('53')` donne l'entier 53, puis 53+1 = 54." },
+  { type: "saisie", niveau: "moyen", q: "Que renvoie Python ?", code: ">>> str(15)+str(5)", answers: ["'155'", "155"],
+    explication: "On convertit en chaînes `'15'` et `'5'`, puis on concatène : `'155'`." }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

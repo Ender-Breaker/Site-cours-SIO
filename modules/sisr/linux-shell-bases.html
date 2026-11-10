@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Linux : le shell et l&#x27;arborescence — Étude Facile</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="sisr" data-chapter="linux-shell-bases">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<p>Un serveur Linux n&#x27;a souvent <b>pas d&#x27;interface graphique</b> : on le pilote en ligne de commande, dans un <b>terminal</b>. Ce chapitre pose les bases : l&#x27;invite, l&#x27;aide, l&#x27;arborescence et la manipulation de fichiers.</p>
+<div class="box retenir"><b>Essaie tout de suite</b><p>Le terminal ci-dessous est <b>simulé</b> : il fonctionne vraiment (fichiers, dossiers, droits…) mais ne touche à rien de réel. Tape <code>ls</code>, <code>pwd</code>, <code>cat notes.txt</code>… <b>Tab</b> complète les noms, <b>↑</b> rappelle l&#x27;historique.</p></div>
+<div data-terminal></div>
+<h2>1. Le système Unix en 30 secondes</h2>
+<ul><li>Le <b>noyau</b> gère la mémoire, les fichiers et les programmes. Le <b>shell</b> est l&#x27;interface entre toi et le noyau : il interprète ce que tu tapes.</li><li><b>Tout est fichier ou processus</b> : un dossier est un fichier spécial, un processus est un programme en cours (identifié par un PID).</li><li>L&#x27;arborescence est un arbre inversé dont la racine est <code>/</code>.</li><li>Unix est <b>sensible à la casse</b> : <code>fichier.txt</code>, <code>Fichier.txt</code> et <code>FICHIER.TXT</code> sont trois fichiers différents.</li><li>Rien n&#x27;est exécuté avant d&#x27;avoir appuyé sur <b>Entrée</b>.</li></ul>
+<h2>2. L&#x27;invite de commande</h2>
+<pre>
+etu@lab:~/docs$ 
+</pre>
+<table><tr><th>Partie</th><th>Signification</th></tr><tr><td><code>etu</code></td><td>nom de l&#x27;utilisateur (commande <code>whoami</code>)</td></tr><tr><td><code>lab</code></td><td>nom de l&#x27;hôte, c&#x27;est-à-dire de l&#x27;ordinateur (commande <code>hostname</code>)</td></tr><tr><td><code>~/docs</code></td><td>répertoire courant (commande <code>pwd</code> pour le chemin absolu)</td></tr><tr><td><code>$</code> ou <code>#</code></td><td><code>$</code> = utilisateur normal ; <code>#</code> = <b>super-utilisateur</b> (root)</td></tr></table>
+<p>Le symbole <code>~</code> désigne le <b>dossier personnel</b> de l&#x27;utilisateur (son « home »).</p>
+<h2>3. Chercher de l&#x27;aide</h2>
+<table><tr><th>Commande</th><th>Rôle</th></tr><tr><td><code>man cmd</code></td><td>manuel complet d&#x27;une commande (<code>q</code> pour quitter)</td></tr><tr><td><code>whatis cmd</code></td><td>description en une ligne</td></tr><tr><td><code>apropos mot</code></td><td>liste les commandes dont le manuel parle de ce mot (<code>apropos copier</code>)</td></tr><tr><td><code>type cmd</code></td><td>dit si la commande est <b>interne</b> (intégrée au shell), <b>externe</b> (un programme) ou *hashed* (externe déjà mémorisée)</td></tr><tr><td><code>cmd --help</code> / <code>cmd --version</code></td><td>aide courte / version</td></tr></table>
+<details><summary>Quelle commande pour chercher un fichier ?</summary>
+<p><code>find</code> cherche un fichier dans une arborescence : <code>find /etc -name &quot;*.conf&quot;</code>. (<code>apropos fichier</code> t&#x27;aurait aussi mis sur la piste.)</p>
+</details>
+<h2>4. Se déplacer dans l&#x27;arborescence</h2>
+<table><tr><th>Commande</th><th>Effet</th></tr><tr><td><code>pwd</code></td><td>affiche le chemin <b>absolu</b> du dossier courant</td></tr><tr><td><code>ls</code></td><td>liste le dossier courant</td></tr><tr><td><code>ls -a</code></td><td>inclut les fichiers cachés (dont le nom commence par <code>.</code>)</td></tr><tr><td><code>ls -l</code></td><td>format long : droits, propriétaire, taille, date</td></tr><tr><td><code>cd dossier</code></td><td>entre dans le dossier</td></tr><tr><td><code>cd</code> ou <code>cd ~</code></td><td>retourne au dossier personnel</td></tr><tr><td><code>cd ..</code></td><td>monte d&#x27;un niveau (dossier parent)</td></tr><tr><td><code>cd .</code></td><td>reste ici (<code>.</code> = dossier courant)</td></tr></table>
+<h3>Chemin absolu et chemin relatif</h3>
+<ul><li><b>Absolu</b> : commence par <code>/</code> (ou <code>~</code>), marche depuis n&#x27;importe où : <code>ls /home/etu/docs</code>, <code>ls ~/docs</code>.</li><li><b>Relatif</b> : part du dossier courant : <code>ls docs/backups</code>, <code>ls ../autre</code>.</li></ul>
+<h2>5. Créer, copier, déplacer, supprimer</h2>
+<table><tr><th>Commande</th><th>Effet</th></tr><tr><td><code>mkdir nom</code></td><td>crée un dossier (<code>mkdir -p a/b/c</code> crée toute la chaîne)</td></tr><tr><td><code>touch f</code></td><td>crée un fichier vide</td></tr><tr><td><code>cp f1 f2</code></td><td>copie <code>f1</code> sous le nom <code>f2</code> ; <code>cp f dossier/</code> copie dedans ; <code>cp -r d1 d2</code> copie un <b>dossier</b> entier</td></tr><tr><td><code>mv f1 f2</code></td><td><b>renomme</b> ou <b>déplace</b> (<code>mv f dossier/</code>)</td></tr><tr><td><code>rm f</code></td><td>supprime un fichier (<b>sans corbeille !</b>)</td></tr><tr><td><code>rmdir d</code></td><td>supprime un dossier <b>vide</b> seulement</td></tr><tr><td><code>rm -r d</code></td><td>supprime un dossier et son contenu</td></tr><tr><td><code>clear</code></td><td>vide l&#x27;écran</td></tr></table>
+<div class="box attention"><b>Pas de corbeille</b><p><code>rm</code> est définitif. Relis ta commande avant d&#x27;appuyer sur Entrée, surtout avec <code>rm -r</code> ou un joker.</p></div>
+<h2>6. Les jokers</h2>
+<table><tr><th>Joker</th><th>Signification</th><th>Exemple</th></tr><tr><td><code>*</code></td><td>zéro ou plusieurs caractères</td><td><code>ls list*</code> ; <code>rm *.csv</code></td></tr><tr><td><code>?</code></td><td>exactement un caractère</td><td><code>ls ?ouse</code> → house, mouse</td></tr></table>
+<p>Côté noms de fichiers : évite <code>/ * &amp; %</code> et les <b>espaces</b> ; privilégie lettres, chiffres, <code>_</code> et <code>.</code>. L&#x27;extension (<code>.c</code>, <code>.txt</code>) indique le contenu par convention.</p>
+<h2>7. Gagner du temps</h2>
+<ul><li><b>Tab</b> complète un nom de commande, de fichier ou de dossier ; <b>Tab Tab</b> liste les choix.</li><li><b>↑ ↓</b> rappellent les commandes déjà tapées ; <code>history</code> les liste avec leur numéro.</li><li><code>!!</code> rappelle la dernière commande, <code>!5</code> la n° 5, <code>!-3</code> la 3ᵉ plus récente, <code>!grep</code> la dernière qui commençait par <code>grep</code>.</li><li><code>tree</code> donne une vue graphique de l&#x27;arborescence (à installer : <code>apt install tree</code>).</li></ul>
+<details open><summary>Résumé express</summary>
+<ul><li>Invite : <code>utilisateur@hôte:dossier$</code> (<code>#</code> = root). <code>whoami</code>, <code>hostname</code>, <code>pwd</code>.</li><li>Aide : <code>man</code>, <code>whatis</code>, <code>apropos</code>, <code>type</code>.</li><li>Navigation : <code>cd</code>, <code>cd ..</code>, <code>cd ~</code>, <code>ls -a -l</code> ; chemins absolus (<code>/</code>) et relatifs.</li><li>Fichiers : <code>mkdir -p</code>, <code>touch</code>, <code>cp -r</code>, <code>mv</code>, <code>rm -r</code>, jokers <code>*</code> et <code>?</code>.</li><li>Confort : Tab, flèches, <code>history</code>, <code>!!</code>.</li></ul>
+</details>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que signifie le symbole `~` dans l'invite ?",
+  "options": [
+   "Le dossier racine",
+   "Le dossier personnel de l'utilisateur",
+   "Le dossier parent",
+   "Un fichier caché"
+  ],
+  "answer": 1,
+  "explication": "`~` désigne le home de l'utilisateur."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel caractère de l'invite indique un super-utilisateur ?",
+  "options": [
+   "$",
+   "#",
+   "%",
+   ">"
+  ],
+  "answer": 1,
+  "explication": "`#` = root ; `$` = utilisateur normal."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle commande affiche le nom de l'utilisateur ?",
+  "options": [
+   "whoami",
+   "hostname",
+   "pwd",
+   "id -h"
+  ],
+  "answer": 0,
+  "explication": "`whoami` : qui suis-je ? `hostname` donne le nom de la machine."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle commande affiche le nom de l'ordinateur (hôte) ?",
+  "options": [
+   "whoami",
+   "hostname",
+   "who",
+   "pwd"
+  ],
+  "answer": 1,
+  "explication": "`hostname`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Unix est sensible à la casse. Combien de fichiers désignent `a.txt`, `A.txt` et `A.TXT` ?",
+  "options": [
+   "1",
+   "2",
+   "3",
+   "Impossible"
+  ],
+  "answer": 2,
+  "explication": "Trois fichiers distincts."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "Dans Unix, un dossier est un type de fichier particulier.",
+  "answer": true,
+  "explication": "Tout est fichier ou processus."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle commande trouve les commandes liées à un mot (`apropos`) ?",
+  "options": [
+   "man",
+   "whatis",
+   "apropos",
+   "type"
+  ],
+  "answer": 2,
+  "explication": "`apropos mot` cherche dans les descriptions des manuels."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "`type cut` répond « cut est /usr/bin/cut ». Cette commande est…",
+  "options": [
+   "interne",
+   "externe",
+   "un alias",
+   "inexistante"
+  ],
+  "answer": 1,
+  "explication": "Un chemin vers un programme = commande externe. Les commandes internes sont intégrées au shell (comme `cd`)."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle commande permet de chercher un fichier dans une arborescence ?",
+  "options": [
+   "find",
+   "cd",
+   "touch",
+   "mv"
+  ],
+  "answer": 0,
+  "explication": "`find`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle commande affiche le chemin absolu du dossier courant ?",
+  "options": [
+   "ls",
+   "pwd",
+   "cd .",
+   "path"
+  ],
+  "answer": 1,
+  "explication": "`pwd` = print working directory."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que fait `cd ..` ?",
+  "options": [
+   "Reste dans le dossier",
+   "Monte au dossier parent",
+   "Va à la racine",
+   "Va dans le home"
+  ],
+  "answer": 1,
+  "explication": "`..` désigne le parent."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que fait `cd` tout seul ?",
+  "options": [
+   "Rien",
+   "Retourne au dossier personnel",
+   "Va à la racine",
+   "Affiche le dossier courant"
+  ],
+  "answer": 1,
+  "explication": "Sans argument, `cd` ramène au home."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que montre `ls -a` en plus de `ls` ?",
+  "options": [
+   "Les droits",
+   "Les fichiers cachés",
+   "La taille",
+   "Les sous-dossiers"
+  ],
+  "answer": 1,
+  "explication": "Les fichiers dont le nom commence par `.`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Lequel est un chemin **absolu** ?",
+  "options": [
+   "docs/liste.txt",
+   "../docs",
+   "/home/etu/docs",
+   "./docs"
+  ],
+  "answer": 2,
+  "explication": "Un chemin absolu commence par `/`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle commande renomme `a.txt` en `b.txt` ?",
+  "options": [
+   "cp a.txt b.txt",
+   "mv a.txt b.txt",
+   "rename a.txt",
+   "rm a.txt b.txt"
+  ],
+  "answer": 1,
+  "explication": "`mv` déplace ou renomme."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle commande supprime un dossier **vide** uniquement ?",
+  "options": [
+   "rm",
+   "rmdir",
+   "rm -r",
+   "del"
+  ],
+  "answer": 1,
+  "explication": "`rmdir` refuse un dossier non vide."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Pour copier un **dossier** entier, il faut…",
+  "options": [
+   "cp dossier copie",
+   "cp -r dossier copie",
+   "mv -c dossier copie",
+   "copy dossier"
+  ],
+  "answer": 1,
+  "explication": "`-r` = récursif."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "`rm fichier.txt` place le fichier dans la corbeille.",
+  "answer": false,
+  "explication": "Il n'y a pas de corbeille en ligne de commande : la suppression est définitive."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que sélectionne `ls ?ouse` ?",
+  "options": [
+   "Tous les fichiers",
+   "house et mouse (un seul caractère devant)",
+   "Seulement ouse",
+   "Les fichiers cachés"
+  ],
+  "answer": 1,
+  "explication": "`?` remplace exactement un caractère."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que sélectionne `rm *.csv` ?",
+  "options": [
+   "Les fichiers dont le nom se termine par .csv",
+   "Tous les fichiers",
+   "Les fichiers nommés `*.csv` uniquement",
+   "Les dossiers"
+  ],
+  "answer": 0,
+  "explication": "`*` remplace zéro ou plusieurs caractères."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle commande crée `a/b/c` même si `a` et `b` n'existent pas ?",
+  "options": [
+   "mkdir a/b/c",
+   "mkdir -p a/b/c",
+   "mkdir -r a/b/c",
+   "touch a/b/c"
+  ],
+  "answer": 1,
+  "explication": "`-p` crée les parents."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quelle commande affiche la liste numérotée des commandes tapées ?",
+  "answers": [
+   "history"
+  ],
+  "explication": "`history`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que fait `!!` ?",
+  "options": [
+   "Efface l'historique",
+   "Rappelle la dernière commande",
+   "Quitte le terminal",
+   "Affiche l'aide"
+  ],
+  "answer": 1,
+  "explication": "`!!` ré-exécute la dernière commande."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle touche complète automatiquement un nom de fichier ?",
+  "options": [
+   "Échap",
+   "Tab",
+   "Ctrl+Z",
+   "Espace"
+  ],
+  "answer": 1,
+  "explication": "Tab (Tab Tab pour lister les choix)."
+ },
+ {
+  "type": "terminal",
+  "niveau": "facile",
+  "q": "Crée un dossier `projets` dans ton dossier personnel.",
+  "checks": [
+   {
+    "exists": "/home/etu/projets"
+   }
+  ],
+  "solution": "mkdir projets",
+  "explication": "",
+  "indice": "Commande : mkdir",
+  "fs": {
+   "/home/etu/notes.txt": "Linux est sensible à la casse\nle shell interprète les commandes\nTab complète les noms\nLinux est libre\n",
+   "/home/etu/.bashrc": "# configuration du shell\n",
+   "/home/etu/docs/": null,
+   "/home/etu/docs/liste.txt": "pomme\nbanane\ncerise\nbanane\nabricot\n",
+   "/home/etu/docs/eleves.csv": "Durand;Alice;17\nMartin;Bob;18\nLeroy;Chloé;17\nBernard;David;19\n",
+   "/home/etu/docs/rapport.csv": "x;1\ny;2\n",
+   "/tmp/": null
+  }
+ },
+ {
+  "type": "terminal",
+  "niveau": "facile",
+  "q": "Place-toi dans le dossier `docs`.",
+  "checks": [
+   {
+    "cwd": "/home/etu/docs"
+   }
+  ],
+  "solution": "cd docs",
+  "explication": "",
+  "fs": {
+   "/home/etu/notes.txt": "Linux est sensible à la casse\nle shell interprète les commandes\nTab complète les noms\nLinux est libre\n",
+   "/home/etu/.bashrc": "# configuration du shell\n",
+   "/home/etu/docs/": null,
+   "/home/etu/docs/liste.txt": "pomme\nbanane\ncerise\nbanane\nabricot\n",
+   "/home/etu/docs/eleves.csv": "Durand;Alice;17\nMartin;Bob;18\nLeroy;Chloé;17\nBernard;David;19\n",
+   "/home/etu/docs/rapport.csv": "x;1\ny;2\n",
+   "/tmp/": null
+  }
+ },
+ {
+  "type": "terminal",
+  "niveau": "facile",
+  "q": "Affiche le chemin absolu du dossier courant.",
+  "checks": [
+   {
+    "cmd": "^pwd$"
+   },
+   {
+    "out": "^/home/etu$"
+   }
+  ],
+  "solution": "pwd",
+  "explication": "",
+  "fs": {
+   "/home/etu/notes.txt": "Linux est sensible à la casse\nle shell interprète les commandes\nTab complète les noms\nLinux est libre\n",
+   "/home/etu/.bashrc": "# configuration du shell\n",
+   "/home/etu/docs/": null,
+   "/home/etu/docs/liste.txt": "pomme\nbanane\ncerise\nbanane\nabricot\n",
+   "/home/etu/docs/eleves.csv": "Durand;Alice;17\nMartin;Bob;18\nLeroy;Chloé;17\nBernard;David;19\n",
+   "/home/etu/docs/rapport.csv": "x;1\ny;2\n",
+   "/tmp/": null
+  }
+ },
+ {
+  "type": "terminal",
+  "niveau": "facile",
+  "q": "Affiche aussi les fichiers cachés du dossier courant.",
+  "checks": [
+   {
+    "cmd": "^ls\\s+-\\w*a"
+   },
+   {
+    "out": "\\.bashrc"
+   }
+  ],
+  "solution": "ls -a",
+  "explication": "",
+  "indice": "Option -a",
+  "fs": {
+   "/home/etu/notes.txt": "Linux est sensible à la casse\nle shell interprète les commandes\nTab complète les noms\nLinux est libre\n",
+   "/home/etu/.bashrc": "# configuration du shell\n",
+   "/home/etu/docs/": null,
+   "/home/etu/docs/liste.txt": "pomme\nbanane\ncerise\nbanane\nabricot\n",
+   "/home/etu/docs/eleves.csv": "Durand;Alice;17\nMartin;Bob;18\nLeroy;Chloé;17\nBernard;David;19\n",
+   "/home/etu/docs/rapport.csv": "x;1\ny;2\n",
+   "/tmp/": null
+  }
+ },
+ {
+  "type": "terminal",
+  "niveau": "moyen",
+  "q": "Crée en **une seule commande** l'arborescence `cours/trim1/maths`.",
+  "checks": [
+   {
+    "exists": "/home/etu/cours/trim1/maths"
+   }
+  ],
+  "solution": "mkdir -p cours/trim1/maths",
+  "explication": "",
+  "indice": "Pense à l'option -p",
+  "fs": {
+   "/home/etu/notes.txt": "Linux est sensible à la casse\nle shell interprète les commandes\nTab complète les noms\nLinux est libre\n",
+   "/home/etu/.bashrc": "# configuration du shell\n",
+   "/home/etu/docs/": null,
+   "/home/etu/docs/liste.txt": "pomme\nbanane\ncerise\nbanane\nabricot\n",
+   "/home/etu/docs/eleves.csv": "Durand;Alice;17\nMartin;Bob;18\nLeroy;Chloé;17\nBernard;David;19\n",
+   "/home/etu/docs/rapport.csv": "x;1\ny;2\n",
+   "/tmp/": null
+  }
+ },
+ {
+  "type": "terminal",
+  "niveau": "moyen",
+  "q": "Copie `notes.txt` sous le nom `sauvegarde.txt` (l'original doit rester).",
+  "checks": [
+   {
+    "exists": "/home/etu/sauvegarde.txt"
+   },
+   {
+    "exists": "/home/etu/notes.txt"
+   },
+   {
+    "contains": [
+     "/home/etu/sauvegarde.txt",
+     "Tab complète"
+    ]
+   }
+  ],
+  "solution": "cp notes.txt sauvegarde.txt",
+  "explication": "",
+  "fs": {
+   "/home/etu/notes.txt": "Linux est sensible à la casse\nle shell interprète les commandes\nTab complète les noms\nLinux est libre\n",
+   "/home/etu/.bashrc": "# configuration du shell\n",
+   "/home/etu/docs/": null,
+   "/home/etu/docs/liste.txt": "pomme\nbanane\ncerise\nbanane\nabricot\n",
+   "/home/etu/docs/eleves.csv": "Durand;Alice;17\nMartin;Bob;18\nLeroy;Chloé;17\nBernard;David;19\n",
+   "/home/etu/docs/rapport.csv": "x;1\ny;2\n",
+   "/tmp/": null
+  }
+ },
+ {
+  "type": "terminal",
+  "niveau": "moyen",
+  "q": "Renomme `notes.txt` en `lisezmoi.txt`.",
+  "checks": [
+   {
+    "exists": "/home/etu/lisezmoi.txt"
+   },
+   {
+    "absent": "/home/etu/notes.txt"
+   }
+  ],
+  "solution": "mv notes.txt lisezmoi.txt",
+  "explication": "",
+  "fs": {
+   "/home/etu/notes.txt": "Linux est sensible à la casse\nle shell interprète les commandes\nTab complète les noms\nLinux est libre\n",
+   "/home/etu/.bashrc": "# configuration du shell\n",
+   "/home/etu/docs/": null,
+   "/home/etu/docs/liste.txt": "pomme\nbanane\ncerise\nbanane\nabricot\n",
+   "/home/etu/docs/eleves.csv": "Durand;Alice;17\nMartin;Bob;18\nLeroy;Chloé;17\nBernard;David;19\n",
+   "/home/etu/docs/rapport.csv": "x;1\ny;2\n",
+   "/tmp/": null
+  }
+ },
+ {
+  "type": "terminal",
+  "niveau": "moyen",
+  "q": "Copie tout le dossier `docs` vers `docs2`.",
+  "checks": [
+   {
+    "exists": "/home/etu/docs2/liste.txt"
+   },
+   {
+    "exists": "/home/etu/docs/liste.txt"
+   }
+  ],
+  "solution": "cp -r docs docs2",
+  "explication": "",
+  "indice": "Un dossier : option -r",
+  "fs": {
+   "/home/etu/notes.txt": "Linux est sensible à la casse\nle shell interprète les commandes\nTab complète les noms\nLinux est libre\n",
+   "/home/etu/.bashrc": "# configuration du shell\n",
+   "/home/etu/docs/": null,
+   "/home/etu/docs/liste.txt": "pomme\nbanane\ncerise\nbanane\nabricot\n",
+   "/home/etu/docs/eleves.csv": "Durand;Alice;17\nMartin;Bob;18\nLeroy;Chloé;17\nBernard;David;19\n",
+   "/home/etu/docs/rapport.csv": "x;1\ny;2\n",
+   "/tmp/": null
+  }
+ },
+ {
+  "type": "terminal",
+  "niveau": "moyen",
+  "q": "Depuis le home, **sans te déplacer**, affiche le contenu détaillé (-l) de `docs`.",
+  "checks": [
+   {
+    "cmd": "^ls\\s+-\\w*l\\w*\\s+(~/|\\./)?docs/?$"
+   },
+   {
+    "out": "liste\\.txt"
+   }
+  ],
+  "solution": "ls -l docs",
+  "explication": "",
+  "fs": {
+   "/home/etu/notes.txt": "Linux est sensible à la casse\nle shell interprète les commandes\nTab complète les noms\nLinux est libre\n",
+   "/home/etu/.bashrc": "# configuration du shell\n",
+   "/home/etu/docs/": null,
+   "/home/etu/docs/liste.txt": "pomme\nbanane\ncerise\nbanane\nabricot\n",
+   "/home/etu/docs/eleves.csv": "Durand;Alice;17\nMartin;Bob;18\nLeroy;Chloé;17\nBernard;David;19\n",
+   "/home/etu/docs/rapport.csv": "x;1\ny;2\n",
+   "/tmp/": null
+  }
+ },
+ {
+  "type": "terminal",
+  "niveau": "moyen",
+  "q": "Dans `docs`, supprime tous les fichiers `.csv` avec **une seule** commande (garde `liste.txt`).",
+  "checks": [
+   {
+    "absent": "/home/etu/docs/eleves.csv"
+   },
+   {
+    "absent": "/home/etu/docs/rapport.csv"
+   },
+   {
+    "exists": "/home/etu/docs/liste.txt"
+   }
+  ],
+  "solution": "rm *.csv",
+  "explication": "",
+  "indice": "Un joker !",
+  "fs": {
+   "/home/etu/notes.txt": "Linux est sensible à la casse\nle shell interprète les commandes\nTab complète les noms\nLinux est libre\n",
+   "/home/etu/.bashrc": "# configuration du shell\n",
+   "/home/etu/docs/": null,
+   "/home/etu/docs/liste.txt": "pomme\nbanane\ncerise\nbanane\nabricot\n",
+   "/home/etu/docs/eleves.csv": "Durand;Alice;17\nMartin;Bob;18\nLeroy;Chloé;17\nBernard;David;19\n",
+   "/home/etu/docs/rapport.csv": "x;1\ny;2\n",
+   "/tmp/": null
+  },
+  "cwd": "/home/etu/docs"
+ },
+ {
+  "type": "terminal",
+  "niveau": "difficile",
+  "q": "Supprime le dossier `docs` **et** tout son contenu.",
+  "checks": [
+   {
+    "absent": "/home/etu/docs"
+   }
+  ],
+  "solution": "rm -r docs",
+  "explication": "",
+  "fs": {
+   "/home/etu/notes.txt": "Linux est sensible à la casse\nle shell interprète les commandes\nTab complète les noms\nLinux est libre\n",
+   "/home/etu/.bashrc": "# configuration du shell\n",
+   "/home/etu/docs/": null,
+   "/home/etu/docs/liste.txt": "pomme\nbanane\ncerise\nbanane\nabricot\n",
+   "/home/etu/docs/eleves.csv": "Durand;Alice;17\nMartin;Bob;18\nLeroy;Chloé;17\nBernard;David;19\n",
+   "/home/etu/docs/rapport.csv": "x;1\ny;2\n",
+   "/tmp/": null
+  }
+ },
+ {
+  "type": "associer",
+  "niveau": "moyen",
+  "q": "Associe chaque commande à son rôle.",
+  "paires": [
+   [
+    "whoami",
+    "nom de l'utilisateur"
+   ],
+   [
+    "hostname",
+    "nom de la machine"
+   ],
+   [
+    "pwd",
+    "dossier courant (absolu)"
+   ],
+   [
+    "apropos",
+    "chercher une commande par mot-clé"
+   ]
+  ],
+  "explication": "Ce sont les commandes de l'invite et de l'aide."
+ },
+ {
+  "type": "associer",
+  "niveau": "moyen",
+  "q": "Associe chaque commande à son effet.",
+  "paires": [
+   [
+    "cd ..",
+    "monter d'un niveau"
+   ],
+   [
+    "cd ~",
+    "aller au dossier personnel"
+   ],
+   [
+    "ls -a",
+    "voir les fichiers cachés"
+   ],
+   [
+    "mkdir -p",
+    "créer toute une chaîne de dossiers"
+   ]
+  ],
+  "explication": "Navigation et création."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Chaînes et listes — Étude Facile</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="algo" data-chapter="bonus-listes-chaines">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<div class="box retenir"><b>Chapitre bonus</b><p>Ce chapitre est un complément créé pour Étude Facile (il ne vient pas d&#x27;un support de cours). Les exemples sont à tester dans un terminal Python ou sur un éditeur en ligne.</p></div>
+<p>Les <b>chaînes</b> (<code>str</code>) et les <b>listes</b> (<code>list</code>) sont des séquences : leurs éléments sont <b>indexés</b> à partir de 0.</p>
+<h2>1. Chaînes de caractères</h2>
+<pre data-repl>
+&gt;&gt;&gt; s = &#x27;Python&#x27;
+&gt;&gt;&gt; s[0]
+&#x27;P&#x27;
+&gt;&gt;&gt; s[-1]
+&#x27;n&#x27;
+&gt;&gt;&gt; s[1:4]
+&#x27;yth&#x27;
+&gt;&gt;&gt; len(s)
+6
+&gt;&gt;&gt; s.upper()
+&#x27;PYTHON&#x27;
+</pre>
+<ul><li><code>s[i]</code> : caractère d&#x27;indice i ; <code>s[-1]</code> : le dernier ;</li><li><code>s[a:b]</code> : tranche de a (inclus) à b (exclu) ;</li><li><code>len(s)</code> : nombre de caractères ;</li><li>les chaînes sont <b>immuables</b> : on ne peut pas faire <code>s[0] = &#x27;J&#x27;</code>.</li></ul>
+<h2>2. Listes</h2>
+<pre data-repl>
+&gt;&gt;&gt; notes = [12, 8, 15]
+&gt;&gt;&gt; notes.append(10)
+&gt;&gt;&gt; notes
+[12, 8, 15, 10]
+&gt;&gt;&gt; notes[1] = 9
+&gt;&gt;&gt; len(notes)
+4
+&gt;&gt;&gt; sum(notes) / len(notes)
+11.5
+</pre>
+<table><tr><th>Opération</th><th>Effet</th></tr><tr><td><code>l.append(x)</code></td><td>ajoute x à la fin</td></tr><tr><td><code>l.pop()</code></td><td>retire et renvoie le dernier</td></tr><tr><td><code>l[i] = x</code></td><td>modifie l&#x27;élément i</td></tr><tr><td><code>x in l</code></td><td>teste l&#x27;appartenance</td></tr><tr><td><code>sum(l)</code>, <code>min(l)</code>, <code>max(l)</code></td><td>somme, minimum, maximum</td></tr><tr><td><code>sorted(l)</code></td><td>nouvelle liste triée</td></tr></table>
+<h2>3. Parcourir</h2>
+<pre>
+for note in notes:
+    print(note)
+
+for i in range(len(notes)):
+    print(i, notes[i])
+</pre>
+<div class="box attention"><b>IndexError</b><p>Pour une liste de n éléments, les indices valides vont de 0 à n−1 : <code>l[n]</code> provoque une erreur.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel est l'indice du premier élément d'une liste ?",
+  "options": [
+   "0",
+   "1",
+   "-1",
+   "dépend"
+  ],
+  "answer": 0,
+  "explication": "On commence à 0."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que renvoie `len([4, 5, 6])` ?",
+  "options": [
+   "2",
+   "3",
+   "6",
+   "15"
+  ],
+  "answer": 1,
+  "explication": "3 éléments."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "On peut modifier un caractère d'une chaîne avec `s[0] = 'J'`.",
+  "answer": false,
+  "explication": "Les chaînes sont immuables."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle méthode ajoute un élément à la fin d'une liste ?",
+  "options": [
+   "add",
+   "append",
+   "push",
+   "insert_end"
+  ],
+  "answer": 1,
+  "explication": "append."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Qu'affiche ce code ?",
+  "answers": [
+   "P"
+  ],
+  "explication": "Premier caractère.",
+  "code": "s = 'Python'\nprint(s[0])"
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Qu'affiche ce code ?",
+  "answers": [
+   "n"
+  ],
+  "explication": "s[-1] est le dernier caractère.",
+  "code": "s = 'Python'\nprint(s[-1])"
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Qu'affiche ce code ?",
+  "answers": [
+   "yth"
+  ],
+  "explication": "Indices 1, 2, 3.",
+  "code": "s = 'Python'\nprint(s[1:4])"
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Que vaut l[2] ?",
+  "answers": [
+   "30"
+  ],
+  "explication": "Indice 2 : troisième élément.",
+  "code": "l = [10, 20, 30, 40]"
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Qu'affiche ce code ?",
+  "answers": [
+   "4"
+  ],
+  "explication": "Après append, la liste a 4 éléments.",
+  "code": "l = [1, 2, 3]\nl.append(9)\nprint(len(l))"
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Qu'affiche ce code ?",
+  "answers": [
+   "12"
+  ],
+  "explication": "4+5+3 = 12.",
+  "code": "l = [4, 5, 3]\ns = 0\nfor x in l:\n    s += x\nprint(s)"
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Qu'affiche ce code ?",
+  "answers": [
+   "3"
+  ],
+  "explication": "Compte les éléments > 5 : 6, 8, 9.",
+  "code": "l = [2, 6, 8, 3, 9]\nc = 0\nfor x in l:\n    if x > 5:\n        c += 1\nprint(c)"
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Qu'affiche ce code ?",
+  "answers": [
+   "[1, 2, 3]"
+  ],
+  "explication": "sorted renvoie une nouvelle liste triée.",
+  "code": "print(sorted([3, 1, 2]))"
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

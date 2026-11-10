@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Congruences — Étude Facile</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="maths" data-chapter="congruences">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<p>Les congruences permettent de calculer <b>avec les restes</b>. Elles servent pour les clés de contrôle (IBAN, ISBN), le hachage, la cryptographie.</p>
+<h2>1. Définition</h2>
+<p>Soit n ≥ 2. Deux entiers a et b sont <b>congrus modulo n</b> si ils ont le même reste dans la division par n, c&#x27;est-à-dire si n divise a − b. On note <code>a ≡ b [n]</code>.</p>
+<pre>
+17 ≡ 2 [5]   car 17 − 2 = 15 = 5×3
+−1 ≡ 6 [7]   car −1 − 6 = −7
+38 ≡ 3 [5]
+</pre>
+<div class="box retenir"><b>Reste</b><p>a ≡ r [n] avec 0 ≤ r &lt; n signifie que r est le <b>reste</b> de a par n.</p></div>
+<h2>2. Calculer avec les congruences</h2>
+<p>Si a ≡ b [n] et c ≡ d [n], alors :</p>
+<ul><li><code>a + c ≡ b + d [n]</code></li><li><code>a × c ≡ b × d [n]</code></li><li><code>a^k ≡ b^k [n]</code> pour tout entier k ≥ 0</li></ul>
+<div class="box attention"><b>Pas de division</b><p>On ne peut pas « simplifier » librement : 6 ≡ 0 [6] ne permet pas de dire 3 ≡ 0 [6] après division par 2.</p></div>
+<h2>3. Exemple : un reste de puissance</h2>
+<p>Reste de 7¹⁰⁰ modulo 5 ? 7 ≡ 2 [5] ; 2² ≡ 4 ; 2³ ≡ 3 ; 2⁴ ≡ 1 [5]. Les puissances de 2 se répètent tous les 4 : 100 = 4×25 donc 7¹⁰⁰ ≡ 2¹⁰⁰ ≡ (2⁴)²⁵ ≡ 1 [5].</p>
+<h2>4. Tableau des restes</h2>
+<p>Pour résoudre <code>a×x ≡ b [n]</code> avec de petits n, on teste x = 0, 1, …, n−1 dans un tableau. Exemple : 3x ≡ 2 [7] → x = 3 (car 9 ≡ 2 [7]).</p>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "17 ≡ 2 [5].",
+  "answer": true,
+  "explication": "17 − 2 = 15 est un multiple de 5."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel est le reste de 38 modulo 5 ?",
+  "options": [
+   "2",
+   "3",
+   "4",
+   "8"
+  ],
+  "answer": 1,
+  "explication": "38 = 5×7 + 3."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "−1 ≡ 6 [7].",
+  "answer": true,
+  "explication": "−1 − 6 = −7 est un multiple de 7."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Si a ≡ 3 [7] et b ≡ 5 [7], alors a + b ≡ ? [7]",
+  "options": [
+   "1",
+   "2",
+   "8",
+   "15"
+  ],
+  "answer": 0,
+  "explication": "3 + 5 = 8 ≡ 1 [7]."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Donne le reste de 100 modulo 7.",
+  "answers": [
+   "2"
+  ],
+  "explication": "100 = 7×14 + 2."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Donne le reste de −3 modulo 5 (entre 0 et 4).",
+  "answers": [
+   "2"
+  ],
+  "explication": "−3 + 5 = 2."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Reste de 23 × 19 modulo 5 ?",
+  "answers": [
+   "2"
+  ],
+  "explication": "23 ≡ 3, 19 ≡ 4 ; 3×4 = 12 ≡ 2 [5]."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Reste de 2¹⁰ modulo 7 ?",
+  "answers": [
+   "2"
+  ],
+  "explication": "2³ ≡ 1 [7] ; 2¹⁰ = (2³)³×2 ≡ 2."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Reste de 7¹⁰⁰ modulo 5 ?",
+  "answers": [
+   "1"
+  ],
+  "explication": "7 ≡ 2 et 2⁴ ≡ 1 [5] ; 100 = 4×25."
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Trouve x entre 0 et 6 tel que 3x ≡ 2 [7].",
+  "answers": [
+   "3"
+  ],
+  "explication": "3×3 = 9 ≡ 2 [7]."
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Reste de 3²⁰²⁶ modulo 4 ?",
+  "answers": [
+   "1"
+  ],
+  "explication": "3 ≡ −1 [4] ; (−1)²⁰²⁶ = 1."
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Quel est le reste de 12345 modulo 9 ? (Astuce : somme des chiffres.)",
+  "answers": [
+   "6"
+  ],
+  "explication": "1+2+3+4+5 = 15, 15 ≡ 6 [9]."
+ },
+ {
+  "type": "associer",
+  "niveau": "facile",
+  "q": "Associe chaque congruence à son reste dans [0 ; n−1].",
+  "paires": [
+   [
+    "25 mod 7",
+    "4"
+   ],
+   [
+    "−2 mod 5",
+    "3"
+   ],
+   [
+    "64 mod 8",
+    "0"
+   ],
+   [
+    "50 mod 9",
+    "5"
+   ]
+  ],
+  "explication": "Divise et garde le reste (en ajoutant n si négatif)."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

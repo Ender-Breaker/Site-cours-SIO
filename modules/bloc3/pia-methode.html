@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Le PIA : analyse d&#x27;impact (méthode CNIL) — Étude Facile</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="bloc3" data-chapter="pia-methode">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<p>Un <b>PIA</b> (Privacy Impact Assessment) est une <b>analyse d&#x27;impact relative à la protection des données</b> (art. 35 du RGPD). On parle aussi d&#x27;EIVP (étude d&#x27;impact sur la vie privée) ou de DPIA (Data Protection Impact Assessment). Il sert à construire et <b>démontrer</b> que les principes de protection de la vie privée sont respectés, pour que les personnes gardent la maîtrise de leurs données.</p>
+<h2>1. La méthode de la CNIL</h2>
+<p>La méthode de la CNIL est composée de <b>trois guides</b> :</p>
+<ul><li><b>la méthode</b> : la démarche à suivre ;</li><li><b>les modèles</b> : pour formaliser l&#x27;étude ;</li><li><b>les bases de connaissances</b> : un catalogue de mesures et d&#x27;exemples (typologies de données, échelles de gravité, menaces, chiffrement, anonymisation…).</li></ul>
+<p>Elle emploie la méthode <span class="tip" data-tip="Expression des Besoins et Identification des Objectifs de Sécurité : méthode de gestion des risques publiée par l&#x27;ANSSI.">EBIOS</span> dans le contexte « Informatique et libertés ».</p>
+<h2>2. Les deux piliers de la conformité</h2>
+<table><tr><th>Pilier</th><th>Idée</th></tr><tr><td>Principes et droits fondamentaux</td><td><b>« non négociables »</b> : fixés par la loi, à respecter quels que soient la nature, la gravité et la vraisemblance des risques</td></tr><tr><td>Gestion des risques sur la vie privée</td><td>déterminer les mesures techniques et d&#x27;organisation <b>appropriées</b> pour protéger les données</td></tr></table>
+<h2>3. Les 4 étapes d&#x27;un PIA</h2>
+<h3>Étape 1 — Étude du contexte</h3>
+<ul><li><b>Vue d&#x27;ensemble</b> : présenter le traitement (nature, portée, finalités, enjeux), identifier le responsable du traitement et les sous-traitants, recenser les référentiels applicables.</li><li><b>Données, processus et supports</b> : décrire les données personnelles concernées, leurs destinataires, leurs durées de conservation, les processus et les supports.</li></ul>
+<h3>Étape 2 — Principes fondamentaux</h3>
+<ul><li><b>Proportionnalité et nécessité</b> : finalités, fondement, minimisation, exactitude, durées de conservation.</li><li><b>Droits des personnes</b> : information, consentement, accès et portabilité, rectification et effacement, opposition, sous-traitants, transferts.</li></ul>
+<h3>Étape 3 — Risques liés à la sécurité des données</h3>
+<ul><li>Évaluer les <b>mesures existantes ou prévues</b>.</li><li>Apprécier les risques : <b>accès illégitime</b> à des données, <b>modification non désirée</b>, <b>disparition</b> de données.</li><li>Pour chaque risque : estimer sa <b>gravité</b> et sa <b>vraisemblance</b>.</li></ul>
+<h3>Étape 4 — Validation</h3>
+<p>Préparer les éléments utiles puis <b>valider formellement</b> le PIA, ou bien <b>réviser</b> les étapes précédentes si le résultat n&#x27;est pas acceptable.</p>
+<h2>4. Gravité et vraisemblance</h2>
+<p>Les bases de connaissances proposent deux échelles à quatre niveaux :</p>
+<table><tr><th>Niveau</th><th>Gravité (impacts sur les personnes)</th><th>Vraisemblance (la menace peut-elle se réaliser ?)</th></tr><tr><td>1</td><td>Négligeable</td><td>Négligeable : il ne semble pas possible de réaliser la menace</td></tr><tr><td>2</td><td>Limitée</td><td>Limitée : il semble difficile de la réaliser</td></tr><tr><td>3</td><td>Importante</td><td>Importante : il semble possible de la réaliser</td></tr><tr><td>4</td><td>Maximale : conséquences significatives, voire irrémédiables</td><td>Maximale : il semble extrêmement facile de la réaliser</td></tr></table>
+<div class="box retenir"><b>Exemple de vraisemblance (vol de supports papier)</b><p>Local fermé par badge <b>et</b> code : <b>négligeable</b>.</p><p>Local fermé par badge seul : <b>limitée</b>.</p><p>Bureaux avec une personne à l&#x27;accueil : <b>importante</b>.</p><p>Hall public de l&#x27;organisme : <b>maximale</b>.</p></div>
+<h2>5. Bonnes pratiques</h2>
+<ul><li>Mener le PIA <b>dès la conception</b> d&#x27;un traitement (« Privacy by Design », art. 25) : cela coûte moins cher et évite de remettre en cause des choix déjà faits.</li><li>C&#x27;est un <b>processus d&#x27;amélioration continue</b> : plusieurs itérations sont parfois nécessaires.</li><li>Surveiller les évolutions (contexte, mesures, risques), par exemple <b>tous les ans</b>, et mettre à jour dès qu&#x27;un changement important a lieu.</li><li>Le responsable de traitement doit pouvoir <b>démontrer</b> sa conformité : c&#x27;est la notion d&#x27;<b>accountability</b> (responsabilité).</li></ul>
+<p>Les études de cas fournies (« Captoo », objets connectés) appliquent cette démarche pas à pas sur des exemples concrets.</p>
+<details open><summary>Résumé express</summary>
+<ul><li>PIA = analyse d&#x27;impact (art. 35 du RGPD), méthode CNIL en 3 guides (méthode, modèles, bases de connaissances).</li><li>2 piliers : principes fondamentaux non négociables + gestion des risques.</li><li>4 étapes : contexte → principes fondamentaux → risques → validation.</li><li>3 risques : accès illégitime, modification non désirée, disparition de données.</li><li>Gravité et vraisemblance : 4 niveaux (négligeable, limité, important, maximal).</li></ul>
+</details>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que signifie PIA ?",
+  "options": [
+   "Privacy Impact Assessment",
+   "Personal Identity Authority",
+   "Protocol of Internet Access",
+   "Public Information Agreement"
+  ],
+  "answer": 0,
+  "explication": "PIA = Privacy Impact Assessment (analyse d'impact relative à la protection des données)."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel article du RGPD prévoit l'analyse d'impact ?",
+  "options": [
+   "art. 7",
+   "art. 25",
+   "art. 35",
+   "art. 12"
+  ],
+  "answer": 2,
+  "explication": "L'analyse d'impact relative à la protection des données est prévue à l'article 35."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "De combien de guides la méthode PIA de la CNIL est-elle composée ?",
+  "options": [
+   "1",
+   "2",
+   "3",
+   "4"
+  ],
+  "answer": 2,
+  "explication": "Trois guides : la méthode, les modèles et les bases de connaissances."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle méthode de gestion des risques (publiée par l'ANSSI) la démarche PIA utilise-t-elle ?",
+  "options": [
+   "ITIL",
+   "EBIOS",
+   "Scrum",
+   "Merise"
+  ],
+  "answer": 1,
+  "explication": "Elle emploie EBIOS dans le contexte « Informatique et libertés »."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Combien d'étapes compte un PIA ?",
+  "options": [
+   "2",
+   "3",
+   "4",
+   "6"
+  ],
+  "answer": 2,
+  "explication": "Contexte, principes fondamentaux, risques, validation."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle est la première étape d'un PIA ?",
+  "options": [
+   "La validation",
+   "L'étude du contexte",
+   "L'appréciation des risques",
+   "Le chiffrement"
+  ],
+  "answer": 1,
+  "explication": "On commence par délimiter et décrire le contexte du traitement."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle est la dernière étape d'un PIA ?",
+  "options": [
+   "Validation",
+   "Étude du contexte",
+   "Principes fondamentaux",
+   "Gravité"
+  ],
+  "answer": 0,
+  "explication": "On valide formellement le PIA ou on révise les étapes précédentes."
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "Les principes et droits fondamentaux sont « négociables » si le risque est faible.",
+  "answer": false,
+  "explication": "Ils sont non négociables : ils doivent être respectés quels que soient la gravité et la vraisemblance des risques."
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "Un PIA doit être mené seulement après la mise en production du traitement.",
+  "answer": false,
+  "explication": "Il doit être mené dès la conception (Privacy by Design)."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quels sont les trois grands risques étudiés à l'étape 3 ?",
+  "options": [
+   "Accès illégitime, modification non désirée, disparition de données",
+   "Virus, spam, phishing",
+   "Panne, coupure, surcharge",
+   "Vol, incendie, inondation"
+  ],
+  "answer": 0,
+  "explication": "Accès illégitime à des données, modification non désirée, disparition de données."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelles sont les deux dimensions utilisées pour évaluer un risque ?",
+  "options": [
+   "Coût et durée",
+   "Gravité et vraisemblance",
+   "Impact et délai",
+   "Fréquence et visibilité"
+  ],
+  "answer": 1,
+  "explication": "Chaque risque est estimé en gravité et en vraisemblance."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Combien de niveaux comptent les échelles de gravité et de vraisemblance ?",
+  "options": [
+   "2",
+   "3",
+   "4",
+   "10"
+  ],
+  "answer": 2,
+  "explication": "4 niveaux : négligeable, limité, important, maximal."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Vol de supports papier stockés dans le hall public de l'organisme : quelle vraisemblance ?",
+  "options": [
+   "Négligeable",
+   "Limitée",
+   "Importante",
+   "Maximale"
+  ],
+  "answer": 3,
+  "explication": "Il semble extrêmement facile de réaliser la menace : vraisemblance maximale."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Vol de supports papier dans un local fermé par badge et code d'accès : quelle vraisemblance ?",
+  "options": [
+   "Négligeable",
+   "Limitée",
+   "Importante",
+   "Maximale"
+  ],
+  "answer": 0,
+  "explication": "Il ne semble pas possible de réaliser la menace : vraisemblance négligeable."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "À quoi sert la notion d'« accountability » ?",
+  "options": [
+   "À crypter les données",
+   "À démontrer sa conformité (responsabilité)",
+   "À supprimer les données",
+   "À compter les utilisateurs"
+  ],
+  "answer": 1,
+  "explication": "Le responsable de traitement doit pouvoir démontrer sa démarche de conformité."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "À quelle fréquence est-il conseillé de revoir un PIA ?",
+  "options": [
+   "Jamais",
+   "Tous les ans et à chaque évolution significative",
+   "Tous les dix ans",
+   "Uniquement après une fuite"
+  ],
+  "answer": 1,
+  "explication": "Le PIA est un processus continu : surveillance régulière, par exemple annuelle."
+ },
+ {
+  "type": "associer",
+  "niveau": "moyen",
+  "q": "Associe chaque étape du PIA à son contenu.",
+  "paires": [
+   [
+    "1. Contexte",
+    "décrire le traitement, les données et les supports"
+   ],
+   [
+    "2. Principes fondamentaux",
+    "proportionnalité, nécessité, droits des personnes"
+   ],
+   [
+    "3. Risques",
+    "mesures existantes, gravité, vraisemblance"
+   ],
+   [
+    "4. Validation",
+    "valider formellement ou réviser"
+   ]
+  ],
+  "explication": "Contexte, principes, risques, puis validation."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

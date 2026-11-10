@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>PHP : les conditionnelles (if, else, switch) — Étude Facile</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="bloc1" data-chapter="php-conditionnelles">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<p>Une <b>conditionnelle</b> permet d&#x27;exécuter une instruction seulement si une condition est vraie. PHP propose <code>if / elseif / else</code> et <code>switch</code>.</p>
+<h2>1. if … else</h2>
+<pre>
+&lt;?php
+if ($a &gt; $b) {
+    echo &quot;a est plus grand que b&quot;;
+} else {
+    echo &quot;a est plus petit que b&quot;;
+}
+</pre>
+<p>Le bloc <code>else</code> ne s&#x27;exécute que si la condition du <code>if</code> est <b>fausse</b>.</p>
+<h3>Comparaisons et opérateurs logiques</h3>
+<table><tr><th>Signification</th><th>PHP</th></tr><tr><td>égal à / différent de</td><td><code>==</code> / <code>!=</code></td></tr><tr><td>inférieur / supérieur</td><td><code>&lt;</code> / <code>&gt;</code></td></tr><tr><td>inférieur ou égal / supérieur ou égal</td><td><code>&lt;=</code> / <code>&gt;=</code></td></tr><tr><td>et / ou / non</td><td><code>&amp;&amp;</code> / <code>||</code> / <code>!</code></td></tr></table>
+<div class="box attention"><b><code>=</code> n&#x27;est pas <code>==</code></b><p><code>$x = 5</code> <b>affecte</b> 5 à <code>$x</code>. <code>$x == 5</code> <b>teste</b> si <code>$x</code> vaut 5. Écrire <code>if ($x = 5)</code> est une erreur classique.</p></div>
+<h2>2. Plusieurs cas : if / elseif / else</h2>
+<p>Exemple du TP « tarif cinéma » : moins de 12 ans 5 €, de 12 à 17 ans 7 €, de 18 à 64 ans 10 €, 65 ans et plus 8 €.</p>
+<pre>
+&lt;?php
+$age = 16;
+
+if ($age &lt; 12) {
+    $tarif = 5;
+} elseif ($age &lt; 18) {
+    $tarif = 7;
+} elseif ($age &lt; 65) {
+    $tarif = 10;
+} else {
+    $tarif = 8;
+}
+
+echo &quot;Âge : $age &lt;br /&gt; Tarif : $tarif €&quot;;
+</pre>
+<div class="box retenir"><b>À retenir</b><p>Les conditions sont testées <b>dans l&#x27;ordre</b> : dès qu&#x27;une est vraie, les suivantes sont ignorées. C&#x27;est pour cela que <code>$age &lt; 18</code> suffit au deuxième test (on sait déjà que <code>$age &gt;= 12</code>).</p></div>
+<h2>3. switch</h2>
+<p><code>switch</code> compare une variable à une liste de valeurs. Chaque cas se termine par <code>break</code>, sinon PHP continue dans le cas suivant.</p>
+<pre>
+&lt;?php
+$note = &quot;E&quot;;
+
+switch ($note) {
+    case &quot;A&quot;:
+        $signification = &quot;Excellent&quot;;
+        break;
+    case &quot;B&quot;:
+        $signification = &quot;Bien&quot;;
+        break;
+    case &quot;C&quot;:
+        $signification = &quot;Moyen&quot;;
+        break;
+    case &quot;D&quot;:
+        $signification = &quot;Insuffisant&quot;;
+        break;
+    default:
+        $signification = &quot;Note invalide&quot;;
+}
+
+echo &quot;Note : $note - Signification : $signification&quot;;
+</pre>
+<h3>Regrouper plusieurs valeurs</h3>
+<pre>
+&lt;?php
+$x = 5;
+switch ($x) {
+    case 1: case 2: case 3: case 4: case 5:
+    case 6: case 7: case 8: case 9:
+        echo &quot;Positif&quot;;
+        break;
+    case 0:
+        echo &quot;Nul&quot;;
+        break;
+    default:
+        echo &quot;Pas un chiffre&quot;;
+}
+</pre>
+<p>Les cas sans <code>break</code> se « déversent » dans le suivant : c&#x27;est ce qui permet de regrouper les valeurs 1 à 9.</p>
+<div class="box retenir"><b>À retenir</b><p><code>default</code> s&#x27;exécute quand aucun cas ne correspond.</p><p>Oublier <code>break</code> fait continuer dans le cas suivant.</p></div>
+<h2>4. Exemple : valeur absolue</h2>
+<pre>
+&lt;?php
+$x = -6;
+
+if ($x &lt; 0) {
+    $vabs = $x * -1;
+} else {
+    $vabs = $x;
+}
+
+echo &quot;La valeur absolue de &quot; . $x . &quot; est : &quot; . $vabs;
+</pre>
+<details><summary>Pour aller plus loin : le jour de la semaine (TP2)</summary>
+<ul><li>On calcule un entier <code>JS</code> (1 = lundi … 7 = dimanche) avec la formule donnée dans le sujet, puis un <code>switch</code> transforme <code>JS</code> en nom de jour.</li><li>Janvier et février sont traités comme les 13e et 14e mois de l&#x27;année précédente.</li><li>On compare la date saisie à celle du jour avec <code>mktime(0, 0, 0, mois, jour, annee)</code> : égale → « est », plus tard → « sera », plus tôt → « était ».</li><li><code>empty($variable)</code> permet de vérifier qu&#x27;une date a bien été saisie.</li></ul>
+</details>
+<details open><summary>Résumé express</summary>
+<ul><li><code>if / elseif / else</code> : les conditions sont testées dans l&#x27;ordre.</li><li><code>switch</code> : un <code>case</code> par valeur, <code>break</code> à la fin, <code>default</code> pour le reste.</li><li><code>==</code> teste, <code>=</code> affecte. <code>&amp;&amp;</code> = et, <code>||</code> = ou, <code>!</code> = non.</li></ul>
+</details>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel opérateur teste l'égalité de deux valeurs en PHP ?",
+  "options": [
+   "=",
+   "==",
+   "=>",
+   ":="
+  ],
+  "answer": 1,
+  "explication": "`==` teste ; `=` affecte."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel opérateur PHP signifie « et » ?",
+  "options": [
+   "&&",
+   "||",
+   "!",
+   "=="
+  ],
+  "answer": 0,
+  "explication": "`&&` = et, `||` = ou, `!` = non."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel opérateur PHP signifie « ou » ?",
+  "options": [
+   "&&",
+   "||",
+   "!=",
+   "<>"
+  ],
+  "answer": 1,
+  "explication": "`||` est le « ou » logique."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "Le bloc `else` s'exécute quand la condition du `if` est fausse.",
+  "answer": true,
+  "explication": "C'est exactement son rôle."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "Dans `if / elseif / else`, toutes les conditions sont toujours testées.",
+  "answer": false,
+  "explication": "Dès qu'une condition est vraie, les suivantes sont ignorées."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "`if ($x = 5)` teste si `$x` vaut 5.",
+  "answer": false,
+  "explication": "C'est une affectation, pas un test. Il faut écrire `$x == 5`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que se passe-t-il si on oublie `break` dans un `case` ?",
+  "options": [
+   "Erreur de syntaxe",
+   "PHP continue dans le cas suivant",
+   "Le switch s'arrête",
+   "Rien de particulier"
+  ],
+  "answer": 1,
+  "explication": "Sans `break`, l'exécution se « déverse » dans le `case` suivant."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "À quoi sert `default` dans un `switch` ?",
+  "options": [
+   "À définir une constante",
+   "À traiter le cas où aucune valeur ne correspond",
+   "À quitter le switch",
+   "À répéter le dernier cas"
+  ],
+  "answer": 1,
+  "explication": "`default` s'exécute si aucun `case` ne correspond."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Que renvoie ce programme ?",
+  "answers": [
+   "6"
+  ],
+  "explication": "-6 est négatif : `$vabs = -6 * -1 = 6`.",
+  "code": "$x = -6;\nif ($x < 0) { $vabs = $x * -1; } else { $vabs = $x; }\necho $vabs;"
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Quel tarif cinéma est affiché pour 16 ans ?",
+  "answers": [
+   "7",
+   "7€",
+   "7 €"
+  ],
+  "explication": "16 ans : entre 12 et 17 ans, donc 7 €."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Quel tarif cinéma est affiché pour 11 ans ?",
+  "answers": [
+   "5",
+   "5€",
+   "5 €"
+  ],
+  "explication": "Moins de 12 ans : 5 €."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quel tarif cinéma est affiché pour 18 ans ?",
+  "answers": [
+   "10",
+   "10€",
+   "10 €"
+  ],
+  "explication": "18 ans : de 18 à 64 ans, donc 10 €."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quel tarif cinéma est affiché pour 65 ans ?",
+  "answers": [
+   "8",
+   "8€",
+   "8 €"
+  ],
+  "explication": "65 ans et plus : 8 €. Attention, 65 n'est pas `< 65`."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Que renvoie ce programme (switch de la note) ?",
+  "answers": [
+   "Bien"
+  ],
+  "explication": "`$note` vaut \"B\" : le `case \"B\"` donne « Bien ».",
+  "code": "$note = \"B\";\nswitch ($note) {\n  case \"A\": echo \"Excellent\"; break;\n  case \"B\": echo \"Bien\"; break;\n  case \"C\": echo \"Moyen\"; break;\n  default: echo \"Note invalide\";\n}"
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Que renvoie ce programme (switch de la note) ?",
+  "answers": [
+   "Note invalide"
+  ],
+  "explication": "\"E\" ne correspond à aucun `case` : on passe par `default`.",
+  "code": "$note = \"E\";\nswitch ($note) {\n  case \"A\": echo \"Excellent\"; break;\n  case \"B\": echo \"Bien\"; break;\n  default: echo \"Note invalide\";\n}"
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Que renvoie ce programme ?",
+  "answers": [
+   "Positif"
+  ],
+  "explication": "5 fait partie des cas regroupés de 1 à 9.",
+  "code": "$x = 5;\nswitch ($x) {\n  case 1: case 2: case 3: case 4: case 5:\n    echo \"Positif\"; break;\n  case 0:\n    echo \"Nul\"; break;\n  default:\n    echo \"Pas un chiffre\";\n}"
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Que renvoie ce programme avec `$x = 0` ?",
+  "answers": [
+   "Nul"
+  ],
+  "explication": "0 correspond au `case 0`.",
+  "code": "$x = 0;\nswitch ($x) {\n  case 1: case 2: case 3:\n    echo \"Positif\"; break;\n  case 0:\n    echo \"Nul\"; break;\n  default:\n    echo \"Pas un chiffre\";\n}"
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Que renvoie ce programme ?",
+  "answers": [
+   "UnDeux"
+  ],
+  "explication": "Pas de `break` dans `case 1` : l'exécution continue dans `case 2`, qui affiche « Deux ».",
+  "code": "$x = 1;\nswitch ($x) {\n  case 1: echo \"Un\";\n  case 2: echo \"Deux\"; break;\n  case 3: echo \"Trois\";\n}"
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Que renvoie ce programme ?",
+  "answers": [
+   "B"
+  ],
+  "explication": "`$a > $b` est faux, donc on passe par le `else`.",
+  "code": "$a = 3; $b = 8;\nif ($a > $b) { echo \"A\"; } else { echo \"B\"; }"
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Que renvoie ce programme ?",
+  "answers": [
+   "Mineur"
+  ],
+  "explication": "17 n'est pas inférieur à 12, mais il est inférieur à 18 : on affiche « Mineur ».",
+  "code": "$age = 17;\nif ($age < 12) { echo \"Enfant\"; }\nelseif ($age < 18) { echo \"Mineur\"; }\nelse { echo \"Majeur\"; }"
+ },
+ {
+  "type": "associer",
+  "niveau": "facile",
+  "q": "Associe chaque opérateur à sa signification.",
+  "paires": [
+   [
+    "==",
+    "égal à"
+   ],
+   [
+    "!=",
+    "différent de"
+   ],
+   [
+    "&&",
+    "et logique"
+   ],
+   [
+    "||",
+    "ou logique"
+   ]
+  ],
+  "explication": "`==` égal, `!=` différent, `&&` et, `||` ou."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

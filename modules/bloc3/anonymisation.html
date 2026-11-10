@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Anonymisation et pseudonymisation — Étude Facile</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="bloc3" data-chapter="anonymisation">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<div class="box "><b>ℹ Source</b><p>Ce chapitre répond aux cinq questions de ton activité « anonymisation » (définition, intérêt, méthodes, vérification, pseudonymisation). Le contenu est rédigé à partir des notions du cours et de la fiche CNIL sur l&#x27;anonymisation : vérifie les détails avec la page du lien fourni.</p></div>
+<h2>1. Qu&#x27;est-ce que l&#x27;anonymisation ?</h2>
+<p><b>Anonymiser</b>, c&#x27;est transformer des données personnelles pour qu&#x27;on ne puisse <b>plus jamais identifier la personne</b>, même avec des moyens raisonnables. Le résultat est <b>irréversible</b>.</p>
+<div class="box retenir"><b>À retenir</b><p>Des données réellement anonymisées ne sont <b>plus des données personnelles</b> : le RGPD ne s&#x27;applique donc plus à elles.</p></div>
+<h2>2. Pourquoi anonymiser ?</h2>
+<ul><li>Pouvoir <b>réutiliser ou partager</b> des données (statistiques, recherche, open data) sans porter atteinte à la vie privée.</li><li>Respecter la <b>limitation de la durée de conservation</b> : au lieu de supprimer, on peut conserver des données anonymisées utiles.</li><li><b>Réduire les risques</b> en cas de fuite : des données anonymes n&#x27;exposent personne.</li><li>Utiliser des données réalistes pour des <b>tests</b> sans exposer de vraies personnes.</li></ul>
+<h2>3. Comment anonymiser ?</h2>
+<table><tr><th>Technique</th><th>Principe</th><th>Exemple</th></tr><tr><td>Suppression</td><td>retirer les identifiants directs</td><td>enlever nom, e-mail, numéro de sécurité sociale</td></tr><tr><td>Généralisation</td><td>rendre l&#x27;information moins précise</td><td>date de naissance → tranche d&#x27;âge ; adresse → département</td></tr><tr><td>Agrégation</td><td>ne garder que des statistiques de groupe</td><td>âge moyen d&#x27;une classe plutôt que l&#x27;âge de chaque élève</td></tr><tr><td>Bruit / randomisation</td><td>modifier légèrement les valeurs</td><td>décaler aléatoirement des dates ou des montants</td></tr></table>
+<div class="box attention"><b>Retirer le nom ne suffit pas</b><p>Une personne peut parfois être retrouvée par <b>recoupement</b> (âge + code postal + profession…). C&#x27;est pourquoi on vérifie l&#x27;efficacité de l&#x27;anonymisation.</p></div>
+<h2>4. Comment vérifier l&#x27;efficacité ?</h2>
+<p>On teste si un attaquant pourrait, avec les données anonymisées, réussir l&#x27;un de ces trois points (critères du G29, le groupe des autorités européennes de protection des données) :</p>
+<table><tr><th>Critère</th><th>Question à se poser</th></tr><tr><td>Individualisation</td><td>Peut-on <b>isoler</b> une personne dans le jeu de données ?</td></tr><tr><td>Corrélation</td><td>Peut-on <b>relier</b> deux jeux de données concernant la même personne ?</td></tr><tr><td>Inférence</td><td>Peut-on <b>déduire</b> une information sur une personne ?</td></tr></table>
+<div class="box retenir"><b>À retenir</b><p>Si <b>un seul</b> de ces trois risques existe, les données ne sont <b>pas</b> anonymes.</p></div>
+<h2>5. La pseudonymisation</h2>
+<p><b>Pseudonymiser</b>, c&#x27;est remplacer un identifiant direct (nom, e-mail) par un <b>pseudonyme</b> (un numéro, un code). Une table de correspondance, conservée <b>séparément et protégée</b>, permet de retrouver la personne.</p>
+<table><tr><th></th><th>Anonymisation</th><th>Pseudonymisation</th></tr><tr><td>Réversible ?</td><td>Non</td><td>Oui (avec la table de correspondance)</td></tr><tr><td>Donnée personnelle ?</td><td>Non</td><td><b>Oui</b>, le RGPD s&#x27;applique toujours</td></tr><tr><td>Objectif</td><td>sortir du champ du RGPD</td><td>réduire les risques (mesure de sécurité)</td></tr><tr><td>Exemple</td><td>âge moyen d&#x27;un groupe</td><td>nom remplacé par « Élève 042 »</td></tr></table>
+<details open><summary>Résumé express</summary>
+<ul><li>Anonymisation = <b>irréversible</b> → plus de donnée personnelle → hors RGPD.</li><li>Techniques : suppression, généralisation, agrégation, bruit.</li><li>Vérification : individualisation, corrélation, inférence.</li><li>Pseudonymisation = <b>réversible</b> → reste une donnée personnelle soumise au RGPD.</li></ul>
+</details>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Une anonymisation est…",
+  "options": [
+   "Réversible avec une clé",
+   "Irréversible",
+   "Un simple chiffrement",
+   "Une suppression de la sauvegarde"
+  ],
+  "answer": 1,
+  "explication": "Anonymiser rend l'identification impossible de façon irréversible."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "Des données correctement anonymisées ne sont plus des données personnelles.",
+  "answer": true,
+  "explication": "Le RGPD ne s'applique donc plus à elles."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "Supprimer simplement le nom d'une personne suffit toujours à anonymiser les données.",
+  "answer": false,
+  "explication": "On peut retrouver la personne par recoupement (âge, code postal, profession…)."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Pourquoi anonymiser des données ?",
+  "options": [
+   "Pour pouvoir les réutiliser sans atteinte à la vie privée",
+   "Pour les rendre plus lourdes",
+   "Pour éviter de les sauvegarder",
+   "Pour contourner la CNIL"
+  ],
+  "answer": 0,
+  "explication": "L'anonymisation permet de réutiliser ou partager des données sans identifier personne."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Laquelle de ces techniques est une généralisation ?",
+  "options": [
+   "Supprimer le nom",
+   "Remplacer une date de naissance par une tranche d'âge",
+   "Chiffrer le fichier",
+   "Dupliquer les données"
+  ],
+  "answer": 1,
+  "explication": "Généraliser = rendre l'information moins précise."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Laquelle de ces techniques est une agrégation ?",
+  "options": [
+   "Garder l'âge moyen du groupe plutôt que chaque âge",
+   "Remplacer un nom par un code",
+   "Supprimer une colonne",
+   "Ajouter du bruit"
+  ],
+  "answer": 0,
+  "explication": "Agréger = ne garder que des statistiques de groupe."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quel critère vérifie qu'on ne peut pas isoler une personne dans le jeu de données ?",
+  "options": [
+   "Individualisation",
+   "Corrélation",
+   "Inférence",
+   "Minimisation"
+  ],
+  "answer": 0,
+  "explication": "Individualisation : peut-on isoler un individu ?"
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quel critère vérifie qu'on ne peut pas relier deux jeux de données sur une même personne ?",
+  "options": [
+   "Individualisation",
+   "Corrélation",
+   "Inférence",
+   "Pseudonymisation"
+  ],
+  "answer": 1,
+  "explication": "Corrélation : peut-on relier des données ?"
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quel critère vérifie qu'on ne peut pas déduire une information sur une personne ?",
+  "options": [
+   "Individualisation",
+   "Corrélation",
+   "Inférence",
+   "Agrégation"
+  ],
+  "answer": 2,
+  "explication": "Inférence : peut-on déduire une information ?"
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "Si un seul des trois critères (individualisation, corrélation, inférence) est possible, les données ne sont pas anonymes.",
+  "answer": true,
+  "explication": "Il suffit d'un seul risque pour que l'anonymisation soit insuffisante."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "La pseudonymisation consiste à…",
+  "options": [
+   "Supprimer définitivement les données",
+   "Remplacer un identifiant direct par un pseudonyme",
+   "Chiffrer le disque dur",
+   "Publier les données en ligne"
+  ],
+  "answer": 1,
+  "explication": "On remplace par un code ; une table de correspondance garde la possibilité de retrouver la personne."
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "Des données pseudonymisées restent des données personnelles soumises au RGPD.",
+  "answer": true,
+  "explication": "Comme la ré-identification reste possible avec la table de correspondance, le RGPD s'applique."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Où doit-on conserver la table de correspondance d'une pseudonymisation ?",
+  "options": [
+   "Dans le même fichier que les données",
+   "Séparément, avec des mesures de sécurité",
+   "Sur le site public",
+   "Nulle part"
+  ],
+  "answer": 1,
+  "explication": "Elle doit être séparée et protégée."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Un fichier remplace chaque nom par « Élève 042 » mais garde la liste « Élève 042 = Marie Durand » dans un classeur à part. De quoi s'agit-il ?",
+  "options": [
+   "D'une anonymisation",
+   "D'une pseudonymisation",
+   "D'une agrégation",
+   "D'un chiffrement asymétrique"
+  ],
+  "answer": 1,
+  "explication": "La liste de correspondance rend l'opération réversible : c'est de la pseudonymisation."
+ },
+ {
+  "type": "associer",
+  "niveau": "moyen",
+  "q": "Associe chaque notion à sa caractéristique.",
+  "paires": [
+   [
+    "Anonymisation",
+    "irréversible"
+   ],
+   [
+    "Pseudonymisation",
+    "réversible avec une table"
+   ],
+   [
+    "Généralisation",
+    "information moins précise"
+   ],
+   [
+    "Agrégation",
+    "statistiques de groupe"
+   ]
+  ],
+  "explication": "Anonymisation irréversible, pseudonymisation réversible, généralisation moins précise, agrégation en groupes."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

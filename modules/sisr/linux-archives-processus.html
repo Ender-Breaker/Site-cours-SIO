@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Linux : archives, processus et variables — Étude Facile</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="sisr" data-chapter="linux-archives-processus">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<p>Ce chapitre rassemble trois outils du quotidien d&#x27;un administrateur : <b>archiver</b> (sauvegardes), <b>gérer les processus</b> et utiliser les <b>variables d&#x27;environnement</b>.</p>
+<div data-terminal></div>
+<h2>1. Archiver et compresser</h2>
+<table><tr><th>Commande</th><th>Effet</th></tr><tr><td><code>tar -czvf a.tar.gz d/</code></td><td><b>c</b>rée une archive, compressée en g<b>z</b>ip, <b>v</b>erbeuse, nommée par <b>f</b></td></tr><tr><td><code>tar -tf a.tar.gz</code></td><td><b>t</b> liste le contenu sans extraire</td></tr><tr><td><code>tar -xzvf a.tar.gz</code></td><td>e<b>x</b>trait et décompresse en une fois</td></tr><tr><td><code>tar -xzf a.tar.gz chemin/f</code></td><td>extrait <b>un seul</b> fichier (chemin tel que listé)</td></tr><tr><td><code>gzip f</code> / <code>gunzip f.gz</code></td><td>compresse en <code>f.gz</code> / décompresse</td></tr><tr><td><code>cp -r d1 d2</code> · <code>rm -r d</code></td><td>copie / supprime un dossier entier</td></tr><tr><td><code>file f</code></td><td>type de contenu d&#x27;un fichier</td></tr></table>
+<pre>
+tar -tf a.tar.gz | grep nom   # cherche un fichier dans l&#x27;archive
+ls -R d                        # liste récursive pour vérifier
+</pre>
+<div class="box retenir"><b>Sauvegarde</b><p>Une archive <code>.tar.gz</code> est la base d&#x27;une sauvegarde : on archive le dossier (<code>tar -czvf</code>), on vérifie (<code>tar -tf</code>), puis on met l&#x27;archive à l&#x27;abri.</p></div>
+<h2>2. Processus et jobs</h2>
+<p>Chaque programme en cours est un <b>processus</b> avec un numéro, le <b>PID</b>.</p>
+<table><tr><th>Commande</th><th>Effet</th></tr><tr><td><code>ps</code></td><td>liste mes processus avec leur PID</td></tr><tr><td><code>cmd &amp;</code></td><td>lance en <b>arrière-plan</b></td></tr><tr><td><code>Ctrl+Z</code> puis <code>bg</code></td><td>suspend, puis relance en arrière-plan</td></tr><tr><td><code>jobs</code></td><td>liste les jobs suspendus ou en arrière-plan</td></tr><tr><td><code>fg %1</code></td><td>ramène le job 1 au premier plan</td></tr><tr><td><code>Ctrl+C</code></td><td>tue le job au premier plan</td></tr><tr><td><code>kill %4</code></td><td>tue le job n° 4</td></tr><tr><td><code>kill PID</code></td><td>tue par numéro de processus</td></tr><tr><td><code>kill -9 PID</code></td><td><b>force</b> si le processus résiste</td></tr></table>
+<h2>3. Les variables</h2>
+<table><tr><th>Syntaxe</th><th>Effet</th></tr><tr><td><code>echo $HOME</code></td><td>affiche la valeur d&#x27;une variable (HOME, USER, PATH…)</td></tr><tr><td><code>printenv</code> · <code>env</code></td><td>variables d&#x27;environnement</td></tr><tr><td><code>V=val</code></td><td>variable du shell (<b>pas d&#x27;espaces</b> autour du <code>=</code>)</td></tr><tr><td><code>export V=val</code></td><td>variable d&#x27;<b>environnement</b> (transmise aux programmes lancés)</td></tr><tr><td><code>unset V</code></td><td>supprime une variable</td></tr><tr><td><code>export PATH=$PATH:~/dir/bin</code></td><td>ajoute un dossier au PATH</td></tr><tr><td><code>cmd1; cmd2</code></td><td>plusieurs commandes sur une ligne</td></tr></table>
+<ul><li>Convention : MAJUSCULES pour l&#x27;environnement, minuscules pour le shell.</li><li><code>~/.bashrc</code> est lu à chaque shell, <code>~/.profile</code> à la connexion ; <code>source ~/.bashrc</code> le relit sans se reconnecter.</li><li><b>command not found</b> : la commande est absente du système ou son dossier n&#x27;est pas dans le <code>PATH</code>.</li></ul>
+<details open><summary>Résumé express</summary>
+<ul><li><code>tar -czvf</code> crée, <code>tar -tf</code> liste, <code>tar -xzvf</code> extrait ; <code>gzip</code>/<code>gunzip</code>.</li><li><code>ps</code>, <code>cmd &amp;</code>, <code>jobs</code>, <code>fg %n</code>, <code>kill %n</code>, <code>kill -9 PID</code>.</li><li><code>$VAR</code> lit une variable, <code>export V=val</code> l&#x27;exporte, <code>PATH</code> dit où chercher les commandes.</li></ul>
+</details>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Dans `tar -czvf a.tar.gz d/`, que fait la lettre `c` ?",
+  "options": [
+   "Compresse",
+   "Crée l'archive",
+   "Copie",
+   "Contrôle"
+  ],
+  "answer": 1,
+  "explication": "`c` = create. `z` = gzip."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle commande liste le contenu d'une archive sans l'extraire ?",
+  "options": [
+   "tar -tf a.tar.gz",
+   "tar -xf a.tar.gz",
+   "tar -cf a.tar.gz",
+   "ls a.tar.gz"
+  ],
+  "answer": 0,
+  "explication": "`-t` = list."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle commande extrait et décompresse `a.tar.gz` en une fois ?",
+  "options": [
+   "tar -xzvf a.tar.gz",
+   "tar -cvf a.tar.gz",
+   "gzip a.tar.gz",
+   "untar a.tar.gz"
+  ],
+  "answer": 0,
+  "explication": "`-x` extrait, `-z` décompresse."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle commande décompresse `f.gz` ?",
+  "options": [
+   "gunzip f.gz",
+   "ungzip f.gz",
+   "tar f.gz",
+   "unzip f"
+  ],
+  "answer": 0,
+  "explication": "`gunzip`."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Quelle commande affiche la liste de tes processus avec leur PID ?",
+  "answers": [
+   "ps"
+  ],
+  "explication": "`ps`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que fait le `&` à la fin d'une commande ?",
+  "options": [
+   "La lance en arrière-plan",
+   "La tue",
+   "L'exécute deux fois",
+   "La met en pause"
+  ],
+  "answer": 0,
+  "explication": "`&` = arrière-plan."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle commande liste les jobs en arrière-plan ?",
+  "options": [
+   "jobs",
+   "ps -j",
+   "bg",
+   "list"
+  ],
+  "answer": 0,
+  "explication": "`jobs`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel raccourci tue le job au premier plan ?",
+  "options": [
+   "Ctrl+C",
+   "Ctrl+Z",
+   "Ctrl+D",
+   "Ctrl+A"
+  ],
+  "answer": 0,
+  "explication": "`Ctrl+C` interrompt le job. `Ctrl+Z` le suspend."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que fait `kill -9 PID` ?",
+  "options": [
+   "Force l'arrêt du processus",
+   "Le met en pause",
+   "Le relance",
+   "Change sa priorité"
+  ],
+  "answer": 0,
+  "explication": "`-9` force si le processus résiste."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle commande ramène le job 1 au premier plan ?",
+  "options": [
+   "fg %1",
+   "bg %1",
+   "jobs 1",
+   "run 1"
+  ],
+  "answer": 0,
+  "explication": "`fg %1`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle syntaxe est correcte pour créer une variable du shell ?",
+  "options": [
+   "V=val",
+   "V = val",
+   "set V val",
+   "$V=val"
+  ],
+  "answer": 0,
+  "explication": "Aucun espace autour du `=`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle commande crée une variable **d'environnement** ?",
+  "options": [
+   "export V=val",
+   "V=val",
+   "echo V=val",
+   "env V"
+  ],
+  "answer": 0,
+  "explication": "`export`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "`bash: foo: command not found` signifie que…",
+  "options": [
+   "la commande est absente ou hors du PATH",
+   "foo est un dossier",
+   "le fichier est protégé",
+   "il manque sudo"
+  ],
+  "answer": 0,
+  "explication": "Absente du système ou pas dans le PATH."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quel fichier est lu à **chaque** ouverture d'un shell ?",
+  "options": [
+   "~/.bashrc",
+   "~/.profile",
+   "/etc/passwd",
+   "~/.bash_history"
+  ],
+  "answer": 0,
+  "explication": "`~/.bashrc` ; `~/.profile` est lu à la connexion."
+ },
+ {
+  "type": "vf",
+  "niveau": "difficile",
+  "q": "Une variable créée par `V=3` (sans `export`) est transmise aux programmes que tu lances.",
+  "answer": false,
+  "explication": "Il faut `export` pour la placer dans l'environnement."
+ },
+ {
+  "type": "terminal",
+  "niveau": "facile",
+  "q": "Crée l'archive compressée `sauvegarde.tar.gz` du dossier `docs`.",
+  "checks": [
+   {
+    "exists": "/home/etu/sauvegarde.tar.gz"
+   },
+   {
+    "cmd": "^tar\\s+-?\\w*c\\w*"
+   }
+  ],
+  "solution": "tar -czvf sauvegarde.tar.gz docs",
+  "explication": "",
+  "indice": "tar -czvf nom dossier",
+  "fs": {
+   "/home/etu/notes.txt": "Linux est sensible à la casse\nle shell interprète les commandes\nTab complète les noms\nLinux est libre\n",
+   "/home/etu/.bashrc": "# configuration du shell\n",
+   "/home/etu/docs/": null,
+   "/home/etu/docs/liste.txt": "pomme\nbanane\ncerise\nbanane\nabricot\n",
+   "/home/etu/docs/eleves.csv": "Durand;Alice;17\nMartin;Bob;18\nLeroy;Chloé;17\nBernard;David;19\n",
+   "/home/etu/docs/rapport.csv": "x;1\ny;2\n",
+   "/tmp/": null,
+   "/home/etu/script.sh": "#!/bin/bash\necho salut\n"
+  }
+ },
+ {
+  "type": "terminal",
+  "niveau": "moyen",
+  "q": "Crée l'archive `sauvegarde.tar.gz` de `docs`, puis **liste** son contenu sans l'extraire.",
+  "checks": [
+   {
+    "exists": "/home/etu/sauvegarde.tar.gz"
+   },
+   {
+    "cmd": "^tar\\s+-?\\w*t\\w*f"
+   },
+   {
+    "out": "docs/liste\\.txt"
+   }
+  ],
+  "solution": "tar -czvf sauvegarde.tar.gz docs\ntar -tf sauvegarde.tar.gz",
+  "explication": "",
+  "fs": {
+   "/home/etu/notes.txt": "Linux est sensible à la casse\nle shell interprète les commandes\nTab complète les noms\nLinux est libre\n",
+   "/home/etu/.bashrc": "# configuration du shell\n",
+   "/home/etu/docs/": null,
+   "/home/etu/docs/liste.txt": "pomme\nbanane\ncerise\nbanane\nabricot\n",
+   "/home/etu/docs/eleves.csv": "Durand;Alice;17\nMartin;Bob;18\nLeroy;Chloé;17\nBernard;David;19\n",
+   "/home/etu/docs/rapport.csv": "x;1\ny;2\n",
+   "/tmp/": null,
+   "/home/etu/script.sh": "#!/bin/bash\necho salut\n"
+  }
+ },
+ {
+  "type": "terminal",
+  "niveau": "facile",
+  "q": "Lance `sleep 300` en arrière-plan.",
+  "checks": [
+   {
+    "jobs": 1
+   }
+  ],
+  "solution": "sleep 300 &",
+  "explication": "",
+  "fs": {
+   "/home/etu/notes.txt": "Linux est sensible à la casse\nle shell interprète les commandes\nTab complète les noms\nLinux est libre\n",
+   "/home/etu/.bashrc": "# configuration du shell\n",
+   "/home/etu/docs/": null,
+   "/home/etu/docs/liste.txt": "pomme\nbanane\ncerise\nbanane\nabricot\n",
+   "/home/etu/docs/eleves.csv": "Durand;Alice;17\nMartin;Bob;18\nLeroy;Chloé;17\nBernard;David;19\n",
+   "/home/etu/docs/rapport.csv": "x;1\ny;2\n",
+   "/tmp/": null,
+   "/home/etu/script.sh": "#!/bin/bash\necho salut\n"
+  }
+ },
+ {
+  "type": "terminal",
+  "niveau": "moyen",
+  "q": "Lance `sleep 300` en arrière-plan, puis **tue** ce job.",
+  "checks": [
+   {
+    "cmd": "^sleep\\s+300\\s*&"
+   },
+   {
+    "jobs": 0
+   }
+  ],
+  "solution": "sleep 300 &\nkill %1",
+  "explication": "",
+  "indice": "kill %1",
+  "fs": {
+   "/home/etu/notes.txt": "Linux est sensible à la casse\nle shell interprète les commandes\nTab complète les noms\nLinux est libre\n",
+   "/home/etu/.bashrc": "# configuration du shell\n",
+   "/home/etu/docs/": null,
+   "/home/etu/docs/liste.txt": "pomme\nbanane\ncerise\nbanane\nabricot\n",
+   "/home/etu/docs/eleves.csv": "Durand;Alice;17\nMartin;Bob;18\nLeroy;Chloé;17\nBernard;David;19\n",
+   "/home/etu/docs/rapport.csv": "x;1\ny;2\n",
+   "/tmp/": null,
+   "/home/etu/script.sh": "#!/bin/bash\necho salut\n"
+  }
+ },
+ {
+  "type": "terminal",
+  "niveau": "facile",
+  "q": "Affiche la valeur de la variable `HOME`.",
+  "checks": [
+   {
+    "cmd": "^echo\\s+\\$\\{?HOME\\}?$"
+   },
+   {
+    "out": "^/home/etu$"
+   }
+  ],
+  "solution": "echo $HOME",
+  "explication": "",
+  "fs": {
+   "/home/etu/notes.txt": "Linux est sensible à la casse\nle shell interprète les commandes\nTab complète les noms\nLinux est libre\n",
+   "/home/etu/.bashrc": "# configuration du shell\n",
+   "/home/etu/docs/": null,
+   "/home/etu/docs/liste.txt": "pomme\nbanane\ncerise\nbanane\nabricot\n",
+   "/home/etu/docs/eleves.csv": "Durand;Alice;17\nMartin;Bob;18\nLeroy;Chloé;17\nBernard;David;19\n",
+   "/home/etu/docs/rapport.csv": "x;1\ny;2\n",
+   "/tmp/": null,
+   "/home/etu/script.sh": "#!/bin/bash\necho salut\n"
+  }
+ },
+ {
+  "type": "terminal",
+  "niveau": "moyen",
+  "q": "Crée la variable d'environnement `PROJET` valant `slam`.",
+  "checks": [
+   {
+    "env": [
+     "PROJET",
+     "slam"
+    ]
+   }
+  ],
+  "solution": "export PROJET=slam",
+  "explication": "",
+  "fs": {
+   "/home/etu/notes.txt": "Linux est sensible à la casse\nle shell interprète les commandes\nTab complète les noms\nLinux est libre\n",
+   "/home/etu/.bashrc": "# configuration du shell\n",
+   "/home/etu/docs/": null,
+   "/home/etu/docs/liste.txt": "pomme\nbanane\ncerise\nbanane\nabricot\n",
+   "/home/etu/docs/eleves.csv": "Durand;Alice;17\nMartin;Bob;18\nLeroy;Chloé;17\nBernard;David;19\n",
+   "/home/etu/docs/rapport.csv": "x;1\ny;2\n",
+   "/tmp/": null,
+   "/home/etu/script.sh": "#!/bin/bash\necho salut\n"
+  }
+ },
+ {
+  "type": "associer",
+  "niveau": "moyen",
+  "q": "Associe chaque commande à son rôle.",
+  "paires": [
+   [
+    "jobs",
+    "liste les jobs"
+   ],
+   [
+    "kill %1",
+    "tue le job 1"
+   ],
+   [
+    "fg %1",
+    "ramène le job 1 au premier plan"
+   ],
+   [
+    "ps",
+    "liste les processus"
+   ]
+  ],
+  "explication": "Gestion des processus."
+ },
+ {
+  "type": "associer",
+  "niveau": "moyen",
+  "q": "Associe chaque lettre de `tar` à son rôle.",
+  "paires": [
+   [
+    "c",
+    "créer"
+   ],
+   [
+    "x",
+    "extraire"
+   ],
+   [
+    "t",
+    "lister"
+   ],
+   [
+    "z",
+    "compression gzip"
+   ]
+  ],
+  "explication": "Les options de tar."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Suites géométriques — Étude Facile</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="maths" data-chapter="suites-geometriques">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<p>Une suite est <b>géométrique</b> si on passe d&#x27;un terme au suivant en multipliant toujours par le même nombre q, la <b>raison</b>.</p>
+<h2>1. Définition et terme général</h2>
+<pre>
+u(n+1) = q × u(n)
+u(n) = u(0) × q^n
+u(n) = u(p) × q^(n−p)
+</pre>
+<p>Pour montrer qu&#x27;une suite est géométrique, on calcule le <b>quotient</b> <code>u(n+1)/u(n)</code> : s&#x27;il est constant, c&#x27;est la raison. Exemple : 4 ; 12 ; 36 → 12/4 = 36/12 = 3.</p>
+<h3>Variations (avec u₀ &gt; 0)</h3>
+<ul><li>q &gt; 1 : croissante</li><li>0 &lt; q &lt; 1 : décroissante</li><li>q = 1 : constante</li></ul>
+<h2>2. Somme de termes</h2>
+<pre>
+1 + q + q² + … + q^n = (1 − q^(n+1)) / (1 − q)     (q ≠ 1)
+</pre>
+<p>Plus généralement : somme = premier terme × (1 − q^(nombre de termes)) / (1 − q).</p>
+<div class="box retenir"><b>Pourcentages</b><p>Augmenter de t % revient à multiplier par <code>1 + t/100</code> ; diminuer de t % à multiplier par <code>1 − t/100</code>. Une évolution à taux fixe est donc une suite géométrique (intérêts composés, baisse de valeur d&#x27;un matériel…).</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "La suite 3 ; 6 ; 12 ; 24 est géométrique.",
+  "answer": true,
+  "explication": "Raison 2."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle est la raison de 100 ; 50 ; 25 ?",
+  "options": [
+   "−50",
+   "0,5",
+   "2",
+   "25"
+  ],
+  "answer": 1,
+  "explication": "50/100 = 0,5."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Augmenter de 20 % revient à multiplier par…",
+  "options": [
+   "0,2",
+   "1,2",
+   "20",
+   "0,8"
+  ],
+  "answer": 1,
+  "explication": "1 + 20/100 = 1,2."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "u₀ = 2 et q = 3. Calcule u₄.",
+  "answers": [
+   "162"
+  ],
+  "explication": "2×3⁴ = 162."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "u₀ = 5 et q = 2. Calcule u₅.",
+  "answers": [
+   "160"
+  ],
+  "explication": "5×32 = 160."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Diminuer de 10 % revient à multiplier par ? (décimal avec virgule)",
+  "answers": [
+   "0,9",
+   "0.9"
+  ],
+  "explication": "1 − 0,1 = 0,9."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "u₁ = 3 et q = 2 (indexée à 1). Calcule u₆.",
+  "answers": [
+   "96"
+  ],
+  "explication": "3×2⁵ = 96."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Calcule 1 + 2 + 4 + 8 + 16 + 32.",
+  "answers": [
+   "63"
+  ],
+  "explication": "(1−2⁶)/(1−2) = 63."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Un capital de 1000 € augmente de 5 % par an. Quel est-il après 2 ans ? (en €)",
+  "answers": [
+   "1102,5",
+   "1102.5",
+   "1102,50"
+  ],
+  "explication": "1000×1,05² = 1102,5."
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Une machine perd 20 % de valeur par an et vaut 5000 € au départ. Valeur après 3 ans (en €) ?",
+  "answers": [
+   "2560"
+  ],
+  "explication": "5000×0,8³ = 2560."
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Calcule la somme u₀ + … + u₅ pour u₀ = 3 et q = 2.",
+  "answers": [
+   "189"
+  ],
+  "explication": "3×(1−2⁶)/(1−2) = 189."
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "u₀ = 1 et q = 2. À partir de quel n a-t-on uₙ ≥ 1000 ? (plus petit n)",
+  "answers": [
+   "10"
+  ],
+  "explication": "2⁹ = 512 < 1000 ≤ 1024 = 2¹⁰."
+ },
+ {
+  "type": "associer",
+  "niveau": "facile",
+  "q": "Associe chaque suite à sa raison.",
+  "paires": [
+   [
+    "2 ; 6 ; 18",
+    "3"
+   ],
+   [
+    "64 ; 32 ; 16",
+    "0,5"
+   ],
+   [
+    "5 ; 5 ; 5",
+    "1"
+   ],
+   [
+    "1 ; −2 ; 4",
+    "−2"
+   ]
+  ],
+  "explication": "q = u(n+1)/u(n)."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

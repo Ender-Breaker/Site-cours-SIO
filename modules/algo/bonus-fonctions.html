@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Fonctions — Étude Facile</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="algo" data-chapter="bonus-fonctions">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<div class="box retenir"><b>Chapitre bonus</b><p>Ce chapitre est un complément créé pour Étude Facile (il ne vient pas d&#x27;un support de cours). Les exemples sont à tester dans un terminal Python ou sur un éditeur en ligne.</p></div>
+<p>Une <b>fonction</b> est un bloc de code nommé, réutilisable. Elle évite de recopier le même code et rend le programme lisible.</p>
+<h2>1. Définir et appeler</h2>
+<pre>
+def carre(x):
+    return x * x
+
+print(carre(5))   # 25
+</pre>
+<ul><li><code>def</code> introduit la fonction, suivie de son nom et de ses <b>paramètres</b> entre parenthèses, puis <code>:</code>.</li><li><code>return</code> renvoie un résultat et <b>termine</b> la fonction.</li><li>Une fonction sans <code>return</code> renvoie <code>None</code>.</li><li>L&#x27;appel <code>carre(5)</code> passe l&#x27;<b>argument</b> 5 au paramètre x.</li></ul>
+<h2>2. Paramètres multiples et valeur par défaut</h2>
+<pre>
+def ttc(prix, taux=0.2):
+    return prix * (1 + taux)
+
+print(ttc(100))        # 120.0
+print(ttc(100, 0.1))   # 110.00000000000001
+</pre>
+<h2>3. Variables locales</h2>
+<p>Une variable créée dans une fonction est <b>locale</b> : elle n&#x27;existe pas en dehors. Les paramètres aussi.</p>
+<div class="box attention"><b>print ≠ return</b><p><code>print</code> <b>affiche</b> une valeur à l&#x27;écran ; <code>return</code> <b>renvoie</b> la valeur à l&#x27;appelant, qui peut la réutiliser dans un calcul.</p></div>
+<h2>4. Exemple complet</h2>
+<pre>
+def est_pair(n):
+    return n % 2 == 0
+
+def somme(l):
+    total = 0
+    for x in l:
+        total += x
+    return total
+
+print(est_pair(7))        # False
+print(somme([1, 2, 3]))   # 6
+</pre>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel mot-clé définit une fonction ?",
+  "options": [
+   "func",
+   "def",
+   "function",
+   "return"
+  ],
+  "answer": 1,
+  "explication": "def."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que fait `return` ?",
+  "options": [
+   "affiche une valeur",
+   "renvoie une valeur et termine la fonction",
+   "répète la fonction",
+   "importe un module"
+  ],
+  "answer": 1,
+  "explication": "Renvoie le résultat à l'appelant."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "Une variable définie dans une fonction est utilisable partout dans le programme.",
+  "answer": false,
+  "explication": "Elle est locale à la fonction."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que renvoie une fonction sans return ?",
+  "options": [
+   "0",
+   "None",
+   "une erreur",
+   "une chaîne vide"
+  ],
+  "answer": 1,
+  "explication": "None."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Qu'affiche ce code ?",
+  "answers": [
+   "25"
+  ],
+  "explication": "carre(5) = 25.",
+  "code": "def carre(x):\n    return x * x\nprint(carre(5))"
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Qu'affiche ce code ?",
+  "answers": [
+   "7"
+  ],
+  "explication": "add(3, 4) = 7.",
+  "code": "def add(a, b):\n    return a + b\nprint(add(3, 4))"
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Qu'affiche ce code ?",
+  "answers": [
+   "10"
+  ],
+  "explication": "double(5) = 10 ; le résultat de la fonction est affiché.",
+  "code": "def double(x):\n    return 2 * x\nprint(double(5))"
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Qu'affiche ce code ?",
+  "answers": [
+   "8"
+  ],
+  "explication": "puiss(2) utilise n=3 par défaut : 2³ = 8.",
+  "code": "def puiss(x, n=3):\n    return x ** n\nprint(puiss(2))"
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Qu'affiche ce code ?",
+  "answers": [
+   "None"
+  ],
+  "explication": "La fonction n'a pas de return : f(2) vaut None.",
+  "code": "def f(x):\n    y = x + 1\nprint(f(2))"
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Qu'affiche ce code ?",
+  "answers": [
+   "12"
+  ],
+  "explication": "g(3) vaut 9, puis +3.",
+  "code": "def g(x):\n    return x * x\nprint(g(3) + 3)"
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Qu'affiche ce code ?",
+  "answers": [
+   "True"
+  ],
+  "explication": "est_pair(10) : 10 % 2 == 0.",
+  "code": "def est_pair(n):\n    return n % 2 == 0\nprint(est_pair(10))"
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Qu'affiche ce code ?",
+  "answers": [
+   "15"
+  ],
+  "explication": "total des éléments de la liste.",
+  "code": "def somme(l):\n    t = 0\n    for x in l:\n        t += x\n    return t\nprint(somme([4, 5, 6]))"
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

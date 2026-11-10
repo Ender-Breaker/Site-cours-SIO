@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>CSS : les bases et les sélecteurs — Étude Facile</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="slam" data-chapter="css-bases">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<p><b>CSS</b> (Cascading Style Sheets, « feuilles de style en cascade ») décrit la <b>présentation</b> d&#x27;une page : couleurs, polices, marges, positions. HTML décrit le contenu, CSS le décore.</p>
+<h2>1. Associer une feuille de style</h2>
+<p>Le style d&#x27;un <code>&lt;h1&gt;</code> répété partout est un problème : si on veut le changer, il faut modifier chaque page. Solution : définir le style <b>une seule fois</b>.</p>
+<pre>
+&lt;!-- Dans le &lt;head&gt; de la page : balise &lt;style&gt; --&gt;
+&lt;style&gt;
+  h1 { color: green; }
+&lt;/style&gt;
+
+&lt;!-- Ou, mieux : un fichier séparé, relié à plusieurs pages --&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;style.css&quot; /&gt;
+</pre>
+<table><tr><th>Méthode</th><th>Avantages</th></tr><tr><td>Style répété dans chaque balise (<code>style=&quot;...&quot;</code>)</td><td>à éviter : répétitions, rendu difficile à maintenir</td></tr><tr><td><code>&lt;style&gt;</code> dans le <code>&lt;head&gt;</code></td><td>style défini une fois pour la page, rendu homogène</td></tr><tr><td>Fichier <code>.css</code> + <code>&lt;link&gt;</code></td><td>un seul fichier pour tout le site, HTML plus lisible, facile à maintenir</td></tr></table>
+<h2>2. Syntaxe d&#x27;une règle</h2>
+<pre>
+sélecteur {
+    propriété: valeur;
+    autre-propriété: valeur;
+}
+
+h1 { color: blue; font-size: 24px; }
+</pre>
+<p>Attention : dans un fichier CSS, la syntaxe est différente de HTML (accolades, deux-points, points-virgules). Si une même propriété est écrite plusieurs fois, <b>la dernière valeur est prioritaire</b>.</p>
+<h2>3. Structure arborescente du HTML</h2>
+<p>HTML forme un <b>arbre</b> : chaque balise imbriquée est le « fils » de la balise qui la contient. CSS et JavaScript utilisent cet arbre.</p>
+<pre>
+body { color: blue; }      /* l&#x27;élément body */
+div { color: blue; }       /* toutes les div */
+* { color: blue; }         /* tous les éléments */
+div div p { color: blue; } /* un paragraphe situé dans 2 div imbriquées */
+</pre>
+<div class="box retenir"><b>À retenir</b><p>Les styles <b>s&#x27;héritent</b> : un style appliqué à un parent s&#x27;applique à ses enfants (sauf s&#x27;ils définissent le leur).</p></div>
+<h2>4. Un objectif = une syntaxe</h2>
+<table><tr><th>Je veux…</th><th>J&#x27;utilise</th><th>En CSS</th><th>En HTML</th></tr><tr><td>un visuel homogène pour des balises du même type</td><td>un <b>sélecteur</b> de balise</td><td><code>p { … }</code></td><td>rien à ajouter</td></tr><tr><td>un visuel homogène pour des balises différentes</td><td>une <b>classe</b></td><td><code>.alerte { … }</code></td><td><code>class=&quot;alerte&quot;</code></td></tr><tr><td>un visuel exceptionnel sur une balise précise</td><td>un <b>identifiant</b></td><td><code>#illustration { … }</code></td><td><code>id=&quot;illustration&quot;</code></td></tr><tr><td>différencier survol, lien visité…</td><td>une <b>pseudo-classe</b></td><td><code>a:hover { … }</code></td><td>rien à ajouter</td></tr></table>
+<pre>
+/* style.css */
+.menu { color: darkred; }          /* classe : plusieurs éléments */
+#illustration { background: #eee; } /* identifiant : un seul élément */
+a:visited { color: green; }         /* lien déjà visité */
+a:hover   { text-decoration: underline; } /* au survol */
+img { width: 300px; }               /* toutes les images */
+</pre>
+<pre>
+&lt;div class=&quot;menu&quot;&gt;...&lt;/div&gt;
+&lt;h1 class=&quot;menu&quot;&gt;Titre&lt;/h1&gt;
+&lt;div id=&quot;illustration&quot;&gt;...&lt;/div&gt;
+</pre>
+<div class="box attention"><b>Classe ou identifiant ?</b><p>Une <b>classe</b> (<code>.nom</code>) peut être utilisée sur autant d&#x27;éléments qu&#x27;on veut. Un <b>identifiant</b> (<code>#nom</code>) ne doit désigner qu&#x27;<b>un seul</b> élément de la page.</p></div>
+<h2>5. Balises sémantiques HTML5</h2>
+<p>HTML5 propose des balises qui donnent du <b>sens</b> à la structure : <code>&lt;header&gt;</code> (en-tête), <code>&lt;nav&gt;</code> (menu), <code>&lt;main&gt;</code> (contenu principal), <code>&lt;section&gt;</code>, <code>&lt;article&gt;</code>, <code>&lt;aside&gt;</code> (contenu annexe), <code>&lt;footer&gt;</code> (pied de page).</p>
+<details open><summary>Résumé express</summary>
+<ul><li>Une feuille de style <code>.css</code> reliée par <code>&lt;link&gt;</code> évite de répéter les styles et homogénéise le site.</li><li>Règle : <code>sélecteur { propriété: valeur; }</code> ; la dernière valeur écrite est prioritaire.</li><li>Sélecteur de balise → type ; <code>.classe</code> → plusieurs éléments ; <code>#id</code> → un seul ; <code>:hover</code>/<code>:visited</code> → états.</li><li>Les styles s&#x27;héritent le long de l&#x27;arbre HTML.</li></ul>
+</details>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que signifie CSS ?",
+  "options": [
+   "Cascading Style Sheets",
+   "Computer Style System",
+   "Color Sheet Syntax",
+   "Creative Site Structure"
+  ],
+  "answer": 0,
+  "explication": "Cascading Style Sheets : feuilles de style en cascade."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel est le rôle de CSS ?",
+  "options": [
+   "Décrire la structure de la page",
+   "Décrire la présentation (couleurs, positions…)",
+   "Exécuter du code sur le serveur",
+   "Stocker des données"
+  ],
+  "answer": 1,
+  "explication": "HTML structure, CSS présente."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle balise relie un fichier CSS externe à une page ?",
+  "options": [
+   "<style>",
+   "<link>",
+   "<script>",
+   "<css>"
+  ],
+  "answer": 1,
+  "explication": "`<link rel=\"stylesheet\" href=\"style.css\" />` dans le `<head>`."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "Écrire le style de `<h1>` dans chaque balise facilite la maintenance du site.",
+  "answer": false,
+  "explication": "C'est l'inverse : il faut modifier chaque balise. On définit le style une seule fois."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel est l'avantage d'une feuille de style séparée ?",
+  "options": [
+   "Le rendu est homogène et plus facile à maintenir",
+   "La page charge toujours instantanément",
+   "Elle remplace le HTML",
+   "Elle permet d'écrire du PHP"
+  ],
+  "answer": 0,
+  "explication": "Style isolé, rendu homogène, HTML plus lisible."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle est la syntaxe correcte d'une règle CSS ?",
+  "options": [
+   "h1 { color: red; }",
+   "h1 (color = red)",
+   "<h1 color=red>",
+   "h1: { color, red }"
+  ],
+  "answer": 0,
+  "explication": "`sélecteur { propriété: valeur; }`."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Que signifie la propriété suivante : dans quelle couleur s'affiche le texte ?",
+  "answers": [
+   "rouge",
+   "red"
+  ],
+  "explication": "`color: red` met le texte en rouge.",
+  "code": "p { color: red; }"
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Si la même propriété est écrite deux fois pour un même élément, laquelle est utilisée ?",
+  "options": [
+   "La première",
+   "La dernière",
+   "La plus longue",
+   "Aucune"
+  ],
+  "answer": 1,
+  "explication": "La valeur de la dernière propriété est prioritaire."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que sélectionne `div div p { color: blue; }` ?",
+  "options": [
+   "Tous les paragraphes",
+   "Un paragraphe situé dans deux div imbriquées",
+   "Toutes les div",
+   "Le premier paragraphe de la page"
+  ],
+  "answer": 1,
+  "explication": "Le sélecteur suit l'imbrication des balises."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que sélectionne `* { color: blue; }` ?",
+  "options": [
+   "Tous les éléments",
+   "Rien",
+   "Seulement le body",
+   "Seulement les liens"
+  ],
+  "answer": 0,
+  "explication": "`*` est le sélecteur universel."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Je veux un visuel homogène sur des balises **différentes**. J'utilise…",
+  "options": [
+   "Un sélecteur de balise",
+   "Une classe",
+   "Un identifiant",
+   "Une pseudo-classe"
+  ],
+  "answer": 1,
+  "explication": "Une classe peut être appliquée à n'importe quelle balise."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Je veux un visuel exceptionnel sur **une** balise bien identifiée. J'utilise…",
+  "options": [
+   "Une classe",
+   "Un identifiant",
+   "Un sélecteur universel",
+   "Une pseudo-classe"
+  ],
+  "answer": 1,
+  "explication": "Un identifiant désigne un élément unique."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Je veux changer l'aspect d'un lien au survol de la souris. J'utilise…",
+  "options": [
+   "Une pseudo-classe",
+   "Un identifiant",
+   "Une balise `<span>`",
+   "Un commentaire"
+  ],
+  "answer": 0,
+  "explication": "`a:hover` s'applique au survol."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel symbole précède le nom d'une classe en CSS ?",
+  "options": [
+   ".",
+   "#",
+   ":",
+   "@"
+  ],
+  "answer": 0,
+  "explication": "`.classe` pour une classe, `#id` pour un identifiant."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel symbole précède le nom d'un identifiant en CSS ?",
+  "options": [
+   ".",
+   "#",
+   ":",
+   "@"
+  ],
+  "answer": 1,
+  "explication": "`#identifiant`."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quel attribut HTML utilise-t-on pour appliquer la classe `menu` à une `<div>` ? (écris l'attribut complet)",
+  "answers": [
+   "class=\"menu\"",
+   "class='menu'"
+  ],
+  "explication": "En HTML : `<div class=\"menu\">`."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quel attribut HTML utilise-t-on pour appliquer l'identifiant `illustration` à une `<div>` ?",
+  "answers": [
+   "id=\"illustration\"",
+   "id='illustration'"
+  ],
+  "explication": "En HTML : `<div id=\"illustration\">`."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quel sélecteur CSS cible les liens déjà visités ?",
+  "answers": [
+   "a:visited"
+  ],
+  "explication": "La pseudo-classe `:visited` s'applique aux liens déjà parcourus."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quelle règle CSS limite toutes les images à 300 pixels de large ?",
+  "answers": [
+   "img{width:300px;}",
+   "img{width:300px}"
+  ],
+  "explication": "`img { width: 300px; }`."
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "Un même identifiant (`id`) peut être utilisé sur plusieurs éléments d'une page.",
+  "answer": false,
+  "explication": "Un identifiant doit être unique dans la page ; pour plusieurs éléments, on utilise une classe."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle balise HTML5 sert à regrouper le menu de navigation ?",
+  "options": [
+   "<header>",
+   "<nav>",
+   "<aside>",
+   "<footer>"
+  ],
+  "answer": 1,
+  "explication": "`<nav>` = navigation."
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "Un style appliqué à `<body>` s'hérite en général par ses éléments enfants.",
+  "answer": true,
+  "explication": "Les styles s'héritent le long de l'arbre HTML."
+ },
+ {
+  "type": "associer",
+  "niveau": "moyen",
+  "q": "Associe chaque objectif à la syntaxe adaptée.",
+  "paires": [
+   [
+    "balises du même type",
+    "sélecteur de balise"
+   ],
+   [
+    "balises différentes, même style",
+    "classe"
+   ],
+   [
+    "un élément unique",
+    "identifiant"
+   ],
+   [
+    "survol, visité",
+    "pseudo-classe"
+   ]
+  ],
+  "explication": "Un objectif = une syntaxe."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

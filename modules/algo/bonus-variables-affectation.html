@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Variables et affectation — Étude Facile</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="algo" data-chapter="bonus-variables-affectation">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<div class="box retenir"><b>Chapitre bonus</b><p>Ce chapitre est un complément créé pour Étude Facile (il ne vient pas d&#x27;un support de cours). Les exemples sont à tester dans un terminal Python ou sur un éditeur en ligne.</p></div>
+<p>Une <b>variable</b> est une case mémoire portant un nom, qui contient une valeur. En Python, on la crée simplement avec <code>=</code> (l&#x27;<b>affectation</b>).</p>
+<pre data-repl>
+&gt;&gt;&gt; age = 17
+&gt;&gt;&gt; nom = &#x27;Léa&#x27;
+&gt;&gt;&gt; age = age + 1
+&gt;&gt;&gt; age
+18
+</pre>
+<h2>1. Affectation</h2>
+<ul><li><code>x = 5</code> signifie « x <b>prend la valeur</b> 5 », ce n&#x27;est pas une égalité mathématique.</li><li><code>x = x + 1</code> est donc possible : on calcule d&#x27;abord à droite, puis on range le résultat dans x.</li><li>Python lit les instructions <b>de haut en bas</b> : la dernière valeur affectée gagne.</li></ul>
+<h2>2. Noms de variables</h2>
+<ul><li>lettres, chiffres et <code>_</code>, sans commencer par un chiffre ;</li><li>sensible à la casse : <code>Age</code> et <code>age</code> sont deux variables différentes ;</li><li>éviter les mots réservés (<code>if</code>, <code>for</code>, <code>while</code>, <code>print</code>…) ;</li><li>choisir des noms parlants : <code>prix_ttc</code> plutôt que <code>x</code>.</li></ul>
+<h2>3. Échanger deux variables</h2>
+<pre>
+a = 3
+b = 8
+c = a      # on garde a en mémoire
+a = b
+b = c
+# a vaut 8, b vaut 3
+
+# version Python
+a, b = b, a
+</pre>
+<h2>4. Opérateurs raccourcis</h2>
+<table><tr><th>Écriture</th><th>Équivaut à</th></tr><tr><td><code>x += 2</code></td><td><code>x = x + 2</code></td></tr><tr><td><code>x -= 2</code></td><td><code>x = x - 2</code></td></tr><tr><td><code>x *= 2</code></td><td><code>x = x * 2</code></td></tr><tr><td><code>x //= 2</code></td><td><code>x = x // 2</code></td></tr></table>
+<div class="box attention"><b>Erreur classique</b><p>Utiliser une variable <b>avant</b> de l&#x27;avoir affectée provoque <code>NameError</code>.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que fait l'instruction `x = 5` ?",
+  "options": [
+   "compare x et 5",
+   "range la valeur 5 dans x",
+   "affiche 5",
+   "teste si x vaut 5"
+  ],
+  "answer": 1,
+  "explication": "C'est une affectation."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "`x = x + 1` est impossible en programmation.",
+  "answer": false,
+  "explication": "On calcule x + 1 puis on le range dans x."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel nom de variable est valide ?",
+  "options": [
+   "2age",
+   "mon-age",
+   "mon_age",
+   "for"
+  ],
+  "answer": 2,
+  "explication": "Ni chiffre au début, ni tiret, ni mot réservé."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "En Python, `Age` et `age` désignent la même variable.",
+  "answer": false,
+  "explication": "Python est sensible à la casse."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Que vaut x à la fin ?",
+  "answers": [
+   "7"
+  ],
+  "explication": "x vaut 3, puis 3 + 4 = 7.",
+  "code": "x = 3\nx = x + 4"
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Que vaut y à la fin ?",
+  "answers": [
+   "10"
+  ],
+  "explication": "x = 5 ; y = 10.",
+  "code": "x = 5\ny = x * 2"
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Que vaut a à la fin ?",
+  "answers": [
+   "8"
+  ],
+  "explication": "a prend la valeur de b (8) ; b ne change pas a ensuite.",
+  "code": "a = 3\nb = 8\na = b\nb = 1"
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Que vaut z à la fin ?",
+  "answers": [
+   "12"
+  ],
+  "explication": "x=2, x devient 3, y=4, z = 3*4 = 12.",
+  "code": "x = 2\nx = x + 1\ny = 4\nz = x * y"
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Que vaut n à la fin ?",
+  "answers": [
+   "20"
+  ],
+  "explication": "n: 4 → 5 → 20.",
+  "code": "n = 4\nn += 1\nn *= 4"
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Que vaut b à la fin ?",
+  "answers": [
+   "3"
+  ],
+  "explication": "Après l'échange a, b = b, a : a=8, b=3.",
+  "code": "a = 3\nb = 8\na, b = b, a"
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Que valent a puis b ? Écris-les séparés par un espace.",
+  "answers": [
+   "5 5"
+  ],
+  "explication": "a prend la valeur de b (5) avant que b reçoive a : les deux valent 5. L'échange sans variable temporaire est faux.",
+  "code": "a = 2\nb = 5\na = b\nb = a"
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Que vaut x à la fin ?",
+  "answers": [
+   "9"
+  ],
+  "explication": "x = 1, +2 → 3, *3 → 9.",
+  "code": "x = 1\nx += 2\nx *= 3"
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Afficher et saisir — Étude Facile</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="algo" data-chapter="bonus-affichage-saisie">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<div class="box retenir"><b>Chapitre bonus</b><p>Ce chapitre est un complément créé pour Étude Facile (il ne vient pas d&#x27;un support de cours). Les exemples sont à tester dans un terminal Python ou sur un éditeur en ligne.</p></div>
+<p>Un programme communique avec l&#x27;utilisateur : il <b>affiche</b> avec <code>print()</code> et <b>lit</b> avec <code>input()</code>.</p>
+<h2>1. Afficher avec print</h2>
+<pre data-repl>
+&gt;&gt;&gt; print(&#x27;Bonjour&#x27;)
+Bonjour
+&gt;&gt;&gt; print(&#x27;x =&#x27;, 5)
+x = 5
+&gt;&gt;&gt; print(2 + 3)
+5
+</pre>
+<p><code>print</code> accepte plusieurs valeurs séparées par des virgules : elles sont affichées avec un espace entre chaque.</p>
+<h2>2. Lire avec input</h2>
+<pre>
+nom = input(&#x27;Ton prénom ? &#x27;)
+print(&#x27;Salut&#x27;, nom)
+</pre>
+<div class="box attention"><b>input renvoie toujours du texte</b><p>Même si l&#x27;utilisateur tape 12, <code>input()</code> renvoie la chaîne <code>&#x27;12&#x27;</code>. Pour calculer, il faut convertir : <code>int(...)</code> pour un entier, <code>float(...)</code> pour un décimal.</p></div>
+<pre>
+age = int(input(&#x27;Ton âge ? &#x27;))
+print(&#x27;Dans 10 ans :&#x27;, age + 10)
+</pre>
+<h2>3. Les f-strings</h2>
+<pre data-repl>
+&gt;&gt;&gt; nom = &#x27;Léa&#x27;
+&gt;&gt;&gt; age = 17
+&gt;&gt;&gt; print(f&#x27;{nom} a {age} ans&#x27;)
+Léa a 17 ans
+</pre>
+<p>Le préfixe <code>f</code> permet d&#x27;insérer des variables ou calculs entre <code>{}</code> dans le texte : <code>f&#x27;{2+3}&#x27;</code> donne <code>&#x27;5&#x27;</code>.</p>
+<h2>4. Caractères spéciaux</h2>
+<table><tr><th>Séquence</th><th>Effet</th></tr><tr><td><code>\n</code></td><td>retour à la ligne</td></tr><tr><td><code>\t</code></td><td>tabulation</td></tr><tr><td><code>end=&#x27;&#x27;</code></td><td>empêche le retour à la ligne de print</td></tr></table>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle fonction affiche du texte à l'écran ?",
+  "options": [
+   "input()",
+   "print()",
+   "show()",
+   "write()"
+  ],
+  "answer": 1,
+  "explication": "print()."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel est le type de la valeur renvoyée par `input()` ?",
+  "options": [
+   "int",
+   "float",
+   "str",
+   "bool"
+  ],
+  "answer": 2,
+  "explication": "Toujours une chaîne de caractères."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "`input()` renvoie un entier si l'utilisateur tape un nombre.",
+  "answer": false,
+  "explication": "Il faut convertir avec int()."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Comment convertir la saisie en entier ?",
+  "options": [
+   "int(input())",
+   "input(int())",
+   "str(input())",
+   "integer(input())"
+  ],
+  "answer": 0,
+  "explication": "int(input(...))."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Qu'affiche ce code ?",
+  "answers": [
+   "x=5"
+  ],
+  "explication": "Ici on concatène deux chaînes avec + : aucun espace n’est ajouté, donc x=5.",
+  "code": "print('x=' + '5')"
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Qu'affiche ce code ?",
+  "answers": [
+   "5"
+  ],
+  "explication": "2 + 3 = 5.",
+  "code": "print(2 + 3)"
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Qu'affiche ce code ?",
+  "answers": [
+   "23"
+  ],
+  "explication": "Concaténation de textes : '2' + '3' = '23'.",
+  "code": "print('2' + '3')"
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Qu'affiche ce code ?",
+  "answers": [
+   "Lea a 17 ans"
+  ],
+  "explication": "f-string avec nom et age.",
+  "code": "nom = 'Lea'\nage = 17\nprint(f'{nom} a {age} ans')"
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "L'utilisateur tape 4. Qu'affiche ce code ?",
+  "answers": [
+   "8"
+  ],
+  "explication": "int('4') = 4 ; 4*2 = 8.",
+  "code": "n = int(input())\nprint(n * 2)"
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "L'utilisateur tape 4. Qu'affiche ce code ? (attention à la conversion)",
+  "answers": [
+   "44"
+  ],
+  "explication": "Sans int(), '4' * 2 répète la chaîne : '44'.",
+  "code": "n = input()\nprint(n * 2)"
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Qu'affiche ce code ?",
+  "answers": [
+   "7"
+  ],
+  "explication": "f'{3+4}' calcule dans les accolades.",
+  "code": "print(f'{3+4}')"
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Qu'affiche ce code ? (une seule ligne)",
+  "answers": [
+   "ab"
+  ],
+  "explication": "end='' empêche le retour à la ligne.",
+  "code": "print('a', end='')\nprint('b')"
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

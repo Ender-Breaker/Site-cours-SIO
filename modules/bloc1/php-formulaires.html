@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>PHP : formulaires et traitement des données — Étude Facile</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="bloc1" data-chapter="php-formulaires">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<p>Un <b>formulaire HTML</b> envoie des données à une page PHP, qui les récupère et les traite. C&#x27;est la base de toute application web : inscription, connexion, recherche…</p>
+<h2>1. Le formulaire HTML</h2>
+<pre>
+&lt;form id=&quot;formulaire&quot; action=&quot;traitement.php&quot; method=&quot;get&quot;&gt;
+
+    &lt;input id=&quot;test&quot; name=&quot;test&quot; type=&quot;text&quot; placeholder=&quot;TEST&quot; /&gt;
+
+    &lt;label for=&quot;checkrgpd&quot;&gt;J&#x27;accepte le RGPD : &lt;/label&gt;
+    &lt;input id=&quot;checkrgpd&quot; name=&quot;checkrgpd&quot; type=&quot;checkbox&quot; value=&quot;accepte&quot; /&gt;
+
+    &lt;input id=&quot;envoyer&quot; name=&quot;envoyer&quot; type=&quot;submit&quot; value=&quot;Envoyer&quot; /&gt;
+&lt;/form&gt;
+</pre>
+<table><tr><th>Élément</th><th>Rôle</th></tr><tr><td><code>action=&quot;traitement.php&quot;</code></td><td>page PHP qui reçoit les données</td></tr><tr><td><code>method=&quot;get&quot;</code> / <code>&quot;post&quot;</code></td><td><code>get</code> : données visibles dans l&#x27;URL ; <code>post</code> : données dans le corps de la requête</td></tr><tr><td><code>name=&quot;...&quot;</code></td><td>nom du champ : c&#x27;est la <b>clé</b> qu&#x27;on retrouve côté PHP</td></tr><tr><td><code>&lt;label for=&quot;id&quot;&gt;</code></td><td>texte associé à un champ (clic sur le texte = focus sur le champ)</td></tr><tr><td><code>type=&quot;submit&quot;</code></td><td>bouton qui envoie le formulaire</td></tr></table>
+<div class="box attention"><b><code>name</code>, pas seulement <code>id</code></b><p>Côté PHP, seuls les champs ayant un attribut <code>name</code> sont récupérés.</p></div>
+<h2>2. Récupérer les données en PHP</h2>
+<p>Les valeurs arrivent dans les tableaux <code>$_GET</code> (méthode get) ou <code>$_POST</code> (méthode post), avec le <code>name</code> du champ comme clé.</p>
+<pre>
+&lt;?php
+ini_set(&quot;display_errors&quot;, 1);
+
+$nom = $_POST[&quot;nom&quot;];          // si method=&quot;post&quot;
+$age = $_GET[&quot;age&quot;];           // si method=&quot;get&quot;
+</pre>
+<h3>Vérifier qu&#x27;une donnée existe : isset et empty</h3>
+<pre>
+&lt;?php
+if (isset($_GET[&quot;checkrgpd&quot;])) {
+    echo &quot;Accepte les conditions&quot;;
+} else {
+    echo &quot;&lt;span style=&#x27;color: red; background: yellow;&#x27;&gt;N&#x27;accepte pas les conditions&lt;/span&gt;&quot;;
+}
+</pre>
+<div class="box retenir"><b>À retenir</b><p>Une <b>case à cocher non cochée n&#x27;est pas envoyée</b> : on teste sa présence avec <code>isset($_GET[&quot;nom&quot;])</code>.</p><p><code>isset($x)</code> : la variable existe. <code>empty($x)</code> : la variable est vide ou absente.</p></div>
+<div class="box attention"><b>Ne jamais faire confiance aux données reçues</b><p>Avant d&#x27;afficher une donnée saisie par l&#x27;utilisateur, on la nettoie avec <code>htmlspecialchars($valeur)</code> pour éviter l&#x27;injection de code HTML/JavaScript (faille XSS). (Bonne pratique de sécurité, en complément de tes TP.)</p></div>
+<h2>3. Formulaire respectant le RGPD (TP)</h2>
+<p>Le TP demande un formulaire de collecte de données personnelles avec de bonnes pratiques RGPD :</p>
+<ul><li>un champ <b>nom</b> et un champ <b>prénom</b> (on ne collecte que le nécessaire : minimisation) ;</li><li>une <b>case à cocher</b> pour accepter la politique de confidentialité (consentement explicite, jamais cochée par défaut) ;</li><li>un bouton d&#x27;envoi ;</li><li>des <code>&lt;label&gt;</code> associés à chaque champ.</li></ul>
+<p>Côté PHP, on refuse le traitement si la case n&#x27;est pas cochée.</p>
+<h2>4. TP de synthèse : abonnement streaming</h2>
+<p>Le TP combine formulaire, <code>if / elseif / else</code> et <code>switch</code>.</p>
+<ol><li>Formulaire : âge, liste déroulante (standard, premium, famille), case « paiement à jour », bouton Valider.</li><li>Vérifier que le formulaire a été envoyé et récupérer les valeurs.</li><li>Réduction : moins de 18 ans → 20 % ; 18 ans et plus → aucune (<code>if / elseif / else</code>).</li><li>Avantages selon l&#x27;abonnement (<code>switch</code>) : standard = Vidéo HD ; premium = Vidéo 4K + Téléchargement ; famille = 4 utilisateurs simultanés.</li><li>Si le paiement n&#x27;est pas à jour : « Accès refusé » ; sinon un récapitulatif complet.</li></ol>
+<pre>
+&lt;?php
+$age = $_POST[&quot;age&quot;];
+$abo = $_POST[&quot;abonnement&quot;];
+
+if ($age &lt; 18) { $reduction = 20; } else { $reduction = 0; }
+
+switch ($abo) {
+    case &quot;standard&quot;: $avantages = &quot;Vidéo HD&quot;; break;
+    case &quot;premium&quot;:  $avantages = &quot;Vidéo 4K + Téléchargement&quot;; break;
+    case &quot;famille&quot;:  $avantages = &quot;4 utilisateurs simultanés&quot;; break;
+    default:         $avantages = &quot;Abonnement inconnu&quot;;
+}
+
+if (!isset($_POST[&quot;paiement&quot;])) {
+    echo &quot;Accès refusé&quot;;
+} else {
+    echo &quot;Abonnement $abo : $avantages (réduction : $reduction %)&quot;;
+}
+</pre>
+<details open><summary>Résumé express</summary>
+<ul><li><code>action</code> = page cible, <code>method</code> = get/post, <code>name</code> = clé côté PHP.</li><li><code>$_GET[&quot;clé&quot;]</code> / <code>$_POST[&quot;clé&quot;]</code> récupèrent les valeurs.</li><li>Case non cochée = non envoyée → <code>isset</code>.</li><li>RGPD : ne demander que le nécessaire, consentement explicite par case à cocher.</li></ul>
+</details>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel attribut de `<form>` indique la page qui traite les données ?",
+  "options": [
+   "method",
+   "action",
+   "name",
+   "target"
+  ],
+  "answer": 1,
+  "explication": "`action` contient l'adresse de la page PHP qui reçoit les données."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Avec `method=\"get\"`, où voit-on les données envoyées ?",
+  "options": [
+   "Dans l'URL",
+   "Nulle part",
+   "Dans un cookie",
+   "Dans une base de données"
+  ],
+  "answer": 0,
+  "explication": "En `get`, les données apparaissent dans l'adresse de la page."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "Un champ sans attribut `name` est récupéré par PHP.",
+  "answer": false,
+  "explication": "Seuls les champs avec un `name` sont envoyés : le `name` sert de clé."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "Une case à cocher non cochée est envoyée avec une valeur vide.",
+  "answer": false,
+  "explication": "Elle n'est tout simplement pas envoyée : on teste donc sa présence avec `isset`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle balise associe un texte à un champ de formulaire ?",
+  "options": [
+   "<legend>",
+   "<label>",
+   "<span>",
+   "<title>"
+  ],
+  "answer": 1,
+  "explication": "`<label for=\"id\">` est lié au champ qui a cet `id`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle instruction teste si la case `checkrgpd` (méthode get) a été cochée ?",
+  "options": [
+   "if ($_GET[\"checkrgpd\"] == 0)",
+   "if (isset($_GET[\"checkrgpd\"]))",
+   "if (empty($checkrgpd) == 1)",
+   "if ($checkrgpd)"
+  ],
+  "answer": 1,
+  "explication": "Une case cochée est envoyée, donc `isset` renvoie vrai."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Comment récupère-t-on en PHP la valeur du champ `name=\"nom\"` envoyé en post ?",
+  "answers": [
+   "$_POST[\"nom\"]",
+   "$_POST['nom']"
+  ],
+  "explication": "La clé est le `name` du champ."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Comment récupère-t-on en PHP la valeur du champ `name=\"age\"` envoyé en get ?",
+  "answers": [
+   "$_GET[\"age\"]",
+   "$_GET['age']"
+  ],
+  "explication": "`$_GET` pour la méthode get, avec le `name` du champ comme clé."
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "Une case « J'accepte la politique de confidentialité » doit être cochée par défaut.",
+  "answer": false,
+  "explication": "Le consentement RGPD doit être explicite : la case n'est jamais précochée."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Pourquoi n'ajoute-t-on que les champs nécessaires (nom, prénom) dans un formulaire RGPD ?",
+  "options": [
+   "Pour que la page charge plus vite",
+   "Par principe de minimisation des données",
+   "Parce que PHP limite le nombre de champs",
+   "Pour éviter les doublons"
+  ],
+  "answer": 1,
+  "explication": "Le RGPD impose de ne collecter que les données adéquates, pertinentes et non excessives."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "À quoi sert `htmlspecialchars($valeur)` ?",
+  "options": [
+   "À mettre en majuscules",
+   "À neutraliser le code HTML saisi par l'utilisateur",
+   "À chiffrer la valeur",
+   "À supprimer les espaces"
+  ],
+  "answer": 1,
+  "explication": "Elle transforme `<` et `>` en texte inoffensif pour éviter les injections (XSS)."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Dans le TP streaming, quelle réduction pour un utilisateur de 16 ans (en %) ?",
+  "answers": [
+   "20",
+   "20%",
+   "20 %"
+  ],
+  "explication": "Moins de 18 ans : 20 % de réduction."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Dans le TP streaming, quelle réduction pour 30 ans (en %) ?",
+  "answers": [
+   "0",
+   "0%",
+   "0 %"
+  ],
+  "explication": "18 ans et plus : aucune réduction."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Dans le TP streaming, quels avantages pour l'abonnement « premium » ?",
+  "answers": [
+   "Vidéo 4K + Téléchargement",
+   "Video 4K + Telechargement"
+  ],
+  "explication": "premium = Vidéo 4K + Téléchargement."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Dans le TP streaming, quels avantages pour l'abonnement « famille » ?",
+  "answers": [
+   "4 utilisateurs simultanés",
+   "4 utilisateurs simultanes"
+  ],
+  "explication": "famille = 4 utilisateurs simultanés."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Que s'affiche-t-il si le paiement n'est pas à jour ?",
+  "answers": [
+   "Accès refusé",
+   "Acces refuse"
+  ],
+  "explication": "Sans paiement à jour, on affiche « Accès refusé »."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Dans le TP streaming, quelle structure détermine les avantages selon le type d'abonnement ?",
+  "options": [
+   "if / else seulement",
+   "switch",
+   "une boucle",
+   "une constante"
+  ],
+  "answer": 1,
+  "explication": "Plusieurs valeurs possibles d'une même variable : `switch` est adapté."
+ },
+ {
+  "type": "associer",
+  "niveau": "moyen",
+  "q": "Associe chaque élément du formulaire à son rôle.",
+  "paires": [
+   [
+    "action",
+    "page qui traite les données"
+   ],
+   [
+    "method",
+    "get ou post"
+   ],
+   [
+    "name",
+    "clé côté PHP"
+   ],
+   [
+    "type=\"submit\"",
+    "bouton d'envoi"
+   ]
+  ],
+  "explication": "`action` = destination, `method` = mode d'envoi, `name` = clé, `submit` = envoi."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

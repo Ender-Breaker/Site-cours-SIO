@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Statistiques à deux variables — Étude Facile</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="maths" data-chapter="statistiques-ajustement">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<p>La statistique à deux variables étudie le lien entre deux séries de données (x ; y) pour en tirer une <b>prévision</b>.</p>
+<h2>1. Nuage de points et point moyen</h2>
+<p>Le <b>nuage de points</b> est l&#x27;ensemble des points Mᵢ(xᵢ ; yᵢ). Le <b>point moyen</b> G a pour coordonnées les moyennes : <code>x̄ = Σxᵢ / n</code> et <code>ȳ = Σyᵢ / n</code>.</p>
+<p>Exemple : x = 8 ; 10 ; 12 ; 14 ; 16 ; 18 et y = 40 ; 55 ; 55 ; 70 ; 75 ; 95. Alors x̄ = 78/6 = 13 et ȳ = 390/6 = 65 : G(13 ; 65).</p>
+<h2>2. Ajustement affine</h2>
+<p>Quand les points sont sensiblement alignés, on les approche par une droite <code>y = ax + b</code>, la <b>droite d&#x27;ajustement</b>. Elle permet :</p>
+<ul><li>l&#x27;<b>interpolation</b> : estimer y pour un x situé *dans* la plage des données ;</li><li>l&#x27;<b>extrapolation</b> : estimer y pour un x *en dehors* de cette plage (moins fiable).</li></ul>
+<h3>Trois méthodes</h3>
+<ul><li><b>Au jugé</b> : on trace à la règle une droite proche des points.</li><li><b>Points moyens</b> : on sépare le nuage en deux groupes, on calcule leurs points moyens G1 et G2 et on trace (G1G2), qui passe par G.</li><li><b>Moindres carrés</b> (calculatrice / tableur) : la droite qui minimise la somme des carrés des écarts verticaux.</li></ul>
+<div class="box retenir"><b>La droite des moindres carrés passe toujours par G</b><p>Si y = ax + b, alors ȳ = a×x̄ + b : on peut retrouver b par <code>b = ȳ − a×x̄</code>.</p></div>
+<h2>3. Utiliser la droite</h2>
+<p>Avec y = 2,1x + 1,1 : pour x = 30, y = 2,1×30 + 1,1 = 64,1. Pour trouver x quand y = 70 : 70 = 2,1x + 1,1 donc x = 68,9/2,1 ≈ 32,8.</p>
+<h2>4. Ajustement par changement de variable</h2>
+<p>Si le nuage (x ; y) n&#x27;est pas aligné (croissance très rapide), on pose par exemple <code>z = log y</code>. Si le nuage (x ; z) est aligné, on ajuste z = ax + b, puis <code>y = 10^z = 10^b × (10^a)^x</code> : une relation <b>exponentielle</b>.</p>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Les coordonnées du point moyen G sont…",
+  "options": [
+   "les moyennes de x et de y",
+   "les maximums de x et de y",
+   "les médianes",
+   "les sommes de x et de y"
+  ],
+  "answer": 0,
+  "explication": "G(x̄ ; ȳ)."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "Extrapoler, c'est estimer une valeur hors de la plage des données.",
+  "answer": true,
+  "explication": "C'est la définition ; moins fiable que l'interpolation."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "La droite des moindres carrés ne passe jamais par le point moyen.",
+  "answer": false,
+  "explication": "Elle passe toujours par G."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Calcule la moyenne de x = 8, 10, 12, 14, 16, 18.",
+  "answers": [
+   "13"
+  ],
+  "explication": "78 / 6 = 13."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Calcule la moyenne de y = 40, 55, 55, 70, 75, 95.",
+  "answers": [
+   "65"
+  ],
+  "explication": "390 / 6 = 65."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "y = 2,1x + 1,1. Calcule y pour x = 20.",
+  "answers": [
+   "43,1",
+   "43.1"
+  ],
+  "explication": "2,1×20 + 1,1 = 43,1."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Droite y = 2x + b passant par G(13 ; 65). Que vaut b ?",
+  "answers": [
+   "39"
+  ],
+  "explication": "b = 65 − 2×13 = 39."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "y = 2,1x + 1,1. Pour quel x a-t-on y = 22,1 ?",
+  "answers": [
+   "10"
+  ],
+  "explication": "(22,1 − 1,1)/2,1 = 10."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Pour un nuage dont y double quand x augmente de 1, on tente le changement de variable…",
+  "options": [
+   "z = x²",
+   "z = log y",
+   "z = 1/x",
+   "z = x + y"
+  ],
+  "answer": 1,
+  "explication": "Une croissance exponentielle devient affine avec log y."
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Si z = log y = 0,3x + 1, que vaut y quand x = 0 ? (donne 10^1)",
+  "answers": [
+   "10"
+  ],
+  "explication": "y = 10^1 = 10."
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Moyenne de x : 1, 2, 3, 4, 5. Moyenne de y : 3, 5, 6, 9, 12. Donne ȳ.",
+  "answers": [
+   "7"
+  ],
+  "explication": "35/5 = 7."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Une prévision pour x loin des données (extrapolation) est…",
+  "options": [
+   "toujours exacte",
+   "plus risquée",
+   "impossible",
+   "identique à l'interpolation"
+  ],
+  "answer": 1,
+  "explication": "Rien ne garantit que la tendance continue."
+ },
+ {
+  "type": "associer",
+  "niveau": "facile",
+  "q": "Associe chaque terme à sa définition.",
+  "paires": [
+   [
+    "Interpolation",
+    "estimer dans la plage"
+   ],
+   [
+    "Extrapolation",
+    "estimer hors plage"
+   ],
+   [
+    "Point moyen",
+    "(x̄ ; ȳ)"
+   ],
+   [
+    "Moindres carrés",
+    "minimise les écarts²"
+   ]
+  ],
+  "explication": "Vocabulaire du cours."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

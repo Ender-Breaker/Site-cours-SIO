@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Service HTTP et URL — Étude Facile</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="slam" data-chapter="http-url">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<p>Quand tu tapes une adresse dans ton navigateur, il <b>réclame une page</b> à un serveur. Ce chapitre explique comment : le service HTTP, la composition d&#x27;une URL et le passage de paramètres.</p>
+<h2>1. Le service HTTP (service web)</h2>
+<p>Un navigateur ne sait qu&#x27;exécuter du <b>HTML</b> : il ne comprend pas le PHP. Pour exécuter du PHP, il doit demander à un <b>service HTTP</b> (un serveur web) de le faire et de lui renvoyer du HTML.</p>
+<div class="box "><b>Analogie du restaurant</b><p>Le <b>client</b> (navigateur) utilise une <b>URL</b> pour réclamer une page au <b>serveur</b> (cuisine), qui prépare la réponse et la renvoie.</p></div>
+<table><tr><th>Outil</th><th>Exemple</th></tr><tr><td>Serveurs web</td><td>Apache, Nginx (Windows et Linux) ; IIS (Windows)</td></tr><tr><td>Packs tout intégrés</td><td>EasyPHP, WAMP/LAMP (Apache, MySQL, PHP), WNMP/LEMP (Nginx, MySQL, PHP)</td></tr><tr><td>Fournis par les langages</td><td><code>php -S localhost:8000</code> ; <code>python -m http.server 8000</code></td></tr></table>
+<h3>Caractéristiques générales</h3>
+<ul><li>2 protocoles : <b>http</b> ou <b>https</b> (sécurisé).</li><li>Le <b>port</b> distingue deux services différents (par exemple intranet et extranet). Port par défaut : <b>80</b> (http).</li><li>Un <b>fichier de paramètres</b> : <code>nginx.conf</code>, <code>apache2.conf</code> ou <code>httpd.conf</code>.</li><li>Un <b>dossier racine</b> pour stocker les fichiers du site.</li><li>Page par défaut : <code>index.html</code> ou <code>index.php</code>.</li></ul>
+<h2>2. Exécuter un programme PHP facilement</h2>
+<pre>
+php -v                                  # vérifier que PHP est installé
+php -S localhost:8000                   # serveur web dans le dossier courant
+php -S localhost:8000 -t monRepertoire  # monRepertoire = dossier racine
+</pre>
+<p>Le navigateur appelle ensuite le serveur sur le port 8000 : <code>http://localhost:8000/calcul.php</code>.</p>
+<h2>3. Composition d&#x27;une URL</h2>
+<pre>
+https://lab.sio-estran.fr:18102/calcul.php?hauteur=10&amp;largeur=5
+</pre>
+<table><tr><th>Partie</th><th>Exemple</th><th>Rôle</th></tr><tr><td>Protocole</td><td><code>https</code></td><td>http ou https</td></tr><tr><td>Domaine (nom ou IP du serveur)</td><td><code>lab.sio-estran.fr</code></td><td>où se trouve le serveur</td></tr><tr><td>Port</td><td><code>18102</code></td><td>80 par défaut pour http (peut être omis)</td></tr><tr><td>Chemin et fichier</td><td><code>/calcul.php</code></td><td>page demandée (<code>index.html</code>/<code>index.php</code> par défaut)</td></tr><tr><td>Paramètres</td><td><code>?hauteur=10&amp;largeur=5</code></td><td>données envoyées au serveur</td></tr></table>
+<h2>4. Les paramètres d&#x27;une URL</h2>
+<p>Les paramètres commencent après un <code>?</code> et forment une liste de paires <b>clé=valeur</b> séparées par <code>&amp;</code> : <code>?clé1=valeur1&amp;clé2=valeur2</code>. Le serveur peut les utiliser avant d&#x27;envoyer la ressource au navigateur. C&#x27;est le programmeur qui décide des paramètres.</p>
+<pre>
+&lt;?php
+// URL : page.php?Nom=Durand&amp;age=17
+echo $_REQUEST[&quot;Nom&quot;];    // Durand
+echo $_REQUEST[&quot;age&quot;];    // 17
+</pre>
+<h3>GET et POST</h3>
+<table><tr><th></th><th>GET</th><th>POST</th></tr><tr><td>Superglobale PHP</td><td><code>$_GET</code></td><td><code>$_POST</code></td></tr><tr><td>Données visibles dans l&#x27;URL ?</td><td>oui</td><td>non</td></tr><tr><td>Pratique pour le debug ?</td><td>oui</td><td>moins</td></tr><tr><td>Sécurité</td><td>données modifiables dans l&#x27;URL</td><td>plus sécurisé (mais pas chiffré pour autant)</td></tr></table>
+<div class="box retenir"><b>À retenir</b><p><code>$_GET</code>, <code>$_POST</code> et <code>$_REQUEST</code> sont des <b>tableaux associatifs</b> qui contiennent les couples clé/valeur. C&#x27;est l&#x27;attribut <code>method</code> de <code>&lt;form&gt;</code> qui décide de la superglobale chargée.</p></div>
+<details open><summary>Résumé express</summary>
+<ul><li>Le navigateur demande une page via une URL à un service HTTP (Apache, Nginx…), qui exécute le PHP et renvoie du HTML.</li><li>URL : protocole, domaine, port (80 par défaut), chemin/fichier, paramètres <code>?clé=valeur&amp;clé=valeur</code>.</li><li><code>php -S localhost:8000</code> lance un petit serveur de test.</li><li><code>$_GET</code> (visible dans l&#x27;URL) / <code>$_POST</code> (non visible) / <code>$_REQUEST</code>.</li></ul>
+</details>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Pourquoi un navigateur ne peut-il pas exécuter directement un programme PHP ?",
+  "options": [
+   "Il n'exécute que du HTML : il faut un service HTTP pour exécuter le PHP",
+   "Le PHP est trop lent",
+   "Le PHP est interdit",
+   "Il n'y a pas assez de mémoire"
+  ],
+  "answer": 0,
+  "explication": "Un service HTTP exécute le PHP et renvoie du HTML au navigateur."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel est le port par défaut du protocole http ?",
+  "options": [
+   "21",
+   "80",
+   "443",
+   "8000"
+  ],
+  "answer": 1,
+  "explication": "Le port par défaut de http est 80."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel logiciel n'est PAS un serveur web ?",
+  "options": [
+   "Apache",
+   "Nginx",
+   "IIS",
+   "Visual Studio Code"
+  ],
+  "answer": 3,
+  "explication": "VS Code est un éditeur de code."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que signifie LEMP ?",
+  "options": [
+   "Linux, Nginx, MySQL, PHP",
+   "Linux, Apache, MySQL, PHP",
+   "Local, Edge, Mail, Proxy",
+   "Linux, Ethernet, MySQL, Python"
+  ],
+  "answer": 0,
+  "explication": "LEMP : Linux, Nginx (« Engine X »), MySQL, PHP. LAMP utilise Apache."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle commande lance un petit serveur web PHP sur le port 8000 ?",
+  "options": [
+   "php localhost:8000",
+   "php -S localhost:8000",
+   "php -v 8000",
+   "serve php 8000"
+  ],
+  "answer": 1,
+  "explication": "`php -S localhost:8000`."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Quelle commande permet de vérifier que PHP est bien installé ?",
+  "answers": [
+   "php -v"
+  ],
+  "explication": "`php -v` affiche la version de PHP."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel fichier est servi par défaut quand l'URL ne précise pas de page ?",
+  "options": [
+   "index.html ou index.php",
+   "default.txt",
+   "home.exe",
+   "main.css"
+  ],
+  "answer": 0,
+  "explication": "La page par défaut s'appelle `index.html` ou `index.php`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Dans `https://lab.exemple.fr:8080/page.php?a=1`, quel est le port ?",
+  "options": [
+   "80",
+   "8080",
+   "443",
+   "1"
+  ],
+  "answer": 1,
+  "explication": "Le port est écrit après le domaine, avec deux-points."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Dans `https://lab.exemple.fr/page.php?a=1`, quel est le protocole ?",
+  "options": [
+   "lab",
+   "https",
+   "page.php",
+   "a=1"
+  ],
+  "answer": 1,
+  "explication": "Le protocole est au début : `https`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel caractère introduit les paramètres dans une URL ?",
+  "options": [
+   "&",
+   "?",
+   "#",
+   "/"
+  ],
+  "answer": 1,
+  "explication": "Les paramètres commencent après le `?`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel caractère sépare deux paramètres dans une URL ?",
+  "options": [
+   "&",
+   "?",
+   ";",
+   "|"
+  ],
+  "answer": 0,
+  "explication": "`?clé1=valeur1&clé2=valeur2`."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Dans `page.php?Nom=Durand&age=17`, quelle est la valeur du paramètre `age` ?",
+  "answers": [
+   "17"
+  ],
+  "explication": "La paire est `age=17`."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Dans `calcul.php?TXTHauteur=10&TXTLargeur=5`, quelle est la clé du premier paramètre ?",
+  "answers": [
+   "TXTHauteur"
+  ],
+  "explication": "La clé est avant le `=`."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "Avec la méthode GET, les données apparaissent dans l'URL du navigateur.",
+  "answer": true,
+  "explication": "`$_GET` est visible dans l'URL."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "Avec la méthode POST, les données apparaissent dans l'URL.",
+  "answer": false,
+  "explication": "Elles n'apparaissent pas : c'est plus sécurisé mais moins pratique pour déboguer."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle superglobale contient les données d'un formulaire envoyé en `method=\"post\"` ?",
+  "options": [
+   "$_GET",
+   "$_POST",
+   "$_SERVER",
+   "$_FILES"
+  ],
+  "answer": 1,
+  "explication": "`$_POST`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Qu'est-ce qui décide si on utilise `$_GET` ou `$_POST` ?",
+  "options": [
+   "L'attribut `method` de la balise `<form>`",
+   "Le nom du fichier PHP",
+   "Le navigateur",
+   "Le port"
+  ],
+  "answer": 0,
+  "explication": "C'est `method` qui définit la superglobale chargée."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que contient le dossier racine d'un serveur web ?",
+  "options": [
+   "Les fichiers du site",
+   "Le système d'exploitation",
+   "Les mots de passe",
+   "Uniquement les images"
+  ],
+  "answer": 0,
+  "explication": "Le dossier racine stocke les fichiers servis par le service HTTP."
+ },
+ {
+  "type": "associer",
+  "niveau": "moyen",
+  "q": "Associe chaque partie de l'URL à son exemple.",
+  "paires": [
+   [
+    "Protocole",
+    "https"
+   ],
+   [
+    "Port",
+    "8080"
+   ],
+   [
+    "Chemin et fichier",
+    "/calcul.php"
+   ],
+   [
+    "Paramètres",
+    "?a=1&b=2"
+   ]
+  ],
+  "explication": "Protocole, port, chemin/fichier, paramètres."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>
