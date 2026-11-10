@@ -3,7 +3,7 @@
   "use strict";
   var EF = window.EtudeFacile, esc = EF.esc, el = EF.el, I = EF.icon;
   var MODS = (window.EF_MODULES || []).filter(function (m) { return m.chapitres.length; });
-  var TYPES = { questionnaire: "Questionnaire", textuel: "Textuel", pratique: "Pratique" };
+  var TYPES = { examen: "Examen blanc", questionnaire: "Questionnaire", textuel: "Textuel", pratique: "Pratique" };
 
   document.body.appendChild(EF.header(""));
   var nav = document.querySelector('.top-nav a[href="classement.html"]'); if (nav) nav.setAttribute("aria-current", "page");
@@ -12,7 +12,9 @@
 
   var options = '<option value="">Classement général</option>';
   MODS.forEach(function (m) {
-    options += '<optgroup label="' + esc(m.titre) + '">' + Object.keys(TYPES).map(function (t) {
+    options += '<optgroup label="' + esc(m.titre) + '">' + Object.keys(TYPES).filter(function (t) {
+      return (t !== "textuel" || m.evalTextuel) && (t !== "pratique" || (m.labos && m.labos.length));
+    }).map(function (t) {
       return '<option value="' + m.id + "_" + t + '">' + esc(m.titre) + " · " + TYPES[t] + '</option>';
     }).join("") + '</optgroup>';
   });

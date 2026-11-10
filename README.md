@@ -36,6 +36,9 @@ PHP et Python sont embarqués dans `assets/vendor/` (aucun CDN nécessaire).
   - *Questionnaire* : 10 questions tirées dans les exercices des chapitres, 6 min.
   - *Textuel* : 3 questions ouvertes (`data/eval-textes.js`), 12 min, correction par notions attendues + corrigé.
   - *Pratique* : 3 missions de labo sans indice (`labo-*.html#examen`), 15 min.
+  - *Examen blanc* : questionnaire + questions ouvertes (+ 2 missions de labo si la matière en a un), 18 à 25 min, sous un seul chrono.
+  - *Évaluation de chapitre* : 8 questions sur un chapitre, 4 min (entraînement, hors classement).
+  - Accès direct : `evaluation.html#m=<matière>&t=<type>[&c=<chapitre>]`, liens sur chaque page de matière.
   - Points = coefficient × réussite + bonus de rapidité (si ≥ 50 %). Le meilleur résultat de chaque épreuve est conservé.
 - **Classement** (`classement.html`) : général (100 pts par chapitre, 20 par mission, + meilleurs points d'évaluation) ou par épreuve.
 

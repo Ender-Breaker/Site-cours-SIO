@@ -19,6 +19,8 @@ const esc = EF.esc;
 const racine = new URL("../", import.meta.url).href;
 
 const CLES = ["ef-progress", "ef-best", "ef-labo-terminal", "ef-labo-html", "ef-labo-php", "ef-labo-python", "ef-evals"];
+/* évaluations qui comptent au classement (les évaluations de chapitre « <matière>_chap_<id> » restent privées) */
+const PUBLIQUE = /^[a-z0-9-]+_(questionnaire|textuel|pratique|examen)$/;
 const LABOS = ["ef-labo-terminal", "ef-labo-html", "ef-labo-php", "ef-labo-python"];
 let user = null, profil = null, etat = "", synchroPrete = false;
 
@@ -210,12 +212,12 @@ function stats() {
   const prog = lit("ef-progress");
   const chapitres = Object.keys(prog).reduce((n, m) => n + (prog[m] || []).length, 0);
   const missions = LABOS.reduce((n, k) => n + Object.keys(lit(k).done || {}).length, 0);
-  const ev = lit("ef-evals"), evals = Object.keys(ev).reduce((n, k) => n + (ev[k].points || 0), 0);
+  const ev = lit("ef-evals"), evals = Object.keys(ev).filter((k) => PUBLIQUE.test(k)).reduce((n, k) => n + (ev[k].points || 0), 0);
   return { chapitres, missions, evals, score: chapitres * 100 + missions * 20 + evals };
 }
 function evalsPubliques() {
   const ev = lit("ef-evals"), r = {};
-  Object.keys(ev).forEach((k) => { if (/^[a-z0-9-]+_(questionnaire|textuel|pratique)$/.test(k)) r[k] = { points: ev[k].points, pct: ev[k].pct, duree: ev[k].duree, date: ev[k].date }; });
+  Object.keys(ev).forEach((k) => { if (PUBLIQUE.test(k)) r[k] = { points: ev[k].points, pct: ev[k].pct, duree: ev[k].duree, date: ev[k].date }; });
   return r;
 }
 

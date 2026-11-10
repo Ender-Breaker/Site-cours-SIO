@@ -224,9 +224,10 @@
   function hasard(a) { return a[Math.floor(Math.random() * a.length)]; }
   function examen() {
     mode = "examen"; main.classList.add("en-examen");
-    var lecons = LAB.lecons.slice().sort(function () { return Math.random() - 0.5; }).slice(0, 3);
-    E = { list: lecons.map(function (l) { return hasard(l.missions); }), i: 0, ok: [], fini: false };
-    E.chrono = EF.examChrono("Labo terminal", 900, function () { finExamen(); });
+    var ctx = EF.examBlancCtx(MID), nEx = ctx ? ctx.n : 3, dureeEx = ctx ? Math.max(1, (ctx.fin - Date.now()) / 1000) : 900;
+    var lecons = LAB.lecons.slice().sort(function () { return Math.random() - 0.5; }).slice(0, nEx);
+    E = { ctx: ctx, list: lecons.map(function (l) { return hasard(l.missions); }), i: 0, ok: [], fini: false };
+    E.chrono = EF.examChrono(ctx ? "Examen blanc · partie pratique" : "Labo terminal", dureeEx, function () { finExamen(); });
     main.querySelector(".labo-grid").insertAdjacentElement("beforebegin", E.chrono.el);
     examOpen(0);
   }
@@ -266,10 +267,17 @@
     }
     examBrief(); term.focus();
   }
+  function SOL(m) { return Array.isArray(m.solution) ? m.solution.join("\n") : m.solution; }
   function finExamen() {
     if (E.fini) return; E.fini = true;
     var rest = E.chrono.restant(); E.chrono.stop(); E.chrono.el.remove();
     var box = main.querySelector(".labo-grid"); box.className = "labo-resultat";
+    if (E.ctx) {
+      try { sessionStorage.removeItem("ef-examen-blanc"); } catch (e) { /* rien */ }
+      EF.examBlancResultat(box, { ctx: E.ctx, restant: rest, racine: "../../",
+        missions: E.list.map(function (m, i) { return { titre: m.titre, ok: !!E.ok[i], solution: SOL(m) }; }) });
+      return;
+    }
     EF.examResultat(box, {
       mid: MID, titre: "Labo terminal", couleur: "emerald", racine: "../../", duree: 900, coef: 150, restant: rest,
       retour: location.pathname.split("/").pop(),

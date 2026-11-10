@@ -594,3 +594,25 @@ html.compte-ouvert { overflow: hidden; }
 .cl-table .ps small { font-weight: 600; color: var(--discret); }
 .cl-regle { margin-top: var(--s2); }
 .ev-login { margin: 12px 0; }
+/* évaluations sur la page d'une matière */
+.mod-evals { margin-top: var(--s4); border: var(--trait); border-radius: var(--r2); background: var(--surface); box-shadow: var(--ombre-1); overflow: hidden; }
+.mod-evals-t { display: flex; justify-content: space-between; align-items: center; gap: var(--s2); padding: 12px 16px; background: var(--m-clair); border-bottom: var(--trait); }
+.mod-evals-t h2 { margin: 0; font-size: 1.4rem; display: flex; align-items: center; gap: 8px; }
+.mod-evals-t a { font-weight: 800; display: inline-flex; gap: 6px; align-items: center; }
+.mod-evals-l { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; padding: 12px; }
+.mod-eval { display: grid; gap: 2px; padding: 12px 14px; border: 1.5px solid var(--encre); border-radius: var(--r1); background: var(--papier); color: var(--encre); transition: transform var(--vite) var(--ease), box-shadow var(--vite); }
+.mod-eval:hover { transform: translate(-2px, -2px); box-shadow: 3px 3px 0 var(--encre); background: var(--safran-clair); }
+.mod-eval.examen { background: var(--encre); color: #fff; }
+.mod-eval.examen small { color: #c9c4b8; }
+.mod-eval.examen:hover { background: var(--cobalt); }
+.mod-eval b { font-family: var(--titre); font-size: 1.15rem; }
+.mod-eval span { font-size: .85rem; }
+.mod-eval small { font-size: .75rem; color: var(--discret); font-weight: 600; }
+.chap-eval small { font-weight: 600; opacity: .75; }
+.ev-go.examen { background: var(--encre); color: #fff; }
+.ev-go.examen small { color: #c9c4b8; }
+.ev-modlien { display: block; padding: 0 14px 12px; font-size: .85rem; font-weight: 700; color: var(--cobalt); }
+.ev-partie { display: flex; justify-content: space-between; align-items: center; margin: var(--s3) 0 var(--s1); font-size: 1.2rem; }
+.ev-partie span { font-family: var(--mono); background: var(--safran); border: 1.5px solid var(--encre); border-radius: 99px; padding: 0 10px; font-size: .9rem; }
+.ev-parts { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: var(--s2); }
+.ev-parts span { padding: 4px 12px; border: 1.5px solid var(--encre); border-radius: 99px; background: var(--surface); font-size: .85rem; }

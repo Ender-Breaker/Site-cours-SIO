@@ -30,6 +30,19 @@
         '<span class="btn primary">Ouvrir le labo →</span></a>';
     });
 
+    if (mod.chapitres.length) {
+      var ev = EF.getEvals(), E = "../../evaluation.html#m=" + mod.id + "&t=";
+      var epr = [["examen", "Examen blanc", "L'épreuve complète, sous chrono"], ["questionnaire", "Questionnaire", "10 questions · 6 min"]];
+      if (mod.evalTextuel) epr.push(["textuel", "Textuel", "3 questions ouvertes · 12 min"]);
+      if (mod.labos && mod.labos.length) epr.push(["pratique", "Pratique", "3 missions de labo · 15 min"]);
+      html += '<section class="mod-evals"><div class="mod-evals-t"><h2>' + I("timer") + ' Évaluations</h2><a href="../../classement.html">' + I("trophy") + ' Classement</a></div><div class="mod-evals-l">' +
+        epr.map(function (e) {
+          var b = ev[mod.id + "_" + e[0]];
+          return '<a class="mod-eval' + (e[0] === "examen" ? " examen" : "") + '" href="' + E + e[0] + '"><b>' + e[1] + '</b><span>' + e[2] + '</span><small>' +
+            (b ? "record " + b.points + " pts · " + Math.round(b.pct * 100) + " %" : "pas encore tenté") + '</small></a>';
+        }).join("") + '</div></section>';
+    }
+
     if (!mod.chapitres.length) {
       html += '<div class="box" style="margin-top:22px"><b>Bientôt disponible</b><p>Les chapitres de cette matière arrivent prochainement.</p></div>';
       main.innerHTML = html;
@@ -53,7 +66,9 @@
         (best != null ? '<span>Meilleur score : <b>' + best + ' %</b></span>' : '<span>Pas encore tenté</span>') +
         '</div></div></div>' +
         '<div class="btns"><a class="btn" href="' + f + '">' + I('book-open') + ' Cours</a>' +
-        '<a class="btn primary" href="' + f + '#jeu">' + I('pencil-line') + ' S\'entraîner</a></div></div>';
+        '<a class="btn primary" href="' + f + '#jeu">' + I('pencil-line') + ' S\'entraîner</a>' +
+        '<a class="btn chap-eval" href="../../evaluation.html#m=' + mod.id + '&t=chapitre&c=' + c.id + '" title="8 questions, 4 min">' + I('timer') + ' Évaluer ce chapitre' +
+        (EF.getEvals()[mod.id + "_chap_" + c.id] ? ' <small>' + EF.getEvals()[mod.id + "_chap_" + c.id].points + ' pts</small>' : '') + '</a></div></div>';
     });
     html += '</div>';
     main.innerHTML = html;

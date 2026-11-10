@@ -124,6 +124,39 @@
       });
       window.scrollTo(0, 0);
     },
+    /* Examen blanc : la partie pratique se termine dans le labo. Combine les parties et enregistre. */
+    examBlancResultat: function (box, o) {
+      var c = o.ctx, reussies = o.missions.filter(function (m) { return m.ok; }).length;
+      var pratique = '<div class="ev-detail">' + o.missions.map(function (m) {
+        return '<details class="ev-corr ' + (m.ok ? "ok" : "ko") + '"' + (m.ok ? "" : " open") + '><summary><span class="ck">' + (m.ok ? "✓" : "✗") + '</span>' + esc(m.titre) + '</summary>' +
+          '<p><b>Une solution possible :</b></p><pre>' + esc(m.solution) + '</pre></details>';
+      }).join("") + '</div>';
+      c.parties.forEach(function (p) { if (p.pct === null) { p.pct = reussies / o.missions.length; p.detail = pratique; } });
+      var tot = c.parties.reduce(function (a, p) { return a + p.poids; }, 0);
+      var pct = c.parties.reduce(function (a, p) { return a + p.poids * (p.pct || 0); }, 0) / tot;
+      var duree = Math.round(c.duree - o.restant), pts = EF.points(pct, c.coef, o.restant, c.duree);
+      var sv = EF.saveEval(c.mid + "_examen", { pct: Math.round(pct * 1000) / 1000, points: pts, duree: duree });
+      var connecte = window.EFCloud && window.EFCloud.user();
+      box.innerHTML = '<div class="ev-res c-' + (c.couleur || "") + '"><div class="lb-kicker">' + esc(c.titre) + ' · Examen blanc</div>' +
+        '<div class="ev-score"><b>' + Math.round(pct * 100) + '<small>%</small></b><div><span class="ev-pts">' + pts + ' pts</span>' +
+        '<span>' + icon("timer") + ' ' + Math.floor(duree / 60) + ':' + ("0" + (duree % 60)).slice(-2) + (o.restant <= 0 ? " (temps écoulé)" : "") + '</span>' +
+        (sv.record ? '<span class="ev-record">Nouveau record !</span>' : '<span>Record : ' + sv.best.points + ' pts</span>') + '</div></div>' +
+        '<div class="ev-parts">' + c.parties.map(function (p) { return '<span><b>' + Math.round((p.pct || 0) * 100) + ' %</b> ' + esc(p.titre) + '</span>'; }).join("") + '</div>' +
+        (window.EF_FIREBASE_CONFIG && !connecte ? '<p class="ev-login">Connecte-toi pour que ce résultat compte dans le classement. <button type="button" class="btn" data-ex="login">Se connecter</button></p>' : '') +
+        '<div class="btns"><a class="btn primary" href="' + o.racine + 'evaluation.html#m=' + c.mid + '&t=examen">' + icon("rotate-ccw") + ' Recommencer</a>' +
+        '<a class="btn" href="' + o.racine + 'evaluation.html">Autre évaluation</a><a class="btn" href="' + o.racine + 'classement.html">' + icon("trophy") + ' Classement</a></div></div>' +
+        '<h2 class="ev-h2">Correction</h2>' + c.parties.map(function (p, i) {
+          return '<h3 class="ev-partie">Partie ' + (i + 1) + ' · ' + esc(p.titre) + ' <span>' + Math.round((p.pct || 0) * 100) + ' %</span></h3><div class="ev-detail">' + (p.detail || "") + '</div>';
+        }).join("");
+      box.addEventListener("click", function (e) { var b = e.target.closest("[data-ex=login]"); if (b && window.EFCloud) window.EFCloud.ouvrir(); });
+      window.scrollTo(0, 0);
+    },
+    /* Contexte d'examen blanc transmis par evaluation.html (ou null) */
+    examBlancCtx: function (mid) {
+      if (!/^#examen-blanc/.test(location.hash)) return null;
+      var c = null; try { c = JSON.parse(sessionStorage.getItem("ef-examen-blanc")); } catch (e) { /* rien */ }
+      return c && c.mid === mid ? c : null;
+    },
     /* points = % de réussite × coefficient + bonus de rapidité (si au moins 50 % de réussite) */
     points: function (pct, coef, restant, total) {
       var bonus = pct >= 0.5 && total ? Math.round(coef * 0.2 * Math.max(0, restant) / total) : 0;

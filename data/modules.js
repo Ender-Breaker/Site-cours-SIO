@@ -10,6 +10,7 @@
 window.EF_MODULES = [
   {
     id: "algo",
+    evalTextuel: true,
     titre: "Algo Python",
     sousTitre: "Algorithmique · Python",
     icone: "Py",
@@ -29,6 +30,7 @@ window.EF_MODULES = [
   },
   {
     id: "slam",
+    evalTextuel: true,
     titre: "SLAM",
     sousTitre: "Bloc 2 · Développement d'applications",
     icone: "</>",
@@ -46,6 +48,7 @@ window.EF_MODULES = [
   },
   {
     id: "sisr",
+    evalTextuel: true,
     titre: "SISR",
     sousTitre: "Bloc 2 · Systèmes et réseaux",
     icone: ">_",
@@ -64,6 +67,7 @@ window.EF_MODULES = [
   },
   {
     id: "bloc1",
+    evalTextuel: true,
     titre: "Bloc 1",
     sousTitre: "Support et mise à disposition de services",
     icone: "<?",
@@ -79,6 +83,7 @@ window.EF_MODULES = [
   },
   {
     id: "bloc3",
+    evalTextuel: true,
     titre: "Bloc 3",
     sousTitre: "Cybersécurité des services informatiques",
     icone: "§",
@@ -93,6 +98,7 @@ window.EF_MODULES = [
   },
   {
     id: "maths",
+    evalTextuel: true,
     titre: "Maths",
     sousTitre: "Arithmétique · Probabilités · Statistiques · Suites",
     icone: "∑",
@@ -120,6 +126,7 @@ window.EF_MODULES = [
   },
   {
     id: "cejm",
+    evalTextuel: true,
     titre: "CEJM",
     sousTitre: "Économie · Droit · Management",
     icone: "€",
