@@ -19,6 +19,63 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // ===================== Forum =====================
+    function connecte() { return request.auth != null; }
+    function monPseudo() { return get(/databases/$(db)/documents/profils/$(request.auth.uid)).data.pseudo; }
+    function seuls(champs) { return request.resource.data.diff(resource.data).affectedKeys().hasOnly(champs); }
+    // Le score ne peut bouger que de la différence entre mon ancien et mon nouveau vote (-1, 0 ou 1),
+    // enregistré dans le même lot d'écriture dans votes/{moi}.m[cle].
+    function voteCoherent(cle) {
+      let apres = getAfter(/databases/$(db)/documents/votes/$(request.auth.uid)).data.m;
+      let avant = exists(/databases/$(db)/documents/votes/$(request.auth.uid))
+        ? get(/databases/$(db)/documents/votes/$(request.auth.uid)).data.m : {};
+      return apres.get(cle, 0) in [-1, 0, 1]
+        && request.resource.data.score - resource.data.score == apres.get(cle, 0) - avant.get(cle, 0);
+    }
+    function matiereOk(m) { return m in ['algo', 'slam', 'sisr', 'bloc1', 'bloc3', 'maths', 'culture-generale', 'cejm', 'anglais', 'general']; }
+
+    match /posts/{post} {
+      allow read: if true;
+      allow create: if connecte()
+        && request.resource.data.keys().hasOnly(['titre', 'texte', 'matiere', 'auteur', 'pseudo', 'cree', 'score', 'nbRep', 'resolu'])
+        && request.resource.data.auteur == request.auth.uid
+        && request.resource.data.pseudo == monPseudo()
+        && request.resource.data.titre is string && request.resource.data.titre.size() >= 5 && request.resource.data.titre.size() <= 150
+        && request.resource.data.texte is string && request.resource.data.texte.size() <= 10000
+        && matiereOk(request.resource.data.matiere)
+        && request.resource.data.cree == request.time
+        && request.resource.data.score == 0 && request.resource.data.nbRep == 0 && request.resource.data.resolu == null;
+      allow update: if connecte() && (
+           (seuls(['score']) && voteCoherent(post))
+        || (seuls(['nbRep']) && (request.resource.data.nbRep - resource.data.nbRep) in [-1, 1])
+        || (resource.data.auteur == request.auth.uid && seuls(['titre', 'texte', 'matiere', 'resolu', 'modifie'])
+            && request.resource.data.titre.size() >= 5 && request.resource.data.titre.size() <= 150
+            && request.resource.data.texte.size() <= 10000 && matiereOk(request.resource.data.matiere)));
+      allow delete: if connecte() && resource.data.auteur == request.auth.uid;
+
+      match /reponses/{rep} {
+        allow read: if true;
+        allow create: if connecte()
+          && request.resource.data.keys().hasOnly(['texte', 'auteur', 'pseudo', 'parent', 'cree', 'score', 'supprime'])
+          && request.resource.data.auteur == request.auth.uid
+          && request.resource.data.pseudo == monPseudo()
+          && request.resource.data.texte is string && request.resource.data.texte.size() >= 1 && request.resource.data.texte.size() <= 5000
+          && (request.resource.data.parent == null || request.resource.data.parent is string)
+          && request.resource.data.cree == request.time
+          && request.resource.data.score == 0 && request.resource.data.supprime == false;
+        allow update: if connecte() && (
+             (seuls(['score']) && voteCoherent(post + '__' + rep))
+          || (resource.data.auteur == request.auth.uid && seuls(['texte', 'supprime', 'modifie'])
+              && request.resource.data.texte.size() <= 5000));
+        allow delete: if false;
+      }
+    }
+
+    // Mes votes (un seul document par personne) : { m: { "<post>": 1, "<post>__<réponse>": -1, … } }
+    match /votes/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
     // Réservation des pseudos (unicité, insensible à la casse).
     match /pseudos/{pseudo} {
       allow read: if true;

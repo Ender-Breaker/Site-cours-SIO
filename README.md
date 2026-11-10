@@ -40,6 +40,7 @@ PHP et Python sont embarqués dans `assets/vendor/` (aucun CDN nécessaire).
   - *Évaluation de chapitre* : 8 questions sur un chapitre, 4 min (entraînement, hors classement).
   - Accès direct : `evaluation.html#m=<matière>&t=<type>[&c=<chapitre>]`, liens sur chaque page de matière.
   - Points = coefficient × réussite + bonus de rapidité (si ≥ 50 %). Le meilleur résultat de chaque épreuve est conservé.
+- **Forum** (`forum.html`) : questions par matière, réponses en fil, votes ▲/▼, meilleure réponse, tri (populaires, récentes, mieux notées, sans réponse) et recherche. Firestore : `posts`, `posts/{id}/reponses`, `votes/{uid}`.
 - **Classement** (`classement.html`) : général (100 pts par chapitre, 20 par mission, + meilleurs points d'évaluation) ou par épreuve.
 
 ## Lancer en local
