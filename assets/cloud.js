@@ -265,7 +265,12 @@ A.onAuthStateChanged(auth, async (u) => {
     rendu();
     await synchroniser();
     if (!profil.pseudo) modale("pseudo", (u.displayName || "").split(" ")[0].replace(/[^\p{L}\p{N}_-]/gu, "").slice(0, 20));
-  } catch (x) { etat = "Erreur Firebase : " + (x.code || x.message); rendu(); }
+  } catch (x) {
+    etat = x && x.code === "permission-denied"
+      ? "Accès refusé par Firestore : les règles de sécurité (firestore.rules) ne sont pas encore publiées."
+      : "Erreur Firebase : " + (x.code || x.message);
+    rendu();
+  }
 });
 
 window.EFCloud = { auth, db, F, A, user: () => user, profil: () => profil, stats, ouvrir: () => modale("connexion") };
