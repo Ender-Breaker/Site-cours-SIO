@@ -63,11 +63,19 @@ document.addEventListener("click", (e) => {
 });
 
 /* ---------- fenêtre de connexion / pseudo ---------- */
-const dlg = document.createElement("dialog");
-dlg.className = "compte-dlg";
-document.body.appendChild(dlg);
-dlg.addEventListener("click", (e) => { if (e.target === dlg && !dlg.dataset.bloque) dlg.close(); });
-dlg.addEventListener("cancel", (e) => { if (dlg.dataset.bloque) e.preventDefault(); });
+/* Calque « maison » plutôt qu'une <dialog> modale : une dialog modale passe dans la top-layer et rend
+   le reste de la page inerte, ce qui casse les menus des gestionnaires de mots de passe (Proton Pass, Bitwarden…). */
+const voile = document.createElement("div");
+voile.className = "compte-voile"; voile.hidden = true;
+voile.innerHTML = '<div class="compte-dlg" role="dialog" aria-modal="true" aria-labelledby="cd-titre"></div>';
+document.body.appendChild(voile);
+const dlg = voile.firstChild;
+let focusAvant = null;
+Object.defineProperty(dlg, "open", { get: () => !voile.hidden });
+dlg.showModal = () => { focusAvant = document.activeElement; voile.hidden = false; document.documentElement.classList.add("compte-ouvert"); };
+dlg.close = () => { voile.hidden = true; document.documentElement.classList.remove("compte-ouvert"); if (focusAvant && focusAvant.focus) focusAvant.focus(); };
+voile.addEventListener("mousedown", (e) => { if (e.target === voile && !dlg.dataset.bloque) dlg.close(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && dlg.open && !dlg.dataset.bloque) dlg.close(); });
 
 const ERREURS = {
   "auth/invalid-credential": "E-mail ou mot de passe incorrect.",
@@ -90,14 +98,19 @@ function modale(type, info) {
   delete dlg.dataset.bloque;
   if (type === "connexion" || type === "inscription") {
     const insc = type === "inscription";
-    dlg.innerHTML = `<form method="dialog" class="cd-form" novalidate>
+    dlg.innerHTML = `<form class="cd-form" id="${insc ? "signup-form" : "login-form"}" action="#" method="post" novalidate autocomplete="on">
       <button type="button" class="cd-x" data-a="fermer" aria-label="Fermer">×</button>
-      <h2>${insc ? "Créer un compte" : "Connexion"}</h2>
+      <h2 id="cd-titre">${insc ? "Créer un compte" : "Connexion"}</h2>
       <p class="cd-sub">Retrouve ta progression sur tous tes appareils et apparais dans le classement.</p>
       <button type="button" class="btn cd-google" data-a="google">${EF.icon("user") || ""} Continuer avec Google</button>
       <div class="cd-ou"><span>ou avec ton e-mail</span></div>
-      <label>E-mail<input type="email" name="email" autocomplete="email" required></label>
-      <label>Mot de passe<input type="password" name="mdp" autocomplete="${insc ? "new-password" : "current-password"}" minlength="6" required></label>
+      <label for="cd-email">E-mail</label>
+      <input type="email" id="cd-email" name="email" autocomplete="username" inputmode="email" autocapitalize="off" spellcheck="false" required>
+      <label for="cd-password">Mot de passe${insc ? " <small>(6 caractères minimum)</small>" : ""}</label>
+      <div class="cd-mdp"><input type="password" id="cd-password" name="${insc ? "new-password" : "password"}" autocomplete="${insc ? "new-password" : "current-password"}" minlength="6" required>
+        <button type="button" class="cd-oeil" data-a="voir" aria-label="Afficher le mot de passe">Voir</button></div>
+      ${insc ? `<label for="cd-password2">Confirme le mot de passe</label>
+      <input type="password" id="cd-password2" name="confirm-password" autocomplete="new-password" minlength="6" required>` : ""}
       ${insc ? "" : `<button type="button" class="cd-lien" data-a="oubli">Mot de passe oublié ?</button>`}
       <p class="cd-err" role="alert"></p>
       <button type="submit" class="btn primary">${insc ? "Créer mon compte" : "Se connecter"}</button>
@@ -107,7 +120,8 @@ function modale(type, info) {
     const occupe = (on) => f.querySelectorAll("button, input").forEach((x) => { x.disabled = on; });
     f.addEventListener("submit", async (e) => {
       e.preventDefault(); err.textContent = "";
-      const email = f.email.value.trim(), mdp = f.mdp.value;
+      const email = f.email.value.trim(), mdp = f.querySelector("#cd-password").value;
+      if (insc && mdp !== f.querySelector("#cd-password2").value) { err.textContent = "Les deux mots de passe ne sont pas identiques."; return; }
       occupe(true);
       try {
         if (insc) await A.createUserWithEmailAndPassword(auth, email, mdp);
@@ -120,6 +134,11 @@ function modale(type, info) {
       const b = e.target.closest("[data-a]"); if (!b) return;
       const a = b.dataset.a; err.textContent = "";
       if (a === "fermer") dlg.close();
+      else if (a === "voir") {
+        const champs = f.querySelectorAll("input[type=password], input.vu"), vu = b.textContent === "Voir";
+        champs.forEach((c) => { c.type = vu ? "text" : "password"; c.classList.toggle("vu", vu); });
+        b.textContent = vu ? "Masquer" : "Voir"; b.setAttribute("aria-label", vu ? "Masquer le mot de passe" : "Afficher le mot de passe");
+      }
       else if (a === "connexion" || a === "inscription") modale(a);
       else if (a === "google") {
         occupe(true);
@@ -139,11 +158,11 @@ function modale(type, info) {
   } else if (type === "pseudo") {
     const premier = !(profil && profil.pseudo);
     if (premier) dlg.dataset.bloque = "1";
-    dlg.innerHTML = `<form method="dialog" class="cd-form" novalidate>
+    dlg.innerHTML = `<form class="cd-form" action="#" method="post" novalidate>
       ${premier ? "" : `<button type="button" class="cd-x" data-a="fermer" aria-label="Fermer">×</button>`}
-      <h2>${premier ? "Choisis ton pseudo" : "Changer de pseudo"}</h2>
+      <h2 id="cd-titre">${premier ? "Choisis ton pseudo" : "Changer de pseudo"}</h2>
       <p class="cd-sub">C'est le nom affiché dans le classement. 3 à 20 caractères : lettres, chiffres, tiret ou souligné.</p>
-      <label>Pseudo<input name="pseudo" maxlength="20" autocomplete="nickname" required value="${esc((profil && profil.pseudo) || info || "")}"></label>
+      <label for="cd-pseudo">Pseudo</label><input id="cd-pseudo" name="pseudo" maxlength="20" autocomplete="nickname" data-protonpass-ignore="true" data-1p-ignore data-lpignore="true" required value="${esc((profil && profil.pseudo) || info || "")}">
       <p class="cd-err" role="alert"></p>
       <button type="submit" class="btn primary">Valider</button>
       ${premier ? `<p class="cd-bas"><button type="button" class="cd-lien" data-a="sortir">Annuler et se déconnecter</button></p>` : ""}
