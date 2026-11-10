@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Labo PHP — Étude Facile</title>
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="bloc1">
+<script>
+window.EF_CODE = {
+ "langue": "php",
+ "key": "ef-labo-php",
+ "titre": "Labo PHP",
+ "sousTitre": "Du vrai PHP 8.4 qui s'exécute dans ton navigateur : écris, exécute, envoie des formulaires.",
+ "ico": "<?",
+ "couleur": "violet",
+ "fichier": "index.php",
+ "module": {
+  "titre": "Bloc 1",
+  "href": "index.html"
+ },
+ "lecons": [
+  {
+   "titre": "Premiers pas",
+   "missions": [
+    {
+     "id": "echo",
+     "titre": "Afficher du texte",
+     "texte": "<p>Un script PHP commence par <code>&lt;?php<\/code>. <code>echo<\/code> envoie du texte vers la page. Chaque instruction se termine par un <b>point-virgule<\/b>.<\/p>",
+     "depart": "<?php\n\n",
+     "objectifs": [
+      {
+       "txt": "Affiche exactement <code>Bonjour le monde !<\/code>",
+       "r": [
+        {
+         "out": "^Bonjour le monde !\\s*$"
+        },
+        {
+         "noerr": true
+        }
+       ]
+      }
+     ],
+     "indice": "<code>echo \"Bonjour le monde !\";<\/code>",
+     "solution": "<?php\necho \"Bonjour le monde !\";\n"
+    },
+    {
+     "id": "variables",
+     "titre": "Les variables",
+     "texte": "<p>Une variable commence par <code>$<\/code> : <code>$prenom = \"Léa\";<\/code>. Pas besoin de déclarer son type. Entre guillemets doubles, PHP remplace la variable par sa valeur : <code>echo \"Salut $prenom\";<\/code>.<\/p>",
+     "depart": "<?php\n\n",
+     "objectifs": [
+      {
+       "txt": "Crée une variable <code>$prenom<\/code> contenant ton prénom",
+       "r": [
+        {
+         "code": "\\$prenom\\s*=\\s*[\\\"'][^\\\"']+[\\\"']\\s*;"
+        }
+       ]
+      },
+      {
+       "txt": "Crée une variable <code>$age<\/code> contenant un nombre",
+       "r": [
+        {
+         "code": "\\$age\\s*=\\s*\\d+\\s*;"
+        }
+       ]
+      },
+      {
+       "txt": "Affiche <code>Je m'appelle … et j'ai … ans<\/code> en utilisant les deux variables",
+       "r": [
+        {
+         "out": "Je m'appelle \\S.* et j'ai \\d+ ans"
+        },
+        {
+         "code": "echo[^;]*\\$prenom"
+        },
+        {
+         "code": "echo[^;]*\\$age"
+        },
+        {
+         "noerr": true
+        }
+       ]
+      }
+     ],
+     "indice": "<code>echo \"Je m'appelle $prenom et j'ai $age ans\";<\/code>",
+     "solution": "<?php\n$prenom = \"Ilan\";\n$age = 19;\necho \"Je m'appelle $prenom et j'ai $age ans\";\n"
+    },
+    {
+     "id": "concat",
+     "titre": "La concaténation",
+     "texte": "<p>Le point <code>.<\/code> colle des chaînes : <code>\"Bonjour \" . $prenom . \" !\"<\/code>. Entre guillemets simples, les variables ne sont <b>pas<\/b> remplacées : on doit concaténer.<\/p><p>Pour un retour à la ligne dans la page, on affiche la balise <code>&lt;br&gt;<\/code>.<\/p>",
+     "depart": "<?php\n$ville = \"Brest\";\n$cp = \"29200\";\n",
+     "objectifs": [
+      {
+       "txt": "Affiche <code>Ville : Brest (29200)<\/code> en utilisant l'opérateur <code>.<\/code>",
+       "r": [
+        {
+         "out": "Ville : Brest \\(29200\\)"
+        },
+        {
+         "code": "\\.\\s*\\$|\\$\\w+\\s*\\."
+        },
+        {
+         "noerr": true
+        }
+       ]
+      },
+      {
+       "txt": "Puis un saut de ligne <code>&lt;br&gt;<\/code> et <code>Bienvenue à Brest !<\/code>, toujours avec la concaténation",
+       "r": [
+        {
+         "dom": "br"
+        },
+        {
+         "out": "Bienvenue à Brest !"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>echo 'Ville : ' . $ville . ' (' . $cp . ')';<\/code> puis <code>echo '&lt;br&gt;Bienvenue à ' . $ville . ' !';<\/code>",
+     "solution": "<?php\n$ville = \"Brest\";\n$cp = \"29200\";\necho 'Ville : ' . $ville . ' (' . $cp . ')';\necho '<br>Bienvenue à ' . $ville . ' !';\n"
+    },
+    {
+     "id": "calculs",
+     "titre": "Calculer",
+     "texte": "<p>Opérateurs : <code>+ - * /<\/code> et <code>%<\/code> (reste de la division). Exemple : un prix TTC = prix HT × 1,2 (TVA à 20 %). En PHP, les décimales s'écrivent avec un <b>point<\/b> : <code>1.2<\/code>.<\/p>",
+     "depart": "<?php\n$prixHT = 50;\n",
+     "objectifs": [
+      {
+       "txt": "Calcule <code>$prixTTC<\/code> à partir de <code>$prixHT<\/code> (TVA 20 %)",
+       "r": [
+        {
+         "code": "\\$prixTTC\\s*=\\s*[^;]*\\$prixHT"
+        }
+       ]
+      },
+      {
+       "txt": "Affiche <code>Prix TTC : 60 €<\/code>",
+       "r": [
+        {
+         "out": "Prix TTC : 60 €"
+        },
+        {
+         "noerr": true
+        }
+       ]
+      }
+     ],
+     "indice": "<code>$prixTTC = $prixHT * 1.2;<\/code> puis <code>echo \"Prix TTC : $prixTTC €\";<\/code>",
+     "solution": "<?php\n$prixHT = 50;\n$prixTTC = $prixHT * 1.2;\necho \"Prix TTC : $prixTTC €\";\n"
+    },
+    {
+     "id": "constantes",
+     "titre": "Les constantes",
+     "texte": "<p>Une constante ne change jamais pendant l'exécution. On la crée avec <code>define(\"TVA\", 0.2);<\/code> (ou <code>const TVA = 0.2;<\/code>) et on l'utilise <b>sans $<\/b> : <code>TVA<\/code>. Par convention, son nom est en majuscules.<\/p>",
+     "depart": "<?php\n$prixHT = 80;\n",
+     "objectifs": [
+      {
+       "txt": "Déclare une constante <code>TVA<\/code> valant <code>0.2<\/code>",
+       "r": [
+        {
+         "code": "(define\\s*\\(\\s*[\\\"']TVA[\\\"']\\s*,\\s*0?\\.2\\s*\\)|const\\s+TVA\\s*=\\s*0?\\.2)"
+        }
+       ]
+      },
+      {
+       "txt": "Affiche le prix TTC de <code>$prixHT<\/code> en utilisant la constante : <code>96<\/code>",
+       "r": [
+        {
+         "code": "TVA"
+        },
+        {
+         "out": "\\b96\\b"
+        },
+        {
+         "noerr": true
+        }
+       ]
+      }
+     ],
+     "indice": "<code>define(\"TVA\", 0.2);<\/code> puis <code>echo $prixHT * (1 + TVA);<\/code>",
+     "solution": "<?php\ndefine(\"TVA\", 0.2);\n$prixHT = 80;\necho \"Prix TTC : \" . $prixHT * (1 + TVA) . \" €\";\n"
+    },
+    {
+     "id": "fonctions",
+     "titre": "Fonctions utiles",
+     "texte": "<p>PHP fournit des centaines de fonctions :<\/p><ul><li><code>strtoupper($t)<\/code> : en majuscules ;<\/li><li><code>strlen($t)<\/code> : longueur ;<\/li><li><code>round($x, 2)<\/code> : arrondi à 2 décimales ;<\/li><li><code>date(\"Y\")<\/code> : année en cours.<\/li><\/ul>",
+     "depart": "<?php\n$ville = \"brest\";\n$pi = 3.14159;\n",
+     "objectifs": [
+      {
+       "txt": "Affiche le nom de la ville en majuscules (<code>BREST<\/code>)",
+       "r": [
+        {
+         "out": "BREST"
+        },
+        {
+         "code": "strtoupper\\s*\\(\\s*\\$ville"
+        }
+       ]
+      },
+      {
+       "txt": "Affiche le nombre de lettres de la ville (<code>5<\/code>) avec <code>strlen<\/code>",
+       "r": [
+        {
+         "code": "strlen\\s*\\(\\s*\\$ville"
+        },
+        {
+         "out": "\\b5\\b"
+        }
+       ]
+      },
+      {
+       "txt": "Affiche <code>$pi<\/code> arrondi à 2 décimales (<code>3.14<\/code>)",
+       "r": [
+        {
+         "code": "round\\s*\\("
+        },
+        {
+         "out": "3\\.14(?!1)"
+        },
+        {
+         "noerr": true
+        }
+       ]
+      }
+     ],
+     "indice": "Un <code>echo<\/code> par résultat, séparés par <code>\"&lt;br&gt;\"<\/code> : <code>echo strtoupper($ville) . \"&lt;br&gt;\";<\/code>",
+     "solution": "<?php\n$ville = \"brest\";\n$pi = 3.14159;\necho strtoupper($ville) . \"<br>\";\necho strlen($ville) . \"<br>\";\necho round($pi, 2);\n"
+    },
+    {
+     "id": "conversion",
+     "titre": "Convertir un type",
+     "texte": "<p>Une donnée venant d'un formulaire est toujours une <b>chaîne<\/b>. Pour calculer proprement, on la convertit : <code>(int)$x<\/code> ou <code>intval($x)<\/code> pour un entier, <code>(float)$x<\/code> pour un décimal. <code>var_dump()<\/code> affiche le type et la valeur.<\/p>",
+     "depart": "<?php\n$saisie = \"42\";\n",
+     "objectifs": [
+      {
+       "txt": "Convertis <code>$saisie<\/code> en entier dans <code>$nombre<\/code>",
+       "r": [
+        {
+         "code": "\\$nombre\\s*=\\s*(\\(int\\)|intval\\s*\\()"
+        }
+       ]
+      },
+      {
+       "txt": "Affiche son type avec <code>var_dump($nombre)<\/code> : <code>int(42)<\/code>",
+       "r": [
+        {
+         "out": "int\\(42\\)"
+        },
+        {
+         "noerr": true
+        }
+       ]
+      }
+     ],
+     "indice": "<code>$nombre = (int)$saisie;<\/code> puis <code>var_dump($nombre);<\/code>",
+     "solution": "<?php\n$saisie = \"42\";\n$nombre = (int)$saisie;\nvar_dump($nombre);\n"
+    }
+   ]
+  },
+  {
+   "titre": "Conditions",
+   "missions": [
+    {
+     "id": "if-else",
+     "titre": "if … else",
+     "texte": "<p>Le code récupère l'âge dans l'URL (<code>?age=…<\/code>) avec une valeur par défaut. Écris la condition qui affiche <code>Majeur<\/code> si l'âge est d'au moins 18 ans, <code>Mineur<\/code> sinon.<\/p><p>Des <b>tests automatiques<\/b> essaient plusieurs âges. Tu peux aussi tester toi-même avec les liens qui sont dans l'aperçu.<\/p>",
+     "depart": "<?php\n$age = (int)($_GET[\"age\"] ?? 17);\necho \"Âge : $age<br>\";\n\n// ta condition ici\n\n?>\n<p><a href=\"?age=15\">Tester 15 ans<\/a> · <a href=\"?age=18\">Tester 18 ans<\/a> · <a href=\"?age=40\">Tester 40 ans<\/a><\/p>\n",
+     "objectifs": [
+      {
+       "txt": "Utilise <code>if<\/code> et <code>else<\/code>",
+       "r": [
+        {
+         "code": "\\bif\\s*\\("
+        },
+        {
+         "code": "\\belse\\b"
+        }
+       ]
+      },
+      {
+       "txt": "Test : 15 ans → <code>Mineur<\/code>",
+       "r": [
+        {
+         "test": {
+          "get": {
+           "age": "15"
+          },
+          "out": "Mineur",
+          "notout": "Majeur"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Test : 18 ans → <code>Majeur<\/code> (attention à la limite)",
+       "r": [
+        {
+         "test": {
+          "get": {
+           "age": "18"
+          },
+          "out": "Majeur",
+          "notout": "Mineur"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Test : 40 ans → <code>Majeur<\/code>",
+       "r": [
+        {
+         "test": {
+          "get": {
+           "age": "40"
+          },
+          "out": "Majeur",
+          "notout": "Mineur"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>if ($age &gt;= 18) { echo \"Majeur\"; } else { echo \"Mineur\"; }<\/code> — avec <code>&gt;<\/code> au lieu de <code>&gt;=<\/code>, 18 ans serait mineur.",
+     "solution": "<?php\n$age = (int)($_GET[\"age\"] ?? 17);\necho \"Âge : $age<br>\";\n\nif ($age >= 18) {\n  echo \"Majeur\";\n} else {\n  echo \"Mineur\";\n}\n\n?>\n<p><a href=\"?age=15\">Tester 15 ans<\/a> · <a href=\"?age=18\">Tester 18 ans<\/a> · <a href=\"?age=40\">Tester 40 ans<\/a><\/p>\n"
+    },
+    {
+     "id": "elseif",
+     "titre": "if / elseif / else",
+     "texte": "<p>Affiche la mention correspondant à la note :<\/p><ul><li>16 et plus : <code>Très bien<\/code><\/li><li>14 et plus : <code>Bien<\/code><\/li><li>12 et plus : <code>Assez bien<\/code><\/li><li>10 et plus : <code>Passable<\/code><\/li><li>sinon : <code>Ajourné<\/code><\/li><\/ul><p>Les conditions sont testées dans l'ordre : commence par la plus haute.<\/p>",
+     "depart": "<?php\n$note = (float)($_GET[\"note\"] ?? 13);\necho \"Note : $note / 20<br>\";\n\n",
+     "objectifs": [
+      {
+       "txt": "Utilise <code>elseif<\/code>",
+       "r": [
+        {
+         "code": "\\belse\\s*if\\b|\\belseif\\b"
+        }
+       ]
+      },
+      {
+       "txt": "Test : 17 → Très bien",
+       "r": [
+        {
+         "test": {
+          "get": {
+           "note": "17"
+          },
+          "out": "Très bien"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Test : 14 → Bien",
+       "r": [
+        {
+         "test": {
+          "get": {
+           "note": "14"
+          },
+          "out": "(?<!Très )Bien",
+          "notout": "Très bien|Assez bien"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Test : 12.5 → Assez bien",
+       "r": [
+        {
+         "test": {
+          "get": {
+           "note": "12.5"
+          },
+          "out": "Assez bien"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Test : 10 → Passable et 8 → Ajourné",
+       "r": [
+        {
+         "test": {
+          "get": {
+           "note": "10"
+          },
+          "out": "Passable"
+         }
+        },
+        {
+         "test": {
+          "get": {
+           "note": "8"
+          },
+          "out": "Ajourné"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>if ($note &gt;= 16) { … } elseif ($note &gt;= 14) { … } elseif …  else { echo \"Ajourné\"; }<\/code>",
+     "solution": "<?php\n$note = (float)($_GET[\"note\"] ?? 13);\necho \"Note : $note / 20<br>\";\n\nif ($note >= 16) {\n  echo \"Très bien\";\n} elseif ($note >= 14) {\n  echo \"Bien\";\n} elseif ($note >= 12) {\n  echo \"Assez bien\";\n} elseif ($note >= 10) {\n  echo \"Passable\";\n} else {\n  echo \"Ajourné\";\n}\n"
+    },
+    {
+     "id": "switch",
+     "titre": "switch",
+     "texte": "<p><code>switch<\/code> compare une variable à une liste de valeurs (<code>case<\/code>). N'oublie pas <code>break;<\/code> à la fin de chaque cas, et <code>default<\/code> pour les autres valeurs.<\/p><p>Affiche le nom du jour : 1 → <code>Lundi<\/code>, 2 → <code>Mardi<\/code>, 3 → <code>Mercredi<\/code>, sinon <code>Jour inconnu<\/code>.<\/p>",
+     "depart": "<?php\n$jour = (int)($_GET[\"jour\"] ?? 1);\n\n",
+     "objectifs": [
+      {
+       "txt": "Utilise <code>switch<\/code> avec des <code>case<\/code>",
+       "r": [
+        {
+         "code": "\\bswitch\\s*\\("
+        },
+        {
+         "code": "\\bcase\\b"
+        }
+       ]
+      },
+      {
+       "txt": "Test : 2 → Mardi (et seulement Mardi)",
+       "r": [
+        {
+         "test": {
+          "get": {
+           "jour": "2"
+          },
+          "out": "Mardi",
+          "notout": "Mercredi|inconnu"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Test : 3 → Mercredi",
+       "r": [
+        {
+         "test": {
+          "get": {
+           "jour": "3"
+          },
+          "out": "Mercredi",
+          "notout": "inconnu"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Test : 9 → Jour inconnu",
+       "r": [
+        {
+         "test": {
+          "get": {
+           "jour": "9"
+          },
+          "out": "Jour inconnu"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>switch ($jour) { case 1: echo \"Lundi\"; break; … default: echo \"Jour inconnu\"; }<\/code>. Si « Mardi » est suivi de « Mercredi », il manque un <code>break<\/code>.",
+     "solution": "<?php\n$jour = (int)($_GET[\"jour\"] ?? 1);\n\nswitch ($jour) {\n  case 1:\n    echo \"Lundi\";\n    break;\n  case 2:\n    echo \"Mardi\";\n    break;\n  case 3:\n    echo \"Mercredi\";\n    break;\n  default:\n    echo \"Jour inconnu\";\n}\n"
+    },
+    {
+     "id": "abs",
+     "titre": "Valeur absolue (sans abs)",
+     "texte": "<p>Exemple du cours : la valeur absolue d'un nombre, c'est le nombre sans son signe (−5 → 5). Calcule-la <b>sans<\/b> utiliser la fonction <code>abs()<\/code>, avec une condition.<\/p>",
+     "depart": "<?php\n$x = (float)($_GET[\"x\"] ?? -5);\n\n",
+     "objectifs": [
+      {
+       "txt": "N'utilise pas la fonction <code>abs()<\/code>",
+       "r": [
+        {
+         "nocode": "\\babs\\s*\\("
+        },
+        {
+         "code": "\\bif\\s*\\("
+        }
+       ]
+      },
+      {
+       "txt": "Test : −5 → 5",
+       "r": [
+        {
+         "test": {
+          "get": {
+           "x": "-5"
+          },
+          "out": "(?<![-\\d])5(?!\\d)",
+          "notout": "-5"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Test : 3 → 3 et 0 → 0",
+       "r": [
+        {
+         "test": {
+          "get": {
+           "x": "3"
+          },
+          "out": "(?<![-\\d])3(?!\\d)"
+         }
+        },
+        {
+         "test": {
+          "get": {
+           "x": "0"
+          },
+          "out": "(?<![-\\d])0(?!\\d)"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Si <code>$x<\/code> est négatif, sa valeur absolue est <code>-$x<\/code>.",
+     "solution": "<?php\n$x = (float)($_GET[\"x\"] ?? -5);\n\nif ($x < 0) {\n  $absolu = -$x;\n} else {\n  $absolu = $x;\n}\necho \"Valeur absolue : $absolu\";\n"
+    }
+   ]
+  },
+  {
+   "titre": "Formulaires",
+   "missions": [
+    {
+     "id": "get-url",
+     "titre": "Paramètres d'URL",
+     "texte": "<p>Dans <code>index.php?nom=Ilan<\/code>, la partie après <code>?<\/code> contient des paramètres. PHP les range dans le tableau <code>$_GET<\/code> : <code>$_GET[\"nom\"]<\/code> vaut <code>\"Ilan\"<\/code>.<\/p><p>Pour éviter qu'un visiteur injecte du HTML ou du JavaScript, on affiche toujours une saisie avec <code>htmlspecialchars()<\/code>.<\/p>",
+     "depart": "<?php\n// affiche Bonjour suivi du paramètre nom\n\n?>\n<p><a href=\"?nom=Ilan\">?nom=Ilan<\/a> · <a href=\"?nom=Léa\">?nom=Léa<\/a><\/p>\n",
+     "objectifs": [
+      {
+       "txt": "Utilise <code>$_GET[\"nom\"]<\/code> et <code>htmlspecialchars<\/code>",
+       "r": [
+        {
+         "code": "\\$_GET\\s*\\[\\s*[\\\"']nom[\\\"']\\s*\\]"
+        },
+        {
+         "code": "htmlspecialchars\\s*\\("
+        }
+       ]
+      },
+      {
+       "txt": "Test : <code>?nom=Ilan<\/code> → <code>Bonjour Ilan<\/code>",
+       "r": [
+        {
+         "test": {
+          "get": {
+           "nom": "Ilan"
+          },
+          "out": "Bonjour Ilan"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Test : <code>?nom=&lt;b&gt;pirate&lt;/b&gt;<\/code> → le HTML est neutralisé",
+       "r": [
+        {
+         "test": {
+          "get": {
+           "nom": "<b>pirate<\/b>"
+          },
+          "out": "&lt;b&gt;pirate"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>echo \"Bonjour \" . htmlspecialchars($_GET[\"nom\"]);<\/code> — clique sur les liens de l'aperçu pour voir l'URL changer.",
+     "solution": "<?php\necho \"Bonjour \" . htmlspecialchars($_GET[\"nom\"]);\n\n?>\n<p><a href=\"?nom=Ilan\">?nom=Ilan<\/a> · <a href=\"?nom=Léa\">?nom=Léa<\/a><\/p>\n",
+     "get": {
+      "nom": "Ilan"
+     }
+    },
+    {
+     "id": "isset",
+     "titre": "Paramètre absent : isset",
+     "texte": "<p>Si on ouvre la page <b>sans<\/b> paramètre, <code>$_GET[\"nom\"]<\/code> n'existe pas et PHP affiche un avertissement. <code>isset($_GET[\"nom\"])<\/code> vérifie qu'il existe avant de l'utiliser.<\/p>",
+     "depart": "<?php\necho \"Bonjour \" . htmlspecialchars($_GET[\"nom\"]);\n\n?>\n<p><a href=\"?\">sans paramètre<\/a> · <a href=\"?nom=Ilan\">?nom=Ilan<\/a><\/p>\n",
+     "objectifs": [
+      {
+       "txt": "Utilise <code>isset<\/code>",
+       "r": [
+        {
+         "code": "isset\\s*\\(\\s*\\$_GET"
+        }
+       ]
+      },
+      {
+       "txt": "Test : sans paramètre → <code>Bonjour inconnu<\/code>, sans avertissement",
+       "r": [
+        {
+         "test": {
+          "get": {},
+          "out": "Bonjour inconnu"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Test : <code>?nom=Ilan<\/code> → <code>Bonjour Ilan<\/code>",
+       "r": [
+        {
+         "test": {
+          "get": {
+           "nom": "Ilan"
+          },
+          "out": "Bonjour Ilan",
+          "notout": "inconnu"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>if (isset($_GET[\"nom\"])) { echo \"Bonjour \" . htmlspecialchars($_GET[\"nom\"]); } else { echo \"Bonjour inconnu\"; }<\/code>",
+     "solution": "<?php\nif (isset($_GET[\"nom\"])) {\n  echo \"Bonjour \" . htmlspecialchars($_GET[\"nom\"]);\n} else {\n  echo \"Bonjour inconnu\";\n}\n\n?>\n<p><a href=\"?\">sans paramètre<\/a> · <a href=\"?nom=Ilan\">?nom=Ilan<\/a><\/p>\n"
+    },
+    {
+     "id": "post",
+     "titre": "Formulaire en POST",
+     "texte": "<p>Un formulaire sans <code>action<\/code> s'envoie à <b>la même page<\/b>. En <code>post<\/code>, les valeurs arrivent dans <code>$_POST<\/code>. On teste <code>$_SERVER[\"REQUEST_METHOD\"] === \"POST\"<\/code> pour savoir si le formulaire vient d'être envoyé.<\/p><p>Remplis le formulaire dans l'aperçu et envoie-le : la page est réexécutée avec tes données.<\/p>",
+     "depart": "<form method=\"post\">\n  <label for=\"prenom\">Prénom<\/label>\n  <input type=\"text\" id=\"prenom\" name=\"prenom\" required>\n  <button type=\"submit\">Envoyer<\/button>\n<\/form>\n\n<?php\n// si le formulaire a été envoyé, affiche Merci suivi du prénom\n\n",
+     "objectifs": [
+      {
+       "txt": "Teste la méthode de la requête ou utilise <code>isset($_POST[…])<\/code>",
+       "r": [
+        {
+         "code": "REQUEST_METHOD|isset\\s*\\(\\s*\\$_POST"
+        }
+       ]
+      },
+      {
+       "txt": "Avant envoi : pas de message",
+       "r": [
+        {
+         "test": {
+          "get": {},
+          "notout": "Merci",
+          "dom": "form[method=post] input[name=prenom]"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Test : prénom « Léa » envoyé → <code>Merci Léa<\/code>",
+       "r": [
+        {
+         "test": {
+          "post": {
+           "prenom": "Léa"
+          },
+          "out": "Merci Léa"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Le prénom est protégé avec <code>htmlspecialchars<\/code>",
+       "r": [
+        {
+         "test": {
+          "post": {
+           "prenom": "<i>x<\/i>"
+          },
+          "out": "&lt;i&gt;x"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>if ($_SERVER[\"REQUEST_METHOD\"] === \"POST\") { echo \"Merci \" . htmlspecialchars($_POST[\"prenom\"]); }<\/code>",
+     "solution": "<form method=\"post\">\n  <label for=\"prenom\">Prénom<\/label>\n  <input type=\"text\" id=\"prenom\" name=\"prenom\" required>\n  <button type=\"submit\">Envoyer<\/button>\n<\/form>\n\n<?php\nif ($_SERVER[\"REQUEST_METHOD\"] === \"POST\") {\n  echo \"<p>Merci \" . htmlspecialchars($_POST[\"prenom\"]) . \"<\/p>\";\n}\n"
+    },
+    {
+     "id": "rectangle-php",
+     "titre": "TP : le rectangle",
+     "texte": "<p>Reprends le formulaire du rectangle (longueur, largeur) et affiche, après envoi, son <b>périmètre<\/b> et son <b>aire<\/b>.<\/p><ul><li>périmètre = 2 × (longueur + largeur)<\/li><li>aire = longueur × largeur<\/li><\/ul>",
+     "depart": "<form method=\"post\">\n  <label for=\"longueur\">Longueur<\/label>\n  <input type=\"number\" id=\"longueur\" name=\"longueur\" required>\n  <label for=\"largeur\">Largeur<\/label>\n  <input type=\"number\" id=\"largeur\" name=\"largeur\" required>\n  <button type=\"submit\">Calculer<\/button>\n<\/form>\n\n<?php\n\n",
+     "objectifs": [
+      {
+       "txt": "Test : 5 × 3 → <code>Périmètre : 16<\/code>",
+       "r": [
+        {
+         "test": {
+          "post": {
+           "longueur": "5",
+           "largeur": "3"
+          },
+          "out": "Périmètre : 16\\b"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Test : 5 × 3 → <code>Aire : 15<\/code>",
+       "r": [
+        {
+         "test": {
+          "post": {
+           "longueur": "5",
+           "largeur": "3"
+          },
+          "out": "Aire : 15\\b"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Test : 2.5 × 4 → périmètre 13 et aire 10",
+       "r": [
+        {
+         "test": {
+          "post": {
+           "longueur": "2.5",
+           "largeur": "4"
+          },
+          "out": "Périmètre : 13\\b[\\s\\S]*Aire : 10\\b"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Avant envoi : aucun calcul ni avertissement",
+       "r": [
+        {
+         "test": {
+          "get": {},
+          "notout": "Périmètre|Aire"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Convertis les saisies avec <code>(float)<\/code>, calcule, puis <code>echo \"Périmètre : $perimetre&lt;br&gt;Aire : $aire\";<\/code> — le tout dans un <code>if<\/code> qui vérifie l'envoi.",
+     "solution": "<form method=\"post\">\n  <label for=\"longueur\">Longueur<\/label>\n  <input type=\"number\" id=\"longueur\" name=\"longueur\" required>\n  <label for=\"largeur\">Largeur<\/label>\n  <input type=\"number\" id=\"largeur\" name=\"largeur\" required>\n  <button type=\"submit\">Calculer<\/button>\n<\/form>\n\n<?php\nif ($_SERVER[\"REQUEST_METHOD\"] === \"POST\") {\n  $longueur = (float)$_POST[\"longueur\"];\n  $largeur = (float)$_POST[\"largeur\"];\n  $perimetre = 2 * ($longueur + $largeur);\n  $aire = $longueur * $largeur;\n  echo \"<p>Périmètre : $perimetre<br>Aire : $aire<\/p>\";\n}\n"
+    },
+    {
+     "id": "streaming",
+     "titre": "TP de synthèse : abonnement streaming",
+     "texte": "<p>Le TP du cours. Le formulaire est fourni : âge, abonnement (<code>standard<\/code>, <code>premium<\/code>, <code>famille<\/code>), case « paiement à jour ». Après envoi :<\/p><ul><li>si la case <code>paiement<\/code> n'est pas cochée (non envoyée → <code>isset<\/code>) : <code>Accès refusé<\/code> ;<\/li><li>sinon : <code>Abonnement premium : Vidéo 4K + Téléchargement (réduction : 0 %)<\/code><\/li><li>réduction : moins de 18 ans → 20 %, sinon 0 % ;<\/li><li>avantages (<code>switch<\/code>) : standard = <code>Vidéo HD<\/code>, premium = <code>Vidéo 4K + Téléchargement<\/code>, famille = <code>4 utilisateurs simultanés<\/code>.<\/li><\/ul>",
+     "depart": "<form method=\"post\">\n  <label for=\"age\">Âge<\/label>\n  <input type=\"number\" id=\"age\" name=\"age\" required>\n  <label for=\"abonnement\">Abonnement<\/label>\n  <select id=\"abonnement\" name=\"abonnement\">\n    <option value=\"standard\">Standard<\/option>\n    <option value=\"premium\">Premium<\/option>\n    <option value=\"famille\">Famille<\/option>\n  <\/select>\n  <label><input type=\"checkbox\" name=\"paiement\"> Paiement à jour<\/label>\n  <button type=\"submit\">Valider<\/button>\n<\/form>\n\n<?php\nif ($_SERVER[\"REQUEST_METHOD\"] === \"POST\") {\n  // à toi de jouer\n\n}\n",
+     "objectifs": [
+      {
+       "txt": "Utilise un <code>switch<\/code> pour les avantages",
+       "r": [
+        {
+         "code": "\\bswitch\\s*\\("
+        }
+       ]
+      },
+      {
+       "txt": "Test : paiement non coché → <code>Accès refusé<\/code>",
+       "r": [
+        {
+         "test": {
+          "post": {
+           "age": "30",
+           "abonnement": "premium"
+          },
+          "out": "Accès refusé",
+          "notout": "Abonnement premium"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Test : 30 ans, premium, payé → avantages 4K, réduction 0 %",
+       "r": [
+        {
+         "test": {
+          "post": {
+           "age": "30",
+           "abonnement": "premium",
+           "paiement": "on"
+          },
+          "out": "Abonnement premium : Vidéo 4K \\+ Téléchargement \\(réduction : 0 %\\)"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Test : 16 ans, famille, payé → 4 utilisateurs, réduction 20 %",
+       "r": [
+        {
+         "test": {
+          "post": {
+           "age": "16",
+           "abonnement": "famille",
+           "paiement": "on"
+          },
+          "out": "Abonnement famille : 4 utilisateurs simultanés \\(réduction : 20 %\\)"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Test : 18 ans, standard, payé → Vidéo HD, réduction 0 %",
+       "r": [
+        {
+         "test": {
+          "post": {
+           "age": "18",
+           "abonnement": "standard",
+           "paiement": "on"
+          },
+          "out": "Abonnement standard : Vidéo HD \\(réduction : 0 %\\)"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Récupère <code>$age<\/code> et <code>$abo<\/code>, calcule <code>$reduction<\/code> avec if/else, <code>$avantages<\/code> avec un switch, puis <code>if (!isset($_POST[\"paiement\"])) { echo \"Accès refusé\"; } else { … }<\/code>.",
+     "solution": "<form method=\"post\">\n  <label for=\"age\">Âge<\/label>\n  <input type=\"number\" id=\"age\" name=\"age\" required>\n  <label for=\"abonnement\">Abonnement<\/label>\n  <select id=\"abonnement\" name=\"abonnement\">\n    <option value=\"standard\">Standard<\/option>\n    <option value=\"premium\">Premium<\/option>\n    <option value=\"famille\">Famille<\/option>\n  <\/select>\n  <label><input type=\"checkbox\" name=\"paiement\"> Paiement à jour<\/label>\n  <button type=\"submit\">Valider<\/button>\n<\/form>\n\n<?php\nif ($_SERVER[\"REQUEST_METHOD\"] === \"POST\") {\n  $age = (int)$_POST[\"age\"];\n  $abo = $_POST[\"abonnement\"];\n  if ($age < 18) {\n    $reduction = 20;\n  } else {\n    $reduction = 0;\n  }\n  switch ($abo) {\n    case \"standard\":\n      $avantages = \"Vidéo HD\";\n      break;\n    case \"premium\":\n      $avantages = \"Vidéo 4K + Téléchargement\";\n      break;\n    case \"famille\":\n      $avantages = \"4 utilisateurs simultanés\";\n      break;\n    default:\n      $avantages = \"Abonnement inconnu\";\n  }\n  if (!isset($_POST[\"paiement\"])) {\n    echo \"<p>Accès refusé<\/p>\";\n  } else {\n    echo \"<p>Abonnement $abo : $avantages (réduction : $reduction %)<\/p>\";\n  }\n}\n",
+     "bravo": "Tu as terminé le TP de synthèse du Bloc 1."
+    }
+   ]
+  },
+  {
+   "titre": "Bonus : boucles",
+   "missions": [
+    {
+     "id": "for",
+     "titre": "La boucle for",
+     "texte": "<p><b>Bonus<\/b> (pas encore vu en cours de PHP, mais déjà en algo) : <code>for ($i = 1; $i &lt;= 5; $i++) { … }<\/code> répète le bloc en faisant varier <code>$i<\/code> de 1 à 5.<\/p>",
+     "depart": "<?php\n\n",
+     "objectifs": [
+      {
+       "txt": "Utilise une boucle <code>for<\/code>",
+       "r": [
+        {
+         "code": "\\bfor\\s*\\("
+        }
+       ]
+      },
+      {
+       "txt": "Affiche la table de multiplication de 7, de <code>7 x 1 = 7<\/code> à <code>7 x 10 = 70<\/code>, une ligne par calcul",
+       "r": [
+        {
+         "out": "7 x 1 = 7\\b"
+        },
+        {
+         "out": "7 x 5 = 35"
+        },
+        {
+         "out": "7 x 10 = 70"
+        },
+        {
+         "min": [
+          "br, li, p",
+          9
+         ]
+        },
+        {
+         "noerr": true
+        }
+       ]
+      }
+     ],
+     "indice": "<code>for ($i = 1; $i &lt;= 10; $i++) { echo \"7 x $i = \" . 7 * $i . \"&lt;br&gt;\"; }<\/code>",
+     "solution": "<?php\nfor ($i = 1; $i <= 10; $i++) {\n  echo \"7 x $i = \" . 7 * $i . \"<br>\";\n}\n"
+    },
+    {
+     "id": "foreach",
+     "titre": "Parcourir un tableau",
+     "texte": "<p>Un tableau : <code>$langages = [\"HTML\", \"CSS\", \"PHP\"];<\/code>. <code>foreach ($langages as $l) { … }<\/code> parcourt chaque élément. Pratique pour générer du HTML !<\/p>",
+     "depart": "<?php\n$langages = [\"HTML\", \"CSS\", \"PHP\", \"SQL\"];\n\n",
+     "objectifs": [
+      {
+       "txt": "Utilise <code>foreach<\/code>",
+       "r": [
+        {
+         "code": "\\bforeach\\s*\\(\\s*\\$langages\\s+as"
+        }
+       ]
+      },
+      {
+       "txt": "Génère une liste <code>&lt;ul&gt;<\/code> avec un <code>&lt;li&gt;<\/code> par langage",
+       "r": [
+        {
+         "count": [
+          "ul > li",
+          4
+         ]
+        },
+        {
+         "text": [
+          "ul > li",
+          "^SQL$"
+         ]
+        },
+        {
+         "noerr": true
+        }
+       ]
+      },
+      {
+       "txt": "N'écris pas les <code>&lt;li&gt;<\/code> à la main",
+       "r": [
+        {
+         "nocode": "<li>\\s*(HTML|CSS|PHP|SQL)"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>echo \"&lt;ul&gt;\"; foreach ($langages as $l) { echo \"&lt;li&gt;$l&lt;/li&gt;\"; } echo \"&lt;/ul&gt;\";<\/code>",
+     "solution": "<?php\n$langages = [\"HTML\", \"CSS\", \"PHP\", \"SQL\"];\n\necho \"<ul>\";\nforeach ($langages as $l) {\n  echo \"<li>$l<\/li>\";\n}\necho \"<\/ul>\";\n"
+    }
+   ]
+  }
+ ],
+ "libre": "<?php\n$prenom = \"Ilan\";\necho \"<h1>Bonjour $prenom<\/h1>\";\n?>\n<form method=\"post\">\n  <input name=\"message\" placeholder=\"Un message\">\n  <button>Envoyer<\/button>\n<\/form>\n<?php\nif (isset($_POST[\"message\"])) {\n  echo \"<p>Reçu : \" . htmlspecialchars($_POST[\"message\"]) . \"<\/p>\";\n}\n",
+ "libreTexte": "<p>Écris le PHP que tu veux. Les formulaires de l'aperçu sont réellement traités (<code>$_GET<\/code>, <code>$_POST<\/code>), et les liens <code>?param=valeur<\/code> aussi. Ton code est sauvegardé dans ce navigateur.<\/p>"
+};
+</script>
+  <script src="../../data/modules.js"></script>
+  <script src="../../assets/app.js"></script>
+  <script src="../../assets/labo-code.js"></script>
+</body>
+</html>

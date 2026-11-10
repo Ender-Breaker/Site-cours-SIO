@@ -34,6 +34,7 @@ window.EF_MODULES = [
     option: "SLAM",
     couleur: "indigo",
     description: "POO, bases de données, web, API : tout pour concevoir et coder des applications.",
+    labos: [{ href: "labo-html.html", ico: "</>", titre: "Labo HTML / CSS", texte: "19 missions : écris du HTML et du CSS, vois le résultat en direct, objectifs vérifiés automatiquement. Plus un bac à sable." }],
     chapitres: [
       { id: "html-bases", titre: "HTML : les bases", niveau: "facile" },
       { id: "css-bases", titre: "CSS : les bases et les sélecteurs", niveau: "facile" },
@@ -68,6 +69,7 @@ window.EF_MODULES = [
     option: "COMMUN",
     couleur: "violet",
     description: "Base de la programmation en PHP : variables, conditions, formulaires.",
+    labos: [{ href: "labo-php.html", ico: "<?", titre: "Labo PHP", texte: "18 missions avec du vrai PHP 8.4 dans le navigateur : variables, conditions, formulaires GET/POST testés automatiquement." }],
     chapitres: [
       { id: "php-variables-fonctions", titre: "PHP : variables, constantes et fonctions", niveau: "facile" },
       { id: "php-conditionnelles", titre: "PHP : les conditionnelles (if, else, switch)", niveau: "moyen" },

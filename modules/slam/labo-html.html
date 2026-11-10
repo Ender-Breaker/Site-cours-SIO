@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Labo HTML / CSS — Étude Facile</title>
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="slam">
+<script>
+window.EF_CODE = {
+ "langue": "html",
+ "key": "ef-labo-html",
+ "titre": "Labo HTML / CSS",
+ "sousTitre": "Écris du HTML et du CSS, vois le résultat tout de suite, valide les objectifs.",
+ "ico": "<\/>",
+ "couleur": "indigo",
+ "fichier": "index.html",
+ "module": {
+  "titre": "SLAM",
+  "href": "index.html"
+ },
+ "lecons": [
+  {
+   "titre": "Les bases du HTML",
+   "missions": [
+    {
+     "id": "h1-p",
+     "titre": "Titre et paragraphe",
+     "texte": "<p>Une page HTML est faite de <b>balises<\/b> : <code>&lt;h1&gt;<\/code> pour le titre principal, <code>&lt;p&gt;<\/code> pour un paragraphe. Tout ce qui s'affiche va dans <code>&lt;body&gt;<\/code>.<\/p><p>Clique sur <b>Exécuter<\/b> pour voir le résultat dans l'aperçu.<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  \n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Un titre <code>&lt;h1&gt;<\/code> contenant « Mon portfolio »",
+       "r": [
+        {
+         "text": [
+          "h1",
+          "Mon portfolio"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Un paragraphe <code>&lt;p&gt;<\/code> qui te présente en une phrase",
+       "r": [
+        {
+         "text": [
+          "body > p",
+          "\\w{3,}"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "Dans le body : <code>&lt;h1&gt;Mon portfolio&lt;/h1&gt;<\/code> puis <code>&lt;p&gt;…&lt;/p&gt;<\/code>. N'oublie pas les balises fermantes.",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <h1>Mon portfolio<\/h1>\n  <p>Je suis étudiant en BTS SIO option SLAM.<\/p>\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "strong-em",
+     "titre": "Mettre en valeur",
+     "texte": "<p><code>&lt;strong&gt;<\/code> indique un texte <b>important<\/b> (affiché en gras), <code>&lt;em&gt;<\/code> un texte <i>accentué<\/i> (en italique). Ces balises se placent <b>à l'intérieur<\/b> d'un paragraphe.<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <h1>Mon portfolio<\/h1>\n  <p>Je suis étudiant en BTS SIO. J'aime le développement web.<\/p>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Mets « BTS SIO » en <code>&lt;strong&gt;<\/code> dans le paragraphe",
+       "r": [
+        {
+         "text": [
+          "p strong",
+          "BTS SIO"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Mets « développement web » en <code>&lt;em&gt;<\/code>",
+       "r": [
+        {
+         "text": [
+          "p em",
+          "d.veloppement web"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "Entoure les mots : <code>&lt;strong&gt;BTS SIO&lt;/strong&gt;<\/code>.",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <h1>Mon portfolio<\/h1>\n  <p>Je suis étudiant en <strong>BTS SIO<\/strong>. J'aime le <em>développement web<\/em>.<\/p>\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "listes",
+     "titre": "Les listes",
+     "texte": "<p><code>&lt;ul&gt;<\/code> crée une liste à puces, <code>&lt;ol&gt;<\/code> une liste numérotée. Chaque élément est un <code>&lt;li&gt;<\/code>.<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <h2>Mes langages<\/h2>\n  \n  <h2>Installer un serveur web<\/h2>\n  \n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Une liste à puces d'au moins 3 langages (HTML, CSS, PHP…)",
+       "r": [
+        {
+         "min": [
+          "ul > li",
+          3
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Une liste numérotée d'au moins 2 étapes",
+       "r": [
+        {
+         "min": [
+          "ol > li",
+          2
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Pas de <code>&lt;li&gt;<\/code> en dehors d'une liste",
+       "r": [
+        {
+         "count": [
+          "li:not(ul > li):not(ol > li)",
+          0
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>&lt;ul&gt;<\/code> puis trois <code>&lt;li&gt;HTML&lt;/li&gt;<\/code>…, et <code>&lt;/ul&gt;<\/code>. Pareil avec <code>&lt;ol&gt;<\/code>.",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <h2>Mes langages<\/h2>\n  <ul>\n    <li>HTML<\/li>\n    <li>CSS<\/li>\n    <li>PHP<\/li>\n  <\/ul>\n  <h2>Installer un serveur web<\/h2>\n  <ol>\n    <li>Installer Nginx<\/li>\n    <li>Copier les fichiers du site<\/li>\n  <\/ol>\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "liens",
+     "titre": "Les liens",
+     "texte": "<p>Un lien : <code>&lt;a href=\"adresse\"&gt;texte cliquable&lt;/a&gt;<\/code>. L'attribut <code>target=\"_blank\"<\/code> ouvre le lien dans un nouvel onglet. Dans l'aperçu, les clics sont interceptés pour te montrer où mène le lien.<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <h1>Ressources<\/h1>\n  <p>Documentation : <\/p>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Un lien vers <code>https://developer.mozilla.org<\/code> dont le texte est « MDN »",
+       "r": [
+        {
+         "attr": [
+          "a",
+          "href",
+          "^https://developer\\.mozilla\\.org/?$"
+         ]
+        },
+        {
+         "text": [
+          "a",
+          "^MDN$"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Le lien s'ouvre dans un nouvel onglet",
+       "r": [
+        {
+         "attr": [
+          "a",
+          "target",
+          "^_blank$"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>&lt;a href=\"https://developer.mozilla.org\" target=\"_blank\"&gt;MDN&lt;/a&gt;<\/code>",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <h1>Ressources<\/h1>\n  <p>Documentation : <a href=\"https://developer.mozilla.org\" target=\"_blank\">MDN<\/a><\/p>\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "images",
+     "titre": "Les images",
+     "texte": "<p><code>&lt;img&gt;<\/code> est une balise <b>orpheline<\/b> (pas de balise fermante). <code>src<\/code> donne le chemin de l'image, <code>alt<\/code> un texte de remplacement, indispensable pour l'accessibilité (et affiché si l'image ne charge pas, comme ici).<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <h1>Mon chat<\/h1>\n  \n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Une image dont la source est <code>images/chat.jpg<\/code>",
+       "r": [
+        {
+         "attr": [
+          "img",
+          "src",
+          "^images/chat\\.jpg$"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Avec un texte alternatif qui décrit l'image",
+       "r": [
+        {
+         "attr": [
+          "img",
+          "alt",
+          "\\w{3,}"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>&lt;img src=\"images/chat.jpg\" alt=\"Mon chat qui dort\"&gt;<\/code>",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <h1>Mon chat<\/h1>\n  <img src=\"images/chat.jpg\" alt=\"Mon chat qui dort sur le canapé\">\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "tableau",
+     "titre": "Les tableaux",
+     "texte": "<p>Un tableau : <code>&lt;table&gt;<\/code>, une ligne par <code>&lt;tr&gt;<\/code>, une cellule par <code>&lt;td&gt;<\/code>. Les cellules d'en-tête utilisent <code>&lt;th&gt;<\/code>.<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <h1>Mes notes<\/h1>\n  \n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Un tableau avec deux en-têtes <code>&lt;th&gt;<\/code> : « Matière » et « Note »",
+       "r": [
+        {
+         "text": [
+          "table th",
+          "^Mati.re$"
+         ]
+        },
+        {
+         "text": [
+          "table th",
+          "^Note$"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Au moins 2 lignes de données (en plus de la ligne d'en-tête)",
+       "r": [
+        {
+         "min": [
+          "table tr",
+          3
+         ]
+        },
+        {
+         "min": [
+          "table td",
+          4
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "Première ligne : <code>&lt;tr&gt;&lt;th&gt;Matière&lt;/th&gt;&lt;th&gt;Note&lt;/th&gt;&lt;/tr&gt;<\/code>, puis des lignes avec des <code>&lt;td&gt;<\/code>.",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <h1>Mes notes<\/h1>\n  <table>\n    <tr><th>Matière<\/th><th>Note<\/th><\/tr>\n    <tr><td>Maths<\/td><td>15<\/td><\/tr>\n    <tr><td>Anglais<\/td><td>13<\/td><\/tr>\n  <\/table>\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "div-span",
+     "titre": "Structurer avec div et span",
+     "texte": "<p><code>&lt;div&gt;<\/code> regroupe un bloc d'éléments, <code>&lt;span&gt;<\/code> un morceau de texte dans une ligne. Seuls, ils ne changent rien à l'affichage : on leur donne une <b>classe<\/b> (<code>class=\"nom\"<\/code>) pour les styliser ensuite en CSS.<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  \n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Un <code>&lt;div class=\"carte\"&gt;<\/code> contenant un <code>&lt;h2&gt;<\/code> et un <code>&lt;p&gt;<\/code>",
+       "r": [
+        {
+         "dom": "div.carte h2"
+        },
+        {
+         "dom": "div.carte p"
+        }
+       ]
+      },
+      {
+       "txt": "Dans le paragraphe, un prix entouré d'un <code>&lt;span class=\"prix\"&gt;<\/code>",
+       "r": [
+        {
+         "dom": "div.carte p span.prix"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>&lt;div class=\"carte\"&gt;&lt;h2&gt;Clé USB&lt;/h2&gt;&lt;p&gt;Prix : &lt;span class=\"prix\"&gt;9 €&lt;/span&gt;&lt;/p&gt;&lt;/div&gt;<\/code>",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <div class=\"carte\">\n    <h2>Clé USB 64 Go<\/h2>\n    <p>Prix : <span class=\"prix\">9 €<\/span><\/p>\n  <\/div>\n<\/body>\n<\/html>\n"
+    }
+   ]
+  },
+  {
+   "titre": "Le CSS",
+   "missions": [
+    {
+     "id": "css-regle",
+     "titre": "Ta première règle CSS",
+     "texte": "<p>Une règle CSS : <code>sélecteur { propriété: valeur; }<\/code>. Ici, on écrit le CSS dans une balise <code>&lt;style&gt;<\/code> du <code>&lt;head&gt;<\/code> (dans un vrai projet, on le met dans un fichier <code>.css<\/code> relié par <code>&lt;link&gt;<\/code>).<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    \n  <\/style>\n<\/head>\n<body>\n  <h1>Mon portfolio<\/h1>\n  <p>Bienvenue sur mon site.<\/p>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Le titre <code>h1<\/code> est en rouge (<code>red<\/code>)",
+       "r": [
+        {
+         "style": [
+          "h1",
+          "color",
+          "rgb\\(255, 0, 0\\)"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Les paragraphes ont une taille de texte de 18px",
+       "r": [
+        {
+         "style": [
+          "p",
+          "font-size",
+          "^18px$"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "Dans le style : <code>h1 { color: red; }<\/code> et <code>p { font-size: 18px; }<\/code>.",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    h1 { color: red; }\n    p { font-size: 18px; }\n  <\/style>\n<\/head>\n<body>\n  <h1>Mon portfolio<\/h1>\n  <p>Bienvenue sur mon site.<\/p>\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "css-class-id",
+     "titre": "Classes et identifiants",
+     "texte": "<p>Le sélecteur <code>.nom<\/code> vise tous les éléments qui ont <code>class=\"nom\"<\/code> ; <code>#nom<\/code> vise l'élément unique qui a <code>id=\"nom\"<\/code>.<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    \n  <\/style>\n<\/head>\n<body>\n  <h1 id=\"titre\">Actualités<\/h1>\n  <p class=\"important\">Le partiel est avancé à lundi.<\/p>\n  <p>La cantine sera fermée vendredi.<\/p>\n  <p class=\"important\">Pensez à rendre le TP.<\/p>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Les paragraphes de classe <code>important<\/code> sont en gras",
+       "r": [
+        {
+         "style": [
+          "p.important",
+          "font-weight",
+          "^(700|bold)$"
+         ]
+        },
+        {
+         "style": [
+          "p:not(.important)",
+          "font-weight",
+          "^400$"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "L'élément d'id <code>titre<\/code> a un fond jaune (<code>yellow<\/code>)",
+       "r": [
+        {
+         "style": [
+          "#titre",
+          "background-color",
+          "rgb\\(255, 255, 0\\)"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>.important { font-weight: bold; }<\/code> et <code>#titre { background-color: yellow; }<\/code>.",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    .important { font-weight: bold; }\n    #titre { background-color: yellow; }\n  <\/style>\n<\/head>\n<body>\n  <h1 id=\"titre\">Actualités<\/h1>\n  <p class=\"important\">Le partiel est avancé à lundi.<\/p>\n  <p>La cantine sera fermée vendredi.<\/p>\n  <p class=\"important\">Pensez à rendre le TP.<\/p>\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "css-descendant",
+     "titre": "Sélecteur descendant",
+     "texte": "<p><code>nav a<\/code> vise les liens <b>situés dans<\/b> un <code>&lt;nav&gt;<\/code>, et seulement eux. Les autres liens de la page ne changent pas. C'est la structure arborescente du HTML qui rend ça possible.<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    \n  <\/style>\n<\/head>\n<body>\n  <nav>\n    <a href=\"#\">Accueil<\/a>\n    <a href=\"#\">Projets<\/a>\n    <a href=\"#\">Contact<\/a>\n  <\/nav>\n  <p>Voir aussi <a href=\"#\">mon CV<\/a>.<\/p>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Les liens du menu sont verts (<code>green<\/code>)",
+       "r": [
+        {
+         "style": [
+          "nav a",
+          "color",
+          "rgb\\(0, 128, 0\\)"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Les liens du menu ne sont pas soulignés",
+       "r": [
+        {
+         "style": [
+          "nav a",
+          "text-decoration-line",
+          "^none$"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Le lien du paragraphe garde son style par défaut",
+       "r": [
+        {
+         "style": [
+          "p a",
+          "text-decoration-line",
+          "^underline$"
+         ]
+        },
+        {
+         "style": [
+          "p a",
+          "color",
+          "^(?!rgb\\(0, 128, 0\\))"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>nav a { color: green; text-decoration: none; }<\/code>",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    nav a { color: green; text-decoration: none; }\n  <\/style>\n<\/head>\n<body>\n  <nav>\n    <a href=\"#\">Accueil<\/a>\n    <a href=\"#\">Projets<\/a>\n    <a href=\"#\">Contact<\/a>\n  <\/nav>\n  <p>Voir aussi <a href=\"#\">mon CV<\/a>.<\/p>\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "semantique",
+     "titre": "Les balises sémantiques",
+     "texte": "<p>HTML5 propose des balises qui <b>décrivent le rôle<\/b> de chaque zone : <code>&lt;header&gt;<\/code> (en-tête), <code>&lt;nav&gt;<\/code> (menu), <code>&lt;main&gt;<\/code> (contenu principal), <code>&lt;footer&gt;<\/code> (pied de page). Mieux qu'une suite de <code>&lt;div&gt;<\/code> pour le référencement et l'accessibilité.<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <div>\n    <h1>Mon site<\/h1>\n  <\/div>\n  <div>\n    <a href=\"#\">Accueil<\/a> <a href=\"#\">Contact<\/a>\n  <\/div>\n  <div>\n    <p>Contenu de la page.<\/p>\n  <\/div>\n  <div>\n    <p>© 2026<\/p>\n  <\/div>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Remplace les <code>div<\/code> par <code>header<\/code>, <code>nav<\/code>, <code>main<\/code> et <code>footer<\/code>",
+       "r": [
+        {
+         "dom": "header h1"
+        },
+        {
+         "dom": "nav a"
+        },
+        {
+         "dom": "main p"
+        },
+        {
+         "dom": "footer p"
+        }
+       ]
+      },
+      {
+       "txt": "Il ne reste plus aucun <code>div<\/code>",
+       "r": [
+        {
+         "count": [
+          "div",
+          0
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "Chaque <code>&lt;div&gt;<\/code> devient la balise de son rôle, avec la balise fermante correspondante.",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <header>\n    <h1>Mon site<\/h1>\n  <\/header>\n  <nav>\n    <a href=\"#\">Accueil<\/a> <a href=\"#\">Contact<\/a>\n  <\/nav>\n  <main>\n    <p>Contenu de la page.<\/p>\n  <\/main>\n  <footer>\n    <p>© 2026<\/p>\n  <\/footer>\n<\/body>\n<\/html>\n"
+    }
+   ]
+  },
+  {
+   "titre": "Mise en page",
+   "missions": [
+    {
+     "id": "boite",
+     "titre": "Le modèle de boîte",
+     "texte": "<p>Chaque élément est une boîte : le contenu, puis <code>padding<\/code> (marge intérieure), <code>border<\/code> (bordure) et <code>margin<\/code> (marge extérieure).<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    \n  <\/style>\n<\/head>\n<body>\n  <div class=\"boite\">Je suis une boîte.<\/div>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "La boîte a une marge intérieure de 20px",
+       "r": [
+        {
+         "style": [
+          ".boite",
+          "padding-top",
+          "^20px$"
+         ]
+        },
+        {
+         "style": [
+          ".boite",
+          "padding-left",
+          "^20px$"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Une bordure pleine (<code>solid<\/code>) de 2px",
+       "r": [
+        {
+         "style": [
+          ".boite",
+          "border-top-width",
+          "^2px$"
+         ]
+        },
+        {
+         "style": [
+          ".boite",
+          "border-top-style",
+          "^solid$"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Une marge extérieure de 10px",
+       "r": [
+        {
+         "style": [
+          ".boite",
+          "margin-top",
+          "^10px$"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>.boite { padding: 20px; border: 2px solid black; margin: 10px; }<\/code>",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    .boite { padding: 20px; border: 2px solid black; margin: 10px; }\n  <\/style>\n<\/head>\n<body>\n  <div class=\"boite\">Je suis une boîte.<\/div>\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "display",
+     "titre": "La propriété display",
+     "texte": "<p><code>display<\/code> change la façon dont une boîte se place : <code>block<\/code> (prend toute la largeur), <code>inline<\/code> (dans la ligne), <code>inline-block<\/code>, ou <code>none<\/code> (caché).<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    \n  <\/style>\n<\/head>\n<body>\n  <ul class=\"menu\">\n    <li>Accueil<\/li>\n    <li>Projets<\/li>\n    <li>Contact<\/li>\n  <\/ul>\n  <p class=\"cache\">Message secret<\/p>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Les <code>li<\/code> du menu s'affichent sur une seule ligne (<code>inline<\/code>)",
+       "r": [
+        {
+         "style": [
+          ".menu li",
+          "display",
+          "^inline(-block)?$"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Le paragraphe de classe <code>cache<\/code> n'est plus affiché",
+       "r": [
+        {
+         "style": [
+          ".cache",
+          "display",
+          "^none$"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>.menu li { display: inline; }<\/code> et <code>.cache { display: none; }<\/code>.",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    .menu li { display: inline; }\n    .cache { display: none; }\n  <\/style>\n<\/head>\n<body>\n  <ul class=\"menu\">\n    <li>Accueil<\/li>\n    <li>Projets<\/li>\n    <li>Contact<\/li>\n  <\/ul>\n  <p class=\"cache\">Message secret<\/p>\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "flex",
+     "titre": "Flexbox",
+     "texte": "<p><code>display: flex<\/code> sur un conteneur aligne ses enfants en ligne. <code>justify-content<\/code> les répartit : <code>space-between<\/code> les écarte au maximum, <code>center<\/code> les centre. <code>gap<\/code> ajoute un espace entre eux.<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    \n  <\/style>\n<\/head>\n<body>\n  <nav class=\"barre\">\n    <a href=\"#\">Logo<\/a>\n    <a href=\"#\">Projets<\/a>\n    <a href=\"#\">Contact<\/a>\n  <\/nav>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "La barre est un conteneur flexible",
+       "r": [
+        {
+         "style": [
+          ".barre",
+          "display",
+          "^flex$"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Les liens sont répartis avec <code>space-between<\/code>",
+       "r": [
+        {
+         "style": [
+          ".barre",
+          "justify-content",
+          "^space-between$"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Un espace (<code>gap<\/code>) de 16px entre les éléments",
+       "r": [
+        {
+         "style": [
+          ".barre",
+          "column-gap",
+          "^16px$"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>.barre { display: flex; justify-content: space-between; gap: 16px; }<\/code>",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    .barre { display: flex; justify-content: space-between; gap: 16px; }\n  <\/style>\n<\/head>\n<body>\n  <nav class=\"barre\">\n    <a href=\"#\">Logo<\/a>\n    <a href=\"#\">Projets<\/a>\n    <a href=\"#\">Contact<\/a>\n  <\/nav>\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "position",
+     "titre": "Positionner un badge",
+     "texte": "<p>Avec <code>position: absolute<\/code>, un élément se place par rapport à son plus proche ancêtre <b>positionné<\/b> (souvent <code>position: relative<\/code>). On le place avec <code>top<\/code>, <code>right<\/code>, <code>bottom<\/code>, <code>left<\/code>.<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    .carte { border: 2px solid black; padding: 20px; width: 260px; }\n    .badge { background: gold; padding: 2px 8px; }\n  <\/style>\n<\/head>\n<body>\n  <div class=\"carte\">\n    <span class=\"badge\">Nouveau<\/span>\n    <h2>Projet Étude Facile<\/h2>\n    <p>Un site de révision pour le BTS SIO.<\/p>\n  <\/div>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "La carte sert de repère (<code>position: relative<\/code>)",
+       "r": [
+        {
+         "style": [
+          ".carte",
+          "position",
+          "^relative$"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Le badge est en <code>position: absolute<\/code>, collé en haut à droite (<code>top: 0<\/code>, <code>right: 0<\/code>)",
+       "r": [
+        {
+         "style": [
+          ".badge",
+          "position",
+          "^absolute$"
+         ]
+        },
+        {
+         "style": [
+          ".badge",
+          "top",
+          "^0px$"
+         ]
+        },
+        {
+         "style": [
+          ".badge",
+          "right",
+          "^0px$"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "Ajoute <code>position: relative;<\/code> à <code>.carte<\/code> et <code>position: absolute; top: 0; right: 0;<\/code> à <code>.badge<\/code>.",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    .carte { border: 2px solid black; padding: 20px; width: 260px; position: relative; }\n    .badge { background: gold; padding: 2px 8px; position: absolute; top: 0; right: 0; }\n  <\/style>\n<\/head>\n<body>\n  <div class=\"carte\">\n    <span class=\"badge\">Nouveau<\/span>\n    <h2>Projet Étude Facile<\/h2>\n    <p>Un site de révision pour le BTS SIO.<\/p>\n  <\/div>\n<\/body>\n<\/html>\n"
+    }
+   ]
+  },
+  {
+   "titre": "Formulaires",
+   "missions": [
+    {
+     "id": "form",
+     "titre": "La balise form",
+     "texte": "<p><code>&lt;form&gt;<\/code> regroupe les champs. <code>action<\/code> donne la page qui traitera les données, <code>method<\/code> la façon de les envoyer : <code>get<\/code> (dans l'URL) ou <code>post<\/code> (dans le corps de la requête, pour les données sensibles).<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <h1>Inscription<\/h1>\n  \n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Un formulaire qui envoie ses données à <code>traitement.php<\/code>",
+       "r": [
+        {
+         "attr": [
+          "form",
+          "action",
+          "^traitement\\.php$"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Avec la méthode <code>post<\/code>",
+       "r": [
+        {
+         "attr": [
+          "form",
+          "method",
+          "^post$"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Un bouton d'envoi à l'intérieur",
+       "r": [
+        {
+         "dom": "form button, form input[type=submit]"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>&lt;form action=\"traitement.php\" method=\"post\"&gt; … &lt;button type=\"submit\"&gt;Envoyer&lt;/button&gt;&lt;/form&gt;<\/code>",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <h1>Inscription<\/h1>\n  <form action=\"traitement.php\" method=\"post\">\n    <button type=\"submit\">Envoyer<\/button>\n  <\/form>\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "label-input",
+     "titre": "Label et input",
+     "texte": "<p>Un champ texte : <code>&lt;input type=\"text\" name=\"nom\" id=\"nom\"&gt;<\/code>. Le <code>name<\/code> est la <b>clé<\/b> que recevra PHP. Le <code>&lt;label for=\"nom\"&gt;<\/code> est relié au champ par son <code>id<\/code> : cliquer sur le texte active le champ. <code>required<\/code> rend le champ obligatoire.<\/p><p>Remplis le formulaire dans l'aperçu et envoie-le pour voir les données transmises.<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <form action=\"traitement.php\" method=\"post\">\n    \n    <button type=\"submit\">Envoyer<\/button>\n  <\/form>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Un champ texte de nom <code>nom<\/code> et d'id <code>nom<\/code>, obligatoire",
+       "r": [
+        {
+         "dom": "form input#nom[name=nom][required]"
+        }
+       ]
+      },
+      {
+       "txt": "Un label relié à ce champ",
+       "r": [
+        {
+         "dom": "label[for=nom]"
+        }
+       ]
+      },
+      {
+       "txt": "Un champ <code>email<\/code> obligatoire, de nom <code>email<\/code>, avec son label",
+       "r": [
+        {
+         "dom": "input[type=email][name=email][required]"
+        },
+        {
+         "dom": "label[for=email]"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>&lt;label for=\"nom\"&gt;Nom&lt;/label&gt; &lt;input type=\"text\" id=\"nom\" name=\"nom\" required&gt;<\/code>, puis pareil avec <code>type=\"email\"<\/code>.",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <form action=\"traitement.php\" method=\"post\">\n    <label for=\"nom\">Nom<\/label>\n    <input type=\"text\" id=\"nom\" name=\"nom\" required>\n    <label for=\"email\">E-mail<\/label>\n    <input type=\"email\" id=\"email\" name=\"email\" required>\n    <button type=\"submit\">Envoyer<\/button>\n  <\/form>\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "controles",
+     "titre": "Les familles de contrôles",
+     "texte": "<p>Selon la donnée attendue :<\/p><ul><li><code>&lt;select&gt;<\/code> + <code>&lt;option value=\"…\"&gt;<\/code> : liste déroulante ;<\/li><li><code>type=\"radio\"<\/code> : un seul choix parmi plusieurs (même <code>name<\/code>) ;<\/li><li><code>type=\"checkbox\"<\/code> : case à cocher ;<\/li><li><code>&lt;textarea&gt;<\/code> : texte long.<\/li><\/ul>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <form action=\"traitement.php\" method=\"post\">\n    \n    <button type=\"submit\">Envoyer<\/button>\n  <\/form>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Une liste déroulante <code>option<\/code> (name=\"option\") avec les choix SLAM et SISR",
+       "r": [
+        {
+         "dom": "select[name=option]"
+        },
+        {
+         "min": [
+          "select[name=option] option",
+          2
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Deux boutons radio <code>annee<\/code> : valeurs 1 et 2",
+       "r": [
+        {
+         "count": [
+          "input[type=radio][name=annee]",
+          2
+         ]
+        },
+        {
+         "dom": "input[type=radio][name=annee][value='1']"
+        },
+        {
+         "dom": "input[type=radio][name=annee][value='2']"
+        }
+       ]
+      },
+      {
+       "txt": "Une case à cocher <code>rgpd<\/code> et une zone de texte <code>message<\/code>",
+       "r": [
+        {
+         "dom": "input[type=checkbox][name=rgpd]"
+        },
+        {
+         "dom": "textarea[name=message]"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>&lt;select name=\"option\"&gt;&lt;option value=\"slam\"&gt;SLAM&lt;/option&gt;…&lt;/select&gt;<\/code> ; <code>&lt;input type=\"radio\" name=\"annee\" value=\"1\"&gt;<\/code>…",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <form action=\"traitement.php\" method=\"post\">\n    <label for=\"option\">Option<\/label>\n    <select name=\"option\" id=\"option\">\n      <option value=\"slam\">SLAM<\/option>\n      <option value=\"sisr\">SISR<\/option>\n    <\/select>\n    <p>Année :\n      <label><input type=\"radio\" name=\"annee\" value=\"1\"> 1re<\/label>\n      <label><input type=\"radio\" name=\"annee\" value=\"2\"> 2e<\/label>\n    <\/p>\n    <label><input type=\"checkbox\" name=\"rgpd\"> J'accepte le traitement de mes données<\/label>\n    <textarea name=\"message\"><\/textarea>\n    <button type=\"submit\">Envoyer<\/button>\n  <\/form>\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "rectangle",
+     "titre": "Exemple complet : le rectangle",
+     "texte": "<p>Comme dans le cours : un formulaire qui demande la <b>longueur<\/b> et la <b>largeur<\/b> d'un rectangle et les envoie à <code>rectangle.php<\/code> en GET. Utilise des champs <code>type=\"number\"<\/code>, qui n'acceptent que des nombres.<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <h1>Calcul du rectangle<\/h1>\n  \n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Un formulaire en GET vers <code>rectangle.php<\/code>",
+       "r": [
+        {
+         "attr": [
+          "form",
+          "action",
+          "^rectangle\\.php$"
+         ]
+        },
+        {
+         "attr": [
+          "form",
+          "method",
+          "^get$"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Deux champs numériques obligatoires <code>longueur<\/code> et <code>largeur<\/code>",
+       "r": [
+        {
+         "dom": "input[type=number][name=longueur][required]"
+        },
+        {
+         "dom": "input[type=number][name=largeur][required]"
+        }
+       ]
+      },
+      {
+       "txt": "Chaque champ a son label",
+       "r": [
+        {
+         "min": [
+          "label",
+          2
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Un bouton « Calculer »",
+       "r": [
+        {
+         "dom": "form button, form input[type=submit]"
+        },
+        {
+         "codei": "Calculer"
+        }
+       ]
+      }
+     ],
+     "indice": "Inspire-toi de la mission « Label et input » avec <code>type=\"number\"<\/code> et <code>method=\"get\"<\/code>.",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <h1>Calcul du rectangle<\/h1>\n  <form action=\"rectangle.php\" method=\"get\">\n    <label for=\"longueur\">Longueur<\/label>\n    <input type=\"number\" id=\"longueur\" name=\"longueur\" required>\n    <label for=\"largeur\">Largeur<\/label>\n    <input type=\"number\" id=\"largeur\" name=\"largeur\" required>\n    <button type=\"submit\">Calculer<\/button>\n  <\/form>\n<\/body>\n<\/html>\n"
+    }
+   ]
+  }
+ ],
+ "libre": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    body { font-family: sans-serif; }\n  <\/style>\n<\/head>\n<body>\n  <h1>Bac à sable<\/h1>\n  <p>Teste ce que tu veux ici.<\/p>\n<\/body>\n<\/html>\n",
+ "libreTexte": "<p>Écris le HTML et le CSS que tu veux, puis <b>Exécuter<\/b> (ou Ctrl + Entrée). Ton code est sauvegardé automatiquement dans ce navigateur.<\/p>"
+};
+</script>
+  <script src="../../data/modules.js"></script>
+  <script src="../../assets/app.js"></script>
+  <script src="../../assets/labo-code.js"></script>
+</body>
+</html>
