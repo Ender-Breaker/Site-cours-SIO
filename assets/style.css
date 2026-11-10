@@ -451,3 +451,7 @@ pre .cm { color: #9aa0b8; font-style: italic; }
 .labo-goals li.ko { background: var(--ko-clair); }
 .labo-goals li.ko .ck { color: var(--ko); border-color: var(--ko); }
 .code-sol { background: #1b1d33; color: #f1ede2; padding: 10px 12px; border-radius: var(--r1); font: .8rem/1.5 var(--mono); overflow: auto; white-space: pre; max-height: 320px; }
+/* console Python */
+.py-in { display: grid; gap: 4px; padding: 8px 12px; border-bottom: 1.5px solid var(--encre); background: var(--papier); font-size: .78rem; font-weight: 700; }
+.py-in textarea { font: .85rem/1.5 var(--mono); border: 1.5px solid var(--encre); border-radius: var(--r1); padding: 6px 8px; resize: vertical; background: var(--surface); }
+.py-console { margin: 0; min-height: 220px; max-height: 340px; overflow: auto; padding: 12px; background: var(--encre); color: #e8e4d8; font: .85rem/1.55 var(--mono); white-space: pre-wrap; word-break: break-word; }

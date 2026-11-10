@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Labo Python — Étude Facile</title>
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="algo">
+<script>
+window.EF_CODE = {
+ "langue": "python",
+ "key": "ef-labo-python",
+ "titre": "Labo Python",
+ "sousTitre": "Du vrai Python 3 dans ton navigateur : écris, exécute, teste avec des entrées.",
+ "ico": "Py",
+ "couleur": "lime",
+ "fichier": "main.py",
+ "module": {
+  "titre": "Algo Python",
+  "href": "index.html"
+ },
+ "lecons": [
+  {
+   "titre": "Variables et types",
+   "missions": [
+    {
+     "id": "print",
+     "titre": "Afficher avec print",
+     "texte": "<p><code>print()<\/code> affiche une valeur dans la console. Le texte se met entre guillemets. Chaque <code>print<\/code> passe à la ligne.<\/p>",
+     "depart": "\n",
+     "objectifs": [
+      {
+       "txt": "Affiche <code>Bonjour le monde !<\/code>",
+       "r": [
+        {
+         "out": "^Bonjour le monde !$"
+        },
+        {
+         "noerr": true
+        }
+       ]
+      },
+      {
+       "txt": "Puis, sur la ligne suivante, <code>BTS SIO<\/code>",
+       "r": [
+        {
+         "out": "^Bonjour le monde !\\nBTS SIO$"
+        }
+       ]
+      }
+     ],
+     "indice": "Deux lignes : <code>print(\"Bonjour le monde !\")<\/code> puis <code>print(\"BTS SIO\")<\/code>.",
+     "solution": "print(\"Bonjour le monde !\")\nprint(\"BTS SIO\")\n"
+    },
+    {
+     "id": "affectation",
+     "titre": "Variables et affectation",
+     "texte": "<p>Une variable se crée en lui <b>affectant<\/b> une valeur avec <code>=<\/code> : <code>age = 19<\/code>. Pas de <code>$<\/code> ni de type à déclarer. Pour afficher plusieurs choses, sépare-les par des virgules dans <code>print<\/code> : <code>print(\"Âge :\", age)<\/code>.<\/p>",
+     "depart": "\n",
+     "objectifs": [
+      {
+       "txt": "Crée une variable <code>prenom<\/code> (un texte) et une variable <code>age<\/code> (un nombre)",
+       "r": [
+        {
+         "code": "^prenom\\s*=\\s*[\\\"'][^\\\"']+[\\\"']"
+        },
+        {
+         "code": "^age\\s*=\\s*\\d+"
+        }
+       ]
+      },
+      {
+       "txt": "Affiche <code>… a … ans<\/code> (par exemple <code>Léa a 19 ans<\/code>) en utilisant les deux variables",
+       "r": [
+        {
+         "out": "^\\S.* a \\d+ ans$"
+        },
+        {
+         "code": "print\\([^)]*prenom"
+        },
+        {
+         "code": "print\\([^)]*age"
+        },
+        {
+         "noerr": true
+        }
+       ]
+      }
+     ],
+     "indice": "<code>print(prenom, \"a\", age, \"ans\")<\/code> — les virgules ajoutent un espace automatiquement.",
+     "solution": "prenom = \"Léa\"\nage = 19\nprint(prenom, \"a\", age, \"ans\")\n"
+    },
+    {
+     "id": "types",
+     "titre": "Les types",
+     "texte": "<p>Chaque valeur a un <b>type<\/b> : <code>int<\/code> (entier), <code>float<\/code> (décimal), <code>str<\/code> (texte), <code>bool<\/code> (<code>True<\/code>/<code>False<\/code>). <code>type(x)<\/code> l'indique.<\/p>",
+     "depart": "a = 42\nb = 3.5\nc = \"42\"\nd = True\n",
+     "objectifs": [
+      {
+       "txt": "Affiche le type de chacune des 4 variables avec <code>type()<\/code>",
+       "r": [
+        {
+         "out": "<class 'int'>"
+        },
+        {
+         "out": "<class 'float'>"
+        },
+        {
+         "out": "<class 'str'>"
+        },
+        {
+         "out": "<class 'bool'>"
+        },
+        {
+         "noerr": true
+        }
+       ]
+      }
+     ],
+     "indice": "<code>print(type(a))<\/code>, puis pareil pour b, c et d. Remarque : <code>\"42\"<\/code> est un texte, pas un nombre !",
+     "solution": "a = 42\nb = 3.5\nc = \"42\"\nd = True\nprint(type(a))\nprint(type(b))\nprint(type(c))\nprint(type(d))\n"
+    },
+    {
+     "id": "operations",
+     "titre": "Les opérations",
+     "texte": "<p>En plus de <code>+ - * /<\/code> : <code>//<\/code> division entière, <code>%<\/code> reste (modulo), <code>**<\/code> puissance. Attention, <code>/<\/code> donne toujours un <code>float<\/code> : <code>10 / 2<\/code> vaut <code>5.0<\/code>.<\/p>",
+     "depart": "minutes = 135\n",
+     "objectifs": [
+      {
+       "txt": "Affiche le nombre d'heures complètes dans <code>minutes<\/code> (avec <code>//<\/code>)",
+       "r": [
+        {
+         "code": "minutes\\s*//\\s*60"
+        }
+       ]
+      },
+      {
+       "txt": "Affiche les minutes restantes (avec <code>%<\/code>)",
+       "r": [
+        {
+         "code": "minutes\\s*%\\s*60"
+        }
+       ]
+      },
+      {
+       "txt": "Résultat attendu : <code>2 h 15 min<\/code>",
+       "r": [
+        {
+         "out": "^2 h 15 min$"
+        },
+        {
+         "noerr": true
+        }
+       ]
+      }
+     ],
+     "indice": "<code>print(minutes // 60, \"h\", minutes % 60, \"min\")<\/code>",
+     "solution": "minutes = 135\nprint(minutes // 60, \"h\", minutes % 60, \"min\")\n"
+    },
+    {
+     "id": "fstring",
+     "titre": "Les f-strings",
+     "texte": "<p>Une <b>f-string<\/b> insère des variables dans un texte : <code>f\"Prix : {prix} €\"<\/code>. On peut y mettre des calculs et un format : <code>{x:.2f}<\/code> affiche 2 décimales.<\/p>",
+     "depart": "prix_ht = 19.99\n",
+     "objectifs": [
+      {
+       "txt": "Calcule le prix TTC (TVA 20 %) dans une variable <code>prix_ttc<\/code>",
+       "r": [
+        {
+         "code": "prix_ttc\\s*=\\s*prix_ht\\s*\\*\\s*1\\.2|prix_ttc\\s*=\\s*prix_ht\\s*\\+\\s*prix_ht\\s*\\*\\s*0?\\.2"
+        }
+       ]
+      },
+      {
+       "txt": "Affiche-le avec une f-string et 2 décimales : <code>Prix TTC : 23.99 €<\/code>",
+       "r": [
+        {
+         "code": "f[\\\"'].*\\{prix_ttc:\\.2f\\}"
+        },
+        {
+         "out": "^Prix TTC : 23\\.99 €$"
+        },
+        {
+         "noerr": true
+        }
+       ]
+      }
+     ],
+     "indice": "<code>print(f\"Prix TTC : {prix_ttc:.2f} €\")<\/code>",
+     "solution": "prix_ht = 19.99\nprix_ttc = prix_ht * 1.2\nprint(f\"Prix TTC : {prix_ttc:.2f} €\")\n"
+    }
+   ]
+  },
+  {
+   "titre": "Saisie",
+   "missions": [
+    {
+     "id": "input",
+     "titre": "Lire une saisie",
+     "texte": "<p><code>input(\"question\")<\/code> affiche la question et attend une réponse. Ici, les réponses viennent de la zone <b>Entrées du programme<\/b> sous l'éditeur (une par ligne). Change la valeur pour tester !<\/p>",
+     "depart": "\n",
+     "objectifs": [
+      {
+       "txt": "Demande le prénom avec <code>input<\/code>",
+       "r": [
+        {
+         "code": "=\\s*input\\("
+        }
+       ]
+      },
+      {
+       "txt": "Affiche <code>Bonjour …<\/code> avec le prénom saisi",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "Léa"
+          ],
+          "out": "Bonjour Léa"
+         }
+        },
+        {
+         "test": {
+          "stdin": [
+           "Ilan"
+          ],
+          "out": "Bonjour Ilan"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>prenom = input(\"Ton prénom ? \")<\/code> puis <code>print(\"Bonjour\", prenom)<\/code>.",
+     "solution": "prenom = input(\"Ton prénom ? \")\nprint(\"Bonjour\", prenom)\n",
+     "stdin": [
+      "Léa"
+     ]
+    },
+    {
+     "id": "int-input",
+     "titre": "Convertir une saisie",
+     "texte": "<p><code>input()<\/code> renvoie <b>toujours<\/b> du texte : <code>\"3\" + \"4\"<\/code> donne <code>\"34\"<\/code> ! Pour calculer, convertis avec <code>int()<\/code> (ou <code>float()<\/code>) : <code>n = int(input())<\/code>.<\/p><p>Exécute d'abord le code fourni pour voir le problème.<\/p>",
+     "depart": "a = input(\"Premier nombre : \")\nb = input(\"Second nombre : \")\nprint(\"Somme :\", a + b)\n",
+     "objectifs": [
+      {
+       "txt": "Convertis les saisies en nombres",
+       "r": [
+        {
+         "code": "(int|float)\\(\\s*input\\(|(int|float)\\(\\s*[ab]\\s*\\)"
+        }
+       ]
+      },
+      {
+       "txt": "Test : 3 et 4 → <code>Somme : 7<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "4"
+          ],
+          "out": "Somme : 7(\\.0)?$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Test : 10 et 25 → <code>Somme : 35<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "10",
+           "25"
+          ],
+          "out": "Somme : 35(\\.0)?$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>a = int(input(\"Premier nombre : \"))<\/code>, pareil pour b.",
+     "solution": "a = int(input(\"Premier nombre : \"))\nb = int(input(\"Second nombre : \"))\nprint(\"Somme :\", a + b)\n",
+     "stdin": [
+      "3",
+      "4"
+     ]
+    },
+    {
+     "id": "moyenne3",
+     "titre": "Moyenne de trois notes",
+     "texte": "<p>Demande trois notes (elles peuvent être décimales), puis affiche leur moyenne avec 2 décimales.<\/p>",
+     "depart": "\n",
+     "objectifs": [
+      {
+       "txt": "Lis trois notes avec <code>float(input(...))<\/code>",
+       "r": [
+        {
+         "code": "float\\(input[\\s\\S]*float\\(input[\\s\\S]*float\\(input"
+        }
+       ]
+      },
+      {
+       "txt": "Test : 12, 15, 9 → <code>Moyenne : 12.00<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "12",
+           "15",
+           "9"
+          ],
+          "out": "Moyenne : 12\\.00$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Test : 10.5, 14, 17 → <code>Moyenne : 13.83<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "10.5",
+           "14",
+           "17"
+          ],
+          "out": "Moyenne : 13\\.83$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>moy = (n1 + n2 + n3) / 3<\/code> puis <code>print(f\"Moyenne : {moy:.2f}\")<\/code>. N'oublie pas les parenthèses !",
+     "solution": "n1 = float(input(\"Note 1 : \"))\nn2 = float(input(\"Note 2 : \"))\nn3 = float(input(\"Note 3 : \"))\nmoy = (n1 + n2 + n3) / 3\nprint(f\"Moyenne : {moy:.2f}\")\n",
+     "stdin": [
+      "12",
+      "15",
+      "9"
+     ]
+    }
+   ]
+  },
+  {
+   "titre": "Conditions",
+   "missions": [
+    {
+     "id": "pair",
+     "titre": "Pair ou impair",
+     "texte": "<p><code>if condition:<\/code> exécute le bloc <b>indenté<\/b> (4 espaces) en dessous si la condition est vraie, <code>else:<\/code> sinon. Un nombre est pair si le reste de sa division par 2 vaut 0 : <code>n % 2 == 0<\/code> (<code>==<\/code> compare, <code>=<\/code> affecte).<\/p>",
+     "depart": "n = int(input(\"Un nombre : \"))\n",
+     "objectifs": [
+      {
+       "txt": "Utilise <code>if<\/code> / <code>else<\/code>",
+       "r": [
+        {
+         "code": "^if\\s.*:"
+        },
+        {
+         "code": "^else\\s*:"
+        }
+       ]
+      },
+      {
+       "txt": "Test : 8 → <code>pair<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "8"
+          ],
+          "out": "\\bpair\\b",
+          "notout": "impair"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Test : 7 → <code>impair<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "7"
+          ],
+          "out": "\\bimpair\\b"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Test : 0 → <code>pair<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "0"
+          ],
+          "out": "\\bpair\\b",
+          "notout": "impair"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>if n % 2 == 0:<\/code> → <code>print(\"pair\")<\/code>, <code>else:<\/code> → <code>print(\"impair\")<\/code>. Pense aux <code>:<\/code> et à l'indentation.",
+     "solution": "n = int(input(\"Un nombre : \"))\nif n % 2 == 0:\n    print(\"pair\")\nelse:\n    print(\"impair\")\n",
+     "stdin": [
+      "8"
+     ]
+    },
+    {
+     "id": "mention-py",
+     "titre": "if / elif / else",
+     "texte": "<p><code>elif<\/code> (« sinon si ») enchaîne plusieurs cas, testés dans l'ordre. Affiche la mention : 16+ <code>Très bien<\/code>, 14+ <code>Bien<\/code>, 12+ <code>Assez bien<\/code>, 10+ <code>Passable<\/code>, sinon <code>Ajourné<\/code>.<\/p>",
+     "depart": "note = float(input(\"Note : \"))\n",
+     "objectifs": [
+      {
+       "txt": "Utilise <code>elif<\/code>",
+       "r": [
+        {
+         "code": "^elif\\s"
+        }
+       ]
+      },
+      {
+       "txt": "Test : 17 → Très bien",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "17"
+          ],
+          "out": "Très bien"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Test : 14 → Bien",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "14"
+          ],
+          "out": "(?<!Très )Bien",
+          "notout": "Très bien|Assez bien"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Test : 12 → Assez bien, 10 → Passable, 9.5 → Ajourné",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "12"
+          ],
+          "out": "Assez bien"
+         }
+        },
+        {
+         "test": {
+          "stdin": [
+           "10"
+          ],
+          "out": "Passable"
+         }
+        },
+        {
+         "test": {
+          "stdin": [
+           "9.5"
+          ],
+          "out": "Ajourné"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Commence par la plus haute : <code>if note &gt;= 16:<\/code> … <code>elif note &gt;= 14:<\/code> … <code>else:<\/code>",
+     "solution": "note = float(input(\"Note : \"))\nif note >= 16:\n    print(\"Très bien\")\nelif note >= 14:\n    print(\"Bien\")\nelif note >= 12:\n    print(\"Assez bien\")\nelif note >= 10:\n    print(\"Passable\")\nelse:\n    print(\"Ajourné\")\n",
+     "stdin": [
+      "14"
+     ]
+    },
+    {
+     "id": "bissextile",
+     "titre": "and / or : année bissextile",
+     "texte": "<p>On combine des conditions avec <code>and<\/code> (les deux vraies), <code>or<\/code> (au moins une) et <code>not<\/code>. Une année est <b>bissextile<\/b> si elle est divisible par 4 mais pas par 100, <b>ou<\/b> si elle est divisible par 400.<\/p>",
+     "depart": "annee = int(input(\"Année : \"))\n",
+     "objectifs": [
+      {
+       "txt": "Utilise <code>and<\/code> et <code>or<\/code>",
+       "r": [
+        {
+         "code": "\\band\\b"
+        },
+        {
+         "code": "\\bor\\b"
+        }
+       ]
+      },
+      {
+       "txt": "Test : 2024 → <code>bissextile<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "2024"
+          ],
+          "out": "^bissextile$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Test : 1900 → <code>non bissextile<\/code> (divisible par 100)",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1900"
+          ],
+          "out": "non bissextile"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Test : 2000 → <code>bissextile<\/code> (divisible par 400) et 2026 → <code>non bissextile<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "2000"
+          ],
+          "out": "^bissextile$"
+         }
+        },
+        {
+         "test": {
+          "stdin": [
+           "2026"
+          ],
+          "out": "non bissextile"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>if (annee % 4 == 0 and annee % 100 != 0) or annee % 400 == 0:<\/code>",
+     "solution": "annee = int(input(\"Année : \"))\nif (annee % 4 == 0 and annee % 100 != 0) or annee % 400 == 0:\n    print(\"bissextile\")\nelse:\n    print(\"non bissextile\")\n",
+     "stdin": [
+      "2024"
+     ]
+    }
+   ]
+  },
+  {
+   "titre": "Boucles",
+   "missions": [
+    {
+     "id": "for-range",
+     "titre": "La boucle for",
+     "texte": "<p><code>for i in range(1, 11):<\/code> répète le bloc avec <code>i<\/code> allant de 1 à 10 (la borne de fin est <b>exclue<\/b>).<\/p>",
+     "depart": "n = int(input(\"Table de : \"))\n",
+     "objectifs": [
+      {
+       "txt": "Utilise <code>for<\/code> et <code>range<\/code>",
+       "r": [
+        {
+         "code": "^for\\s+\\w+\\s+in\\s+range\\("
+        }
+       ]
+      },
+      {
+       "txt": "Test : table de 7, de <code>7 x 1 = 7<\/code> à <code>7 x 10 = 70<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "7"
+          ],
+          "out": "^7 x 1 = 7\\n(.*\\n){8}7 x 10 = 70$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Test : table de 3 (10 lignes, pas 9 ni 11)",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3"
+          ],
+          "out": "^3 x 10 = 30$",
+          "notout": "3 x 11|3 x 0 "
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>for i in range(1, 11):<\/code> puis <code>print(f\"{n} x {i} = {n * i}\")<\/code>.",
+     "solution": "n = int(input(\"Table de : \"))\nfor i in range(1, 11):\n    print(f\"{n} x {i} = {n * i}\")\n",
+     "stdin": [
+      "7"
+     ]
+    },
+    {
+     "id": "somme",
+     "titre": "Accumuler une somme",
+     "texte": "<p>Pour additionner dans une boucle, on part d'un <b>accumulateur<\/b> à 0 et on y ajoute chaque valeur : <code>total = total + i<\/code> (ou <code>total += i<\/code>).<\/p>",
+     "depart": "n = int(input(\"n = \"))\n",
+     "objectifs": [
+      {
+       "txt": "Calcule la somme 1 + 2 + … + n avec une boucle (sans <code>sum<\/code>)",
+       "r": [
+        {
+         "code": "^(for|while)\\b"
+        },
+        {
+         "nocode": "\\bsum\\s*\\("
+        }
+       ]
+      },
+      {
+       "txt": "Test : n = 10 → <code>55<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "10"
+          ],
+          "out": "\\b55$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Test : n = 100 → <code>5050<\/code> et n = 1 → <code>1<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "100"
+          ],
+          "out": "\\b5050$"
+         }
+        },
+        {
+         "test": {
+          "stdin": [
+           "1"
+          ],
+          "out": "(?<!\\d)1$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>total = 0<\/code>, puis <code>for i in range(1, n + 1): total += i<\/code>, et <code>print(total)<\/code> <b>après<\/b> la boucle (pas indenté).",
+     "solution": "n = int(input(\"n = \"))\ntotal = 0\nfor i in range(1, n + 1):\n    total += i\nprint(total)\n",
+     "stdin": [
+      "10"
+     ]
+    },
+    {
+     "id": "while",
+     "titre": "La boucle while",
+     "texte": "<p><code>while condition:<\/code> répète tant que la condition est vraie. Utile quand on ne sait pas à l'avance combien de tours faire. Si la condition ne devient jamais fausse : boucle infinie (le labo l'arrête au bout de 5 secondes).<\/p><p>Le programme demande un mot de passe <b>jusqu'à<\/b> ce qu'il soit correct (<code>sio2026<\/code>), puis affiche le nombre d'essais.<\/p>",
+     "depart": "essais = 0\nmdp = \"\"\n",
+     "objectifs": [
+      {
+       "txt": "Utilise <code>while<\/code>",
+       "r": [
+        {
+         "code": "^while\\s"
+        }
+       ]
+      },
+      {
+       "txt": "Test : bon mot de passe du premier coup → <code>Accès autorisé en 1 essai(s)<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "sio2026"
+          ],
+          "out": "Accès autorisé en 1 essai\\(s\\)"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Test : deux erreurs puis le bon → <code>Accès autorisé en 3 essai(s)<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1234",
+           "azerty",
+           "sio2026"
+          ],
+          "out": "Accès autorisé en 3 essai\\(s\\)"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>while mdp != \"sio2026\":<\/code> → <code>mdp = input(\"Mot de passe : \")<\/code> et <code>essais += 1<\/code>. Le message final après la boucle.",
+     "solution": "essais = 0\nmdp = \"\"\nwhile mdp != \"sio2026\":\n    mdp = input(\"Mot de passe : \")\n    essais += 1\nprint(f\"Accès autorisé en {essais} essai(s)\")\n",
+     "stdin": [
+      "1234",
+      "sio2026"
+     ]
+    },
+    {
+     "id": "voyelles",
+     "titre": "Parcourir une chaîne",
+     "texte": "<p>Un <code>for<\/code> parcourt aussi un texte, caractère par caractère : <code>for c in mot:<\/code>. L'opérateur <code>in<\/code> teste l'appartenance : <code>c in \"aeiouy\"<\/code>.<\/p>",
+     "depart": "mot = input(\"Un mot : \")\n",
+     "objectifs": [
+      {
+       "txt": "Parcours le mot avec <code>for<\/code>",
+       "r": [
+        {
+         "code": "^for\\s+\\w+\\s+in\\s+mot\\b"
+        }
+       ]
+      },
+      {
+       "txt": "Test : <code>informatique<\/code> → <code>6 voyelles<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "informatique"
+          ],
+          "out": "\\b6 voyelles"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Test : <code>BTS<\/code> → <code>0 voyelles<\/code> et <code>Alice<\/code> → <code>3 voyelles<\/code> (majuscules comprises)",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "BTS"
+          ],
+          "out": "\\b0 voyelles"
+         }
+        },
+        {
+         "test": {
+          "stdin": [
+           "Alice"
+          ],
+          "out": "\\b3 voyelles"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Un compteur à 0, puis <code>if c.lower() in \"aeiouy\": compteur += 1<\/code>.",
+     "solution": "mot = input(\"Un mot : \")\nnb = 0\nfor c in mot:\n    if c.lower() in \"aeiouy\":\n        nb += 1\nprint(f\"{nb} voyelles\")\n",
+     "stdin": [
+      "informatique"
+     ]
+    }
+   ]
+  },
+  {
+   "titre": "Listes et chaînes",
+   "missions": [
+    {
+     "id": "max-liste",
+     "titre": "Le plus grand élément",
+     "texte": "<p>Une liste : <code>notes = [12, 8, 17]<\/code>. On la parcourt avec <code>for n in notes:<\/code>. Trouve la plus grande note <b>sans<\/b> utiliser <code>max()<\/code> : garde la meilleure vue jusqu'ici et compare chaque élément.<\/p>",
+     "depart": "notes = [12, 8, 17, 15, 9]\n",
+     "objectifs": [
+      {
+       "txt": "Sans la fonction <code>max()<\/code>",
+       "r": [
+        {
+         "nocode": "\\bmax\\s*\\("
+        },
+        {
+         "code": "^for\\s"
+        }
+       ]
+      },
+      {
+       "txt": "Affiche <code>Meilleure note : 17<\/code>",
+       "r": [
+        {
+         "out": "^Meilleure note : 17$"
+        },
+        {
+         "noerr": true
+        }
+       ]
+      },
+      {
+       "txt": "Le résultat est calculé, pas écrit en dur dans le <code>print<\/code>",
+       "r": [
+        {
+         "nocode": "print\\(\\s*f?[\\\"']Meilleure note : 17"
+        },
+        {
+         "nocode": "meilleure\\s*=\\s*17\\b"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>meilleure = notes[0]<\/code>, puis <code>for n in notes: if n &gt; meilleure: meilleure = n<\/code>.",
+     "solution": "notes = [12, 8, 17, 15, 9]\nmeilleure = notes[0]\nfor n in notes:\n    if n > meilleure:\n        meilleure = n\nprint(f\"Meilleure note : {meilleure}\")\n"
+    },
+    {
+     "id": "append",
+     "titre": "Construire une liste",
+     "texte": "<p><code>liste.append(x)<\/code> ajoute <code>x<\/code> à la fin. <code>len(liste)<\/code> donne le nombre d'éléments. Garde dans une nouvelle liste <code>pairs<\/code> les nombres pairs de <code>nombres<\/code>.<\/p>",
+     "depart": "nombres = [4, 7, 10, 13, 22, 5, 8]\npairs = []\n",
+     "objectifs": [
+      {
+       "txt": "Utilise <code>append<\/code>",
+       "r": [
+        {
+         "code": "pairs\\.append\\("
+        }
+       ]
+      },
+      {
+       "txt": "Affiche la liste <code>[4, 10, 22, 8]<\/code>",
+       "r": [
+        {
+         "out": "^\\[4, 10, 22, 8\\]$"
+        }
+       ]
+      },
+      {
+       "txt": "Puis <code>4 nombres pairs<\/code> grâce à <code>len<\/code>",
+       "r": [
+        {
+         "code": "len\\(\\s*pairs\\s*\\)"
+        },
+        {
+         "out": "^4 nombres pairs$"
+        },
+        {
+         "noerr": true
+        }
+       ]
+      }
+     ],
+     "indice": "<code>for n in nombres: if n % 2 == 0: pairs.append(n)<\/code>, puis <code>print(pairs)<\/code> et <code>print(len(pairs), \"nombres pairs\")<\/code>.",
+     "solution": "nombres = [4, 7, 10, 13, 22, 5, 8]\npairs = []\nfor n in nombres:\n    if n % 2 == 0:\n        pairs.append(n)\nprint(pairs)\nprint(len(pairs), \"nombres pairs\")\n"
+    },
+    {
+     "id": "chaines",
+     "titre": "Manipuler des chaînes",
+     "texte": "<p>Quelques outils sur les textes :<\/p><ul><li><code>s.upper()<\/code>, <code>s.lower()<\/code> : majuscules / minuscules ;<\/li><li><code>s[0]<\/code> : 1er caractère, <code>s[-1]<\/code> : dernier ;<\/li><li><code>s[::-1]<\/code> : le texte à l'envers ;<\/li><li><code>len(s)<\/code> : longueur.<\/li><\/ul>",
+     "depart": "mot = input(\"Un mot : \")\n",
+     "objectifs": [
+      {
+       "txt": "Affiche le mot en majuscules",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "radar"
+          ],
+          "out": "^RADAR$"
+         }
+        },
+        {
+         "test": {
+          "stdin": [
+           "sio"
+          ],
+          "out": "^SIO$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Affiche le mot à l'envers",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "python"
+          ],
+          "out": "^nohtyp$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Affiche <code>palindrome<\/code> si le mot se lit pareil dans les deux sens, sinon <code>pas un palindrome<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "radar"
+          ],
+          "out": "^palindrome$"
+         }
+        },
+        {
+         "test": {
+          "stdin": [
+           "python"
+          ],
+          "out": "pas un palindrome"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>print(mot.upper())<\/code>, <code>print(mot[::-1])<\/code>, puis <code>if mot == mot[::-1]:<\/code>.",
+     "solution": "mot = input(\"Un mot : \")\nprint(mot.upper())\nprint(mot[::-1])\nif mot == mot[::-1]:\n    print(\"palindrome\")\nelse:\n    print(\"pas un palindrome\")\n",
+     "stdin": [
+      "radar"
+     ]
+    }
+   ]
+  },
+  {
+   "titre": "Fonctions",
+   "missions": [
+    {
+     "id": "def",
+     "titre": "Définir une fonction",
+     "texte": "<p><code>def nom(paramètre):<\/code> définit une fonction ; <code>return<\/code> renvoie son résultat. On l'appelle ensuite : <code>carre(4)<\/code>. Une fonction qui <b>renvoie<\/b> (return) est plus réutilisable qu'une fonction qui affiche (print).<\/p><p>Les tests appellent ta fonction avec d'autres valeurs.<\/p>",
+     "depart": "# définis la fonction carre ici\n\nprint(carre(5))\n",
+     "objectifs": [
+      {
+       "txt": "Définis une fonction <code>carre(x)<\/code> qui <b>renvoie<\/b> x²",
+       "r": [
+        {
+         "code": "^def\\s+carre\\s*\\(\\s*\\w+\\s*\\)\\s*:"
+        },
+        {
+         "code": "\\breturn\\b"
+        }
+       ]
+      },
+      {
+       "txt": "Le programme affiche <code>25<\/code>",
+       "r": [
+        {
+         "out": "^25$"
+        },
+        {
+         "noerr": true
+        }
+       ]
+      },
+      {
+       "txt": "Tests : <code>carre(3)<\/code> = 9, <code>carre(-4)<\/code> = 16, <code>carre(0)<\/code> = 0",
+       "r": [
+        {
+         "test": {
+          "out": "^R= 9 16 0$",
+          "apres": "print('R=', carre(3), carre(-4), carre(0))"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>def carre(x):<\/code> puis, indenté, <code>return x * x<\/code>.",
+     "solution": "def carre(x):\n    return x * x\n\nprint(carre(5))\n"
+    },
+    {
+     "id": "def-params",
+     "titre": "Plusieurs paramètres",
+     "texte": "<p>Une fonction peut prendre plusieurs paramètres : <code>def prix_ttc(ht, taux):<\/code>. Écris une fonction qui renvoie le prix TTC arrondi à 2 décimales (<code>round(x, 2)<\/code>).<\/p>",
+     "depart": "\nprint(prix_ttc(100, 20))\nprint(prix_ttc(19.99, 5.5))\n",
+     "objectifs": [
+      {
+       "txt": "Définis <code>prix_ttc(ht, taux)<\/code> avec <code>return<\/code>",
+       "r": [
+        {
+         "code": "^def\\s+prix_ttc\\s*\\(\\s*\\w+\\s*,\\s*\\w+\\s*\\)\\s*:"
+        },
+        {
+         "code": "\\breturn\\b"
+        }
+       ]
+      },
+      {
+       "txt": "Affiche <code>120.0<\/code> puis <code>21.09<\/code>",
+       "r": [
+        {
+         "out": "^120(\\.0)?\\n21\\.09$"
+        },
+        {
+         "noerr": true
+        }
+       ]
+      },
+      {
+       "txt": "Test : <code>prix_ttc(50, 10)<\/code> = 55",
+       "r": [
+        {
+         "test": {
+          "out": "^R= 55(\\.0)?$",
+          "apres": "print('R=', prix_ttc(50, 10))"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "TTC = HT × (1 + taux / 100) : <code>return round(ht * (1 + taux / 100), 2)<\/code>",
+     "solution": "def prix_ttc(ht, taux):\n    return round(ht * (1 + taux / 100), 2)\n\nprint(prix_ttc(100, 20))\nprint(prix_ttc(19.99, 5.5))\n"
+    },
+    {
+     "id": "premier",
+     "titre": "Fonction booléenne : nombre premier",
+     "texte": "<p>Une fonction peut renvoyer <code>True<\/code> ou <code>False<\/code>. Un nombre est <b>premier<\/b> s'il est supérieur ou égal à 2 et n'a aucun diviseur entre 2 et lui-même (exclu). Dès qu'on trouve un diviseur, on peut faire <code>return False<\/code>.<\/p>",
+     "depart": "def est_premier(n):\n    pass  # à compléter\n\nfor n in range(1, 20):\n    if est_premier(n):\n        print(n, end=\" \")\n",
+     "objectifs": [
+      {
+       "txt": "Le programme affiche <code>2 3 5 7 11 13 17 19<\/code>",
+       "r": [
+        {
+         "out": "^2 3 5 7 11 13 17 19\\s*$"
+        },
+        {
+         "noerr": true
+        }
+       ]
+      },
+      {
+       "txt": "Tests : 1 → False, 2 → True, 91 → False, 97 → True",
+       "r": [
+        {
+         "test": {
+          "out": "R= False True False True$",
+          "apres": "print('R=', est_premier(1), est_premier(2), est_premier(91), est_premier(97))"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>if n &lt; 2: return False<\/code>, puis <code>for d in range(2, n): if n % d == 0: return False<\/code>, et <code>return True<\/code> après la boucle.",
+     "solution": "def est_premier(n):\n    if n < 2:\n        return False\n    for d in range(2, n):\n        if n % d == 0:\n            return False\n    return True\n\nfor n in range(1, 20):\n    if est_premier(n):\n        print(n, end=\" \")\n",
+     "bravo": "Bravo, tu as terminé tout le parcours Python !"
+    }
+   ]
+  }
+ ],
+ "libre": "# Bac à sable Python\nnom = input(\"Ton prénom ? \")\nfor i in range(3):\n    print(f\"{i + 1}. Salut {nom} !\")\n",
+ "libreTexte": "<p>Écris le Python que tu veux. Les valeurs lues par <code>input()<\/code> se mettent dans « Entrées du programme », une par ligne. Une boucle infinie est arrêtée au bout de 5 secondes.<\/p>"
+};
+</script>
+  <script src="../../data/modules.js"></script>
+  <script src="../../assets/app.js"></script>
+  <script src="../../assets/labo-code.js"></script>
+</body>
+</html>

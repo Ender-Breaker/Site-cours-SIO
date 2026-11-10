@@ -8,10 +8,10 @@
 (function () {
   "use strict";
   var EF = window.EtudeFacile, esc = EF.esc, el = EF.el, I = EF.icon;
-  var CFG = window.EF_CODE, PHP = CFG.langue === "php";
+  var CFG = window.EF_CODE, PHP = CFG.langue === "php", PY = CFG.langue === "python";
   var HERE = (document.currentScript && document.currentScript.src) || location.href;
   var PHP_URLS = window.EF_PHP_URLS || [new URL("vendor/php-wasm/PhpWeb.mjs", HERE).href, "https://cdn.jsdelivr.net/npm/php-wasm@0.2.0/PhpWeb.mjs", "https://unpkg.com/php-wasm@0.2.0/PhpWeb.mjs"];
-  var ERR = /(Parse error|Fatal error|Warning|Deprecated|Notice):/;
+  var ERR = PY ? /^Traceback|^\w*(Error|Exception)\b.*:|^\s+File "main\.py"/m : /(Parse error|Fatal error|Warning|Deprecated|Notice):/;
 
   /* ---------- progression ---------- */
   function load() { try { return JSON.parse(localStorage.getItem(CFG.key)) || {}; } catch (e) { return {}; } }
@@ -45,10 +45,13 @@
     '<textarea id="lc-src" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Éditeur de code"></textarea></div>' +
     '<div class="code-hint">Ctrl + Entrée pour exécuter · Tab pour indenter</div></div>' +
     '<div id="lc-err"></div>' +
+    (PY ? '<div class="code-out py-out"><div class="code-url"><i></i><i></i><i></i><span id="lc-url">Console Python</span></div>' +
+      '<label class="py-in"><span>Entrées du programme — une valeur par ligne, lues dans l\'ordre par <code>input()</code></span><textarea id="lc-stdin" rows="2" spellcheck="false"></textarea></label>' +
+      '<pre id="lc-console" class="py-console" aria-live="polite"></pre><div id="lc-notice"></div></div>' :
     '<div class="code-out"><div class="code-url"><i></i><i></i><i></i><span id="lc-url"></span></div>' +
     (PHP ? '<div class="code-tabs"><button type="button" data-v="rendu" aria-pressed="true">Aperçu</button><button type="button" data-v="source" aria-pressed="false">HTML produit par PHP</button></div>' : '') +
     '<iframe id="lc-frame" title="Aperçu" sandbox="allow-same-origin allow-forms"></iframe><pre id="lc-raw" class="code-raw" hidden></pre>' +
-    '<div id="lc-notice"></div></div>' +
+    '<div id="lc-notice"></div></div>') +
     '</section></div>';
 
   var $ = function (id) { return document.getElementById(id); };
@@ -75,10 +78,11 @@
     if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); runAndCheck(); return; }
     if (e.key === "Tab") {
       e.preventDefault();
-      src.setRangeText("  ", a, b, "end"); draft();
+      src.setRangeText(PY ? "    " : "  ", a, b, "end"); draft();
     } else if (e.key === "Enter") {
       var lineStart = v.lastIndexOf("\n", a - 1) + 1, ind = /^[ \t]*/.exec(v.slice(lineStart, a))[0];
-      if (/[{>]\s*$/.test(v.slice(lineStart, a)) && !/<\/[^>]*>\s*$/.test(v.slice(lineStart, a)) && !/\/>\s*$/.test(v.slice(lineStart, a))) ind += "  ";
+      if (PY && /:\s*$/.test(v.slice(lineStart, a))) ind += "    ";
+      else if (!PY && /[{>]\s*$/.test(v.slice(lineStart, a)) && !/<\/[^>]*>\s*$/.test(v.slice(lineStart, a)) && !/\/>\s*$/.test(v.slice(lineStart, a))) ind += "  ";
       e.preventDefault();
       src.setRangeText("\n" + ind, a, b, "end"); draft();
     }
@@ -107,10 +111,46 @@
     });
     return phpReady;
   }
+  /* ---------- Python (Pyodide dans un Web Worker) ---------- */
+  var worker = null, wReady = null, wSeq = 0, wWait = {};
+  function startWorker() {
+    status.textContent = "Chargement de Python… (une seule fois, quelques secondes)"; status.className = "code-status wait";
+    worker = new Worker(new URL("py-worker.js", HERE).href, { type: "module" });
+    wReady = new Promise(function (ok, ko) {
+      worker.onmessage = function (e) {
+        var d = e.data;
+        if (d.pret) { status.textContent = "Python " + d.version + " · prêt"; status.className = "code-status ok"; ok(); return; }
+        if (d.echec) { status.textContent = "Python n'a pas pu se charger"; status.className = "code-status ko"; ko(new Error(d.echec)); return; }
+        var w = wWait[d.id]; if (w) { delete wWait[d.id]; clearTimeout(w.t); w.ok(d.out); }
+      };
+      worker.onerror = function (e) { ko(e); };
+    });
+    wReady.catch(function () {});
+    return wReady;
+  }
+  function runPy(code, stdin) {
+    if (!worker) startWorker();
+    return wReady.then(function () {
+      return new Promise(function (ok) {
+        var id = ++wSeq;
+        wWait[id] = { ok: ok, t: setTimeout(function () {
+          /* boucle infinie probable : on coupe et on relance Python */
+          Object.keys(wWait).forEach(function (k) { clearTimeout(wWait[k].t); wWait[k].ok(k == id ? "⏱ Programme arrêté au bout de 5 secondes : il tourne en boucle ? (vérifie la condition de ton while)\nTimeoutError: temps dépassé\n" : ""); });
+          wWait = {}; worker.terminate(); worker = null; startWorker();
+        }, 5000) };
+        worker.postMessage({ id: id, code: code, stdin: stdin || [] });
+      });
+    });
+  }
   function b64(o) { return btoa(unescape(encodeURIComponent(JSON.stringify(o || {})))); }
   /* req = { method, get, post } ; renvoie la sortie (texte) */
   function execute(code, req) {
     req = req || {};
+    if (PY) {
+      var job0 = queue.then(function () { return runPy(code, req.stdin); });
+      queue = job0.catch(function () {});
+      return job0;
+    }
     if (!PHP) return Promise.resolve(code);
     var job = queue.then(function () { return ensurePhp(); }).then(function () {
       return php.refresh();
@@ -134,7 +174,25 @@
     return "http://localhost/" + (PHP ? CFG.fichier : CFG.fichier) + q + (req.method === "post" ? "   (POST)" : "");
   }
   function notice(html) { $("lc-notice").innerHTML = html ? '<div class="code-notice">' + html + '</div>' : ""; }
+  var AIDE_PY = {
+    SyntaxError: "Erreur de syntaxe : regarde la ligne indiquée (un <code>:</code> oublié après if/for/def ? une parenthèse ou un guillemet non fermé ?).",
+    IndentationError: "Problème d'indentation : le bloc après <code>:</code> doit être décalé de 4 espaces, toujours les mêmes.",
+    NameError: "Variable ou fonction inconnue : faute de frappe ? variable utilisée avant d'être créée ? guillemets oubliés autour d'un texte ?",
+    TypeError: "Types incompatibles : par exemple un texte + un nombre. <code>input()</code> renvoie toujours du texte : convertis avec <code>int()</code> ou <code>float()</code>.",
+    ValueError: "Valeur impossible à convertir : par exemple <code>int(\"abc\")</code>. Vérifie les entrées du programme.",
+    ZeroDivisionError: "Division par zéro.",
+    IndexError: "Indice hors de la liste : le dernier élément d'une liste de n éléments a l'indice n - 1.",
+    EOFError: "Le programme attend une saisie avec <code>input()</code> mais il n'y a plus de valeur : ajoute-la dans « Entrées du programme ».",
+    TimeoutError: "Le programme ne s'arrête pas : une boucle <code>while</code> dont la condition reste toujours vraie ?"
+  };
   function showErr(out) {
+    if (PY) {
+      var lines = (out || "").split("\n").filter(Boolean), last = lines.filter(function (l) { return /^\w+(Error|Exception)\b/.test(l); }).pop();
+      if (!last || !ERR.test(out)) { $("lc-err").innerHTML = ""; return; }
+      var ln = /File "main\.py", line (\d+)/.exec(out), type = last.split(":")[0];
+      $("lc-err").innerHTML = '<div class="code-erreur"><b>' + esc(type) + (ln ? " · ligne " + ln[1] : "") + '</b><code>' + esc(last) + '</code><span>' + (AIDE_PY[type] || "Lis le message : il indique la ligne et la nature du problème.") + '</span></div>';
+      return;
+    }
     var m = ERR.exec(out || "");
     if (!m) { $("lc-err").innerHTML = ""; return; }
     var line = out.split("\n").filter(function (l) { return ERR.test(l); })[0];
@@ -143,6 +201,11 @@
   }
   function render(out, req) {
     current = { req: req || {}, out: out };
+    if (PY) {
+      $("lc-console").textContent = out || "(le programme n'a rien affiché)";
+      showErr(out);
+      return Promise.resolve();
+    }
     $("lc-url").textContent = urlFor(current.req);
     raw.textContent = out || "(aucune sortie)";
     showErr(out);
@@ -227,12 +290,12 @@
       case "notout": return Promise.resolve(!rx(v).test(current.out));
       case "noerr": return Promise.resolve(!ERR.test(current.out));
       case "test":
-        var req = { method: v.post ? "post" : "get", get: v.get || {}, post: v.post || {} };
-        return execute(code, req).then(function (out) {
+        var req = PY ? { stdin: v.stdin || [] } : { method: v.post ? "post" : "get", get: v.get || {}, post: v.post || {} };
+        return execute(v.apres ? code + "\n" + v.apres + "\n" : code, req).then(function (out) {
           if (v.out && !rx(v.out).test(out)) return false;
           if (v.notout && rx(v.notout).test(out)) return false;
           if (ERR.test(out)) return false;
-          if (v.dom) { var d = new DOMParser().parseFromString(out, "text/html"); if (!d.querySelector(v.dom)) return false; }
+          if (v.dom && !PY) { var d = new DOMParser().parseFromString(out, "text/html"); if (!d.querySelector(v.dom)) return false; }
           return true;
         });
       default:
@@ -254,10 +317,11 @@
   function runAndCheck() {
     if (running) return;
     running = true;
-    var btn = $("lc-run"), code = src.value, req = cur ? { method: cur.post ? "post" : "get", get: cur.get || {}, post: cur.post || {} } : {};
+    var btn = $("lc-run"), code = src.value, req = PY ? { stdin: stdinLines() } : cur ? { method: cur.post ? "post" : "get", get: cur.get || {}, post: cur.post || {} } : {};
     btn.disabled = true; notice("");
     execute(code, req).then(function (out) { return render(out, req); }).then(function () {
       if (mode !== "guide" || !cur) return;
+      if (PY && /TimeoutError: temps dépassé/.test(current.out)) { results = cur.objectifs.map(function () { return false; }); renderBrief(false); return; }
       return checkAll(cur, code).then(function (res) {
         results = res;
         var ok = res.every(Boolean);
@@ -269,6 +333,8 @@
     }).then(function () { running = false; btn.disabled = false; });
   }
   $("lc-run").addEventListener("click", runAndCheck);
+  function stdinLines() { var t = $("lc-stdin"); return t && t.value.length ? t.value.replace(/\n$/, "").split("\n") : []; }
+  if (PY) $("lc-stdin").addEventListener("keydown", function (e) { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); runAndCheck(); } });
 
   /* ---------- parcours ---------- */
   function score() {
@@ -328,6 +394,12 @@
     prog.last = m.id; save();
     setCode(prog.code[m.id] != null ? prog.code[m.id] : m.depart);
     renderBrief(false); renderLecons(); notice("");
+    if (PY) {
+      $("lc-stdin").value = (m.stdin || []).join("\n");
+      $("lc-console").textContent = "Clique sur Exécuter pour lancer ton programme.";
+      $("lc-err").innerHTML = "";
+      return;
+    }
     var req = { method: m.post ? "post" : "get", get: m.get || {}, post: m.post || {} };
     execute(src.value, req).then(function (out) { return render(out, req); }).catch(function () {});
   }
@@ -338,6 +410,7 @@
     $("lc-reset").onclick = function () { setCode(CFG.libre); draft(); runAndCheck(); };
     setCode(prog.code.__libre != null ? prog.code.__libre : CFG.libre);
     renderLecons(); notice("");
+    if (PY) { $("lc-stdin").value = ""; $("lc-console").textContent = "Clique sur Exécuter pour lancer ton programme."; $("lc-err").innerHTML = ""; return; }
     execute(src.value, {}).then(function (out) { return render(out, {}); }).catch(function () {});
   }
 
@@ -355,9 +428,10 @@
   window.addEventListener("hashchange", route);
   /* accès pour les tests automatiques */
   window.EFCodeLab = { missions: all, verify: function (m, code) {
-    cur = m; var req = { method: m.post ? "post" : "get", get: m.get || {}, post: m.post || {} };
+    cur = m; var req = PY ? { stdin: m.stdin || [] } : { method: m.post ? "post" : "get", get: m.get || {}, post: m.post || {} };
     return execute(code, req).then(function (out) { return render(out, req); }).then(function () { return checkAll(m, code); });
   } };
   if (PHP) ensurePhp().catch(function () {});
+  if (PY) startWorker();
   score(); route();
 })();

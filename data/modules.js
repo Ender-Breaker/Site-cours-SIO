@@ -16,6 +16,7 @@ window.EF_MODULES = [
     option: "COMMUN",
     couleur: "lime",
     description: "Types de données, conditions, boucles, fonctions : les bases pour programmer en Python.",
+    labos: [{ href: "labo-python.html", ico: "Py", titre: "Labo Python", texte: "21 missions avec du vrai Python 3 dans le navigateur : saisies, conditions, boucles, listes, fonctions, testées automatiquement." }],
     chapitres: [
       { id: "types-operations", titre: "Données : types et opérations", niveau: "facile" },
       { id: "bonus-variables-affectation", titre: "Bonus : variables et affectation", niveau: "facile" },

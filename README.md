@@ -2,7 +2,7 @@
 
 Site de révision pour le BTS SIO (1re année, option SLAM). Chaque matière est un module, chaque chapitre une page avec une partie **Cours** et une partie **S'entraîner** (exercices interactifs : QCM, vrai/faux, saisie, association, terminal simulé). Une progression avec XP et séries est enregistrée dans le navigateur.
 
-**Site en ligne :** https://ender-breaker.github.io/Site-cours-SIO/
+**Site en ligne :** https://sitecoursio.vercel.app
 
 ## Matières
 
@@ -16,6 +16,18 @@ Site de révision pour le BTS SIO (1re année, option SLAM). Chaque matière est
 | Mathématiques | Numération, divisibilité et PGCD, congruences, suites, statistiques |
 | CEJM | Agents économiques, marché, offre et demande |
 | Culture générale, Anglais | À venir |
+
+## Labos interactifs
+
+| Labo | Module | Contenu |
+|---|---|---|
+| Terminal Linux | SISR | 40 missions guidées sur un système de fichiers virtuel (ls, cd, grep, chmod, pipes, sudo, tar…) + bac à sable |
+| HTML / CSS | SLAM | 19 missions avec aperçu en direct, objectifs vérifiés sur le rendu (DOM, styles calculés) |
+| PHP | Bloc 1 | 18 missions avec du vrai PHP 8.4 (php-wasm) ; formulaires GET/POST simulés et tests automatiques |
+| Python | Algo Python | 21 missions avec du vrai Python 3 (Pyodide, dans un Web Worker) ; saisies `input()` et tests automatiques |
+
+Les labos de code partagent le moteur `assets/labo-code.js` ; les missions sont générées dans les pages `modules/*/labo-*.html`.
+PHP et Python sont embarqués dans `assets/vendor/` (aucun CDN nécessaire).
 
 ## Lancer en local
 
@@ -43,4 +55,4 @@ modules/<matière>/  une page HTML par chapitre
 
 ## Crédits
 
-Icônes : [Lucide](https://lucide.dev) (licence ISC). Polices : Bricolage Grotesque et Hanken Grotesk (Google Fonts).
+Icônes : [Lucide](https://lucide.dev) (licence ISC). PHP : [php-wasm](https://github.com/seanmorris/php-wasm) (Apache-2.0 / GPL-2.0). Python : [Pyodide](https://pyodide.org) (MPL-2.0). Polices : Bricolage Grotesque et Hanken Grotesk (Google Fonts).
