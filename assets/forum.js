@@ -15,7 +15,7 @@
   var main = el("main", "wrap page forum");
   document.body.appendChild(main);
 
-  var C = null, F = null, mesVotes = {}, filtre = "", tri = "populaires", recherche = "", cache = null;
+  var C = null, F = null, modo = false, mesVotes = {}, filtre = "", tri = "populaires", recherche = "", cache = null;
 
   /* ---------- utilitaires ---------- */
   function ms(t) { return !t ? Date.now() : typeof t === "number" ? t : t.toMillis ? t.toMillis() : t.seconds ? t.seconds * 1000 : Date.now(); }
@@ -92,6 +92,12 @@
     e.preventDefault(); e.stopPropagation();
     voter(b.parentNode.dataset.cle, +b.dataset.v, b.parentNode);
   });
+  /* Modérateur ? La règle Firestore ne laisse lire config/moderation qu'aux modérateurs. */
+  function verifierModo() {
+    modo = false;
+    if (!moi()) return Promise.resolve();
+    return F.getDoc(F.doc(C.db, "config", "moderation")).then(function () { modo = true; }).catch(function () { modo = false; });
+  }
   function chargerVotes() {
     mesVotes = {};
     if (!moi()) return Promise.resolve();
@@ -104,6 +110,7 @@
     main.innerHTML = '<nav class="crumbs"><a href="index.html">Accueil</a><span>›</span><span>Forum</span></nav>' +
       '<div class="page-head"><div class="ico">' + I("message") + '</div><div><h1>Forum</h1>' +
       '<div class="sub">Pose tes questions, aide les autres. Vote pour les meilleures réponses.</div></div>' +
+      (modo ? '<span class="fo-modo">Modération</span>' : '') +
       '<a class="btn primary fo-poser" href="#nouveau">' + I("plus") + ' Poser une question</a></div>' +
       '<div class="fo-outils"><div class="chips" id="fo-mat">' +
       '<button class="chip" data-m="" aria-pressed="' + (!filtre) + '">Toutes</button>' +
@@ -133,6 +140,7 @@
     if (tri === "populaires") l.sort(function (a, b) { return chaud(b) - chaud(a); });
     else if (tri === "top") l.sort(function (a, b) { return b.score - a.score || ms(b.cree) - ms(a.cree); });
     else l.sort(function (a, b) { return ms(b.cree) - ms(a.cree); });
+    l.sort(function (a, b) { return (b.epingle ? 1 : 0) - (a.epingle ? 1 : 0); });
     if (!l.length) {
       box.innerHTML = '<div class="box fo-vide"><b>' + (cache.length ? "Aucune question ne correspond" : "Aucune question pour l'instant") + '</b><p>' +
         (cache.length ? "Change de filtre, ou pose la question toi-même !" : "Sois le premier à lancer une discussion.") + '</p><a class="btn primary" href="#nouveau">' + I("plus") + ' Poser une question</a></div>';
@@ -142,6 +150,7 @@
       var m = mat(p.matiere);
       return '<article class="fo-post c-' + (m.couleur || "") + '">' + boutonsVote(p.id, p.score) +
         '<a class="fo-post-c" href="#p=' + p.id + '"><div class="fo-meta"><span class="fo-tag">' + esc(m.titre) + '</span>' +
+        (p.epingle ? '<span class="fo-epingle">Épinglé</span>' : '') + (p.verrouille ? '<span class="fo-verrou">Verrouillé</span>' : '') +
         (p.resolu ? '<span class="fo-resolu">' + I("check") + ' Résolu</span>' : '') +
         '<span>par <b>' + esc(p.pseudo) + '</b> · ' + ilya(p.cree) + '</span></div>' +
         '<h2>' + esc(p.titre) + '</h2><p>' + esc(extrait(p.texte)) + '</p>' +
@@ -214,23 +223,30 @@
           boutonsVote(P.id + "__" + x.id, x.score, true) +
           '<div class="fo-rep-c"><div class="fo-meta"><b>' + (x.supprime ? "[supprimé]" : esc(x.pseudo)) + '</b>' + (x.auteur === P.auteur && !x.supprime ? '<span class="fo-op">auteur</span>' : '') +
           '<span>· ' + ilya(x.cree) + (x.modifie ? " · modifié" : "") + '</span>' + (best ? '<span class="fo-resolu">' + I("check") + ' Meilleure réponse</span>' : '') + '</div>' +
-          '<div class="fo-texte">' + (x.supprime ? "<i>Réponse supprimée par son auteur.</i>" : md(x.texte)) + '</div>' +
-          (x.supprime ? '' : '<div class="fo-actions"><button type="button" data-a="repondre" data-id="' + x.id + '">' + I("message") + ' Répondre</button>' +
+          '<div class="fo-texte">' + (x.supprime ? "<i>" + (x.modere ? "Réponse supprimée par la modération." : "Réponse supprimée par son auteur.") + "</i>" : md(x.texte)) + '</div>' +
+          (x.supprime ? '' : '<div class="fo-actions">' + (P.verrouille ? '' : '<button type="button" data-a="repondre" data-id="' + x.id + '">' + I("message") + ' Répondre</button>') +
             (auteur && !x.supprime ? '<button type="button" data-a="best" data-id="' + x.id + '">' + I("check") + ' ' + (best ? "Retirer « meilleure réponse »" : "Meilleure réponse") + '</button>' : '') +
-            (a ? '<button type="button" data-a="suppr-rep" data-id="' + x.id + '">Supprimer</button>' : '') + '</div>') +
+            (a ? '<button type="button" data-a="suppr-rep" data-id="' + x.id + '">Supprimer</button>' : '') +
+            (modo && !a ? '<button type="button" class="fo-amodo" data-a="modo-rep" data-id="' + x.id + '">Supprimer (modération)</button>' : '') + '</div>') +
           '<div class="fo-sous" data-pour="' + x.id + '"></div>' + fil(x.id, prof + 1) + '</div></div>';
       }).join("");
     }
     main.innerHTML = '<nav class="crumbs"><a href="index.html">Accueil</a><span>›</span><a href="#">Forum</a><span>›</span><span>' + esc(m.titre) + '</span></nav>' +
       '<article class="fo-question c-' + (m.couleur || "") + '">' + boutonsVote(P.id, P.score) +
-      '<div class="fo-q-c"><div class="fo-meta"><span class="fo-tag">' + esc(m.titre) + '</span>' + (P.resolu ? '<span class="fo-resolu">' + I("check") + ' Résolu</span>' : '') +
+      '<div class="fo-q-c"><div class="fo-meta"><span class="fo-tag">' + esc(m.titre) + '</span>' +
+      (P.epingle ? '<span class="fo-epingle">Épinglé</span>' : '') + (P.verrouille ? '<span class="fo-verrou">Verrouillé</span>' : '') + (P.resolu ? '<span class="fo-resolu">' + I("check") + ' Résolu</span>' : '') +
       '<span>par <b>' + esc(P.pseudo) + '</b> · ' + ilya(P.cree) + (P.modifie ? " · modifié" : "") + '</span></div>' +
       '<h1>' + esc(P.titre) + '</h1><div class="fo-texte">' + (md(P.texte) || "") + '</div>' +
-      (auteur ? '<div class="fo-actions"><a href="#modifier=' + P.id + '">Modifier</a><button type="button" data-a="suppr-post">Supprimer la question</button></div>' : '') +
+      (auteur || modo ? '<div class="fo-actions">' +
+        (auteur ? '<a href="#modifier=' + P.id + '">Modifier</a><button type="button" data-a="suppr-post">Supprimer la question</button>' : '') +
+        (modo ? '<button type="button" class="fo-amodo" data-a="modo-epingle">' + (P.epingle ? "Désépingler" : "Épingler") + '</button>' +
+          '<button type="button" class="fo-amodo" data-a="modo-verrou">' + (P.verrouille ? "Déverrouiller" : "Verrouiller") + '</button>' +
+          (auteur ? '' : '<button type="button" class="fo-amodo" data-a="suppr-post">Supprimer (modération)</button>') : '') + '</div>' : '') +
       '</div></article>' +
       '<section class="fo-reponses"><h2>' + REPS.filter(function (x) { return !x.supprime; }).length + ' réponse' + (REPS.length > 1 ? "s" : "") + '</h2>' +
       '<div class="fo-repondre" id="fo-racine"></div>' + (fil("", 0) || '<p class="lb-small">Pas encore de réponse. Aide ' + esc(P.pseudo) + ' !</p>') + '</section>';
-    zoneReponse(document.getElementById("fo-racine"), null);
+    if (P.verrouille) document.getElementById("fo-racine").innerHTML = '<div class="fo-co">Discussion verrouillée par la modération : on ne peut plus y répondre.</div>';
+    else zoneReponse(document.getElementById("fo-racine"), null);
     if (location.hash.indexOf("&r=") > 0) { var c = document.getElementById("r-" + location.hash.split("&r=")[1]); if (c) c.scrollIntoView({ block: "center" }); }
   }
   function zoneReponse(box, parent) {
@@ -274,8 +290,16 @@
       F.updateDoc(F.doc(C.db, "posts", P.id, "reponses", id), { texte: "", supprime: true }).then(function () {
         REPS.forEach(function (x) { if (x.id === id) { x.supprime = true; x.texte = ""; } }); rendreDiscussion();
       }).catch(erreur);
+    } else if (a === "modo-rep") {
+      if (!window.confirm("Supprimer cette réponse (modération) ?")) return;
+      F.updateDoc(F.doc(C.db, "posts", P.id, "reponses", id), { texte: "", supprime: true, modere: true }).then(function () {
+        REPS.forEach(function (x) { if (x.id === id) { x.supprime = true; x.modere = true; x.texte = ""; } }); rendreDiscussion();
+      }).catch(erreur);
+    } else if (a === "modo-epingle" || a === "modo-verrou") {
+      var champ = a === "modo-epingle" ? "epingle" : "verrouille", maj = {}; maj[champ] = !P[champ];
+      F.updateDoc(F.doc(C.db, "posts", P.id), maj).then(function () { P[champ] = maj[champ]; cache = null; rendreDiscussion(); alerte(champ === "epingle" ? (P.epingle ? "Question épinglée." : "Question désépinglée.") : (P.verrouille ? "Discussion verrouillée." : "Discussion déverrouillée.")); }).catch(erreur);
     } else if (a === "suppr-post") {
-      if (!window.confirm("Supprimer définitivement ta question ?")) return;
+      if (!window.confirm(moi() && moi().uid === P.auteur ? "Supprimer définitivement ta question ?" : "Supprimer définitivement cette question (modération) ?")) return;
       F.deleteDoc(F.doc(C.db, "posts", P.id)).then(function () { cache = null; location.hash = ""; }).catch(erreur);
     }
   });
@@ -300,7 +324,7 @@
     var premier = true;
     C.A.onAuthStateChanged(C.auth, function () {
       /* le profil (pseudo) arrive juste après la connexion */
-      setTimeout(function () { chargerVotes().then(function () { if (premier || !/^#(nouveau|modifier)/.test(location.hash)) route(); premier = false; }); }, premier ? 0 : 600);
+      setTimeout(function () { Promise.all([chargerVotes(), verifierModo()]).then(function () { if (premier || !/^#(nouveau|modifier)/.test(location.hash)) route(); premier = false; }); }, premier ? 0 : 600);
     });
   }
   if (window.EFCloud) demarrer();

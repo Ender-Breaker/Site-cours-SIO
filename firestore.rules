@@ -32,6 +32,13 @@ service cloud.firestore {
       return apres.get(cle, 0) in [-1, 0, 1]
         && request.resource.data.score - resource.data.score == apres.get(cle, 0) - avant.get(cle, 0);
     }
+    // Modération : la liste des e-mails des modérateurs est dans le document config/moderation { emails: [...] },
+    // créé à la main dans la console (aucun e-mail dans le code du site). L'adresse doit être vérifiée (connexion Google).
+    function estModo() {
+      return request.auth != null && request.auth.token.email_verified == true
+        && exists(/databases/$(db)/documents/config/moderation)
+        && request.auth.token.email in get(/databases/$(db)/documents/config/moderation).data.emails;
+    }
     function matiereOk(m) { return m in ['algo', 'slam', 'sisr', 'bloc1', 'bloc3', 'maths', 'culture-generale', 'cejm', 'anglais', 'general']; }
 
     match /posts/{post} {
@@ -50,8 +57,10 @@ service cloud.firestore {
         || (seuls(['nbRep']) && (request.resource.data.nbRep - resource.data.nbRep) in [-1, 1])
         || (resource.data.auteur == request.auth.uid && seuls(['titre', 'texte', 'matiere', 'resolu', 'modifie'])
             && request.resource.data.titre.size() >= 5 && request.resource.data.titre.size() <= 150
-            && request.resource.data.texte.size() <= 10000 && matiereOk(request.resource.data.matiere)));
-      allow delete: if connecte() && resource.data.auteur == request.auth.uid;
+            && request.resource.data.texte.size() <= 10000 && matiereOk(request.resource.data.matiere))
+        || (estModo() && seuls(['epingle', 'verrouille'])
+            && request.resource.data.get('epingle', false) is bool && request.resource.data.get('verrouille', false) is bool));
+      allow delete: if connecte() && (resource.data.auteur == request.auth.uid || estModo());
 
       match /reponses/{rep} {
         allow read: if true;
@@ -62,13 +71,22 @@ service cloud.firestore {
           && request.resource.data.texte is string && request.resource.data.texte.size() >= 1 && request.resource.data.texte.size() <= 5000
           && (request.resource.data.parent == null || request.resource.data.parent is string)
           && request.resource.data.cree == request.time
-          && request.resource.data.score == 0 && request.resource.data.supprime == false;
+          && request.resource.data.score == 0 && request.resource.data.supprime == false
+          && get(/databases/$(db)/documents/posts/$(post)).data.get('verrouille', false) == false;
         allow update: if connecte() && (
              (seuls(['score']) && voteCoherent(post + '__' + rep))
           || (resource.data.auteur == request.auth.uid && seuls(['texte', 'supprime', 'modifie'])
-              && request.resource.data.texte.size() <= 5000));
+              && request.resource.data.texte.size() <= 5000)
+          || (estModo() && seuls(['texte', 'supprime', 'modere'])
+              && request.resource.data.texte == '' && request.resource.data.supprime == true && request.resource.data.modere == true));
         allow delete: if false;
       }
+    }
+
+    // Liste des modérateurs : lisible seulement par un modérateur (sert au site à savoir s'il doit afficher les outils).
+    match /config/moderation {
+      allow read: if estModo();
+      allow write: if false;
     }
 
     // Mes votes (un seul document par personne) : { m: { "<post>": 1, "<post>__<réponse>": -1, … } }

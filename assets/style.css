@@ -684,3 +684,10 @@ html.compte-ouvert { overflow: hidden; }
 .fo-texte pre, .fo-apercu pre { background: #1b1d33; color: #f1ede2; padding: 10px 14px; border-radius: var(--r1); font: .85rem/1.5 var(--mono); overflow-x: auto; white-space: pre; }
 .fo-texte code, .fo-apercu code { font-family: var(--mono); font-size: .88em; background: var(--papier); border: 1px solid #d6cfbe; border-radius: 4px; padding: 0 4px; }
 .fo-texte pre code { background: none; border: 0; padding: 0; }
+.fo-epingle, .fo-verrou { font-weight: 800; border-radius: 99px; padding: 1px 10px; border: 1.5px solid var(--encre); }
+.fo-epingle { background: var(--safran); color: var(--encre); }
+.fo-verrou { background: var(--encre); color: #fff; }
+.fo-modo { align-self: center; font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: #fff; background: var(--ko); border: var(--trait); border-radius: 99px; padding: 3px 12px; margin-left: auto; }
+.fo-modo + .fo-poser { margin-left: 12px; }
+.fo-actions .fo-amodo { color: var(--ko); }
+.fo-actions .fo-amodo:hover { background: var(--ko-clair); color: var(--ko); }
