@@ -76,12 +76,22 @@ window.EF_MODULES = [
     icone: "<?",
     option: "COMMUN",
     couleur: "violet",
-    description: "Base de la programmation en PHP : variables, conditions, formulaires.",
-    labos: [{ href: "labo-php.html", ico: "<?", titre: "Labo PHP", texte: "18 missions avec du vrai PHP 8.4 dans le navigateur : variables, conditions, formulaires GET/POST testés automatiquement." }],
+    description: "Pages web en HTML et CSS, programmation PHP et bases de données SQL.",
+    labos: [{ href: "labo-php.html", ico: "<?", titre: "Labo PHP", court: "PHP", texte: "18 missions avec du vrai PHP 8.4 dans le navigateur : variables, conditions, formulaires GET/POST testés automatiquement." },
+      { href: "labo-html.html", ico: "</>", titre: "Labo HTML", court: "HTML", cle: "bloc1-html", texte: "12 missions sur la structure et la sémantique : zones HTML5, titres, articles, figures, tableaux, médias, formulaire accessible." },
+      { href: "labo-css.html", ico: "{ }", titre: "Labo CSS", court: "CSS", cle: "bloc1-css", texte: "13 missions vérifiées sur le rendu : sélecteurs et spécificité, modèle de boîte, Flexbox, grille, media queries." },
+      { href: "labo-sql.html", ico: "SQL", titre: "Labo SQL", court: "SQL", cle: "bloc1-sql", texte: "26 missions sur une vraie base SQLite (parc informatique) : SELECT, WHERE, GROUP BY, jointures, INSERT, UPDATE, DELETE, CREATE TABLE." }],
     chapitres: [
+      { id: "html-semantique", titre: "HTML : structure et sémantique d'une page", niveau: "facile" },
+      { id: "html-tableaux-medias", titre: "HTML : tableaux, médias et accessibilité", niveau: "moyen" },
+      { id: "css-selecteurs-cascade", titre: "CSS : sélecteurs, cascade et unités", niveau: "facile" },
+      { id: "css-flexbox-grid", titre: "CSS : Flexbox, Grid et responsive", niveau: "moyen" },
       { id: "php-variables-fonctions", titre: "PHP : variables, constantes et fonctions", niveau: "facile" },
       { id: "php-conditionnelles", titre: "PHP : les conditionnelles (if, else, switch)", niveau: "moyen" },
-      { id: "php-formulaires", titre: "PHP : formulaires et traitement des données", niveau: "moyen" }
+      { id: "php-formulaires", titre: "PHP : formulaires et traitement des données", niveau: "moyen" },
+      { id: "sql-select", titre: "SQL : interroger une base de données", niveau: "facile" },
+      { id: "sql-jointures", titre: "SQL : jointures et regroupements", niveau: "moyen" },
+      { id: "sql-ldd-lmd", titre: "SQL : créer et modifier les données", niveau: "moyen" }
     ]
   },
   {

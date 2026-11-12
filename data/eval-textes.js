@@ -138,7 +138,33 @@ window.EF_EVAL_TEXTES = {
         { n: "faille XSS / injection de code", rx: "xss|injection|faille|attaque|pirat|malveill" },
         { n: "empêche l'exécution de HTML ou JavaScript", rx: "javascript|script|html|balise|execut" },
         { n: "convertit les caractères spéciaux (< > &) en entités", rx: "caracteres? speciaux|entite|&lt;|<|chevron|convert|transform" }],
-      corrige: "<p>Si on affiche directement une saisie, un visiteur peut injecter des balises HTML ou du <b>JavaScript</b> qui s'exécuteront dans la page des autres : c'est la <b>faille XSS</b>. <code>htmlspecialchars()</code> <b>convertit les caractères spéciaux</b> (<code>&lt;</code>, <code>&gt;</code>, <code>&amp;</code>, guillemets) en entités HTML : le code s'affiche comme du texte au lieu d'être exécuté.</p>" }
+      corrige: "<p>Si on affiche directement une saisie, un visiteur peut injecter des balises HTML ou du <b>JavaScript</b> qui s'exécuteront dans la page des autres : c'est la <b>faille XSS</b>. <code>htmlspecialchars()</code> <b>convertit les caractères spéciaux</b> (<code>&lt;</code>, <code>&gt;</code>, <code>&amp;</code>, guillemets) en entités HTML : le code s'affiche comme du texte au lieu d'être exécuté.</p>" },
+    { q: "Pourquoi utiliser les balises sémantiques HTML5 (header, nav, main, article, footer) plutôt que des div ? Donne deux avantages.",
+      notions: [
+        { n: "elles donnent du sens à la structure (rôle de chaque zone)", rx: "sens|semanti|role|signif|structur" },
+        { n: "accessibilité : lecteurs d'écran, navigation", rx: "accessib|lecteur|malvoyant|aveugle|handicap" },
+        { n: "référencement par les moteurs de recherche", rx: "referenc|seo|moteur|google" },
+        { n: "code plus lisible et maintenable", rx: "lisib|maintenab|clair|comprendre le code|relire" }],
+      corrige: "<p>Les balises sémantiques disent <b>à quoi sert</b> chaque zone (en-tête, menu, contenu principal, pied de page) alors qu'une <code>div</code> ne dit rien. Avantages : <b>accessibilité</b> (les lecteurs d'écran permettent d'aller directement au menu ou au contenu), <b>référencement</b> (les moteurs comprennent mieux la page) et un code <b>plus lisible</b> pour les développeurs.</p>" },
+    { q: "Explique la différence entre <code>display: flex</code> et <code>display: grid</code>, avec un exemple d'utilisation pour chacun.",
+      notions: [
+        { n: "flex : une dimension (ligne ou colonne)", rx: "une dimension|1 dimension|une seule (ligne|direction)|ligne ou (une )?colonne|un axe|un seul axe" },
+        { n: "grid : deux dimensions (lignes et colonnes)", rx: "deux dimensions|2 dimensions|lignes et (des )?colonnes|grille" },
+        { n: "exemple flex : menu, barre, alignement, centrage", rx: "menu|nav|barre|centr|align|bouton" },
+        { n: "exemple grid : mise en page, galerie, cartes", rx: "mise en page|galerie|cartes|layout|tableau de bord|colonnes de|gabarit" }],
+      corrige: "<p><b>Flexbox</b> place des éléments sur <b>un seul axe</b> (une ligne ou une colonne) : idéal pour un menu, une barre d'outils ou centrer un élément. <b>Grid</b> organise en <b>deux dimensions</b> (lignes et colonnes) : idéal pour la mise en page générale ou une galerie de cartes (<code>grid-template-columns: repeat(3, 1fr)</code>).</p>" },
+    { q: "Quelle est la différence entre <code>WHERE</code> et <code>HAVING</code> dans une requête SQL ? Donne un exemple.",
+      notions: [
+        { n: "WHERE filtre les lignes avant le regroupement", rx: "where[^.]*(ligne|avant)" },
+        { n: "HAVING filtre les groupes après GROUP BY", rx: "having[^.]*(groupe|apres|group by)" },
+        { n: "HAVING peut utiliser un agrégat (COUNT, SUM, AVG…)", rx: "count|sum|avg|agregat|max|min" }],
+      corrige: "<p><code>WHERE</code> filtre les <b>lignes</b> avant le regroupement, il ne peut pas contenir d'agrégat. <code>HAVING</code> filtre les <b>groupes</b> après le <code>GROUP BY</code> et peut utiliser un agrégat. Exemple : <code>SELECT type, COUNT(*) FROM materiel WHERE prix &gt; 100 GROUP BY type HAVING COUNT(*) &gt;= 3;</code></p>" },
+    { q: "Qu'est-ce qu'une clé étrangère dans une base de données ? À quoi sert-elle ?",
+      notions: [
+        { n: "colonne qui fait référence à la clé primaire d'une autre table", rx: "cle primaire|reference|autre table|id d" },
+        { n: "relie deux tables (permet les jointures)", rx: "relie|lien|relation|jointure|join" },
+        { n: "garantit la cohérence (intégrité référentielle)", rx: "coheren|integrit|exist|interdit|empeche|refuse" }],
+      corrige: "<p>Une clé étrangère est une colonne qui contient la <b>clé primaire d'une ligne d'une autre table</b> (ex. <code>employe.service_id</code> → <code>service.id</code>). Elle <b>relie</b> les tables, ce qui permet les jointures, et le SGBD garantit l'<b>intégrité référentielle</b> : impossible d'y mettre une valeur qui n'existe pas dans la table référencée.</p>" }
   ],
   bloc3: [
     { q: "Qu'est-ce qu'une donnée à caractère personnel au sens du RGPD ? Donne des exemples.",

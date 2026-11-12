@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>SQL : créer et modifier les données — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="bloc1" data-chapter="sql-ldd-lmd">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<p>SQL ne sert pas qu'à lire : il crée la structure de la base et en modifie le contenu. On distingue deux familles de commandes :</p>
+<table><tr><th>Famille</th><th>Rôle</th><th>Commandes</th></tr>
+<tr><td><b>LDD</b> (langage de définition des données)</td><td>Créer et modifier la <b>structure</b></td><td><code>CREATE</code>, <code>ALTER</code>, <code>DROP</code></td></tr>
+<tr><td><b>LMD</b> (langage de manipulation des données)</td><td>Lire et modifier le <b>contenu</b></td><td><code>SELECT</code>, <code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code></td></tr></table>
+
+<h2>1. Créer une table</h2>
+<pre><code>CREATE TABLE logiciel (
+  id          INTEGER PRIMARY KEY,
+  nom         TEXT NOT NULL,
+  editeur     TEXT,
+  fin_licence DATE,
+  postes      INTEGER DEFAULT 1
+);</code></pre>
+<table><tr><th>Contrainte</th><th>Effet</th></tr>
+<tr><td><code>PRIMARY KEY</code></td><td>Identifiant unique de la ligne (souvent auto-incrémenté : <code>AUTO_INCREMENT</code> en MySQL).</td></tr>
+<tr><td><code>NOT NULL</code></td><td>Valeur obligatoire.</td></tr>
+<tr><td><code>UNIQUE</code></td><td>Pas deux fois la même valeur (une adresse e-mail, par exemple).</td></tr>
+<tr><td><code>DEFAULT v</code></td><td>Valeur utilisée si on n'en donne pas.</td></tr>
+<tr><td><code>REFERENCES table(col)</code></td><td>Clé étrangère : la valeur doit exister dans l'autre table.</td></tr></table>
+<p>Types courants : <code>INT</code>/<code>INTEGER</code>, <code>DECIMAL(8,2)</code> (montants), <code>VARCHAR(100)</code> (texte limité), <code>TEXT</code>, <code>DATE</code>, <code>DATETIME</code>, <code>BOOLEAN</code>.</p>
+<pre><code>CREATE TABLE pret (
+  id          INTEGER PRIMARY KEY,
+  materiel_id INTEGER NOT NULL,
+  employe_id  INTEGER NOT NULL,
+  date_debut  DATE,
+  FOREIGN KEY (materiel_id) REFERENCES materiel(id),
+  FOREIGN KEY (employe_id)  REFERENCES employe(id)
+);</code></pre>
+<div class="box retenir"><b>L'intégrité référentielle</b><p>Grâce aux clés étrangères, le SGBD refuse un prêt pour un matériel qui n'existe pas, et (selon les réglages) refuse de supprimer un matériel encore prêté. La base reste cohérente même si l'application a un bug.</p></div>
+
+<h2>2. Modifier ou supprimer une table</h2>
+<pre><code>ALTER TABLE employe ADD COLUMN telephone VARCHAR(20);
+ALTER TABLE employe DROP COLUMN telephone;
+DROP TABLE logiciel;          -- supprime la table ET toutes ses données</code></pre>
+
+<h2>3. Ajouter des lignes : INSERT</h2>
+<pre><code>INSERT INTO service (nom, etage) VALUES (&#x27;Qualité&#x27;, 1);
+
+INSERT INTO logiciel (nom, editeur, fin_licence)
+VALUES (&#x27;Office 365&#x27;, &#x27;Microsoft&#x27;, &#x27;2026-09-01&#x27;),
+       (&#x27;GLPI&#x27;, &#x27;Teclib&#x27;, NULL);</code></pre>
+<p>On liste les colonnes puis les valeurs, dans le même ordre. Les colonnes omises prennent leur valeur par défaut (ou NULL) ; la clé primaire auto-incrémentée est calculée par le SGBD.</p>
+
+<h2>4. Modifier des lignes : UPDATE</h2>
+<pre><code>UPDATE intervention SET resolue = 1 WHERE id = 14;
+UPDATE materiel SET prix = prix * 0.9 WHERE type = &#x27;Tablette&#x27;;
+UPDATE employe SET ville = &#x27;Rennes&#x27;, poste = &#x27;Technicien&#x27; WHERE id = 14;</code></pre>
+
+<h2>5. Supprimer des lignes : DELETE</h2>
+<pre><code>DELETE FROM intervention WHERE resolue = 1 AND date_inter &lt; &#x27;2025-01-01&#x27;;</code></pre>
+<div class="box attention"><b>Toujours un WHERE</b><p><code>UPDATE materiel SET prix = 0;</code> ou <code>DELETE FROM employe;</code> sans <code>WHERE</code> touchent <b>toutes</b> les lignes. Bon réflexe : écrire d'abord le <code>SELECT … WHERE …</code> pour vérifier quelles lignes seront concernées, puis le transformer en UPDATE ou DELETE. Et faire une sauvegarde avant les grosses opérations.</p></div>
+
+<h2>6. SQL et sécurité</h2>
+<p>Dans une application PHP, une requête construite en collant directement la saisie de l'utilisateur est vulnérable à l'<b>injection SQL</b> :</p>
+<pre><code>// DANGEREUX : si $nom vaut  &#x27; OR &#x27;1&#x27;=&#x27;1  la requête renvoie tout
+$sql = &quot;SELECT * FROM employe WHERE nom = &#x27;&quot; . $_GET[&#x27;nom&#x27;] . &quot;&#x27;&quot;;
+
+// CORRECT : requête préparée, la saisie est traitée comme une simple valeur
+$req = $pdo-&gt;prepare(&quot;SELECT * FROM employe WHERE nom = ?&quot;);
+$req-&gt;execute([$_GET[&#x27;nom&#x27;]]);</code></pre>
+<p>On donne aussi à l'application un compte de base de données avec les <b>seuls droits nécessaires</b> (pas le compte root), et on ne laisse jamais un mot de passe de base dans un fichier public.</p>
+<div class="box retenir"><b>Passe à la pratique</b><p>Les missions du <a href="labo-sql.html">labo SQL</a> reprennent ce chapitre et sont vérifiées automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "CREATE, ALTER et DROP font partie du…",
+  "options": [
+   "LMD",
+   "LDD",
+   "LCD",
+   "PHP"
+  ],
+  "answer": 1,
+  "explication": "Langage de définition des données : la structure."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "INSERT, UPDATE et DELETE font partie du…",
+  "options": [
+   "LMD",
+   "LDD",
+   "HTML",
+   "SGBD"
+  ],
+  "answer": 0,
+  "explication": "Langage de manipulation des données : le contenu."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle contrainte rend une colonne obligatoire ?",
+  "options": [
+   "UNIQUE",
+   "NOT NULL",
+   "DEFAULT",
+   "REQUIRED"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle contrainte empêche deux utilisateurs d'avoir la même adresse e-mail ?",
+  "options": [
+   "NOT NULL",
+   "UNIQUE",
+   "PRIMARY",
+   "CHECK NULL"
+  ],
+  "answer": 1,
+  "explication": "UNIQUE (une clé primaire est aussi unique, mais on n'en a qu'une)."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quel type choisir pour un prix en euros avec centimes ?",
+  "options": [
+   "INTEGER",
+   "DECIMAL(8,2)",
+   "VARCHAR(10)",
+   "DATE"
+  ],
+  "answer": 1,
+  "explication": "DECIMAL : valeur exacte, 2 chiffres après la virgule."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle commande ajoute une colonne à une table existante ?",
+  "options": [
+   "ADD COLUMN employe telephone",
+   "ALTER TABLE employe ADD COLUMN telephone VARCHAR(20);",
+   "UPDATE employe ADD telephone",
+   "INSERT COLUMN telephone"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle commande ajoute une ligne ?",
+  "options": [
+   "ADD INTO",
+   "INSERT INTO",
+   "UPDATE",
+   "CREATE ROW"
+  ],
+  "answer": 1,
+  "explication": "INSERT INTO table (colonnes) VALUES (valeurs)."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle requête passe l'intervention 7 en résolue ?",
+  "options": [
+   "UPDATE intervention SET resolue = 1;",
+   "UPDATE intervention SET resolue = 1 WHERE id = 7;",
+   "INSERT INTO intervention (resolue) VALUES (1);",
+   "ALTER intervention resolue = 1"
+  ],
+  "answer": 1,
+  "explication": "Sans WHERE, toutes les interventions seraient modifiées."
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "DELETE FROM employe; supprime la table employe.",
+  "answer": false,
+  "explication": "Elle supprime toutes les LIGNES ; la table vide existe toujours. C'est DROP TABLE qui supprime la table."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "DROP TABLE supprime la table et toutes ses données.",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que garantit une clé étrangère materiel_id REFERENCES materiel(id) ?",
+  "options": [
+   "Que materiel_id est unique",
+   "Que materiel_id correspond à un matériel qui existe",
+   "Que materiel_id n'est jamais NULL",
+   "Que le matériel est trié"
+  ],
+  "answer": 1,
+  "explication": "L'intégrité référentielle."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Bon réflexe avant un DELETE avec WHERE :",
+  "options": [
+   "Le lancer deux fois",
+   "Lancer d'abord le SELECT avec le même WHERE pour voir les lignes concernées",
+   "Supprimer la clé primaire",
+   "Désactiver les clés étrangères"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Comment se protéger de l'injection SQL en PHP ?",
+  "options": [
+   "Utiliser des requêtes préparées",
+   "Cacher les erreurs",
+   "Mettre la requête en majuscules",
+   "Utiliser le compte root"
+  ],
+  "answer": 0,
+  "explication": "prepare() + execute() : la saisie n'est jamais interprétée comme du SQL."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quel mot-clé, en MySQL, fait calculer automatiquement l'id suivant ?",
+  "answers": [
+   "AUTO_INCREMENT",
+   "auto_increment"
+  ],
+  "explication": "id INT PRIMARY KEY AUTO_INCREMENT."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

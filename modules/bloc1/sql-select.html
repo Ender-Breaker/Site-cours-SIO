@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>SQL : interroger une base de données — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="bloc1" data-chapter="sql-select">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<p>Une application web stocke ses données (utilisateurs, commandes, matériel…) dans une <b>base de données relationnelle</b> : un ensemble de <b>tables</b>, chacune faite de <b>colonnes</b> (les champs) et de <b>lignes</b> (les enregistrements). On l'interroge avec le langage <b>SQL</b> (<i>Structured Query Language</i>), commun à MySQL/MariaDB, PostgreSQL, SQLite, SQL Server…</p>
+
+<h2>1. Vocabulaire</h2>
+<table><tr><th>Terme</th><th>Définition</th></tr>
+<tr><td>Table</td><td>Ensemble de données sur un même sujet (ex. <code>employe</code>).</td></tr>
+<tr><td>Colonne (attribut)</td><td>Une information, avec un type : entier, texte, date, décimal…</td></tr>
+<tr><td>Ligne (enregistrement)</td><td>Un élément de la table : un employé.</td></tr>
+<tr><td>Clé primaire</td><td>Colonne dont la valeur identifie chaque ligne de façon <b>unique</b> (souvent <code>id</code>).</td></tr>
+<tr><td>Clé étrangère</td><td>Colonne qui contient la clé primaire d'une ligne d'une autre table (ex. <code>employe.service_id</code> → <code>service.id</code>).</td></tr>
+<tr><td>SGBD</td><td>Logiciel qui gère la base : MariaDB, PostgreSQL, SQLite…</td></tr></table>
+<p>Les exemples de ce chapitre et du labo utilisent la base d'un <b>parc informatique</b> :</p>
+<table><tr><th>Table</th><th>Colonnes</th></tr>
+<tr><td><code>service</code></td><td><u>id</u>, nom, etage</td></tr>
+<tr><td><code>employe</code></td><td><u>id</u>, nom, prenom, poste, ville, <i>service_id</i></td></tr>
+<tr><td><code>materiel</code></td><td><u>id</u>, type, marque, modele, prix, date_achat, <i>employe_id</i></td></tr>
+<tr><td><code>intervention</code></td><td><u>id</u>, <i>materiel_id</i>, date_inter, technicien, duree, motif, resolue</td></tr></table>
+<p>Clé primaire soulignée, clés étrangères en italique.</p>
+
+<h2>2. SELECT … FROM</h2>
+<pre><code>SELECT * FROM employe;                  -- toutes les colonnes
+SELECT nom, prenom FROM employe;         -- certaines colonnes
+SELECT DISTINCT ville FROM employe;      -- sans doublons
+SELECT modele, prix * 1.2 AS prix_ttc FROM materiel;   -- calcul + alias</code></pre>
+<p>Une requête se termine par un point-virgule. Les mots-clés s'écrivent souvent en majuscules par convention (SQL ne distingue pas). Les commentaires commencent par <code>--</code>.</p>
+
+<h2>3. Filtrer avec WHERE</h2>
+<pre><code>SELECT * FROM materiel WHERE prix &gt; 1000;
+SELECT * FROM materiel WHERE type = &#x27;Portable&#x27; AND marque = &#x27;Dell&#x27;;
+SELECT * FROM employe WHERE ville = &#x27;Rennes&#x27; OR ville = &#x27;Vannes&#x27;;
+SELECT * FROM employe WHERE ville IN (&#x27;Rennes&#x27;, &#x27;Vannes&#x27;);
+SELECT * FROM materiel WHERE date_achat BETWEEN &#x27;2024-01-01&#x27; AND &#x27;2024-12-31&#x27;;
+SELECT * FROM employe WHERE nom LIKE &#x27;M%&#x27;;      -- commence par M
+SELECT * FROM materiel WHERE employe_id IS NULL;</code></pre>
+<table><tr><th>Opérateur</th><th>Sens</th></tr>
+<tr><td><code>= &lt;&gt; &lt; &gt; &lt;= &gt;=</code></td><td>comparaisons (<code>&lt;&gt;</code> = différent, aussi <code>!=</code>)</td></tr>
+<tr><td><code>AND</code>, <code>OR</code>, <code>NOT</code></td><td>combiner des conditions (parenthèses si on mélange AND et OR)</td></tr>
+<tr><td><code>IN (…)</code></td><td>appartient à une liste</td></tr>
+<tr><td><code>BETWEEN a AND b</code></td><td>entre a et b, bornes incluses</td></tr>
+<tr><td><code>LIKE</code></td><td>motif : <code>%</code> = n'importe quelle suite de caractères, <code>_</code> = un caractère</td></tr>
+<tr><td><code>IS NULL</code>, <code>IS NOT NULL</code></td><td>absence de valeur</td></tr></table>
+<div class="box attention"><b>Les pièges</b><p>Les textes et les dates s'écrivent entre <b>apostrophes</b> : <code>'Rennes'</code>. Et <code>NULL</code> ne se compare jamais avec <code>=</code> : <code>WHERE employe_id = NULL</code> ne renvoie rien, il faut <code>IS NULL</code>.</p></div>
+
+<h2>4. Trier et limiter</h2>
+<pre><code>SELECT modele, prix FROM materiel ORDER BY prix DESC;           -- du plus cher au moins cher
+SELECT nom, prenom FROM employe ORDER BY nom, prenom;            -- tri sur deux colonnes
+SELECT modele, prix FROM materiel ORDER BY prix DESC LIMIT 3;    -- les 3 plus chers</code></pre>
+<p><code>ASC</code> (croissant) est le tri par défaut. <code>LIMIT</code> se place à la fin.</p>
+
+<h2>5. Les fonctions d'agrégat</h2>
+<pre><code>SELECT COUNT(*) FROM materiel;                          -- nombre de lignes
+SELECT COUNT(*) FROM intervention WHERE resolue = 0;
+SELECT SUM(prix), AVG(prix), MIN(prix), MAX(prix) FROM materiel;</code></pre>
+<p>Un agrégat résume toutes les lignes retenues en une seule valeur. Pour obtenir un résultat <b>par catégorie</b> (par type, par service…), il faut <code>GROUP BY</code> : c'est l'objet du chapitre suivant.</p>
+<div class="box retenir"><b>L'ordre des clauses</b><p><code>SELECT</code> … <code>FROM</code> … <code>WHERE</code> … <code>GROUP BY</code> … <code>HAVING</code> … <code>ORDER BY</code> … <code>LIMIT</code>. Toujours dans cet ordre.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Les missions du <a href="labo-sql.html">labo SQL</a> reprennent ce chapitre et sont vérifiées automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Comment appelle-t-on la colonne qui identifie chaque ligne de façon unique ?",
+  "options": [
+   "Clé étrangère",
+   "Clé primaire",
+   "Index",
+   "Attribut"
+  ],
+  "answer": 1,
+  "explication": "Clé primaire."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "employe.service_id contient l'id d'un service. C'est :",
+  "options": [
+   "une clé primaire",
+   "une clé étrangère",
+   "un agrégat",
+   "un alias"
+  ],
+  "answer": 1,
+  "explication": "Elle référence la clé primaire d'une autre table."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle requête affiche toutes les colonnes de la table materiel ?",
+  "options": [
+   "SELECT ALL materiel;",
+   "SELECT * FROM materiel;",
+   "GET * FROM materiel;",
+   "SELECT materiel.*;"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel mot-clé supprime les doublons du résultat ?",
+  "options": [
+   "UNIQUE",
+   "DISTINCT",
+   "SINGLE",
+   "NODUP"
+  ],
+  "answer": 1,
+  "explication": "SELECT DISTINCT."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Comment écrire la condition « la ville est Rennes » ?",
+  "options": [
+   "WHERE ville = Rennes",
+   "WHERE ville = 'Rennes'",
+   "WHERE ville == \"Rennes\"",
+   "WHERE ville IS Rennes"
+  ],
+  "answer": 1,
+  "explication": "Les textes entre apostrophes."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quel motif LIKE trouve les noms qui se terminent par « son » ?",
+  "options": [
+   "'son%'",
+   "'%son'",
+   "'_son'",
+   "'%son%'"
+  ],
+  "answer": 1,
+  "explication": "% avant = n'importe quoi avant."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Comment trouver le matériel sans employé (employe_id vide) ?",
+  "options": [
+   "WHERE employe_id = NULL",
+   "WHERE employe_id IS NULL",
+   "WHERE employe_id = ''",
+   "WHERE employe_id = 0"
+  ],
+  "answer": 1,
+  "explication": "NULL se teste avec IS NULL."
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "BETWEEN 10 AND 20 inclut les valeurs 10 et 20.",
+  "answer": true,
+  "explication": "Les bornes sont incluses."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel mot-clé trie du plus grand au plus petit ?",
+  "options": [
+   "ASC",
+   "DESC",
+   "DOWN",
+   "REVERSE"
+  ],
+  "answer": 1,
+  "explication": "ORDER BY … DESC."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quel mot-clé garde seulement les n premières lignes du résultat (MySQL, SQLite) ?",
+  "answers": [
+   "LIMIT"
+  ],
+  "explication": "ORDER BY prix DESC LIMIT 3."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle fonction compte le nombre de lignes ?",
+  "options": [
+   "SUM(*)",
+   "COUNT(*)",
+   "NB(*)",
+   "TOTAL(*)"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle fonction calcule une moyenne ?",
+  "options": [
+   "MEAN",
+   "AVG",
+   "MOY",
+   "MEDIAN"
+  ],
+  "answer": 1,
+  "explication": "AVG (average)."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Dans quel ordre s'écrivent les clauses ?",
+  "options": [
+   "SELECT, WHERE, FROM, ORDER BY",
+   "SELECT, FROM, WHERE, ORDER BY",
+   "FROM, SELECT, WHERE, ORDER BY",
+   "SELECT, FROM, ORDER BY, WHERE"
+  ],
+  "answer": 1,
+  "explication": "SELECT FROM WHERE GROUP BY HAVING ORDER BY LIMIT."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "WHERE type = 'Portable' AND marque = 'Dell' OR marque = 'HP' renvoie…",
+  "options": [
+   "les portables Dell ou HP",
+   "les portables Dell, plus TOUT le matériel HP",
+   "rien",
+   "une erreur"
+  ],
+  "answer": 1,
+  "explication": "AND est prioritaire sur OR : il faut des parenthèses (marque = 'Dell' OR marque = 'HP')."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

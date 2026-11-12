@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Labo CSS — Étude Facile</title>
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="bloc1">
+<script>
+window.EF_CODE = {
+ "langue": "html",
+ "key": "ef-labo-b1css",
+ "mid": "bloc1-css",
+ "titre": "Labo CSS",
+ "sousTitre": "Sélecteurs, boîtes, Flexbox, grille et responsive : mets en forme une vraie page, vérifiée sur le rendu.",
+ "ico": "{ }",
+ "couleur": "violet",
+ "fichier": "index.html",
+ "module": {
+  "titre": "Bloc 1",
+  "href": "index.html"
+ },
+ "lecons": [
+  {
+   "titre": "Sélecteurs",
+   "missions": [
+    {
+     "id": "c-elem",
+     "titre": "Sélecteur de balise",
+     "texte": "<p>Une règle CSS = un <b>sélecteur<\/b> + des déclarations <code>propriété: valeur;<\/code> entre accolades. Le sélecteur <code>h2<\/code> vise toutes les balises h2.<\/p><p>Écris tes règles dans la balise <code>&lt;style&gt;<\/code>.<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    \n  <\/style>\n<\/head>\n<body>\n  <header class=\"entete\">\n    <h1>Club informatique<\/h1>\n    <nav><a href=\"#\">Accueil<\/a> <a href=\"#\">Ateliers<\/a> <a href=\"#\">Contact<\/a><\/nav>\n  <\/header>\n  <main>\n    <p class=\"intro\">Trois ateliers cette semaine :<\/p>\n    <div class=\"cartes\">\n      <article class=\"carte\"><h2>Python<\/h2><p>Lundi<\/p><\/article>\n      <article class=\"carte\" id=\"vedette\"><h2>Réseau<\/h2><p>Mercredi<\/p><\/article>\n      <article class=\"carte\"><h2>Web<\/h2><p>Vendredi<\/p><\/article>\n    <\/div>\n  <\/main>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Tous les <code>h2<\/code> sont en bleu <code>#2b3fe0<\/code>",
+       "r": [
+        {
+         "style": [
+          "h2",
+          "color",
+          "rgb\\(43, 63, 224\\)"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Toute la page utilise la police <code>sans-serif<\/code> (règle sur <code>body<\/code>)",
+       "r": [
+        {
+         "style": [
+          "body",
+          "font-family",
+          "sans-serif"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>h2 { color: #2b3fe0; }<\/code> et <code>body { font-family: sans-serif; }<\/code>",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    body { font-family: sans-serif; }\n    h2 { color: #2b3fe0; }\n  <\/style>\n<\/head>\n<body>\n  <header class=\"entete\">\n    <h1>Club informatique<\/h1>\n    <nav><a href=\"#\">Accueil<\/a> <a href=\"#\">Ateliers<\/a> <a href=\"#\">Contact<\/a><\/nav>\n  <\/header>\n  <main>\n    <p class=\"intro\">Trois ateliers cette semaine :<\/p>\n    <div class=\"cartes\">\n      <article class=\"carte\"><h2>Python<\/h2><p>Lundi<\/p><\/article>\n      <article class=\"carte\" id=\"vedette\"><h2>Réseau<\/h2><p>Mercredi<\/p><\/article>\n      <article class=\"carte\"><h2>Web<\/h2><p>Vendredi<\/p><\/article>\n    <\/div>\n  <\/main>\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "c-classe",
+     "titre": "Classes et identifiants",
+     "texte": "<p><code>.carte<\/code> vise les éléments qui ont <code>class=\"carte\"<\/code> (plusieurs possibles), <code>#vedette<\/code> l'élément unique qui a <code>id=\"vedette\"<\/code>.<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    \n  <\/style>\n<\/head>\n<body>\n  <header class=\"entete\">\n    <h1>Club informatique<\/h1>\n    <nav><a href=\"#\">Accueil<\/a> <a href=\"#\">Ateliers<\/a> <a href=\"#\">Contact<\/a><\/nav>\n  <\/header>\n  <main>\n    <p class=\"intro\">Trois ateliers cette semaine :<\/p>\n    <div class=\"cartes\">\n      <article class=\"carte\"><h2>Python<\/h2><p>Lundi<\/p><\/article>\n      <article class=\"carte\" id=\"vedette\"><h2>Réseau<\/h2><p>Mercredi<\/p><\/article>\n      <article class=\"carte\"><h2>Web<\/h2><p>Vendredi<\/p><\/article>\n    <\/div>\n  <\/main>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Les cartes ont un fond <code>#f5f1e8<\/code> (sauf la vedette)",
+       "r": [
+        {
+         "style": [
+          ".carte:not(#vedette)",
+          "background-color",
+          "rgb\\(245, 241, 232\\)"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "La carte vedette a un fond jaune <code>#ffd23f<\/code>",
+       "r": [
+        {
+         "style": [
+          "#vedette",
+          "background-color",
+          "rgb\\(255, 210, 63\\)"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Le paragraphe <code>.intro<\/code> est en italique",
+       "r": [
+        {
+         "style": [
+          ".intro",
+          "font-style",
+          "italic"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>.carte { background-color: #f5f1e8; }<\/code>, <code>#vedette { background-color: #ffd23f; }<\/code>, <code>.intro { font-style: italic; }<\/code>",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    .carte { background-color: #f5f1e8; }\n    #vedette { background-color: #ffd23f; }\n    .intro { font-style: italic; }\n  <\/style>\n<\/head>\n<body>\n  <header class=\"entete\">\n    <h1>Club informatique<\/h1>\n    <nav><a href=\"#\">Accueil<\/a> <a href=\"#\">Ateliers<\/a> <a href=\"#\">Contact<\/a><\/nav>\n  <\/header>\n  <main>\n    <p class=\"intro\">Trois ateliers cette semaine :<\/p>\n    <div class=\"cartes\">\n      <article class=\"carte\"><h2>Python<\/h2><p>Lundi<\/p><\/article>\n      <article class=\"carte\" id=\"vedette\"><h2>Réseau<\/h2><p>Mercredi<\/p><\/article>\n      <article class=\"carte\"><h2>Web<\/h2><p>Vendredi<\/p><\/article>\n    <\/div>\n  <\/main>\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "c-desc",
+     "titre": "Descendants et groupes",
+     "texte": "<p><code>nav a<\/code> vise les liens <b>dans<\/b> le nav (sélecteur descendant). <code>h1, h2<\/code> applique la même règle aux deux (groupe).<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    \n  <\/style>\n<\/head>\n<body>\n  <header class=\"entete\">\n    <h1>Club informatique<\/h1>\n    <nav><a href=\"#\">Accueil<\/a> <a href=\"#\">Ateliers<\/a> <a href=\"#\">Contact<\/a><\/nav>\n  <\/header>\n  <main>\n    <p class=\"intro\">Trois ateliers cette semaine :<\/p>\n    <div class=\"cartes\">\n      <article class=\"carte\"><h2>Python<\/h2><p>Lundi<\/p><\/article>\n      <article class=\"carte\" id=\"vedette\"><h2>Réseau<\/h2><p>Mercredi<\/p><\/article>\n      <article class=\"carte\"><h2>Web<\/h2><p>Vendredi<\/p><\/article>\n    <\/div>\n  <\/main>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Les liens du menu ne sont pas soulignés",
+       "r": [
+        {
+         "style": [
+          "nav a",
+          "text-decoration-line",
+          "none"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Les liens du menu sont blancs",
+       "r": [
+        {
+         "style": [
+          "nav a",
+          "color",
+          "rgb\\(255, 255, 255\\)"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "<code>h1<\/code> et <code>h2<\/code> utilisent la police <code>Georgia<\/code> (une seule règle)",
+       "r": [
+        {
+         "style": [
+          "h1",
+          "font-family",
+          "Georgia"
+         ]
+        },
+        {
+         "style": [
+          "h2",
+          "font-family",
+          "Georgia"
+         ]
+        },
+        {
+         "codei": "h1\\s*,\\s*h2|h2\\s*,\\s*h1"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>nav a { color: white; text-decoration: none; }<\/code> et <code>h1, h2 { font-family: Georgia, serif; }<\/code>",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    nav a { color: white; text-decoration: none; }\n    h1, h2 { font-family: Georgia, serif; }\n  <\/style>\n<\/head>\n<body>\n  <header class=\"entete\">\n    <h1>Club informatique<\/h1>\n    <nav><a href=\"#\">Accueil<\/a> <a href=\"#\">Ateliers<\/a> <a href=\"#\">Contact<\/a><\/nav>\n  <\/header>\n  <main>\n    <p class=\"intro\">Trois ateliers cette semaine :<\/p>\n    <div class=\"cartes\">\n      <article class=\"carte\"><h2>Python<\/h2><p>Lundi<\/p><\/article>\n      <article class=\"carte\" id=\"vedette\"><h2>Réseau<\/h2><p>Mercredi<\/p><\/article>\n      <article class=\"carte\"><h2>Web<\/h2><p>Vendredi<\/p><\/article>\n    <\/div>\n  <\/main>\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "c-specif",
+     "titre": "La cascade et la spécificité",
+     "texte": "<p>Quand deux règles se contredisent, la plus <b>spécifique<\/b> gagne : un identifiant (#) l'emporte sur une classe (.), qui l'emporte sur une balise. À spécificité égale, c'est la dernière écrite qui gagne.<\/p><p>Ici, la règle sur <code>.carte h2<\/code> rend tous les titres de carte gris. Fais en sorte que le titre de la carte vedette soit rouge <b>sans modifier ni supprimer<\/b> la règle existante, et sans <code>!important<\/code>.<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    .carte h2 { color: gray; }\n    \n  <\/style>\n<\/head>\n<body>\n  <header class=\"entete\">\n    <h1>Club informatique<\/h1>\n    <nav><a href=\"#\">Accueil<\/a> <a href=\"#\">Ateliers<\/a> <a href=\"#\">Contact<\/a><\/nav>\n  <\/header>\n  <main>\n    <p class=\"intro\">Trois ateliers cette semaine :<\/p>\n    <div class=\"cartes\">\n      <article class=\"carte\"><h2>Python<\/h2><p>Lundi<\/p><\/article>\n      <article class=\"carte\" id=\"vedette\"><h2>Réseau<\/h2><p>Mercredi<\/p><\/article>\n      <article class=\"carte\"><h2>Web<\/h2><p>Vendredi<\/p><\/article>\n    <\/div>\n  <\/main>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Le titre de la carte vedette est rouge (<code>#c0392b<\/code>)",
+       "r": [
+        {
+         "style": [
+          "#vedette h2",
+          "color",
+          "rgb\\(192, 57, 43\\)"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Les autres titres de carte restent gris",
+       "r": [
+        {
+         "style": [
+          ".carte:not(#vedette) h2",
+          "color",
+          "rgb\\(128, 128, 128\\)"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "La règle <code>.carte h2<\/code> est toujours là, sans <code>!important<\/code>",
+       "r": [
+        {
+         "code": "\\.carte h2 \\{ color: gray; \\}"
+        },
+        {
+         "nocode": "!important"
+        }
+       ]
+      }
+     ],
+     "indice": "Un sélecteur avec l'identifiant est plus spécifique : <code>#vedette h2 { color: #c0392b; }<\/code>",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    .carte h2 { color: gray; }\n    #vedette h2 { color: #c0392b; }\n  <\/style>\n<\/head>\n<body>\n  <header class=\"entete\">\n    <h1>Club informatique<\/h1>\n    <nav><a href=\"#\">Accueil<\/a> <a href=\"#\">Ateliers<\/a> <a href=\"#\">Contact<\/a><\/nav>\n  <\/header>\n  <main>\n    <p class=\"intro\">Trois ateliers cette semaine :<\/p>\n    <div class=\"cartes\">\n      <article class=\"carte\"><h2>Python<\/h2><p>Lundi<\/p><\/article>\n      <article class=\"carte\" id=\"vedette\"><h2>Réseau<\/h2><p>Mercredi<\/p><\/article>\n      <article class=\"carte\"><h2>Web<\/h2><p>Vendredi<\/p><\/article>\n    <\/div>\n  <\/main>\n<\/body>\n<\/html>\n"
+    }
+   ]
+  },
+  {
+   "titre": "Le modèle de boîte",
+   "missions": [
+    {
+     "id": "c-boite",
+     "titre": "Marges, bordure, remplissage",
+     "texte": "<p>Chaque élément est une boîte : le contenu, puis le <b>padding<\/b> (marge intérieure), la <b>border<\/b> (bordure) et la <b>margin<\/b> (marge extérieure).<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    \n  <\/style>\n<\/head>\n<body>\n  <header class=\"entete\">\n    <h1>Club informatique<\/h1>\n    <nav><a href=\"#\">Accueil<\/a> <a href=\"#\">Ateliers<\/a> <a href=\"#\">Contact<\/a><\/nav>\n  <\/header>\n  <main>\n    <p class=\"intro\">Trois ateliers cette semaine :<\/p>\n    <div class=\"cartes\">\n      <article class=\"carte\"><h2>Python<\/h2><p>Lundi<\/p><\/article>\n      <article class=\"carte\" id=\"vedette\"><h2>Réseau<\/h2><p>Mercredi<\/p><\/article>\n      <article class=\"carte\"><h2>Web<\/h2><p>Vendredi<\/p><\/article>\n    <\/div>\n  <\/main>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Les cartes ont un padding de 16px",
+       "r": [
+        {
+         "style": [
+          ".carte",
+          "padding-top",
+          "^16px$"
+         ]
+        },
+        {
+         "style": [
+          ".carte",
+          "padding-left",
+          "^16px$"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Une bordure pleine de 2px",
+       "r": [
+        {
+         "style": [
+          ".carte",
+          "border-top-width",
+          "^2px$"
+         ]
+        },
+        {
+         "style": [
+          ".carte",
+          "border-top-style",
+          "solid"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Une marge extérieure basse de 12px",
+       "r": [
+        {
+         "style": [
+          ".carte",
+          "margin-bottom",
+          "^12px$"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>.carte { padding: 16px; border: 2px solid #16182b; margin-bottom: 12px; }<\/code>",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    .carte { padding: 16px; border: 2px solid #16182b; margin-bottom: 12px; }\n  <\/style>\n<\/head>\n<body>\n  <header class=\"entete\">\n    <h1>Club informatique<\/h1>\n    <nav><a href=\"#\">Accueil<\/a> <a href=\"#\">Ateliers<\/a> <a href=\"#\">Contact<\/a><\/nav>\n  <\/header>\n  <main>\n    <p class=\"intro\">Trois ateliers cette semaine :<\/p>\n    <div class=\"cartes\">\n      <article class=\"carte\"><h2>Python<\/h2><p>Lundi<\/p><\/article>\n      <article class=\"carte\" id=\"vedette\"><h2>Réseau<\/h2><p>Mercredi<\/p><\/article>\n      <article class=\"carte\"><h2>Web<\/h2><p>Vendredi<\/p><\/article>\n    <\/div>\n  <\/main>\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "c-sizing",
+     "titre": "box-sizing et largeur",
+     "texte": "<p>Par défaut, <code>width<\/code> ne compte que le contenu : padding et bordure s'ajoutent. Avec <code>box-sizing: border-box<\/code>, la largeur annoncée inclut tout. C'est le réglage que presque tous les sites appliquent à tous les éléments.<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    .carte { padding: 20px; border: 5px solid black; }\n    \n  <\/style>\n<\/head>\n<body>\n  <header class=\"entete\">\n    <h1>Club informatique<\/h1>\n    <nav><a href=\"#\">Accueil<\/a> <a href=\"#\">Ateliers<\/a> <a href=\"#\">Contact<\/a><\/nav>\n  <\/header>\n  <main>\n    <p class=\"intro\">Trois ateliers cette semaine :<\/p>\n    <div class=\"cartes\">\n      <article class=\"carte\"><h2>Python<\/h2><p>Lundi<\/p><\/article>\n      <article class=\"carte\" id=\"vedette\"><h2>Réseau<\/h2><p>Mercredi<\/p><\/article>\n      <article class=\"carte\"><h2>Web<\/h2><p>Vendredi<\/p><\/article>\n    <\/div>\n  <\/main>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Tous les éléments (sélecteur <code>*<\/code>) sont en <code>border-box<\/code>",
+       "r": [
+        {
+         "style": [
+          "*",
+          "box-sizing",
+          "border-box"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Les cartes font 250px de large, bordure comprise",
+       "r": [
+        {
+         "style": [
+          ".carte",
+          "width",
+          "^250px$"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>* { box-sizing: border-box; }<\/code> puis <code>.carte { width: 250px; }<\/code>",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    .carte { padding: 20px; border: 5px solid black; }\n    * { box-sizing: border-box; }\n    .carte { width: 250px; }\n  <\/style>\n<\/head>\n<body>\n  <header class=\"entete\">\n    <h1>Club informatique<\/h1>\n    <nav><a href=\"#\">Accueil<\/a> <a href=\"#\">Ateliers<\/a> <a href=\"#\">Contact<\/a><\/nav>\n  <\/header>\n  <main>\n    <p class=\"intro\">Trois ateliers cette semaine :<\/p>\n    <div class=\"cartes\">\n      <article class=\"carte\"><h2>Python<\/h2><p>Lundi<\/p><\/article>\n      <article class=\"carte\" id=\"vedette\"><h2>Réseau<\/h2><p>Mercredi<\/p><\/article>\n      <article class=\"carte\"><h2>Web<\/h2><p>Vendredi<\/p><\/article>\n    <\/div>\n  <\/main>\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "c-centre",
+     "titre": "Centrer un bloc",
+     "texte": "<p>Un bloc de largeur fixée se centre horizontalement avec <code>margin: 0 auto<\/code> (les marges gauche et droite se partagent l'espace libre). <code>max-width<\/code> limite la largeur sans empêcher le bloc de rétrécir sur petit écran.<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    \n  <\/style>\n<\/head>\n<body>\n  <header class=\"entete\">\n    <h1>Club informatique<\/h1>\n    <nav><a href=\"#\">Accueil<\/a> <a href=\"#\">Ateliers<\/a> <a href=\"#\">Contact<\/a><\/nav>\n  <\/header>\n  <main>\n    <p class=\"intro\">Trois ateliers cette semaine :<\/p>\n    <div class=\"cartes\">\n      <article class=\"carte\"><h2>Python<\/h2><p>Lundi<\/p><\/article>\n      <article class=\"carte\" id=\"vedette\"><h2>Réseau<\/h2><p>Mercredi<\/p><\/article>\n      <article class=\"carte\"><h2>Web<\/h2><p>Vendredi<\/p><\/article>\n    <\/div>\n  <\/main>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "<code>main<\/code> a une largeur maximale de 800px",
+       "r": [
+        {
+         "style": [
+          "main",
+          "max-width",
+          "^800px$"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "<code>main<\/code> est centré (marges auto)",
+       "r": [
+        {
+         "codei": "main\\s*\\{[^}]*margin\\s*:\\s*0\\s+auto|main\\s*\\{[^}]*margin-left\\s*:\\s*auto"
+        }
+       ]
+      },
+      {
+       "txt": "Le texte de l'intro est centré",
+       "r": [
+        {
+         "style": [
+          ".intro",
+          "text-align",
+          "center"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>main { max-width: 800px; margin: 0 auto; }<\/code> et <code>.intro { text-align: center; }<\/code>",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    main { max-width: 800px; margin: 0 auto; }\n    .intro { text-align: center; }\n  <\/style>\n<\/head>\n<body>\n  <header class=\"entete\">\n    <h1>Club informatique<\/h1>\n    <nav><a href=\"#\">Accueil<\/a> <a href=\"#\">Ateliers<\/a> <a href=\"#\">Contact<\/a><\/nav>\n  <\/header>\n  <main>\n    <p class=\"intro\">Trois ateliers cette semaine :<\/p>\n    <div class=\"cartes\">\n      <article class=\"carte\"><h2>Python<\/h2><p>Lundi<\/p><\/article>\n      <article class=\"carte\" id=\"vedette\"><h2>Réseau<\/h2><p>Mercredi<\/p><\/article>\n      <article class=\"carte\"><h2>Web<\/h2><p>Vendredi<\/p><\/article>\n    <\/div>\n  <\/main>\n<\/body>\n<\/html>\n"
+    }
+   ]
+  },
+  {
+   "titre": "Flexbox",
+   "missions": [
+    {
+     "id": "c-flex",
+     "titre": "Les cartes côte à côte",
+     "texte": "<p><code>display: flex<\/code> sur un <b>conteneur<\/b> aligne ses enfants directs sur une ligne. <code>gap<\/code> espace les éléments.<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    \n  <\/style>\n<\/head>\n<body>\n  <header class=\"entete\">\n    <h1>Club informatique<\/h1>\n    <nav><a href=\"#\">Accueil<\/a> <a href=\"#\">Ateliers<\/a> <a href=\"#\">Contact<\/a><\/nav>\n  <\/header>\n  <main>\n    <p class=\"intro\">Trois ateliers cette semaine :<\/p>\n    <div class=\"cartes\">\n      <article class=\"carte\"><h2>Python<\/h2><p>Lundi<\/p><\/article>\n      <article class=\"carte\" id=\"vedette\"><h2>Réseau<\/h2><p>Mercredi<\/p><\/article>\n      <article class=\"carte\"><h2>Web<\/h2><p>Vendredi<\/p><\/article>\n    <\/div>\n  <\/main>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "<code>.cartes<\/code> est un conteneur flex",
+       "r": [
+        {
+         "style": [
+          ".cartes",
+          "display",
+          "^flex$"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Un espace de 16px entre les cartes",
+       "r": [
+        {
+         "style": [
+          ".cartes",
+          "column-gap",
+          "^16px$"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Chaque carte prend la même part de largeur (<code>flex: 1<\/code>)",
+       "r": [
+        {
+         "style": [
+          ".carte",
+          "flex-grow",
+          "^1$"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>.cartes { display: flex; gap: 16px; }<\/code> et <code>.carte { flex: 1; }<\/code>",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    .cartes { display: flex; gap: 16px; }\n    .carte { flex: 1; }\n  <\/style>\n<\/head>\n<body>\n  <header class=\"entete\">\n    <h1>Club informatique<\/h1>\n    <nav><a href=\"#\">Accueil<\/a> <a href=\"#\">Ateliers<\/a> <a href=\"#\">Contact<\/a><\/nav>\n  <\/header>\n  <main>\n    <p class=\"intro\">Trois ateliers cette semaine :<\/p>\n    <div class=\"cartes\">\n      <article class=\"carte\"><h2>Python<\/h2><p>Lundi<\/p><\/article>\n      <article class=\"carte\" id=\"vedette\"><h2>Réseau<\/h2><p>Mercredi<\/p><\/article>\n      <article class=\"carte\"><h2>Web<\/h2><p>Vendredi<\/p><\/article>\n    <\/div>\n  <\/main>\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "c-entete",
+     "titre": "Un en-tête aligné",
+     "texte": "<p><code>justify-content<\/code> répartit les éléments sur l'axe principal (<code>space-between<\/code> : aux deux bouts), <code>align-items<\/code> les aligne sur l'axe secondaire (<code>center<\/code> : centrés verticalement).<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    \n  <\/style>\n<\/head>\n<body>\n  <header class=\"entete\">\n    <h1>Club informatique<\/h1>\n    <nav><a href=\"#\">Accueil<\/a> <a href=\"#\">Ateliers<\/a> <a href=\"#\">Contact<\/a><\/nav>\n  <\/header>\n  <main>\n    <p class=\"intro\">Trois ateliers cette semaine :<\/p>\n    <div class=\"cartes\">\n      <article class=\"carte\"><h2>Python<\/h2><p>Lundi<\/p><\/article>\n      <article class=\"carte\" id=\"vedette\"><h2>Réseau<\/h2><p>Mercredi<\/p><\/article>\n      <article class=\"carte\"><h2>Web<\/h2><p>Vendredi<\/p><\/article>\n    <\/div>\n  <\/main>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "L'en-tête <code>.entete<\/code> est en flex",
+       "r": [
+        {
+         "style": [
+          ".entete",
+          "display",
+          "^flex$"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Titre à gauche, menu à droite",
+       "r": [
+        {
+         "style": [
+          ".entete",
+          "justify-content",
+          "space-between"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Alignés verticalement au centre",
+       "r": [
+        {
+         "style": [
+          ".entete",
+          "align-items",
+          "center"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>.entete { display: flex; justify-content: space-between; align-items: center; }<\/code>",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    .entete { display: flex; justify-content: space-between; align-items: center; }\n  <\/style>\n<\/head>\n<body>\n  <header class=\"entete\">\n    <h1>Club informatique<\/h1>\n    <nav><a href=\"#\">Accueil<\/a> <a href=\"#\">Ateliers<\/a> <a href=\"#\">Contact<\/a><\/nav>\n  <\/header>\n  <main>\n    <p class=\"intro\">Trois ateliers cette semaine :<\/p>\n    <div class=\"cartes\">\n      <article class=\"carte\"><h2>Python<\/h2><p>Lundi<\/p><\/article>\n      <article class=\"carte\" id=\"vedette\"><h2>Réseau<\/h2><p>Mercredi<\/p><\/article>\n      <article class=\"carte\"><h2>Web<\/h2><p>Vendredi<\/p><\/article>\n    <\/div>\n  <\/main>\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "c-colonne",
+     "titre": "Empiler et passer à la ligne",
+     "texte": "<p><code>flex-direction: column<\/code> empile les éléments verticalement. <code>flex-wrap: wrap<\/code> autorise le retour à la ligne quand il n'y a plus de place.<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    .cartes { display: flex; gap: 12px; }\n    .carte { width: 300px; }\n    \n  <\/style>\n<\/head>\n<body>\n  <header class=\"entete\">\n    <h1>Club informatique<\/h1>\n    <nav><a href=\"#\">Accueil<\/a> <a href=\"#\">Ateliers<\/a> <a href=\"#\">Contact<\/a><\/nav>\n  <\/header>\n  <main>\n    <p class=\"intro\">Trois ateliers cette semaine :<\/p>\n    <div class=\"cartes\">\n      <article class=\"carte\"><h2>Python<\/h2><p>Lundi<\/p><\/article>\n      <article class=\"carte\" id=\"vedette\"><h2>Réseau<\/h2><p>Mercredi<\/p><\/article>\n      <article class=\"carte\"><h2>Web<\/h2><p>Vendredi<\/p><\/article>\n    <\/div>\n  <\/main>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Les cartes peuvent passer à la ligne",
+       "r": [
+        {
+         "style": [
+          ".cartes",
+          "flex-wrap",
+          "^wrap$"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Le contenu de chaque carte (titre, jour) est empilé avec flex en colonne",
+       "r": [
+        {
+         "style": [
+          ".carte",
+          "display",
+          "^flex$"
+         ]
+        },
+        {
+         "style": [
+          ".carte",
+          "flex-direction",
+          "column"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "Ajoute <code>flex-wrap: wrap;<\/code> à <code>.cartes<\/code> et <code>display: flex; flex-direction: column;<\/code> à <code>.carte<\/code>.",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    .cartes { display: flex; gap: 12px; flex-wrap: wrap; }\n    .carte { width: 300px; display: flex; flex-direction: column; }\n  <\/style>\n<\/head>\n<body>\n  <header class=\"entete\">\n    <h1>Club informatique<\/h1>\n    <nav><a href=\"#\">Accueil<\/a> <a href=\"#\">Ateliers<\/a> <a href=\"#\">Contact<\/a><\/nav>\n  <\/header>\n  <main>\n    <p class=\"intro\">Trois ateliers cette semaine :<\/p>\n    <div class=\"cartes\">\n      <article class=\"carte\"><h2>Python<\/h2><p>Lundi<\/p><\/article>\n      <article class=\"carte\" id=\"vedette\"><h2>Réseau<\/h2><p>Mercredi<\/p><\/article>\n      <article class=\"carte\"><h2>Web<\/h2><p>Vendredi<\/p><\/article>\n    <\/div>\n  <\/main>\n<\/body>\n<\/html>\n"
+    }
+   ]
+  },
+  {
+   "titre": "Grille et responsive",
+   "missions": [
+    {
+     "id": "c-grid",
+     "titre": "Une grille de 3 colonnes",
+     "texte": "<p><code>display: grid<\/code> crée une grille. <code>grid-template-columns: repeat(3, 1fr)<\/code> fait 3 colonnes de même largeur (<code>fr<\/code> = une fraction de l'espace libre).<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    \n  <\/style>\n<\/head>\n<body>\n  <header class=\"entete\">\n    <h1>Club informatique<\/h1>\n    <nav><a href=\"#\">Accueil<\/a> <a href=\"#\">Ateliers<\/a> <a href=\"#\">Contact<\/a><\/nav>\n  <\/header>\n  <main>\n    <p class=\"intro\">Trois ateliers cette semaine :<\/p>\n    <div class=\"cartes\">\n      <article class=\"carte\"><h2>Python<\/h2><p>Lundi<\/p><\/article>\n      <article class=\"carte\" id=\"vedette\"><h2>Réseau<\/h2><p>Mercredi<\/p><\/article>\n      <article class=\"carte\"><h2>Web<\/h2><p>Vendredi<\/p><\/article>\n    <\/div>\n  <\/main>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "<code>.cartes<\/code> est une grille",
+       "r": [
+        {
+         "style": [
+          ".cartes",
+          "display",
+          "^grid$"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "3 colonnes égales",
+       "r": [
+        {
+         "style": [
+          ".cartes",
+          "grid-template-columns",
+          "^([\\d.]+)px \\1px \\1px$"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Un espace de 20px entre les cases",
+       "r": [
+        {
+         "style": [
+          ".cartes",
+          "row-gap",
+          "^20px$"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>.cartes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }<\/code>",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    .cartes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }\n  <\/style>\n<\/head>\n<body>\n  <header class=\"entete\">\n    <h1>Club informatique<\/h1>\n    <nav><a href=\"#\">Accueil<\/a> <a href=\"#\">Ateliers<\/a> <a href=\"#\">Contact<\/a><\/nav>\n  <\/header>\n  <main>\n    <p class=\"intro\">Trois ateliers cette semaine :<\/p>\n    <div class=\"cartes\">\n      <article class=\"carte\"><h2>Python<\/h2><p>Lundi<\/p><\/article>\n      <article class=\"carte\" id=\"vedette\"><h2>Réseau<\/h2><p>Mercredi<\/p><\/article>\n      <article class=\"carte\"><h2>Web<\/h2><p>Vendredi<\/p><\/article>\n    <\/div>\n  <\/main>\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "c-media",
+     "titre": "S'adapter au téléphone",
+     "texte": "<p>Une <b>media query<\/b> applique des règles seulement sous une condition : <code>@media (max-width: 600px) { … }<\/code> ne s'applique que si la fenêtre fait 600px de large ou moins. On s'en sert pour passer en une colonne sur téléphone.<\/p><p>L'aperçu est plus large que 600px : seule la grille à 3 colonnes doit s'y voir.<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    .cartes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }\n    \n  <\/style>\n<\/head>\n<body>\n  <header class=\"entete\">\n    <h1>Club informatique<\/h1>\n    <nav><a href=\"#\">Accueil<\/a> <a href=\"#\">Ateliers<\/a> <a href=\"#\">Contact<\/a><\/nav>\n  <\/header>\n  <main>\n    <p class=\"intro\">Trois ateliers cette semaine :<\/p>\n    <div class=\"cartes\">\n      <article class=\"carte\"><h2>Python<\/h2><p>Lundi<\/p><\/article>\n      <article class=\"carte\" id=\"vedette\"><h2>Réseau<\/h2><p>Mercredi<\/p><\/article>\n      <article class=\"carte\"><h2>Web<\/h2><p>Vendredi<\/p><\/article>\n    <\/div>\n  <\/main>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Une media query <code>max-width: 600px<\/code>",
+       "r": [
+        {
+         "codei": "@media\\s*(screen\\s*and\\s*)?\\(\\s*max-width\\s*:\\s*600px\\s*\\)"
+        }
+       ]
+      },
+      {
+       "txt": "Dedans, <code>.cartes<\/code> passe à une seule colonne",
+       "r": [
+        {
+         "codei": "@media[^{]*\\{[^@]*\\.cartes\\s*\\{[^}]*grid-template-columns\\s*:\\s*(1fr|repeat\\(\\s*1\\s*,\\s*1fr\\s*\\)|100%)"
+        }
+       ]
+      },
+      {
+       "txt": "Sur grand écran, il y a toujours 3 colonnes",
+       "r": [
+        {
+         "style": [
+          ".cartes",
+          "grid-template-columns",
+          "^[\\d.]+px [\\d.]+px [\\d.]+px$"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>@media (max-width: 600px) { .cartes { grid-template-columns: 1fr; } }<\/code>",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    .cartes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }\n    @media (max-width: 600px) {\n      .cartes { grid-template-columns: 1fr; }\n    }\n  <\/style>\n<\/head>\n<body>\n  <header class=\"entete\">\n    <h1>Club informatique<\/h1>\n    <nav><a href=\"#\">Accueil<\/a> <a href=\"#\">Ateliers<\/a> <a href=\"#\">Contact<\/a><\/nav>\n  <\/header>\n  <main>\n    <p class=\"intro\">Trois ateliers cette semaine :<\/p>\n    <div class=\"cartes\">\n      <article class=\"carte\"><h2>Python<\/h2><p>Lundi<\/p><\/article>\n      <article class=\"carte\" id=\"vedette\"><h2>Réseau<\/h2><p>Mercredi<\/p><\/article>\n      <article class=\"carte\"><h2>Web<\/h2><p>Vendredi<\/p><\/article>\n    <\/div>\n  <\/main>\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "c-sticky",
+     "titre": "Un en-tête qui reste en haut",
+     "texte": "<p><code>position: sticky<\/code> avec <code>top: 0<\/code> garde l'élément collé en haut de l'écran quand on fait défiler. <code>z-index<\/code> le place au-dessus du reste.<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    \n  <\/style>\n<\/head>\n<body>\n  <header class=\"entete\">\n    <h1>Club informatique<\/h1>\n    <nav><a href=\"#\">Accueil<\/a> <a href=\"#\">Ateliers<\/a> <a href=\"#\">Contact<\/a><\/nav>\n  <\/header>\n  <main>\n    <p class=\"intro\">Trois ateliers cette semaine :<\/p>\n    <div class=\"cartes\">\n      <article class=\"carte\"><h2>Python<\/h2><p>Lundi<\/p><\/article>\n      <article class=\"carte\" id=\"vedette\"><h2>Réseau<\/h2><p>Mercredi<\/p><\/article>\n      <article class=\"carte\"><h2>Web<\/h2><p>Vendredi<\/p><\/article>\n    <\/div>\n  <\/main>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "L'en-tête est <code>sticky<\/code>, collé à <code>top: 0<\/code>",
+       "r": [
+        {
+         "style": [
+          ".entete",
+          "position",
+          "sticky"
+         ]
+        },
+        {
+         "style": [
+          ".entete",
+          "top",
+          "^0px$"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Il a un <code>z-index<\/code> d'au moins 10",
+       "r": [
+        {
+         "style": [
+          ".entete",
+          "z-index",
+          "^([1-9]\\d+)$"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Il a un fond (sinon le contenu se voit à travers)",
+       "r": [
+        {
+         "style": [
+          ".entete",
+          "background-color",
+          "^rgb\\("
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>.entete { position: sticky; top: 0; z-index: 10; background: #2b3fe0; }<\/code>",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    .entete { position: sticky; top: 0; z-index: 10; background: #2b3fe0; }\n  <\/style>\n<\/head>\n<body>\n  <header class=\"entete\">\n    <h1>Club informatique<\/h1>\n    <nav><a href=\"#\">Accueil<\/a> <a href=\"#\">Ateliers<\/a> <a href=\"#\">Contact<\/a><\/nav>\n  <\/header>\n  <main>\n    <p class=\"intro\">Trois ateliers cette semaine :<\/p>\n    <div class=\"cartes\">\n      <article class=\"carte\"><h2>Python<\/h2><p>Lundi<\/p><\/article>\n      <article class=\"carte\" id=\"vedette\"><h2>Réseau<\/h2><p>Mercredi<\/p><\/article>\n      <article class=\"carte\"><h2>Web<\/h2><p>Vendredi<\/p><\/article>\n    <\/div>\n  <\/main>\n<\/body>\n<\/html>\n"
+    }
+   ]
+  }
+ ],
+ "libre": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n  <style>\n    body { font-family: sans-serif; }\n    .cartes { display: flex; gap: 16px; }\n  <\/style>\n<\/head>\n<body>\n  <header class=\"entete\">\n    <h1>Club informatique<\/h1>\n    <nav><a href=\"#\">Accueil<\/a> <a href=\"#\">Ateliers<\/a> <a href=\"#\">Contact<\/a><\/nav>\n  <\/header>\n  <main>\n    <p class=\"intro\">Trois ateliers cette semaine :<\/p>\n    <div class=\"cartes\">\n      <article class=\"carte\"><h2>Python<\/h2><p>Lundi<\/p><\/article>\n      <article class=\"carte\" id=\"vedette\"><h2>Réseau<\/h2><p>Mercredi<\/p><\/article>\n      <article class=\"carte\"><h2>Web<\/h2><p>Vendredi<\/p><\/article>\n    <\/div>\n  <\/main>\n<\/body>\n<\/html>\n",
+ "libreTexte": "<p>La page du club est déjà là : change le CSS librement, puis <b>Exécuter<\/b>.<\/p>"
+};
+</script>
+  <script src="../../data/modules.js"></script>
+  <script src="../../assets/app.js"></script>
+  <script src="../../assets/labo-code.js"></script>
+</body>
+</html>

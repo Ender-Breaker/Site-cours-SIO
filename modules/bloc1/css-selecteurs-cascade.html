@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>CSS : sélecteurs, cascade et unités — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="bloc1" data-chapter="css-selecteurs-cascade">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<p>Le CSS (<i>Cascading Style Sheets</i>) décrit l'apparence des éléments HTML. Ce chapitre approfondit la façon dont le navigateur choisit le style d'un élément : quels éléments une règle vise (sélecteurs), laquelle gagne en cas de conflit (cascade et spécificité), ce qui se transmet aux enfants (héritage), et dans quelles unités on exprime les tailles.</p>
+
+<h2>1. Rappel : une règle CSS</h2>
+<pre><code>sélecteur {
+  propriété: valeur;
+  propriété: valeur;
+}
+
+h2 { color: #2b3fe0; font-size: 1.5rem; }</code></pre>
+<p>Les règles se placent de préférence dans un fichier séparé relié par <code>&lt;link rel="stylesheet" href="style.css"&gt;</code> dans le head : une seule feuille pour tout le site, mise en cache par le navigateur.</p>
+
+<h2>2. Les sélecteurs</h2>
+<table><tr><th>Sélecteur</th><th>Vise</th><th>Exemple</th></tr>
+<tr><td><code>p</code></td><td>toutes les balises p</td><td><code>p { line-height: 1.5; }</code></td></tr>
+<tr><td><code>.carte</code></td><td>les éléments avec <code>class="carte"</code></td><td>plusieurs éléments possibles</td></tr>
+<tr><td><code>#vedette</code></td><td>l'élément avec <code>id="vedette"</code></td><td>unique dans la page</td></tr>
+<tr><td><code>nav a</code></td><td>les a <b>à l'intérieur</b> d'un nav (descendants)</td><td>à n'importe quelle profondeur</td></tr>
+<tr><td><code>ul &gt; li</code></td><td>les li <b>enfants directs</b> d'un ul</td><td></td></tr>
+<tr><td><code>h1, h2</code></td><td>les h1 <b>et</b> les h2 (groupe)</td><td></td></tr>
+<tr><td><code>a:hover</code></td><td>un lien survolé (pseudo-classe)</td><td>aussi <code>:focus</code>, <code>:first-child</code>, <code>:nth-child(2n)</code></td></tr>
+<tr><td><code>input[type="email"]</code></td><td>les éléments qui ont cet attribut</td><td></td></tr>
+<tr><td><code>*</code></td><td>tous les éléments</td><td><code>* { box-sizing: border-box; }</code></td></tr></table>
+<p>Un élément peut avoir plusieurs classes : <code>class="carte vedette"</code>, visé par <code>.carte.vedette</code> (sans espace : les deux à la fois).</p>
+
+<h2>3. La cascade et la spécificité</h2>
+<p>Quand plusieurs règles donnent une valeur différente à la même propriété d'un élément, le navigateur choisit dans cet ordre :</p>
+<ol>
+<li><b>Importance</b> : une déclaration <code>!important</code> l'emporte (à éviter : elle rend le code difficile à maintenir).</li>
+<li><b>Spécificité</b> : le sélecteur le plus précis gagne. On compte (identifiants, classes/attributs/pseudo-classes, balises).</li>
+<li><b>Ordre</b> : à spécificité égale, la règle écrite <b>en dernier</b> gagne.</li>
+</ol>
+<table><tr><th>Sélecteur</th><th>Spécificité (id, classe, balise)</th></tr>
+<tr><td><code>p</code></td><td>(0, 0, 1)</td></tr>
+<tr><td><code>.intro</code></td><td>(0, 1, 0)</td></tr>
+<tr><td><code>article p.intro</code></td><td>(0, 1, 2)</td></tr>
+<tr><td><code>#vedette h2</code></td><td>(1, 0, 1)</td></tr>
+<tr><td>attribut <code>style="…"</code> dans le HTML</td><td>plus fort que toute feuille de style</td></tr></table>
+<div class="box retenir"><b>En pratique</b><p>Un identifiant bat n'importe quel nombre de classes, une classe bat n'importe quel nombre de balises. Pour garder un CSS simple, on stylise surtout avec des <b>classes</b>.</p></div>
+
+<h2>4. L'héritage</h2>
+<p>Certaines propriétés se transmettent aux descendants : surtout celles du <b>texte</b> (<code>color</code>, <code>font-family</code>, <code>font-size</code>, <code>line-height</code>, <code>text-align</code>). C'est pourquoi on règle la police une seule fois sur <code>body</code>. Les propriétés de <b>boîte</b> (<code>margin</code>, <code>padding</code>, <code>border</code>, <code>background</code>, <code>width</code>) ne s'héritent pas.</p>
+<pre><code>body { font-family: &quot;Hanken Grotesk&quot;, sans-serif; color: #16182b; }
+/* tous les paragraphes, titres, listes… héritent de la police et de la couleur */</code></pre>
+
+<h2>5. Couleurs et unités</h2>
+<table><tr><th>Écriture</th><th>Exemple</th></tr>
+<tr><td>mot-clé</td><td><code>red</code>, <code>white</code>, <code>transparent</code></td></tr>
+<tr><td>hexadécimal</td><td><code>#2b3fe0</code> (rouge 2b, vert 3f, bleu e0)</td></tr>
+<tr><td>rgb / rgba</td><td><code>rgb(43, 63, 224)</code>, <code>rgba(0, 0, 0, .5)</code> (50 % d'opacité)</td></tr></table>
+<table><tr><th>Unité</th><th>Signification</th><th>Usage</th></tr>
+<tr><td><code>px</code></td><td>pixel CSS, taille fixe</td><td>bordures, petites marges</td></tr>
+<tr><td><code>%</code></td><td>pourcentage du parent</td><td>largeurs</td></tr>
+<tr><td><code>em</code></td><td>relatif à la taille de police de l'élément</td><td>marges liées au texte</td></tr>
+<tr><td><code>rem</code></td><td>relatif à la police de la racine (16 px par défaut)</td><td>tailles de texte : respecte les réglages de l'utilisateur</td></tr>
+<tr><td><code>vw</code>, <code>vh</code></td><td>1 % de la largeur / hauteur de la fenêtre</td><td>sections plein écran</td></tr></table>
+<div class="box retenir"><b>Passe à la pratique</b><p>Les missions du <a href="labo-css.html">labo CSS</a> reprennent ce chapitre et sont vérifiées automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel sélecteur vise les éléments ayant class=\"alerte\" ?",
+  "options": [
+   "#alerte",
+   ".alerte",
+   "alerte",
+   "*alerte"
+  ],
+  "answer": 1,
+  "explication": "Le point vise une classe."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel sélecteur vise l'élément ayant id=\"menu\" ?",
+  "options": [
+   ".menu",
+   "#menu",
+   "menu",
+   "@menu"
+  ],
+  "answer": 1,
+  "explication": "Le # vise un identifiant."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que vise « nav a » ?",
+  "options": [
+   "Les nav et les a",
+   "Les a placés à l'intérieur d'un nav",
+   "Les nav à l'intérieur d'un a",
+   "Le premier a du nav"
+  ],
+  "answer": 1,
+  "explication": "L'espace = descendant."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que vise « ul > li » ?",
+  "options": [
+   "Tous les li de la page",
+   "Les li enfants directs d'un ul",
+   "Les ul après un li",
+   "Le dernier li"
+  ],
+  "answer": 1,
+  "explication": "> = enfant direct."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle pseudo-classe s'applique quand la souris survole un lien ?",
+  "options": [
+   ":focus",
+   ":active",
+   ":hover",
+   ":visited"
+  ],
+  "answer": 2,
+  "explication": ":hover."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle règle gagne pour un <p class=\"intro\" id=\"chapo\"> ?  p { color: blue } / .intro { color: green } / #chapo { color: red }",
+  "options": [
+   "blue",
+   "green",
+   "red",
+   "La dernière écrite"
+  ],
+  "answer": 2,
+  "explication": "L'identifiant est le plus spécifique."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Deux règles .carte { color: gray } puis .carte { color: black } : quelle couleur ?",
+  "options": [
+   "gray",
+   "black",
+   "Mélange",
+   "Aucune"
+  ],
+  "answer": 1,
+  "explication": "Spécificité égale : la dernière gagne."
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "Une classe l'emporte sur 10 sélecteurs de balise combinés.",
+  "answer": true,
+  "explication": "(0,1,0) bat (0,0,10)."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "La propriété color est héritée par les éléments enfants.",
+  "answer": true,
+  "explication": "Les propriétés de texte s'héritent."
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "La propriété border est héritée par les éléments enfants.",
+  "answer": false,
+  "explication": "Les propriétés de boîte ne s'héritent pas."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Avec la police racine par défaut (16 px), combien vaut 1.5rem ?",
+  "options": [
+   "15 px",
+   "16 px",
+   "24 px",
+   "150 %"
+  ],
+  "answer": 2,
+  "explication": "1,5 × 16 = 24 px."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que représente #ffffff ?",
+  "options": [
+   "Noir",
+   "Blanc",
+   "Rouge",
+   "Transparent"
+  ],
+  "answer": 1,
+  "explication": "ff partout : blanc."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quelle valeur de la 4e composante de rgba() rend une couleur totalement transparente ?",
+  "answers": [
+   "0"
+  ],
+  "explication": "rgba(r, g, b, 0)."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Pourquoi éviter !important ?",
+  "options": [
+   "Il ne marche pas partout",
+   "Il casse la logique de la cascade et rend le CSS difficile à maintenir",
+   "Il ralentit la page",
+   "Il est obsolète"
+  ],
+  "answer": 1,
+  "explication": "Il force une valeur qu'on ne peut ensuite écraser qu'avec un autre !important."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

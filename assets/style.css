@@ -792,3 +792,22 @@ html.compte-ouvert { overflow: hidden; }
 @media (max-width: 340px) { .logo-txt { display: none; } }
 .bandeau-info .btn { white-space: nowrap; }
 @media (max-width: 560px) { .bandeau-info .bi-long { display: none; } }
+
+/* ===================== Labo SQL ===================== */
+.sql-res { min-height: 220px; max-height: 420px; overflow: auto; padding: 12px; background: var(--papier); }
+.sql-vide { margin: 0; color: var(--discret); font-weight: 600; }
+.sql-table { overflow-x: auto; border: 1.5px solid var(--encre); border-radius: var(--r1); background: var(--surface); }
+.sql-table table { border-collapse: collapse; width: 100%; font: .82rem/1.4 var(--mono); }
+.sql-table th { position: sticky; top: 0; background: var(--m-clair, var(--safran-clair)); text-align: left; font-weight: 800; }
+.sql-table th, .sql-table td { padding: 5px 10px; border-bottom: 1px solid var(--filet); border-right: 1px solid var(--filet); white-space: nowrap; }
+.sql-table td.nul { color: var(--discret); font-style: italic; }
+.sql-n { margin: 6px 0 12px; font-size: .8rem; font-weight: 700; color: var(--discret); }
+.sql-schema { max-height: 420px; overflow: auto; padding: 12px; background: var(--papier); }
+.sql-tbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.sql-tb { border: 1.5px solid var(--encre); border-radius: var(--r1); background: var(--surface); padding: 8px 10px; }
+.sql-tb b { font-family: var(--mono); }
+.sql-tb small { color: var(--discret); font-weight: 700; margin-left: 4px; }
+.sql-tb ul { list-style: none; margin: 6px 0 0; padding: 0; font-size: .8rem; }
+.sql-tb li { padding: 2px 0; border-top: 1px dashed var(--filet); }
+.sql-tb li span { color: var(--discret); }
+.lb-texte pre { white-space: pre-wrap; overflow-wrap: anywhere; max-width: 100%; }

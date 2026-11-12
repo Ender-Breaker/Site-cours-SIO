@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>CSS : Flexbox, Grid et responsive — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="bloc1" data-chapter="css-flexbox-grid">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<p>Pour placer les blocs d'une page (en-tête, colonnes, cartes), le CSS moderne offre deux outils : <b>Flexbox</b>, pour aligner des éléments sur une ligne ou une colonne, et <b>Grid</b>, pour une grille à deux dimensions. Les <b>media queries</b> adaptent la mise en page à la taille de l'écran : c'est le <i>responsive design</i>.</p>
+
+<h2>1. Le modèle de boîte (rappel)</h2>
+<p>Chaque élément est une boîte : contenu, puis <code>padding</code> (marge intérieure), <code>border</code>, <code>margin</code> (marge extérieure). Par défaut, <code>width</code> ne compte que le contenu ; avec <code>box-sizing: border-box</code>, elle inclut padding et bordure, ce qui simplifie tous les calculs :</p>
+<pre><code>* { box-sizing: border-box; }
+.carte { width: 300px; padding: 20px; border: 2px solid; }  /* fait bien 300 px au total */
+main { max-width: 960px; margin: 0 auto; }                 /* bloc centré */</code></pre>
+
+<h2>2. Flexbox : aligner sur un axe</h2>
+<p>On active Flexbox sur le <b>conteneur</b> ; ce sont ses <b>enfants directs</b> qui sont placés.</p>
+<pre><code>.cartes {
+  display: flex;
+  gap: 16px;                         /* espace entre les éléments */
+  justify-content: space-between;    /* axe principal */
+  align-items: center;               /* axe secondaire */
+  flex-wrap: wrap;                   /* retour à la ligne autorisé */
+}
+.carte { flex: 1; }                  /* chaque carte prend une part égale */</code></pre>
+<table><tr><th>Propriété (conteneur)</th><th>Valeurs courantes</th></tr>
+<tr><td><code>flex-direction</code></td><td><code>row</code> (défaut, en ligne), <code>column</code> (empilés)</td></tr>
+<tr><td><code>justify-content</code></td><td><code>flex-start</code>, <code>center</code>, <code>space-between</code>, <code>space-around</code></td></tr>
+<tr><td><code>align-items</code></td><td><code>stretch</code> (défaut), <code>center</code>, <code>flex-start</code>, <code>flex-end</code></td></tr>
+<tr><td><code>flex-wrap</code></td><td><code>nowrap</code> (défaut), <code>wrap</code></td></tr>
+<tr><td><code>gap</code></td><td>espacement entre les éléments</td></tr></table>
+<div class="box retenir"><b>Les deux axes</b><p><code>justify-content</code> agit sur l'axe <b>principal</b> (horizontal en <code>row</code>, vertical en <code>column</code>) ; <code>align-items</code> sur l'axe <b>secondaire</b>. Centrer un élément dans un bloc : <code>display: flex; justify-content: center; align-items: center;</code></p></div>
+
+<h2>3. Grid : une grille en deux dimensions</h2>
+<pre><code>.galerie {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);   /* 3 colonnes égales */
+  gap: 20px;
+}
+.page {
+  display: grid;
+  grid-template-columns: 250px 1fr;        /* barre latérale fixe + contenu */
+}
+.bandeau { grid-column: 1 / 3; }           /* s&#x27;étend de la ligne 1 à la ligne 3 */</code></pre>
+<p>L'unité <code>fr</code> représente une fraction de l'espace restant : <code>1fr 2fr</code> donne une colonne deux fois plus large que l'autre. <code>repeat(auto-fill, minmax(200px, 1fr))</code> crée automatiquement autant de colonnes d'au moins 200 px que la place le permet.</p>
+<table><tr><th>Flexbox</th><th>Grid</th></tr>
+<tr><td>Une dimension (ligne <b>ou</b> colonne)</td><td>Deux dimensions (lignes <b>et</b> colonnes)</td></tr>
+<tr><td>Menu, barre d'outils, centrer un élément</td><td>Mise en page générale, galerie, tableau de bord</td></tr></table>
+
+<h2>4. Le positionnement</h2>
+<table><tr><th>Valeur de <code>position</code></th><th>Comportement</th></tr>
+<tr><td><code>static</code></td><td>Défaut : dans le flux normal.</td></tr>
+<tr><td><code>relative</code></td><td>Décalé par rapport à sa place normale ; sert de repère aux enfants en absolute.</td></tr>
+<tr><td><code>absolute</code></td><td>Sorti du flux, placé par rapport au premier ancêtre positionné (badge sur une image).</td></tr>
+<tr><td><code>fixed</code></td><td>Fixé par rapport à la fenêtre (bouton « haut de page »).</td></tr>
+<tr><td><code>sticky</code></td><td>Normal, puis collé quand on fait défiler (en-tête avec <code>top: 0</code>).</td></tr></table>
+<p><code>z-index</code> règle l'ordre d'empilement des éléments positionnés (le plus grand passe devant).</p>
+
+<h2>5. Le responsive design</h2>
+<p>Le même site doit être lisible sur téléphone, tablette et ordinateur. Trois ingrédients :</p>
+<ol>
+<li>La balise <code>&lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;</code>.</li>
+<li>Des largeurs souples (<code>%</code>, <code>fr</code>, <code>max-width</code>) plutôt que fixes.</li>
+<li>Des <b>media queries</b> qui changent la mise en page selon la largeur :</li>
+</ol>
+<pre><code>.cartes { display: grid; grid-template-columns: repeat(3, 1fr); }
+
+@media (max-width: 600px) {
+  .cartes { grid-template-columns: 1fr; }   /* une colonne sur téléphone */
+  nav ul { flex-direction: column; }
+}</code></pre>
+<div class="box retenir"><b>Mobile first</b><p>On peut aussi écrire d'abord le style pour téléphone, puis l'enrichir pour les grands écrans avec <code>@media (min-width: 768px)</code>. L'outil « mode responsive » des outils de développement (F12) permet de tester toutes les tailles.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Les missions du <a href="labo-css.html">labo CSS</a> reprennent ce chapitre et sont vérifiées automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Sur quel élément écrit-on display: flex ?",
+  "options": [
+   "Sur chaque élément à aligner",
+   "Sur le conteneur parent",
+   "Sur body uniquement",
+   "Sur le premier enfant"
+  ],
+  "answer": 1,
+  "explication": "Flexbox s'active sur le conteneur ; ses enfants directs sont placés."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle propriété espace les éléments d'un conteneur flex ou grid ?",
+  "options": [
+   "margin",
+   "gap",
+   "space",
+   "padding"
+  ],
+  "answer": 1,
+  "explication": "gap."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "En flex-direction: row, quelle propriété répartit les éléments horizontalement ?",
+  "options": [
+   "align-items",
+   "justify-content",
+   "flex-wrap",
+   "text-align"
+  ],
+  "answer": 1,
+  "explication": "justify-content agit sur l'axe principal."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Comment centrer un élément horizontalement ET verticalement dans un conteneur flex ?",
+  "options": [
+   "text-align: center",
+   "justify-content: center; align-items: center",
+   "margin: center",
+   "position: center"
+  ],
+  "answer": 1,
+  "explication": "Les deux axes."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que fait flex-wrap: wrap ?",
+  "options": [
+   "Empile les éléments",
+   "Autorise le retour à la ligne",
+   "Inverse l'ordre",
+   "Cache ce qui dépasse"
+  ],
+  "answer": 1,
+  "explication": "Les éléments passent à la ligne quand il n'y a plus de place."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "grid-template-columns: repeat(4, 1fr) crée :",
+  "options": [
+   "4 lignes",
+   "4 colonnes égales",
+   "1 colonne de 4 px",
+   "4 colonnes de 1 px"
+  ],
+  "answer": 1,
+  "explication": "fr = fraction de l'espace libre."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "grid-template-columns: 1fr 2fr : la 2e colonne est…",
+  "options": [
+   "deux fois plus large",
+   "deux fois plus étroite",
+   "de 2 px",
+   "identique"
+  ],
+  "answer": 0,
+  "explication": "2 parts contre 1."
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "Grid est fait pour les mises en page à deux dimensions, Flexbox pour une seule.",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle valeur de position garde un en-tête collé en haut quand on fait défiler ?",
+  "options": [
+   "absolute",
+   "relative",
+   "sticky",
+   "static"
+  ],
+  "answer": 2,
+  "explication": "sticky avec top: 0."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Un élément en position: absolute se place par rapport à…",
+  "options": [
+   "la fenêtre toujours",
+   "son premier ancêtre positionné (relative, absolute…)",
+   "l'élément précédent",
+   "le body toujours"
+  ],
+  "answer": 1,
+  "explication": "D'où le relative sur le parent."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quelle règle CSS commence une media query ? (écris le mot avec son symbole)",
+  "answers": [
+   "@media"
+  ],
+  "explication": "@media (max-width: 600px) { … }"
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "@media (max-width: 600px) { … } s'applique…",
+  "options": [
+   "aux écrans de plus de 600 px",
+   "aux fenêtres de 600 px de large ou moins",
+   "seulement à l'impression",
+   "toujours"
+  ],
+  "answer": 1,
+  "explication": "max-width = jusqu'à 600 px."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "Avec box-sizing: border-box, la largeur width inclut le padding et la bordure.",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Quel couple de propriétés centre un bloc de largeur max 960px dans la page ?",
+  "options": [
+   "text-align: center",
+   "max-width: 960px; margin: 0 auto",
+   "align: center",
+   "position: center"
+  ],
+  "answer": 1,
+  "explication": "Marges auto à gauche et à droite."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

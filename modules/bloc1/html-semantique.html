@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>HTML : structure et sémantique d'une page — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="bloc1" data-chapter="html-semantique">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<p>Le HTML décrit la <b>structure</b> et le <b>sens</b> du contenu d'une page ; le CSS s'occupe de son apparence. Une page bien structurée est mieux comprise par les navigateurs, les moteurs de recherche et les lecteurs d'écran utilisés par les personnes malvoyantes. Ce chapitre complète les bases vues en SLAM (balises, listes, liens, images).</p>
+
+<h2>1. Le squelette d'une page</h2>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;fr&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;&gt;
+  &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;
+  &lt;title&gt;Club informatique&lt;/title&gt;
+  &lt;link rel=&quot;stylesheet&quot; href=&quot;style.css&quot;&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  …contenu visible…
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<table><tr><th>Élément</th><th>Rôle</th></tr>
+<tr><td><code>&lt;!DOCTYPE html&gt;</code></td><td>Indique au navigateur qu'il s'agit de HTML5 (mode standard).</td></tr>
+<tr><td><code>lang="fr"</code></td><td>Langue de la page : prononciation des lecteurs d'écran, traduction automatique, référencement.</td></tr>
+<tr><td><code>&lt;meta charset="utf-8"&gt;</code></td><td>Encodage des caractères : sans lui, les accents peuvent s'afficher « Ã© ».</td></tr>
+<tr><td><code>&lt;meta name="viewport"&gt;</code></td><td>Sur téléphone, affiche la page à la largeur de l'écran au lieu d'un bureau miniature.</td></tr>
+<tr><td><code>&lt;title&gt;</code></td><td>Titre de l'onglet et des résultats de recherche.</td></tr></table>
+<div class="box attention"><b>head ou body ?</b><p>Le <code>&lt;head&gt;</code> contient les informations <b>sur</b> la page (rien ne s'y affiche) ; le <code>&lt;body&gt;</code> contient ce que l'on voit.</p></div>
+
+<h2>2. Les balises de structure HTML5</h2>
+<p>Avant HTML5, tout était fait de <code>&lt;div&gt;</code>. Les balises sémantiques disent <b>à quoi sert</b> chaque zone :</p>
+<table><tr><th>Balise</th><th>Contenu</th></tr>
+<tr><td><code>&lt;header&gt;</code></td><td>En-tête : logo, titre du site, souvent le menu.</td></tr>
+<tr><td><code>&lt;nav&gt;</code></td><td>Liens de navigation principaux.</td></tr>
+<tr><td><code>&lt;main&gt;</code></td><td>Contenu principal de la page, <b>une seule fois</b> par page.</td></tr>
+<tr><td><code>&lt;article&gt;</code></td><td>Contenu autonome, qui aurait du sens seul : billet, fiche produit, commentaire.</td></tr>
+<tr><td><code>&lt;section&gt;</code></td><td>Partie thématique d'un document, avec un titre.</td></tr>
+<tr><td><code>&lt;aside&gt;</code></td><td>Contenu annexe : encadré, liens connexes, publicité.</td></tr>
+<tr><td><code>&lt;footer&gt;</code></td><td>Pied de page : mentions légales, contact, copyright.</td></tr></table>
+<pre><code>&lt;body&gt;
+  &lt;header&gt;
+    &lt;h1&gt;Club informatique&lt;/h1&gt;
+    &lt;nav&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&quot;index.html&quot;&gt;Accueil&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&quot;contact.html&quot;&gt;Contact&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/nav&gt;
+  &lt;/header&gt;
+  &lt;main&gt;
+    &lt;article&gt;
+      &lt;h2&gt;Atelier Raspberry Pi&lt;/h2&gt;
+      &lt;p&gt;Mercredi, on installe un serveur web.&lt;/p&gt;
+    &lt;/article&gt;
+    &lt;aside&gt;…&lt;/aside&gt;
+  &lt;/main&gt;
+  &lt;footer&gt;© 2026 Club informatique&lt;/footer&gt;
+&lt;/body&gt;</code></pre>
+<p><code>&lt;div&gt;</code> (bloc) et <code>&lt;span&gt;</code> (en ligne) restent utiles, mais seulement pour la mise en forme, quand aucune balise sémantique ne convient.</p>
+
+<h2>3. Le plan : la hiérarchie des titres</h2>
+<ul>
+<li>Un seul <code>&lt;h1&gt;</code> par page : le sujet de la page.</li>
+<li>Des <code>&lt;h2&gt;</code> pour les grandes parties, des <code>&lt;h3&gt;</code> pour les sous-parties, etc.</li>
+<li>On ne saute pas de niveau (pas de <code>h4</code> directement sous un <code>h2</code>).</li>
+<li>On ne choisit jamais un titre pour sa taille : la taille se règle en CSS.</li>
+</ul>
+<div class="box retenir"><b>Pourquoi c'est important</b><p>Les lecteurs d'écran permettent de naviguer de titre en titre, et les moteurs de recherche s'appuient sur le plan pour comprendre la page.</p></div>
+
+<h2>4. Liens : internes, ancres, mail, téléphone</h2>
+<pre><code>&lt;a href=&quot;contact.html&quot;&gt;Contact&lt;/a&gt;                  &lt;!-- page du même site (chemin relatif) --&gt;
+&lt;a href=&quot;https://www.cnil.fr&quot; target=&quot;_blank&quot;&gt;CNIL&lt;/a&gt;  &lt;!-- autre site, nouvel onglet --&gt;
+&lt;a href=&quot;#horaires&quot;&gt;Voir les horaires&lt;/a&gt;             &lt;!-- ancre vers id=&quot;horaires&quot; --&gt;
+&lt;a href=&quot;mailto:club@lycee.fr&quot;&gt;Écrire au club&lt;/a&gt;
+&lt;a href=&quot;tel:+33299000000&quot;&gt;Appeler&lt;/a&gt;</code></pre>
+<p>Un chemin <b>relatif</b> part du fichier courant (<code>images/logo.png</code>, <code>../index.html</code> pour remonter d'un dossier) ; un chemin <b>absolu</b> donne l'URL complète (<code>https://…</code>). Le texte d'un lien doit dire où il mène : « Télécharger le règlement (PDF) » plutôt que « cliquez ici ».</p>
+
+<h2>5. Contenus particuliers</h2>
+<pre><code>&lt;figure&gt;
+  &lt;img src=&quot;salle.jpg&quot; alt=&quot;La salle du club avec dix postes&quot;&gt;
+  &lt;figcaption&gt;La salle B12&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;dl&gt;
+  &lt;dt&gt;DNS&lt;/dt&gt;
+  &lt;dd&gt;Service qui traduit un nom de domaine en adresse IP.&lt;/dd&gt;
+&lt;/dl&gt;
+
+&lt;p&gt;Le prix est de 10&amp;nbsp;€ &amp;lt;TTC&amp;gt; — écrire &amp;amp;lt; pour afficher &amp;lt;&lt;/p&gt;</code></pre>
+<ul>
+<li><code>&lt;figure&gt;</code> + <code>&lt;figcaption&gt;</code> : une illustration et sa légende.</li>
+<li><code>&lt;dl&gt;</code>, <code>&lt;dt&gt;</code>, <code>&lt;dd&gt;</code> : liste de définitions (glossaire).</li>
+<li>Les <b>entités</b> affichent les caractères réservés : <code>&amp;lt;</code> (&lt;), <code>&amp;gt;</code> (&gt;), <code>&amp;amp;</code> (&amp;), <code>&amp;nbsp;</code> (espace insécable).</li>
+<li>Les commentaires <code>&lt;!-- … --&gt;</code> ne s'affichent pas (mais restent visibles dans le code source : jamais de mot de passe dedans !).</li>
+</ul>
+<div class="box retenir"><b>Valider son code</b><p>Le validateur du W3C (validator.w3.org) signale les balises mal fermées, les attributs inconnus et les erreurs de structure. Un code valide s'affiche de la même façon dans tous les navigateurs.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Les missions du <a href="labo-html.html">labo HTML</a> reprennent ce chapitre et sont vérifiées automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel attribut indique la langue d'une page ?",
+  "options": [
+   "charset",
+   "lang",
+   "xml:lang uniquement",
+   "language"
+  ],
+  "answer": 1,
+  "explication": "<html lang=\"fr\">."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que se passe-t-il souvent si l'encodage UTF-8 n'est pas déclaré ?",
+  "options": [
+   "La page ne s'affiche pas",
+   "Les accents s'affichent mal",
+   "Les images disparaissent",
+   "Rien"
+  ],
+  "answer": 1,
+  "explication": "Sans <meta charset=\"utf-8\">, « é » peut devenir « Ã© »."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "À quoi sert la balise meta viewport ?",
+  "options": [
+   "Au référencement",
+   "À afficher la page à la largeur de l'écran du téléphone",
+   "À définir la couleur de la barre d'adresse",
+   "À précharger les images"
+  ],
+  "answer": 1,
+  "explication": "width=device-width, initial-scale=1."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle balise contient le contenu principal, une seule fois par page ?",
+  "options": [
+   "<section>",
+   "<article>",
+   "<main>",
+   "<body>"
+  ],
+  "answer": 2,
+  "explication": "<main> est unique dans la page."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Un billet de blog qu'on pourrait publier seul se met dans :",
+  "options": [
+   "<section>",
+   "<article>",
+   "<aside>",
+   "<div>"
+  ],
+  "answer": 1,
+  "explication": "<article> = contenu autonome."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Où place-t-on généralement le menu de navigation ?",
+  "options": [
+   "<nav>, souvent dans <header>",
+   "<aside>",
+   "<footer> uniquement",
+   "<head>"
+  ],
+  "answer": 0,
+  "explication": "<nav> regroupe les liens principaux."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "On peut mettre plusieurs <h1> dans une page sans problème.",
+  "answer": false,
+  "explication": "Bonne pratique : un seul h1, le sujet de la page."
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "On peut passer directement d'un <h2> à un <h4> si l'on veut un titre plus petit.",
+  "answer": false,
+  "explication": "On ne saute pas de niveau ; la taille se règle en CSS."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quel lien mène à l'élément <h2 id=\"tarifs\"> de la même page ?",
+  "options": [
+   "<a href=\"tarifs\">",
+   "<a href=\"#tarifs\">",
+   "<a href=\".tarifs\">",
+   "<a id=\"tarifs\">"
+  ],
+  "answer": 1,
+  "explication": "Le # vise un identifiant."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Quel préfixe d'URL ouvre la messagerie dans un lien ? (sans les deux-points)",
+  "answers": [
+   "mailto"
+  ],
+  "explication": "href=\"mailto:adresse@exemple.fr\"."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Depuis pages/contact.html, quel chemin mène à index.html situé à la racine ?",
+  "options": [
+   "index.html",
+   "/pages/index.html",
+   "../index.html",
+   "./index.html"
+  ],
+  "answer": 2,
+  "explication": ".. remonte d'un dossier."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle balise ajoute une légende à une image ?",
+  "options": [
+   "<caption>",
+   "<legend>",
+   "<figcaption>",
+   "<label>"
+  ],
+  "answer": 2,
+  "explication": "<figure> + <figcaption>."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Comment afficher le caractère < dans le texte d'une page ?",
+  "options": [
+   "\\<",
+   "&lt;",
+   "<<",
+   "%3C"
+  ],
+  "answer": 1,
+  "explication": "Entité &lt;."
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "Un commentaire HTML <!-- … --> n'est pas visible dans le code source de la page.",
+  "answer": false,
+  "explication": "Il ne s'affiche pas, mais n'importe qui peut le lire avec « Afficher le code source »."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Quel texte de lien est le plus accessible ?",
+  "options": [
+   "Cliquez ici",
+   "Ici",
+   "Télécharger le règlement (PDF, 200 Ko)",
+   "Lien"
+  ],
+  "answer": 2,
+  "explication": "Le lien doit dire où il mène, même lu hors contexte."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>SQL : jointures et regroupements — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="bloc1" data-chapter="sql-jointures">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<p>Les données d'une base relationnelle sont <b>réparties</b> dans plusieurs tables pour éviter de répéter les mêmes informations : le nom du service n'est écrit qu'une fois, dans <code>service</code>, et chaque employé n'en garde que l'identifiant. Pour reconstituer l'information, on fait des <b>jointures</b>. On apprend aussi à calculer des résultats <b>par groupe</b>.</p>
+<table><tr><th>Table</th><th>Colonnes</th></tr>
+<tr><td><code>service</code></td><td><u>id</u>, nom, etage</td></tr>
+<tr><td><code>employe</code></td><td><u>id</u>, nom, prenom, poste, ville, <i>service_id</i></td></tr>
+<tr><td><code>materiel</code></td><td><u>id</u>, type, marque, modele, prix, date_achat, <i>employe_id</i></td></tr>
+<tr><td><code>intervention</code></td><td><u>id</u>, <i>materiel_id</i>, date_inter, technicien, duree, motif, resolue</td></tr></table>
+<p>Clé primaire soulignée, clés étrangères en italique.</p>
+
+<h2>1. La jointure interne : JOIN … ON</h2>
+<pre><code>SELECT employe.nom, materiel.modele
+FROM materiel
+JOIN employe ON materiel.employe_id = employe.id;</code></pre>
+<p>Pour chaque matériel, la base cherche l'employé dont l'<code>id</code> est égal à <code>employe_id</code>, et assemble les deux lignes. La condition <code>ON</code> relie presque toujours une <b>clé étrangère</b> à la <b>clé primaire</b> qu'elle référence.</p>
+<ul>
+<li>Quand deux tables ont une colonne de même nom (<code>nom</code>, <code>id</code>), on préfixe : <code>employe.nom</code>.</li>
+<li>Des <b>alias</b> de table raccourcissent l'écriture : <code>FROM materiel m JOIN employe e ON m.employe_id = e.id</code>.</li>
+<li>Un <code>JOIN</code> (ou <code>INNER JOIN</code>) ne garde que les lignes qui ont une correspondance : le matériel non attribué disparaît du résultat.</li>
+</ul>
+
+<h2>2. Plusieurs jointures</h2>
+<pre><code>SELECT i.date_inter, i.motif, m.modele, e.nom
+FROM intervention i
+JOIN materiel m ON i.materiel_id = m.id
+JOIN employe e  ON m.employe_id = e.id
+WHERE i.resolue = 0;</code></pre>
+<p>On suit le chemin des clés étrangères : intervention → matériel → employé. Le <code>WHERE</code> peut porter sur n'importe quelle table de la jointure.</p>
+
+<h2>3. La jointure externe : LEFT JOIN</h2>
+<pre><code>-- tous les employés, même ceux sans matériel
+SELECT e.nom, m.modele
+FROM employe e
+LEFT JOIN materiel m ON m.employe_id = e.id;
+
+-- seulement les employés SANS matériel
+SELECT e.nom
+FROM employe e
+LEFT JOIN materiel m ON m.employe_id = e.id
+WHERE m.id IS NULL;</code></pre>
+<p><code>LEFT JOIN</code> garde <b>toutes</b> les lignes de la table de gauche (celle du FROM) ; quand il n'y a pas de correspondance, les colonnes de droite valent <code>NULL</code>. C'est la technique pour trouver « ceux qui n'ont pas de… ».</p>
+<div class="box attention"><b>Ancienne écriture</b><p>On rencontre encore <code>FROM materiel, employe WHERE materiel.employe_id = employe.id</code>. Le résultat est le même qu'un JOIN, mais oublier la condition produit le produit cartésien (chaque ligne avec chaque ligne) : préfère <code>JOIN … ON</code>.</p></div>
+
+<h2>4. Regrouper : GROUP BY</h2>
+<pre><code>SELECT type, COUNT(*) AS nombre, AVG(prix) AS prix_moyen
+FROM materiel
+GROUP BY type;</code></pre>
+<p>Les lignes qui ont la même valeur de <code>type</code> forment un groupe ; les agrégats sont calculés <b>pour chaque groupe</b>. Règle : dans le <code>SELECT</code>, on ne met que les colonnes du <code>GROUP BY</code> et des agrégats.</p>
+<pre><code>-- valeur du matériel par service : jointure + regroupement
+SELECT s.nom, SUM(m.prix) AS total
+FROM service s
+JOIN employe e  ON e.service_id = s.id
+JOIN materiel m ON m.employe_id = e.id
+GROUP BY s.nom
+ORDER BY total DESC;</code></pre>
+
+<h2>5. Filtrer les groupes : HAVING</h2>
+<pre><code>SELECT technicien, SUM(duree) AS minutes
+FROM intervention
+WHERE date_inter &gt;= &#x27;2025-01-01&#x27;     -- filtre les LIGNES (avant regroupement)
+GROUP BY technicien
+HAVING SUM(duree) &gt; 120;             -- filtre les GROUPES (après regroupement)</code></pre>
+<div class="box retenir"><b>WHERE ou HAVING ?</b><p><code>WHERE</code> agit sur les lignes, avant le regroupement : il ne peut pas utiliser d'agrégat. <code>HAVING</code> agit sur les groupes, après : c'est là que se met une condition sur <code>COUNT</code>, <code>SUM</code>, <code>AVG</code>…</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Les missions du <a href="labo-sql.html">labo SQL</a> reprennent ce chapitre et sont vérifiées automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "À quoi sert une jointure ?",
+  "options": [
+   "À trier",
+   "À reconstituer une information répartie dans plusieurs tables",
+   "À supprimer des doublons",
+   "À créer une table"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle condition relie materiel à employe ?",
+  "options": [
+   "ON materiel.id = employe.id",
+   "ON materiel.employe_id = employe.id",
+   "ON materiel.nom = employe.nom",
+   "ON employe.materiel_id = materiel.id"
+  ],
+  "answer": 1,
+  "explication": "La clé étrangère vers la clé primaire."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Pourquoi écrire employe.nom plutôt que nom ?",
+  "options": [
+   "C'est obligatoire tout le temps",
+   "Plusieurs tables de la jointure ont une colonne nom",
+   "Pour aller plus vite",
+   "Pour trier"
+  ],
+  "answer": 1,
+  "explication": "Sinon : ambiguous column name."
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "Un JOIN simple garde aussi le matériel qui n'est attribué à personne.",
+  "answer": false,
+  "explication": "Seules les lignes avec correspondance sont gardées."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle jointure garde toutes les lignes de la table de gauche ?",
+  "options": [
+   "INNER JOIN",
+   "LEFT JOIN",
+   "CROSS JOIN",
+   "SELF JOIN"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Comment trouver les services qui n'ont aucun employé ?",
+  "options": [
+   "service JOIN employe … WHERE employe.id IS NULL",
+   "service LEFT JOIN employe ON employe.service_id = service.id WHERE employe.id IS NULL",
+   "service WHERE employe IS NULL",
+   "COUNT(*) = 0"
+  ],
+  "answer": 1,
+  "explication": "LEFT JOIN puis IS NULL côté droit."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "SELECT type, COUNT(*) FROM materiel GROUP BY type renvoie…",
+  "options": [
+   "une ligne au total",
+   "une ligne par type",
+   "une ligne par matériel",
+   "une erreur"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Où mettre la condition « les types qui ont plus de 3 appareils » ?",
+  "options": [
+   "WHERE COUNT(*) > 3",
+   "HAVING COUNT(*) > 3",
+   "ORDER BY COUNT(*) > 3",
+   "LIMIT 3"
+  ],
+  "answer": 1,
+  "explication": "Une condition sur un agrégat va dans HAVING."
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "WHERE est appliqué avant le regroupement, HAVING après.",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quel mot-clé regroupe les lignes qui ont la même valeur ? (deux mots)",
+  "answers": [
+   "GROUP BY",
+   "group by"
+  ],
+  "explication": "GROUP BY colonne."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "FROM materiel, employe sans condition WHERE produit…",
+  "options": [
+   "les matériels attribués",
+   "le produit cartésien : chaque matériel avec chaque employé",
+   "une erreur",
+   "rien"
+  ],
+  "answer": 1,
+  "explication": "22 × 14 = 308 lignes ici."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Dans une requête avec GROUP BY type, quelle colonne ne peut PAS être affichée telle quelle ?",
+  "options": [
+   "type",
+   "COUNT(*)",
+   "modele",
+   "AVG(prix)"
+  ],
+  "answer": 2,
+  "explication": "modele varie dans un groupe : il faut un agrégat ou l'ajouter au GROUP BY."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Avec un alias, comment écrire la jointure ?",
+  "options": [
+   "FROM materiel AS m JOIN employe AS e ON m.employe_id = e.id",
+   "FROM m = materiel JOIN e = employe",
+   "FROM materiel(m) JOIN employe(e)",
+   "Impossible"
+  ],
+  "answer": 0,
+  "explication": "AS est facultatif : FROM materiel m."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

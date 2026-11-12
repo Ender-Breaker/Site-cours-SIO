@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Labo HTML — Étude Facile</title>
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="bloc1">
+<script>
+window.EF_CODE = {
+ "langue": "html",
+ "key": "ef-labo-b1html",
+ "mid": "bloc1-html",
+ "titre": "Labo HTML",
+ "sousTitre": "Structure, sémantique et accessibilité : construis des pages propres, vérifiées automatiquement.",
+ "ico": "<\/>",
+ "couleur": "violet",
+ "fichier": "index.html",
+ "module": {
+  "titre": "Bloc 1",
+  "href": "index.html"
+ },
+ "lecons": [
+  {
+   "titre": "La structure d'une page",
+   "missions": [
+    {
+     "id": "b1-squelette",
+     "titre": "Le squelette complet",
+     "texte": "<p>Toute page commence par <code>&lt;!DOCTYPE html&gt;<\/code>, puis <code>&lt;html lang=\"fr\"&gt;<\/code> qui indique la langue (lecteurs d'écran, traduction, référencement). Dans le <code>&lt;head&gt;<\/code> : l'encodage, la balise <b>viewport<\/b> pour les téléphones et le titre de l'onglet.<\/p>",
+     "depart": "<!DOCTYPE html>\n<html>\n<head>\n  \n<\/head>\n<body>\n  <h1>Club informatique<\/h1>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "La balise <code>html<\/code> déclare la langue française",
+       "r": [
+        {
+         "attr": [
+          "html",
+          "lang",
+          "^fr"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "L'encodage UTF-8 est déclaré",
+       "r": [
+        {
+         "codei": "<meta\\s+charset=\\\"?utf-8"
+        }
+       ]
+      },
+      {
+       "txt": "La balise viewport : <code>width=device-width, initial-scale=1<\/code>",
+       "r": [
+        {
+         "attr": [
+          "meta[name=viewport]",
+          "content",
+          "width=device-width"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Un titre d'onglet « Club informatique »",
+       "r": [
+        {
+         "text": [
+          "title",
+          "Club informatique"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>&lt;html lang=\"fr\"&gt;<\/code>, puis dans le head : <code>&lt;meta charset=\"utf-8\"&gt;<\/code>, <code>&lt;meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"&gt;<\/code> et <code>&lt;title&gt;<\/code>.",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Club informatique<\/title>\n<\/head>\n<body>\n  <h1>Club informatique<\/h1>\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "b1-zones",
+     "titre": "Les grandes zones",
+     "texte": "<p>HTML5 donne des balises qui ont un <b>sens<\/b> : <code>&lt;header&gt;<\/code> (en-tête du site), <code>&lt;nav&gt;<\/code> (menu), <code>&lt;main&gt;<\/code> (contenu principal, une seule fois par page) et <code>&lt;footer&gt;<\/code> (pied de page). Elles remplacent avantageusement des <code>&lt;div&gt;<\/code> anonymes.<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <div>\n    <h1>Club informatique<\/h1>\n  <\/div>\n  <div>\n    <p>Bienvenue sur le site du club.<\/p>\n  <\/div>\n  <div>\n    <p>© 2026 Club informatique<\/p>\n  <\/div>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Le titre est dans un <code>&lt;header&gt;<\/code>",
+       "r": [
+        {
+         "dom": "header h1"
+        }
+       ]
+      },
+      {
+       "txt": "Le paragraphe de bienvenue est dans <code>&lt;main&gt;<\/code>",
+       "r": [
+        {
+         "text": [
+          "main p",
+          "Bienvenue"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Le copyright est dans un <code>&lt;footer&gt;<\/code>",
+       "r": [
+        {
+         "text": [
+          "footer",
+          "2026"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Plus aucune <code>&lt;div&gt;<\/code>",
+       "r": [
+        {
+         "count": [
+          "div",
+          0
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "Remplace chaque <code>&lt;div&gt;<\/code> par la balise qui correspond à son rôle.",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <header>\n    <h1>Club informatique<\/h1>\n  <\/header>\n  <main>\n    <p>Bienvenue sur le site du club.<\/p>\n  <\/main>\n  <footer>\n    <p>© 2026 Club informatique<\/p>\n  <\/footer>\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "b1-nav",
+     "titre": "Un menu de navigation",
+     "texte": "<p>Un menu est une <b>liste de liens<\/b> placée dans <code>&lt;nav&gt;<\/code> : <code>&lt;nav&gt;&lt;ul&gt;&lt;li&gt;&lt;a href=\"…\"&gt;…&lt;/a&gt;&lt;/li&gt;…&lt;/ul&gt;&lt;/nav&gt;<\/code>. On le met généralement dans le header.<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <header>\n    <h1>Club informatique<\/h1>\n    \n  <\/header>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Un <code>&lt;nav&gt;<\/code> dans le header",
+       "r": [
+        {
+         "dom": "header nav"
+        }
+       ]
+      },
+      {
+       "txt": "Une liste <code>&lt;ul&gt;<\/code> d'au moins 3 liens dans le nav",
+       "r": [
+        {
+         "min": [
+          "nav ul > li > a",
+          3
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Un des liens mène à <code>contact.html<\/code>",
+       "r": [
+        {
+         "attr": [
+          "nav a",
+          "href",
+          "^contact\\.html$"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>&lt;nav&gt;&lt;ul&gt;&lt;li&gt;&lt;a href=\"index.html\"&gt;Accueil&lt;/a&gt;&lt;/li&gt;<\/code>… avec <code>contact.html<\/code> pour le dernier.",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <header>\n    <h1>Club informatique<\/h1>\n    <nav>\n      <ul>\n        <li><a href=\"index.html\">Accueil<\/a><\/li>\n        <li><a href=\"ateliers.html\">Ateliers<\/a><\/li>\n        <li><a href=\"contact.html\">Contact<\/a><\/li>\n      <\/ul>\n    <\/nav>\n  <\/header>\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "b1-titres",
+     "titre": "La hiérarchie des titres",
+     "texte": "<p>Les titres forment le <b>plan<\/b> de la page : un seul <code>&lt;h1&gt;<\/code>, puis des <code>&lt;h2&gt;<\/code> pour les parties, des <code>&lt;h3&gt;<\/code> pour les sous-parties. On ne saute pas de niveau (pas de h4 directement sous un h2) et on ne choisit pas un titre pour sa taille : la taille, c'est le CSS.<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <h1>Ateliers<\/h1>\n  <h1>Programmation<\/h1>\n  <h4>Python débutant<\/h4>\n  <h4>Web avec PHP<\/h4>\n  <h1>Réseau<\/h1>\n  <h4>Monter un switch<\/h4>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Un seul <code>&lt;h1&gt;<\/code> (« Ateliers »)",
+       "r": [
+        {
+         "count": [
+          "h1",
+          1
+         ]
+        },
+        {
+         "text": [
+          "h1",
+          "^Ateliers$"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "« Programmation » et « Réseau » sont des <code>&lt;h2&gt;<\/code>",
+       "r": [
+        {
+         "count": [
+          "h2",
+          2
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Les ateliers sont des <code>&lt;h3&gt;<\/code>, et il n'y a plus de <code>&lt;h4&gt;<\/code>",
+       "r": [
+        {
+         "count": [
+          "h3",
+          3
+         ]
+        },
+        {
+         "count": [
+          "h4",
+          0
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "h1 Ateliers → h2 Programmation → h3 Python débutant, h3 Web avec PHP → h2 Réseau → h3 Monter un switch.",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <h1>Ateliers<\/h1>\n  <h2>Programmation<\/h2>\n  <h3>Python débutant<\/h3>\n  <h3>Web avec PHP<\/h3>\n  <h2>Réseau<\/h2>\n  <h3>Monter un switch<\/h3>\n<\/body>\n<\/html>\n"
+    }
+   ]
+  },
+  {
+   "titre": "Le contenu sémantique",
+   "missions": [
+    {
+     "id": "b1-article",
+     "titre": "Articles et sections",
+     "texte": "<p><code>&lt;article&gt;<\/code> entoure un contenu <b>autonome<\/b> qu'on pourrait publier seul (un billet, une fiche produit). <code>&lt;section&gt;<\/code> regroupe une partie thématique, avec son titre. <code>&lt;aside&gt;<\/code> contient un contenu annexe (encadré, liens connexes).<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <main>\n    <h1>Actualités<\/h1>\n    \n  <\/main>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Au moins 2 <code>&lt;article&gt;<\/code> dans main, chacun avec un titre <code>&lt;h2&gt;<\/code>",
+       "r": [
+        {
+         "min": [
+          "main article",
+          2
+         ]
+        },
+        {
+         "count": [
+          "main article:not(:has(h2))",
+          0
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Chaque article contient au moins un paragraphe",
+       "r": [
+        {
+         "count": [
+          "main article:not(:has(p))",
+          0
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Un <code>&lt;aside&gt;<\/code> avec un titre et un lien",
+       "r": [
+        {
+         "dom": "aside :is(h2,h3)"
+        },
+        {
+         "dom": "aside a[href]"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>&lt;article&gt;&lt;h2&gt;Titre&lt;/h2&gt;&lt;p&gt;…&lt;/p&gt;&lt;/article&gt;<\/code> deux fois, puis un <code>&lt;aside&gt;<\/code>.",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <main>\n    <h1>Actualités<\/h1>\n    <article>\n      <h2>Atelier Raspberry Pi<\/h2>\n      <p>Mercredi, on installe un serveur web sur un Raspberry Pi.<\/p>\n    <\/article>\n    <article>\n      <h2>Sortie au salon<\/h2>\n      <p>Le club visite le salon de la cybersécurité.<\/p>\n    <\/article>\n    <aside>\n      <h2>À lire aussi<\/h2>\n      <a href=\"archives.html\">Les archives<\/a>\n    <\/aside>\n  <\/main>\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "b1-figure",
+     "titre": "Une image légendée",
+     "texte": "<p><code>&lt;figure&gt;<\/code> regroupe une illustration et sa légende <code>&lt;figcaption&gt;<\/code>. L'attribut <code>alt<\/code> de l'image décrit ce qu'elle montre (pour ceux qui ne la voient pas) ; la légende, elle, s'affiche pour tout le monde.<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <h1>Notre salle<\/h1>\n  \n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Une <code>&lt;figure&gt;<\/code> contenant une image <code>salle.jpg<\/code>",
+       "r": [
+        {
+         "attr": [
+          "figure img",
+          "src",
+          "salle\\.jpg$"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "L'image a un texte alternatif descriptif (au moins 10 caractères)",
+       "r": [
+        {
+         "attr": [
+          "figure img",
+          "alt",
+          ".{10,}"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Une légende <code>&lt;figcaption&gt;<\/code> dans la figure",
+       "r": [
+        {
+         "text": [
+          "figure figcaption",
+          "\\w{3,}"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>&lt;figure&gt;&lt;img src=\"salle.jpg\" alt=\"…\"&gt;&lt;figcaption&gt;…&lt;/figcaption&gt;&lt;/figure&gt;<\/code>",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <h1>Notre salle<\/h1>\n  <figure>\n    <img src=\"salle.jpg\" alt=\"La salle du club avec dix postes informatiques\">\n    <figcaption>La salle B12, ouverte le mercredi après-midi.<\/figcaption>\n  <\/figure>\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "b1-liens",
+     "titre": "Liens internes, mail et téléphone",
+     "texte": "<p>Un lien peut viser un <b>endroit de la page<\/b> : <code>href=\"#horaires\"<\/code> mène à l'élément qui a <code>id=\"horaires\"<\/code>. Il peut aussi ouvrir la messagerie (<code>mailto:<\/code>) ou appeler (<code>tel:<\/code>).<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <h1>Contact<\/h1>\n  <p>Aller aux horaires<\/p>\n  <p>Écrire au club<\/p>\n  <h2>Horaires<\/h2>\n  <p>Mercredi de 14 h à 17 h.<\/p>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Le titre « Horaires » a l'identifiant <code>horaires<\/code>",
+       "r": [
+        {
+         "text": [
+          "h2#horaires",
+          "Horaires"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Un lien vers <code>#horaires<\/code>",
+       "r": [
+        {
+         "attr": [
+          "a",
+          "href",
+          "^#horaires$"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Un lien <code>mailto:<\/code> vers club@lycee.fr",
+       "r": [
+        {
+         "attr": [
+          "a",
+          "href",
+          "^mailto:club@lycee\\.fr$"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>&lt;h2 id=\"horaires\"&gt;<\/code>, puis <code>&lt;a href=\"#horaires\"&gt;<\/code> et <code>&lt;a href=\"mailto:club@lycee.fr\"&gt;<\/code>.",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <h1>Contact<\/h1>\n  <p><a href=\"#horaires\">Aller aux horaires<\/a><\/p>\n  <p><a href=\"mailto:club@lycee.fr\">Écrire au club<\/a><\/p>\n  <h2 id=\"horaires\">Horaires<\/h2>\n  <p>Mercredi de 14 h à 17 h.<\/p>\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "b1-dl",
+     "titre": "Une liste de définitions",
+     "texte": "<p>Pour un glossaire : <code>&lt;dl&gt;<\/code> (la liste), <code>&lt;dt&gt;<\/code> (le terme), <code>&lt;dd&gt;<\/code> (sa définition).<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <h1>Glossaire<\/h1>\n  \n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Une liste <code>&lt;dl&gt;<\/code> avec au moins 3 termes <code>&lt;dt&gt;<\/code>",
+       "r": [
+        {
+         "min": [
+          "dl > dt",
+          3
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Autant de définitions <code>&lt;dd&gt;<\/code> que de termes",
+       "r": [
+        {
+         "min": [
+          "dl > dd",
+          3
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Un des termes est « DNS »",
+       "r": [
+        {
+         "text": [
+          "dt",
+          "^DNS$"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>&lt;dl&gt;&lt;dt&gt;DNS&lt;/dt&gt;&lt;dd&gt;Traduit un nom en adresse IP.&lt;/dd&gt;<\/code>… <code>&lt;/dl&gt;<\/code>",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <h1>Glossaire<\/h1>\n  <dl>\n    <dt>DNS<\/dt>\n    <dd>Service qui traduit un nom de domaine en adresse IP.<\/dd>\n    <dt>DHCP<\/dt>\n    <dd>Service qui attribue automatiquement une adresse IP.<\/dd>\n    <dt>HTTP<\/dt>\n    <dd>Protocole du web.<\/dd>\n  <\/dl>\n<\/body>\n<\/html>\n"
+    }
+   ]
+  },
+  {
+   "titre": "Tableaux et médias",
+   "missions": [
+    {
+     "id": "b1-table",
+     "titre": "Un tableau bien structuré",
+     "texte": "<p>Un tableau de données propre a une légende <code>&lt;caption&gt;<\/code>, un en-tête <code>&lt;thead&gt;<\/code> avec des <code>&lt;th scope=\"col\"&gt;<\/code> et un corps <code>&lt;tbody&gt;<\/code>. <code>scope<\/code> dit si l'en-tête porte sur une colonne ou une ligne.<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <table>\n    <tr><td>Poste<\/td><td>Système<\/td><td>RAM<\/td><\/tr>\n    <tr><td>PC-01<\/td><td>Debian 12<\/td><td>8 Go<\/td><\/tr>\n    <tr><td>PC-02<\/td><td>Windows 11<\/td><td>16 Go<\/td><\/tr>\n  <\/table>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Une légende <code>&lt;caption&gt;<\/code>",
+       "r": [
+        {
+         "text": [
+          "table > caption",
+          "\\w{3,}"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "La première ligne est dans <code>&lt;thead&gt;<\/code>, en <code>&lt;th scope=\"col\"&gt;<\/code>",
+       "r": [
+        {
+         "count": [
+          "thead th[scope=col]",
+          3
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Les deux postes sont dans <code>&lt;tbody&gt;<\/code>",
+       "r": [
+        {
+         "count": [
+          "tbody tr",
+          2
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>&lt;caption&gt;Parc&lt;/caption&gt;&lt;thead&gt;&lt;tr&gt;&lt;th scope=\"col\"&gt;Poste&lt;/th&gt;…&lt;/thead&gt;&lt;tbody&gt;…&lt;/tbody&gt;<\/code>",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <table>\n    <caption>Parc de la salle B12<\/caption>\n    <thead>\n      <tr><th scope=\"col\">Poste<\/th><th scope=\"col\">Système<\/th><th scope=\"col\">RAM<\/th><\/tr>\n    <\/thead>\n    <tbody>\n      <tr><td>PC-01<\/td><td>Debian 12<\/td><td>8 Go<\/td><\/tr>\n      <tr><td>PC-02<\/td><td>Windows 11<\/td><td>16 Go<\/td><\/tr>\n    <\/tbody>\n  <\/table>\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "b1-fusion",
+     "titre": "Fusionner des cellules",
+     "texte": "<p><code>colspan=\"2\"<\/code> étale une cellule sur deux colonnes, <code>rowspan=\"2\"<\/code> sur deux lignes.<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <table>\n    <tr><th>Jour<\/th><th>Matin<\/th><th>Après-midi<\/th><\/tr>\n    <tr><td>Lundi<\/td><td>Réseau<\/td><td>Réseau<\/td><\/tr>\n    <tr><td>Mardi<\/td><td>PHP<\/td><td>Anglais<\/td><\/tr>\n  <\/table>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Lundi : une seule cellule « Réseau » sur 2 colonnes",
+       "r": [
+        {
+         "attr": [
+          "td",
+          "colspan",
+          "^2$"
+         ]
+        },
+        {
+         "count": [
+          "tr:nth-child(2) td",
+          2
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Toujours 3 lignes",
+       "r": [
+        {
+         "count": [
+          "tr",
+          3
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "Supprime la deuxième cellule « Réseau » et mets <code>colspan=\"2\"<\/code> sur la première.",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <table>\n    <tr><th>Jour<\/th><th>Matin<\/th><th>Après-midi<\/th><\/tr>\n    <tr><td>Lundi<\/td><td colspan=\"2\">Réseau<\/td><\/tr>\n    <tr><td>Mardi<\/td><td>PHP<\/td><td>Anglais<\/td><\/tr>\n  <\/table>\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "b1-video",
+     "titre": "Vidéo et audio",
+     "texte": "<p><code>&lt;video&gt;<\/code> et <code>&lt;audio&gt;<\/code> lisent des médias sans plugin. L'attribut <code>controls<\/code> affiche les boutons lecture/pause. Un texte placé à l'intérieur s'affiche si le navigateur ne sait pas lire le média.<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <h1>Tutoriel<\/h1>\n  \n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Une vidéo <code>tuto.mp4<\/code> avec les contrôles",
+       "r": [
+        {
+         "dom": "video[controls]"
+        },
+        {
+         "codei": "tuto\\.mp4"
+        }
+       ]
+      },
+      {
+       "txt": "Un texte de secours dans la balise video",
+       "r": [
+        {
+         "text": [
+          "video",
+          "\\w{3,}"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Un podcast <code>podcast.mp3<\/code> avec <code>&lt;audio controls&gt;<\/code>",
+       "r": [
+        {
+         "dom": "audio[controls]"
+        },
+        {
+         "codei": "podcast\\.mp3"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>&lt;video src=\"tuto.mp4\" controls&gt;Ton navigateur ne lit pas la vidéo.&lt;/video&gt;<\/code>",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <h1>Tutoriel<\/h1>\n  <video src=\"tuto.mp4\" controls width=\"480\">Ton navigateur ne peut pas lire cette vidéo.<\/video>\n  <audio src=\"podcast.mp3\" controls><\/audio>\n<\/body>\n<\/html>\n"
+    },
+    {
+     "id": "b1-form-a11y",
+     "titre": "Un formulaire accessible",
+     "texte": "<p>Chaque champ doit avoir un <code>&lt;label&gt;<\/code> relié par <code>for<\/code> = <code>id<\/code> du champ : cliquer sur le texte active le champ, et les lecteurs d'écran l'annoncent. <code>required<\/code> rend le champ obligatoire, <code>type=\"email\"<\/code> vérifie le format.<\/p>",
+     "depart": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <form action=\"inscription.php\" method=\"post\">\n    Nom <input name=\"nom\">\n    E-mail <input name=\"mail\">\n    <button>Envoyer<\/button>\n  <\/form>\n<\/body>\n<\/html>\n",
+     "objectifs": [
+      {
+       "txt": "Les deux champs ont un <code>id<\/code> et un <code>&lt;label for&gt;<\/code> correspondant",
+       "r": [
+        {
+         "dom": "label[for=nom]"
+        },
+        {
+         "dom": "input#nom"
+        },
+        {
+         "dom": "label[for=mail]"
+        },
+        {
+         "dom": "input#mail"
+        }
+       ]
+      },
+      {
+       "txt": "Le champ e-mail est de type <code>email<\/code>",
+       "r": [
+        {
+         "attr": [
+          "#mail",
+          "type",
+          "^email$"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Les deux champs sont obligatoires",
+       "r": [
+        {
+         "count": [
+          "input:not([required])",
+          0
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>&lt;label for=\"nom\"&gt;Nom&lt;/label&gt; &lt;input id=\"nom\" name=\"nom\" required&gt;<\/code>",
+     "solution": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <form action=\"inscription.php\" method=\"post\">\n    <label for=\"nom\">Nom<\/label>\n    <input id=\"nom\" name=\"nom\" required>\n    <label for=\"mail\">E-mail<\/label>\n    <input id=\"mail\" name=\"mail\" type=\"email\" required>\n    <button>Envoyer<\/button>\n  <\/form>\n<\/body>\n<\/html>\n"
+    }
+   ]
+  }
+ ],
+ "libre": "<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"utf-8\">\n  <title>Ma page<\/title>\n<\/head>\n<body>\n  <header>\n    <h1>Bac à sable<\/h1>\n  <\/header>\n  <main>\n    <p>Teste ce que tu veux ici.<\/p>\n  <\/main>\n<\/body>\n<\/html>\n",
+ "libreTexte": "<p>Écris le HTML que tu veux, puis <b>Exécuter<\/b> (ou Ctrl + Entrée). Ton code est sauvegardé dans ce navigateur.<\/p>"
+};
+</script>
+  <script src="../../data/modules.js"></script>
+  <script src="../../assets/app.js"></script>
+  <script src="../../assets/labo-code.js"></script>
+</body>
+</html>

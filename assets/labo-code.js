@@ -1,17 +1,20 @@
 /* Étude Facile — Labo code (HTML/CSS ou PHP) : éditeur + aperçu + objectifs vérifiés à l'exécution.
-   Données : window.EF_CODE = { langue: "html"|"php", key, titre, sousTitre, ico, couleur, fichier,
+   Données : window.EF_CODE = { langue: "html"|"php"|"python"|"sql", key, titre, sousTitre, ico, couleur, fichier,
              module: { titre, href }, lecons: [{ titre, missions: [...] }], libre: "code de départ" }
    Mission : { id, titre, texte, depart, objectifs: [{ txt, r: [règles] }], indice, solution, get?, post? }
    Règles : code / codei / nocode (regex sur le source), out (regex sur la sortie), noerr,
             dom (sélecteur), min [sél, n], count [sél, n], text [sél, regex], attr [sél, attribut, regex],
-            style [sél, propriété, regex], test { get, post, out, notout, dom }  (PHP : exécution séparée)  */
+            style [sél, propriété, regex], test { get, post, out, notout, dom }  (PHP : exécution séparée)
+   SQL (sql.js / SQLite, base recréée à chaque exécution depuis CFG.base) :
+            res { ref, ordre? } (dernier résultat = celui de la requête de référence), cols [noms de colonnes],
+            etat { ref, q } (après le script de l'élève et après celui de référence, la requête q donne le même résultat)  */
 (function () {
   "use strict";
   var EF = window.EtudeFacile, esc = EF.esc, el = EF.el, I = EF.icon;
-  var CFG = window.EF_CODE, PHP = CFG.langue === "php", PY = CFG.langue === "python";
+  var CFG = window.EF_CODE, PHP = CFG.langue === "php", PY = CFG.langue === "python", SQL = CFG.langue === "sql";
   var HERE = (document.currentScript && document.currentScript.src) || location.href;
   var PHP_URLS = window.EF_PHP_URLS || [new URL("vendor/php-wasm/PhpWeb.mjs", HERE).href, "https://cdn.jsdelivr.net/npm/php-wasm@0.2.0/PhpWeb.mjs", "https://unpkg.com/php-wasm@0.2.0/PhpWeb.mjs"];
-  var ERR = PY ? /^Traceback|^\w*(Error|Exception)\b.*:|^\s+File "main\.py"/m : /(Parse error|Fatal error|Warning|Deprecated|Notice):/;
+  var ERR = SQL ? /^Erreur SQL/ : PY ? /^Traceback|^\w*(Error|Exception)\b.*:|^\s+File "main\.py"/m : /(Parse error|Fatal error|Warning|Deprecated|Notice):/;
 
   /* ---------- progression ---------- */
   function load() { try { return JSON.parse(localStorage.getItem(CFG.key)) || {}; } catch (e) { return {}; } }
@@ -49,6 +52,9 @@
     (PY ? '<div class="code-out py-out"><div class="code-url"><i></i><i></i><i></i><span id="lc-url">Console Python</span></div>' +
       '<label class="py-in"><span>Entrées du programme — une valeur par ligne, lues dans l\'ordre par <code>input()</code></span><textarea id="lc-stdin" rows="2" spellcheck="false"></textarea></label>' +
       '<pre id="lc-console" class="py-console" aria-live="polite"></pre><div id="lc-notice"></div></div>' :
+    SQL ? '<div class="code-out sql-out"><div class="code-url"><i></i><i></i><i></i><span id="lc-url">' + esc(CFG.baseNom || "Base de données") + ' · SQLite</span></div>' +
+      '<div class="code-tabs"><button type="button" data-v="res" aria-pressed="true">Résultat</button><button type="button" data-v="schema" aria-pressed="false">Schéma de la base</button></div>' +
+      '<div id="lc-res" class="sql-res" aria-live="polite"></div><div id="lc-schema" class="sql-schema" hidden></div><div id="lc-notice"></div></div>' :
     '<div class="code-out"><div class="code-url"><i></i><i></i><i></i><span id="lc-url"></span></div>' +
     (PHP ? '<div class="code-tabs"><button type="button" data-v="rendu" aria-pressed="true">Aperçu</button><button type="button" data-v="source" aria-pressed="false">HTML produit par PHP</button></div>' : '') +
     '<iframe id="lc-frame" title="Aperçu" sandbox="allow-same-origin allow-forms"></iframe><pre id="lc-raw" class="code-raw" hidden></pre>' +
@@ -92,7 +98,7 @@
   function setCode(c) { src.value = c; gutter(); }
   /* barre de symboles pour les écrans tactiles */
   (function () {
-    var sym = PY ? ["⇥", ":", "(", ")", "[", "]", "\"", "'", "=", "+", "#", "_"] :
+    var sym = SQL ? ["*", ",", "(", ")", "'", "=", "<", ">", "%", ";", "."] : PY ? ["⇥", ":", "(", ")", "[", "]", "\"", "'", "=", "+", "#", "_"] :
       PHP ? ["⇥", "$", ";", "(", ")", "{", "}", "\"", ".", "=", "<", ">", "[", "]"] :
       ["⇥", "<", ">", "/", "=", "\"", "{", "}", ":", ";", "#", "."];
     var bar = $("lc-touches");
@@ -161,6 +167,69 @@
       });
     });
   }
+  /* ---------- SQL (sql.js) ---------- */
+  var SQLJS = null, sqlReady = null, lastSql = null;
+  function ensureSql() {
+    if (sqlReady) return sqlReady;
+    status.textContent = "Chargement de SQLite…";
+    sqlReady = new Promise(function (ok, ko) {
+      if (window.initSqlJs) return ok();
+      var sc = document.createElement("script"); sc.src = new URL("vendor/sqljs/sql-wasm.js", HERE).href;
+      sc.onload = function () { ok(); }; sc.onerror = ko; document.head.appendChild(sc);
+    }).then(function () {
+      return window.initSqlJs({ locateFile: function (f) { return new URL("vendor/sqljs/" + f, HERE).href; } });
+    }).then(function (S) { SQLJS = S; status.textContent = ""; schema(); })
+      .catch(function (e) { status.textContent = ""; sqlReady = null; throw e; });
+    return sqlReady;
+  }
+  function runSql(script, apres) {
+    var db = new SQLJS.Database(), r = { sets: [], err: null, modif: 0 };
+    db.run(CFG.base);
+    try { r.sets = db.exec(script); r.modif = db.getRowsModified(); } catch (e) { r.err = String(e.message || e); }
+    if (apres) { try { r.apres = db.exec(apres); } catch (e) { r.apres = null; } }
+    db.close();
+    return r;
+  }
+  function dernier(sets) { return sets && sets.length ? sets[sets.length - 1] : null; }
+  function cle(v) { return v === null ? "∅" : typeof v === "number" ? String(Math.round(v * 1e6) / 1e6) : String(v); }
+  function memes(a, b, ordre) {
+    if (!a || !b) return !a && !b;
+    if (a.columns.length !== b.columns.length || a.values.length !== b.values.length) return false;
+    var la = a.values.map(function (l) { return l.map(cle).join("\u0001"); }), lb = b.values.map(function (l) { return l.map(cle).join("\u0001"); });
+    if (!ordre) { la.sort(); lb.sort(); }
+    return la.every(function (x, i) { return x === lb[i]; });
+  }
+  function tableau(set, max) {
+    var n = set.values.length, rows = set.values.slice(0, max || 200);
+    return '<div class="sql-table"><table><thead><tr>' + set.columns.map(function (c) { return '<th>' + esc(c) + '</th>'; }).join("") + '</tr></thead><tbody>' +
+      rows.map(function (l) { return '<tr>' + l.map(function (v) { return v === null ? '<td class="nul">NULL</td>' : '<td>' + esc(String(v)) + '</td>'; }).join("") + '</tr>'; }).join("") +
+      '</tbody></table></div><p class="sql-n">' + n + ' ligne' + (n > 1 ? "s" : "") + (n > rows.length ? " (" + rows.length + " affichées)" : "") + '</p>';
+  }
+  function schema() {
+    var db = new SQLJS.Database(); db.run(CFG.base);
+    var t = db.exec("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY rowid");
+    var h = (t[0] ? t[0].values : []).map(function (x) {
+      var n = x[0], cols = db.exec("PRAGMA table_info(" + n + ")")[0].values, fk = (db.exec("PRAGMA foreign_key_list(" + n + ")")[0] || { values: [] }).values;
+      var nb = db.exec("SELECT COUNT(*) FROM " + n)[0].values[0][0];
+      return '<div class="sql-tb"><b>' + esc(n) + '</b> <small>' + nb + ' lignes</small><ul>' + cols.map(function (c) {
+        var f = fk.filter(function (k) { return k[3] === c[1]; })[0];
+        return '<li><code>' + esc(c[1]) + '</code> <span>' + esc(c[2] || "") + (c[5] ? ' · clé primaire' : '') + (f ? ' · → ' + esc(f[2]) + '(' + esc(f[4]) + ')' : '') + '</span></li>';
+      }).join("") + '</ul></div>';
+    }).join("");
+    db.close();
+    $("lc-schema").innerHTML = (CFG.schemaTexte ? '<p class="sql-n">' + CFG.schemaTexte + '</p>' : '') + '<div class="sql-tbs">' + h + '</div>';
+  }
+  var AIDE_SQL = [
+    [/no such table: (\w+)/, "La table « $1 » n'existe pas : regarde l'onglet « Schéma de la base » (orthographe, singulier/pluriel)."],
+    [/no such column: ([\w.]+)/, "La colonne « $1 » n'existe pas : vérifie son nom dans le schéma, et préfixe-la par la table si plusieurs tables ont une colonne de ce nom."],
+    [/ambiguous column name: ([\w.]+)/, "La colonne « $1 » existe dans plusieurs tables de la jointure : écris table.colonne."],
+    [/near "(.*?)": syntax error/, "Erreur de syntaxe près de « $1 » : une virgule en trop ou oubliée, un mot-clé mal écrit, une apostrophe non fermée ?"],
+    [/incomplete input/, "Requête incomplète : une parenthèse ou une apostrophe non fermée ?"],
+    [/UNIQUE constraint failed/, "Cette valeur existe déjà alors que la colonne doit être unique (clé primaire ?)."],
+    [/NOT NULL constraint failed: ([\w.]+)/, "La colonne « $1 » est obligatoire : donne-lui une valeur."],
+    [/FOREIGN KEY constraint failed/, "Clé étrangère invalide : la ligne référencée n'existe pas (ou d'autres lignes en dépendent)."],
+    [/misuse of aggregate/, "Une fonction d'agrégat (COUNT, SUM, AVG…) ne peut pas aller dans WHERE : utilise HAVING après GROUP BY."]
+  ];
   function b64(o) { return btoa(unescape(encodeURIComponent(JSON.stringify(o || {})))); }
   /* req = { method, get, post } ; renvoie la sortie (texte) */
   function execute(code, req) {
@@ -169,6 +238,12 @@
       var job0 = queue.then(function () { return runPy(code, req.stdin); });
       queue = job0.catch(function () {});
       return job0;
+    }
+    if (SQL) {
+      return ensureSql().then(function () {
+        lastSql = runSql(code);
+        return lastSql.err ? "Erreur SQL : " + lastSql.err : "";
+      });
     }
     if (!PHP) return Promise.resolve(code);
     var job = queue.then(function () { return ensurePhp(); }).then(function () {
@@ -205,6 +280,13 @@
     TimeoutError: "Le programme ne s'arrête pas : une boucle <code>while</code> dont la condition reste toujours vraie ?"
   };
   function showErr(out) {
+    if (SQL) {
+      if (!lastSql || !lastSql.err) { $("lc-err").innerHTML = ""; return; }
+      var aide = "Lis le message d'erreur : il indique souvent le mot qui pose problème.";
+      AIDE_SQL.some(function (a) { var m = a[0].exec(lastSql.err); if (m) { aide = a[1].replace("$1", esc(m[1] || "")); return true; } return false; });
+      $("lc-err").innerHTML = '<div class="code-erreur"><b>Erreur SQL</b><code>' + esc(lastSql.err) + '</code><span>' + aide + '</span></div>';
+      return;
+    }
     if (PY) {
       var lines = (out || "").split("\n").filter(Boolean), last = lines.filter(function (l) { return /^\w+(Error|Exception)\b/.test(l); }).pop();
       if (!last || !ERR.test(out)) { $("lc-err").innerHTML = ""; return; }
@@ -220,6 +302,16 @@
   }
   function render(out, req) {
     current = { req: req || {}, out: out };
+    if (SQL) {
+      var r = lastSql, h;
+      if (!r) h = '<p class="sql-vide">Écris une requête puis clique sur Exécuter.</p>';
+      else if (r.err) h = '<p class="sql-vide">La requête n\'a pas pu être exécutée (voir l\'erreur au-dessus).</p>';
+      else if (!r.sets.length) h = '<p class="sql-vide">' + (r.modif ? "Requête exécutée : " + r.modif + " ligne" + (r.modif > 1 ? "s" : "") + " concernée" + (r.modif > 1 ? "s" : "") + "." : "Requête exécutée, aucun résultat à afficher.") + '</p>';
+      else h = (r.sets.length > 1 ? '<p class="sql-n">' + r.sets.length + ' résultats (le dernier est vérifié)</p>' : '') + r.sets.slice(-3).map(function (x) { return tableau(x); }).join("");
+      $("lc-res").innerHTML = h;
+      showErr(out);
+      return Promise.resolve();
+    }
     if (PY) {
       $("lc-console").textContent = out || "(le programme n'a rien affiché)";
       showErr(out);
@@ -278,6 +370,7 @@
   main.addEventListener("click", function (e) {
     var t = e.target.closest(".code-tabs button"); if (!t) return;
     main.querySelectorAll(".code-tabs button").forEach(function (b) { b.setAttribute("aria-pressed", String(b === t)); });
+    if (SQL) { $("lc-res").hidden = t.dataset.v !== "res"; $("lc-schema").hidden = t.dataset.v !== "schema"; return; }
     var srcView = t.dataset.v === "source"; raw.hidden = !srcView; frame.hidden = srcView;
   });
 
@@ -308,6 +401,18 @@
       case "out": return Promise.resolve(rx(v).test(current.out));
       case "notout": return Promise.resolve(!rx(v).test(current.out));
       case "noerr": return Promise.resolve(!ERR.test(current.out));
+      case "res": return ensureSql().then(function () {
+        var e = runSql(code), r = runSql(v.ref);
+        return !e.err && memes(dernier(e.sets), dernier(r.sets), v.ordre);
+      });
+      case "cols": return ensureSql().then(function () {
+        var d = dernier(runSql(code).sets);
+        return !!d && v.every(function (c, i) { return d.columns[i] && d.columns[i].toLowerCase() === c.toLowerCase(); });
+      });
+      case "etat": return ensureSql().then(function () {
+        var e = runSql(code, v.q), r = runSql(v.ref, v.q);
+        return !e.err && memes(dernier(e.apres), dernier(r.apres), true);
+      });
       case "test":
         var req = PY ? { stdin: v.stdin || [] } : { method: v.post ? "post" : "get", get: v.get || {}, post: v.post || {} };
         return execute(v.apres ? code + "\n" + v.apres + "\n" : code, req).then(function (out) {
@@ -349,7 +454,7 @@
         renderBrief(ok);
       });
     }).catch(function () {
-      notice("Impossible d'exécuter le code : PHP n'est pas chargé. Vérifie ta connexion puis réessaie.");
+      notice(SQL ? "Impossible de charger SQLite. Recharge la page puis réessaie." : "Impossible d'exécuter le code : PHP n'est pas chargé. Vérifie ta connexion puis réessaie.");
     }).then(function () { running = false; btn.disabled = false; });
   }
   $("lc-run").addEventListener("click", runAndCheck);
@@ -420,6 +525,7 @@
       $("lc-err").innerHTML = "";
       return;
     }
+    if (SQL) { lastSql = null; render("", {}); return; }
     var req = { method: m.post ? "post" : "get", get: m.get || {}, post: m.post || {} };
     execute(src.value, req).then(function (out) { return render(out, req); }).catch(function () {});
   }
@@ -431,11 +537,12 @@
     setCode(prog.code.__libre != null ? prog.code.__libre : CFG.libre);
     renderLecons(); notice("");
     if (PY) { $("lc-stdin").value = ""; $("lc-console").textContent = "Clique sur Exécuter pour lancer ton programme."; $("lc-err").innerHTML = ""; return; }
+    if (SQL) { lastSql = null; render("", {}); return; }
     execute(src.value, {}).then(function (out) { return render(out, {}); }).catch(function () {});
   }
 
   /* ---------- évaluation pratique (#examen) ---------- */
-  var E = null, MID = document.body.dataset.module;
+  var E = null, MID = CFG.mid || document.body.dataset.module;
   function hasard(a) { return a[Math.floor(Math.random() * a.length)]; }
   function examen() {
     mode = "examen"; main.classList.add("en-examen");
@@ -451,6 +558,7 @@
     E.chrono.pos("mission " + (i + 1) + "/" + E.list.length);
     setCode(cur.depart); notice(""); $("lc-err").innerHTML = "";
     if (PY) { $("lc-stdin").value = (cur.stdin || []).join("\n"); $("lc-console").textContent = "Clique sur Exécuter pour lancer ton programme."; }
+    else if (SQL) { lastSql = null; render("", {}); }
     else {
       var req = { method: cur.post ? "post" : "get", get: cur.get || {}, post: cur.post || {} };
       execute(src.value, req).then(function (out) { return render(out, req); }).catch(function () {});
@@ -533,5 +641,6 @@
   } };
   if (PHP) ensurePhp().catch(function () {});
   if (PY) startWorker();
+  if (SQL) ensureSql().catch(function () {});
   score(); route();
 })();

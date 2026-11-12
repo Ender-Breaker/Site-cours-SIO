@@ -18,11 +18,11 @@ const EF = window.EtudeFacile;
 const esc = EF.esc;
 const racine = new URL("../", import.meta.url).href;
 
-const CLES = ["ef-progress", "ef-best", "ef-labo-terminal", "ef-labo-html", "ef-labo-php", "ef-labo-python", "ef-labo-conjugaison", "ef-labo-ipv4", "ef-evals"];
+const CLES = ["ef-progress", "ef-best", "ef-labo-terminal", "ef-labo-html", "ef-labo-php", "ef-labo-python", "ef-labo-conjugaison", "ef-labo-ipv4", "ef-labo-b1html", "ef-labo-b1css", "ef-labo-sql", "ef-evals"];
 /* évaluations qui comptent au classement (les évaluations de chapitre « <matière>_chap_<id> » restent privées) */
 const VERSION_CGU = "2026-11-10";
 const PUBLIQUE = /^[a-z0-9-]+_(questionnaire|textuel|pratique|examen)$/;
-const LABOS = ["ef-labo-terminal", "ef-labo-html", "ef-labo-php", "ef-labo-python", "ef-labo-conjugaison", "ef-labo-ipv4"];
+const LABOS = ["ef-labo-terminal", "ef-labo-html", "ef-labo-php", "ef-labo-python", "ef-labo-conjugaison", "ef-labo-ipv4", "ef-labo-b1html", "ef-labo-b1css", "ef-labo-sql"];
 let user = null, profil = null, etat = "", synchroPrete = false;
 
 /* ---------- interface : bouton de compte dans la barre du haut ---------- */

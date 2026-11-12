@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Labo SQL — Étude Facile</title>
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="bloc1">
+<script>
+window.EF_CODE = {
+ "langue": "sql",
+ "key": "ef-labo-sql",
+ "mid": "bloc1-sql",
+ "titre": "Labo SQL",
+ "sousTitre": "Une vraie base SQLite dans ton navigateur : interroge, joins, regroupe, modifie. Chaque requête est vérifiée sur son résultat.",
+ "ico": "SQL",
+ "couleur": "violet",
+ "fichier": "requete.sql",
+ "module": {
+  "titre": "Bloc 1",
+  "href": "index.html"
+ },
+ "lecons": [
+  {
+   "titre": "Afficher des données",
+   "missions": [
+    {
+     "id": "s-tout",
+     "titre": "Toute une table",
+     "texte": "<p>La base gère le <b>parc informatique<\/b> d'une entreprise (onglet <b>Schéma de la base<\/b> à droite). <code>SELECT * FROM table;<\/code> affiche toutes les colonnes et toutes les lignes d'une table.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Affiche toute la table <code>service<\/code>",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT * FROM service;",
+          "ordre": false
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>SELECT * FROM service;<\/code>",
+     "solution": "SELECT * FROM service;\n"
+    },
+    {
+     "id": "s-colonnes",
+     "titre": "Choisir les colonnes",
+     "texte": "<p>Au lieu de <code>*<\/code>, on liste les colonnes voulues, séparées par des virgules, dans l'ordre d'affichage souhaité.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Affiche le nom, le prénom et le poste de chaque employé (dans cet ordre)",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT nom, prenom, poste FROM employe;",
+          "ordre": false
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>SELECT nom, prenom, poste FROM employe;<\/code>",
+     "solution": "SELECT nom, prenom, poste FROM employe;\n"
+    },
+    {
+     "id": "s-distinct",
+     "titre": "Sans doublons",
+     "texte": "<p><code>SELECT DISTINCT<\/code> supprime les lignes en double du résultat.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Affiche la liste des <b>types<\/b> de matériel, chacun une seule fois",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT DISTINCT type FROM materiel;",
+          "ordre": false
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>SELECT DISTINCT type FROM materiel;<\/code>",
+     "solution": "SELECT DISTINCT type FROM materiel;\n"
+    },
+    {
+     "id": "s-alias",
+     "titre": "Renommer et calculer",
+     "texte": "<p>On peut calculer dans le SELECT et renommer une colonne avec <code>AS<\/code> : <code>SELECT prix * 2 AS double FROM …<\/code>.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Affiche le modèle et le prix TTC (prix × 1.2) de chaque matériel",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT modele, prix * 1.2 FROM materiel;",
+          "ordre": false
+         }
+        }
+       ]
+      },
+      {
+       "txt": "La colonne calculée s'appelle <code>prix_ttc<\/code>",
+       "r": [
+        {
+         "cols": [
+          "modele",
+          "prix_ttc"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>SELECT modele, prix * 1.2 AS prix_ttc FROM materiel;<\/code>",
+     "solution": "SELECT modele, prix * 1.2 AS prix_ttc FROM materiel;\n"
+    }
+   ]
+  },
+  {
+   "titre": "Filtrer et trier",
+   "missions": [
+    {
+     "id": "s-where",
+     "titre": "Filtrer avec WHERE",
+     "texte": "<p><code>WHERE condition<\/code> ne garde que les lignes qui la respectent. Opérateurs : <code>= &lt;&gt; &lt; &gt; &lt;= &gt;=<\/code>. Les textes s'écrivent entre apostrophes : <code>'Rennes'<\/code>.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Affiche tout le matériel qui coûte plus de 1000 €",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT * FROM materiel WHERE prix > 1000;",
+          "ordre": false
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>SELECT * FROM materiel WHERE prix &gt; 1000;<\/code>",
+     "solution": "SELECT * FROM materiel WHERE prix > 1000;\n"
+    },
+    {
+     "id": "s-and",
+     "titre": "Combiner les conditions",
+     "texte": "<p><code>AND<\/code> : les deux conditions doivent être vraies. <code>OR<\/code> : au moins une. <code>IN ('a', 'b')<\/code> remplace plusieurs OR.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Affiche les portables de marque Dell",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT * FROM materiel WHERE type = 'Portable' AND marque = 'Dell';",
+          "ordre": false
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Écris une seule requête",
+       "r": [
+        {
+         "nocode": ";\\s*\\S[\\s\\S]*;"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>WHERE type = 'Portable' AND marque = 'Dell'<\/code>",
+     "solution": "SELECT * FROM materiel WHERE type = 'Portable' AND marque = 'Dell';\n"
+    },
+    {
+     "id": "s-like",
+     "titre": "Rechercher un motif",
+     "texte": "<p><code>LIKE<\/code> compare à un motif : <code>%<\/code> remplace n'importe quelle suite de caractères, <code>_<\/code> un seul caractère. <code>'M%'<\/code> = commence par M.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Affiche nom et prénom des employés dont le nom commence par M",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT nom, prenom FROM employe WHERE nom LIKE 'M%';",
+          "ordre": false
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Utilise <code>LIKE<\/code>",
+       "r": [
+        {
+         "codei": "\\blike\\b"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>WHERE nom LIKE 'M%'<\/code>",
+     "solution": "SELECT nom, prenom FROM employe WHERE nom LIKE 'M%';\n"
+    },
+    {
+     "id": "s-between",
+     "titre": "Un intervalle de dates",
+     "texte": "<p>Les dates sont stockées au format <code>'AAAA-MM-JJ'<\/code>, qui se compare correctement. <code>BETWEEN a AND b<\/code> inclut les deux bornes.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Affiche le matériel acheté en 2024",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT * FROM materiel WHERE date_achat BETWEEN '2024-01-01' AND '2024-12-31';",
+          "ordre": false
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>WHERE date_achat BETWEEN '2024-01-01' AND '2024-12-31'<\/code>",
+     "solution": "SELECT * FROM materiel WHERE date_achat BETWEEN '2024-01-01' AND '2024-12-31';\n"
+    },
+    {
+     "id": "s-null",
+     "titre": "Les valeurs absentes",
+     "texte": "<p><code>NULL<\/code> signifie « pas de valeur ». On ne le teste pas avec <code>=<\/code> mais avec <code>IS NULL<\/code> ou <code>IS NOT NULL<\/code>.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Affiche le type et le modèle du matériel qui n'est attribué à aucun employé",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT type, modele FROM materiel WHERE employe_id IS NULL;",
+          "ordre": false
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>WHERE employe_id IS NULL<\/code>",
+     "solution": "SELECT type, modele FROM materiel WHERE employe_id IS NULL;\n"
+    },
+    {
+     "id": "s-order",
+     "titre": "Trier et limiter",
+     "texte": "<p><code>ORDER BY colonne<\/code> trie (croissant ; <code>DESC<\/code> pour décroissant). <code>LIMIT n<\/code> garde les n premières lignes.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Affiche le modèle et le prix des 3 matériels les plus chers, du plus cher au moins cher",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT modele, prix FROM materiel ORDER BY prix DESC LIMIT 3;",
+          "ordre": true
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>ORDER BY prix DESC LIMIT 3<\/code>",
+     "solution": "SELECT modele, prix FROM materiel ORDER BY prix DESC LIMIT 3;\n"
+    }
+   ]
+  },
+  {
+   "titre": "Compter et regrouper",
+   "missions": [
+    {
+     "id": "s-count",
+     "titre": "Compter",
+     "texte": "<p>Les fonctions d'agrégat résument plusieurs lignes en une : <code>COUNT(*)<\/code> (nombre de lignes), <code>SUM<\/code>, <code>AVG<\/code> (moyenne), <code>MIN<\/code>, <code>MAX<\/code>.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Combien d'interventions ne sont pas résolues (<code>resolue = 0<\/code>) ?",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT COUNT(*) FROM intervention WHERE resolue = 0;",
+          "ordre": false
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>SELECT COUNT(*) FROM intervention WHERE resolue = 0;<\/code>",
+     "solution": "SELECT COUNT(*) FROM intervention WHERE resolue = 0;\n"
+    },
+    {
+     "id": "s-sum",
+     "titre": "Total et moyenne",
+     "texte": "<p>Plusieurs agrégats peuvent être calculés dans la même requête.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Affiche en une ligne la valeur totale du parc (somme des prix) puis le prix moyen",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT SUM(prix), AVG(prix) FROM materiel;",
+          "ordre": false
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>SELECT SUM(prix), AVG(prix) FROM materiel;<\/code>",
+     "solution": "SELECT SUM(prix), AVG(prix) FROM materiel;\n"
+    },
+    {
+     "id": "s-group",
+     "titre": "Regrouper avec GROUP BY",
+     "texte": "<p><code>GROUP BY colonne<\/code> fait des paquets de lignes qui ont la même valeur, et l'agrégat est calculé <b>pour chaque paquet<\/b>.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Pour chaque type de matériel, affiche le type et le nombre d'appareils",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT type, COUNT(*) FROM materiel GROUP BY type;",
+          "ordre": false
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>SELECT type, COUNT(*) FROM materiel GROUP BY type;<\/code>",
+     "solution": "SELECT type, COUNT(*) FROM materiel GROUP BY type;\n"
+    },
+    {
+     "id": "s-having",
+     "titre": "Filtrer les groupes avec HAVING",
+     "texte": "<p><code>WHERE<\/code> filtre les lignes <b>avant<\/b> le regroupement ; <code>HAVING<\/code> filtre les groupes <b>après<\/b>, donc peut utiliser un agrégat.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Affiche les techniciens et leur temps total d'intervention (somme des durées), seulement pour ceux qui dépassent 500 minutes",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT technicien, SUM(duree) FROM intervention GROUP BY technicien HAVING SUM(duree) > 500;",
+          "ordre": false
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>GROUP BY technicien HAVING SUM(duree) &gt; 500<\/code>",
+     "solution": "SELECT technicien, SUM(duree) FROM intervention GROUP BY technicien HAVING SUM(duree) > 500;\n"
+    }
+   ]
+  },
+  {
+   "titre": "Les jointures",
+   "missions": [
+    {
+     "id": "s-join",
+     "titre": "Relier deux tables",
+     "texte": "<p>La colonne <code>materiel.employe_id<\/code> est une <b>clé étrangère<\/b> : elle contient l'<code>id<\/code> d'un employé. Une jointure reconstitue le lien :<\/p><pre>SELECT … FROM materiel\nJOIN employe ON materiel.employe_id = employe.id;<\/pre>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Affiche le nom de l'employé et le modèle de chaque matériel attribué",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT employe.nom, materiel.modele FROM materiel JOIN employe ON materiel.employe_id = employe.id;",
+          "ordre": false
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Utilise <code>JOIN … ON<\/code>",
+       "r": [
+        {
+         "codei": "\\bjoin\\b[\\s\\S]+\\bon\\b"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>SELECT employe.nom, materiel.modele FROM materiel JOIN employe ON materiel.employe_id = employe.id;<\/code>",
+     "solution": "SELECT employe.nom, materiel.modele\nFROM materiel\nJOIN employe ON materiel.employe_id = employe.id;\n"
+    },
+    {
+     "id": "s-join-where",
+     "titre": "Jointure et filtre",
+     "texte": "<p>On peut filtrer après une jointure, sur n'importe quelle colonne des tables reliées.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Affiche nom et prénom des employés du service « Informatique »",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT e.nom, e.prenom FROM employe e JOIN service s ON e.service_id = s.id WHERE s.nom = 'Informatique';",
+          "ordre": false
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Joins <code>employe<\/code> et <code>service<\/code>, puis <code>WHERE service.nom = 'Informatique'<\/code>.",
+     "solution": "SELECT employe.nom, employe.prenom\nFROM employe\nJOIN service ON employe.service_id = service.id\nWHERE service.nom = 'Informatique';\n"
+    },
+    {
+     "id": "s-join3",
+     "titre": "Trois tables",
+     "texte": "<p>Les jointures s'enchaînent : intervention → matériel → employé.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Pour chaque intervention non résolue sur un matériel attribué à un employé : la date, le motif, le modèle du matériel et le nom de l'employé",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT i.date_inter, i.motif, m.modele, e.nom FROM intervention i JOIN materiel m ON i.materiel_id = m.id JOIN employe e ON m.employe_id = e.id WHERE i.resolue = 0;",
+          "ordre": false
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>FROM intervention JOIN materiel ON … JOIN employe ON … WHERE intervention.resolue = 0<\/code>",
+     "solution": "SELECT intervention.date_inter, intervention.motif, materiel.modele, employe.nom\nFROM intervention\nJOIN materiel ON intervention.materiel_id = materiel.id\nJOIN employe ON materiel.employe_id = employe.id\nWHERE intervention.resolue = 0;\n"
+    },
+    {
+     "id": "s-left",
+     "titre": "Garder les lignes sans correspondance",
+     "texte": "<p>Un <code>JOIN<\/code> simple élimine les lignes sans correspondance. <code>LEFT JOIN<\/code> garde toutes les lignes de la table de gauche, avec <code>NULL<\/code> quand il n'y a rien en face.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Affiche nom et prénom des employés qui n'ont <b>aucun<\/b> matériel attribué",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT e.nom, e.prenom FROM employe e LEFT JOIN materiel m ON m.employe_id = e.id WHERE m.id IS NULL;",
+          "ordre": false
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Utilise <code>LEFT JOIN<\/code>",
+       "r": [
+        {
+         "codei": "\\bleft\\s+(outer\\s+)?join\\b"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>FROM employe LEFT JOIN materiel ON materiel.employe_id = employe.id WHERE materiel.id IS NULL<\/code>",
+     "solution": "SELECT employe.nom, employe.prenom\nFROM employe\nLEFT JOIN materiel ON materiel.employe_id = employe.id\nWHERE materiel.id IS NULL;\n"
+    },
+    {
+     "id": "s-join-group",
+     "titre": "Jointure et regroupement",
+     "texte": "<p>On combine tout : jointure, regroupement, tri.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Pour chaque service : son nom et la valeur totale du matériel de ses employés, du plus gros total au plus petit",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT s.nom, SUM(m.prix) FROM service s JOIN employe e ON e.service_id = s.id JOIN materiel m ON m.employe_id = e.id GROUP BY s.id ORDER BY SUM(m.prix) DESC;",
+          "ordre": true
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>… JOIN employe … JOIN materiel … GROUP BY service.nom ORDER BY SUM(materiel.prix) DESC<\/code>",
+     "solution": "SELECT service.nom, SUM(materiel.prix) AS total\nFROM service\nJOIN employe ON employe.service_id = service.id\nJOIN materiel ON materiel.employe_id = employe.id\nGROUP BY service.nom\nORDER BY total DESC;\n"
+    }
+   ]
+  },
+  {
+   "titre": "Modifier les données",
+   "missions": [
+    {
+     "id": "s-insert",
+     "titre": "Ajouter une ligne",
+     "texte": "<p><code>INSERT INTO table (col1, col2) VALUES (v1, v2);<\/code> ajoute une ligne. Si la clé primaire <code>id<\/code> n'est pas donnée, SQLite en choisit une.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Ajoute le service « Qualité » au 1er étage",
+       "r": [
+        {
+         "etat": {
+          "ref": "INSERT INTO service (nom, etage) VALUES ('Qualité', 1);",
+          "q": "SELECT nom, etage FROM service ORDER BY nom;"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>INSERT INTO service (nom, etage) VALUES ('Qualité', 1);<\/code>",
+     "solution": "INSERT INTO service (nom, etage) VALUES ('Qualité', 1);\n"
+    },
+    {
+     "id": "s-update",
+     "titre": "Modifier des lignes",
+     "texte": "<p><code>UPDATE table SET colonne = valeur WHERE condition;<\/code> Attention : sans <code>WHERE<\/code>, <b>toutes<\/b> les lignes sont modifiées !<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "L'intervention n° 14 est terminée : passe sa colonne <code>resolue<\/code> à 1",
+       "r": [
+        {
+         "etat": {
+          "ref": "UPDATE intervention SET resolue = 1 WHERE id = 14;",
+          "q": "SELECT id, resolue FROM intervention ORDER BY id;"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>UPDATE intervention SET resolue = 1 WHERE id = 14;<\/code>",
+     "solution": "UPDATE intervention SET resolue = 1 WHERE id = 14;\n"
+    },
+    {
+     "id": "s-update-calc",
+     "titre": "Modifier avec un calcul",
+     "texte": "<p>La nouvelle valeur peut dépendre de l'ancienne : <code>SET prix = prix * 0.9<\/code>.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Baisse de 10 % le prix de toutes les tablettes, et seulement elles",
+       "r": [
+        {
+         "etat": {
+          "ref": "UPDATE materiel SET prix = prix * 0.9 WHERE type = 'Tablette';",
+          "q": "SELECT id, prix FROM materiel ORDER BY id;"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>UPDATE materiel SET prix = prix * 0.9 WHERE type = 'Tablette';<\/code>",
+     "solution": "UPDATE materiel SET prix = prix * 0.9 WHERE type = 'Tablette';\n"
+    },
+    {
+     "id": "s-delete",
+     "titre": "Supprimer des lignes",
+     "texte": "<p><code>DELETE FROM table WHERE condition;<\/code> supprime les lignes visées. Comme pour UPDATE, ne jamais oublier le <code>WHERE<\/code>.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Supprime les interventions résolues datant d'avant 2025",
+       "r": [
+        {
+         "etat": {
+          "ref": "DELETE FROM intervention WHERE resolue = 1 AND date_inter < '2025-01-01';",
+          "q": "SELECT id FROM intervention ORDER BY id;"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>DELETE FROM intervention WHERE resolue = 1 AND date_inter &lt; '2025-01-01';<\/code>",
+     "solution": "DELETE FROM intervention WHERE resolue = 1 AND date_inter < '2025-01-01';\n"
+    }
+   ]
+  },
+  {
+   "titre": "Créer des tables",
+   "missions": [
+    {
+     "id": "s-create",
+     "titre": "Créer une table",
+     "texte": "<p><code>CREATE TABLE<\/code> définit les colonnes et leur type (<code>INTEGER<\/code>, <code>TEXT<\/code>, <code>REAL<\/code>…). <code>PRIMARY KEY<\/code> désigne l'identifiant unique, <code>NOT NULL<\/code> rend une colonne obligatoire.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Crée la table <code>logiciel<\/code> : <code>id<\/code> entier clé primaire, <code>nom<\/code> texte obligatoire, <code>editeur<\/code> texte, <code>fin_licence<\/code> texte",
+       "r": [
+        {
+         "etat": {
+          "ref": "CREATE TABLE logiciel (id INTEGER PRIMARY KEY, nom TEXT NOT NULL, editeur TEXT, fin_licence TEXT);",
+          "q": "SELECT name, lower(type), \"notnull\", pk FROM pragma_table_info('logiciel');"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>CREATE TABLE logiciel (id INTEGER PRIMARY KEY, nom TEXT NOT NULL, editeur TEXT, fin_licence TEXT);<\/code>",
+     "solution": "CREATE TABLE logiciel (\n  id INTEGER PRIMARY KEY,\n  nom TEXT NOT NULL,\n  editeur TEXT,\n  fin_licence TEXT\n);\n"
+    },
+    {
+     "id": "s-fk",
+     "titre": "Une clé étrangère",
+     "texte": "<p><code>REFERENCES table(colonne)<\/code> déclare une clé étrangère : la base refusera une valeur qui ne correspond à aucune ligne de la table référencée.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Crée la table <code>pret<\/code> : <code>id<\/code> entier clé primaire, <code>materiel_id<\/code> entier obligatoire qui référence <code>materiel(id)<\/code>, <code>date_debut<\/code> texte",
+       "r": [
+        {
+         "etat": {
+          "ref": "CREATE TABLE pret (id INTEGER PRIMARY KEY, materiel_id INTEGER NOT NULL REFERENCES materiel(id), date_debut TEXT);",
+          "q": "SELECT name, lower(type), \"notnull\", pk FROM pragma_table_info('pret');"
+         }
+        },
+        {
+         "etat": {
+          "ref": "CREATE TABLE pret (id INTEGER PRIMARY KEY, materiel_id INTEGER NOT NULL REFERENCES materiel(id), date_debut TEXT);",
+          "q": "SELECT \"table\", \"from\", \"to\" FROM pragma_foreign_key_list('pret');"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>materiel_id INTEGER NOT NULL REFERENCES materiel(id)<\/code>",
+     "solution": "CREATE TABLE pret (\n  id INTEGER PRIMARY KEY,\n  materiel_id INTEGER NOT NULL REFERENCES materiel(id),\n  date_debut TEXT\n);\n"
+    },
+    {
+     "id": "s-alter",
+     "titre": "Ajouter une colonne",
+     "texte": "<p><code>ALTER TABLE table ADD COLUMN colonne TYPE;<\/code> ajoute une colonne à une table existante (les lignes déjà présentes reçoivent NULL, ou la valeur <code>DEFAULT<\/code>).<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Ajoute à <code>employe<\/code> une colonne <code>telephone<\/code> de type texte",
+       "r": [
+        {
+         "etat": {
+          "ref": "ALTER TABLE employe ADD COLUMN telephone TEXT;",
+          "q": "SELECT name, lower(type) FROM pragma_table_info('employe');"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>ALTER TABLE employe ADD COLUMN telephone TEXT;<\/code>",
+     "solution": "ALTER TABLE employe ADD COLUMN telephone TEXT;\n"
+    }
+   ]
+  }
+ ],
+ "base": "PRAGMA foreign_keys = ON;\nCREATE TABLE service (id INTEGER PRIMARY KEY, nom TEXT NOT NULL, etage INTEGER);\nCREATE TABLE employe (id INTEGER PRIMARY KEY, nom TEXT NOT NULL, prenom TEXT NOT NULL, poste TEXT, ville TEXT, service_id INTEGER REFERENCES service(id));\nCREATE TABLE materiel (id INTEGER PRIMARY KEY, type TEXT NOT NULL, marque TEXT, modele TEXT, prix REAL, date_achat TEXT, employe_id INTEGER REFERENCES employe(id));\nCREATE TABLE intervention (id INTEGER PRIMARY KEY, materiel_id INTEGER NOT NULL REFERENCES materiel(id), date_inter TEXT, technicien TEXT, duree INTEGER, motif TEXT, resolue INTEGER DEFAULT 0);\nINSERT INTO service VALUES (1,'Direction',3),(2,'Comptabilité',2),(3,'Informatique',1),(4,'Commercial',2),(5,'Logistique',0),(6,'Ressources humaines',3);\nINSERT INTO employe VALUES\n (1,'Martin','Claire','Directrice','Rennes',1),(2,'Bernard','Hugo','Assistant de direction','Rennes',1),\n (3,'Petit','Léa','Comptable','Vannes',2),(4,'Moreau','Lucas','Comptable','Rennes',2),\n (5,'Lefèvre','Inès','Technicienne','Rennes',3),(6,'Garcia','Nathan','Administrateur réseau','Lorient',3),(7,'Roux','Emma','Développeuse','Rennes',3),\n (8,'Fournier','Louis','Commercial','Vannes',4),(9,'Girard','Chloé','Commerciale','Lorient',4),(10,'Mercier','Tom','Responsable commercial','Rennes',4),\n (11,'Blanc','Sarah','Magasinière','Vannes',5),(12,'Faure','Yanis','Cariste','Vannes',5),(13,'Muller','Jade','Gestionnaire de stock',NULL,5),(14,'Masson','Paul','Stagiaire','Rennes',NULL);\nINSERT INTO materiel VALUES\n (1,'Portable','Dell','Latitude 5440',1150,'2024-02-12',1),(2,'Portable','Lenovo','ThinkPad E14',890,'2023-09-05',2),(3,'Fixe','HP','ProDesk 400',720,'2022-11-20',3),\n (4,'Fixe','HP','ProDesk 400',720,'2022-11-20',4),(5,'Portable','Dell','Latitude 5440',1150,'2024-02-12',5),(6,'Portable','Apple','MacBook Air M3',1299,'2024-05-03',7),\n (7,'Fixe','Dell','OptiPlex 7010',840,'2023-03-14',6),(8,'Portable','Lenovo','ThinkPad E14',890,'2023-09-05',8),(9,'Portable','Lenovo','ThinkPad E14',890,'2023-09-05',9),\n (10,'Portable','Dell','Latitude 7450',1590,'2025-01-22',10),(11,'Tablette','Samsung','Galaxy Tab A9',229,'2024-10-01',11),(12,'Tablette','Samsung','Galaxy Tab A9',229,'2024-10-01',12),\n (13,'Fixe','HP','ProDesk 400',720,'2022-11-20',13),(14,'Écran','Iiyama','ProLite 27',189,'2023-03-14',6),(15,'Écran','Iiyama','ProLite 27',189,'2023-03-14',7),\n (16,'Imprimante','Brother','HL-L5210',349,'2021-06-30',NULL),(17,'Imprimante','HP','LaserJet M234',259,'2024-02-12',NULL),(18,'Switch','Cisco','Catalyst 1000',610,'2022-01-10',NULL),\n (19,'Serveur','Dell','PowerEdge T150',2150,'2023-01-18',NULL),(20,'Portable','HP','ProBook 450',799,'2025-03-03',NULL),(21,'Écran','Dell','P2425',245,'2025-01-22',10),(22,'Borne Wi-Fi','Ubiquiti','U6 Lite',119,'2024-06-17',NULL);\nINSERT INTO intervention VALUES\n (1,3,'2024-01-15','Lefèvre',45,'Écran bleu au démarrage',1),(2,16,'2024-02-02','Garcia',30,'Bourrage papier',1),(3,18,'2024-03-11','Garcia',120,'Mise à jour du firmware',1),\n (4,2,'2024-04-08','Lefèvre',60,'Batterie défectueuse',1),(5,19,'2024-05-20','Garcia',180,'Remplacement disque RAID',1),(6,8,'2024-06-03','Lefèvre',20,'Mot de passe oublié',1),\n (7,16,'2024-09-12','Lefèvre',25,'Toner vide',1),(8,4,'2024-10-07','Lefèvre',90,'Lenteurs importantes',1),(9,11,'2024-11-18','Garcia',35,'Configuration Wi-Fi',1),\n (10,19,'2025-01-09','Garcia',240,'Migration Debian 12',1),(11,1,'2025-02-14','Lefèvre',50,'Clavier défectueux',1),(12,13,'2025-03-21','Lefèvre',40,'Virus détecté',1),\n (13,16,'2025-04-02','Garcia',30,'Bourrage papier',1),(14,9,'2025-05-15','Lefèvre',75,'Réinstallation Windows',0),(15,22,'2025-06-10','Garcia',45,'Borne hors ligne',0),\n (16,3,'2025-06-18','Lefèvre',30,'Ventilateur bruyant',0),(17,18,'2025-06-25','Garcia',60,'Port défectueux',0),(18,20,'2025-07-01','Lefèvre',20,'Préparation du poste',0);\n",
+ "baseNom": "Parc informatique",
+ "schemaTexte": "La base est remise à neuf à chaque exécution : tu ne peux rien casser.",
+ "libre": "-- Essaie ce que tu veux : la base est recréée à chaque exécution.\nSELECT type, COUNT(*) AS nombre, ROUND(AVG(prix)) AS prix_moyen\nFROM materiel\nGROUP BY type\nORDER BY nombre DESC;\n",
+ "libreTexte": "<p>Écris les requêtes que tu veux sur la base du parc informatique, puis <b>Exécuter<\/b> (Ctrl + Entrée). Le résultat de chaque requête SELECT s'affiche ; la base repart de zéro à chaque exécution.<\/p>"
+};
+</script>
+  <script src="../../data/modules.js"></script>
+  <script src="../../assets/app.js"></script>
+  <script src="../../assets/labo-code.js"></script>
+</body>
+</html>

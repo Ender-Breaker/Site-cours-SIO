@@ -11,7 +11,7 @@ Site de révision pour le BTS SIO (1re année, option SLAM). Chaque matière est
 | Algorithmique / Python | Types et opérations, plus 6 chapitres bonus (variables, affichage, conditions, boucles, listes et chaînes, fonctions) |
 | SLAM | HTML, CSS, formulaires, HTTP et URL |
 | SISR | Présentation des blocs, shell Linux, droits, archives et processus, adressage IPv4 et services réseau, WordPress / Nginx |
-| Bloc 1 | PHP : variables, fonctions, conditions, formulaires |
+| Bloc 1 | HTML (structure et sémantique ; tableaux, médias, accessibilité), CSS (sélecteurs et cascade ; Flexbox, Grid, responsive), PHP (variables, conditions, formulaires), SQL (SELECT ; jointures et regroupements ; LDD/LMD) |
 | Bloc 3 | RGPD, PIA, anonymisation |
 | Mathématiques | Numération, divisibilité et PGCD, congruences, suites, statistiques |
 | CEJM | Agents économiques, marché, offre et demande |
@@ -26,11 +26,14 @@ Site de révision pour le BTS SIO (1re année, option SLAM). Chaque matière est
 | HTML / CSS | SLAM | 19 missions avec aperçu en direct, objectifs vérifiés sur le rendu (DOM, styles calculés) |
 | PHP | Bloc 1 | 18 missions avec du vrai PHP 8.4 (php-wasm) ; formulaires GET/POST simulés et tests automatiques |
 | Python | Algo Python | 21 missions avec du vrai Python 3 (Pyodide, dans un Web Worker) ; saisies `input()` et tests automatiques |
+| HTML | Bloc 1 | 12 missions sur la structure HTML5, les titres, les articles, les figures, les tableaux, les médias et un formulaire accessible |
+| CSS | Bloc 1 | 13 missions vérifiées sur le rendu : sélecteurs et spécificité, modèle de boîte, Flexbox, grille, media query, sticky |
+| SQL | Bloc 1 | 26 missions sur une vraie base SQLite (sql.js) : SELECT, WHERE, agrégats, GROUP BY/HAVING, jointures, INSERT/UPDATE/DELETE, CREATE/ALTER TABLE ; requêtes vérifiées sur leur résultat |
 | Sous-réseaux | SISR | 24 missions de calcul IPv4 générées au hasard (masque, réseau, broadcast, plage, même réseau, découpage, VLSM), correction pas à pas + calculateur (`assets/labo-ipv4.js`) |
 | La bonne terminaison | Culture générale | Conjugaison de 754 verbes à 6 temps avec diagnostic des erreurs ; 25 bonnes réponses = 1 mission ; épreuve de 20 verbes en 6 min |
 
 Les labos de code partagent le moteur `assets/labo-code.js` ; les missions sont générées dans les pages `modules/*/labo-*.html`.
-PHP et Python sont embarqués dans `assets/vendor/` (aucun CDN nécessaire).
+PHP, Python et SQLite (sql.js) sont embarqués dans `assets/vendor/` (aucun CDN nécessaire).
 
 ## Comptes, évaluations et classement
 

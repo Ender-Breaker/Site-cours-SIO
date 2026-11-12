@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>HTML : tableaux, médias et accessibilité — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="bloc1" data-chapter="html-tableaux-medias">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<p>Une page ne contient pas que du texte : tableaux de données, images, vidéos, formulaires. Ce chapitre montre comment les écrire proprement, et surtout de façon <b>accessible</b>, c'est-à-dire utilisable par tous, y compris au clavier ou avec un lecteur d'écran.</p>
+
+<h2>1. Les tableaux de données</h2>
+<pre><code>&lt;table&gt;
+  &lt;caption&gt;Parc de la salle B12&lt;/caption&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;&lt;th scope=&quot;col&quot;&gt;Poste&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;Système&lt;/th&gt;&lt;th scope=&quot;col&quot;&gt;RAM&lt;/th&gt;&lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;&lt;th scope=&quot;row&quot;&gt;PC-01&lt;/th&gt;&lt;td&gt;Debian 12&lt;/td&gt;&lt;td&gt;8 Go&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;th scope=&quot;row&quot;&gt;PC-02&lt;/th&gt;&lt;td&gt;Windows 11&lt;/td&gt;&lt;td&gt;16 Go&lt;/td&gt;&lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;</code></pre>
+<table><tr><th>Balise</th><th>Rôle</th></tr>
+<tr><td><code>&lt;caption&gt;</code></td><td>Titre du tableau (juste après <code>&lt;table&gt;</code>).</td></tr>
+<tr><td><code>&lt;thead&gt;</code>, <code>&lt;tbody&gt;</code>, <code>&lt;tfoot&gt;</code></td><td>En-tête, corps et pied du tableau.</td></tr>
+<tr><td><code>&lt;tr&gt;</code></td><td>Une ligne.</td></tr>
+<tr><td><code>&lt;th&gt;</code></td><td>Cellule d'en-tête ; <code>scope="col"</code> ou <code>scope="row"</code> précise si elle porte sur une colonne ou une ligne.</td></tr>
+<tr><td><code>&lt;td&gt;</code></td><td>Cellule de données.</td></tr></table>
+<p>Fusionner : <code>colspan="2"</code> étale une cellule sur deux colonnes, <code>rowspan="3"</code> sur trois lignes. Il faut alors retirer les cellules « mangées ».</p>
+<div class="box attention"><b>Un tableau pour des données, pas pour la mise en page</b><p>On n'utilise plus les tableaux pour placer des blocs sur la page : c'est le rôle de Flexbox et de Grid en CSS.</p></div>
+
+<h2>2. Les images</h2>
+<ul>
+<li><code>alt</code> est <b>obligatoire</b> : il décrit l'image pour ceux qui ne la voient pas, et s'affiche si elle ne charge pas.</li>
+<li>Image purement décorative : <code>alt=""</code> (vide), pour que le lecteur d'écran l'ignore.</li>
+<li><code>width</code> et <code>height</code> réservent la place et évitent que la page « saute » au chargement.</li>
+<li>Formats : <b>JPEG</b> (photos), <b>PNG</b> (transparence, captures), <b>SVG</b> (logos et icônes vectoriels), <b>WebP</b> (plus léger).</li>
+</ul>
+<pre><code>&lt;img src=&quot;images/logo.svg&quot; alt=&quot;Club informatique&quot; width=&quot;120&quot; height=&quot;40&quot;&gt;
+&lt;img src=&quot;images/vague.png&quot; alt=&quot;&quot;&gt;   &lt;!-- décorative --&gt;</code></pre>
+
+<h2>3. Audio et vidéo</h2>
+<pre><code>&lt;video src=&quot;tuto.mp4&quot; controls width=&quot;640&quot; poster=&quot;apercu.jpg&quot;&gt;
+  Ton navigateur ne peut pas lire cette vidéo.
+&lt;/video&gt;
+&lt;audio src=&quot;podcast.mp3&quot; controls&gt;&lt;/audio&gt;</code></pre>
+<p><code>controls</code> affiche les boutons de lecture. <code>poster</code> donne une image avant lecture. <code>autoplay</code> est à éviter (et ne fonctionne en général qu'avec <code>muted</code>). Pour l'accessibilité, une vidéo devrait avoir des sous-titres (<code>&lt;track kind="subtitles"&gt;</code>).</p>
+
+<h2>4. Des formulaires accessibles</h2>
+<pre><code>&lt;form action=&quot;inscription.php&quot; method=&quot;post&quot;&gt;
+  &lt;label for=&quot;nom&quot;&gt;Nom&lt;/label&gt;
+  &lt;input id=&quot;nom&quot; name=&quot;nom&quot; required&gt;
+
+  &lt;label for=&quot;mail&quot;&gt;E-mail&lt;/label&gt;
+  &lt;input id=&quot;mail&quot; name=&quot;mail&quot; type=&quot;email&quot; required&gt;
+
+  &lt;fieldset&gt;
+    &lt;legend&gt;Atelier&lt;/legend&gt;
+    &lt;input type=&quot;radio&quot; id=&quot;py&quot; name=&quot;atelier&quot; value=&quot;python&quot;&gt;
+    &lt;label for=&quot;py&quot;&gt;Python&lt;/label&gt;
+    &lt;input type=&quot;radio&quot; id=&quot;web&quot; name=&quot;atelier&quot; value=&quot;web&quot;&gt;
+    &lt;label for=&quot;web&quot;&gt;Web&lt;/label&gt;
+  &lt;/fieldset&gt;
+  &lt;button type=&quot;submit&quot;&gt;S&#x27;inscrire&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+<ul>
+<li>Chaque champ a un <code>&lt;label&gt;</code> relié par <code>for</code> = <code>id</code> : le texte est lu avec le champ, et cliquer dessus active le champ.</li>
+<li><code>name</code> donne le nom de la donnée envoyée au serveur (<code>$_POST['nom']</code> en PHP).</li>
+<li><code>&lt;fieldset&gt;</code> + <code>&lt;legend&gt;</code> regroupent des boutons radio ou des cases liés.</li>
+<li>Les types (<code>email</code>, <code>number</code>, <code>date</code>, <code>tel</code>…) et <code>required</code> font vérifier la saisie par le navigateur, et affichent le bon clavier sur téléphone.</li>
+</ul>
+<div class="box attention"><b>La vérification côté navigateur ne suffit pas</b><p>N'importe qui peut la contourner : le serveur (PHP) doit toujours revérifier les données reçues.</p></div>
+
+<h2>5. Les bases de l'accessibilité</h2>
+<table><tr><th>Règle</th><th>Pourquoi</th></tr>
+<tr><td>Texte alternatif sur les images</td><td>Lecteurs d'écran, images non chargées.</td></tr>
+<tr><td>Labels sur tous les champs</td><td>Savoir quoi saisir sans voir la mise en page.</td></tr>
+<tr><td>Contraste suffisant entre texte et fond</td><td>Malvoyance, écran au soleil.</td></tr>
+<tr><td>Tout est utilisable au clavier (Tab, Entrée)</td><td>Personnes qui n'utilisent pas de souris.</td></tr>
+<tr><td>Ne pas transmettre une information uniquement par la couleur</td><td>Daltonisme (« les champs en rouge sont obligatoires » ne suffit pas).</td></tr></table>
+<p>En France, le <b>RGAA</b> (référentiel général d'amélioration de l'accessibilité) fixe ces règles pour les sites publics et de nombreuses entreprises.</p>
+<div class="box retenir"><b>Passe à la pratique</b><p>Les missions du <a href="labo-html.html">labo HTML</a> reprennent ce chapitre et sont vérifiées automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle balise donne un titre à un tableau ?",
+  "options": [
+   "<title>",
+   "<caption>",
+   "<th>",
+   "<legend>"
+  ],
+  "answer": 1,
+  "explication": "<caption> juste après <table>."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Une cellule d'en-tête s'écrit avec :",
+  "options": [
+   "<td>",
+   "<th>",
+   "<thead>",
+   "<tr>"
+  ],
+  "answer": 1,
+  "explication": "<th> ; <thead> est le groupe de lignes d'en-tête."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "À quoi sert scope=\"col\" sur un <th> ?",
+  "options": [
+   "À trier la colonne",
+   "À indiquer que l'en-tête porte sur la colonne",
+   "À fusionner la colonne",
+   "À cacher la colonne"
+  ],
+  "answer": 1,
+  "explication": "scope=\"col\" ou \"row\"."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quel attribut étale une cellule sur plusieurs colonnes ?",
+  "answers": [
+   "colspan"
+  ],
+  "explication": "colspan=\"2\" ; rowspan pour les lignes."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "Les tableaux sont la bonne méthode pour placer les blocs d'une page (menu à gauche, contenu à droite).",
+  "answer": false,
+  "explication": "On utilise Flexbox ou Grid ; les tableaux sont pour les données."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que mettre dans alt pour une image purement décorative ?",
+  "options": [
+   "Le nom du fichier",
+   "« image »",
+   "Rien : alt=\"\"",
+   "Ne pas mettre l'attribut"
+  ],
+  "answer": 2,
+  "explication": "alt vide : le lecteur d'écran l'ignore."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quel format choisir pour un logo qui doit rester net à toutes les tailles ?",
+  "options": [
+   "JPEG",
+   "SVG",
+   "BMP",
+   "GIF"
+  ],
+  "answer": 1,
+  "explication": "SVG est vectoriel."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel attribut affiche les boutons lecture/pause d'une vidéo ?",
+  "options": [
+   "autoplay",
+   "play",
+   "controls",
+   "buttons"
+  ],
+  "answer": 2,
+  "explication": "<video controls>."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Comment relier un label au champ <input id=\"ville\"> ?",
+  "options": [
+   "<label name=\"ville\">",
+   "<label for=\"ville\">",
+   "<label id=\"ville\">",
+   "<label href=\"#ville\">"
+  ],
+  "answer": 1,
+  "explication": "for = id du champ."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quel attribut donne le nom de la donnée reçue par PHP ($_POST['...']) ?",
+  "options": [
+   "id",
+   "name",
+   "for",
+   "value"
+  ],
+  "answer": 1,
+  "explication": "name."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle balise regroupe des boutons radio avec un intitulé ?",
+  "options": [
+   "<div>",
+   "<fieldset> avec <legend>",
+   "<group>",
+   "<section>"
+  ],
+  "answer": 1,
+  "explication": "fieldset + legend."
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "Avec required et type=\"email\", le serveur n'a plus besoin de vérifier les données.",
+  "answer": false,
+  "explication": "La vérification du navigateur se contourne : le serveur revérifie toujours."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "« Les champs en rouge sont obligatoires » pose un problème pour :",
+  "options": [
+   "Les utilisateurs de Firefox",
+   "Les personnes daltoniennes ou malvoyantes",
+   "Les téléphones",
+   "Le référencement"
+  ],
+  "answer": 1,
+  "explication": "Ne jamais transmettre une information uniquement par la couleur."
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "Quel est le sigle du référentiel français d'accessibilité numérique ?",
+  "answers": [
+   "RGAA"
+  ],
+  "explication": "Référentiel général d'amélioration de l'accessibilité."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>
