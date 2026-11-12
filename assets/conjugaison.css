@@ -1,0 +1,112 @@
+/* La bonne terminaison — labo de conjugaison (style Étude Facile) */
+.conj [hidden] { display: none !important; }
+.conj { --cj-ligne: rgba(43,63,224,.13); --cj-marge: rgba(163,32,42,.35); }
+.conj .cj-train, .conj .cj-exam { display: flex; flex-direction: column; gap: var(--s2); max-width: 760px; }
+.conj .labo-mode { margin: var(--s2) 0; align-items: center; }
+.conj .labo-mode a.chip { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; color: inherit; }
+
+/* paliers */
+.cj-paliers { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding: 12px 16px; border: var(--trait); border-radius: var(--r2); background: var(--m-clair, var(--surface)); box-shadow: var(--ombre-1); max-width: 760px; margin-bottom: var(--s2); }
+.cj-paliers b.n { font-family: var(--titre); font-size: 1.6rem; font-weight: 800; line-height: 1; }
+.cj-paliers .cj-pt { display: flex; flex-direction: column; line-height: 1.15; }
+.cj-paliers .cj-pt span { font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--m-fonce); }
+.cj-paliers .cj-jauge { flex: 1 1 180px; height: 14px; border: var(--trait); border-radius: 99px; background: var(--surface); overflow: hidden; }
+.cj-paliers .cj-jauge i { display: block; height: 100%; background: var(--m, var(--cobalt)); transition: width var(--normal) var(--ease); }
+.cj-paliers small { font-weight: 600; color: var(--discret); }
+.cj-toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 50; padding: 12px 18px; border: var(--trait); border-radius: var(--r2); background: var(--safran); box-shadow: var(--ombre-2); font-weight: 800; animation: cjPop .35s var(--ease); }
+@keyframes cjPop { from { opacity: 0; transform: translate(-50%, 12px); } }
+
+/* en-tête de l'exercice */
+.conj .top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.conj .top h2 { margin: 0; font-size: var(--t2); }
+.conj .scoreboard { display: flex; gap: 10px; font-variant-numeric: tabular-nums; }
+.conj .score { display: flex; flex-direction: column; align-items: center; line-height: 1.1; padding: 6px 12px; border: var(--trait); border-radius: var(--r1); background: var(--surface); box-shadow: var(--ombre-1); min-width: 74px; }
+.conj .score b { font-family: var(--titre); font-size: 1.25rem; font-weight: 800; }
+.conj .score span { font-size: .7rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--discret); }
+.conj .score.hot { background: var(--safran); }
+
+/* filtres */
+.conj .filters { display: flex; flex-direction: column; gap: 12px; padding: var(--s2); border: var(--trait); border-radius: var(--r2); background: var(--surface); }
+.conj .row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.conj .row-label { font-size: .75rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--discret); width: 100%; }
+.conj .pill { font: inherit; font-size: .88rem; font-weight: 700; border: var(--trait); background: var(--surface); color: var(--encre); padding: 5px 12px; border-radius: 99px; cursor: pointer; transition: transform var(--vite), box-shadow var(--vite), background var(--vite); }
+.conj .pill:hover { transform: translate(-1px, -1px); box-shadow: 2px 2px 0 var(--encre); }
+.conj .pill[aria-pressed="true"] { background: var(--cobalt); color: var(--sur-cobalt); box-shadow: 2px 2px 0 var(--encre); }
+.conj .pill.ghost { border-style: dashed; }
+.conj .picker { display: flex; flex-direction: column; gap: 6px; }
+.conj .picker-box { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.conj .cj-search { font: inherit; font-size: 16px; color: var(--encre); background: var(--surface); border: var(--trait); border-radius: var(--r1); padding: 8px 12px; flex: 1 1 260px; min-width: 0; max-width: 460px; min-height: 44px; }
+.conj .cj-search:focus { outline: none; box-shadow: var(--ombre-1); background: var(--safran-clair); }
+.conj .picker.is-set .cj-search { color: var(--cobalt); font-weight: 800; }
+.conj .picker-msg { margin: 0; font-size: .85rem; color: var(--discret); }
+.conj .picker-msg.warn { color: var(--ko); font-weight: 700; }
+.conj .count { font-size: .82rem; font-weight: 600; color: var(--discret); margin-left: auto; }
+
+/* la feuille */
+.conj .sheet { position: relative; background: var(--surface); border: var(--trait); border-radius: var(--r2); box-shadow: var(--ombre-2); padding: 22px 22px 20px 36px; overflow: hidden; }
+.conj .sheet::before { content: ""; position: absolute; inset: 0 auto 0 22px; width: 2px; background: var(--cj-marge); }
+.conj .heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.conj .infinitif { margin: 0; color: var(--discret); font-weight: 600; }
+.conj .infinitif b { font-family: var(--titre); font-weight: 800; color: var(--encre); font-size: 1.25rem; }
+.conj .tense-tag { font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; font-weight: 800; background: var(--safran); border: var(--trait); padding: 3px 10px; border-radius: var(--r1); }
+.conj .writing { position: relative; padding: 14px 0 10px; background-image: repeating-linear-gradient(to bottom, transparent 0 21px, var(--cj-ligne) 21px 22px); background-size: 100% 22px; background-position: 0 6px; }
+.conj .line { font-family: var(--titre); font-size: clamp(28px, 7.2vw, 44px); line-height: 1.5; display: flex; align-items: baseline; flex-wrap: wrap; }
+.conj .pronom { color: var(--discret); font-weight: 400; white-space: pre; }
+.conj .radical { font-weight: 700; }
+.conj .field { font: inherit; font-weight: 800; color: var(--cobalt); background: transparent; border: 0; border-bottom: 3px solid var(--cobalt); padding: 0 2px; min-width: 2.4ch; caret-color: var(--cobalt); border-radius: 4px 4px 0 0; }
+.conj .field:focus { outline: none; background: var(--safran-clair); }
+.conj .field.is-wrong { color: var(--ko); border-bottom-color: var(--ko); text-decoration: line-through; text-decoration-thickness: 2px; }
+.conj .field.is-right { color: var(--ok); border-bottom-color: var(--ok); }
+.conj .person { margin: 8px 0 0; font-size: .85rem; color: var(--discret); font-weight: 600; }
+.conj .accents { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+.conj .key { font: inherit; font-size: 1.05rem; font-weight: 700; min-width: 40px; height: 40px; border: var(--trait); border-radius: var(--r1); background: var(--surface); color: var(--encre); cursor: pointer; box-shadow: 2px 2px 0 var(--encre); }
+.conj .key:hover { background: var(--safran-clair); }
+.conj .key:active { transform: translate(2px, 2px); box-shadow: none; }
+.conj .actions { display: flex; gap: 10px; align-items: center; margin-top: 18px; flex-wrap: wrap; }
+.conj .hint { font-size: .8rem; color: var(--discret); }
+.conj kbd { font: inherit; font-size: .75rem; font-weight: 700; border: 2px solid var(--encre); border-radius: 4px; padding: 0 5px; background: var(--surface); }
+
+/* correction */
+.conj .correction { border: var(--trait); border-left: 8px solid var(--verdict, var(--encre)); border-radius: var(--r2); background: var(--surface); padding: 18px 20px; box-shadow: var(--ombre-1); }
+.conj .correction.right { --verdict: var(--ok); }
+.conj .correction.wrong { --verdict: var(--ko); }
+@media (prefers-reduced-motion: no-preference) { .conj .correction { animation: cjRise .28s ease-out; } }
+@keyframes cjRise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.conj .verdict { display: flex; gap: 12px; align-items: flex-start; }
+.conj .mark { width: 30px; height: 30px; flex: none; margin-top: 2px; }
+.conj .mark path { fill: none; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; stroke: var(--verdict); }
+.conj .verdict h2 { margin: 0; font-size: 1.3rem; }
+.conj .answer { margin: 4px 0 0; font-size: 1.1rem; color: var(--discret); font-weight: 600; }
+.conj .answer .good { color: var(--ok); font-weight: 800; }
+.conj .answer .bad { color: var(--ko); text-decoration: line-through; }
+.conj .blocks { margin-top: 14px; display: flex; flex-direction: column; gap: 12px; }
+.conj .block h3 { margin: 0 0 3px; font-family: var(--corps); font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: var(--discret); font-weight: 800; }
+.conj .block p { margin: 0; max-width: 62ch; }
+.conj .block.reflexe { background: var(--safran-clair); border: var(--trait); border-radius: var(--r1); padding: 12px 14px; }
+.conj .block.reflexe h3 { color: var(--encre); }
+.conj .tableau { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px 14px; font-size: 1rem; }
+.conj .tableau div { padding: 2px 8px; border-radius: 5px; color: var(--discret); font-weight: 600; }
+.conj .tableau div.target { background: var(--ok-clair); color: var(--encre); font-weight: 800; }
+.conj .tableau div .t { color: var(--cobalt); font-weight: 800; }
+.conj .tableau div.target .t { color: var(--ok); }
+@media (max-width: 430px) { .conj .tableau { grid-template-columns: 1fr; } .conj .sheet { padding: 18px 14px 16px 26px; } .conj .sheet::before { left: 14px; } }
+
+/* bilan */
+.conj .cj-panel { border: var(--trait); border-radius: var(--r2); background: var(--surface); padding: 18px 20px; box-shadow: var(--ombre-1); }
+.conj .cj-panel h2 { margin: 0 0 4px; font-size: 1.4rem; }
+.conj .cj-lead { margin: 0 0 14px; color: var(--discret); font-weight: 600; }
+.conj .traps { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.conj .trap { display: grid; grid-template-columns: 38px 1fr; gap: 12px; align-items: start; }
+.conj .trap b { font-size: 1rem; color: var(--ko); background: var(--ko-clair); border: var(--trait); border-radius: var(--r1); text-align: center; padding: 3px 0; }
+.conj .trap p { margin: 0; font-size: .92rem; color: var(--discret); }
+.conj .trap p strong { color: var(--encre); display: block; font-size: .98rem; }
+.conj .empty { color: var(--discret); margin: 0; }
+.conj .panel-actions { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
+.conj .foot { font-size: .82rem; color: var(--discret); margin: 0; }
+.conj .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* épreuve chronométrée */
+.conj .cj-exam .sheet .cj-ex-pos { font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--discret); }
+.conj .cj-intro { padding: var(--s3); border: var(--trait); border-radius: var(--r2); background: var(--surface); box-shadow: var(--ombre-2); }
+.conj .cj-intro h2 { margin: 4px 0 8px; }
+.conj .cj-intro ul { margin: 8px 0 16px; padding-left: 20px; }

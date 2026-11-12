@@ -3,314 +3,22 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>La bonne terminaison</title>
+<title>La bonne terminaison · Culture générale · Étude Facile</title>
+<meta name="description" content="Labo de conjugaison : tape la bonne terminaison de 754 verbes, à six temps, avec diagnostic de chaque erreur.">
 <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
-<link rel="stylesheet" href="../../assets/pages-integrees.css">
-<style>
-  :root{
-    --bg:#ECEEF4;
-    --paper:#FDFDFB;
-    --ink:#18233D;
-    --ink-2:#5C6784;
-    --ink-3:#8A93AB;
-    --line:#DCE0EC;
-    --accent:#2C4BB3;
-    --accent-soft:#E7EBF9;
-    --on-accent:#FFFFFF;
-    --red:#C23A2B;
-    --red-soft:#FAE8E4;
-    --green:#1F7A57;
-    --green-soft:#E1F1EA;
-    --rule:rgba(44,75,179,.14);
-    --margin-rule:rgba(194,58,43,.30);
-    --shadow:0 1px 2px rgba(24,35,61,.06), 0 12px 28px -18px rgba(24,35,61,.45);
-    --radius:14px;
-  }
-  :root:not([data-theme="light"]){
-    color-scheme:light;
-  }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
-      color-scheme:dark;
-      --bg:#0F1420;
-      --paper:#19212F;
-      --ink:#E9EDF7;
-      --ink-2:#9BA7C1;
-      --ink-3:#77839C;
-      --line:#2B3548;
-      --accent:#8FA9FF;
-      --accent-soft:#1F2B47;
-      --on-accent:#0F1420;
-      --red:#FF9483;
-      --red-soft:#3B222A;
-      --green:#6FD6A6;
-      --green-soft:#12301F;
-      --rule:rgba(143,169,255,.16);
-      --margin-rule:rgba(255,148,131,.28);
-      --shadow:0 1px 2px rgba(0,0,0,.4), 0 16px 32px -20px rgba(0,0,0,.9);
-    }
-  }
-  :root[data-theme="dark"]{
-    color-scheme:dark;
-    --bg:#0F1420;
-    --paper:#19212F;
-    --ink:#E9EDF7;
-    --ink-2:#9BA7C1;
-    --ink-3:#77839C;
-    --line:#2B3548;
-    --accent:#8FA9FF;
-    --accent-soft:#1F2B47;
-    --on-accent:#0F1420;
-    --red:#FF9483;
-    --red-soft:#3B222A;
-    --green:#6FD6A6;
-    --green-soft:#12301F;
-    --rule:rgba(143,169,255,.16);
-    --margin-rule:rgba(255,148,131,.28);
-    --shadow:0 1px 2px rgba(0,0,0,.4), 0 16px 32px -20px rgba(0,0,0,.9);
-  }
-
-  *{box-sizing:border-box}
-  [hidden]{display:none!important}
-  body{
-    margin:0;
-    background:var(--bg);
-    color:var(--ink);
-    font-family:Archivo,"Segoe UI",system-ui,sans-serif;
-    font-size:15px;
-    line-height:1.55;
-    -webkit-text-size-adjust:100%;
-  }
-  .wrap{
-    max-width:680px;
-    margin:0 auto;
-    padding-inline:20px;
-    padding-block:26px 56px;
-    display:flex;
-    flex-direction:column;
-    gap:18px;
-  }
-
-  /* ---------- en-tête ---------- */
-  .top{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap}
-  .brand{
-    font-family:Newsreader,"Iowan Old Style",Georgia,serif;
-    font-size:26px;font-weight:600;letter-spacing:-.01em;margin:0;
-  }
-  .brand em{font-style:italic;font-weight:400;color:var(--accent)}
-  .scoreboard{display:flex;gap:18px;align-items:baseline;font-variant-numeric:tabular-nums}
-  .score{display:flex;flex-direction:column;align-items:flex-end;line-height:1.1}
-  .score b{font-size:19px;font-weight:600}
-  .score span{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
-  .score.hot b{color:var(--red)}
-
-  /* ---------- filtres ---------- */
-  .filters{display:flex;flex-direction:column;gap:8px}
-  .row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-  .row-label{
-    font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);
-    width:100%;margin-bottom:-2px;
-  }
-  .pill{
-    font:inherit;font-size:13px;
-    border:1px solid var(--line);
-    background:transparent;color:var(--ink-2);
-    padding:5px 11px;border-radius:999px;cursor:pointer;
-    transition:background .15s,color .15s,border-color .15s;
-  }
-  .pill:hover{border-color:var(--accent);color:var(--ink)}
-  .pill[aria-pressed="true"]{
-    background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:500;
-  }
-  .pill[aria-pressed="true"]:hover{color:var(--on-accent)}
-  .pill.ghost{border-style:dashed}
-
-  .picker{display:flex;flex-direction:column;gap:6px}
-  .picker .row-label{margin-bottom:0}
-  .picker-box{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-  .search{
-    font:inherit;font-size:14px;color:var(--ink);
-    background:var(--paper);border:1px solid var(--line);border-radius:9px;
-    padding:8px 12px;flex:1 1 260px;min-width:0;max-width:420px;
-  }
-  .search::placeholder{color:var(--ink-3)}
-  .search:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
-  .picker.is-set .search{
-    border-color:var(--accent);color:var(--accent);
-    font-family:Newsreader,"Iowan Old Style",Georgia,serif;font-style:italic;font-size:17px;padding-block:5px;
-  }
-  .picker-msg{margin:0;font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
-  .picker-msg.warn{color:var(--red)}
-  .count{font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums;margin-left:auto;padding-right:2px}
-
-  /* ---------- la feuille ---------- */
-  .sheet{
-    position:relative;
-    background:var(--paper);
-    border:1px solid var(--line);
-    border-radius:var(--radius);
-    box-shadow:var(--shadow);
-    padding:26px 24px 22px 34px;
-    overflow:hidden;
-  }
-  .sheet::before{ /* marge du cahier */
-    content:"";position:absolute;inset:0 auto 0 22px;width:1px;background:var(--margin-rule);
-  }
-  .heading{
-    display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;
-    margin-bottom:18px;
-  }
-  .infinitif{
-    font-family:Newsreader,"Iowan Old Style",Georgia,serif;
-    font-size:15px;color:var(--ink-2);
-  }
-  .infinitif b{font-weight:600;font-style:italic;color:var(--ink);font-size:17px}
-  .tense-tag{
-    font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
-    color:var(--accent);background:var(--accent-soft);
-    padding:3px 9px;border-radius:5px;font-weight:600;
-  }
-
-  /* ligne d'écriture Seyès */
-  .writing{
-    position:relative;
-    padding:14px 0 10px;
-    background-image:repeating-linear-gradient(to bottom,transparent 0 21px,var(--rule) 21px 22px);
-    background-size:100% 22px;
-    background-position:0 6px;
-  }
-  .line{
-    font-family:Newsreader,"Iowan Old Style",Georgia,serif;
-    font-size:clamp(28px,7.2vw,42px);
-    line-height:1.5;
-    display:flex;align-items:baseline;flex-wrap:wrap;gap:0;
-  }
-  .pronom{color:var(--ink-2);font-weight:300;white-space:pre}
-  .radical{font-weight:400}
-  .field{
-    font:inherit;
-    color:var(--accent);
-    background:transparent;
-    border:0;border-bottom:2px solid var(--accent);
-    padding:0 2px;
-    min-width:2.4ch;
-    caret-color:var(--accent);
-    border-radius:2px 2px 0 0;
-  }
-  .field:focus{outline:none;background:var(--accent-soft)}
-  .field[readonly]{opacity:1}
-  .field.is-wrong{color:var(--red);border-bottom-color:var(--red);text-decoration:line-through;text-decoration-thickness:1px}
-  .field.is-right{color:var(--green);border-bottom-color:var(--green)}
-  .person{
-    margin:10px 0 0;font-size:12.5px;color:var(--ink-3);
-  }
-
-  .accents{display:flex;flex-wrap:wrap;gap:5px;margin-top:16px}
-  .key{
-    font-family:Newsreader,Georgia,serif;font-size:16px;
-    width:34px;height:32px;border:1px solid var(--line);border-radius:7px;
-    background:transparent;color:var(--ink-2);cursor:pointer;
-  }
-  .key:hover{border-color:var(--accent);color:var(--accent)}
-
-  .actions{display:flex;gap:10px;align-items:center;margin-top:18px;flex-wrap:wrap}
-  .btn{
-    font:inherit;font-weight:600;font-size:14px;
-    background:var(--ink);color:var(--paper);
-    border:1px solid var(--ink);
-    padding:9px 20px;border-radius:9px;cursor:pointer;
-  }
-  .btn:hover{background:var(--accent);border-color:var(--accent);color:#fff}
-  .btn.secondary{background:transparent;color:var(--ink-2);border-color:var(--line);font-weight:400}
-  .btn.secondary:hover{background:transparent;color:var(--accent);border-color:var(--accent)}
-  .hint{font-size:12px;color:var(--ink-3)}
-  kbd{
-    font:inherit;font-size:11px;border:1px solid var(--line);border-bottom-width:2px;
-    border-radius:4px;padding:0 4px;color:var(--ink-2);
-  }
-
-  /* ---------- correction ---------- */
-  .correction{
-    position:relative;
-    border:1px solid var(--line);
-    border-left:3px solid var(--verdict,var(--line));
-    border-radius:var(--radius);
-    background:var(--paper);
-    padding:20px 22px;
-    box-shadow:var(--shadow);
-  }
-  .correction.right{--verdict:var(--green)}
-  .correction.wrong{--verdict:var(--red)}
-  @media (prefers-reduced-motion: no-preference){
-    .correction{animation:rise .28s ease-out}
-  }
-  @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-  .verdict{display:flex;gap:12px;align-items:flex-start}
-  .mark{width:30px;height:30px;flex:none;margin-top:1px}
-  .mark path{fill:none;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke:var(--verdict)}
-  @media (prefers-reduced-motion: no-preference){
-    .mark path{stroke-dasharray:90;stroke-dashoffset:90;animation:draw .4s .05s ease-out forwards}
-  }
-  @keyframes draw{to{stroke-dashoffset:0}}
-  .verdict h2{
-    margin:0;font-family:Newsreader,Georgia,serif;font-size:21px;font-weight:600;
-    letter-spacing:-.01em;text-wrap:balance;
-  }
-  .answer{
-    margin:4px 0 0;font-family:Newsreader,Georgia,serif;font-size:17px;color:var(--ink-2);
-  }
-  .answer .good{color:var(--green);font-weight:600}
-  .answer .bad{color:var(--red);text-decoration:line-through;text-decoration-thickness:1px}
-  .blocks{margin-top:16px;display:flex;flex-direction:column;gap:14px}
-  .block h3{
-    margin:0 0 3px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
-    color:var(--ink-3);font-weight:600;
-  }
-  .block p{margin:0;max-width:62ch}
-  .block.reflexe{
-    background:var(--accent-soft);border-radius:10px;padding:13px 15px;
-  }
-  .block.reflexe h3{color:var(--accent)}
-  .block.reflexe p{font-size:14.5px}
-  .tableau{
-    display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 14px;
-    font-family:Newsreader,Georgia,serif;font-size:15.5px;
-  }
-  .tableau div{padding:2px 6px;border-radius:5px;color:var(--ink-2)}
-  .tableau div.target{background:var(--green-soft);color:var(--ink);font-weight:600}
-  .tableau div .t{color:var(--accent);font-weight:600}
-  .tableau div.target .t{color:var(--green)}
-  @media (max-width:430px){.tableau{grid-template-columns:1fr}}
-
-  /* ---------- bilan ---------- */
-  .panel{
-    border:1px solid var(--line);border-radius:var(--radius);background:var(--paper);
-    padding:20px 22px;box-shadow:var(--shadow);
-  }
-  .panel h2{margin:0 0 4px;font-family:Newsreader,Georgia,serif;font-size:20px;font-weight:600}
-  .panel .lead{margin:0 0 16px;color:var(--ink-2);font-size:13.5px}
-  .traps{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
-  .trap{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}
-  .trap b{
-    font-variant-numeric:tabular-nums;font-size:16px;color:var(--red);
-    background:var(--red-soft);border-radius:7px;text-align:center;padding:3px 0;
-  }
-  .trap p{margin:0;font-size:13.5px;color:var(--ink-2)}
-  .trap p strong{color:var(--ink);font-weight:600;display:block;font-size:14px}
-  .empty{color:var(--ink-3);font-size:13.5px;margin:0}
-  .panel-actions{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap}
-
-  .foot{font-size:12px;color:var(--ink-3);text-align:center;margin:0}
-  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
-</style>
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="stylesheet" href="../../assets/conjugaison.css">
 <meta name="theme-color" content="#2b3fe0">
 </head>
-<body data-integree="1" data-module="culture-generale">
-<nav class="ef-barre" aria-label="Étude Facile"><a class="ef-logo" href="../../index.html"><span>&gt;_</span>Étude Facile</a><span class="ef-sep">›</span><a class="ef-mod" href="index.html">Culture générale</a><span class="ef-droite"><a href="../../evaluation.html">Évaluation</a><a href="../../forum.html">Forum</a></span></nav>
-<div class="wrap">
+<body data-module="culture-generale">
+<main class="wrap page conj c-amber">
+<nav class="crumbs"><a href="../../index.html">Accueil</a><span>›</span><a href="index.html">Culture générale</a><span>›</span><span>La bonne terminaison</span></nav>
+<div class="page-head c-amber"><div class="ico">é</div><div><h1>La bonne terminaison</h1><div class="sub">Labo de conjugaison · 754 verbes · 6 temps</div></div></div>
+<div class="labo-mode chips" id="cjModes"><a class="chip" aria-pressed="true" href="conjugaison.html">Entraînement</a><a class="chip" href="../../evaluation.html#m=culture-generale&amp;t=pratique">Épreuve chronométrée</a><a class="chip" href="terminaisons-verbales.html">Le cours</a></div>
+<section class="cj-paliers" id="cjPaliers" aria-live="polite"></section>
+<div class="cj-train" id="cjTrain">
   <header class="top">
-    <h1 class="brand">La bonne <em>terminaison</em></h1>
+    <h2>Entraînement libre</h2>
     <div class="scoreboard">
       <div class="score" id="scoreStreak"><b id="streak">0</b><span>série</span></div>
       <div class="score"><b><span id="right">0</span>/<span id="seen">0</span></b><span>justes</span></div>
@@ -321,7 +29,7 @@
     <div class="picker" id="picker">
       <label class="row-label" for="verbSearch">Verbe</label>
       <div class="picker-box">
-        <input class="search" id="verbSearch" type="search" list="verbList" placeholder="Tous les verbes · tape un infinitif pour t’entraîner sur un seul" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="go">
+        <input class="cj-search" id="verbSearch" type="search" list="verbList" placeholder="Tous les verbes · tape un infinitif pour t’entraîner sur un seul" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="go">
         <button class="pill" id="clearVerb" type="button" hidden>Revenir à tous les verbes</button>
       </div>
       <p class="picker-msg" id="pickerMsg" hidden></p>
@@ -335,7 +43,7 @@
     </div>
   </section>
 
-  <main class="sheet" id="sheet">
+  <section class="sheet" id="sheet">
     <div class="heading">
       <p class="infinitif" id="infinitif"></p>
       <span class="tense-tag" id="tenseTag"></span>
@@ -348,27 +56,28 @@
     <p class="person" id="person"></p>
     <div class="accents" id="accents" aria-label="Lettres accentuées"></div>
     <div class="actions">
-      <button class="btn" id="mainBtn" type="button">Vérifier</button>
-      <button class="btn secondary" id="skipBtn" type="button">Je ne sais pas</button>
+      <button class="btn primary" id="mainBtn" type="button">Vérifier</button>
+      <button class="btn" id="skipBtn" type="button">Je ne sais pas</button>
       <span class="hint"><kbd>Entrée</kbd> pour valider, puis pour enchaîner</span>
     </div>
-  </main>
+  </section>
 
   <section id="correction" aria-live="polite"></section>
 
-  <section class="panel" id="bilan" hidden>
+  <section class="cj-panel" id="bilan" hidden>
     <h2>Mes pièges</h2>
-    <p class="lead" id="bilanLead"></p>
+    <p class="cj-lead" id="bilanLead"></p>
     <ul class="traps" id="trapList"></ul>
     <div class="panel-actions">
-      <button class="btn secondary" id="closeBilan" type="button">Retour à l'exercice</button>
-      <button class="btn secondary" id="resetBtn" type="button">Remettre les compteurs à zéro</button>
+      <button class="btn" id="closeBilan" type="button">Retour à l'exercice</button>
+      <button class="btn" id="resetBtn" type="button">Remettre les compteurs à zéro</button>
     </div>
   </section>
 
   <p class="foot">Les accents comptent. La casse et les espaces, non.</p>
 </div>
-
+<div class="cj-exam" id="cjExam" hidden></div>
+</main>
 <script>
 (function(){
   "use strict";
@@ -1393,6 +1102,7 @@
     }
     paintScore();
     save();
+    if(ok && window.EFConjPalier) window.EFConjPalier();
 
     var full = current.prefix + current.stem;
     var html = '<div class="correction ' + (ok ? "right" : "wrong") + '">'
@@ -1483,6 +1193,8 @@
     save(); paintScore(); showBilan();
   });
 
+  window.EFConj = { VERBES: VERBES, TENSES: TENSES, PERSON_LABEL: PERSON_LABEL, makeItem: makeItem, diagnose: diagnose };
+
   load();
   if(state.focus) focusVerb = findVerb(state.focus) || customVerb(state.focus);
   if(!focusVerb) state.focus = "";
@@ -1494,5 +1206,130 @@
 </script>
 <script src="../../data/modules.js"></script>
 <script src="../../assets/app.js"></script>
+<script>
+/* Étude Facile — la conjugaison comme labo : paliers (25 bonnes réponses = 1 mission) et épreuve chronométrée. */
+(function () {
+  "use strict";
+  var EF = window.EtudeFacile, C = window.EFConj;
+  if (!EF || !C) return;
+  var CLE = "ef-labo-conjugaison", PAS = 25, MID = "culture-generale";
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = EF.esc, I = EF.icon;
+
+  document.body.insertBefore(EF.header("../../"), document.body.firstChild);
+
+  /* ---------- paliers ---------- */
+  function lit() { try { return JSON.parse(localStorage.getItem(CLE)) || {}; } catch (e) { return {}; } }
+  function ecrit(o) { try { localStorage.setItem(CLE, JSON.stringify(o)); } catch (e) { /* rien */ } }
+  function nbPaliers(o) { return Object.keys(o.done || {}).length; }
+  function peindre() {
+    var o = lit(), t = Math.max(o.total || 0, nbPaliers(o) * PAS), r = t % PAS;
+    $("cjPaliers").innerHTML = '<div class="cj-pt"><span>Missions validées</span><b class="n">' + nbPaliers(o) + '</b></div>' +
+      '<div class="cj-jauge" title="' + r + ' / ' + PAS + '"><i style="width:' + (100 * r / PAS) + '%"></i></div>' +
+      '<small>' + r + ' / ' + PAS + ' bonnes réponses avant la prochaine mission · ' + t + ' au total</small>';
+  }
+  function toast(txt) {
+    var d = document.createElement("div"); d.className = "cj-toast"; d.textContent = txt;
+    document.body.appendChild(d); setTimeout(function () { d.remove(); }, 2600);
+  }
+  window.EFConjPalier = function () {
+    if (E) return;
+    var o = lit(); o.done = o.done || {};
+    o.total = Math.max(o.total || 0, nbPaliers(o) * PAS) + 1;
+    if (o.total % PAS === 0) {
+      var n = o.total / PAS; o.done["palier" + n] = 1;
+      toast("Mission " + n + " validée : " + o.total + " bonnes réponses !");
+    }
+    ecrit(o); peindre();
+  };
+
+  /* ---------- épreuve chronométrée (#examen / #examen-blanc) ---------- */
+  var E = null, NB = 20, DUREE = 360, COEF = 150;
+  function hasard(n) { return Math.floor(Math.random() * n); }
+  function tirage(n) {
+    var vus = {}, out = [], essais = 0;
+    while (out.length < n && essais++ < 500) {
+      var v = C.VERBES[hasard(C.VERBES.length)], t = C.TENSES[hasard(C.TENSES.length)].key, p = hasard(6);
+      if (vus[v.inf]) continue; vus[v.inf] = 1;
+      out.push(C.makeItem(v, t, p));
+    }
+    return out;
+  }
+  function nomTemps(k) { return C.TENSES.filter(function (t) { return t.key === k; })[0].tag; }
+
+  function examen() {
+    var ctx = EF.examBlancCtx(MID);
+    $("cjTrain").hidden = true; $("cjPaliers").hidden = true; $("cjModes").hidden = true;
+    var box = $("cjExam"); box.hidden = false;
+    E = { ctx: ctx, list: tirage(ctx ? Math.max(5, ctx.n * 5) : NB), i: 0, rep: [], fini: false };
+    var duree = ctx ? Math.max(1, (ctx.fin - Date.now()) / 1000) : DUREE;
+    E.chrono = EF.examChrono(ctx ? "Examen blanc · partie pratique" : "La bonne terminaison", duree, function () { fin(); });
+    box.parentNode.insertBefore(E.chrono.el, box);
+    box.innerHTML = '<main class="sheet"><div class="heading"><p class="infinitif" id="exInf"></p><span class="tense-tag" id="exTemps"></span></div>' +
+      '<div class="writing"><div class="line"><span class="pronom" id="exPron"></span><span class="radical" id="exRad"></span>' +
+      '<input class="field" id="exField" type="text" aria-label="Terminaison du verbe" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"></div></div>' +
+      '<p class="person" id="exPers"></p><div class="accents" id="exAcc"></div>' +
+      '<div class="actions"><button class="btn primary" id="exOk" type="button">Valider</button>' +
+      '<button class="btn" id="exFin" type="button">Terminer l\'épreuve</button><span class="hint"><kbd>Entrée</kbd> pour valider · pas de correction avant la fin</span></div></main>';
+    "é è ê à â û ù î ç".split(" ").forEach(function (c) {
+      var b = document.createElement("button"); b.type = "button"; b.className = "key"; b.textContent = c;
+      b.onclick = function () { var f = $("exField"); f.value += c; taille(); f.focus(); };
+      $("exAcc").appendChild(b);
+    });
+    $("exField").addEventListener("input", taille);
+    $("exField").addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); valider(); } });
+    $("exOk").onclick = valider;
+    $("exFin").onclick = function () {
+      if (E.i < E.list.length && !window.confirm("Terminer maintenant ? Les verbes restants compteront comme faux.")) return;
+      fin();
+    };
+    montrer();
+  }
+  function taille() { var f = $("exField"); f.style.width = Math.max(2.4, f.value.length + 0.6) + "ch"; }
+  function montrer() {
+    var it = E.list[E.i];
+    E.chrono.pos("verbe " + (E.i + 1) + "/" + E.list.length);
+    $("exInf").innerHTML = "<b>" + esc(it.verbe.inf) + "</b>";
+    $("exTemps").textContent = nomTemps(it.tense);
+    $("exPron").textContent = it.prefix; $("exRad").textContent = it.stem;
+    $("exPers").textContent = C.PERSON_LABEL[it.person] + (it.tense === "passe" ? " · auxiliaire " + it.verbe.aux : "");
+    var f = $("exField"); f.value = ""; taille(); f.focus();
+  }
+  function valider() {
+    if (!E || E.fini) return;
+    E.rep[E.i] = $("exField").value;
+    if (E.i + 1 >= E.list.length) { fin(); return; }
+    E.i++; montrer();
+  }
+  function fin() {
+    if (E.fini) return; E.fini = true;
+    var rest = E.chrono.restant(); E.chrono.stop(); E.chrono.el.remove();
+    var missions = E.list.map(function (it, i) {
+      var r = E.rep[i] || "", ok = r.trim() !== "" && C.diagnose(r, it).kind === "juste";
+      var juste = it.prefix + it.stem + it.end;
+      return { titre: it.verbe.inf + " · " + nomTemps(it.tense) + " · " + C.PERSON_LABEL[it.person] + (ok ? "" : (r.trim() ? " (tu as écrit « " + it.prefix + it.stem + r.trim() + " »)" : " (pas de réponse)")), ok: ok, solution: juste };
+    });
+    var box = $("cjExam"); box.className = "labo-resultat";
+    if (E.ctx) {
+      try { sessionStorage.removeItem("ef-examen-blanc"); } catch (e) { /* rien */ }
+      EF.examBlancResultat(box, { ctx: E.ctx, restant: rest, racine: "../../", missions: missions });
+      return;
+    }
+    EF.examResultat(box, {
+      mid: MID, titre: "La bonne terminaison", couleur: "amber", racine: "../../", duree: DUREE, coef: COEF, restant: rest,
+      retour: "conjugaison.html", missions: missions,
+      rejouer: function () { location.hash = "#examen"; location.reload(); }
+    });
+  }
+
+  if (/^#examen/.test(location.hash)) examen();
+  else peindre();
+  window.addEventListener("hashchange", function () {
+    if (/^#examen/.test(location.hash) && !E) examen();
+    else if (!/^#examen/.test(location.hash) && E) location.reload();
+  });
+})();
+</script>
+
 </body>
 </html>

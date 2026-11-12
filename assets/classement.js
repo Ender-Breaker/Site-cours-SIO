@@ -13,9 +13,12 @@
   var options = '<option value="">Classement général</option>';
   MODS.forEach(function (m) {
     options += '<optgroup label="' + esc(m.titre) + '">' + Object.keys(TYPES).filter(function (t) {
-      return (t !== "textuel" || m.evalTextuel) && (t !== "pratique" || (m.labos && m.labos.length));
+      return (t !== "textuel" || m.evalTextuel) && t !== "pratique";
     }).map(function (t) {
       return '<option value="' + m.id + "_" + t + '">' + esc(m.titre) + " · " + TYPES[t] + '</option>';
+    }).join("") + (m.labos || []).map(function (l, i) {
+      var nom = m.labos.length > 1 ? "Pratique · " + (l.court || l.titre) : "Pratique";
+      return '<option value="' + (i && l.cle ? l.cle : m.id) + '_pratique">' + esc(m.titre) + " · " + esc(nom) + '</option>';
     }).join("") + '</optgroup>';
   });
   main.innerHTML = '<nav class="crumbs"><a href="index.html">Accueil</a><span>›</span><span>Classement</span></nav>' +

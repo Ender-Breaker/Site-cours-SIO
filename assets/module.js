@@ -34,10 +34,12 @@
       var ev = EF.getEvals(), E = "../../evaluation.html#m=" + mod.id + "&t=";
       var epr = [["examen", "Examen blanc", "L'épreuve complète, sous chrono"], ["questionnaire", "Questionnaire", "10 questions · 6 min"]];
       if (mod.evalTextuel) epr.push(["textuel", "Textuel", "3 questions ouvertes · 12 min"]);
-      if (mod.labos && mod.labos.length) epr.push(["pratique", "Pratique", "3 missions de labo · 15 min"]);
+      (mod.labos || []).forEach(function (l, i) {
+        epr.push(["pratique" + (i ? "&l=" + i : ""), mod.labos.length > 1 ? "Pratique · " + (l.court || l.titre) : "Pratique", l.examTexte || "3 missions de labo · 15 min", i && l.cle ? l.cle + "_pratique" : mod.id + "_pratique"]);
+      });
       html += '<section class="mod-evals"><div class="mod-evals-t"><h2>' + I("timer") + ' Évaluations</h2><a href="../../classement.html">' + I("trophy") + ' Classement</a></div><div class="mod-evals-l">' +
         epr.map(function (e) {
-          var b = ev[mod.id + "_" + e[0]];
+          var b = ev[e[3] || mod.id + "_" + e[0]];
           return '<a class="mod-eval' + (e[0] === "examen" ? " examen" : "") + '" href="' + E + e[0] + '"><b>' + e[1] + '</b><span>' + e[2] + '</span><small>' +
             (b ? "record " + b.points + " pts · " + Math.round(b.pct * 100) + " %" : "pas encore tenté") + '</small></a>';
         }).join("") + '</div></section>';

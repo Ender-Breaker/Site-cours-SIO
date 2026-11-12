@@ -26,10 +26,14 @@
   function norm(s) { return String(s).replace(/[’‘`´"]/g, "'").replace(/\s+/g, ""); }
   function sansAccent(s) { return String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/\s+/g, " "); }
   function mmss(s) { s = Math.max(0, Math.round(s)); return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
-  function laboDe(m) { return (m.labos || [])[0]; }
+  function laboDe(m, l) { return (m.labos || [])[+l || 0]; }
   function modDe(id) { return MODS.filter(function (x) { return x.id === id; })[0]; }
   function chapDe(m, cid) { return m.chapitres.filter(function (c) { return c.id === cid; })[0]; }
-  function cle(m, type, cid) { return type === "chapitre" ? m.id + "_chap_" + cid : m.id + "_" + type; }
+  function cle(m, type, cid, l) {
+    if (type === "pratique" && +l > 0) return (laboDe(m, l).cle || m.id + "-" + l) + "_pratique";
+    return type === "chapitre" ? m.id + "_chap_" + cid : m.id + "_" + type;
+  }
+  function nomPratique(m, l) { return (m.labos || []).length > 1 ? "Pratique · " + (laboDe(m, l).court || laboDe(m, l).titre) : "Pratique"; }
 
   /* Parties d'une épreuve : { k: "q"|"t"|"p", n, poids, chap? } */
   function parties(m, type, cid) {
@@ -42,7 +46,8 @@
     if (laboDe(m)) p.push({ k: "p", n: 2, poids: 3, titre: "Pratique" });
     return p;
   }
-  function duree(m, type) {
+  function duree(m, type, l) {
+    if (type === "pratique") return laboDe(m, l).examDuree || TYPES.pratique.duree;
     if (type !== "examen") return TYPES[type].duree;
     return laboDe(m) ? 1500 : 1080;
   }
@@ -66,12 +71,12 @@
     MODS.forEach(function (m) {
       var types = ["questionnaire"];
       if (TEXTES[m.id]) types.push("textuel");
-      if (laboDe(m)) types.push("pratique");
+      (m.labos || []).forEach(function (x, i) { types.push("pratique:" + i); });
       types.push("examen");
       h += '<div class="ev-mod c-' + m.couleur + '"><div class="ev-mod-t"><span class="ico">' + esc(m.icone) + '</span><div><b>' + esc(m.titre) + '</b><span>' + esc(m.sousTitre) + '</span></div></div>' +
-        '<div class="ev-btns">' + types.map(function (t) {
-          var best = ev[cle(m, t)];
-          return '<button type="button" class="ev-go' + (t === "examen" ? " examen" : "") + '" data-m="' + m.id + '" data-t="' + t + '"><span>' + TYPES[t].nom + '</span>' +
+        '<div class="ev-btns">' + types.map(function (tt) {
+          var t = tt.split(":")[0], l = tt.split(":")[1] || "", best = ev[cle(m, t, null, l)];
+          return '<button type="button" class="ev-go' + (t === "examen" ? " examen" : "") + '" data-m="' + m.id + '" data-t="' + t + '" data-l="' + l + '"><span>' + (t === "pratique" ? nomPratique(m, l) : TYPES[t].nom) + '</span>' +
             (best ? '<small>record ' + best.points + ' pts · ' + Math.round(best.pct * 100) + ' %</small>' : '<small>pas encore tenté</small>') + '</button>';
         }).join("") + '</div><a class="ev-modlien" href="modules/' + m.id + '/index.html">Évaluations par chapitre →</a></div>';
     });
@@ -80,15 +85,17 @@
   }
   main.addEventListener("click", function (e) {
     var b = e.target.closest(".ev-go"); if (!b) return;
-    consignes(modDe(b.dataset.m), b.dataset.t, b.dataset.c);
+    consignes(modDe(b.dataset.m), b.dataset.t, b.dataset.c, b.dataset.l);
   });
 
   /* ---------- consignes ---------- */
-  function consignes(m, type, cid) {
-    var T = TYPES[type], ch = cid && chapDe(m, cid), P = parties(m, type, cid), D = duree(m, type), C = coef(m, type);
-    var best = EF.getEvals()[cle(m, type, cid)];
+  function consignes(m, type, cid, l) {
+    var T = TYPES[type], ch = cid && chapDe(m, cid), P = parties(m, type, cid), D = duree(m, type, l), C = coef(m, type);
+    var best = EF.getEvals()[cle(m, type, cid, l)], LB = type === "pratique" ? laboDe(m, l) : null;
+    if (LB && (LB.examDesc || LB.examCoef)) { T = { nom: nomPratique(m, l), desc: LB.examDesc || T.desc }; C = LB.examCoef || C; }
+    else if (LB) T = { nom: nomPratique(m, l), desc: T.desc };
     var detailParties = type === "examen" ? '<li>Déroulé : ' + P.map(function (p, i) {
-      return (i + 1) + '. <b>' + p.titre + '</b> (' + p.n + (p.k === "q" ? " questions" : p.k === "t" ? " questions ouvertes" : " missions de labo") + ', ' + Math.round(100 * p.poids / P.reduce(function (a, x) { return a + x.poids; }, 0)) + ' % de la note)';
+      return (i + 1) + '. <b>' + p.titre + '</b> (' + (p.k === "p" && laboDe(m).blancTexte ? laboDe(m).blancTexte : p.n + (p.k === "q" ? " questions" : p.k === "t" ? " questions ouvertes" : " missions de labo")) + ', ' + Math.round(100 * p.poids / P.reduce(function (a, x) { return a + x.poids; }, 0)) + ' % de la note)';
     }).join(" → ") + '. Tu ne peux pas revenir à une partie terminée.</li>' : '';
     main.innerHTML = '<nav class="crumbs"><a href="index.html">Accueil</a><span>›</span><a href="evaluation.html" data-retour>Évaluation</a><span>›</span><span>' + esc(m.titre) + '</span></nav>' +
       '<div class="ev-consignes c-' + m.couleur + '"><div class="lb-kicker">' + esc(m.titre) + (ch ? ' · ' + esc(ch.titre) : '') + '</div><h1>' + T.nom + '</h1><p class="lead">' + T.desc + '</p>' +
@@ -96,13 +103,13 @@
       '<li>Pas d\'indice, pas de correction pendant l\'épreuve : tout est corrigé à la fin.</li>' +
       '<li>Points : ' + C + ' × ton taux de réussite, + un bonus de rapidité jusqu\'à ' + Math.round(C * 0.2) + ' pts si tu as au moins 50 %.' + (type === "chapitre" ? ' (entraînement : hors classement)' : '') + '</li>' +
       (P.some(function (p) { return p.k === "t"; }) ? '<li>Questions ouvertes : la correction cherche les notions attendues dans ta réponse. Écris des phrases complètes avec le vocabulaire du cours.</li>' : '') +
-      (P.some(function (p) { return p.k === "p"; }) ? '<li>La partie pratique se déroule dans le labo de la matière (' + esc(laboDe(m).titre) + ').</li>' : '') +
+      (P.some(function (p) { return p.k === "p"; }) ? '<li>La partie pratique se déroule dans le labo de la matière (' + esc(laboDe(m, l).titre) + ').</li>' : '') +
       (best ? '<li>Ton record : <b>' + best.points + ' pts</b> (' + Math.round(best.pct * 100) + ' %, le ' + esc(best.date) + ').</li>' : '') +
       '</ul><div class="btns"><button type="button" class="btn primary" id="ev-start">' + I("timer") + ' Commencer</button>' +
       '<button type="button" class="btn" data-retour>Retour</button></div></div>';
     main.querySelectorAll("[data-retour]").forEach(function (x) { x.onclick = function (e) { e.preventDefault(); accueil(); }; });
     document.getElementById("ev-start").onclick = function () {
-      if (type === "pratique") { location.href = "modules/" + m.id + "/" + laboDe(m).href + "#examen"; return; }
+      if (type === "pratique") { location.href = "modules/" + m.id + "/" + laboDe(m, l).href + "#examen"; return; }
       lancer(m, type, cid);
     };
     window.scrollTo(0, 0);
@@ -372,7 +379,7 @@
   function route() {
     var h = {}; location.hash.replace(/^#/, "").split("&").forEach(function (kv) { var p = kv.split("="); if (p[0]) h[p[0]] = decodeURIComponent(p[1] || ""); });
     var m = h.m && modDe(h.m);
-    if (m && TYPES[h.t] && (h.t !== "chapitre" || (h.c && chapDe(m, h.c))) && (h.t !== "textuel" || TEXTES[m.id]) && (h.t !== "pratique" || laboDe(m))) consignes(m, h.t, h.c);
+    if (m && TYPES[h.t] && (h.t !== "chapitre" || (h.c && chapDe(m, h.c))) && (h.t !== "textuel" || TEXTES[m.id]) && (h.t !== "pratique" || laboDe(m, h.l))) consignes(m, h.t, h.c, h.l);
     else accueil();
   }
 

@@ -15,7 +15,7 @@ Site de révision pour le BTS SIO (1re année, option SLAM). Chaque matière est
 | Bloc 3 | RGPD, PIA, anonymisation |
 | Mathématiques | Numération, divisibilité et PGCD, congruences, suites, statistiques |
 | CEJM | Agents économiques, marché, offre et demande |
-| Culture générale | « La bonne terminaison » : entraînement à la conjugaison (754 verbes) |
+| Culture générale | Les terminaisons verbales (cours + exercices) |
 | Anglais | À venir |
 
 ## Labos interactifs
@@ -26,6 +26,8 @@ Site de révision pour le BTS SIO (1re année, option SLAM). Chaque matière est
 | HTML / CSS | SLAM | 19 missions avec aperçu en direct, objectifs vérifiés sur le rendu (DOM, styles calculés) |
 | PHP | Bloc 1 | 18 missions avec du vrai PHP 8.4 (php-wasm) ; formulaires GET/POST simulés et tests automatiques |
 | Python | Algo Python | 21 missions avec du vrai Python 3 (Pyodide, dans un Web Worker) ; saisies `input()` et tests automatiques |
+| Sous-réseaux | SISR | 24 missions de calcul IPv4 générées au hasard (masque, réseau, broadcast, plage, même réseau, découpage, VLSM), correction pas à pas + calculateur (`assets/labo-ipv4.js`) |
+| La bonne terminaison | Culture générale | Conjugaison de 754 verbes à 6 temps avec diagnostic des erreurs ; 25 bonnes réponses = 1 mission ; épreuve de 20 verbes en 6 min |
 
 Les labos de code partagent le moteur `assets/labo-code.js` ; les missions sont générées dans les pages `modules/*/labo-*.html`.
 PHP et Python sont embarqués dans `assets/vendor/` (aucun CDN nécessaire).
@@ -36,7 +38,7 @@ PHP et Python sont embarqués dans `assets/vendor/` (aucun CDN nécessaire).
 - **Évaluation** (`evaluation.html`) : épreuves chronométrées par matière.
   - *Questionnaire* : 10 questions tirées dans les exercices des chapitres, 6 min.
   - *Textuel* : 3 questions ouvertes (`data/eval-textes.js`), 12 min, correction par notions attendues + corrigé.
-  - *Pratique* : 3 missions de labo sans indice (`labo-*.html#examen`), 15 min.
+  - *Pratique* : 3 missions de labo sans indice (`labo-*.html#examen`), 15 min. Une matière peut avoir plusieurs labos : chacun a sa propre épreuve et son classement (`#m=sisr&t=pratique&l=1`, clé `cle` du labo dans `data/modules.js`, ex. `sisr-ipv4_pratique`).
   - *Examen blanc* : questionnaire + questions ouvertes (+ 2 missions de labo si la matière en a un), 18 à 25 min, sous un seul chrono.
   - *Évaluation de chapitre* : 8 questions sur un chapitre, 4 min (entraînement, hors classement).
   - Accès direct : `evaluation.html#m=<matière>&t=<type>[&c=<chapitre>]`, liens sur chaque page de matière.
@@ -55,9 +57,9 @@ PHP et Python sont embarqués dans `assets/vendor/` (aucun CDN nécessaire).
 
 Le site est utilisable sur téléphone : barre du haut compacte, pastilles et leçons en défilement horizontal, tableaux défilants, champs à 16 px (pas de zoom iOS), touches tactiles pour le terminal (Tab, ↑, |, /…) et pour l'éditeur de code (symboles, indentation, exécuter).
 
-## Pages intégrées
+## Pages reprises
 
-`modules/culture-generale/conjugaison.html` et `modules/sisr/adressage-ipv4.html` gardent leur propre design ; `assets/pages-integrees.css` leur ajoute les polices hébergées, la barre de retour vers le site et le pied de page légal. Le quiz IPv4 valide le chapitre (≥ 70 %) et ses questions alimentent les évaluations SISR.
+`modules/culture-generale/conjugaison.html` (labo de conjugaison, styles `assets/conjugaison.css`) et `modules/sisr/adressage-ipv4.html` (chapitre standard avec ses outils de calcul et schémas, styles `assets/ipv4.css`) sont passés au design du site. Le chapitre IPv4 ajoute à chaque chargement des questions de calcul tirées au hasard.
 
 ## Lancer en local
 

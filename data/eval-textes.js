@@ -197,6 +197,28 @@ window.EF_EVAL_TEXTES = {
         { n: "PGCD(84, 36) = 12", rx: "\\b12\\b" }],
       corrige: "<p>On effectue des <b>divisions euclidiennes successives</b> en remplaçant (a, b) par (b, r) où r est le reste, jusqu'à obtenir un reste nul. Le PGCD est le <b>dernier reste non nul</b>. 84 = 36×2 + 12 ; 36 = 12×3 + 0 → <b>PGCD(84, 36) = 12</b>.</p>" }
   ],
+  "culture-generale": [
+    { q: "Comment reconnaître un verbe du 2e groupe d'un verbe du 3e groupe en -ir ? Donne un exemple de chaque.",
+      notions: [
+        { n: "le participe présent en -issant (ou nous -issons)", rx: "issant|issons" },
+        { n: "exemple 2e groupe : finir, choisir, réussir…", rx: "finir|choisir|reussir|grandir|rougir|agir|remplir|obeir|batir|punir" },
+        { n: "exemple 3e groupe : partir, venir, dormir, courir…", rx: "partir|venir|dormir|courir|sortir|tenir|mourir|ouvrir|sentir|servir|mentir|offrir|cueillir" }],
+      corrige: "<p>On regarde le <b>participe présent</b> : <i>finir → finissant</i> (2<sup>e</sup> groupe) ; <i>partir → partant</i> (3<sup>e</sup> groupe). On peut aussi conjuguer avec <i>nous</i> : <i>nous finissons</i> / <i>nous partons</i>.</p>" },
+    { q: "Avec « je », comment savoir s'il faut écrire « -ai » (futur) ou « -ais » (conditionnel) ? Explique la méthode.",
+      notions: [
+        { n: "remplacer je par nous (ou une autre personne)", rx: "nous|tu|il |autre personne" },
+        { n: "nous -rons → futur → -ai", rx: "rons|futur" },
+        { n: "nous -rions → conditionnel → -ais", rx: "rions|conditionnel" },
+        { n: "après si + imparfait, on met le conditionnel", rx: "\\bsi\\b" }],
+      corrige: "<p>On remplace <b>je</b> par <b>nous</b> : si l'on dit <i>nous chanterons</i>, c'est le <b>futur</b> (<i>je chanterai</i>) ; si l'on dit <i>nous chanterions</i>, c'est le <b>conditionnel</b> (<i>je chanterais</i>). Après « si + imparfait », on emploie le conditionnel : <i>si je pouvais, je viendrais</i>.</p>" },
+    { q: "Comment choisir entre « -é », « -er » et « -ez » à la fin d'un verbe du 1er groupe ?",
+      notions: [
+        { n: "remplacer par un verbe du 3e groupe (vendre, prendre, mordre…)", rx: "vendre|prendre|mordre|3e groupe|troisieme groupe|remplac" },
+        { n: "vendu / pris → participe passé en -é", rx: "vendu|pris|mordu|participe" },
+        { n: "vendre → infinitif en -er", rx: "infinitif" },
+        { n: "-ez avec vous", rx: "vous" }],
+      corrige: "<p>On remplace par un verbe du 3<sup>e</sup> groupe comme <i>vendre</i> : <i>j'ai vendu</i> → <b>participe passé -é</b> ; <i>il va vendre</i> → <b>infinitif -er</b> ; avec <i>vous</i> au présent → <b>-ez</b> (<i>vous chantez</i>).</p>" }
+  ],
   cejm: [
     { q: "Qui sont les principaux agents économiques ? Donne la fonction principale de chacun.",
       notions: [

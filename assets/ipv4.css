@@ -1,0 +1,138 @@
+/* Adressage IPv4 — schémas et outils de calcul, au style Étude Facile.
+   Bleu cobalt = partie réseau, orange = partie hôte. Utilisé par le chapitre et par le labo Sous-réseaux. */
+.ipv4, .labo-ipv4 {
+  --net: var(--cobalt); --net-soft: #dfe3fc; --on-net: #fff;
+  --host: #d9480f; --host-soft: #fde2d3;
+  --c1: #1f2fb0; --c2: #2b3fe0; --c3: #8e9af2; --c4: #c9cff9; --on-1: #fff; --on-2: #fff; --on-3: #16182b; --on-4: #16182b;
+}
+#cours.ipv4 { max-width: 80ch; counter-reset: fig; }
+.ipv4 section.ip-sec + section.ip-sec { margin-top: var(--s5); }
+.ipv4 section.ip-sec > h2:first-child { margin-top: 0; }
+.ipv4 .tablewrap { margin: var(--s3) 0; }
+.ipv4 td.m, .ipv4 td .m, .ipv4 .m { font-family: var(--mono); font-size: .9em; white-space: nowrap; }
+.ipv4 tr.hl td { background: var(--safran-clair); }
+.ipv4 pre .c { opacity: .65; }
+
+/* schémas SVG */
+.ipv4 figure.diagram { margin: var(--s4) 0; padding: var(--s2); border: var(--trait); border-radius: var(--r2); background: var(--surface); box-shadow: var(--ombre-1); overflow-x: auto; counter-increment: fig; }
+.ipv4 .diagram svg { display: block; width: 100%; min-width: 660px; height: auto; }
+.ipv4 figure.diagram figcaption { position: sticky; left: 0; margin-top: var(--s2); font-size: .95rem; color: var(--discret); max-width: min(68ch, calc(100vw - 80px)); }
+.ipv4 figure.diagram figcaption::before { content: "Fig. " counter(fig); font-weight: 800; text-transform: uppercase; letter-spacing: .06em; font-size: .78rem; color: var(--host); margin-right: var(--s1); }
+.ipv4 svg rect { rx: 4px; ry: 4px; }
+.ipv4 svg .zoneA { fill: var(--net-soft); stroke: var(--net); stroke-dasharray: 5 4; }
+.ipv4 svg .zoneB { fill: var(--host-soft); stroke: var(--host); stroke-dasharray: 5 4; }
+.ipv4 svg .box { fill: var(--surface); stroke: var(--encre); stroke-width: 2; }
+.ipv4 svg .boxh { fill: var(--surface); stroke: var(--host); stroke-width: 2; }
+.ipv4 svg .rt { fill: var(--net); stroke: var(--encre); stroke-width: 2; }
+.ipv4 svg .t { fill: var(--encre); font: 700 13px var(--mono); }
+.ipv4 svg .tw { fill: var(--on-net); font: 700 13px var(--mono); }
+.ipv4 svg .s { fill: var(--discret); font: 600 11px var(--mono); }
+.ipv4 svg .sw { fill: var(--on-net); font: 600 11px var(--mono); }
+.ipv4 svg .sl { fill: var(--discret); font: 600 10px var(--mono); }
+.ipv4 svg .ln { stroke: var(--discret); stroke-width: 1.5; fill: none; }
+.ipv4 svg .la { stroke: var(--net); stroke-width: 2; fill: none; }
+.ipv4 svg .lh { stroke: var(--host); stroke-width: 2; fill: none; }
+.ipv4 svg .life { stroke: var(--filet); stroke-width: 1.5; stroke-dasharray: 6 5; }
+.ipv4 svg .mk, .ipv4 svg .num { fill: var(--net); }
+.ipv4 svg .mkh, .ipv4 svg .numh { fill: var(--host); }
+.ipv4 svg .numt { fill: var(--on-net); font: 700 12px var(--mono); }
+.ipv4 svg .cloud { fill: var(--surface); stroke: var(--discret); stroke-width: 1.5; }
+
+/* bits */
+.ipv4 .bitscroll, .labo-ipv4 .bitscroll { overflow-x: auto; padding-bottom: var(--s1); }
+.ipv4 .octets, .labo-ipv4 .octets { display: flex; gap: 12px; }
+.ipv4 .oct, .labo-ipv4 .oct { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.ipv4 .bits, .labo-ipv4 .bits { display: flex; gap: 2px; }
+.ipv4 .bit, .labo-ipv4 .bit { width: 1.2rem; height: 1.6rem; display: grid; place-items: center; font: 700 .8rem var(--mono); border-radius: 3px; border: 1.5px solid var(--encre); }
+.ipv4 .bit.n, .labo-ipv4 .bit.n { background: var(--net); color: var(--on-net); }
+.ipv4 .bit.h, .labo-ipv4 .bit.h { background: var(--host-soft); color: var(--host); }
+.ipv4 .dec, .labo-ipv4 .dec { font: 800 .95rem var(--mono); }
+.ipv4 .brow { margin: var(--s2) 0; }
+.ipv4 .brow .lab { font-size: .85rem; color: var(--discret); margin-bottom: 6px; }
+.ipv4 .brow .lab b { color: var(--encre); font-family: var(--mono); }
+.ipv4 .op { font: 800 .9rem var(--mono); color: var(--host); margin: 6px 0; }
+.ipv4-hero { background: var(--net-soft) !important; }
+.ipv4-cap { font-weight: 800; font-family: var(--mono); margin-bottom: 8px; }
+.ipv4 .legend { display: flex; gap: var(--s3); flex-wrap: wrap; margin-top: 8px; font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
+.ipv4 .legend i { display: inline-block; width: .8rem; height: .8rem; border: 1.5px solid var(--encre); border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.ipv4 .legend .ln { background: var(--net); } .ipv4 .legend .lh { background: var(--host-soft); }
+
+/* outils interactifs */
+.ipv4 .tool { background: var(--surface); border: var(--trait); border-radius: var(--r2); padding: var(--s3); margin: var(--s4) 0; box-shadow: var(--ombre-2); }
+.ipv4 .tool h3 { margin: 0 0 6px; }
+.ipv4 .tool .hint { font-size: .95rem; color: var(--discret); margin: 0 0 var(--s2); }
+.ipv4 .field, .labo-ipv4 .field { display: flex; flex-direction: column; gap: 6px; font-size: .75rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--discret); }
+.ipv4 .field input, .labo-ipv4 .field input { font: 600 16px var(--mono); letter-spacing: 0; text-transform: none; min-height: 44px; padding: 6px 12px; border: var(--trait); border-radius: var(--r1); background: var(--surface); color: var(--encre); min-width: 0; }
+.ipv4 .field input:focus, .labo-ipv4 .field input:focus { outline: none; background: var(--safran-clair); box-shadow: var(--ombre-1); }
+.ipv4 .row, .labo-ipv4 .row { display: flex; gap: var(--s2); flex-wrap: wrap; align-items: flex-end; }
+.ipv4 .conv { display: flex; gap: var(--s3); flex-wrap: wrap; }
+.ipv4 .convoct { display: flex; flex-direction: column; gap: 6px; }
+.ipv4 .convoct input { width: 5.5rem; }
+.ipv4 .weights, .ipv4 .bitbtns { display: flex; gap: 2px; }
+.ipv4 .weights span { width: 2rem; text-align: center; font: 600 .68rem var(--mono); color: var(--discret); }
+.ipv4 .bitbtn { width: 2rem; height: 2.75rem; font: 800 1rem var(--mono); border: 2px solid var(--encre); border-radius: 4px; background: var(--surface); color: var(--discret); cursor: pointer; padding: 0; }
+.ipv4 .bitbtn:hover { background: var(--safran-clair); }
+.ipv4 .bitbtn[aria-pressed="true"] { background: var(--net); color: var(--on-net); }
+.ipv4 .result, .labo-ipv4 .result { font: 600 .95rem/1.8 var(--mono); margin-top: var(--s2); overflow-wrap: anywhere; }
+.ipv4 .result b, .labo-ipv4 .result b { color: var(--net); }
+.ipv4 .kv, .labo-ipv4 .kv { display: grid; grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr)); gap: 10px; margin-top: var(--s3); }
+.ipv4 .kv div, .labo-ipv4 .kv div { border: var(--trait); border-radius: var(--r1); padding: 8px 12px; background: var(--papier); }
+.ipv4 .kv span, .labo-ipv4 .kv span { display: block; font-size: .72rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--discret); }
+.ipv4 .kv strong, .labo-ipv4 .kv strong { font: 800 1rem var(--mono); overflow-wrap: anywhere; }
+.ipv4 .err, .labo-ipv4 .err { color: var(--ko); font-weight: 700; margin-top: 6px; min-height: 1.5em; }
+.ipv4 .verdict { display: inline-flex; gap: 8px; align-items: baseline; font: 800 .9rem/1.4 var(--mono); padding: 8px 14px; border: var(--trait); border-radius: var(--r1); margin-top: var(--s2); }
+.ipv4 .verdict.y { background: var(--ok-clair); color: var(--ok); }
+.ipv4 .verdict.y::before { content: "✓"; }
+.ipv4 .verdict.no { background: var(--ko-clair); color: var(--ko); }
+.ipv4 .verdict.no::before { content: "✕"; }
+.ipv4 input[type=range] { accent-color: var(--cobalt); width: min(14rem, 100%); min-height: 44px; padding: 0; border: 0; background: none; }
+
+/* découpage visuel */
+.ipv4 .split, .labo-ipv4 .split { display: flex; height: 3.5rem; border: var(--trait); border-radius: var(--r1); overflow: hidden; margin: var(--s2) 0 6px; }
+.ipv4 .split div, .labo-ipv4 .split div { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; font: 700 .72rem/1.3 var(--mono); min-width: 0; overflow: hidden; border-right: 2px solid var(--encre); }
+.ipv4 .split div:last-child, .labo-ipv4 .split div:last-child { border-right: 0; }
+.ipv4 .split .a1, .labo-ipv4 .split .a1 { background: var(--c1); color: var(--on-1); }
+.ipv4 .split .a2, .labo-ipv4 .split .a2 { background: var(--c2); color: var(--on-2); }
+.ipv4 .split .a3, .labo-ipv4 .split .a3 { background: var(--c3); color: var(--on-3); }
+.ipv4 .split .a4, .labo-ipv4 .split .a4 { background: var(--c4); color: var(--on-4); }
+.ipv4 .split.dim div { font-size: .68rem; }
+.ipv4 .scale { display: flex; justify-content: space-between; font: 600 .68rem var(--mono); color: var(--discret); }
+.ipv4 .scale.abs { display: block; position: relative; height: 1.25rem; }
+.ipv4 .scale.abs span { position: absolute; top: 0; transform: translateX(-50%); }
+.ipv4 .scale.abs span:first-child { transform: none; }
+
+/* nom de domaine */
+.ipv4 .fqdn { display: flex; flex-wrap: wrap; align-items: stretch; gap: 6px; font: 800 1.1rem var(--mono); margin: var(--s3) 0; }
+.ipv4 .fqdn div { padding: 8px 14px; border: var(--trait); border-radius: var(--r1); text-align: center; }
+.ipv4 .fqdn small { display: block; font: 700 .66rem var(--corps); letter-spacing: .06em; text-transform: uppercase; margin-top: 2px; }
+.ipv4 .fqdn .f1 { background: var(--net); color: var(--on-net); }
+.ipv4 .fqdn .f2 { background: var(--host-soft); color: var(--host); }
+.ipv4 .fqdn .f3 { background: var(--surface); }
+.ipv4 .fqdn .f4 { background: transparent; color: var(--discret); border-style: dashed; }
+.ipv4 .fqdn .dot { align-self: center; padding: 0; border: 0; color: var(--discret); }
+.ipv4 details .sol { padding: 0 0 var(--s1); }
+@media (max-width: 560px) { .ipv4 .tool { padding: var(--s2); } .ipv4 .bit { width: 1rem; height: 1.45rem; font-size: .72rem; } .ipv4 .octets { gap: 8px; } }
+.ipv4 .tool > h3:first-child { margin-top: 0; }
+
+/* ===== Labo sous-réseaux ===== */
+.labo-ipv4 .ip-carte { border: var(--trait); border-radius: var(--r2); background: var(--surface); padding: var(--s3); box-shadow: var(--ombre-2); }
+.labo-ipv4 .ip-champs { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: var(--s2); }
+.labo-ipv4 .ip-champs .field > span { display: block; }
+.labo-ipv4 .ip-on { margin-top: 2px; }
+.labo-ipv4 .ip-on .chip { min-width: 72px; min-height: 44px; font-size: 1rem; text-transform: none; letter-spacing: 0; }
+.labo-ipv4 .ip-verdicts { display: grid; gap: 6px; margin-top: var(--s2); }
+.labo-ipv4 .ip-verdicts:empty { display: none; }
+.labo-ipv4 .ip-v { display: flex; gap: 10px; align-items: center; padding: 8px 10px; border: 1.5px solid var(--encre); border-radius: var(--r1); font-weight: 700; }
+.labo-ipv4 .ip-v.ok { background: var(--ok-clair); }
+.labo-ipv4 .ip-v.ko { background: var(--ko-clair); }
+.labo-ipv4 .ip-v .ck { width: 22px; height: 22px; flex: none; border: 2px solid var(--encre); border-radius: 5px; display: grid; place-items: center; background: var(--surface); font-weight: 900; }
+.labo-ipv4 #li-corr .box { margin-bottom: 0; }
+.labo-ipv4 #li-corr .octets, .labo-ipv4 .lb-texte .octets { margin: 8px 0; overflow-x: auto; }
+.labo-ipv4 .ip-h3 { margin: var(--s3) 0 6px; font-size: 1.15rem; }
+.labo-ipv4 table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: .92rem; }
+.labo-ipv4 th, .labo-ipv4 td { border: 1.5px solid var(--encre); padding: 5px 8px; text-align: left; }
+.labo-ipv4 th { background: var(--m-clair, var(--surface-2)); }
+.labo-ipv4 td.m { font-family: var(--mono); white-space: nowrap; }
+.labo-ipv4 .labo-mode a.chip { display: inline-flex; align-items: center; gap: 6px; color: inherit; text-decoration: none; }
+.labo-ipv4 [hidden] { display: none !important; }
+@media (max-width: 560px) { .labo-ipv4 .ip-carte { padding: var(--s2); } .labo-ipv4 .bit { width: 1rem; height: 1.45rem; font-size: .72rem; } .labo-ipv4 .octets { gap: 8px; } }

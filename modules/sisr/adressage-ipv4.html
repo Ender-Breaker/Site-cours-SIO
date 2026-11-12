@@ -1,348 +1,25 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="light dark">
-<meta name="description" content="Cours BTS SIO : adressage IPv4, masques, CIDR, sous-réseaux, passerelle, DNS, DHCP et NAT, avec outils de calcul et quiz.">
-<title>Adressage IPv4 et services</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Adressage IPv4 et services réseau — Étude Facile</title>
+  <meta name="description" content="Cours BTS SIO : adressage IPv4, masques, CIDR, sous-réseaux, passerelle, DNS, DHCP et NAT, avec outils de calcul et exercices.">
 <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
-<link rel="stylesheet" href="../../assets/pages-integrees.css">
-<style>
-/* Direction : manuel technique éditorial.
-   Dominante : bleu de Prusse (partie réseau). Accent : vermillon (partie hôte). Neutres : papier et encre teintés.
-   Grille de 8 px. Deux familles : Newsreader (texte, titres) et JetBrains Mono (adresses, bits, étiquettes). */
-:root{
-  --paper:#f1ede4; --paper-2:#e8e3d6; --surface:#f8f5ee; --bg:var(--paper);
-  --ink:#1c2128; --muted:#4f5760; --line:#d2cbbb; --line-strong:#857f70;
-  --net:#1d3f66; --net-soft:#dbe3ea; --on-net:#f8f5ee;
-  --host:#b0340d; --host-soft:#f6e4d8;
-  --plate:#1d3f66; --plate-ink:#f1ede4; --plate-muted:#b9c6d4;
-  --plate-net:#f1ede4; --plate-net-ink:#1d3f66; --plate-host:#e2552a; --plate-host-ink:#0f1a26;
-  --c1:#1d3f66; --c2:#3b648f; --c3:#8fadcb; --c4:#bccfe0;
-  --on-1:#f8f5ee; --on-2:#f8f5ee; --on-3:#10202f; --on-4:#10202f;
-  --code-bg:#17283a; --code-ink:#e6e1d3; --code-muted:#8fa0b2;
 
-  --serif:"Newsreader","Iowan Old Style","Palatino Linotype",Georgia,serif;
-  --mono:"JetBrains Mono","IBM Plex Mono",Consolas,"Courier New",monospace;
-
-  --fs-xs:.75rem; --fs-s:.875rem; --fs-m:1.125rem; --fs-l:1.375rem;
-  --fs-xl:clamp(1.875rem,3.4vw + .5rem,2.75rem);
-  --fs-xxl:clamp(2.75rem,7.5vw,5.5rem);
-
-  --s1:.5rem; --s2:1rem; --s3:1.5rem; --s4:2rem; --s5:3rem; --s6:4rem; --s7:6rem;
-  --measure:60ch; --radius:2px; --ease:150ms ease;
-  color-scheme:light;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --paper:#151a20; --paper-2:#1c232b; --surface:#1a2028;
-    --ink:#ebe6da; --muted:#a3abb5; --line:#2f3841; --line-strong:#6a7480;
-    --net:#8db6e6; --net-soft:#1f3347; --on-net:#0f1a26;
-    --host:#f0925f; --host-soft:#44261a;
-    --plate:#12304d; --plate-ink:#ebe6da;
-    --c1:#8db6e6; --c2:#6a96c8; --c3:#46739f; --c4:#2c5078;
-    --on-1:#0f1a26; --on-2:#0f1a26; --on-3:#f8f5ee; --on-4:#f8f5ee;
-    --code-bg:#0d1217; --code-ink:#e6e1d3; --code-muted:#8fa0b2;
-    color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --paper:#151a20; --paper-2:#1c232b; --surface:#1a2028;
-  --ink:#ebe6da; --muted:#a3abb5; --line:#2f3841; --line-strong:#6a7480;
-  --net:#8db6e6; --net-soft:#1f3347; --on-net:#0f1a26;
-  --host:#f0925f; --host-soft:#44261a;
-  --plate:#12304d; --plate-ink:#ebe6da;
-  --c1:#8db6e6; --c2:#6a96c8; --c3:#46739f; --c4:#2c5078;
-  --on-1:#0f1a26; --on-2:#0f1a26; --on-3:#f8f5ee; --on-4:#f8f5ee;
-  --code-bg:#0d1217; --code-ink:#e6e1d3; --code-muted:#8fa0b2;
-  color-scheme:dark;
-}
-
-*{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:4.5rem;-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--paper);color:var(--ink);font:400 var(--fs-m)/1.6 var(--serif);font-optical-sizing:auto;font-kerning:normal;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}
-::selection{background:var(--host-soft);color:var(--ink)}
-h1,h2,h3{font-family:var(--serif);font-weight:560;line-height:1.1;letter-spacing:-.015em;text-wrap:balance;margin:0}
-p{margin:0 0 var(--s2);max-width:var(--measure)}
-b{font-weight:650}
-a{color:var(--net);text-decoration-thickness:1px;text-underline-offset:.2em;transition:color var(--ease)}
-a:hover{color:var(--host)}
-code,kbd{font:500 .82em var(--mono);background:var(--paper-2);color:var(--ink);padding:.12em .4em;border-radius:var(--radius)}
-:focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:var(--radius)}
-sup{line-height:0}
-
-.skip{position:absolute;left:var(--s2);top:-4rem;z-index:30;background:var(--ink);color:var(--paper);padding:var(--s1) var(--s2);font:500 var(--fs-s) var(--mono);text-decoration:none}
-.skip:focus{top:var(--s1);color:var(--paper)}
-
-/* En-tête : titre éditorial, puis planche bleue avec le binaire en point focal */
-.hero{background:var(--paper)}
-.hero-in{max-width:1180px;margin:0 auto;padding:var(--s4) var(--s2) var(--s5);display:grid;gap:var(--s3)}
-.kicker{font:500 var(--fs-xs)/1.4 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding-bottom:var(--s1);border-bottom:1px solid var(--ink)}
-.hero h1{font-size:var(--fs-xxl);font-weight:500;line-height:.98;letter-spacing:-.03em}
-.hero h1 em{font-style:italic;font-weight:400;color:var(--net)}
-.hero p.lead{font-size:1.25rem;line-height:1.5;color:var(--muted);margin:0;max-width:34ch}
-.hero-card{background:var(--plate);color:var(--plate-ink)}
-.hero-card :focus-visible{outline-color:var(--plate-ink)}
-.hero-card-in{max-width:1180px;margin:0 auto;padding:var(--s4) var(--s2);display:grid;gap:var(--s3)}
-.hero-card .cap{font:500 var(--fs-s) var(--mono);letter-spacing:.04em;color:var(--plate-muted)}
-.hero-card .octets{display:grid;grid-template-columns:repeat(2,max-content);gap:var(--s3) var(--s3)}
-.hero-card .bit{width:1rem;height:1.5rem;font-size:.75rem}
-.hero-card .bit.n{background:var(--plate-net);color:var(--plate-net-ink)}
-.hero-card .bit.h{background:var(--plate-host);color:var(--plate-host-ink)}
-.hero-card .dec{font:600 1.25rem var(--mono);color:var(--plate-ink);margin-top:.25rem}
-.legend{display:flex;gap:var(--s3);flex-wrap:wrap;font:500 var(--fs-xs) var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--plate-muted)}
-.legend i{display:inline-block;width:.75rem;height:.75rem;border-radius:var(--radius);margin-right:var(--s1);vertical-align:-1px}
-.legend .ln{background:var(--plate-net)} .legend .lh{background:var(--plate-host)}
-@media (min-width:640px){
-  .hero-card .bit{width:1.375rem;height:2rem;font-size:.9rem}
-}
-@media (min-width:900px){
-  .hero-in{grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--s3);align-items:end;padding-top:var(--s5)}
-  .kicker{grid-column:1/-1}
-  .hero h1{grid-column:1/9}
-  .hero p.lead{grid-column:9/-1;padding-bottom:var(--s1)}
-  .hero-card .octets{grid-template-columns:repeat(4,max-content)}
-  .hero-card-in{padding:var(--s5) var(--s2)}
-}
-@media (min-width:1024px){
-  .hero-card .bit{width:1.625rem;height:2.5rem;font-size:1.1rem}
-}
-
-/* Mise en page : sommaire numéroté, cours à droite */
-.layout{display:grid;gap:var(--s3);max-width:1180px;margin:0 auto;padding:0 var(--s2) var(--s7)}
-.toc{position:sticky;top:0;z-index:10;background:var(--paper);display:flex;gap:var(--s1);overflow-x:auto;padding:var(--s1) 0;border-bottom:1px solid var(--ink);counter-reset:toc;scrollbar-width:thin}
-.toc a{counter-increment:toc;white-space:nowrap;text-decoration:none;color:var(--muted);font:500 var(--fs-xs)/1 var(--mono);letter-spacing:.04em;padding:var(--s2) var(--s1);border-bottom:2px solid transparent;transition:color var(--ease),border-color var(--ease),background var(--ease)}
-.toc a::before{content:counter(toc,decimal-leading-zero);margin-right:.5em;color:var(--host)}
-.toc a:hover{color:var(--ink)}
-.toc a.on{color:var(--ink);border-bottom-color:var(--host)}
-.toc .quizlink{margin-left:auto}
-@media (min-width:980px){
-  .layout{grid-template-columns:12rem minmax(0,1fr);gap:var(--s6);align-items:start}
-  .toc{top:var(--s3);flex-direction:column;overflow:visible;border:0;padding:var(--s4) 0 0;gap:0}
-  .toc::before{content:"Sommaire";font:500 var(--fs-xs) var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding-bottom:var(--s1);border-bottom:1px solid var(--ink);margin-bottom:var(--s1)}
-  .toc a{white-space:normal;padding:var(--s1) var(--s1);border-bottom:0;border-left:2px solid transparent}
-  .toc a.on{border-left-color:var(--host)}
-  .toc a.quizlink{margin:var(--s2) 0 0;padding:var(--s1) var(--s2);border-left:0;background:var(--net);color:var(--on-net)}
-  .toc a.quizlink::before{color:var(--on-net);opacity:.7}
-  .toc a.quizlink:hover,.toc a.quizlink.on{background:var(--ink);color:var(--paper)}
-  .toc a.quizlink:hover::before,.toc a.quizlink.on::before{color:var(--paper)}
-}
-article{min-width:0;counter-reset:fig}
-section.chap{padding:var(--s6) 0 var(--s2);border-top:2px solid var(--ink)}
-section.chap:first-child{border-top:0;padding-top:var(--s4)}
-section.chap>h2{font-size:var(--fs-xl);display:flex;align-items:baseline;gap:var(--s2);margin-bottom:var(--s3)}
-h2 .no{font:italic 400 clamp(2.5rem,5vw,4rem)/1 var(--serif);color:var(--host);letter-spacing:-.02em;font-variant-numeric:lining-nums}
-h3{font-size:var(--fs-l);font-weight:600;margin:var(--s5) 0 var(--s1)}
-section.chap>h3::before{content:"§";color:var(--host);font-weight:400;margin-right:.4em}
-ul,ol{padding-left:1.25rem;max-width:var(--measure);margin:0 0 var(--s2)}
-li{margin:.25rem 0}
-li::marker{color:var(--host)}
-ol{list-style:none;counter-reset:ol;padding-left:var(--s5)}
-ol>li{counter-increment:ol;position:relative}
-ol>li::before{content:counter(ol,decimal-leading-zero);position:absolute;left:calc(-1 * var(--s5));top:.35em;font:500 var(--fs-s) var(--mono);color:var(--host)}
-
-/* Encadrés : notes en marge, sans boîte */
-.callout{border-left:3px solid var(--net);padding:var(--s1) 0 var(--s1) var(--s3);margin:var(--s4) 0;max-width:calc(var(--measure) + var(--s4))}
-.callout.warn{border-left-color:var(--host)}
-.callout.ok{border-left-color:var(--ink)}
-.callout b.t{display:block;font:500 var(--fs-xs) var(--mono);letter-spacing:.12em;text-transform:uppercase;margin-bottom:var(--s1);color:var(--net)}
-.callout.warn b.t{color:var(--host)}
-.callout.ok b.t{color:var(--ink)}
-.callout p:last-child,.callout ul:last-child{margin-bottom:0}
-
-/* Tableaux : filets fins, en-têtes en mono */
-.tablewrap{overflow-x:auto;margin:var(--s3) 0;border-top:2px solid var(--ink)}
-table{border-collapse:collapse;width:100%;font-size:1rem;line-height:1.4}
-th,td{text-align:left;padding:var(--s1) var(--s2) var(--s1) 0;border-bottom:1px solid var(--line);vertical-align:top}
-th:first-child,td:first-child{padding-left:var(--s1)}
-th{font:500 var(--fs-xs)/1.3 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--ink);white-space:nowrap;padding-top:var(--s2)}
-tr:last-child td{border-bottom:1px solid var(--ink)}
-td.m,td .m{font:500 .875rem var(--mono);white-space:nowrap}
-tr.hl td{background:var(--net-soft)}
-pre{background:var(--code-bg);color:var(--code-ink);font:400 .875rem/1.7 var(--mono);tab-size:2;padding:var(--s2) var(--s3);border-radius:var(--radius);border-left:3px solid var(--plate-host);overflow-x:auto;margin:var(--s3) 0}
-pre .c{color:var(--code-muted)}
-
-/* Schémas : filet fin, légende numérotée */
-figure.diagram{margin:var(--s4) 0;border-top:1px solid var(--ink);padding-top:var(--s2);overflow-x:auto;counter-increment:fig}
-.diagram svg{display:block;width:100%;min-width:660px;height:auto}
-figure.diagram figcaption{position:sticky;left:0;margin-top:var(--s2);font-size:.9375rem;line-height:1.5;color:var(--muted);max-width:min(var(--measure),calc(100vw - var(--s4)))}
-figure.diagram figcaption::before{content:"Fig. " counter(fig);font:500 var(--fs-xs) var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--host);margin-right:var(--s1)}
-svg rect{rx:2px;ry:2px}
-svg .zoneA{fill:var(--net-soft);stroke:var(--net);stroke-dasharray:5 4}
-svg .zoneB{fill:var(--host-soft);stroke:var(--host);stroke-dasharray:5 4}
-svg .box{fill:var(--surface);stroke:var(--net);stroke-width:1.5}
-svg .boxh{fill:var(--surface);stroke:var(--host);stroke-width:1.5}
-svg .rt{fill:var(--net);stroke:var(--net)}
-svg .t{fill:var(--ink);font:600 13px var(--mono)}
-svg .tw{fill:var(--on-net);font:600 13px var(--mono)}
-svg .s{fill:var(--muted);font:500 11px var(--mono)}
-svg .sw{fill:var(--on-net);font:500 11px var(--mono)}
-svg .sl{fill:var(--muted);font:500 10px var(--mono)}
-svg .ln{stroke:var(--muted);stroke-width:1.5;fill:none}
-svg .la{stroke:var(--net);stroke-width:2;fill:none}
-svg .lh{stroke:var(--host);stroke-width:2;fill:none}
-svg .life{stroke:var(--line-strong);stroke-width:1.5;stroke-dasharray:6 5}
-svg .mk{fill:var(--net)}
-svg .mkh{fill:var(--host)}
-svg .num{fill:var(--net)}
-svg .numh{fill:var(--host)}
-svg .numt{fill:var(--on-net);font:700 12px var(--mono)}
-svg .cloud{fill:var(--surface);stroke:var(--muted);stroke-width:1.5}
-
-/* Bits */
-.bitscroll{overflow-x:auto;padding-bottom:var(--s1)}
-.octets{display:flex;gap:var(--s2)}
-.oct{display:flex;flex-direction:column;align-items:center;gap:.25rem}
-.bits{display:flex;gap:2px}
-.bit{width:1.125rem;height:1.5rem;display:grid;place-items:center;font:500 .8125rem var(--mono);border-radius:var(--radius)}
-.bit.n{background:var(--net-soft);color:var(--net)}
-.bit.h{background:var(--host-soft);color:var(--host)}
-.dec{font:600 .9375rem var(--mono)}
-.brow{margin:var(--s2) 0}
-.brow .lab{font:500 var(--fs-xs) var(--mono);letter-spacing:.04em;color:var(--muted);margin-bottom:var(--s1)}
-.brow .lab b{color:var(--ink);font-weight:600}
-.op{font:700 var(--fs-s) var(--mono);color:var(--host);margin:var(--s1) 0}
-
-/* Outils interactifs */
-.tool{background:var(--surface);border:1px solid var(--ink);border-radius:var(--radius);padding:var(--s3);margin:var(--s4) 0}
-.tool h3{margin:0 0 var(--s1);font-size:var(--fs-l)}
-.tool .hint{font-size:.9375rem;color:var(--muted);margin:0 0 var(--s2)}
-.field{display:flex;flex-direction:column;gap:var(--s1);font:500 var(--fs-xs) var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.field input,.field select{font:500 1rem var(--mono);letter-spacing:0;text-transform:none;min-height:2.75rem;padding:var(--s1) var(--s2);border:1px solid var(--line-strong);border-radius:var(--radius);background:var(--paper);color:var(--ink);min-width:0;transition:border-color var(--ease)}
-.field input:hover{border-color:var(--ink)}
-.row{display:flex;gap:var(--s2);flex-wrap:wrap;align-items:flex-end}
-.conv{display:flex;gap:var(--s3);flex-wrap:wrap}
-.convoct{display:flex;flex-direction:column;gap:var(--s1)}
-.convoct input{width:5.25rem}
-.weights,.bitbtns{display:flex;gap:2px}
-.weights span{width:2rem;text-align:center;font:500 .6875rem var(--mono);color:var(--muted)}
-.bitbtn{width:2rem;height:2.75rem;font:600 1rem var(--mono);border:1px solid var(--line-strong);border-radius:var(--radius);background:var(--paper);color:var(--muted);cursor:pointer;padding:0;transition:background var(--ease),color var(--ease),border-color var(--ease)}
-.bitbtn:hover{border-color:var(--ink);color:var(--ink)}
-.bitbtn:active{transform:translateY(1px)}
-.bitbtn[aria-pressed="true"]{background:var(--net);color:var(--on-net);border-color:var(--net)}
-.result{font:500 .9375rem/1.8 var(--mono);margin-top:var(--s2);overflow-wrap:anywhere}
-.result b{color:var(--net);font-weight:600}
-.kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(14rem,1fr));gap:var(--s2) var(--s3);margin-top:var(--s3)}
-.kv div{border-top:1px solid var(--ink);padding:var(--s1) 0}
-.kv span{display:block;font:500 var(--fs-xs) var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.kv strong{font:600 1rem var(--mono);overflow-wrap:anywhere}
-.err{color:var(--host);font:500 var(--fs-s) var(--mono);margin-top:var(--s1);min-height:1.5em}
-.verdict{display:inline-flex;gap:var(--s1);align-items:baseline;font:600 var(--fs-s)/1.4 var(--mono);padding:var(--s1) var(--s2);border-left:3px solid;border-radius:var(--radius);margin-top:var(--s2)}
-.verdict.y{background:var(--net-soft);color:var(--net);border-color:var(--net)}
-.verdict.y::before{content:"✓"}
-.verdict.no{background:var(--host-soft);color:var(--host);border-color:var(--host)}
-.verdict.no::before{content:"✕"}
-input[type=range]{accent-color:var(--net);width:min(14rem,100%);min-height:2.75rem}
-
-/* Découpage visuel : quatre tons du bleu dominant */
-.split{display:flex;height:3.5rem;border-radius:var(--radius);overflow:hidden;margin:var(--s2) 0 var(--s1)}
-.split div{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;font:500 .75rem/1.3 var(--mono);min-width:0;overflow:hidden;border-right:2px solid var(--paper)}
-.split div:last-child{border-right:0}
-.split .a1{background:var(--c1);color:var(--on-1)}
-.split .a2{background:var(--c2);color:var(--on-2)}
-.split .a3{background:var(--c3);color:var(--on-3)}
-.split .a4{background:var(--c4);color:var(--on-4)}
-.split.dim div{font-size:.6875rem}
-.scale{display:flex;justify-content:space-between;font:500 .6875rem var(--mono);color:var(--muted)}
-.scale.abs{display:block;position:relative;height:1.25rem}
-.scale.abs span{position:absolute;top:0;transform:translateX(-50%)}
-.scale.abs span:first-child{transform:none}
-
-/* FQDN */
-.fqdn{display:flex;flex-wrap:wrap;align-items:stretch;gap:var(--s1);font:600 1.125rem var(--mono);margin:var(--s3) 0}
-.fqdn div{padding:var(--s1) var(--s2);border-radius:var(--radius);text-align:center}
-.fqdn small{display:block;font:500 .6875rem var(--mono);letter-spacing:.08em;text-transform:uppercase;margin-top:.25rem}
-.fqdn .f1{background:var(--net-soft);color:var(--net)}
-.fqdn .f2{background:var(--host-soft);color:var(--host)}
-.fqdn .f3{background:var(--surface);color:var(--ink);border:1px solid var(--ink)}
-.fqdn .f4{background:transparent;color:var(--muted);border:1px dashed var(--line-strong)}
-.fqdn .dot{align-self:center;padding:0;color:var(--muted)}
-
-/* Exercices */
-details{border-top:1px solid var(--ink)}
-details:last-of-type{border-bottom:1px solid var(--ink)}
-summary{cursor:pointer;font-weight:600;list-style:none;position:relative;padding:var(--s2) var(--s4) var(--s2) 0;transition:color var(--ease)}
-summary::-webkit-details-marker{display:none}
-summary::after{content:"+";position:absolute;right:var(--s1);top:var(--s2);font:500 1.25rem/1.3 var(--mono);color:var(--host)}
-details[open]>summary::after{content:"−"}
-summary:hover{color:var(--net)}
-details .sol{padding:0 0 var(--s2)}
-
-/* Quiz */
-#quiz-wrap{background:var(--surface);border:1px solid var(--ink);border-radius:var(--radius);padding:var(--s3);margin-top:var(--s2)}
-@media (min-width:640px){#quiz-wrap{padding:var(--s4)}}
-.qhead{display:flex;justify-content:space-between;font:500 var(--fs-xs) var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:var(--s1)}
-.bar{height:4px;background:var(--line);margin-bottom:var(--s3);overflow:hidden}
-.bar i{display:block;height:100%;background:var(--net);transition:width 300ms ease}
-.qtext{font:500 1.5rem/1.3 var(--serif);letter-spacing:-.01em;margin:0 0 var(--s3);max-width:var(--measure)}
-.opts{display:grid;gap:var(--s1)}
-.opt{font:400 1.0625rem/1.4 var(--serif);text-align:left;min-height:3rem;padding:var(--s2);border:1px solid var(--line-strong);border-radius:var(--radius);background:var(--paper);color:var(--ink);cursor:pointer;display:flex;gap:var(--s2);align-items:baseline;transition:background var(--ease),border-color var(--ease),color var(--ease)}
-.opt:hover:not(:disabled){border-color:var(--ink);background:var(--paper-2)}
-.opt:active:not(:disabled){transform:translateY(1px)}
-.opt .k{font:600 var(--fs-s) var(--mono);color:var(--host);flex:none}
-.opt:disabled{cursor:default;color:var(--ink)}
-.opt:disabled:not(.right):not(.wrong){color:var(--muted)}
-.opt.right{background:var(--net-soft);border-color:var(--net);box-shadow:inset 3px 0 0 var(--net)}
-.opt.wrong{background:var(--host-soft);border-color:var(--host);box-shadow:inset 3px 0 0 var(--host)}
-.opt.right::after,.opt.wrong::after{margin-left:auto;font:600 var(--fs-s) var(--mono)}
-.opt.right::after{content:"✓";color:var(--net)}
-.opt.wrong::after{content:"✕";color:var(--host)}
-.fb{margin-top:var(--s2);padding:var(--s2);border-left:3px solid;border-radius:var(--radius);font-size:1rem}
-.fb.y{background:var(--net-soft);border-color:var(--net)}
-.fb.n{background:var(--host-soft);border-color:var(--host)}
-.btn{font:600 var(--fs-s) var(--mono);letter-spacing:.06em;text-transform:uppercase;min-height:3rem;padding:var(--s1) var(--s3);border:1px solid var(--net);border-radius:var(--radius);background:var(--net);color:var(--on-net);cursor:pointer;margin-top:var(--s2);transition:background var(--ease),color var(--ease),border-color var(--ease)}
-.btn:hover{background:var(--ink);border-color:var(--ink);color:var(--paper)}
-.btn:active{transform:translateY(1px)}
-.score{font:500 4.5rem/1 var(--serif);letter-spacing:-.03em}
-.score small{font:500 1.25rem var(--mono);letter-spacing:0;color:var(--muted)}
-.review{margin-top:var(--s3);display:grid;gap:var(--s2)}
-.review div{border-left:3px solid var(--host);background:var(--paper-2);padding:var(--s2);border-radius:var(--radius);font-size:1rem}
-.review b{display:block;margin-bottom:.25rem}
-footer{width:calc(100% - 2 * var(--s2));max-width:calc(1180px - 2 * var(--s2));margin:0 auto;padding:var(--s2) 0 var(--s5);border-top:1px solid var(--ink);color:var(--muted);font:400 var(--fs-xs)/1.6 var(--mono)}
-@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*{transition:none!important}}
-</style>
+  <link rel="stylesheet" href="../../assets/style.css">
+  <link rel="stylesheet" href="../../assets/ipv4.css">
 </head>
-<body data-integree="1" data-module="sisr">
-<nav class="ef-barre" aria-label="Étude Facile"><a class="ef-logo" href="../../index.html"><span>&gt;_</span>Étude Facile</a><span class="ef-sep">›</span><a class="ef-mod" href="index.html">SISR</a><span class="ef-droite"><a href="../../evaluation.html">Évaluation</a><a href="../../forum.html">Forum</a></span></nav>
-<a class="skip" href="#intro">Aller au cours</a>
+<body data-module="sisr" data-chapter="adressage-ipv4">
 
-<header class="hero">
-  <div class="hero-in">
-    <div class="kicker">BTS SIO · Réseaux · Couche 3</div>
-    <h1>Adressage <em>IPv4</em> et services réseau</h1>
-    <p class="lead">Adresses, masques, CIDR, sous-réseaux, passerelle, DNS, DHCP et NAT, avec schémas, outils de calcul et quiz final.</p>
-  </div>
-  <div class="hero-card">
-    <div class="hero-card-in">
-      <div class="cap">192.168.1.130/26 en binaire</div>
-      <div class="bitscroll" id="heroBits"></div>
-      <div class="legend"><span><i class="ln"></i>26 bits de réseau</span><span><i class="lh"></i>6 bits d'hôte</span></div>
-    </div>
-  </div>
-</header>
+<!-- ============ COURS ============ -->
+<article id="cours" class="ipv4">
+<section class="ip-sec" id="intro">
+<div class="tool ipv4-hero"><div class="ipv4-cap">192.168.1.130/26 en binaire</div><div class="bitscroll" id="heroBits"></div>
+<div class="legend"><span><i class="ln"></i>26 bits de réseau</span><span><i class="lh"></i>6 bits d'hôte</span></div></div>
 
-<main class="layout">
-<nav class="toc" aria-label="Sommaire" id="toc">
-  <a href="#intro">Introduction</a>
-  <a href="#ipv4">Adresses IPv4</a>
-  <a href="#masques">Masques</a>
-  <a href="#cidr">CIDR</a>
-  <a href="#sous-reseaux">Sous-réseaux</a>
-  <a href="#passerelle">Passerelle</a>
-  <a href="#dns">DNS</a>
-  <a href="#dhcp">DHCP</a>
-  <a href="#nat">NAT</a>
-  <a href="#commandes">Commandes</a>
-  <a href="#memo">Fiche mémo</a>
-  <a href="#quiz" class="quizlink">Quiz final</a>
-</nav>
-
-<article>
-
-<!-- 01 INTRO -->
-<section class="chap" id="intro">
-  <h2><span class="no">01</span>Introduction</h2>
+  <h2>1. Introduction</h2>
   <p>Chaque équipement qui communique sur un réseau IP a besoin d'une identité logique : son adresse IP. Ce cours part de l'adresse elle-même, puis montre comment les masques et le CIDR permettent de découper un réseau, et enfin comment DNS, DHCP et NAT rendent ce réseau utilisable au quotidien.</p>
   <div class="tablewrap">
     <table>
@@ -355,7 +32,7 @@ footer{width:calc(100% - 2 * var(--s2));max-width:calc(1180px - 2 * var(--s2));m
       </tbody>
     </table>
   </div>
-  <div class="callout"><b class="t">Objectifs</b>
+  <div class="box"><b>Objectifs</b>
     <ul>
       <li>Convertir une adresse entre décimal et binaire.</li>
       <li>Calculer adresse réseau, broadcast, plage d'hôtes à partir d'une adresse et d'un masque.</li>
@@ -366,8 +43,8 @@ footer{width:calc(100% - 2 * var(--s2));max-width:calc(1180px - 2 * var(--s2));m
 </section>
 
 <!-- 02 IPV4 -->
-<section class="chap" id="ipv4">
-  <h2><span class="no">02</span>Adresses IPv4</h2>
+<section class="ip-sec" id="ipv4">
+  <h2>2. Adresses IPv4</h2>
   <p>Une adresse IPv4 est un nombre de <b>32 bits</b>, découpé en <b>4 octets</b> de 8 bits. On l'écrit en <b>notation décimale pointée</b> : chaque octet est converti en un nombre de 0 à 255. Il existe 2<sup>32</sup> soit environ 4,29 milliards d'adresses, ce qui explique la pénurie et l'usage du NAT.</p>
   <p>Chaque adresse se compose de deux parties : l'identifiant du <b style="color:var(--net)">réseau</b> et l'identifiant de l'<b style="color:var(--host)">hôte</b>. C'est le masque qui indique où passe la frontière.</p>
 
@@ -425,8 +102,8 @@ footer{width:calc(100% - 2 * var(--s2));max-width:calc(1180px - 2 * var(--s2));m
 </section>
 
 <!-- 03 MASQUES -->
-<section class="chap" id="masques">
-  <h2><span class="no">03</span>Masques de sous-réseau</h2>
+<section class="ip-sec" id="masques">
+  <h2>3. Masques de sous-réseau</h2>
   <p>Le masque est un nombre de 32 bits composé d'une suite de <b>1</b> suivie d'une suite de <b>0</b>. Les 1 désignent la partie réseau, les 0 la partie hôte. Exemple : <code>255.255.255.192</code> = <code>11111111.11111111.11111111.11000000</code>.</p>
 
   <h3>L'opération ET logique</h3>
@@ -452,14 +129,14 @@ footer{width:calc(100% - 2 * var(--s2));max-width:calc(1180px - 2 * var(--s2));m
       </tbody>
     </table>
   </div>
-  <div class="callout warn"><b class="t">Pourquoi « moins 2 » ?</b>
+  <div class="box attention"><b>Pourquoi « moins 2 » ?</b>
     <p>La première adresse du bloc identifie le réseau et la dernière sert au broadcast. Aucune des deux ne peut être attribuée à une machine.</p>
   </div>
 </section>
 
 <!-- 04 CIDR -->
-<section class="chap" id="cidr">
-  <h2><span class="no">04</span>Notation CIDR</h2>
+<section class="ip-sec" id="cidr">
+  <h2>4. Notation CIDR</h2>
   <p>CIDR (Classless Inter-Domain Routing) note le masque par le nombre de bits à 1 : <code>192.168.1.0/24</code> signifie 24 bits de réseau. Les frontières ne sont plus liées aux classes, on peut donc choisir n'importe quelle taille de réseau.</p>
 
   <div class="tablewrap">
@@ -485,7 +162,7 @@ footer{width:calc(100% - 2 * var(--s2));max-width:calc(1180px - 2 * var(--s2));m
 
   <h3>La méthode de la taille de bloc</h3>
   <p>Dans l'octet où passe la frontière, la valeur du masque donne directement la taille des blocs : <b>taille = 256 − valeur du masque dans cet octet</b>. Les réseaux commencent alors à des multiples de cette taille.</p>
-  <div class="callout ok"><b class="t">Exemple</b>
+  <div class="box retenir"><b>Exemple</b>
     <p>Masque <code>255.255.255.192</code> : 256 − 192 = 64. Les réseaux sont <code>.0</code>, <code>.64</code>, <code>.128</code>, <code>.192</code>. L'adresse <code>.130</code> est dans le bloc qui commence à 128 : réseau <code>.128</code>, broadcast <code>.191</code>.</p>
   </div>
   <p>Valeurs possibles d'un octet de masque : <code>0, 128, 192, 224, 240, 248, 252, 254, 255</code>. À connaître par cœur.</p>
@@ -493,8 +170,8 @@ footer{width:calc(100% - 2 * var(--s2));max-width:calc(1180px - 2 * var(--s2));m
 </section>
 
 <!-- 05 SOUS-RESEAUX -->
-<section class="chap" id="sous-reseaux">
-  <h2><span class="no">05</span>Sous-réseaux et VLSM</h2>
+<section class="ip-sec" id="sous-reseaux">
+  <h2>5. Sous-réseaux et VLSM</h2>
   <p>Découper un réseau en sous-réseaux permet d'isoler des services (compta, serveurs, Wi-Fi invités), de limiter les broadcasts et de mieux contrôler les flux. On <b>emprunte des bits à la partie hôte</b> pour les ajouter à la partie réseau.</p>
 
   <h3>Méthode en 4 étapes</h3>
@@ -588,8 +265,8 @@ footer{width:calc(100% - 2 * var(--s2));max-width:calc(1180px - 2 * var(--s2));m
 </section>
 
 <!-- 06 PASSERELLE -->
-<section class="chap" id="passerelle">
-  <h2><span class="no">06</span>Communication et passerelle</h2>
+<section class="ip-sec" id="passerelle">
+  <h2>6. Communication et passerelle</h2>
   <p>Avant d'envoyer un paquet, un poste applique son masque à sa propre adresse et à l'adresse de destination (ET logique). Si le résultat est identique, la destination est sur le même réseau. Sinon, le paquet doit passer par un routeur : la <b>passerelle par défaut</b>.</p>
 
   <figure class="diagram">
@@ -629,14 +306,14 @@ footer{width:calc(100% - 2 * var(--s2));max-width:calc(1180px - 2 * var(--s2));m
     <li>Il émet une trame vers la MAC du routeur. L'adresse IP de destination du paquet reste <b>192.168.20.5</b>.</li>
     <li>Le routeur consulte sa table de routage, puis livre le paquet sur le réseau B (nouvelle trame, nouvelle MAC).</li>
   </ol>
-  <div class="callout warn"><b class="t">Erreur classique</b>
+  <div class="box attention"><b>Erreur classique</b>
     <p>Une passerelle doit être une adresse <b>du même réseau</b> que le poste. Une passerelle mal saisie permet de joindre le réseau local mais pas Internet.</p>
   </div>
 </section>
 
 <!-- 07 DNS -->
-<section class="chap" id="dns">
-  <h2><span class="no">07</span>DNS</h2>
+<section class="ip-sec" id="dns">
+  <h2>7. DNS</h2>
   <p>Le DNS (Domain Name System) traduit les noms lisibles en adresses IP, et inversement. C'est un annuaire distribué et hiérarchique : aucun serveur ne connaît tous les noms.</p>
 
   <h3>Structure d'un nom de domaine</h3>
@@ -707,7 +384,7 @@ footer{width:calc(100% - 2 * var(--s2));max-width:calc(1180px - 2 * var(--s2));m
     </table>
   </div>
 
-  <div class="callout"><b class="t">À retenir</b>
+  <div class="box"><b>À retenir</b>
     <ul>
       <li>Port <b>53</b> : UDP pour les requêtes courantes, TCP pour les réponses volumineuses et les transferts de zone.</li>
       <li>Un serveur <b>autoritaire</b> détient la zone. Un <b>résolveur</b> (ou serveur récursif) cherche la réponse pour le client et la met en cache.</li>
@@ -725,8 +402,8 @@ dig -x 203.0.113.10</pre>
 </section>
 
 <!-- 08 DHCP -->
-<section class="chap" id="dhcp">
-  <h2><span class="no">08</span>DHCP</h2>
+<section class="ip-sec" id="dhcp">
+  <h2>8. DHCP</h2>
   <p>Le DHCP (Dynamic Host Configuration Protocol) distribue automatiquement la configuration IP : adresse, masque, passerelle, serveurs DNS. Il évite les saisies manuelles et les conflits d'adresses.</p>
 
   <h3>Les 4 étapes : DORA</h3>
@@ -780,7 +457,7 @@ dig -x 203.0.113.10</pre>
       </tbody>
     </table>
   </div>
-  <div class="callout warn"><b class="t">Sécurité</b>
+  <div class="box attention"><b>Sécurité</b>
     <p>Un faux serveur DHCP (rogue DHCP) peut distribuer une mauvaise passerelle et détourner le trafic. Sur les switchs, la fonction <b>DHCP snooping</b> n'autorise les réponses DHCP que sur les ports de confiance.</p>
   </div>
   <pre><span class="c"># Windows</span>
@@ -793,8 +470,8 @@ ip a</pre>
 </section>
 
 <!-- 09 NAT -->
-<section class="chap" id="nat">
-  <h2><span class="no">09</span>NAT et PAT</h2>
+<section class="ip-sec" id="nat">
+  <h2>9. NAT et PAT</h2>
   <p>Le NAT (Network Address Translation) remplace les adresses IP d'un paquet lorsqu'il traverse un routeur ou un pare-feu. Il permet à des machines en adresses privées d'accéder à Internet derrière une seule adresse publique, et il masque la topologie interne.</p>
 
   <div class="tablewrap">
@@ -847,17 +524,17 @@ ip a</pre>
   </div>
   <p>Au retour, le serveur répond à <code>198.51.100.7:40002</code> : le routeur retrouve l'entrée, remplace par <code>192.168.1.11:51000</code> et livre le paquet au bon poste.</p>
 
-  <div class="callout"><b class="t">Le NAT entrant : redirection de port (DNAT)</b>
+  <div class="box"><b>Le NAT entrant : redirection de port (DNAT)</b>
     <p>Pour joindre un serveur interne depuis Internet, on configure une redirection : par exemple, le port public 443 de <code>198.51.100.7</code> est renvoyé vers <code>192.168.1.20:443</code>. Sans règle de ce type, une connexion entrante est rejetée car aucune entrée n'existe dans la table.</p>
   </div>
-  <div class="callout warn"><b class="t">Pour aller plus loin : IPv6</b>
+  <div class="box attention"><b>Pour aller plus loin : IPv6</b>
     <p>IPv6 offre des adresses de 128 bits, suffisantes pour que chaque équipement ait une adresse publique. Le NAT n'y est plus nécessaire pour économiser des adresses, mais un pare-feu reste indispensable.</p>
   </div>
 </section>
 
 <!-- 10 COMMANDES -->
-<section class="chap" id="commandes">
-  <h2><span class="no">10</span>Commandes de diagnostic</h2>
+<section class="ip-sec" id="commandes">
+  <h2>10. Commandes de diagnostic</h2>
   <p>Méthode de dépannage conseillée : on teste du plus proche au plus lointain. Poste, puis passerelle, puis Internet par IP, puis Internet par nom.</p>
   <div class="tablewrap">
     <table>
@@ -885,8 +562,8 @@ ping exemple.fr</pre>
 </section>
 
 <!-- 11 MEMO -->
-<section class="chap" id="memo">
-  <h2><span class="no">11</span>Fiche mémo</h2>
+<section class="ip-sec" id="memo">
+  <h2>11. Fiche mémo</h2>
   <div class="tablewrap">
     <table>
       <thead><tr><th>Sujet</th><th>À retenir</th></tr></thead>
@@ -908,16 +585,49 @@ ping exemple.fr</pre>
 </section>
 
 <!-- 12 QUIZ -->
-<section class="chap" id="quiz">
-  <h2><span class="no">12</span>Quiz final</h2>
-  <p>18 questions dans un ordre aléatoire. Chaque réponse est corrigée tout de suite, avec une explication. Vous pouvez recommencer autant de fois que vous voulez.</p>
-  <div id="quiz-wrap"><div id="quiz-box"></div></div>
-</section>
-
+<div class="box retenir"><b>Et maintenant ?</b><p>Passe à l'onglet <b>S'entraîner</b> : en plus des questions de cours, des calculs (adresse réseau, broadcast, masque…) sont tirés au hasard à chaque partie. Pour t'exercer sans limite, ouvre le <a href="labo-ipv4.html">labo Sous-réseaux</a>.</p></div>
 </article>
-</main>
-<footer>Les adresses 203.0.113.0/24 et 198.51.100.0/24 sont réservées à la documentation (RFC 5737). Elles sont utilisées ici comme exemples d'adresses publiques.</footer>
 
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [{"type": "qcm", "niveau": "facile", "q": "Combien de bits compte une adresse IPv4 ?", "options": ["16", "32", "48", "128"], "answer": 1, "explication": "Une adresse IPv4 fait 32 bits, soit 4 octets. 48 bits correspond à une adresse MAC et 128 bits à une adresse IPv6."}, {"type": "qcm", "niveau": "facile", "q": "Laquelle de ces adresses est une adresse privée ?", "options": ["172.32.10.5", "172.20.5.4", "192.169.1.1", "11.0.0.1"], "answer": 1, "explication": "La plage privée 172.16.0.0/12 va de 172.16.0.0 à 172.31.255.255. 172.32.x.x et 192.169.x.x sont publiques."}, {"type": "qcm", "niveau": "facile", "q": "Quel est le masque correspondant au préfixe /27 ?", "options": ["255.255.255.192", "255.255.255.224", "255.255.255.240", "255.255.255.248"], "answer": 1, "explication": "27 bits à 1 : les 3 premiers bits du dernier octet valent 1, soit 11100000 = 224."}, {"type": "qcm", "niveau": "facile", "q": "Combien d'hôtes utilisables offre un réseau /26 ?", "options": ["64", "62", "60", "30"], "answer": 1, "explication": "/26 laisse 6 bits d'hôte : 2⁶ = 64 adresses, moins l'adresse réseau et le broadcast = 62."}, {"type": "qcm", "niveau": "facile", "q": "Quelle est l'adresse réseau de 10.4.77.200/20 ?", "options": ["10.4.64.0", "10.4.77.0", "10.4.0.0", "10.4.80.0"], "answer": 0, "explication": "/20 donne le masque 255.255.240.0, soit des blocs de 16 sur le 3e octet. 77 est dans le bloc 64 – 79 : réseau 10.4.64.0."}, {"type": "qcm", "niveau": "facile", "q": "Quelle est l'adresse de broadcast de 192.168.5.64/28 ?", "options": ["192.168.5.79", "192.168.5.127", "192.168.5.95", "192.168.5.71"], "answer": 0, "explication": "/28 donne des blocs de 16. Le bloc commence à 64 et finit à 79, qui est l'adresse de broadcast."}, {"type": "qcm", "niveau": "moyen", "q": "PC A : 192.168.1.70/26 et PC B : 192.168.1.130/26. Peuvent-ils communiquer sans routeur ?", "options": ["Oui, ils sont dans le même réseau", "Non : A est dans 192.168.1.64/26 et B dans 192.168.1.128/26, il faut un routeur", "Oui, mais seulement avec un hub", "Non, car ce sont deux adresses de broadcast"], "answer": 1, "explication": "Avec des blocs de 64, A est dans 64 – 127 et B dans 128 – 191. Ce sont deux réseaux distincts."}, {"type": "qcm", "niveau": "moyen", "q": "Quel est le rôle de la passerelle par défaut ?", "options": ["Attribuer des adresses IP", "Traduire les noms en adresses IP", "Acheminer les paquets destinés à d'autres réseaux", "Filtrer les adresses MAC"], "answer": 2, "explication": "La passerelle (un routeur) est la sortie du réseau local : le poste lui envoie tout ce qui n'est pas dans son propre réseau."}, {"type": "qcm", "niveau": "moyen", "q": "Quel est le plus petit préfixe permettant 30 hôtes par sous-réseau ?", "options": ["/26", "/27", "/28", "/25"], "answer": 1, "explication": "Il faut 2^h − 2 ≥ 30, donc h = 5 bits d'hôte, soit un préfixe de 32 − 5 = /27 (30 hôtes exactement)."}, {"type": "qcm", "niveau": "moyen", "q": "Sur quel port le DNS écoute-t-il par défaut ?", "options": ["23", "53", "67", "80"], "answer": 1, "explication": "Le DNS utilise le port 53, en UDP pour les requêtes courantes et en TCP pour les transferts de zone ou les grosses réponses."}, {"type": "qcm", "niveau": "moyen", "q": "Quel enregistrement DNS désigne les serveurs de messagerie d'un domaine ?", "options": ["A", "CNAME", "MX", "PTR"], "answer": 2, "explication": "MX (Mail eXchanger) indique les serveurs qui reçoivent le courrier du domaine, avec une priorité."}, {"type": "qcm", "niveau": "moyen", "q": "Quel serveur DNS détient la zone d'un domaine et répond avec autorité ?", "options": ["Le résolveur du fournisseur d'accès", "Le serveur racine", "Le serveur autoritaire de la zone", "Le cache du navigateur"], "answer": 2, "explication": "Le serveur autoritaire contient les enregistrements de la zone. Les résolveurs ne font que chercher et mettre en cache."}, {"type": "qcm", "niveau": "moyen", "q": "Dans quel ordre se déroule un échange DHCP ?", "options": ["Discover, Offer, Request, Acknowledge", "Request, Offer, Discover, Acknowledge", "Offer, Discover, Acknowledge, Request", "Discover, Request, Offer, Acknowledge"], "answer": 0, "explication": "DORA : le client cherche (Discover), le serveur propose (Offer), le client demande (Request), le serveur confirme (Acknowledge)."}, {"type": "qcm", "niveau": "moyen", "q": "Quels ports utilise DHCP ?", "options": ["UDP 67 (serveur) et UDP 68 (client)", "TCP 53 et TCP 80", "UDP 53 et UDP 123", "TCP 67 et TCP 443"], "answer": 0, "explication": "Le serveur écoute sur UDP 67 et le client sur UDP 68."}, {"type": "qcm", "niveau": "difficile", "q": "Un poste Windows affiche l'adresse 169.254.12.34. Que cela signifie-t-il ?", "options": ["Le serveur DNS est injoignable", "Aucun serveur DHCP n'a répondu : le poste s'est attribué une adresse APIPA", "Le poste est en boucle locale", "L'adresse est une adresse publique valide"], "answer": 1, "explication": "169.254.0.0/16 est la plage APIPA. Elle apparaît quand la requête DHCP reste sans réponse."}, {"type": "qcm", "niveau": "difficile", "q": "Que fait le PAT (NAT avec surcharge) ?", "options": ["Associe chaque adresse privée à une adresse publique distincte", "Partage une adresse publique entre plusieurs machines en distinguant les ports source", "Traduit les noms de domaine en adresses IP", "Bloque tout le trafic entrant"], "answer": 1, "explication": "Le PAT remplace l'adresse source privée par une même adresse publique et se sert du numéro de port pour retrouver le poste au retour."}, {"type": "qcm", "niveau": "difficile", "q": "À quoi correspond l'adresse 127.0.0.1 ?", "options": ["La passerelle par défaut", "La machine elle-même (boucle locale)", "L'adresse de broadcast", "Un serveur DNS public"], "answer": 1, "explication": "127.0.0.0/8 est la boucle locale : le trafic ne quitte jamais la machine. Pratique pour tester la pile TCP/IP."}, {"type": "qcm", "niveau": "difficile", "q": "Pourquoi faut-il un relais DHCP quand le serveur est dans un autre réseau ?", "options": ["Les broadcasts ne traversent pas les routeurs", "DHCP ne fonctionne qu'en TCP", "Le client n'a pas d'adresse MAC", "Le routeur doit traduire l'adresse du client"], "answer": 0, "explication": "Le Discover est un broadcast, il reste confiné au réseau local. Le relais le retransmet en unicast vers le serveur."}];
+/* Questions de calcul tirées au hasard à chaque chargement (adresse réseau, broadcast, masque, hôtes…). */
+(function (W) {
+  function toIP(n) { return [n >>> 24, (n >>> 16) & 255, (n >>> 8) & 255, n & 255].join("."); }
+  function maskOf(c) { return c === 0 ? 0 : ((0xFFFFFFFF << (32 - c)) >>> 0); }
+  function r(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
+  function ip() {
+    var t = r(0, 2);
+    if (t === 0) return ((192 << 24) | (168 << 16) | (r(0, 255) << 8) | r(1, 254)) >>> 0;
+    if (t === 1) return ((172 << 24) | (r(16, 31) << 16) | (r(0, 255) << 8) | r(1, 254)) >>> 0;
+    return ((10 << 24) | (r(0, 255) << 16) | (r(0, 255) << 8) | r(1, 254)) >>> 0;
+  }
+  function bloc(c) {
+    var o = Math.min(3, Math.floor(c / 8)), m = (maskOf(c) >>> (24 - 8 * o)) & 255;
+    return c % 8 === 0 ? "" : " Le masque vaut " + m + " sur le " + (o + 1) + "e octet : taille de bloc 256 − " + m + " = " + (256 - m) + ".";
+  }
+  var out = [], fab = [
+    function () { var c = r(17, 30), a = ip(), n = (a & maskOf(c)) >>> 0;
+      return { niveau: "moyen", q: "Quelle est l'adresse réseau de " + toIP(a) + "/" + c + " ?", answers: [toIP(n)], explication: "Adresse IP ET masque (" + toIP(maskOf(c)) + ") = " + toIP(n) + "." + bloc(c) }; },
+    function () { var c = r(17, 30), a = ip(), m = maskOf(c), b = ((a & m) | (~m >>> 0)) >>> 0;
+      return { niveau: "moyen", q: "Quelle est l'adresse de broadcast de " + toIP(a) + "/" + c + " ?", answers: [toIP(b)], explication: "On met tous les bits d'hôte à 1 : " + toIP(b) + "." + bloc(c) }; },
+    function () { var c = r(9, 30);
+      return { niveau: "facile", q: "Écris en décimal pointé le masque du préfixe /" + c + ".", answers: [toIP(maskOf(c))], explication: c + " bits à 1 puis " + (32 - c) + " bits à 0 : " + toIP(maskOf(c)) + "." }; },
+    function () { var c = r(20, 30), h = 32 - c;
+      return { niveau: "facile", q: "Combien d'hôtes utilisables offre un réseau /" + c + " ?", answers: [String(Math.pow(2, h) - 2)], explication: h + " bits d'hôte : 2^" + h + " − 2 = " + (Math.pow(2, h) - 2) + " (on retire l'adresse réseau et le broadcast)." }; },
+    function () { var c = r(18, 30), a = ip(), n = (a & maskOf(c)) >>> 0;
+      return { niveau: "difficile", q: "Quelle est la première adresse utilisable du réseau de " + toIP(a) + "/" + c + " ?", answers: [toIP(n + 1)], explication: "Réseau " + toIP(n) + ", donc première adresse " + toIP(n + 1) + "." + bloc(c) }; },
+    function () { var c = r(18, 30), a = ip(), m = maskOf(c), b = ((a & m) | (~m >>> 0)) >>> 0;
+      return { niveau: "difficile", q: "Quelle est la dernière adresse utilisable du réseau de " + toIP(a) + "/" + c + " ?", answers: [toIP(b - 1)], explication: "Broadcast " + toIP(b) + ", donc dernière adresse " + toIP(b - 1) + "." + bloc(c) }; },
+    function () { var c = r(16, 30);
+      return { niveau: "facile", q: "Quel préfixe CIDR correspond au masque " + toIP(maskOf(c)) + " ? (écris /n)", answers: ["/" + c, String(c)], explication: "On compte les bits à 1 du masque : " + c + ", donc /" + c + "." }; },
+    function () { var k = [2, 4, 8, 16][r(0, 3)], c = 24 + Math.log2(k);
+      return { niveau: "moyen", q: "On découpe 192.168.10.0/24 en " + k + " sous-réseaux égaux. Quel préfixe obtient-on ? (écris /n)", answers: ["/" + c, String(c)], explication: k + " sous-réseaux = 2^" + Math.log2(k) + " : on emprunte " + Math.log2(k) + " bits, donc /" + c + "." }; }
+  ];
+  fab.forEach(function (f) { for (var i = 0; i < 2; i++) { var q = f(); q.type = "saisie"; out.push(q); } });
+  W.EF_EXERCICES = (W.EF_EXERCICES || []).concat(out);
+})(window);
+</script>
 <script>
 (function(){
   "use strict";
@@ -1058,129 +768,11 @@ ping exemple.fr</pre>
   [sA,sB,sC].forEach(function(el){ el.addEventListener('input',same); });
   same();
 
-  /* ---------- Sommaire actif ---------- */
-  var links = Array.prototype.slice.call(document.querySelectorAll('#toc a'));
-  if('IntersectionObserver' in window){
-    var io = new IntersectionObserver(function(entries){
-      entries.forEach(function(en){
-        if(en.isIntersecting){
-          links.forEach(function(a){ a.classList.toggle('on', a.getAttribute('href')==='#'+en.target.id); });
-        }
-      });
-    },{rootMargin:'-20% 0px -70% 0px'});
-    document.querySelectorAll('section.chap').forEach(function(s){ io.observe(s); });
-  }
-
-  /* ---------- Quiz ---------- */
-  var QUIZ = [
-    {q:'Combien de bits compte une adresse IPv4 ?', o:['16','32','48','128'], a:1,
-     e:'Une adresse IPv4 fait 32 bits, soit 4 octets. 48 bits correspond à une adresse MAC et 128 bits à une adresse IPv6.'},
-    {q:'Laquelle de ces adresses est une adresse privée ?', o:['172.32.10.5','172.20.5.4','192.169.1.1','11.0.0.1'], a:1,
-     e:'La plage privée 172.16.0.0/12 va de 172.16.0.0 à 172.31.255.255. 172.32.x.x et 192.169.x.x sont publiques.'},
-    {q:'Quel est le masque correspondant au préfixe /27 ?', o:['255.255.255.192','255.255.255.224','255.255.255.240','255.255.255.248'], a:1,
-     e:'27 bits à 1 : les 3 premiers bits du dernier octet valent 1, soit 11100000 = 224.'},
-    {q:'Combien d\'hôtes utilisables offre un réseau /26 ?', o:['64','62','60','30'], a:1,
-     e:'/26 laisse 6 bits d\'hôte : 2⁶ = 64 adresses, moins l\'adresse réseau et le broadcast = 62.'},
-    {q:'Quelle est l\'adresse réseau de 10.4.77.200/20 ?', o:['10.4.64.0','10.4.77.0','10.4.0.0','10.4.80.0'], a:0,
-     e:'/20 donne le masque 255.255.240.0, soit des blocs de 16 sur le 3e octet. 77 est dans le bloc 64 – 79 : réseau 10.4.64.0.'},
-    {q:'Quelle est l\'adresse de broadcast de 192.168.5.64/28 ?', o:['192.168.5.79','192.168.5.127','192.168.5.95','192.168.5.71'], a:0,
-     e:'/28 donne des blocs de 16. Le bloc commence à 64 et finit à 79, qui est l\'adresse de broadcast.'},
-    {q:'PC A : 192.168.1.70/26 et PC B : 192.168.1.130/26. Peuvent-ils communiquer sans routeur ?',
-     o:['Oui, ils sont dans le même réseau','Non : A est dans 192.168.1.64/26 et B dans 192.168.1.128/26, il faut un routeur','Oui, mais seulement avec un hub','Non, car ce sont deux adresses de broadcast'], a:1,
-     e:'Avec des blocs de 64, A est dans 64 – 127 et B dans 128 – 191. Ce sont deux réseaux distincts.'},
-    {q:'Quel est le rôle de la passerelle par défaut ?', o:['Attribuer des adresses IP','Traduire les noms en adresses IP','Acheminer les paquets destinés à d\'autres réseaux','Filtrer les adresses MAC'], a:2,
-     e:'La passerelle (un routeur) est la sortie du réseau local : le poste lui envoie tout ce qui n\'est pas dans son propre réseau.'},
-    {q:'Quel est le plus petit préfixe permettant 30 hôtes par sous-réseau ?', o:['/26','/27','/28','/25'], a:1,
-     e:'Il faut 2^h − 2 ≥ 30, donc h = 5 bits d\'hôte, soit un préfixe de 32 − 5 = /27 (30 hôtes exactement).'},
-    {q:'Sur quel port le DNS écoute-t-il par défaut ?', o:['23','53','67','80'], a:1,
-     e:'Le DNS utilise le port 53, en UDP pour les requêtes courantes et en TCP pour les transferts de zone ou les grosses réponses.'},
-    {q:'Quel enregistrement DNS désigne les serveurs de messagerie d\'un domaine ?', o:['A','CNAME','MX','PTR'], a:2,
-     e:'MX (Mail eXchanger) indique les serveurs qui reçoivent le courrier du domaine, avec une priorité.'},
-    {q:'Quel serveur DNS détient la zone d\'un domaine et répond avec autorité ?', o:['Le résolveur du fournisseur d\'accès','Le serveur racine','Le serveur autoritaire de la zone','Le cache du navigateur'], a:2,
-     e:'Le serveur autoritaire contient les enregistrements de la zone. Les résolveurs ne font que chercher et mettre en cache.'},
-    {q:'Dans quel ordre se déroule un échange DHCP ?', o:['Discover, Offer, Request, Acknowledge','Request, Offer, Discover, Acknowledge','Offer, Discover, Acknowledge, Request','Discover, Request, Offer, Acknowledge'], a:0,
-     e:'DORA : le client cherche (Discover), le serveur propose (Offer), le client demande (Request), le serveur confirme (Acknowledge).'},
-    {q:'Quels ports utilise DHCP ?', o:['UDP 67 (serveur) et UDP 68 (client)','TCP 53 et TCP 80','UDP 53 et UDP 123','TCP 67 et TCP 443'], a:0,
-     e:'Le serveur écoute sur UDP 67 et le client sur UDP 68.'},
-    {q:'Un poste Windows affiche l\'adresse 169.254.12.34. Que cela signifie-t-il ?', o:['Le serveur DNS est injoignable','Aucun serveur DHCP n\'a répondu : le poste s\'est attribué une adresse APIPA','Le poste est en boucle locale','L\'adresse est une adresse publique valide'], a:1,
-     e:'169.254.0.0/16 est la plage APIPA. Elle apparaît quand la requête DHCP reste sans réponse.'},
-    {q:'Que fait le PAT (NAT avec surcharge) ?', o:['Associe chaque adresse privée à une adresse publique distincte','Partage une adresse publique entre plusieurs machines en distinguant les ports source','Traduit les noms de domaine en adresses IP','Bloque tout le trafic entrant'], a:1,
-     e:'Le PAT remplace l\'adresse source privée par une même adresse publique et se sert du numéro de port pour retrouver le poste au retour.'},
-    {q:'À quoi correspond l\'adresse 127.0.0.1 ?', o:['La passerelle par défaut','La machine elle-même (boucle locale)','L\'adresse de broadcast','Un serveur DNS public'], a:1,
-     e:'127.0.0.0/8 est la boucle locale : le trafic ne quitte jamais la machine. Pratique pour tester la pile TCP/IP.'},
-    {q:'Pourquoi faut-il un relais DHCP quand le serveur est dans un autre réseau ?', o:['Les broadcasts ne traversent pas les routeurs','DHCP ne fonctionne qu\'en TCP','Le client n\'a pas d\'adresse MAC','Le routeur doit traduire l\'adresse du client'], a:0,
-     e:'Le Discover est un broadcast, il reste confiné au réseau local. Le relais le retransmet en unicast vers le serveur.'}
-  ];
-
-  var qBox = $('#quiz-box'), order, idx, score, missed;
-  function shuffle(a){
-    a = a.slice();
-    for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; }
-    return a;
-  }
-  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-  function startQuiz(){
-    order = shuffle(QUIZ.map(function(_,k){ return k; }));
-    idx = 0; score = 0; missed = [];
-    showQ();
-  }
-  function showQ(){
-    var it = QUIZ[order[idx]];
-    var opts = shuffle(it.o.map(function(t,k){ return {t:t, ok:k===it.a}; }));
-    var N = QUIZ.length, letters = ['A','B','C','D'];
-    var h = '<div class="qhead"><span>Question '+(idx+1)+' / '+N+'</span><span>Score : '+score+'</span></div>'+
-            '<div class="bar"><i style="width:'+(idx/N*100)+'%"></i></div>'+
-            '<p class="qtext">'+esc(it.q)+'</p><div class="opts">';
-    opts.forEach(function(o,k){
-      h += '<button type="button" class="opt" data-ok="'+(o.ok?1:0)+'"><span class="k">'+letters[k]+'</span><span>'+esc(o.t)+'</span></button>';
-    });
-    h += '</div><div id="fb" aria-live="polite"></div>';
-    qBox.innerHTML = h;
-    qBox.querySelector('.opts').addEventListener('click', function(e){
-      var b = e.target.closest('.opt'); if(!b || b.disabled) return;
-      var good = b.dataset.ok==='1';
-      qBox.querySelectorAll('.opt').forEach(function(x){
-        x.disabled = true;
-        if(x.dataset.ok==='1') x.classList.add('right');
-      });
-      var goodText = qBox.querySelector('.opt.right span:last-child').textContent;
-      if(good){ score++; } else { b.classList.add('wrong'); missed.push({q:it.q, good:goodText, e:it.e}); }
-      var last = idx===N-1;
-      $('#fb').innerHTML = '<div class="fb '+(good?'y':'n')+'"><b>'+(good?'Bonne réponse.':'Pas tout à fait.')+'</b> '+esc(it.e)+'</div>'+
-        '<button type="button" class="btn" id="nextBtn">'+(last?'Voir mon résultat':'Question suivante')+'</button>';
-      var nb = $('#nextBtn'); nb.focus();
-      nb.addEventListener('click', function(){ idx++; if(idx<N) showQ(); else showEnd(); });
-    });
-  }
-  function showEnd(){
-    var N = QUIZ.length, pct = score/N, note = Math.round(pct*20*10)/10;
-    /* Étude Facile : meilleur score et validation du chapitre (70 % ou plus) */
-    if (window.EtudeFacile) { window.EtudeFacile.setBest('sisr', 'adressage-ipv4', Math.round(pct*100)); if (pct >= 0.7) window.EtudeFacile.markDone('sisr', 'adressage-ipv4'); }
-    var msg = pct>=0.9 ? 'Excellent, le chapitre est maîtrisé.' :
-              pct>=0.7 ? 'Bon niveau. Revoyez les points ci-dessous.' :
-              pct>=0.5 ? 'Les bases sont là. Reprenez les chapitres des erreurs, puis refaites le quiz.' :
-                         'Reprenez le cours chapitre par chapitre, en vous aidant des calculateurs.';
-    var h = '<div class="bar"><i style="width:100%"></i></div>'+
-            '<div class="score">'+score+'<small> / '+N+'</small></div>'+
-            '<p style="margin-top:.5rem">Soit <b>'+String(note).replace('.',',')+' / 20</b>. '+msg+'</p>';
-    if(missed.length){
-      h += '<h3>À revoir</h3><div class="review">';
-      missed.forEach(function(m){
-        h += '<div><b>'+esc(m.q)+'</b>Bonne réponse : '+esc(m.good)+'. '+esc(m.e)+'</div>';
-      });
-      h += '</div>';
-    }
-    if (window.EtudeFacile) h += '<p style="margin-top:.75rem">' + (pct >= 0.7 ? 'Chapitre validé dans ta progression Étude Facile.' : 'Il faut 70 % pour valider le chapitre dans ta progression Étude Facile.') + '</p>';
-    h += '<button type="button" class="btn" id="again">Recommencer le quiz</button>';
-    qBox.innerHTML = h;
-    $('#again').addEventListener('click', startQuiz);
-  }
-  startQuiz();
 })();
 </script>
-<script>/* Questions du quiz, au format du site : elles alimentent les évaluations (questionnaire, examen blanc, évaluation du chapitre). */
-window.EF_EXERCICES = [{"type": "qcm", "niveau": "facile", "q": "Combien de bits compte une adresse IPv4 ?", "options": ["16", "32", "48", "128"], "answer": 1, "explication": "Une adresse IPv4 fait 32 bits, soit 4 octets. 48 bits correspond à une adresse MAC et 128 bits à une adresse IPv6."}, {"type": "qcm", "niveau": "facile", "q": "Laquelle de ces adresses est une adresse privée ?", "options": ["172.32.10.5", "172.20.5.4", "192.169.1.1", "11.0.0.1"], "answer": 1, "explication": "La plage privée 172.16.0.0/12 va de 172.16.0.0 à 172.31.255.255. 172.32.x.x et 192.169.x.x sont publiques."}, {"type": "qcm", "niveau": "facile", "q": "Quel est le masque correspondant au préfixe /27 ?", "options": ["255.255.255.192", "255.255.255.224", "255.255.255.240", "255.255.255.248"], "answer": 1, "explication": "27 bits à 1 : les 3 premiers bits du dernier octet valent 1, soit 11100000 = 224."}, {"type": "qcm", "niveau": "facile", "q": "Combien d'hôtes utilisables offre un réseau /26 ?", "options": ["64", "62", "60", "30"], "answer": 1, "explication": "/26 laisse 6 bits d'hôte : 2⁶ = 64 adresses, moins l'adresse réseau et le broadcast = 62."}, {"type": "qcm", "niveau": "facile", "q": "Quelle est l'adresse réseau de 10.4.77.200/20 ?", "options": ["10.4.64.0", "10.4.77.0", "10.4.0.0", "10.4.80.0"], "answer": 0, "explication": "/20 donne le masque 255.255.240.0, soit des blocs de 16 sur le 3e octet. 77 est dans le bloc 64 – 79 : réseau 10.4.64.0."}, {"type": "qcm", "niveau": "facile", "q": "Quelle est l'adresse de broadcast de 192.168.5.64/28 ?", "options": ["192.168.5.79", "192.168.5.127", "192.168.5.95", "192.168.5.71"], "answer": 0, "explication": "/28 donne des blocs de 16. Le bloc commence à 64 et finit à 79, qui est l'adresse de broadcast."}, {"type": "qcm", "niveau": "moyen", "q": "PC A : 192.168.1.70/26 et PC B : 192.168.1.130/26. Peuvent-ils communiquer sans routeur ?", "options": ["Oui, ils sont dans le même réseau", "Non : A est dans 192.168.1.64/26 et B dans 192.168.1.128/26, il faut un routeur", "Oui, mais seulement avec un hub", "Non, car ce sont deux adresses de broadcast"], "answer": 1, "explication": "Avec des blocs de 64, A est dans 64 – 127 et B dans 128 – 191. Ce sont deux réseaux distincts."}, {"type": "qcm", "niveau": "moyen", "q": "Quel est le rôle de la passerelle par défaut ?", "options": ["Attribuer des adresses IP", "Traduire les noms en adresses IP", "Acheminer les paquets destinés à d'autres réseaux", "Filtrer les adresses MAC"], "answer": 2, "explication": "La passerelle (un routeur) est la sortie du réseau local : le poste lui envoie tout ce qui n'est pas dans son propre réseau."}, {"type": "qcm", "niveau": "moyen", "q": "Quel est le plus petit préfixe permettant 30 hôtes par sous-réseau ?", "options": ["/26", "/27", "/28", "/25"], "answer": 1, "explication": "Il faut 2^h − 2 ≥ 30, donc h = 5 bits d'hôte, soit un préfixe de 32 − 5 = /27 (30 hôtes exactement)."}, {"type": "qcm", "niveau": "moyen", "q": "Sur quel port le DNS écoute-t-il par défaut ?", "options": ["23", "53", "67", "80"], "answer": 1, "explication": "Le DNS utilise le port 53, en UDP pour les requêtes courantes et en TCP pour les transferts de zone ou les grosses réponses."}, {"type": "qcm", "niveau": "moyen", "q": "Quel enregistrement DNS désigne les serveurs de messagerie d'un domaine ?", "options": ["A", "CNAME", "MX", "PTR"], "answer": 2, "explication": "MX (Mail eXchanger) indique les serveurs qui reçoivent le courrier du domaine, avec une priorité."}, {"type": "qcm", "niveau": "moyen", "q": "Quel serveur DNS détient la zone d'un domaine et répond avec autorité ?", "options": ["Le résolveur du fournisseur d'accès", "Le serveur racine", "Le serveur autoritaire de la zone", "Le cache du navigateur"], "answer": 2, "explication": "Le serveur autoritaire contient les enregistrements de la zone. Les résolveurs ne font que chercher et mettre en cache."}, {"type": "qcm", "niveau": "moyen", "q": "Dans quel ordre se déroule un échange DHCP ?", "options": ["Discover, Offer, Request, Acknowledge", "Request, Offer, Discover, Acknowledge", "Offer, Discover, Acknowledge, Request", "Discover, Request, Offer, Acknowledge"], "answer": 0, "explication": "DORA : le client cherche (Discover), le serveur propose (Offer), le client demande (Request), le serveur confirme (Acknowledge)."}, {"type": "qcm", "niveau": "moyen", "q": "Quels ports utilise DHCP ?", "options": ["UDP 67 (serveur) et UDP 68 (client)", "TCP 53 et TCP 80", "UDP 53 et UDP 123", "TCP 67 et TCP 443"], "answer": 0, "explication": "Le serveur écoute sur UDP 67 et le client sur UDP 68."}, {"type": "qcm", "niveau": "difficile", "q": "Un poste Windows affiche l'adresse 169.254.12.34. Que cela signifie-t-il ?", "options": ["Le serveur DNS est injoignable", "Aucun serveur DHCP n'a répondu : le poste s'est attribué une adresse APIPA", "Le poste est en boucle locale", "L'adresse est une adresse publique valide"], "answer": 1, "explication": "169.254.0.0/16 est la plage APIPA. Elle apparaît quand la requête DHCP reste sans réponse."}, {"type": "qcm", "niveau": "difficile", "q": "Que fait le PAT (NAT avec surcharge) ?", "options": ["Associe chaque adresse privée à une adresse publique distincte", "Partage une adresse publique entre plusieurs machines en distinguant les ports source", "Traduit les noms de domaine en adresses IP", "Bloque tout le trafic entrant"], "answer": 1, "explication": "Le PAT remplace l'adresse source privée par une même adresse publique et se sert du numéro de port pour retrouver le poste au retour."}, {"type": "qcm", "niveau": "difficile", "q": "À quoi correspond l'adresse 127.0.0.1 ?", "options": ["La passerelle par défaut", "La machine elle-même (boucle locale)", "L'adresse de broadcast", "Un serveur DNS public"], "answer": 1, "explication": "127.0.0.0/8 est la boucle locale : le trafic ne quitte jamais la machine. Pratique pour tester la pile TCP/IP."}, {"type": "qcm", "niveau": "difficile", "q": "Pourquoi faut-il un relais DHCP quand le serveur est dans un autre réseau ?", "options": ["Les broadcasts ne traversent pas les routeurs", "DHCP ne fonctionne qu'en TCP", "Le client n'a pas d'adresse MAC", "Le routeur doit traduire l'adresse du client"], "answer": 0, "explication": "Le Discover est un broadcast, il reste confiné au réseau local. Le relais le retransmet en unicast vers le serveur."}];</script>
 <script src="../../data/modules.js"></script>
 <script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
 </body>
 </html>
