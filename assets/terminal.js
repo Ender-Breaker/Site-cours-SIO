@@ -803,19 +803,39 @@
       setPs(); out.scrollTop = out.scrollHeight;
       if (opts.onCommand) opts.onCommand(sh, line, res);
     }
+    function completer() {
+      var c = sh.complete(inp.value);
+      if (c.list.length === 1) inp.value = c.before + c.list[0] + (c.list[0].slice(-1) === "/" ? "" : " ");
+      else if (c.list.length > 1) {
+        var p = c.list[0]; c.list.forEach(function (x) { while (x.indexOf(p) !== 0) p = p.slice(0, -1); });
+        if (p.length > c.word.length) inp.value = c.before + p; else print(c.list.join("  "));
+      }
+    }
+    function histo(d) {
+      if (d < 0 && hi > 0) { hi--; inp.value = sh.hist[hi] || ""; }
+      if (d > 0 && hi < sh.hist.length) { hi++; inp.value = sh.hist[hi] || ""; }
+    }
+    /* rangée de touches pour les écrans tactiles (pas de Tab, de ↑ ni de | sur un clavier de téléphone) */
+    var touches = document.createElement("div");
+    touches.className = "term-touches";
+    touches.innerHTML = [["Tab", "tab"], ["↑", "haut"], ["↓", "bas"], ["|", "|"], ["/", "/"], ["~", "~"], ["-", "-"], [">", ">"], ["*", "*"], ["..", ".."], ["Entrée", "ok"]]
+      .map(function (t) { return '<button type="button" data-k="' + t[1] + '">' + t[0] + '</button>'; }).join("");
+    box.appendChild(touches);
+    touches.addEventListener("mousedown", function (e) { e.preventDefault(); });
+    touches.addEventListener("click", function (e) {
+      var b = e.target.closest("button"); if (!b || locked) return;
+      e.stopPropagation();
+      var k = b.dataset.k;
+      if (k === "tab") completer(); else if (k === "haut") histo(-1); else if (k === "bas") histo(1); else if (k === "ok") submit();
+      else { var a = inp.selectionStart || inp.value.length; inp.value = inp.value.slice(0, a) + k + inp.value.slice(inp.selectionEnd || a); inp.setSelectionRange(a + k.length, a + k.length); }
+      inp.focus();
+    });
     inp.addEventListener("keydown", function (ev) {
       if (ev.key === "Enter") { ev.preventDefault(); submit(); }
-      else if (ev.key === "ArrowUp") { ev.preventDefault(); if (hi > 0) { hi--; inp.value = sh.hist[hi] || ""; } }
-      else if (ev.key === "ArrowDown") { ev.preventDefault(); if (hi < sh.hist.length) { hi++; inp.value = sh.hist[hi] || ""; } }
-      else if (ev.key === "Tab") {
-        ev.preventDefault();
-        var c = sh.complete(inp.value);
-        if (c.list.length === 1) inp.value = c.before + c.list[0] + (c.list[0].slice(-1) === "/" ? "" : " ");
-        else if (c.list.length > 1) {
-          var p = c.list[0]; c.list.forEach(function (x) { while (x.indexOf(p) !== 0) p = p.slice(0, -1); });
-          if (p.length > c.word.length) inp.value = c.before + p; else print(c.list.join("  "));
-        }
-      } else if (ev.ctrlKey && ev.key.toLowerCase() === "l") { ev.preventDefault(); out.innerHTML = ""; }
+      else if (ev.key === "ArrowUp") { ev.preventDefault(); histo(-1); }
+      else if (ev.key === "ArrowDown") { ev.preventDefault(); histo(1); }
+      else if (ev.key === "Tab") { ev.preventDefault(); completer(); }
+      else if (ev.ctrlKey && ev.key.toLowerCase() === "l") { ev.preventDefault(); out.innerHTML = ""; }
       else if (ev.ctrlKey && ev.key.toLowerCase() === "c") { ev.preventDefault(); print(ps.textContent + inp.value + "^C", "cmd"); inp.value = ""; }
     });
     box.addEventListener("click", function () { if (!locked && window.getSelection().toString() === "") inp.focus(); });

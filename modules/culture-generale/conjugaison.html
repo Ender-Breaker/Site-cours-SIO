@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>La bonne terminaison</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="stylesheet" href="../../assets/pages-integrees.css">
+<style>
+  :root{
+    --bg:#ECEEF4;
+    --paper:#FDFDFB;
+    --ink:#18233D;
+    --ink-2:#5C6784;
+    --ink-3:#8A93AB;
+    --line:#DCE0EC;
+    --accent:#2C4BB3;
+    --accent-soft:#E7EBF9;
+    --on-accent:#FFFFFF;
+    --red:#C23A2B;
+    --red-soft:#FAE8E4;
+    --green:#1F7A57;
+    --green-soft:#E1F1EA;
+    --rule:rgba(44,75,179,.14);
+    --margin-rule:rgba(194,58,43,.30);
+    --shadow:0 1px 2px rgba(24,35,61,.06), 0 12px 28px -18px rgba(24,35,61,.45);
+    --radius:14px;
+  }
+  :root:not([data-theme="light"]){
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      color-scheme:dark;
+      --bg:#0F1420;
+      --paper:#19212F;
+      --ink:#E9EDF7;
+      --ink-2:#9BA7C1;
+      --ink-3:#77839C;
+      --line:#2B3548;
+      --accent:#8FA9FF;
+      --accent-soft:#1F2B47;
+      --on-accent:#0F1420;
+      --red:#FF9483;
+      --red-soft:#3B222A;
+      --green:#6FD6A6;
+      --green-soft:#12301F;
+      --rule:rgba(143,169,255,.16);
+      --margin-rule:rgba(255,148,131,.28);
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 16px 32px -20px rgba(0,0,0,.9);
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme:dark;
+    --bg:#0F1420;
+    --paper:#19212F;
+    --ink:#E9EDF7;
+    --ink-2:#9BA7C1;
+    --ink-3:#77839C;
+    --line:#2B3548;
+    --accent:#8FA9FF;
+    --accent-soft:#1F2B47;
+    --on-accent:#0F1420;
+    --red:#FF9483;
+    --red-soft:#3B222A;
+    --green:#6FD6A6;
+    --green-soft:#12301F;
+    --rule:rgba(143,169,255,.16);
+    --margin-rule:rgba(255,148,131,.28);
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 16px 32px -20px rgba(0,0,0,.9);
+  }
+
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:Archivo,"Segoe UI",system-ui,sans-serif;
+    font-size:15px;
+    line-height:1.55;
+    -webkit-text-size-adjust:100%;
+  }
+  .wrap{
+    max-width:680px;
+    margin:0 auto;
+    padding-inline:20px;
+    padding-block:26px 56px;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+  }
+
+  /* ---------- en-tête ---------- */
+  .top{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .brand{
+    font-family:Newsreader,"Iowan Old Style",Georgia,serif;
+    font-size:26px;font-weight:600;letter-spacing:-.01em;margin:0;
+  }
+  .brand em{font-style:italic;font-weight:400;color:var(--accent)}
+  .scoreboard{display:flex;gap:18px;align-items:baseline;font-variant-numeric:tabular-nums}
+  .score{display:flex;flex-direction:column;align-items:flex-end;line-height:1.1}
+  .score b{font-size:19px;font-weight:600}
+  .score span{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+  .score.hot b{color:var(--red)}
+
+  /* ---------- filtres ---------- */
+  .filters{display:flex;flex-direction:column;gap:8px}
+  .row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  .row-label{
+    font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);
+    width:100%;margin-bottom:-2px;
+  }
+  .pill{
+    font:inherit;font-size:13px;
+    border:1px solid var(--line);
+    background:transparent;color:var(--ink-2);
+    padding:5px 11px;border-radius:999px;cursor:pointer;
+    transition:background .15s,color .15s,border-color .15s;
+  }
+  .pill:hover{border-color:var(--accent);color:var(--ink)}
+  .pill[aria-pressed="true"]{
+    background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:500;
+  }
+  .pill[aria-pressed="true"]:hover{color:var(--on-accent)}
+  .pill.ghost{border-style:dashed}
+
+  .picker{display:flex;flex-direction:column;gap:6px}
+  .picker .row-label{margin-bottom:0}
+  .picker-box{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .search{
+    font:inherit;font-size:14px;color:var(--ink);
+    background:var(--paper);border:1px solid var(--line);border-radius:9px;
+    padding:8px 12px;flex:1 1 260px;min-width:0;max-width:420px;
+  }
+  .search::placeholder{color:var(--ink-3)}
+  .search:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .picker.is-set .search{
+    border-color:var(--accent);color:var(--accent);
+    font-family:Newsreader,"Iowan Old Style",Georgia,serif;font-style:italic;font-size:17px;padding-block:5px;
+  }
+  .picker-msg{margin:0;font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+  .picker-msg.warn{color:var(--red)}
+  .count{font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums;margin-left:auto;padding-right:2px}
+
+  /* ---------- la feuille ---------- */
+  .sheet{
+    position:relative;
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:26px 24px 22px 34px;
+    overflow:hidden;
+  }
+  .sheet::before{ /* marge du cahier */
+    content:"";position:absolute;inset:0 auto 0 22px;width:1px;background:var(--margin-rule);
+  }
+  .heading{
+    display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;
+    margin-bottom:18px;
+  }
+  .infinitif{
+    font-family:Newsreader,"Iowan Old Style",Georgia,serif;
+    font-size:15px;color:var(--ink-2);
+  }
+  .infinitif b{font-weight:600;font-style:italic;color:var(--ink);font-size:17px}
+  .tense-tag{
+    font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--accent);background:var(--accent-soft);
+    padding:3px 9px;border-radius:5px;font-weight:600;
+  }
+
+  /* ligne d'écriture Seyès */
+  .writing{
+    position:relative;
+    padding:14px 0 10px;
+    background-image:repeating-linear-gradient(to bottom,transparent 0 21px,var(--rule) 21px 22px);
+    background-size:100% 22px;
+    background-position:0 6px;
+  }
+  .line{
+    font-family:Newsreader,"Iowan Old Style",Georgia,serif;
+    font-size:clamp(28px,7.2vw,42px);
+    line-height:1.5;
+    display:flex;align-items:baseline;flex-wrap:wrap;gap:0;
+  }
+  .pronom{color:var(--ink-2);font-weight:300;white-space:pre}
+  .radical{font-weight:400}
+  .field{
+    font:inherit;
+    color:var(--accent);
+    background:transparent;
+    border:0;border-bottom:2px solid var(--accent);
+    padding:0 2px;
+    min-width:2.4ch;
+    caret-color:var(--accent);
+    border-radius:2px 2px 0 0;
+  }
+  .field:focus{outline:none;background:var(--accent-soft)}
+  .field[readonly]{opacity:1}
+  .field.is-wrong{color:var(--red);border-bottom-color:var(--red);text-decoration:line-through;text-decoration-thickness:1px}
+  .field.is-right{color:var(--green);border-bottom-color:var(--green)}
+  .person{
+    margin:10px 0 0;font-size:12.5px;color:var(--ink-3);
+  }
+
+  .accents{display:flex;flex-wrap:wrap;gap:5px;margin-top:16px}
+  .key{
+    font-family:Newsreader,Georgia,serif;font-size:16px;
+    width:34px;height:32px;border:1px solid var(--line);border-radius:7px;
+    background:transparent;color:var(--ink-2);cursor:pointer;
+  }
+  .key:hover{border-color:var(--accent);color:var(--accent)}
+
+  .actions{display:flex;gap:10px;align-items:center;margin-top:18px;flex-wrap:wrap}
+  .btn{
+    font:inherit;font-weight:600;font-size:14px;
+    background:var(--ink);color:var(--paper);
+    border:1px solid var(--ink);
+    padding:9px 20px;border-radius:9px;cursor:pointer;
+  }
+  .btn:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn.secondary{background:transparent;color:var(--ink-2);border-color:var(--line);font-weight:400}
+  .btn.secondary:hover{background:transparent;color:var(--accent);border-color:var(--accent)}
+  .hint{font-size:12px;color:var(--ink-3)}
+  kbd{
+    font:inherit;font-size:11px;border:1px solid var(--line);border-bottom-width:2px;
+    border-radius:4px;padding:0 4px;color:var(--ink-2);
+  }
+
+  /* ---------- correction ---------- */
+  .correction{
+    position:relative;
+    border:1px solid var(--line);
+    border-left:3px solid var(--verdict,var(--line));
+    border-radius:var(--radius);
+    background:var(--paper);
+    padding:20px 22px;
+    box-shadow:var(--shadow);
+  }
+  .correction.right{--verdict:var(--green)}
+  .correction.wrong{--verdict:var(--red)}
+  @media (prefers-reduced-motion: no-preference){
+    .correction{animation:rise .28s ease-out}
+  }
+  @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .verdict{display:flex;gap:12px;align-items:flex-start}
+  .mark{width:30px;height:30px;flex:none;margin-top:1px}
+  .mark path{fill:none;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke:var(--verdict)}
+  @media (prefers-reduced-motion: no-preference){
+    .mark path{stroke-dasharray:90;stroke-dashoffset:90;animation:draw .4s .05s ease-out forwards}
+  }
+  @keyframes draw{to{stroke-dashoffset:0}}
+  .verdict h2{
+    margin:0;font-family:Newsreader,Georgia,serif;font-size:21px;font-weight:600;
+    letter-spacing:-.01em;text-wrap:balance;
+  }
+  .answer{
+    margin:4px 0 0;font-family:Newsreader,Georgia,serif;font-size:17px;color:var(--ink-2);
+  }
+  .answer .good{color:var(--green);font-weight:600}
+  .answer .bad{color:var(--red);text-decoration:line-through;text-decoration-thickness:1px}
+  .blocks{margin-top:16px;display:flex;flex-direction:column;gap:14px}
+  .block h3{
+    margin:0 0 3px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--ink-3);font-weight:600;
+  }
+  .block p{margin:0;max-width:62ch}
+  .block.reflexe{
+    background:var(--accent-soft);border-radius:10px;padding:13px 15px;
+  }
+  .block.reflexe h3{color:var(--accent)}
+  .block.reflexe p{font-size:14.5px}
+  .tableau{
+    display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 14px;
+    font-family:Newsreader,Georgia,serif;font-size:15.5px;
+  }
+  .tableau div{padding:2px 6px;border-radius:5px;color:var(--ink-2)}
+  .tableau div.target{background:var(--green-soft);color:var(--ink);font-weight:600}
+  .tableau div .t{color:var(--accent);font-weight:600}
+  .tableau div.target .t{color:var(--green)}
+  @media (max-width:430px){.tableau{grid-template-columns:1fr}}
+
+  /* ---------- bilan ---------- */
+  .panel{
+    border:1px solid var(--line);border-radius:var(--radius);background:var(--paper);
+    padding:20px 22px;box-shadow:var(--shadow);
+  }
+  .panel h2{margin:0 0 4px;font-family:Newsreader,Georgia,serif;font-size:20px;font-weight:600}
+  .panel .lead{margin:0 0 16px;color:var(--ink-2);font-size:13.5px}
+  .traps{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+  .trap{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}
+  .trap b{
+    font-variant-numeric:tabular-nums;font-size:16px;color:var(--red);
+    background:var(--red-soft);border-radius:7px;text-align:center;padding:3px 0;
+  }
+  .trap p{margin:0;font-size:13.5px;color:var(--ink-2)}
+  .trap p strong{color:var(--ink);font-weight:600;display:block;font-size:14px}
+  .empty{color:var(--ink-3);font-size:13.5px;margin:0}
+  .panel-actions{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap}
+
+  .foot{font-size:12px;color:var(--ink-3);text-align:center;margin:0}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+</style>
+<meta name="theme-color" content="#2b3fe0">
+</head>
+<body data-integree="1" data-module="culture-generale">
+<nav class="ef-barre" aria-label="Étude Facile"><a class="ef-logo" href="../../index.html"><span>&gt;_</span>Étude Facile</a><span class="ef-sep">›</span><a class="ef-mod" href="index.html">Culture générale</a><span class="ef-droite"><a href="../../evaluation.html">Évaluation</a><a href="../../forum.html">Forum</a></span></nav>
+<div class="wrap">
+  <header class="top">
+    <h1 class="brand">La bonne <em>terminaison</em></h1>
+    <div class="scoreboard">
+      <div class="score" id="scoreStreak"><b id="streak">0</b><span>série</span></div>
+      <div class="score"><b><span id="right">0</span>/<span id="seen">0</span></b><span>justes</span></div>
+    </div>
+  </header>
+
+  <section class="filters" aria-label="Réglages de l'entraînement">
+    <div class="picker" id="picker">
+      <label class="row-label" for="verbSearch">Verbe</label>
+      <div class="picker-box">
+        <input class="search" id="verbSearch" type="search" list="verbList" placeholder="Tous les verbes · tape un infinitif pour t’entraîner sur un seul" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="go">
+        <button class="pill" id="clearVerb" type="button" hidden>Revenir à tous les verbes</button>
+      </div>
+      <p class="picker-msg" id="pickerMsg" hidden></p>
+      <datalist id="verbList"></datalist>
+    </div>
+    <div class="row" id="tenseRow"><span class="row-label">Temps</span></div>
+    <div class="row" id="groupRow"><span class="row-label">Verbes</span>
+      <button class="pill" id="trickyPill" type="button" aria-pressed="false" title="Ne garder que les verbes dont le radical change : -cer, -ger, appeler, acheter, espérer, employer">Radicaux pièges</button>
+      <span class="count" id="vcount"></span>
+      <button class="pill ghost" id="openBilan" type="button">Mon bilan</button>
+    </div>
+  </section>
+
+  <main class="sheet" id="sheet">
+    <div class="heading">
+      <p class="infinitif" id="infinitif"></p>
+      <span class="tense-tag" id="tenseTag"></span>
+    </div>
+    <div class="writing">
+      <div class="line">
+        <span class="pronom" id="pronom"></span><span class="radical" id="radical"></span><input class="field" id="field" type="text" aria-label="Terminaison du verbe" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="text">
+      </div>
+    </div>
+    <p class="person" id="person"></p>
+    <div class="accents" id="accents" aria-label="Lettres accentuées"></div>
+    <div class="actions">
+      <button class="btn" id="mainBtn" type="button">Vérifier</button>
+      <button class="btn secondary" id="skipBtn" type="button">Je ne sais pas</button>
+      <span class="hint"><kbd>Entrée</kbd> pour valider, puis pour enchaîner</span>
+    </div>
+  </main>
+
+  <section id="correction" aria-live="polite"></section>
+
+  <section class="panel" id="bilan" hidden>
+    <h2>Mes pièges</h2>
+    <p class="lead" id="bilanLead"></p>
+    <ul class="traps" id="trapList"></ul>
+    <div class="panel-actions">
+      <button class="btn secondary" id="closeBilan" type="button">Retour à l'exercice</button>
+      <button class="btn secondary" id="resetBtn" type="button">Remettre les compteurs à zéro</button>
+    </div>
+  </section>
+
+  <p class="foot">Les accents comptent. La casse et les espaces, non.</p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ======================================================================
+     1. DONNÉES
+     ==================================================================== */
+
+  var PRON = ["je","tu","il","nous","vous","ils"];
+  var PERSON_LABEL = [
+    "1re personne du singulier","2e personne du singulier","3e personne du singulier",
+    "1re personne du pluriel","2e personne du pluriel","3e personne du pluriel"
+  ];
+  var AUX = {
+    avoir:["ai","as","a","avons","avez","ont"],
+    "être":["suis","es","est","sommes","êtes","sont"]
+  };
+
+  var TENSES = [
+    {key:"present",      nom:"présent",             tag:"Présent"},
+    {key:"imparfait",    nom:"imparfait",           tag:"Imparfait"},
+    {key:"futur",        nom:"futur simple",        tag:"Futur"},
+    {key:"conditionnel", nom:"conditionnel présent",tag:"Conditionnel"},
+    {key:"passe",        nom:"passé composé",       tag:"Passé composé"},
+    {key:"subjonctif",   nom:"subjonctif présent",  tag:"Subjonctif"}
+  ];
+  var TENSE_NAME = {};
+  TENSES.forEach(function(t){ TENSE_NAME[t.key] = t.nom; });
+
+  // "radical|terminaison" pour les six personnes
+  function cut(stem, ends){
+    return ends.map(function(e){ return {stem:stem, end:e}; });
+  }
+  function parse(str){
+    return str.split(" ").map(function(f){
+      var i = f.indexOf("|");
+      return {stem:f.slice(0,i), end:f.slice(i+1)};
+    });
+  }
+
+  /* --- moteur du 1er groupe -------------------------------------------
+     Les terminaisons sont toujours les mêmes ; c'est le radical qui bouge.
+     Six familles : -cer (ç), -ger (e), -eler/-eter à double consonne,
+     e -> è (lever), é -> è (espérer), -yer (y -> i).                      */
+
+  var CONS = "[^aeiouyéèêàâîôûïëü]";
+
+  var DOUBLE = ("appeler rappeler épeler renouveler atteler chanceler ficeler niveler ruisseler "
+    + "étinceler ensorceler amonceler morceler jeter rejeter projeter cacheter décacheter "
+    + "déchiqueter empaqueter épousseter étiqueter feuilleter souffleter voleter").split(" ");
+  var FUTUR_A_PART = {"envoyer":"enverr", "renvoyer":"renverr"};
+  var AUX_ETRE = ("arriver rester tomber retomber entrer rentrer retourner monter remonter").split(" ");
+
+  function familleER(inf, r){
+    if(DOUBLE.indexOf(inf) !== -1) return "double";
+    if(/yer$/.test(inf)) return "yer";
+    if(new RegExp("é" + CONS + "{1,2}$").test(r)) return "acute";
+    if(new RegExp("e" + CONS + "$").test(r)) return "grave";
+    return "";
+  }
+
+  function radicalFaible(r, fam){           // devant une terminaison muette
+    if(fam === "double") return r + r.slice(-1);
+    if(fam === "yer")    return r.replace(/y$/,"i");
+    if(fam === "acute")  return r.replace(new RegExp("é(" + CONS + "{1,2})$"), "è$1");
+    if(fam === "grave")  return r.replace(new RegExp("e(" + CONS + ")$"), "è$1");
+    return r;
+  }
+
+  // Devant a et o, -cer prend une cédille et -ger un e : la lettre fait
+  // partie de ce que l'élève doit écrire.
+  function euph(r, end){
+    if(end.charAt(0) === "a" || end.charAt(0) === "o"){
+      if(/c$/.test(r)) return {stem:r.slice(0,-1), end:"ç" + end};
+      if(/g$/.test(r)) return {stem:r, end:"e" + end};
+    }
+    return {stem:r, end:end};
+  }
+
+  function groupe1(inf){
+    var r = inf.slice(0,-2);
+    var fam = familleER(inf, r);
+    var W = radicalFaible(r, fam);
+    var fut = FUTUR_A_PART[inf] || ((fam === "" || fam === "acute") ? inf : W + "er");
+    var m = function(s,e){ return {stem:s, end:e}; };
+    return {
+      fam: fam,
+      piege: fam !== "" || /[cg]er$/.test(inf),
+      present:      [m(W,"e"), m(W,"es"), m(W,"e"), euph(r,"ons"), m(r,"ez"), m(W,"ent")],
+      imparfait:    [euph(r,"ais"), euph(r,"ais"), euph(r,"ait"), m(r,"ions"), m(r,"iez"), euph(r,"aient")],
+      futur:        cut(fut,["ai","as","a","ons","ez","ont"]),
+      conditionnel: cut(fut,["ais","ais","ait","ions","iez","aient"]),
+      subjonctif:   [m(W,"e"), m(W,"es"), m(W,"e"), m(r,"ions"), m(r,"iez"), m(W,"ent")],
+      passe:        {stem:r, end:"é"}
+    };
+  }
+  function groupe2(inf){
+    var r = inf.slice(0,-2);
+    return {
+      present:      cut(r,["is","is","it","issons","issez","issent"]),
+      imparfait:    cut(r,["issais","issais","issait","issions","issiez","issaient"]),
+      futur:        cut(inf,["ai","as","a","ons","ez","ont"]),
+      conditionnel: cut(inf,["ais","ais","ait","ions","iez","aient"]),
+      subjonctif:   cut(r,["isse","isses","isse","issions","issiez","issent"]),
+      passe:        {stem:r, end:"i"}
+    };
+  }
+
+  var VERBES = [];
+  function add(inf, groupe, aux, forms){
+    VERBES.push({inf:inf, groupe:groupe, aux:aux, f:forms, piege:!!forms.piege, fam:forms.fam || ""});
+  }
+
+  // --- 1er groupe : les verbes en -er ------------------------------------
+  var ER = [
+    "abandonner abîmer aborder abriter accabler accélérer accepter accompagner accorder accrocher",
+    "accumuler accuser acheter achever activer adapter additionner adhérer admirer adopter adorer",
+    "adresser afficher affirmer affronter agacer agiter aider aimer ajouter ajuster alerter aligner",
+    "alimenter allumer allonger alterner améliorer aménager amener amuser analyser animer annoncer",
+    "annuler apaiser appeler appliquer apporter apprécier approcher approuver appuyer arracher",
+    "arranger arrêter arriver arroser aspirer assembler assister associer assurer attacher attaquer",
+    "atteler attirer attraper augmenter autoriser avaler avancer avouer",
+    "baisser balancer balayer barrer baser bavarder bégayer bénéficier bercer blesser bloquer border",
+    "boucher bouger bouleverser bousculer bricoler briller briser bronzer brosser brouiller brûler",
+    "cacher cacheter calculer calmer camper capturer caresser casser causer céder célébrer cesser",
+    "chanceler changer chanter charger charmer chasser chauffer chercher chiffrer choquer chuchoter",
+    "circuler ciseler citer clarifier classer cliquer coiffer coincer collaborer collectionner coller",
+    "colorer combiner commander commencer commenter communiquer comparer compenser compléter",
+    "compliquer comporter composer compter concentrer concerner condamner confier confirmer congeler",
+    "conseiller conserver considérer consister consoler consommer constater constituer consulter",
+    "contacter contempler contenter continuer contourner contribuer contrôler convoquer copier corriger",
+    "coucher couler couper couronner coûter créer creuser crever crier critiquer croiser cuisiner cultiver",
+    "danser dater débarrasser déborder déboucher débrouiller débuter décacheter décaler déceler",
+    "décharger déchiqueter déchirer décider déclarer déclencher décoller décorer découper décrocher",
+    "dédier dégager dégeler déguiser déjeuner délaisser délivrer demander démarrer déménager démanteler",
+    "démonter démontrer dénoncer dépanner dépasser dépêcher dépenser déplacer déplier déposer déranger",
+    "dériver dérouler désigner désirer dessiner détacher détailler déterminer détester développer deviner",
+    "dévoiler dicter différer diffuser digérer diminuer diriger discuter disposer disputer distinguer",
+    "distribuer diviser divorcer dominer donner doubler douter dresser durer",
+    "écarteler échanger échapper échouer éclairer éclater économiser écouter écraser éditer éduquer",
+    "effacer effectuer effrayer égaler élaborer élever éliminer éloigner emballer embarquer embrasser",
+    "emmener empaqueter empêcher employer emporter emprunter encadrer encourager énerver enfermer",
+    "enfoncer engager enlever ennuyer enregistrer enseigner ensorceler entasser enterrer entourer",
+    "entraîner entrer envelopper envoyer épargner épeler éprouver épuiser épousseter équiper escalader",
+    "espérer essayer essuyer estimer étaler étinceler étiqueter étonner étouffer étudier évaluer éveiller",
+    "éviter évoluer évoquer exagérer examiner excuser exécuter exercer exiger exister expliquer explorer",
+    "exploser exporter exposer exprimer",
+    "fabriquer fâcher faciliter fatiguer favoriser féliciter fermer fêter feuilleter ficeler figurer",
+    "filmer filtrer financer fixer flâner flotter foncer fonctionner fonder forcer former formuler",
+    "fouiller frapper freiner fréquenter frissonner frotter fumer fureter fusionner",
+    "gagner garder garer gaspiller gâter geler gêner générer glisser gonfler goûter gouverner gratter",
+    "griller grimper gronder grouper guetter guider",
+    "habiller habiter habituer haleter harceler hâter hériter hésiter heurter honorer humilier hurler",
+    "identifier ignorer illuminer illustrer imaginer imiter implanter impliquer importer imposer",
+    "impressionner imprimer inciter incliner indiquer influencer informer inquiéter insister inspirer",
+    "installer insulter intégrer intéresser interpréter interroger inventer inviter isoler",
+    "jeter jouer juger justifier jurer",
+    "lâcher laisser lancer laver lever libérer lier limiter livrer loger longer louer lutter",
+    "mâcher maîtriser manger manifester manipuler manquer maquiller marcher marier marquer marteler",
+    "masquer mélanger mêler menacer ménager mener mentionner mériter mesurer meubler mimer modeler",
+    "modérer moderniser modifier monter montrer moquer morceler motiver mouiller multiplier murmurer",
+    "nager naviguer négliger négocier neiger nettoyer niveler nommer noter noyer numéroter",
+    "objecter obliger observer occuper offenser opérer opposer ordonner organiser orienter oser ôter oublier",
+    "pardonner parfumer parier parler partager participer passer passionner patienter payer pêcher peler",
+    "pencher pénétrer penser percer perfectionner persuader peser photographier piquer placer plaisanter",
+    "planifier planter pleurer plier plonger porter poser posséder poster pousser pratiquer précéder",
+    "précipiter préciser préférer préparer présenter préserver presser prêter prier priver procéder",
+    "proclamer procurer profiter programmer progresser projeter prolonger promener prononcer proposer",
+    "protéger protester prouver provoquer publier puiser",
+    "qualifier questionner quitter",
+    "raccrocher racheter raconter ramasser ramener ranger rappeler rapporter rapprocher rassembler",
+    "rassurer rater rattraper réaliser réchauffer rechercher réciter réclamer recommander recommencer",
+    "récompenser recopier récupérer rédiger redonner redouter refléter refuser regarder régler régner",
+    "regretter rejeter relever relier remarquer rembourser remercier remonter remplacer remporter remuer",
+    "rencontrer renforcer renoncer renouveler rentrer renverser renvoyer réparer repasser repérer répéter",
+    "replacer reporter reposer représenter reprocher réserver résister respecter respirer ressembler",
+    "rester résumer retarder retirer retomber retourner retrouver révéler rêver réviser rigoler risquer",
+    "rouler ruisseler",
+    "sacrifier saluer sauter sauver savourer sécher secouer séjourner sélectionner sembler semer séparer",
+    "serrer signaler signer signifier simplifier situer soigner sonner souffler souffleter soulager",
+    "soulever souligner soupçonner souhaiter spécialiser stationner stimuler succéder sucrer suggérer",
+    "supporter supposer supprimer surgeler surveiller sympathiser",
+    "tacher tailler taper taquiner tarder téléphoner témoigner tenter terminer tirer tolérer tomber",
+    "toucher tourner tousser tracer traîner traiter transférer transformer transporter travailler",
+    "traverser trembler tremper tricher tromper troubler trouver tuer tutoyer",
+    "unifier utiliser",
+    "vacciner valider vanter varier veiller venger vérifier verser vexer vibrer vider viser visiter",
+    "voler voter vouvoyer voyager"
+  ].join(" ").split(/\s+/);
+
+  var vus = {};
+  ER.forEach(function(inf){
+    if(!inf || vus[inf]) return;
+    vus[inf] = 1;
+    add(inf, 1, AUX_ETRE.indexOf(inf) !== -1 ? "être" : "avoir", groupe1(inf));
+  });
+
+  // --- 2e groupe --------------------------------------------------------
+  ["finir","choisir","grandir","réussir","réfléchir","obéir"]
+    .forEach(function(v){ add(v,2,"avoir",groupe2(v)); });
+
+  // --- 3e groupe --------------------------------------------------------
+  add("être",3,"avoir",{
+    present:      parse("su|is e|s es|t somm|es ê|tes so|nt"),
+    imparfait:    cut("ét",["ais","ais","ait","ions","iez","aient"]),
+    futur:        cut("ser",["ai","as","a","ons","ez","ont"]),
+    conditionnel: cut("ser",["ais","ais","ait","ions","iez","aient"]),
+    subjonctif:   parse("so|is so|is so|it soy|ons soy|ez so|ient"),
+    passe:        {stem:"ét", end:"é"}
+  });
+  add("avoir",3,"avoir",{
+    present:      parse("|ai |as |a av|ons av|ez |ont"),
+    imparfait:    cut("av",["ais","ais","ait","ions","iez","aient"]),
+    futur:        cut("aur",["ai","as","a","ons","ez","ont"]),
+    conditionnel: cut("aur",["ais","ais","ait","ions","iez","aient"]),
+    subjonctif:   parse("|aie |aies |ait ay|ons ay|ez |aient"),
+    passe:        {stem:"e", end:"u"}
+  });
+  add("aller",3,"être",{
+    present:      parse("v|ais v|as v|a all|ons all|ez v|ont"),
+    imparfait:    cut("all",["ais","ais","ait","ions","iez","aient"]),
+    futur:        cut("ir",["ai","as","a","ons","ez","ont"]),
+    conditionnel: cut("ir",["ais","ais","ait","ions","iez","aient"]),
+    subjonctif:   parse("aill|e aill|es aill|e all|ions all|iez aill|ent"),
+    passe:        {stem:"all", end:"é"}
+  });
+  add("faire",3,"avoir",{
+    present:      parse("fa|is fa|is fa|it fais|ons fa|ites fo|nt"),
+    imparfait:    cut("fais",["ais","ais","ait","ions","iez","aient"]),
+    futur:        cut("fer",["ai","as","a","ons","ez","ont"]),
+    conditionnel: cut("fer",["ais","ais","ait","ions","iez","aient"]),
+    subjonctif:   cut("fass",["e","es","e","ions","iez","ent"]),
+    passe:        {stem:"fa", end:"it"}
+  });
+  add("dire",3,"avoir",{
+    present:      parse("di|s di|s di|t dis|ons di|tes dis|ent"),
+    imparfait:    cut("dis",["ais","ais","ait","ions","iez","aient"]),
+    futur:        cut("dir",["ai","as","a","ons","ez","ont"]),
+    conditionnel: cut("dir",["ais","ais","ait","ions","iez","aient"]),
+    subjonctif:   cut("dis",["e","es","e","ions","iez","ent"]),
+    passe:        {stem:"d", end:"it"}
+  });
+  add("pouvoir",3,"avoir",{
+    present:      parse("pe|ux pe|ux pe|ut pouv|ons pouv|ez peuv|ent"),
+    imparfait:    cut("pouv",["ais","ais","ait","ions","iez","aient"]),
+    futur:        cut("pourr",["ai","as","a","ons","ez","ont"]),
+    conditionnel: cut("pourr",["ais","ais","ait","ions","iez","aient"]),
+    subjonctif:   cut("puiss",["e","es","e","ions","iez","ent"]),
+    passe:        {stem:"p", end:"u"}
+  });
+  add("vouloir",3,"avoir",{
+    present:      parse("ve|ux ve|ux ve|ut voul|ons voul|ez veul|ent"),
+    imparfait:    cut("voul",["ais","ais","ait","ions","iez","aient"]),
+    futur:        cut("voudr",["ai","as","a","ons","ez","ont"]),
+    conditionnel: cut("voudr",["ais","ais","ait","ions","iez","aient"]),
+    subjonctif:   parse("veuill|e veuill|es veuill|e voul|ions voul|iez veuill|ent"),
+    passe:        {stem:"voul", end:"u"}
+  });
+  add("prendre",3,"avoir",{
+    present:      parse("pren|ds pren|ds pren|d pren|ons pren|ez prenn|ent"),
+    imparfait:    cut("pren",["ais","ais","ait","ions","iez","aient"]),
+    futur:        cut("prendr",["ai","as","a","ons","ez","ont"]),
+    conditionnel: cut("prendr",["ais","ais","ait","ions","iez","aient"]),
+    subjonctif:   parse("prenn|e prenn|es prenn|e pren|ions pren|iez prenn|ent"),
+    passe:        {stem:"pr", end:"is"}
+  });
+  add("venir",3,"être",{
+    present:      parse("vien|s vien|s vien|t ven|ons ven|ez vienn|ent"),
+    imparfait:    cut("ven",["ais","ais","ait","ions","iez","aient"]),
+    futur:        cut("viendr",["ai","as","a","ons","ez","ont"]),
+    conditionnel: cut("viendr",["ais","ais","ait","ions","iez","aient"]),
+    subjonctif:   parse("vienn|e vienn|es vienn|e ven|ions ven|iez vienn|ent"),
+    passe:        {stem:"ven", end:"u"}
+  });
+  add("voir",3,"avoir",{
+    present:      parse("vo|is vo|is vo|it voy|ons voy|ez vo|ient"),
+    imparfait:    cut("voy",["ais","ais","ait","ions","iez","aient"]),
+    futur:        cut("verr",["ai","as","a","ons","ez","ont"]),
+    conditionnel: cut("verr",["ais","ais","ait","ions","iez","aient"]),
+    subjonctif:   parse("voi|e voi|es voi|e voy|ions voy|iez voi|ent"),
+    passe:        {stem:"v", end:"u"}
+  });
+  add("savoir",3,"avoir",{
+    present:      parse("sa|is sa|is sa|it sav|ons sav|ez sav|ent"),
+    imparfait:    cut("sav",["ais","ais","ait","ions","iez","aient"]),
+    futur:        cut("saur",["ai","as","a","ons","ez","ont"]),
+    conditionnel: cut("saur",["ais","ais","ait","ions","iez","aient"]),
+    subjonctif:   cut("sach",["e","es","e","ions","iez","ent"]),
+    passe:        {stem:"s", end:"u"}
+  });
+  add("devoir",3,"avoir",{
+    present:      parse("do|is do|is do|it dev|ons dev|ez doiv|ent"),
+    imparfait:    cut("dev",["ais","ais","ait","ions","iez","aient"]),
+    futur:        cut("devr",["ai","as","a","ons","ez","ont"]),
+    conditionnel: cut("devr",["ais","ais","ait","ions","iez","aient"]),
+    subjonctif:   parse("doiv|e doiv|es doiv|e dev|ions dev|iez doiv|ent"),
+    passe:        {stem:"d", end:"û"}
+  });
+  add("mettre",3,"avoir",{
+    present:      parse("me|ts me|ts me|t mett|ons mett|ez mett|ent"),
+    imparfait:    cut("mett",["ais","ais","ait","ions","iez","aient"]),
+    futur:        cut("mettr",["ai","as","a","ons","ez","ont"]),
+    conditionnel: cut("mettr",["ais","ais","ait","ions","iez","aient"]),
+    subjonctif:   cut("mett",["e","es","e","ions","iez","ent"]),
+    passe:        {stem:"m", end:"is"}
+  });
+  add("partir",3,"être",{
+    present:      parse("par|s par|s par|t part|ons part|ez part|ent"),
+    imparfait:    cut("part",["ais","ais","ait","ions","iez","aient"]),
+    futur:        cut("partir",["ai","as","a","ons","ez","ont"]),
+    conditionnel: cut("partir",["ais","ais","ait","ions","iez","aient"]),
+    subjonctif:   cut("part",["e","es","e","ions","iez","ent"]),
+    passe:        {stem:"part", end:"i"}
+  });
+
+  /* ======================================================================
+     2. CONSTRUCTION D'UNE FORME
+     ==================================================================== */
+
+  function formOf(verbe, tense, person){
+    if(tense === "passe"){
+      var pp = verbe.f.passe;
+      var end = pp.end;
+      if(verbe.aux === "être" && person >= 3) end = end + "s";
+      return {stem:pp.stem, end:end};
+    }
+    return verbe.f[tense][person];
+  }
+
+  function startsVowel(w){
+    return /^[aeiouyâàéèêëîïôûùh]/i.test(w || "");
+  }
+
+  function prefixOf(verbe, tense, person){
+    var out = "";
+    if(tense === "subjonctif"){
+      out += (person === 2 || person === 5) ? "qu’" : "que ";
+    }
+    var pron = PRON[person];
+    var head;
+    if(tense === "passe"){
+      head = AUX[verbe.aux][person];
+    } else {
+      var f = formOf(verbe, tense, person);
+      head = f.stem || f.end;
+    }
+    if(tense === "subjonctif" && (person === 2 || person === 5)){
+      out += pron + " ";
+    } else if(pron === "je" && startsVowel(head)){
+      out += "j’";
+    } else {
+      out += pron + " ";
+    }
+    if(tense === "passe") out += AUX[verbe.aux][person] + " ";
+    return out;
+  }
+
+  function fullForm(verbe, tense, person){
+    var f = formOf(verbe, tense, person);
+    return prefixOf(verbe, tense, person) + f.stem + f.end;
+  }
+
+  function endingsOf(verbe, tense){
+    var out = [];
+    for(var p = 0; p < 6; p++) out.push(formOf(verbe, tense, p).end);
+    return out;
+  }
+
+  /* ======================================================================
+     3. ÉTAT
+     ==================================================================== */
+
+  var STORE = "verbe.terminaison.v1";
+  var state = {
+    tenses: ["present","imparfait","futur"],
+    groupes: [1,2,3],
+    tricky: false,
+    focus: "",          // infinitif choisi, vide = tous les verbes
+    seen: 0, right: 0, streak: 0, best: 0,
+    traps: {},          // type d'erreur -> nombre
+    weak: {}            // "verbe|temps" -> nombre d'erreurs
+  };
+  var queue = [];       // reprises programmées
+  var recent = [];      // anti-répétition
+  var current = null;
+  var answered = false;
+  var focusVerb = null; // verbe choisi (objet)
+  var deck = [], deckTotal = 0, tour = 0;
+
+  function load(){
+    try{
+      var raw = localStorage.getItem(STORE);
+      if(!raw) return;
+      var s = JSON.parse(raw);
+      ["seen","right","streak","best"].forEach(function(k){
+        if(typeof s[k] === "number") state[k] = s[k];
+      });
+      if(s.traps) state.traps = s.traps;
+      if(s.weak) state.weak = s.weak;
+      if(Array.isArray(s.tenses) && s.tenses.length) state.tenses = s.tenses;
+      if(Array.isArray(s.groupes) && s.groupes.length) state.groupes = s.groupes;
+      if(typeof s.tricky === "boolean") state.tricky = s.tricky;
+      if(typeof s.focus === "string") state.focus = s.focus;
+    }catch(e){/* stockage indisponible : on continue sans */}
+  }
+  function save(){
+    try{ localStorage.setItem(STORE, JSON.stringify(state)); }catch(e){}
+  }
+
+  /* ======================================================================
+     4. TIRAGE DES QUESTIONS
+     ==================================================================== */
+
+  function pool(){
+    return VERBES.filter(function(v){
+      if(state.groupes.indexOf(v.groupe) === -1) return false;
+      if(state.tricky && v.groupe === 1 && !v.piege) return false;
+      return true;
+    });
+  }
+
+  function makeItem(verbe, tense, person){
+    var f = formOf(verbe, tense, person);
+    return {
+      verbe: verbe, tense: tense, person: person,
+      stem: f.stem, end: f.end,
+      prefix: prefixOf(verbe, tense, person),
+      key: verbe.inf + "|" + tense + "|" + person
+    };
+  }
+
+  /* --- verbe choisi ----------------------------------------------------- */
+
+  // « esperer » retrouve « espérer » : les accents sont facultatifs à la saisie.
+  function findVerb(q){
+    var k = bare(q || "");
+    if(!k) return null;
+    for(var i = 0; i < VERBES.length; i++){
+      if(bare(VERBES[i].inf) === k) return VERBES[i];
+    }
+    return null;
+  }
+
+  // Un verbe en -er absent de la liste se conjugue quand même : la règle du
+  // 1er groupe ne connaît pas d'exception en dehors d'aller et d'envoyer.
+  function customVerb(q){
+    var w = (q || "").trim().toLowerCase();
+    if(!/^[a-zàâçéèêëîïôûùüœ]{2,}er$/.test(w)) return null;
+    var f = groupe1(w);
+    return {inf:w, groupe:1, aux:"avoir", f:f, piege:!!f.piege, fam:f.fam, horsListe:true};
+  }
+
+  function shuffle(a){
+    for(var i = a.length - 1; i > 0; i--){
+      var j = (Math.random() * (i + 1)) | 0;
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  // Toutes les personnes de tous les temps cochés, dans le désordre.
+  function refillDeck(){
+    deck = [];
+    state.tenses.forEach(function(t){
+      for(var p = 0; p < 6; p++) deck.push({tense:t, person:p});
+    });
+    shuffle(deck);
+    deckTotal = deck.length;
+    tour++;
+  }
+  function resetDeck(){ deck = []; deckTotal = 0; tour = 0; }
+
+  function pickFocused(){
+    for(var j = 0; j < queue.length; j++){
+      var q = queue[j];
+      if(q.at <= state.seen && q.inf === focusVerb.inf && state.tenses.indexOf(q.tense) !== -1){
+        queue.splice(j, 1);
+        var it = makeItem(focusVerb, q.tense, q.person);
+        it.reprise = true;
+        return it;
+      }
+    }
+    if(!deck.length) refillDeck();
+    var c = deck.pop();
+    return makeItem(focusVerb, c.tense, c.person);
+  }
+
+  function pick(){
+    if(focusVerb) return state.tenses.length ? pickFocused() : null;
+    var vs = pool();
+    if(!vs.length || !state.tenses.length) return null;
+
+    // une reprise arrive à échéance ?
+    for(var i = 0; i < queue.length; i++){
+      if(queue[i].at <= state.seen){
+        var q = queue.splice(i,1)[0];
+        if(state.tenses.indexOf(q.tense) !== -1){
+          var v = VERBES.filter(function(x){ return x.inf === q.inf; })[0];
+          if(v) return makeItem(v, q.tense, q.person);
+        }
+        i--;
+      }
+    }
+
+    // 1 fois sur 3, on repique dans les verbes/temps ratés
+    var weakKeys = Object.keys(state.weak).filter(function(k){
+      var p = k.split("|");
+      return state.tenses.indexOf(p[1]) !== -1 &&
+             vs.some(function(v){ return v.inf === p[0]; });
+    });
+    var item = null, guard = 0;
+    do{
+      if(weakKeys.length && Math.random() < 0.33){
+        var wk = weakKeys[(Math.random()*weakKeys.length)|0].split("|");
+        var wv = VERBES.filter(function(x){ return x.inf === wk[0]; })[0];
+        item = makeItem(wv, wk[1], (Math.random()*6)|0);
+      } else {
+        var verbe = vs[(Math.random()*vs.length)|0];
+        var tense = state.tenses[(Math.random()*state.tenses.length)|0];
+        item = makeItem(verbe, tense, (Math.random()*6)|0);
+      }
+      guard++;
+    } while(recent.indexOf(item.key) !== -1 && guard < 30);
+
+    recent.push(item.key);
+    if(recent.length > 12) recent.shift();
+    return item;
+  }
+
+  /* ======================================================================
+     5. DIAGNOSTIC DES ERREURS
+     ==================================================================== */
+
+  function norm(s){
+    return (s || "").toLowerCase()
+      .replace(/[\s’'\-]/g,"")
+      .replace(/œ/g,"oe");
+  }
+  function bare(s){
+    return norm(s).normalize("NFD").replace(/[̀-ͯ]/g,"");
+  }
+
+  var TENSE_TIP = {
+    present: "Au présent, chaque groupe a son tableau : 1er groupe -e, -es, -e, -ons, -ez, -ent ; 2e groupe -is, -is, -it, -issons, -issez, -issent. Récite le tableau en entier avant d’écrire, la bonne case apparaît toute seule.",
+    imparfait: "L’imparfait est le temps le plus régulier du français : -ais, -ais, -ait, -ions, -iez, -aient pour absolument tous les verbes, sans exception. Apprends cette suite par cœur une bonne fois et l’imparfait est réglé à vie.",
+    futur: "Le futur se fabrique avec l’infinitif + les terminaisons d’avoir : ai, as, a, (av)ons, (av)ez, ont. Il y a donc toujours un r avant la terminaison : je parlerai, je finirai, je prendrai.",
+    conditionnel: "Conditionnel = radical du futur + terminaisons de l’imparfait. Il contient donc toujours un r ET -ais/-ait/-ions/-iez/-aient : je prendrais.",
+    passe: "Participe passé : 1er groupe en -é, 2e groupe en -i. Pour les autres, mets-le au féminin à l’oreille pour entendre la lettre muette : prise → pris, faite → fait, mise → mis, offerte → offert.",
+    subjonctif: "Teste toujours le subjonctif avec « il faut que » devant. Il se voit surtout à nous/vous, qui prennent -ions et -iez : il faut que nous prenions, que vous fassiez."
+  };
+
+  // Réflexes ciblés, du plus précis au plus général.
+  var REFLEXES = [
+    {
+      id:"er-e",
+      test:function(c,g){ return (c==="é"||c==="és") && (g==="er"||g==="ez"||g==="ai"); },
+      titre:"-er ou -é ?",
+      why:function(c,g){ return "« -"+g+" » est un infinitif (ou un présent), pas un participe passé. Après l’auxiliaire avoir ou être, c’est le participe qu’il faut : -"+c+"."; },
+      tip:"Remplace le verbe par « mordre ». Si « mordre » sonne juste, c’est -er ; si c’est « mordu » qui sonne juste, c’est -é. Ici : « j’ai mordu » → donc -é."
+    },
+    {
+      id:"e-er",
+      test:function(c,g){ return (c==="er") && (g==="é"||g==="ée"); },
+      titre:"-é ou -er ?",
+      why:function(){ return "Il fallait l’infinitif, tu as écrit le participe passé. Les deux se prononcent [e], c’est le piège le plus fréquent de l’orthographe française."; },
+      tip:"Le test de « mordre » : si tu peux dire « mordre » à la place, c’est -er. « Je vais mordre » → « je vais manger »."
+    },
+    {
+      id:"ons-ont",
+      test:function(c,g){ return c==="ons" && g==="ont"; },
+      titre:"-ons, jamais -ont avec « nous »",
+      why:function(){ return "Avec le sujet « nous », la terminaison est toujours -ons, à tous les temps, pour tous les verbes."; },
+      tip:"Au présent, -ont n’existe que pour quatre verbes, tous à « ils » : ils ont, ils sont, ils font, ils vont. Partout ailleurs, ce son s’écrit -ons avec « nous »."
+    },
+    {
+      id:"ont-ons",
+      test:function(c,g){ return c==="ont" && g==="ons"; },
+      titre:"Ici c’est bien -ont",
+      why:function(){ return "Le sujet est « ils », pas « nous ». -ons appartient à « nous »."; },
+      tip:"Quatre verbes seulement font -ont au présent : ils ont, ils sont, ils font, ils vont. Au futur, en revanche, tous les verbes le font : ils parleront, ils prendront."
+    },
+    {
+      id:"ent-muet",
+      test:function(c,g){ return c==="ent" && (g==="e"||g==="es"||g===""); },
+      titre:"Le -ent qui ne s’entend pas",
+      why:function(){ return "« il chante » et « ils chantent » se prononcent exactement pareil : seule l’orthographe montre le pluriel. Le sujet ici est au pluriel."; },
+      tip:"Remplace le verbe par « prendre » : « ils prennent ». Tu entends la différence avec « il prend » → le verbe est au pluriel, donc -ent."
+    },
+    {
+      id:"e-ent",
+      test:function(c,g){ return (c==="e"||c==="es") && g==="ent"; },
+      titre:"-ent est réservé au pluriel",
+      why:function(){ return "-ent ne s’emploie qu’avec ils/elles. Ici le sujet est au singulier."; },
+      tip:"Le test de « prendre » : dis « il prend » (singulier) ou « ils prennent » (pluriel) à la place du verbe. Ce que tu entends te donne le nombre."
+    },
+    {
+      id:"euph-g",
+      strong:true,
+      test:function(c,g){ return /^e[ao]/.test(c) && c.slice(1)===g; },
+      titre:"Le e de « nous mangeons »",
+      why:function(){ return "Devant a et o, le g se prononcerait [g], comme dans « gare ». On intercale un e pour garder le son [j] du verbe."; },
+      tip:"Tous les verbes en -ger prennent ce e devant a et o : nous mangeons, je bougeais, nous voyageons, ils partageaient. Devant e et i, rien à ajouter : nous mangions, vous mangez."
+    },
+    {
+      id:"euph-c",
+      strong:true,
+      test:function(c,g){ return /^ç/.test(c) && (g===c.slice(1) || g==="c"+c.slice(1)); },
+      titre:"La cédille de « nous commençons »",
+      why:function(){ return "Devant a et o, le c se prononcerait [k], comme dans « car ». La cédille garde le son [s]."; },
+      tip:"Les verbes en -cer prennent une cédille devant a et o : nous commençons, je plaçais, ils avançaient. Devant e et i, le c suffit : nous commencions, vous placez."
+    },
+    {
+      id:"iss",
+      strong:true,
+      test:function(c,g){ return c.indexOf("iss")===0 && c.slice(3)===g; },
+      titre:"Il manque le -iss-",
+      why:function(){ return "C’est un verbe du 2e groupe : il intercale -iss- au pluriel du présent et à tout l’imparfait."; },
+      tip:"Le test du 2e groupe : si « nous ...issons » sonne juste (nous finissons, nous choisissons), le verbe prend -iss-. Si tu obtiens « nous partissons », c’est raté → 3e groupe."
+    },
+    {
+      id:"fut-cond",
+      test:function(c,g,it){ return it.tense==="futur" && g===c+"s"; },
+      titre:"Futur ou conditionnel ?",
+      why:function(){ return "-rais est le conditionnel ; on demandait le futur, qui s’écrit -rai, sans s."; },
+      tip:"Place un mot-test devant : « demain, je ... » → futur, -ai. « Si je pouvais, je ... » → conditionnel, -ais. Moyen mnémotechnique : le s du conditionnel, c’est le s de « si »."
+    },
+    {
+      id:"cond-fut",
+      test:function(c,g,it){ return it.tense==="conditionnel" && c===g+"s"; },
+      titre:"Conditionnel ou futur ?",
+      why:function(){ return "Tu as écrit le futur (-rai). Le conditionnel prend les terminaisons de l’imparfait : -rais, -rait, -rions, -riez, -raient."; },
+      tip:"« Demain, je ...rai » → futur. « Si je pouvais, je ...rais » → conditionnel. Le s du conditionnel, c’est le s de « si »."
+    },
+    {
+      id:"accord-etre",
+      test:function(c,g,it){ return it.tense==="passe" && it.verbe.aux==="être" && c===g+"s"; },
+      titre:"Accord du participe avec être",
+      why:function(){ return "Avec l’auxiliaire être, le participe passé s’accorde avec le sujet. Le sujet est au pluriel, le participe prend donc un s."; },
+      tip:"Deux réflexes opposés : avec être, le participe s’accorde (nous sommes allés, elle est partie) ; avec avoir, il ne bouge pas (nous avons mangé, elles ont fini)."
+    },
+    {
+      id:"s-t",
+      test:function(c,g,it){ return it.tense==="present" && it.person===2 && (g==="s"||g==="ds"||g==="ts"); },
+      titre:"Pas de -s à « il »",
+      why:function(){ return "La 3e personne du singulier ne prend jamais -s au présent : il finit, il prend, il met, il va."; },
+      tip:"Retiens la paire : tu prends / il prend, tu finis / il finit. Le s appartient à « tu », le t à « il »."
+    },
+    {
+      id:"tu-s",
+      test:function(c,g,it){ return it.tense==="present" && it.person===1 && c.slice(-1)==="s" && g===c.slice(0,-1); },
+      titre:"« tu » prend toujours un s",
+      why:function(){ return "Sans aucune exception au présent (sauf tu peux, tu veux, tu vaux, qui prennent un x), le verbe se termine par s avec « tu »."; },
+      tip:"« tu » finit par un s, le verbe aussi : tu parles, tu finis, tu prends, tu vas. Vérifie-le d’un coup d’œil après chaque « tu »."
+    },
+    {
+      id:"vous-ez",
+      test:function(c,g,it){ return c==="ez" && g!=="ez"; },
+      titre:"Avec « vous », c’est -ez",
+      why:function(){ return "La 2e personne du pluriel se termine par -ez à presque tous les temps."; },
+      tip:"Trois exceptions au présent seulement : vous êtes, vous faites, vous dites. Partout ailleurs : -ez."
+    }
+  ];
+
+  function findReflexe(correct, given, item){
+    for(var i = 0; i < REFLEXES.length; i++){
+      try{
+        if(REFLEXES[i].test(correct, given, item)) return REFLEXES[i];
+      }catch(e){}
+    }
+    return null;
+  }
+
+  // Cherche la terminaison saisie ailleurs dans la conjugaison du verbe.
+  function locate(given, item){
+    var ends = endingsOf(item.verbe, item.tense);
+    for(var p = 0; p < 6; p++){
+      if(p !== item.person && norm(ends[p]) === given){
+        return {kind:"personne", person:p};
+      }
+    }
+    for(var i = 0; i < TENSES.length; i++){
+      var t = TENSES[i].key;
+      if(t === item.tense) continue;
+      var f = formOf(item.verbe, t, item.person);
+      if(norm(f.end) === given) return {kind:"temps", tense:t};
+    }
+    return null;
+  }
+
+  // Regroupe les terminaisons qui se prononcent de la même façon.
+  var PHON = {
+    "e":"E","es":"E","ent":"E","er":"E","ez":"E","ee":"E","ees":"E",
+    "ai":"AI","ais":"AI","ait":"AI","aient":"AI","aie":"AI","aies":"AI",
+    "i":"I","is":"I","it":"I","ie":"I","ies":"I","ient":"I",
+    "u":"U","us":"U","ut":"U","ue":"U","ues":"U","uent":"U","ux":"U",
+    "ons":"ON","ont":"ON",
+    "s":"C","t":"C","d":"C","ds":"C","ts":"C","x":"C","ss":"C"
+  };
+  function phon(e){
+    var k = bare(e);
+    return PHON[k] || k;
+  }
+  function homophone(a, b){
+    return bare(a) !== bare(b) && phon(a) === phon(b);
+  }
+
+  function diagnose(raw, item){
+    var given = norm(raw);
+    var correct = norm(item.end);
+    var res = {kind:"", titre:"", why:"", tip:"", trap:""};
+
+    if(given === correct){
+      res.kind = "juste";
+      res.titre = "Exact.";
+      res.tip = TENSE_TIP[item.tense];
+      return res;
+    }
+
+    if(!given){
+      res.kind = "vide";
+      res.trap = "vide";
+      res.titre = "Rien n’a été écrit";
+      res.why = "La terminaison attendue était « -" + item.end + " ».";
+      res.tip = TENSE_TIP[item.tense];
+      return res;
+    }
+
+    var reflexe = findReflexe(correct, given, item);
+
+    // Certaines confusions expliquent la faute mieux que tout le reste.
+    if(reflexe && reflexe.strong){
+      res.kind = "confusion";
+      res.trap = reflexe.id;
+      res.titre = reflexe.titre;
+      res.why = reflexe.why(correct, given, item);
+      res.tip = reflexe.tip;
+      return res;
+    }
+
+    if(bare(given) === bare(correct)){
+      res.kind = "accent";
+      res.trap = "accent";
+      res.titre = "Les bonnes lettres, le mauvais accent";
+      res.why = "Tu as écrit « -" + raw.trim() + " » au lieu de « -" + item.end + " ». Dans une terminaison, l’accent fait partie de l’orthographe.";
+      res.tip = item.end.indexOf("û") !== -1
+        ? "« dû » prend un accent circonflexe au masculin singulier pour le distinguer de l’article « du ». Il le perd au féminin et au pluriel : due, dus, dues."
+        : "Dans les terminaisons verbales, le son [e] s’écrit toujours é (fermé, comme dans « nez ») : mangé, allé, été. Le è n’apparaît jamais en fin de verbe conjugué.";
+      return res;
+    }
+
+    var found = locate(given, item);
+
+    if(found && found.kind === "personne"){
+      var otherFull = fullForm(item.verbe, item.tense, found.person);
+      res.kind = "personne";
+      res.trap = reflexe ? reflexe.id : "personne";
+      res.titre = reflexe ? reflexe.titre : "Bonne terminaison, mauvaise personne";
+      res.why = "« -" + given + " » est la terminaison de « " + PRON[found.person] + " » (" + otherFull + "). "
+              + "Ici le sujet est « " + PRON[item.person] + " », " + PERSON_LABEL[item.person] + "."
+              + (homophone(item.end, given) ? " Les deux formes se prononcent pareil : seul l’œil peut trancher." : "");
+      res.tip = reflexe ? reflexe.tip
+        : "Avant d’écrire la terminaison, pose la question « qui est-ce qui fait l’action ? ». Le verbe s’accorde avec ce sujet-là, même quand un mot s’intercale : « les élèves que le professeur interroge répondent ».";
+      return res;
+    }
+
+    if(found && found.kind === "temps"){
+      res.kind = "temps";
+      res.trap = reflexe ? reflexe.id : "temps";
+      res.titre = reflexe ? reflexe.titre : "Bonne personne, mauvais temps";
+      res.why = "« -" + given + " » est la terminaison de " + PRON[item.person] + " au " + TENSE_NAME[found.tense]
+              + " (" + fullForm(item.verbe, found.tense, item.person) + "). On demandait le " + TENSE_NAME[item.tense] + "."
+              + (homophone(item.end, given) ? " Les deux se prononcent pareil : c’est un piège d’oreille." : "");
+      res.tip = reflexe ? reflexe.tip : TENSE_TIP[item.tense];
+      return res;
+    }
+
+    if(reflexe){
+      res.kind = "confusion";
+      res.trap = reflexe.id;
+      res.titre = reflexe.titre;
+      res.why = reflexe.why(correct, given, item);
+      res.tip = reflexe.tip;
+      return res;
+    }
+
+    res.kind = "inconnu";
+    res.trap = "inconnu-" + item.tense;
+    res.titre = "Cette terminaison n’existe pas ici";
+    res.why = "« -" + raw.trim() + " » ne fait partie d’aucune forme de « " + item.verbe.inf + " » au " + TENSE_NAME[item.tense] + ".";
+    res.tip = TENSE_TIP[item.tense];
+    return res;
+  }
+
+  var TRAP_LABEL = {
+    "personne":"Accord avec le sujet", "temps":"Confusion de temps",
+    "accent":"Accent oublié ou mal choisi", "vide":"Terminaison non trouvée",
+    "inconnu":"Terminaison inventée"
+  };
+  REFLEXES.forEach(function(r){ TRAP_LABEL[r.id] = r.titre; });
+  function trapLabel(id){
+    if(TRAP_LABEL[id]) return TRAP_LABEL[id];
+    if(id.indexOf("inconnu-") === 0) return "Terminaison inventée au " + TENSE_NAME[id.slice(8)];
+    return id;
+  }
+  function trapTip(id){
+    for(var i = 0; i < REFLEXES.length; i++) if(REFLEXES[i].id === id) return REFLEXES[i].tip;
+    if(id === "personne") return "Repère le sujet avant d’écrire : le verbe s’accorde avec lui, jamais avec le mot le plus proche.";
+    if(id === "temps") return "Situe l’action dans le temps avant de choisir la terminaison : hier, maintenant, demain, ou sous condition.";
+    if(id === "accent") return "Dans les terminaisons verbales, le son [e] s’écrit é, jamais è.";
+    if(id.indexOf("inconnu-") === 0) return TENSE_TIP[id.slice(8)];
+    return "Relis le tableau du temps demandé avant de répondre.";
+  }
+
+  /* ======================================================================
+     6. AFFICHAGE
+     ==================================================================== */
+
+  var $ = function(id){ return document.getElementById(id); };
+  var elField = $("field"), elCorr = $("correction"), elBtn = $("mainBtn");
+
+  function esc(s){
+    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  function sizeField(){
+    var n = Math.max(3, elField.value.length + 1);
+    elField.style.width = n + "ch";
+  }
+
+  function buildFilters(){
+    var tr = $("tenseRow"), gr = $("groupRow");
+    TENSES.forEach(function(t){
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "pill"; b.id = "t-" + t.key; b.textContent = t.tag;
+      b.setAttribute("aria-pressed", state.tenses.indexOf(t.key) !== -1);
+      b.addEventListener("click", function(){
+        var i = state.tenses.indexOf(t.key);
+        if(i === -1) state.tenses.push(t.key);
+        else if(state.tenses.length > 1) state.tenses.splice(i,1);
+        else return;
+        b.setAttribute("aria-pressed", state.tenses.indexOf(t.key) !== -1);
+        resetDeck();
+        save(); next();
+      });
+      tr.appendChild(b);
+    });
+
+    // liste déroulante des verbes, par ordre alphabétique
+    var dl = $("verbList");
+    VERBES.map(function(v){ return v.inf; })
+      .sort(function(a,b){ return a.localeCompare(b, "fr"); })
+      .forEach(function(inf){
+        var o = document.createElement("option");
+        o.value = inf;
+        dl.appendChild(o);
+      });
+    var vsIn = $("verbSearch");
+    vsIn.addEventListener("change", function(){ chooseVerb(vsIn.value); });
+    vsIn.addEventListener("input", function(e){
+      // clic dans la liste déroulante, ou croix d'effacement du champ
+      if(!e.inputType || e.inputType === "insertReplacementText") chooseVerb(vsIn.value);
+    });
+    vsIn.addEventListener("keydown", function(e){
+      if(e.key === "Enter"){ e.preventDefault(); chooseVerb(vsIn.value); }
+      if(e.key === "Escape" && focusVerb){ e.preventDefault(); chooseVerb(""); }
+    });
+    $("clearVerb").addEventListener("click", function(){ chooseVerb(""); });
+    var GLABEL = {1:"1er groupe (-er)", 2:"2e groupe (-ir)", 3:"3e groupe (irréguliers)"};
+    [1,2,3].forEach(function(g){
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "pill"; b.id = "g-" + g; b.textContent = GLABEL[g];
+      b.setAttribute("aria-pressed", state.groupes.indexOf(g) !== -1);
+      b.addEventListener("click", function(){
+        var i = state.groupes.indexOf(g);
+        if(i === -1) state.groupes.push(g);
+        else if(state.groupes.length > 1) state.groupes.splice(i,1);
+        else return;
+        b.setAttribute("aria-pressed", state.groupes.indexOf(g) !== -1);
+        save(); next();
+      });
+      gr.insertBefore(b, $("trickyPill"));
+    });
+    var tp = $("trickyPill");
+    tp.setAttribute("aria-pressed", state.tricky);
+    tp.addEventListener("click", function(){
+      state.tricky = !state.tricky;
+      tp.setAttribute("aria-pressed", state.tricky);
+      save(); next();
+    });
+    "é è ê à â û ù î ç".split(" ").forEach(function(c){
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "key"; b.textContent = c;
+      b.addEventListener("click", function(){
+        if(answered) return;
+        elField.value += c; sizeField(); elField.focus();
+      });
+      $("accents").appendChild(b);
+    });
+  }
+
+  function paintScore(){
+    $("streak").textContent = state.streak;
+    $("right").textContent = state.right;
+    $("seen").textContent = state.seen;
+    $("scoreStreak").classList.toggle("hot", state.streak >= 5);
+  }
+
+  function paintCount(){
+    var n = pool().length;
+    $("vcount").textContent = n + (n > 1 ? " verbes" : " verbe");
+  }
+
+  function say(msg, warn){
+    var el = $("pickerMsg");
+    el.textContent = msg || "";
+    el.hidden = !msg;
+    el.classList.toggle("warn", !!warn);
+  }
+
+  function paintPicker(){
+    var on = !!focusVerb;
+    $("picker").classList.toggle("is-set", on);
+    $("clearVerb").hidden = !on;
+    $("groupRow").hidden = on;       // les groupes ne servent plus quand un verbe est choisi
+    if(on) $("verbSearch").value = focusVerb.inf;
+  }
+
+  function chooseVerb(q){
+    q = (q || "").trim();
+    if(!q){
+      if(!focusVerb){ say(""); return; }
+      focusVerb = null; state.focus = "";
+      resetDeck(); say(""); paintPicker();
+      $("verbSearch").value = "";
+      save(); next();
+      return;
+    }
+    var v = findVerb(q) || customVerb(q);
+    if(!v){
+      say("« " + q + " » n’est pas dans la liste. Tu peux choisir n’importe quel verbe en -er, "
+        + "ou un des verbes en -ir et -re proposés dans la liste déroulante.", true);
+      return;
+    }
+    if(focusVerb && focusVerb.inf === v.inf){ paintPicker(); return; }
+    focusVerb = v; state.focus = v.inf;
+    resetDeck(); paintPicker();
+    save(); next();
+  }
+
+  function paintProgress(item){
+    if(!focusVerb){ say(""); return; }
+    var head = focusVerb.horsListe
+      ? "Verbe hors liste, conjugué selon la règle du 1er groupe (auxiliaire avoir). "
+      : "";
+    if(item.reprise){
+      say(head + "Reprise d’une forme ratée tout à l’heure.");
+      return;
+    }
+    var n = deckTotal - deck.length;
+    say(head + "Conjugaison complète : forme " + n + " sur " + deckTotal
+      + (tour > 1 ? " · tour " + tour : ""));
+  }
+
+  function next(){
+    paintCount();
+    var item = pick();
+    if(!item) return;
+    paintProgress(item);
+    current = item;
+    answered = false;
+    $("infinitif").innerHTML = "<b>" + esc(item.verbe.inf) + "</b> · "
+      + esc(item.verbe.groupe === 3 ? "3e groupe" : item.verbe.groupe + (item.verbe.groupe === 1 ? "er" : "e") + " groupe");
+    $("tenseTag").textContent = TENSES.filter(function(t){ return t.key === item.tense; })[0].tag;
+    $("pronom").textContent = item.prefix;
+    $("radical").textContent = item.stem;
+    $("person").textContent = PERSON_LABEL[item.person]
+      + (item.tense === "passe" ? " · auxiliaire " + item.verbe.aux : "");
+    elField.value = "";
+    elField.readOnly = false;
+    elField.className = "field";
+    sizeField();
+    elCorr.innerHTML = "";
+    elBtn.textContent = "Vérifier";
+    $("skipBtn").hidden = false;
+    elField.focus();
+  }
+
+  function tableauHTML(item){
+    var rows = "";
+    for(var p = 0; p < 6; p++){
+      var f = formOf(item.verbe, item.tense, p);
+      rows += '<div class="' + (p === item.person ? "target" : "") + '">'
+            + esc(prefixOf(item.verbe, item.tense, p) + f.stem)
+            + '<span class="t">' + esc(f.end) + '</span></div>';
+    }
+    return '<div class="block"><h3>Le tableau complet</h3><div class="tableau">' + rows + '</div></div>';
+  }
+
+  var CHECK = '<svg class="mark" viewBox="0 0 48 48" aria-hidden="true"><path d="M7 25 L19 37 L41 9"/></svg>';
+  var CROSS = '<svg class="mark" viewBox="0 0 48 48" aria-hidden="true"><path d="M11 11 L37 37 M37 11 L11 37"/></svg>';
+
+  function check(){
+    if(answered || !current) return;
+    var raw = elField.value;
+    var d = diagnose(raw, current);
+    var ok = d.kind === "juste";
+
+    answered = true;
+    elField.readOnly = true;
+    elField.classList.add(ok ? "is-right" : "is-wrong");
+    state.seen++;
+    if(ok){
+      state.right++;
+      state.streak++;
+      if(state.streak > state.best) state.best = state.streak;
+    } else {
+      state.streak = 0;
+      state.traps[d.trap] = (state.traps[d.trap] || 0) + 1;
+      var wk = current.verbe.inf + "|" + current.tense;
+      state.weak[wk] = (state.weak[wk] || 0) + 1;
+      queue.push({inf:current.verbe.inf, tense:current.tense, person:current.person, at:state.seen + 4});
+    }
+    paintScore();
+    save();
+
+    var full = current.prefix + current.stem;
+    var html = '<div class="correction ' + (ok ? "right" : "wrong") + '">'
+      + '<div class="verdict">' + (ok ? CHECK : CROSS)
+      + '<div><h2>' + esc(d.titre) + '</h2>'
+      + '<p class="answer">'
+      + (ok
+          ? esc(full) + '<span class="good">' + esc(current.end) + '</span>'
+          : esc(full) + '<span class="bad">' + esc(raw.trim() || "…") + '</span>'
+            + ' → ' + esc(full) + '<span class="good">' + esc(current.end) + '</span>')
+      + '</p></div></div><div class="blocks">'
+      + (d.why ? '<div class="block"><h3>Ce qui s’est passé</h3><p>' + esc(d.why) + '</p></div>' : "")
+      + '<div class="block reflexe"><h3>' + (ok ? "À retenir" : "Le réflexe pour ne plus la refaire") + '</h3><p>' + esc(d.tip) + '</p></div>'
+      + (ok ? "" : tableauHTML(current))
+      + '</div></div>';
+
+    elCorr.innerHTML = html;
+    elBtn.textContent = "Question suivante";
+    $("skipBtn").hidden = true;
+    elBtn.focus();
+  }
+
+  /* ======================================================================
+     7. BILAN
+     ==================================================================== */
+
+  function showBilan(){
+    var list = $("trapList");
+    var entries = Object.keys(state.traps).map(function(k){
+      return {id:k, n:state.traps[k]};
+    }).sort(function(a,b){ return b.n - a.n; }).slice(0,8);
+
+    var pct = state.seen ? Math.round(state.right / state.seen * 100) : 0;
+    $("bilanLead").textContent = state.seen
+      ? state.right + " réponses justes sur " + state.seen + " (" + pct + " %) · meilleure série : " + state.best
+      : "Aucune question pour l’instant.";
+
+    list.innerHTML = "";
+    if(!entries.length){
+      list.innerHTML = '<li class="empty">Aucune erreur enregistrée. Les fautes que tu feras apparaîtront ici, classées par type, avec le réflexe qui les évite.</li>';
+    } else {
+      entries.forEach(function(e){
+        var li = document.createElement("li");
+        li.className = "trap";
+        li.innerHTML = '<b>' + e.n + '</b><p><strong>' + esc(trapLabel(e.id)) + '</strong>' + esc(trapTip(e.id)) + '</p>';
+        list.appendChild(li);
+      });
+    }
+    $("bilan").hidden = false;
+    $("sheet").hidden = true;
+    elCorr.hidden = true;
+    $("bilan").scrollIntoView({block:"nearest"});
+  }
+  function hideBilan(){
+    $("bilan").hidden = true;
+    $("sheet").hidden = false;
+    elCorr.hidden = false;
+    elField.focus();
+  }
+
+  /* ======================================================================
+     8. ÉVÉNEMENTS
+     ==================================================================== */
+
+  elBtn.addEventListener("click", function(){ answered ? next() : check(); });
+  $("skipBtn").addEventListener("click", function(){
+    if(answered) return;
+    elField.value = "";
+    check();
+  });
+  elField.addEventListener("input", sizeField);
+  elField.addEventListener("keydown", function(e){
+    if(e.key === "Enter"){ e.preventDefault(); check(); }
+  });
+  document.addEventListener("keydown", function(e){
+    if(e.key !== "Enter" || !answered) return;
+    if(!$("bilan").hidden) return;                 // on est dans le bilan
+    if(e.target === $("verbSearch")) return;       // Entrée sert à choisir le verbe
+    if(document.activeElement === elBtn) return;   // le bouton s'en charge lui-même
+    e.preventDefault();
+    next();
+  });
+  $("openBilan").addEventListener("click", showBilan);
+  $("closeBilan").addEventListener("click", hideBilan);
+  $("resetBtn").addEventListener("click", function(){
+    state.seen = 0; state.right = 0; state.streak = 0; state.best = 0;
+    state.traps = {}; state.weak = {}; queue = [];
+    save(); paintScore(); showBilan();
+  });
+
+  load();
+  if(state.focus) focusVerb = findVerb(state.focus) || customVerb(state.focus);
+  if(!focusVerb) state.focus = "";
+  buildFilters();
+  paintPicker();
+  paintScore();
+  next();
+})();
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+</body>
+</html>

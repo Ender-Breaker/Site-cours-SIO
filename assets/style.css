@@ -729,3 +729,66 @@ html.compte-ouvert { overflow: hidden; }
 .cd-danger { border-top: 1.5px dashed var(--ko); padding-top: 12px; }
 .btn.danger { background: var(--ko); color: #fff; }
 .btn.danger:hover { background: #7f1820; }
+
+/* ===================== Téléphone ===================== */
+.labo-grid > * { min-width: 0; }
+.tab-defil { overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; margin: 10px 0; }
+.tab-defil > table { margin: 0; }
+.term-touches, .code-touches { display: none; }
+.compte-btn .i { width: 1.05em; height: 1.05em; }
+.compte-btn:not(.moi) .i { display: none; }
+@media (hover: none) and (pointer: coarse) {
+  /* touches que le clavier d'un téléphone n'a pas */
+  .term-touches { display: flex; gap: 6px; overflow-x: auto; padding: 8px 10px; border-top: 1px solid #34375a; background: #1b1d33; scrollbar-width: none; }
+  .code-touches { display: flex; gap: 6px; overflow-x: auto; padding: 6px 8px; border-top: 1px solid #34375a; background: #17192d; scrollbar-width: none; }
+  .term-touches::-webkit-scrollbar, .code-touches::-webkit-scrollbar { display: none; }
+  .term-touches button, .code-touches button { flex: none; min-width: 40px; height: 36px; padding: 0 10px; border: 1px solid #4a4e7a; border-radius: 8px; background: #2a2d4d; color: #f1ede2; font: 600 .9rem var(--mono); }
+  .term-touches button:active, .code-touches button:active { background: var(--safran); color: var(--encre); }
+  .code-touches .run { background: var(--safran); color: var(--encre); margin-left: auto; }
+  .code-hint { display: none; }
+}
+@media (max-width: 700px) {
+  /* évite le zoom automatique d'iOS quand on touche un champ */
+  input, select, textarea, .term-in { font-size: 16px !important; }
+  .code-area textarea, .code-gut { font-size: 15px !important; line-height: 1.5 !important; }
+  .code-area { height: 260px; }
+  #lc-frame, .code-raw { height: 260px; }
+  /* rangées de pastilles : défilement horizontal plutôt que 5 lignes */
+  #chips, #fo-mat, .labo-mode { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-left: -16px; margin-right: -16px; padding: 4px 16px 8px; }
+  #chips::-webkit-scrollbar, #fo-mat::-webkit-scrollbar, .labo-mode::-webkit-scrollbar { display: none; }
+  #chips .chip, #fo-mat .chip, .labo-mode .chip { flex: none; }
+  .labo-score { flex: none; padding-left: 8px; }
+  .labo-lecons { display: flex; overflow-x: auto; scrollbar-width: none; margin-left: -16px; margin-right: -16px; padding: 4px 16px 10px; scroll-snap-type: x proximity; }
+  .labo-lecons::-webkit-scrollbar { display: none; }
+  .labo-lecon { flex: none; width: 220px; scroll-snap-align: start; }
+  .labo-brief, .fo-q-c, .ev-q, .ev-consignes, .ev-res, .fo-form { padding: 16px; }
+  .labo-explo-body { min-height: 0; }
+  .labo-tree, .labo-preview { max-height: 220px; }
+  .ev-bar { top: 56px; padding: 8px 10px; font-size: .85rem; }
+  .ev-score > b { font-size: 4rem; }
+  .fo-vote { min-width: 44px; padding: 8px 4px; }
+  .fo-rep .fo-rep { margin-left: 0; padding-left: 6px; }
+  .pied .wrap { padding: 16px 0 24px; }
+}
+@media (max-width: 560px) {
+  .topbar .wrap { gap: 8px; }
+  .compte-btn:not(.moi) { padding: 0; width: 38px; justify-content: center; }
+  .compte-btn:not(.moi) .i { display: block; }
+  .compte-btn .txt { display: none; }
+  .top-nav a { padding: 6px 9px; }
+  .bandeau-info { left: 8px; right: 8px; bottom: 8px; flex-direction: row; gap: 10px; padding: 10px 10px 10px 12px; }
+  .bandeau-info p { font-size: .78rem; }
+  .bandeau-info .btn { min-height: 34px; padding: 4px 12px; font-size: .85rem; }
+}
+@media (max-width: 420px) {
+  .wrap { width: calc(100% - 24px); }
+  .logo { font-size: 1rem; gap: 8px; white-space: nowrap; }
+  .logo-mark { padding: 0 7px; }
+  .top-nav { gap: 0; }
+  .top-nav a { padding: 6px 7px; }
+  #chips, #fo-mat, .labo-mode, .labo-lecons { margin-left: -12px; margin-right: -12px; padding-left: 12px; padding-right: 12px; }
+  .page-head { margin-left: -12px; margin-right: -12px; }
+}
+@media (max-width: 340px) { .logo-txt { display: none; } }
+.bandeau-info .btn { white-space: nowrap; }
+@media (max-width: 560px) { .bandeau-info .bi-long { display: none; } }

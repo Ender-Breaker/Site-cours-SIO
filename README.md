@@ -10,12 +10,13 @@ Site de révision pour le BTS SIO (1re année, option SLAM). Chaque matière est
 |---|---|
 | Algorithmique / Python | Types et opérations, plus 6 chapitres bonus (variables, affichage, conditions, boucles, listes et chaînes, fonctions) |
 | SLAM | HTML, CSS, formulaires, HTTP et URL |
-| SISR | Présentation des blocs, shell Linux, droits, archives et processus, WordPress / Nginx |
+| SISR | Présentation des blocs, shell Linux, droits, archives et processus, adressage IPv4 et services réseau, WordPress / Nginx |
 | Bloc 1 | PHP : variables, fonctions, conditions, formulaires |
 | Bloc 3 | RGPD, PIA, anonymisation |
 | Mathématiques | Numération, divisibilité et PGCD, congruences, suites, statistiques |
 | CEJM | Agents économiques, marché, offre et demande |
-| Culture générale, Anglais | À venir |
+| Culture générale | « La bonne terminaison » : entraînement à la conjugaison (754 verbes) |
+| Anglais | À venir |
 
 ## Labos interactifs
 
@@ -49,6 +50,14 @@ PHP et Python sont embarqués dans `assets/vendor/` (aucun CDN nécessaire).
 - Aucun traceur non nécessaire : simple bandeau d'information (pas de consentement requis pour les stockages strictement nécessaires).
 - Aucune ressource tierce au chargement : polices (`assets/fonts/`) et SDK Firebase (`assets/vendor/firebase/`) hébergés sur le site.
 - Inscription : acceptation des conditions (date et version enregistrées). Menu du compte › « Mes données » : export JSON et suppression du compte.
+
+## Téléphone
+
+Le site est utilisable sur téléphone : barre du haut compacte, pastilles et leçons en défilement horizontal, tableaux défilants, champs à 16 px (pas de zoom iOS), touches tactiles pour le terminal (Tab, ↑, |, /…) et pour l'éditeur de code (symboles, indentation, exécuter).
+
+## Pages intégrées
+
+`modules/culture-generale/conjugaison.html` et `modules/sisr/adressage-ipv4.html` gardent leur propre design ; `assets/pages-integrees.css` leur ajoute les polices hébergées, la barre de retour vers le site et le pied de page légal. Le quiz IPv4 valide le chapitre (≥ 70 %) et ses questions alimentent les évaluations SISR.
 
 ## Lancer en local
 

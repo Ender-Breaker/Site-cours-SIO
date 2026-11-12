@@ -66,7 +66,7 @@
         (best != null ? '<span>Meilleur score : <b>' + best + ' %</b></span>' : '<span>Pas encore tenté</span>') +
         '</div></div></div>' +
         '<div class="btns"><a class="btn" href="' + f + '">' + I('book-open') + ' Cours</a>' +
-        '<a class="btn primary" href="' + f + '#jeu">' + I('pencil-line') + ' S\'entraîner</a>' +
+        '<a class="btn primary" href="' + f + (c.externe ? '#quiz' : '#jeu') + '">' + I('pencil-line') + (c.externe ? ' Quiz' : ' S\'entraîner') + '</a>' +
         '<a class="btn chap-eval" href="../../evaluation.html#m=' + mod.id + '&t=chapitre&c=' + c.id + '" title="8 questions, 4 min">' + I('timer') + ' Évaluer ce chapitre' +
         (EF.getEvals()[mod.id + "_chap_" + c.id] ? ' <small>' + EF.getEvals()[mod.id + "_chap_" + c.id].points + ' pts</small>' : '') + '</a></div></div>';
     });

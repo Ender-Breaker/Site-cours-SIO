@@ -40,7 +40,7 @@ if (!place()) {
 
 function rendu() {
   if (!user) {
-    slot.innerHTML = `<button type="button" class="compte-btn" data-a="ouvrir">Se connecter</button>`;
+    slot.innerHTML = `<button type="button" class="compte-btn" data-a="ouvrir" aria-label="Se connecter">${EF.icon("user")}<span class="txt">Se connecter</span></button>`;
     return;
   }
   const nom = profil && profil.pseudo ? profil.pseudo : "…";

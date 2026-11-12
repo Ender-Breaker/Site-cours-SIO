@@ -62,6 +62,7 @@ window.EF_MODULES = [
       { id: "linux-texte-pipes", titre: "Linux : texte, redirections et pipes", niveau: "moyen" },
       { id: "linux-droits-utilisateurs", titre: "Linux : droits, propriétaires et utilisateurs", niveau: "moyen" },
       { id: "linux-archives-processus", titre: "Linux : archives, processus et variables", niveau: "moyen" },
+      { id: "adressage-ipv4", titre: "Adressage IPv4 et services réseau", niveau: "moyen", externe: true },
       { id: "wordpress-nginx", titre: "WordPress sur un serveur LEMP (Nginx)", niveau: "difficile" }
     ]
   },
@@ -122,6 +123,7 @@ window.EF_MODULES = [
     option: "COMMUN",
     couleur: "amber",
     description: "Synthèse de documents, expression écrite et orale, thèmes de l'année.",
+    labos: [{ href: "conjugaison.html", ico: "é", titre: "La bonne terminaison", texte: "Conjugaison : tape la bonne terminaison de 754 verbes, à tous les temps. Repère tes pièges et suis ton bilan." }],
     chapitres: []
   },
   {

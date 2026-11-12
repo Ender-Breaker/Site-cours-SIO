@@ -16,14 +16,24 @@
     var vu = null; try { vu = localStorage.getItem("ef-info-stockage"); } catch (e) { vu = "1"; }
     if (!vu) {
       var b = document.createElement("div"); b.className = "bandeau-info"; b.setAttribute("role", "region"); b.setAttribute("aria-label", "Information sur les cookies");
-      b.innerHTML = '<p><b>Pas de cookie publicitaire ni de mesure d\'audience.</b> Le site enregistre seulement dans ton navigateur ce qui est nécessaire à son fonctionnement (ta progression et, si tu te connectes, ta session). ' +
+      b.innerHTML = '<p><b>Pas de cookie publicitaire ni de mesure d\'audience.</b><span class="bi-long"> Le site enregistre seulement dans ton navigateur ce qui est nécessaire à son fonctionnement (ta progression et, si tu te connectes, ta session).</span> ' +
         '<a href="' + RACINE + 'confidentialite.html">En savoir plus</a></p><button type="button" class="btn">J\'ai compris</button>';
       b.querySelector("button").onclick = function () { try { localStorage.setItem("ef-info-stockage", new Date().toISOString().slice(0, 10)); } catch (e) { /* rien */ } b.remove(); };
       document.body.appendChild(b);
     }
   }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { setTimeout(piedDePage, 0); });
-  else setTimeout(piedDePage, 0);
+  /* tableaux larges : défilement horizontal dans leur propre cadre (téléphone) */
+  function tableauxDefilants() {
+    if (document.body.dataset.integree) return; /* pages intégrées : elles gèrent leur propre mise en page */
+    [].forEach.call(document.querySelectorAll("table"), function (t) {
+      if (t.closest(".tab-defil, .cl-table, .code-data") || t.parentElement.classList.contains("tab-defil")) return;
+      var w = document.createElement("div"); w.className = "tab-defil";
+      t.parentNode.insertBefore(w, t); w.appendChild(t);
+    });
+  }
+  function auChargement() { setTimeout(function () { piedDePage(); tableauxDefilants(); }, 0); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", auChargement);
+  else auChargement();
 
   (function () {
     var root = RACINE; if (!root) return;
@@ -189,7 +199,7 @@
     header: function (prefix) {
       var h = el("header", "topbar");
       h.innerHTML = '<div class="wrap"><a class="logo" href="' + prefix + 'index.html">' +
-        '<span class="logo-mark">&gt;_</span> Étude Facile</a>' +
+        '<span class="logo-mark">&gt;_</span> <span class="logo-txt">Étude Facile</span></a>' +
         '<nav class="top-nav"><a href="' + prefix + 'evaluation.html">' + icon("timer") + '<span>Évaluation</span></a>' +
         '<a href="' + prefix + 'classement.html">' + icon("trophy") + '<span>Classement</span></a>' +
         '<a href="' + prefix + 'forum.html">' + icon("message") + '<span>Forum</span></a></nav>' +

@@ -43,6 +43,7 @@
     '<button class="btn primary" id="lc-run" type="button">' + I("play") + ' Exécuter</button></div>' +
     '<div class="code-area"><pre class="code-gut" id="lc-gut" aria-hidden="true">1</pre>' +
     '<textarea id="lc-src" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Éditeur de code"></textarea></div>' +
+    '<div class="code-touches" id="lc-touches"></div>' +
     '<div class="code-hint">Ctrl + Entrée pour exécuter · Tab pour indenter</div></div>' +
     '<div id="lc-err"></div>' +
     (PY ? '<div class="code-out py-out"><div class="code-url"><i></i><i></i><i></i><span id="lc-url">Console Python</span></div>' +
@@ -89,6 +90,23 @@
     }
   });
   function setCode(c) { src.value = c; gutter(); }
+  /* barre de symboles pour les écrans tactiles */
+  (function () {
+    var sym = PY ? ["⇥", ":", "(", ")", "[", "]", "\"", "'", "=", "+", "#", "_"] :
+      PHP ? ["⇥", "$", ";", "(", ")", "{", "}", "\"", ".", "=", "<", ">", "[", "]"] :
+      ["⇥", "<", ">", "/", "=", "\"", "{", "}", ":", ";", "#", "."];
+    var bar = $("lc-touches");
+    bar.innerHTML = sym.map(function (x) { return '<button type="button" data-s="' + esc(x) + '">' + esc(x) + '</button>'; }).join("") +
+      '<button type="button" class="run" data-s="run">' + I("play") + '</button>';
+    bar.addEventListener("mousedown", function (e) { e.preventDefault(); });
+    bar.addEventListener("click", function (e) {
+      var b = e.target.closest("button"); if (!b) return;
+      var x = b.dataset.s;
+      if (x === "run") { runAndCheck(); return; }
+      src.setRangeText(x === "⇥" ? (PY ? "    " : "  ") : x, src.selectionStart, src.selectionEnd, "end");
+      draft(); src.focus();
+    });
+  })();
 
   /* ---------- exécution ---------- */
   var php = null, phpReady = null, queue = Promise.resolve(), status = $("lc-status");
