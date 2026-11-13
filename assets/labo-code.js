@@ -12,9 +12,11 @@
   "use strict";
   var EF = window.EtudeFacile, esc = EF.esc, el = EF.el, I = EF.icon;
   var CFG = window.EF_CODE, PHP = CFG.langue === "php", PY = CFG.langue === "python", SQL = CFG.langue === "sql";
+  var EXT = ["js", "lua", "cpp", "java"].indexOf(CFG.langue) >= 0, CONS = PY || EXT;
+  var NOM_L = { js: "JavaScript", lua: "Lua", cpp: "C++", java: "Java" }[CFG.langue] || "";
   var HERE = (document.currentScript && document.currentScript.src) || location.href;
   var PHP_URLS = window.EF_PHP_URLS || [new URL("vendor/php-wasm/PhpWeb.mjs", HERE).href, "https://cdn.jsdelivr.net/npm/php-wasm@0.2.0/PhpWeb.mjs", "https://unpkg.com/php-wasm@0.2.0/PhpWeb.mjs"];
-  var ERR = SQL ? /^Erreur SQL/ : PY ? /^Traceback|^\w*(Error|Exception)\b.*:|^\s+File "main\.py"/m : /(Parse error|Fatal error|Warning|Deprecated|Notice):/;
+  var ERR = EXT ? /^⛔ /m : SQL ? /^Erreur SQL/ : PY ? /^Traceback|^\w*(Error|Exception)\b.*:|^\s+File "main\.py"/m : /(Parse error|Fatal error|Warning|Deprecated|Notice):/;
 
   /* ---------- progression ---------- */
   function load() { try { return JSON.parse(localStorage.getItem(CFG.key)) || {}; } catch (e) { return {}; } }
@@ -30,7 +32,7 @@
   var main = el("main", "wrap page labo c-" + CFG.couleur);
   document.body.appendChild(main);
   main.innerHTML =
-    '<nav class="crumbs"><a href="../../index.html">Accueil</a><span>›</span><a href="' + esc(CFG.module.href) + '">' + esc(CFG.module.titre) + '</a><span>›</span><span>' + esc(CFG.titre) + '</span></nav>' +
+    '<nav class="crumbs"><a href="../../index.html">Accueil</a><span>›</span>' + (EXT ? '<a href="../../bonus.html">Cours bonus</a><span>›</span>' : '') + '<a href="' + esc(CFG.module.href) + '">' + esc(CFG.module.titre) + '</a><span>›</span><span>' + esc(CFG.titre) + '</span></nav>' +
     '<div class="page-head c-' + CFG.couleur + '"><div class="ico">' + esc(CFG.ico) + '</div><div><h1>' + esc(CFG.titre) + '</h1>' +
     '<div class="sub">' + esc(CFG.sousTitre) + '</div></div></div>' +
     '<div class="labo-mode chips" role="tablist">' +
@@ -49,7 +51,13 @@
     '<div class="code-touches" id="lc-touches"></div>' +
     '<div class="code-hint">Ctrl + Entrée pour exécuter · Tab pour indenter</div></div>' +
     '<div id="lc-err"></div>' +
-    (PY ? '<div class="code-out py-out"><div class="code-url"><i></i><i></i><i></i><span id="lc-url">Console Python</span></div>' +
+    (EXT ? '<div class="code-out py-out"><div class="code-url"><i></i><i></i><i></i><span id="lc-url">' + NOM_L + '</span></div>' +
+      '<div class="jeu-zone" id="lc-jeu" hidden><canvas id="lc-canvas" width="480" height="320" tabindex="0" aria-label="Zone de jeu : clique dessus puis utilise le clavier"></canvas>' +
+      '<div class="jeu-bar"><span>Clique sur le jeu, puis clavier (flèches, espace…) ou souris.</span><button type="button" class="btn" id="lc-stop">Arrêter</button></div>' +
+      '<div class="jeu-pad" id="lc-pad"><button type="button" data-k="gauche">◀</button><button type="button" data-k="haut">▲</button><button type="button" data-k="bas">▼</button><button type="button" data-k="droite">▶</button><button type="button" data-k="espace" class="large">Espace</button></div></div>' +
+      '<label class="py-in" id="lc-in"><span>Entrées du programme — une valeur par ligne, lues dans l\'ordre</span><textarea id="lc-stdin" rows="2" spellcheck="false"></textarea></label>' +
+      '<pre id="lc-console" class="py-console" aria-live="polite"></pre><div id="lc-notice"></div></div>' :
+    PY ? '<div class="code-out py-out"><div class="code-url"><i></i><i></i><i></i><span id="lc-url">Console Python</span></div>' +
       '<label class="py-in"><span>Entrées du programme — une valeur par ligne, lues dans l\'ordre par <code>input()</code></span><textarea id="lc-stdin" rows="2" spellcheck="false"></textarea></label>' +
       '<pre id="lc-console" class="py-console" aria-live="polite"></pre><div id="lc-notice"></div></div>' :
     SQL ? '<div class="code-out sql-out"><div class="code-url"><i></i><i></i><i></i><span id="lc-url">' + esc(CFG.baseNom || "Base de données") + ' · SQLite</span></div>' +
@@ -86,7 +94,7 @@
     if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); runAndCheck(); return; }
     if (e.key === "Tab") {
       e.preventDefault();
-      src.setRangeText(PY ? "    " : "  ", a, b, "end"); draft();
+      src.setRangeText(PY || CFG.langue === "cpp" || CFG.langue === "java" ? "    " : "  ", a, b, "end"); draft();
     } else if (e.key === "Enter") {
       var lineStart = v.lastIndexOf("\n", a - 1) + 1, ind = /^[ \t]*/.exec(v.slice(lineStart, a))[0];
       if (PY && /:\s*$/.test(v.slice(lineStart, a))) ind += "    ";
@@ -98,7 +106,7 @@
   function setCode(c) { src.value = c; gutter(); }
   /* barre de symboles pour les écrans tactiles */
   (function () {
-    var sym = SQL ? ["*", ",", "(", ")", "'", "=", "<", ">", "%", ";", "."] : PY ? ["⇥", ":", "(", ")", "[", "]", "\"", "'", "=", "+", "#", "_"] :
+    var sym = EXT ? ["⇥", "{", "}", "(", ")", ";", "\"", "=", "<", ">", "[", "]"] : SQL ? ["*", ",", "(", ")", "'", "=", "<", ">", "%", ";", "."] : PY ? ["⇥", ":", "(", ")", "[", "]", "\"", "'", "=", "+", "#", "_"] :
       PHP ? ["⇥", "$", ";", "(", ")", "{", "}", "\"", ".", "=", "<", ">", "[", "]"] :
       ["⇥", "<", ">", "/", "=", "\"", "{", "}", ":", ";", "#", "."];
     var bar = $("lc-touches");
@@ -109,7 +117,7 @@
       var b = e.target.closest("button"); if (!b) return;
       var x = b.dataset.s;
       if (x === "run") { runAndCheck(); return; }
-      src.setRangeText(x === "⇥" ? (PY ? "    " : "  ") : x, src.selectionStart, src.selectionEnd, "end");
+      src.setRangeText(x === "⇥" ? (PY || CFG.langue === "cpp" || CFG.langue === "java" ? "    " : "  ") : x, src.selectionStart, src.selectionEnd, "end");
       draft(); src.focus();
     });
   })();
@@ -167,6 +175,47 @@
       });
     });
   }
+  /* ---------- JavaScript, Lua, C++, Java (assets/jeu.js) ---------- */
+  var lastExt = null, stopJeu = null, ecranJeu = null;
+  function arreteJeu() {
+    if (stopJeu) { stopJeu(); stopJeu = null; }
+    if (ecranJeu) { ecranJeu.fin(); ecranJeu = null; }
+    if (EXT) { $("lc-jeu").hidden = true; $("lc-in").hidden = false; }
+  }
+  function demarreJeu(code) {
+    arreteJeu();
+    return window.EFJeu.runner(CFG.langue).jeu(code).then(function (s) {
+      var cv = $("lc-canvas"), cons = $("lc-console");
+      $("lc-jeu").hidden = false; $("lc-in").hidden = true;
+      ecranJeu = window.EFJeu.ecran(cv); ecranJeu.vide();
+      lastExt = { out: s.out, err: s.err };
+      if (!s.err) {
+        stopJeu = window.EFJeu.boucle(s, ecranJeu, function (t) {
+          cons.textContent = (cons.textContent === "(le programme n'a rien affiché)" ? "" : cons.textContent) + t;
+          if (cons.textContent.length > 4000) cons.textContent = cons.textContent.slice(-3000);
+          cons.scrollTop = cons.scrollHeight;
+        }, function (e) {
+          current.out += "\n⛔ " + e; showErr(current.out);
+        });
+        if (!matchMedia("(pointer: coarse)").matches) setTimeout(function () { cv.focus(); }, 50);
+      }
+      return (s.out || "") + (s.err ? "\n⛔ " + s.err : "");
+    });
+  }
+  var AIDE_EXT = [
+    [/Temps|boucle sans fin|trop de temps/, "Une boucle dont la condition ne devient jamais fausse ? Vérifie que la variable de la condition change bien dans la boucle."],
+    [/Erreur de compilation/, "Lis la première erreur : <code>main.cpp:LIGNE:COLONNE</code> indique où regarder. Souvent un <code>;</code> oublié, une accolade, ou une variable non déclarée."],
+    [/cannot find symbol/, "Nom inconnu : faute de frappe, majuscule oubliée (Java distingue <code>string</code> et <code>String</code>), ou variable déclarée ailleurs ?"],
+    [/incompatible types/, "Types incompatibles : par exemple un texte (String) mis dans un int. Convertis avec <code>Integer.parseInt()</code> si besoin."],
+    [/';' expected|expected ';'/, "Il manque un point-virgule à la fin de l'instruction indiquée (ou juste avant)."],
+    [/ReferenceError|is not defined/, "Variable ou fonction inconnue : faute de frappe ? déclarée avec <code>let</code> dans un autre bloc ?"],
+    [/TypeError|is not a function|Cannot read properties/, "Tu utilises une valeur qui n'est pas ce que tu crois (undefined, un nombre au lieu d'une fonction…). Affiche-la avec <code>console.log</code>."],
+    [/SyntaxError/, "Erreur de syntaxe : parenthèse, accolade ou guillemet non fermé ? virgule en trop ?"],
+    [/attempt to (call|index|perform arithmetic|compare|concatenate)/, "Valeur <code>nil</code> utilisée : variable mal orthographiée ou jamais définie ? Pour coller du texte, Lua utilise <code>..</code>."],
+    [/unexpected symbol|expected near|'end' expected|'=' expected/, "Erreur de syntaxe Lua : un <code>end</code>, un <code>then</code> ou un <code>do</code> oublié ?"],
+    [/Exception|exception/, "Une exception a arrêté le programme : lis son nom (ArithmeticException = division par zéro, ArrayIndexOutOfBounds = indice hors du tableau…)."],
+    [/hors limites|planté|récursion/, "Le programme a planté pendant l'exécution : indice de tableau trop grand, division par zéro, récursion sans fin ?"]
+  ];
   /* ---------- SQL (sql.js) ---------- */
   var SQLJS = null, sqlReady = null, lastSql = null;
   function ensureSql() {
@@ -234,6 +283,21 @@
   /* req = { method, get, post } ; renvoie la sortie (texte) */
   function execute(code, req) {
     req = req || {};
+    if (EXT) {
+      var rn = window.EFJeu.runner(CFG.langue);
+      rn.phase(function (p) {
+        status.className = "code-status wait";
+        status.textContent = p === "charge" ? "Chargement du compilateur " + NOM_L + "… (une seule fois)" : p === "compile" ? "Compilation…" : p === "init" ? "Chargement de " + NOM_L + "…" : "";
+      });
+      var jeuMode = !req.console && window.EFJeu.estJeu(CFG.langue, code);
+      var job1 = queue.then(function () {
+        if (jeuMode && req.live) return demarreJeu(code);
+        if (jeuMode) { lastExt = { out: "", err: "" }; return ""; }
+        return rn.console(code, req.stdin || []).then(function (r) { lastExt = r; return (r.out || "") + (r.err ? (r.out && !/\n$/.test(r.out) ? "\n" : "") + "⛔ " + r.err : ""); });
+      }).then(function (o) { status.textContent = ""; status.className = "code-status"; return o; });
+      queue = job1.catch(function () {});
+      return job1;
+    }
     if (PY) {
       var job0 = queue.then(function () { return runPy(code, req.stdin); });
       queue = job0.catch(function () {});
@@ -280,6 +344,15 @@
     TimeoutError: "Le programme ne s'arrête pas : une boucle <code>while</code> dont la condition reste toujours vraie ?"
   };
   function showErr(out) {
+    if (EXT) {
+      var i0 = (out || "").indexOf("⛔ ");
+      if (i0 < 0) { $("lc-err").innerHTML = ""; return; }
+      var et = out.slice(i0 + 2).trim(), aide = "Lis le message : il indique souvent la ligne et la nature du problème.";
+      AIDE_EXT.some(function (a) { if (a[0].test(et)) { aide = a[1]; return true; } return false; });
+      var titre = /^Erreur de compilation/.test(et) ? "Erreur de compilation" : "Erreur";
+      $("lc-err").innerHTML = '<div class="code-erreur"><b>' + titre + '</b><code style="white-space:pre-wrap">' + esc(et.replace(/^Erreur de compilation\n?/, "")) + '</code><span>' + aide + '</span></div>';
+      return;
+    }
     if (SQL) {
       if (!lastSql || !lastSql.err) { $("lc-err").innerHTML = ""; return; }
       var aide = "Lis le message d'erreur : il indique souvent le mot qui pose problème.";
@@ -312,8 +385,13 @@
       showErr(out);
       return Promise.resolve();
     }
+    if (EXT) {
+      var i1 = (out || "").indexOf("⛔ "), txt = i1 >= 0 ? out.slice(0, i1) : out;
+      $("lc-console").textContent = txt || (stopJeu ? "" : "(le programme n'a rien affiché)");
+      showErr(out);
+      return Promise.resolve();
+    }
     if (PY) {
-      $("lc-console").textContent = out || "(le programme n'a rien affiché)";
       showErr(out);
       return Promise.resolve();
     }
@@ -413,13 +491,20 @@
         var e = runSql(code, v.q), r = runSql(v.ref, v.q);
         return !e.err && memes(dernier(e.apres), dernier(r.apres), true);
       });
+      case "jeu": return window.EFJeu.scenario(CFG.langue, code, v.etapes || [{ n: 1 }]).then(function (R) {
+        if (R.E) return false;
+        var Tf = function (q, t) { return (q || []).filter(function (c) { return c[0] === t; }); };
+        var Pf = function (t, coul) { return R.F.map(function (q) { return Tf(q, t).filter(function (c) { return coul == null || c[c.length - (t === "ligne" ? 2 : 1)] === coul; })[0] || null; }); };
+        var corps = /\breturn\b/.test(v.test) ? v.test : "return (" + v.test + ");";
+        try { return !!new Function("S", "F", "O", "D", "T", "P", corps)(R.S, R.F, R.O, R.F[R.F.length - 1] || R.S, Tf, Pf); } catch (e) { return false; }
+      });
       case "test":
-        var req = PY ? { stdin: v.stdin || [] } : { method: v.post ? "post" : "get", get: v.get || {}, post: v.post || {} };
+        var req = CONS ? { stdin: v.stdin || [], console: true } : { method: v.post ? "post" : "get", get: v.get || {}, post: v.post || {} };
         return execute(v.apres ? code + "\n" + v.apres + "\n" : code, req).then(function (out) {
           if (v.out && !rx(v.out).test(out)) return false;
           if (v.notout && rx(v.notout).test(out)) return false;
           if (ERR.test(out)) return false;
-          if (v.dom && !PY) { var d = new DOMParser().parseFromString(out, "text/html"); if (!d.querySelector(v.dom)) return false; }
+          if (v.dom && !CONS) { var d = new DOMParser().parseFromString(out, "text/html"); if (!d.querySelector(v.dom)) return false; }
           return true;
         });
       default:
@@ -441,12 +526,13 @@
   function runAndCheck() {
     if (running) return;
     running = true;
-    var btn = $("lc-run"), code = src.value, req = PY ? { stdin: stdinLines() } : cur ? { method: cur.post ? "post" : "get", get: cur.get || {}, post: cur.post || {} } : {};
+    var btn = $("lc-run"), code = src.value, req = CONS ? { stdin: stdinLines(), live: true } : cur ? { method: cur.post ? "post" : "get", get: cur.get || {}, post: cur.post || {} } : {};
     btn.disabled = true; notice("");
+    if (EXT) arreteJeu();
     execute(code, req).then(function (out) { return render(out, req); }).then(function () {
       if (mode === "examen") return evalExamen(code);
       if (mode !== "guide" || !cur) return;
-      if (PY && /TimeoutError: temps dépassé/.test(current.out)) { results = cur.objectifs.map(function () { return false; }); renderBrief(false); return; }
+      if ((PY && /TimeoutError: temps dépassé/.test(current.out)) || (EXT && lastExt && lastExt.temps)) { results = cur.objectifs.map(function () { return false; }); renderBrief(false); return; }
       return checkAll(cur, code).then(function (res) {
         results = res;
         var ok = res.every(Boolean);
@@ -454,12 +540,18 @@
         renderBrief(ok);
       });
     }).catch(function () {
-      notice(SQL ? "Impossible de charger SQLite. Recharge la page puis réessaie." : "Impossible d'exécuter le code : PHP n'est pas chargé. Vérifie ta connexion puis réessaie.");
+      notice(EXT ? "Impossible de charger " + NOM_L + ". Recharge la page puis réessaie." : SQL ? "Impossible de charger SQLite. Recharge la page puis réessaie." : "Impossible d'exécuter le code : PHP n'est pas chargé. Vérifie ta connexion puis réessaie.");
     }).then(function () { running = false; btn.disabled = false; });
   }
   $("lc-run").addEventListener("click", runAndCheck);
   function stdinLines() { var t = $("lc-stdin"); return t && t.value.length ? t.value.replace(/\n$/, "").split("\n") : []; }
-  if (PY) $("lc-stdin").addEventListener("keydown", function (e) { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); runAndCheck(); } });
+  if (EXT) {
+    $("lc-stop").addEventListener("click", function () { arreteJeu(); });
+    $("lc-pad").addEventListener("pointerdown", function (e) { var b = e.target.closest("[data-k]"); if (b && ecranJeu) { e.preventDefault(); ecranJeu.appuie(b.dataset.k, true); } });
+    $("lc-pad").addEventListener("pointerup", function (e) { var b = e.target.closest("[data-k]"); if (b && ecranJeu) ecranJeu.appuie(b.dataset.k, false); });
+    $("lc-pad").addEventListener("pointerleave", function () { if (ecranJeu) ["gauche", "droite", "haut", "bas", "espace"].forEach(function (k) { ecranJeu.appuie(k, false); }); });
+  }
+  if (CONS) $("lc-stdin").addEventListener("keydown", function (e) { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); runAndCheck(); } });
 
   /* ---------- parcours ---------- */
   function score() {
@@ -519,7 +611,8 @@
     prog.last = m.id; save();
     setCode(prog.code[m.id] != null ? prog.code[m.id] : m.depart);
     renderBrief(false); renderLecons(); notice("");
-    if (PY) {
+    if (EXT) arreteJeu();
+    if (CONS) {
       $("lc-stdin").value = (m.stdin || []).join("\n");
       $("lc-console").textContent = "Clique sur Exécuter pour lancer ton programme.";
       $("lc-err").innerHTML = "";
@@ -536,7 +629,8 @@
     $("lc-reset").onclick = function () { setCode(CFG.libre); draft(); runAndCheck(); };
     setCode(prog.code.__libre != null ? prog.code.__libre : CFG.libre);
     renderLecons(); notice("");
-    if (PY) { $("lc-stdin").value = ""; $("lc-console").textContent = "Clique sur Exécuter pour lancer ton programme."; $("lc-err").innerHTML = ""; return; }
+    if (EXT) arreteJeu();
+    if (CONS) { $("lc-stdin").value = ""; $("lc-console").textContent = "Clique sur Exécuter pour lancer ton programme."; $("lc-err").innerHTML = ""; return; }
     if (SQL) { lastSql = null; render("", {}); return; }
     execute(src.value, {}).then(function (out) { return render(out, {}); }).catch(function () {});
   }
@@ -557,7 +651,8 @@
     E.i = i; cur = E.list[i]; results = null;
     E.chrono.pos("mission " + (i + 1) + "/" + E.list.length);
     setCode(cur.depart); notice(""); $("lc-err").innerHTML = "";
-    if (PY) { $("lc-stdin").value = (cur.stdin || []).join("\n"); $("lc-console").textContent = "Clique sur Exécuter pour lancer ton programme."; }
+    if (EXT) arreteJeu();
+    if (CONS) { $("lc-stdin").value = (cur.stdin || []).join("\n"); $("lc-console").textContent = "Clique sur Exécuter pour lancer ton programme."; }
     else if (SQL) { lastSql = null; render("", {}); }
     else {
       var req = { method: cur.post ? "post" : "get", get: cur.get || {}, post: cur.post || {} };
@@ -585,7 +680,7 @@
   }
   function evalExamen(code) {
     if (E.fini) return;
-    if (PY && /TimeoutError: temps dépassé/.test(current.out)) { results = cur.objectifs.map(function () { return false; }); examBrief(); return; }
+    if ((PY && /TimeoutError: temps dépassé/.test(current.out)) || (EXT && lastExt && lastExt.temps)) { results = cur.objectifs.map(function () { return false; }); examBrief(); return; }
     var i = E.i;
     return checkAll(cur, code).then(function (res) {
       if (E.fini || E.i !== i) return;
@@ -636,7 +731,7 @@
   window.addEventListener("hashchange", route);
   /* accès pour les tests automatiques */
   window.EFCodeLab = { missions: all, verify: function (m, code) {
-    cur = m; var req = PY ? { stdin: m.stdin || [] } : { method: m.post ? "post" : "get", get: m.get || {}, post: m.post || {} };
+    cur = m; var req = CONS ? { stdin: m.stdin || [] } : { method: m.post ? "post" : "get", get: m.get || {}, post: m.post || {} };
     return execute(code, req).then(function (out) { return render(out, req); }).then(function () { return checkAll(m, code); });
   } };
   if (PHP) ensurePhp().catch(function () {});

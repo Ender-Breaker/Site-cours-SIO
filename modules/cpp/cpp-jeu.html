@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>C++ : créer un jeu dans le navigateur — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="cpp" data-chapter="cpp-jeu">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>La plupart des grands jeux sont écrits en C++ (Unreal Engine, la plupart des moteurs maison) : il est rapide et contrôle précisément la mémoire. Dans le navigateur, le C++ peut être compilé en <b>WebAssembly</b>, un format binaire que le navigateur exécute presque aussi vite que du code natif (c'est ce que fait Emscripten pour porter des jeux sur le web, et ce que fait le labo).</p>
+
+<h2>1. Le principe : la boucle de jeu</h2>
+<p>Le programme n'a pas de <code>main</code> qui se termine : c'est le moteur qui appelle tes fonctions à chaque image.</p>
+<pre><code>#include &quot;jeu.h&quot;            // l&#x27;API du labo
+
+double x = 200;             // l&#x27;état du jeu : variables globales (ou dans une classe)
+
+void setup() {              // une fois, au démarrage
+}
+
+void update(double dt) {    // 60 fois par seconde : logique
+    if (touche(&quot;droite&quot;)) x += 5;
+}
+
+void draw() {               // 60 fois par seconde : dessin
+    effacer(&quot;black&quot;);
+    rect(x, 140, 40, 40, &quot;blue&quot;);
+}</code></pre>
+<table><tr><th>Fonction du labo</th><th>Rôle</th></tr>
+<tr><td><code>effacer(c)</code></td><td>remplit l'écran (480 × 320)</td></tr>
+<tr><td><code>rect(x, y, l, h, c)</code>, <code>cercle(x, y, r, c)</code>, <code>ligne(x1, y1, x2, y2, c)</code></td><td>formes pleines</td></tr>
+<tr><td><code>texte(t, x, y, taille, c)</code></td><td>texte (utilise <code>std::to_string</code> pour les nombres)</td></tr>
+<tr><td><code>touche("gauche")</code>, <code>toucheAppuyee("espace")</code></td><td>touche maintenue / appuyée à cette image</td></tr>
+<tr><td><code>sourisX()</code>, <code>sourisY()</code>, <code>clic()</code></td><td>souris</td></tr>
+<tr><td><code>hasard(a, b)</code></td><td>entier au hasard entre a et b</td></tr></table>
+
+<h2>2. Des entités avec des struct</h2>
+<pre><code>struct Balle {
+    double x, y, vx, vy;
+    void avancer() {
+        x += vx; y += vy;
+        if (x &lt; 10 || x &gt; LARGEUR - 10) vx = -vx;
+        if (y &lt; 10 || y &gt; HAUTEUR - 10) vy = -vy;
+    }
+};
+
+vector&lt;Balle&gt; balles;
+
+void setup() {
+    for (int i = 0; i &lt; 5; i++)
+        balles.push_back({ (double)hasard(20, 460), (double)hasard(20, 300), 3, 2 });
+}
+void update(double dt) { for (auto&amp; b : balles) b.avancer(); }
+void draw() {
+    effacer(&quot;black&quot;);
+    for (const auto&amp; b : balles) cercle(b.x, b.y, 10, &quot;orange&quot;);
+}</code></pre>
+<div class="box attention"><b>auto&amp; dans la boucle</b><p><code>for (auto b : balles)</code> travaille sur des <b>copies</b> : les balles ne bougeraient pas. Il faut <code>auto&amp;</code> pour modifier les éléments du vector.</p></div>
+
+<h2>3. Collisions</h2>
+<pre><code>bool collision(double ax, double ay, double al, double ah,
+               double bx, double by, double bl, double bh) {
+    return ax &lt; bx + bl &amp;&amp; ax + al &gt; bx &amp;&amp; ay &lt; by + bh &amp;&amp; ay + ah &gt; by;
+}
+// cercle contre cercle
+bool touche2(const Balle&amp; a, const Balle&amp; b) {
+    return hypot(a.x - b.x, a.y - b.y) &lt; 20;
+}</code></pre>
+
+<h2>4. Supprimer des éléments</h2>
+<pre><code>#include &lt;algorithm&gt;
+balles.erase(remove_if(balles.begin(), balles.end(),
+             [](const Balle&amp; b) { return b.y &gt; HAUTEUR; }), balles.end());</code></pre>
+<p>L'idiome <code>erase(remove_if(…))</code> retire d'un coup tous les éléments qui vérifient une condition (ici une <b>lambda</b>, une petite fonction anonyme).</p>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cpp.html">labo C++</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Combien de fois par seconde le labo appelle-t-il update() et draw() ?",
+  "options": [
+   "1",
+   "10",
+   "Environ 60",
+   "1000"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quel format permet d'exécuter du C++ compilé dans un navigateur ?",
+  "options": [
+   "Java bytecode",
+   "WebAssembly",
+   "PDF",
+   "JSON"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Pourquoi `for (auto b : balles) b.avancer();` ne fait-il rien ?",
+  "options": [
+   "auto est interdit",
+   "b est une copie : il faut auto&",
+   "avancer est privée",
+   "Il manque un return"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Comment afficher le score (int) avec texte() ?",
+  "options": [
+   "`texte(score, …)`",
+   "`texte(\"Score : \" + std::to_string(score), …)`",
+   "`texte(\"Score : \" + score, …)`",
+   "`cout << score;`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Où place-t-on la logique (déplacements, collisions) ?",
+  "options": [
+   "Dans draw()",
+   "Dans update()",
+   "Dans main()",
+   "Dans jeu.h"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Que fait `erase(remove_if(v.begin(), v.end(), cond), v.end())` ?",
+  "options": [
+   "Trie v",
+   "Supprime de v tous les éléments qui vérifient cond",
+   "Vide v",
+   "Ajoute des éléments"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'une lambda en C++ ?",
+  "options": [
+   "Une constante mathématique",
+   "Une petite fonction anonyme écrite sur place",
+   "Un type de pointeur",
+   "Une boucle"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "Unreal Engine est écrit en C++.",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quelle fonction du labo renvoie vrai seulement à l'image où une touche vient d'être appuyée ?",
+  "answers": [
+   "toucheAppuyee",
+   "toucheAppuyee()"
+  ],
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Deux cercles de rayon 10 se touchent si la distance entre leurs centres est…",
+  "options": [
+   "< 10",
+   "< 20",
+   "= 0",
+   "> 20"
+  ],
+  "answer": 1,
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

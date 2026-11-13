@@ -18,7 +18,7 @@
   function render() {
     var s = EF.stats(mod);
     var html =
-      '<nav class="crumbs"><a href="../../index.html">Accueil</a><span>›</span><span>' + esc(mod.titre) + '</span></nav>' +
+      '<nav class="crumbs"><a href="../../index.html">Accueil</a><span>›</span>' + (mod.bonus ? '<a href="../../bonus.html">Cours bonus</a><span>›</span>' : '') + '<span>' + esc(mod.titre) + '</span></nav>' +
       '<div class="page-head c-' + mod.couleur + '"><div class="ico">' + esc(mod.icone) + '</div><div>' +
       '<h1>' + esc(mod.titre) + '</h1><div class="sub">' + esc(mod.sousTitre) + '</div></div></div>' +
       '<p class="lead">' + esc(mod.description) + '</p>' +
@@ -37,7 +37,7 @@
       (mod.labos || []).forEach(function (l, i) {
         epr.push(["pratique" + (i ? "&l=" + i : ""), mod.labos.length > 1 ? "Pratique · " + (l.court || l.titre) : "Pratique", l.examTexte || "3 missions de labo · 15 min", i && l.cle ? l.cle + "_pratique" : mod.id + "_pratique"]);
       });
-      html += '<section class="mod-evals"><div class="mod-evals-t"><h2>' + I("timer") + ' Évaluations</h2><a href="../../classement.html">' + I("trophy") + ' Classement</a></div><div class="mod-evals-l">' +
+      html += '<section class="mod-evals"><div class="mod-evals-t"><h2>' + I("timer") + ' Évaluations</h2>' + (mod.bonus ? '<span class="lb-small">Hors classement</span>' : '<a href="../../classement.html">' + I("trophy") + ' Classement</a>') + '</div><div class="mod-evals-l">' +
         epr.map(function (e) {
           var b = ev[e[3] || mod.id + "_" + e[0]];
           return '<a class="mod-eval' + (e[0] === "examen" ? " examen" : "") + '" href="' + E + e[0] + '"><b>' + e[1] + '</b><span>' + e[2] + '</span><small>' +

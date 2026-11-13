@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>C++ : compiler, afficher, lire — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="cpp" data-chapter="cpp-bases">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p><b>C++</b> est un langage <b>compilé</b> créé par Bjarne Stroustrup dans les années 1980 comme une extension du C. Il est très rapide et donne un contrôle fin sur la mémoire : on le trouve dans les moteurs de jeux (Unreal Engine), les navigateurs, les logiciels de création, l'embarqué et la finance.</p>
+
+<h2>1. Compiler, puis exécuter</h2>
+<p>Le code source (<code>main.cpp</code>) n'est pas exécuté directement : un <b>compilateur</b> (g++, clang++, MSVC) le traduit en programme exécutable. Les erreurs de syntaxe ou de type sont détectées <b>avant</b> l'exécution.</p>
+<pre><code>g++ -std=c++20 -Wall main.cpp -o main     # compiler
+./main                                    # exécuter</code></pre>
+<p>Le labo fait tout ça dans ton navigateur : ton code est compilé par <b>clang</b> en WebAssembly puis exécuté.</p>
+
+<h2>2. Le programme minimal</h2>
+<pre><code>#include &lt;iostream&gt;     // bibliothèque d&#x27;entrées/sorties
+using namespace std;    // évite d&#x27;écrire std:: partout
+
+int main() {            // point d&#x27;entrée du programme
+    cout &lt;&lt; &quot;Bonjour !&quot; &lt;&lt; endl;
+    return 0;           // 0 = tout s&#x27;est bien passé
+}</code></pre>
+<p>Chaque instruction se termine par un <b>point-virgule</b>. Les blocs sont entre accolades.</p>
+
+<h2>3. Variables et types</h2>
+<pre><code>int age = 19;              // entier
+double prix = 9.99;        // nombre à virgule
+char lettre = &#x27;A&#x27;;         // un caractère (apostrophes)
+bool majeur = true;        // vrai / faux
+string nom = &quot;Léa&quot;;        // texte (#include &lt;string&gt;)
+const double TVA = 0.2;    // constante
+auto x = 3.5;              // type déduit : double</code></pre>
+<div class="box attention"><b>Typage statique</b><p>Le type d'une variable est fixé à sa déclaration et ne change plus. <code>int n = 7 / 2;</code> vaut <b>3</b> : entre deux entiers, la division est entière. Écris <code>7.0 / 2</code> pour obtenir 3.5.</p></div>
+
+<h2>4. Afficher et lire</h2>
+<pre><code>int a, b;
+cout &lt;&lt; &quot;Deux nombres : &quot;;
+cin &gt;&gt; a &gt;&gt; b;                     // lit deux valeurs séparées par des espaces
+cout &lt;&lt; &quot;Somme : &quot; &lt;&lt; a + b &lt;&lt; endl;
+string ligne;
+getline(cin, ligne);               // lit toute une ligne</code></pre>
+<p><code>&lt;&lt;</code> envoie vers la sortie, <code>&gt;&gt;</code> lit depuis l'entrée. <code>endl</code> passe à la ligne (comme <code>"\n"</code>).</p>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cpp.html">labo C++</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que fait le compilateur ?",
+  "options": [
+   "Il exécute le code ligne par ligne",
+   "Il traduit le code source en programme exécutable",
+   "Il corrige les fautes",
+   "Il héberge le site"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle fonction est le point d'entrée d'un programme C++ ?",
+  "options": [
+   "`start()`",
+   "`main()`",
+   "`run()`",
+   "`init()`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Avec quoi se termine une instruction C++ ?",
+  "options": [
+   "Un point",
+   "Un point-virgule",
+   "Un retour à la ligne",
+   "Rien"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que vaut `7 / 2` quand les deux sont des int ?",
+  "options": [
+   "3.5",
+   "3",
+   "4",
+   "Erreur"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quel type pour un nombre à virgule ?",
+  "options": [
+   "`int`",
+   "`double`",
+   "`char`",
+   "`bool`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Comment afficher la valeur de x ?",
+  "options": [
+   "`print(x);`",
+   "`cout << x;`",
+   "`cin >> x;`",
+   "`echo x;`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Comment lire un entier dans n ?",
+  "options": [
+   "`cin >> n;`",
+   "`cout << n;`",
+   "`n = input();`",
+   "`read(n);`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "En C++, une variable déclarée int peut ensuite contenir du texte.",
+  "answer": false,
+  "explication": "Typage statique."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle ligne permet d'utiliser cout sans écrire std:: ?",
+  "options": [
+   "`#include <std>`",
+   "`using namespace std;`",
+   "`import std;`",
+   "`namespace cout;`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quel fichier d'en-tête inclure pour utiliser cout et cin ? (entre chevrons)",
+  "answers": [
+   "<iostream>",
+   "iostream"
+  ],
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Que signifie `return 0;` à la fin de main ?",
+  "options": [
+   "Le programme recommence",
+   "Le programme s'est terminé sans erreur",
+   "Affiche 0",
+   "Rien"
+  ],
+  "answer": 1,
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

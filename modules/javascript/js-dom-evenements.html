@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>JavaScript : le DOM et les événements — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="javascript" data-chapter="js-dom-evenements">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>Le <b>DOM</b> (Document Object Model) est la représentation de la page HTML sous forme d'objets que JavaScript peut lire et modifier : changer un texte, ajouter un élément, réagir à un clic.</p>
+
+<h2>1. Trouver des éléments</h2>
+<pre><code>const titre = document.querySelector(&quot;h1&quot;);          // le premier qui correspond
+const btn   = document.querySelector(&quot;#valider&quot;);     // par id
+const items = document.querySelectorAll(&quot;.item&quot;);     // tous (liste)
+const champ = document.getElementById(&quot;nom&quot;);</code></pre>
+<p>Les sélecteurs sont les mêmes qu'en CSS.</p>
+
+<h2>2. Modifier la page</h2>
+<pre><code>titre.textContent = &quot;Nouveau titre&quot;;       // texte (sûr)
+titre.classList.add(&quot;actif&quot;);              // ajoute une classe CSS
+titre.classList.toggle(&quot;cache&quot;);
+titre.style.color = &quot;red&quot;;
+champ.value                                // contenu d&#x27;un champ de formulaire
+const li = document.createElement(&quot;li&quot;);   // créer un élément
+li.textContent = &quot;Nouvel item&quot;;
+document.querySelector(&quot;ul&quot;).append(li);
+li.remove();</code></pre>
+<div class="box attention"><b>textContent plutôt qu'innerHTML</b><p><code>innerHTML</code> interprète le HTML : si on y met une saisie utilisateur, un visiteur peut injecter du code (faille <b>XSS</b>). Pour du texte, utilise <code>textContent</code>.</p></div>
+
+<h2>3. Les événements</h2>
+<pre><code>btn.addEventListener(&quot;click&quot;, () =&gt; {
+  console.log(&quot;Bouton cliqué&quot;);
+});
+
+champ.addEventListener(&quot;input&quot;, (e) =&gt; {
+  console.log(&quot;Saisie :&quot;, e.target.value);
+});
+
+document.addEventListener(&quot;keydown&quot;, (e) =&gt; {
+  if (e.key === &quot;ArrowRight&quot;) avancer();
+});</code></pre>
+<table><tr><th>Événement</th><th>Quand</th></tr>
+<tr><td><code>click</code></td><td>clic sur l'élément</td></tr>
+<tr><td><code>input</code> / <code>change</code></td><td>saisie dans un champ / valeur validée</td></tr>
+<tr><td><code>submit</code></td><td>envoi d'un formulaire</td></tr>
+<tr><td><code>keydown</code> / <code>keyup</code></td><td>touche enfoncée / relâchée</td></tr>
+<tr><td><code>DOMContentLoaded</code></td><td>la page est chargée</td></tr></table>
+
+<h2>4. Valider un formulaire</h2>
+<pre><code>form.addEventListener(&quot;submit&quot;, (e) =&gt; {
+  if (champ.value.trim() === &quot;&quot;) {
+    e.preventDefault();          // bloque l&#x27;envoi
+    erreur.textContent = &quot;Le nom est obligatoire&quot;;
+  }
+});</code></pre>
+<p>La vérification en JavaScript améliore le confort, mais le serveur (PHP) doit toujours revérifier : n'importe qui peut désactiver JavaScript.</p>
+
+<h2>5. Récupérer des données : fetch</h2>
+<pre><code>async function charger() {
+  const rep = await fetch(&quot;api/produits.json&quot;);
+  const produits = await rep.json();
+  console.log(produits.length + &quot; produits&quot;);
+}</code></pre>
+<p><code>async</code>/<code>await</code> permettent d'attendre une réponse réseau sans bloquer la page.</p>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que signifie DOM ?",
+  "options": [
+   "Data Object Mode",
+   "Document Object Model",
+   "Dynamic Online Markup",
+   "Domain Object Manager"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle méthode trouve le premier élément correspondant à un sélecteur CSS ?",
+  "options": [
+   "`document.find()`",
+   "`document.querySelector()`",
+   "`document.select()`",
+   "`$()` obligatoirement"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Comment réagir à un clic sur btn ?",
+  "options": [
+   "`btn.onclick = true`",
+   "`btn.addEventListener(\"click\", f)`",
+   "`btn.click(f)` uniquement",
+   "`btn.event(\"click\")`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Pourquoi préférer textContent à innerHTML pour afficher une saisie ?",
+  "options": [
+   "C'est plus rapide",
+   "innerHTML interprète le HTML : risque de faille XSS",
+   "innerHTML n'existe plus",
+   "Pour le style"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle propriété donne le contenu d'un champ input ?",
+  "options": [
+   "`.text`",
+   "`.value`",
+   "`.content`",
+   "`.input`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que fait `e.preventDefault()` dans un écouteur submit ?",
+  "options": [
+   "Envoie le formulaire",
+   "Empêche l'envoi du formulaire",
+   "Vide le formulaire",
+   "Recharge la page"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle méthode ajoute une classe CSS à un élément ?",
+  "options": [
+   "`el.class = \"x\"`",
+   "`el.classList.add(\"x\")`",
+   "`el.addClass(\"x\")`",
+   "`el.style.class(\"x\")`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "Une vérification de formulaire en JavaScript suffit, le serveur n'a pas besoin de revérifier.",
+  "answer": false,
+  "explication": ""
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quel événement se déclenche à chaque frappe dans un champ texte ?",
+  "answers": [
+   "input"
+  ],
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "À quoi sert await devant fetch() ?",
+  "options": [
+   "À accélérer la requête",
+   "À attendre la réponse sans bloquer la page",
+   "À annuler la requête",
+   "À chiffrer"
+  ],
+  "answer": 1,
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

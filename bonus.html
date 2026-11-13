@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Cours bonus — Étude Facile</title>
+  <meta name="description" content="Cours bonus hors programme : C++, Java, Lua et JavaScript, avec des labos où l'on code de vrais programmes et des jeux dans le navigateur.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <main class="wrap page">
+    <nav class="crumbs"><a href="index.html">Accueil</a><span>›</span><span>Cours bonus</span></nav>
+    <div class="page-head"><div class="ico" id="bonus-ico">+</div><div><h1>Cours bonus</h1>
+      <div class="sub">Hors programme, pour aller plus loin : C++, Java, Lua et JavaScript. Chaque langage a ses cours, ses tests et un labo où ton code tourne vraiment, jeux compris.</div></div></div>
+    <div class="box retenir bonus-note"><b>Ne compte pas</b><p>Les cours bonus sont à part : ils n'entrent ni dans ta progression générale ni dans le classement. Ta progression y est quand même enregistrée.</p></div>
+    <div class="grid" id="grid-bonus"></div>
+  </main>
+  <script src="data/modules.js"></script>
+  <script src="assets/app.js"></script>
+  <script>
+    document.body.insertBefore(EtudeFacile.header(""), document.body.firstChild);
+    document.getElementById("bonus-ico").innerHTML = EtudeFacile.icon("zap");
+    var a = document.querySelector('.top-nav a[href="bonus.html"]'); if (a) a.setAttribute("aria-current", "page");
+  </script>
+</body>
+</html>

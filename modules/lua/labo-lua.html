@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Labo Lua — Étude Facile</title>
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="lua">
+<script>
+window.EF_CODE = {
+ "langue": "lua",
+ "key": "ef-labo-lua",
+ "titre": "Labo Lua",
+ "sousTitre": "Du vrai Lua 5.4 (le langage de Roblox et de LÖVE) : programmes console puis jeux dans le navigateur.",
+ "ico": "Lua",
+ "couleur": "lua",
+ "fichier": "main.lua",
+ "module": {
+  "titre": "Lua",
+  "href": "index.html"
+ },
+ "lecons": [
+  {
+   "titre": "Afficher et calculer",
+   "missions": [
+    {
+     "id": "lua-afficher",
+     "titre": "Afficher un message",
+     "texte": "<p>Premier programme : il écrit une ligne dans la console. Affiche exactement <b>Bonjour, monde !<\/b><\/p><p><b>Exemple<\/b><\/p><pre><code>print(&quot;Salut&quot;)<\/code><\/pre>",
+     "depart": "-- Affiche le message\n",
+     "objectifs": [
+      {
+       "txt": "Le programme affiche <code>Bonjour, monde !<\/code>",
+       "r": [
+        {
+         "out": "Bonjour, monde !"
+        },
+        {
+         "noerr": true
+        }
+       ]
+      }
+     ],
+     "indice": "<code>print(\"Bonjour, monde !\")<\/code>",
+     "solution": "print(\"Bonjour, monde !\")\n"
+    },
+    {
+     "id": "lua-age",
+     "titre": "Lire une valeur",
+     "texte": "<p>Le programme lit l'âge de l'utilisateur (dans « Entrées du programme ») et affiche <b>Dans 10 ans, tu auras X ans.<\/b><\/p><p><b>Exemple<\/b><\/p><pre><code>local n = io.read(&quot;n&quot;)   -- lit un nombre\nprint(&quot;Tu as &quot; .. n .. &quot; ans&quot;)<\/code><\/pre>",
+     "depart": "local age = io.read()\n",
+     "objectifs": [
+      {
+       "txt": "Avec 17 en entrée : <code>Dans 10 ans, tu auras 27 ans.<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "17"
+          ],
+          "out": "Dans 10 ans, tu auras 27 ans\\."
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Ça marche avec d'autres âges (40 → 50)",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "40"
+          ],
+          "out": "Dans 10 ans, tu auras 50 ans\\."
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>io.read(\"n\")<\/code> lit un nombre ; on colle les textes avec <code>..<\/code>.",
+     "solution": "local age = io.read(\"n\")\nprint(\"Dans 10 ans, tu auras \" .. (age + 10) .. \" ans.\")\n",
+     "stdin": [
+      "17"
+     ]
+    },
+    {
+     "id": "lua-ttc",
+     "titre": "Un calcul",
+     "texte": "<p>Lis un prix hors taxes et affiche <b>Prix TTC : X<\/b> avec une TVA de 20 % (prix × 1.2).<\/p><p><b>Exemple<\/b><\/p><pre><code>local ttc = ht * 1.2<\/code><\/pre>",
+     "depart": "local ht = io.read(\"n\")\n",
+     "objectifs": [
+      {
+       "txt": "100 → <code>Prix TTC : 120<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "100"
+          ],
+          "out": "Prix TTC : 120(\\.0+)?(?![\\d.])"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "50 → <code>Prix TTC : 60<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "50"
+          ],
+          "out": "Prix TTC : 60(\\.0+)?(?![\\d.])"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>print(\"Prix TTC : \" .. ht * 1.2)<\/code>",
+     "solution": "local ht = io.read(\"n\")\nprint(\"Prix TTC : \" .. ht * 1.2)\n",
+     "stdin": [
+      "100"
+     ]
+    }
+   ]
+  },
+  {
+   "titre": "Conditions et boucles",
+   "missions": [
+    {
+     "id": "lua-parite",
+     "titre": "Pair ou impair",
+     "texte": "<p>Lis un entier et affiche <b>pair<\/b> ou <b>impair<\/b>. Le reste de la division par 2 se calcule avec l'opérateur modulo.<\/p><p><b>Exemple<\/b><\/p><pre><code>if n % 2 == 0 then\n  …\nelse\n  …\nend<\/code><\/pre>",
+     "depart": "local n = io.read(\"n\")\n",
+     "objectifs": [
+      {
+       "txt": "4 → <code>pair<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "4"
+          ],
+          "out": "^pair\\s*$",
+          "notout": "impair"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "7 → <code>impair<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "7"
+          ],
+          "out": "^impair\\s*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Utilise une condition",
+       "r": [
+        {
+         "codei": "\\bif\\b|\\?"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>if n % 2 == 0 then … else … end<\/code>",
+     "solution": "local n = io.read(\"n\")\nif n % 2 == 0 then\n  print(\"pair\")\nelse\n  print(\"impair\")\nend\n",
+     "stdin": [
+      "4"
+     ]
+    },
+    {
+     "id": "lua-table",
+     "titre": "Table de multiplication",
+     "texte": "<p>Lis un entier n et affiche sa table de 1 à 10, une ligne par calcul : <b>n x i = résultat<\/b> (par exemple <code>7 x 3 = 21<\/code>).<\/p><p><b>Exemple<\/b><\/p><pre><code>for i = 1, 10 do\n  …\nend<\/code><\/pre>",
+     "depart": "local n = io.read(\"n\")\n",
+     "objectifs": [
+      {
+       "txt": "7 → de <code>7 x 1 = 7<\/code> à <code>7 x 10 = 70<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "7"
+          ],
+          "out": "7 x 1 = 7\\n[\\s\\S]*7 x 5 = 35\\n[\\s\\S]*7 x 10 = 70"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Pas de ligne en trop (pas de 7 x 11)",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "7"
+          ],
+          "out": "7 x 10 = 70",
+          "notout": "7 x (0|11) ="
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Utilise une boucle",
+       "r": [
+        {
+         "codei": "\\b(for|while)\\b"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>for i = 1, 10 do … end<\/code>",
+     "solution": "local n = io.read(\"n\")\nfor i = 1, 10 do\n  print(n .. \" x \" .. i .. \" = \" .. n * i)\nend\n",
+     "stdin": [
+      "7"
+     ]
+    },
+    {
+     "id": "lua-somme",
+     "titre": "Additionner jusqu'à zéro",
+     "texte": "<p>Lis des nombres un par un et additionne-les, jusqu'à lire <b>0<\/b>. Affiche alors <b>Somme : X<\/b>. On ne sait pas à l'avance combien il y aura de nombres : c'est le travail d'une boucle <i>while<\/i>.<\/p><p><b>Exemple<\/b><\/p><pre><code>local x = io.read(&quot;n&quot;)\nwhile x ~= 0 do\n  …\n  x = io.read(&quot;n&quot;)\nend<\/code><\/pre>",
+     "depart": "local somme = 0\n",
+     "objectifs": [
+      {
+       "txt": "3, 4, 5, 0 → <code>Somme : 12<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "4",
+           "5",
+           "0"
+          ],
+          "out": "Somme : 12(?!\\d)"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "0 tout de suite → <code>Somme : 0<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "0"
+          ],
+          "out": "Somme : 0(?!\\d)"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Utilise une boucle while",
+       "r": [
+        {
+         "codei": "\\bwhile\\b|\\brepeat\\b"
+        }
+       ]
+      }
+     ],
+     "indice": "En Lua, « différent » s'écrit <code>~=<\/code>.",
+     "solution": "local somme = 0\nlocal x = io.read(\"n\")\nwhile x ~= 0 do\n  somme = somme + x\n  x = io.read(\"n\")\nend\nprint(\"Somme : \" .. somme)\n",
+     "stdin": [
+      "3",
+      "4",
+      "5",
+      "0"
+     ]
+    }
+   ]
+  },
+  {
+   "titre": "Fonctions, tableaux, objets",
+   "missions": [
+    {
+     "id": "lua-premier",
+     "titre": "Une fonction",
+     "texte": "<p>Écris une fonction <b>estPremier(n)<\/b> qui renvoie vrai si n est premier (divisible seulement par 1 et par lui-même, et n ≥ 2). Le programme lit n et affiche <b>premier<\/b> ou <b>pas premier<\/b>.<\/p><p><b>Exemple<\/b><\/p><pre><code>function double(x)\n  return x * 2\nend<\/code><\/pre>",
+     "depart": "function estPremier(n)\n  -- à compléter\nend\n\nlocal n = io.read(\"n\")\n",
+     "objectifs": [
+      {
+       "txt": "La fonction <code>estPremier<\/code> existe et renvoie un booléen",
+       "r": [
+        {
+         "code": "function\\s+estPremier\\s*\\("
+        }
+       ]
+      },
+      {
+       "txt": "7 → <code>premier<\/code>, 9 → <code>pas premier<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "7"
+          ],
+          "out": "^premier\\s*$"
+         }
+        },
+        {
+         "test": {
+          "stdin": [
+           "9"
+          ],
+          "out": "pas premier"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "1 → <code>pas premier<\/code>, 2 et 97 → <code>premier<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1"
+          ],
+          "out": "pas premier"
+         }
+        },
+        {
+         "test": {
+          "stdin": [
+           "2"
+          ],
+          "out": "^premier\\s*$"
+         }
+        },
+        {
+         "test": {
+          "stdin": [
+           "97"
+          ],
+          "out": "^premier\\s*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Boucle sur d tant que <code>d * d &lt;= n<\/code> ; <code>return false<\/code> dès qu'un diviseur est trouvé.",
+     "solution": "function estPremier(n)\n  if n < 2 then return false end\n  local d = 2\n  while d * d <= n do\n    if n % d == 0 then return false end\n    d = d + 1\n  end\n  return true\nend\n\nlocal n = io.read(\"n\")\nif estPremier(n) then print(\"premier\") else print(\"pas premier\") end\n",
+     "stdin": [
+      "7"
+     ]
+    },
+    {
+     "id": "lua-tableau",
+     "titre": "Un tableau",
+     "texte": "<p>Lis un entier n, puis n nombres que tu ranges dans un tableau. Affiche ensuite <b>max = …<\/b> puis <b>moyenne = …<\/b>.<\/p><p><b>Exemple<\/b><\/p><pre><code>local t = {}\nt[#t + 1] = 4\nfor i, x in ipairs(t) do … end<\/code><\/pre>",
+     "depart": "local n = io.read(\"n\")\nlocal t = {}\n",
+     "objectifs": [
+      {
+       "txt": "Les nombres sont rangés dans un tableau",
+       "r": [
+        {
+         "code": "\\{\\s*\\}|table\\.insert"
+        }
+       ]
+      },
+      {
+       "txt": "4 nombres 3, 9, 2, 6 → <code>max = 9<\/code> et <code>moyenne = 5<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "4",
+           "3",
+           "9",
+           "2",
+           "6"
+          ],
+          "out": "max = 9(?!\\d)[\\s\\S]*moyenne = 5(\\.0+)?(?![\\d.])"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Fonctionne avec des négatifs : -1, -5, -2 → <code>max = -1<\/code>, moyenne ≈ -2.67",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "-1",
+           "-5",
+           "-2"
+          ],
+          "out": "max = -1(?!\\d)[\\s\\S]*moyenne = -2\\.66"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Les tableaux Lua commencent à l'indice 1 ; <code>ipairs<\/code> les parcourt dans l'ordre.",
+     "solution": "local n = io.read(\"n\")\nlocal t = {}\nfor i = 1, n do t[i] = io.read(\"n\") end\nlocal max, total = t[1], 0\nfor _, x in ipairs(t) do\n  if x > max then max = x end\n  total = total + x\nend\nprint(\"max = \" .. max)\nprint(\"moyenne = \" .. total / n)\n",
+     "stdin": [
+      "4",
+      "3",
+      "9",
+      "2",
+      "6"
+     ]
+    },
+    {
+     "id": "lua-palindrome",
+     "titre": "Les chaînes de caractères",
+     "texte": "<p>Lis un mot, affiche-le <b>à l'envers<\/b> sur une ligne, puis <b>palindrome<\/b> s'il se lit pareil dans les deux sens, sinon <b>pas un palindrome<\/b>.<\/p><p><b>Exemple<\/b><\/p><pre><code>local s = &quot;abc&quot;\nprint(s:reverse(), #s)<\/code><\/pre>",
+     "depart": "local mot = io.read()\n",
+     "objectifs": [
+      {
+       "txt": "radar → <code>radar<\/code> puis <code>palindrome<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "radar"
+          ],
+          "out": "^radar\\s*\\n[\\s\\S]*^palindrome\\s*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "code → <code>edoc<\/code> puis <code>pas un palindrome<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "code"
+          ],
+          "out": "edoc[\\s\\S]*pas un palindrome"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>mot:reverse()<\/code> renvoie le mot à l'envers.",
+     "solution": "local mot = io.read()\nlocal inv = mot:reverse()\nprint(inv)\nif inv == mot then print(\"palindrome\") else print(\"pas un palindrome\") end\n",
+     "stdin": [
+      "radar"
+     ]
+    },
+    {
+     "id": "lua-compte",
+     "titre": "Un objet : le compte bancaire",
+     "texte": "<p>Crée un type <b>Compte<\/b> qui garde un solde, avec deux opérations : <b>deposer(montant)<\/b> et <b>retirer(montant)<\/b>. Si le solde ne suffit pas, <b>retirer<\/b> affiche <code>Solde insuffisant<\/code> et ne change rien. Le programme principal est déjà écrit en bas.<\/p><p><b>Exemple<\/b><\/p><pre><code>Chien = {}\nChien.__index = Chien\nfunction Chien.nouveau(nom) return setmetatable({nom = nom}, Chien) end\nfunction Chien:aboyer() print(self.nom .. &quot; : Ouaf&quot;) end<\/code><\/pre>",
+     "depart": "-- Écris Compte ici : une table et des fonctions\n\nlocal c = Compte.nouveau(100)\nc:deposer(50)\nc:retirer(30)\nc:retirer(500)\nprint(\"Solde : \" .. c.solde)\n",
+     "objectifs": [
+      {
+       "txt": "Le type Compte est défini",
+       "r": [
+        {
+         "code": "Compte\\s*=\\s*\\{|setmetatable"
+        }
+       ]
+      },
+      {
+       "txt": "Le retrait trop gros affiche <code>Solde insuffisant<\/code>",
+       "r": [
+        {
+         "out": "Solde insuffisant"
+        },
+        {
+         "noerr": true
+        }
+       ]
+      },
+      {
+       "txt": "Le solde final est <code>120<\/code>",
+       "r": [
+        {
+         "out": "Solde : 120(?![\\d.])"
+        }
+       ]
+      }
+     ],
+     "indice": "Une méthode déclarée avec <code>:<\/code> reçoit l'objet dans <code>self<\/code>.",
+     "solution": "Compte = {}\nCompte.__index = Compte\n\nfunction Compte.nouveau(solde)\n  return setmetatable({ solde = solde }, Compte)\nend\n\nfunction Compte:deposer(m)\n  self.solde = self.solde + m\nend\n\nfunction Compte:retirer(m)\n  if m > self.solde then\n    print(\"Solde insuffisant\")\n    return\n  end\n  self.solde = self.solde - m\nend\n\nlocal c = Compte.nouveau(100)\nc:deposer(50)\nc:retirer(30)\nc:retirer(500)\nprint(\"Solde : \" .. c.solde)\n"
+    }
+   ]
+  },
+  {
+   "titre": "Dessiner et bouger",
+   "missions": [
+    {
+     "id": "lua-dessin",
+     "titre": "Premier dessin",
+     "texte": "<p>Ton premier écran de jeu (480 × 320 pixels, origine en haut à gauche, y vers le bas). Dans <b>draw()<\/b> : efface l'écran en noir, puis dessine un rectangle rouge en (40, 40) de 100 × 60, un cercle jaune de centre (300, 160) et de rayon 40, et le texte <b>Mon jeu<\/b> en (20, 280).<\/p><p class=\"lb-small\">Le jeu appelle <code>update(dt)<\/code> puis <code>draw()<\/code> 60 fois par seconde. Fonctions : <code>effacer(c)<\/code>, <code>rect(x, y, l, h, c)<\/code>, <code>cercle(x, y, r, c)<\/code>, <code>ligne(x1, y1, x2, y2, c)<\/code>, <code>texte(t, x, y, taille, c)<\/code>, <code>touche(\"droite\")<\/code>, <code>toucheAppuyee(\"espace\")<\/code>, <code>clic()<\/code>, <code>sourisX()<\/code>, <code>hasard(a, b)<\/code>, <code>LARGEUR<\/code> (480), <code>HAUTEUR<\/code> (320).<\/p><p><b>Exemple<\/b><\/p><pre><code>rect(10, 10, 50, 30, &quot;blue&quot;)<\/code><\/pre>",
+     "depart": "function draw()\n  effacer(\"black\")\n  -- à toi : rect, cercle, texte\nend\n",
+     "objectifs": [
+      {
+       "txt": "L'écran est effacé en noir",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 2
+           }
+          ],
+          "test": "return T(D, 'efface').some(c => c[1] === 'black');"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Rectangle rouge en (40, 40), 100 × 60",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 2
+           }
+          ],
+          "test": "return T(D, 'rect').some(c => c[1] === 40 && c[2] === 40 && c[3] === 100 && c[4] === 60 && c[5] === 'red');"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Cercle jaune de centre (300, 160), rayon 40",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 2
+           }
+          ],
+          "test": "return T(D, 'cercle').some(c => c[1] === 300 && c[2] === 160 && c[3] === 40 && c[4] === 'yellow');"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Le texte « Mon jeu » en (20, 280)",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 2
+           }
+          ],
+          "test": "return T(D, 'texte').some(c => /Mon jeu/.test(c[1]) && c[2] === 20 && c[3] === 280);"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>rect(40, 40, 100, 60, \"red\")<\/code>",
+     "solution": "function draw()\n  effacer(\"black\")\n  rect(40, 40, 100, 60, \"red\")\n  cercle(300, 160, 40, \"yellow\")\n  texte(\"Mon jeu\", 20, 280, 24, \"white\")\nend\n"
+    },
+    {
+     "id": "lua-bouger",
+     "titre": "Bouger avec les flèches",
+     "texte": "<p>Un carré bleu de 40 × 40 démarre en x = 200, y = 140. Chaque image, il avance de <b>5 pixels<\/b> vers la droite si la flèche droite est enfoncée, vers la gauche avec la flèche gauche. Il ne doit jamais sortir de l'écran (x entre 0 et LARGEUR − 40).<\/p><p>Clique sur l'écran du jeu pour lui donner le clavier.<\/p><p><b>Exemple<\/b><\/p><pre><code>if touche(&quot;droite&quot;) then x = x + 5 end<\/code><\/pre>",
+     "depart": "local x = 200\n\nfunction update(dt)\n  -- if touche(\"droite\") then … end\nend\n\nfunction draw()\n  effacer(\"black\")\n  rect(x, 140, 40, 40, \"blue\")\nend\n",
+     "objectifs": [
+      {
+       "txt": "La flèche droite fait avancer le carré, la gauche le fait reculer",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1
+           },
+           {
+            "n": 10,
+            "k": [
+             "droite"
+            ]
+           },
+           {
+            "n": 10,
+            "k": [
+             "gauche"
+            ]
+           }
+          ],
+          "test": "const xs = P('rect', 'blue').map(c => c && c[1]);\nreturn xs[0] === 200 && xs[10] > xs[0] && xs[20] < xs[10];"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "5 pixels par image",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1
+           },
+           {
+            "n": 10,
+            "k": [
+             "droite"
+            ]
+           },
+           {
+            "n": 10,
+            "k": [
+             "gauche"
+            ]
+           }
+          ],
+          "test": "const xs = P('rect', 'blue').map(c => c && c[1]);\nreturn xs[10] - xs[0] === 50 && xs[20] === xs[0];"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Le carré reste dans l'écran",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 100,
+            "k": [
+             "droite"
+            ]
+           },
+           {
+            "n": 150,
+            "k": [
+             "gauche"
+            ]
+           }
+          ],
+          "test": "const xs = P('rect', 'blue').map(c => c && c[1]);\nreturn xs.every(x => x >= 0 && x <= 440) && Math.max(...xs) === 440 && Math.min(...xs) === 0;"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>if x &lt; 0 then x = 0 end<\/code>",
+     "solution": "local x = 200\n\nfunction update(dt)\n  if touche(\"droite\") then x = x + 5 end\n  if touche(\"gauche\") then x = x - 5 end\n  if x < 0 then x = 0 end\n  if x > LARGEUR - 40 then x = LARGEUR - 40 end\nend\n\nfunction draw()\n  effacer(\"black\")\n  rect(x, 140, 40, 40, \"blue\")\nend\n"
+    },
+    {
+     "id": "lua-rebond",
+     "titre": "La balle qui rebondit",
+     "texte": "<p>Une balle rouge de rayon 12 part de (100, 80) avec une vitesse de 4 pixels par image en x et 3 en y. Quand elle touche un bord, sa vitesse s'inverse dans cette direction : elle rebondit et ne sort jamais de l'écran.<\/p><p><b>Exemple<\/b><\/p><pre><code>if x &lt; 12 or x &gt; LARGEUR - 12 then vx = -vx end<\/code><\/pre>",
+     "depart": "local x, y = 100, 80\nlocal vx, vy = 4, 3\n\nfunction update(dt)\n  x = x + vx\n  -- et y ? et les rebonds ?\nend\n\nfunction draw()\n  effacer(\"black\")\n  cercle(x, y, 12, \"red\")\nend\n",
+     "objectifs": [
+      {
+       "txt": "La balle bouge en diagonale",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 60
+           }
+          ],
+          "test": "const c = P('cercle', 'red');\nconst xs = c.map(v => v[1]), ys = c.map(v => v[2]);\nconst sens = a => a.some((v, i) => i && v > a[i - 1]) && a.some((v, i) => i && v < a[i - 1]);\nreturn xs[10] > xs[0] && ys[10] > ys[0];"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Elle rebondit sur les bords gauche/droite et haut/bas",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 400
+           }
+          ],
+          "test": "const c = P('cercle', 'red');\nconst xs = c.map(v => v[1]), ys = c.map(v => v[2]);\nconst sens = a => a.some((v, i) => i && v > a[i - 1]) && a.some((v, i) => i && v < a[i - 1]);\nreturn sens(xs) && sens(ys);"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Elle ne sort jamais de l'écran",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 400
+           }
+          ],
+          "test": "const c = P('cercle', 'red');\nconst xs = c.map(v => v[1]), ys = c.map(v => v[2]);\nconst sens = a => a.some((v, i) => i && v > a[i - 1]) && a.some((v, i) => i && v < a[i - 1]);\nreturn xs.every(x => x >= 0 && x <= 480) && ys.every(y => y >= 0 && y <= 320);"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "« ou » s'écrit <code>or<\/code> en Lua.",
+     "solution": "local x, y = 100, 80\nlocal vx, vy = 4, 3\n\nfunction update(dt)\n  x = x + vx\n  y = y + vy\n  if x < 12 or x > LARGEUR - 12 then vx = -vx end\n  if y < 12 or y > HAUTEUR - 12 then vy = -vy end\nend\n\nfunction draw()\n  effacer(\"black\")\n  cercle(x, y, 12, \"red\")\nend\n"
+    }
+   ]
+  },
+  {
+   "titre": "Mini-jeux",
+   "missions": [
+    {
+     "id": "lua-clics",
+     "titre": "Compter les clics",
+     "texte": "<p>Affiche <b>Score : N<\/b> en haut à gauche, où N est le nombre de clics de souris sur le jeu depuis le début. Dessine aussi un petit cercle jaune (rayon 10) qui suit la souris.<\/p><p><b>Exemple<\/b><\/p><pre><code>texte(&quot;Score : &quot; .. score, 16, 16, 28, &quot;white&quot;)<\/code><\/pre>",
+     "depart": "local score = 0\n\nfunction update(dt)\n  -- if clic() then … end\nend\n\nfunction draw()\n  effacer(\"black\")\nend\n",
+     "objectifs": [
+      {
+       "txt": "Au départ : <code>Score : 0<\/code>",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 2
+           },
+           {
+            "n": 3,
+            "souris": {
+             "x": 100,
+             "y": 100,
+             "clic": true
+            }
+           },
+           {
+            "n": 3,
+            "souris": {
+             "x": 50,
+             "y": 60,
+             "clic": true
+            }
+           },
+           {
+            "n": 3,
+            "souris": {
+             "x": 200,
+             "y": 150,
+             "clic": true
+            }
+           }
+          ],
+          "test": "return T(F[0], 'texte').some(c => /Score : 0\\b/.test(c[1]));"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Après 3 clics : <code>Score : 3<\/code>",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 2
+           },
+           {
+            "n": 3,
+            "souris": {
+             "x": 100,
+             "y": 100,
+             "clic": true
+            }
+           },
+           {
+            "n": 3,
+            "souris": {
+             "x": 50,
+             "y": 60,
+             "clic": true
+            }
+           },
+           {
+            "n": 3,
+            "souris": {
+             "x": 200,
+             "y": 150,
+             "clic": true
+            }
+           }
+          ],
+          "test": "return T(D, 'texte').some(c => /Score : 3\\b/.test(c[1]));"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Un cercle jaune suit la souris",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 2
+           },
+           {
+            "n": 3,
+            "souris": {
+             "x": 100,
+             "y": 100,
+             "clic": true
+            }
+           },
+           {
+            "n": 3,
+            "souris": {
+             "x": 50,
+             "y": 60,
+             "clic": true
+            }
+           },
+           {
+            "n": 3,
+            "souris": {
+             "x": 200,
+             "y": 150,
+             "clic": true
+            }
+           }
+          ],
+          "test": "return T(D, 'cercle').some(c => c[1] === 200 && c[2] === 150 && c[4] === 'yellow');"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>if clic() then score = score + 1 end<\/code>",
+     "solution": "local score = 0\n\nfunction update(dt)\n  if clic() then score = score + 1 end\nend\n\nfunction draw()\n  effacer(\"black\")\n  texte(\"Score : \" .. score, 16, 16, 28, \"white\")\n  cercle(sourisX(), sourisY(), 10, \"yellow\")\nend\n"
+    },
+    {
+     "id": "lua-saut",
+     "titre": "Sauter avec la gravité",
+     "texte": "<p>Un joueur (carré bleu 40 × 40 en x = 60) est posé sur un sol vert (rectangle en y = 300). Sa position y (le haut du carré) vaut 260 au sol. Quand on appuie sur <b>espace<\/b> et qu'il est au sol, sa vitesse verticale vy devient −12. À chaque image : vy augmente de 0,6 (la gravité), y augmente de vy, et s'il passe sous le sol on le replace à 260 avec vy = 0. Pas de double saut !<\/p><p><b>Exemple<\/b><\/p><pre><code>if toucheAppuyee(&quot;espace&quot;) and y &gt;= 260 then vy = -12 end<\/code><\/pre>",
+     "depart": "local y, vy = 260, 0\n\nfunction update(dt)\n  -- saut, gravité, sol\nend\n\nfunction draw()\n  effacer(\"skyblue\")\n  rect(0, 300, 480, 20, \"green\")\n  rect(60, y, 40, 40, \"blue\")\nend\n",
+     "objectifs": [
+      {
+       "txt": "Un sol vert est dessiné",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 2
+           }
+          ],
+          "test": "return T(D, 'rect').some(c => c[5] === 'green' && c[2] === 300);"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Sans appui, le joueur reste au sol (y = 260)",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 20
+           }
+          ],
+          "test": "const ys = P('rect', 'blue').map(c => c && c[2]);\nreturn ys.every(y => y === 260);"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Espace : il monte puis retombe au sol",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 5
+           },
+           {
+            "n": 1,
+            "p": [
+             "espace"
+            ]
+           },
+           {
+            "n": 70
+           }
+          ],
+          "test": "const ys = P('rect', 'blue').map(c => c && c[2]);\nreturn ys[4] === 260 && Math.min(...ys) < 180 && ys[ys.length - 1] === 260;"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Pas de double saut en l'air",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1,
+            "p": [
+             "espace"
+            ]
+           },
+           {
+            "n": 5
+           },
+           {
+            "n": 1,
+            "p": [
+             "espace"
+            ]
+           },
+           {
+            "n": 50
+           }
+          ],
+          "test": "const ys = P('rect', 'blue').map(c => c && c[2]);\nreturn Math.min(...ys) > 120;"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "« et » s'écrit <code>and<\/code>.",
+     "solution": "local y, vy = 260, 0\n\nfunction update(dt)\n  if toucheAppuyee(\"espace\") and y >= 260 then vy = -12 end\n  vy = vy + 0.6\n  y = y + vy\n  if y > 260 then\n    y = 260\n    vy = 0\n  end\nend\n\nfunction draw()\n  effacer(\"skyblue\")\n  rect(0, 300, 480, 20, \"green\")\n  rect(60, y, 40, 40, \"blue\")\nend\n"
+    },
+    {
+     "id": "lua-fruits",
+     "titre": "Attrape les fruits",
+     "texte": "<p>Le vrai mini-jeu ! Une raquette blanche (80 × 12, en y = 290, x de départ 200) se déplace de 6 pixels par image avec les flèches, sans sortir de l'écran. Un fruit (cercle rouge de rayon 10) tombe de 4 pixels par image depuis le haut, à une position x tirée au hasard. S'il touche la raquette, le score augmente de 1 ; dans tous les cas, quand il est attrapé ou qu'il sort en bas, il repart du haut. Affiche <b>Score : N<\/b>.<\/p><p><b>Exemple<\/b><\/p><pre><code>px = math.max(0, math.min(LARGEUR - 80, px))<\/code><\/pre>",
+     "depart": "local px = 200\nlocal fx, fy = hasard(20, 460), 0\nlocal score = 0\n\nfunction update(dt)\n  -- raquette, chute, collision, score\nend\n\nfunction draw()\n  effacer(\"black\")\n  rect(px, 290, 80, 12, \"white\")\n  cercle(fx, fy, 10, \"red\")\n  texte(\"Score : \" .. score, 16, 16, 24, \"white\")\nend\n",
+     "objectifs": [
+      {
+       "txt": "La raquette se déplace avec les flèches",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1
+           },
+           {
+            "n": 30,
+            "k": [
+             "droite"
+            ]
+           },
+           {
+            "n": 120
+           }
+          ],
+          "test": "const p = P('rect', 'white').map(c => c && c[1]);\nconst f = P('cercle', 'red').map(c => c && c[2]);\nreturn p[0] === 200 && p[30] > p[0];"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Le fruit tombe",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1
+           },
+           {
+            "n": 30,
+            "k": [
+             "droite"
+            ]
+           },
+           {
+            "n": 120
+           }
+          ],
+          "test": "const p = P('rect', 'white').map(c => c && c[1]);\nconst f = P('cercle', 'red').map(c => c && c[2]);\nreturn f[20] > f[0];"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Le fruit repart du haut quand il arrive en bas",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1
+           },
+           {
+            "n": 30,
+            "k": [
+             "droite"
+            ]
+           },
+           {
+            "n": 120
+           }
+          ],
+          "test": "const p = P('rect', 'white').map(c => c && c[1]);\nconst f = P('cercle', 'red').map(c => c && c[2]);\nreturn f.some((v, i) => i && v < f[i - 1] - 100);"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Le score est affiché",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1
+           },
+           {
+            "n": 30,
+            "k": [
+             "droite"
+            ]
+           },
+           {
+            "n": 120
+           }
+          ],
+          "test": "return T(D, 'texte').some(c => /Score : \\d+/.test(c[1]));"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "La raquette ne sort pas de l'écran",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 120,
+            "k": [
+             "droite"
+            ]
+           },
+           {
+            "n": 150,
+            "k": [
+             "gauche"
+            ]
+           }
+          ],
+          "test": "const p = P('rect', 'white').map(c => c && c[1]);\nconst f = P('cercle', 'red').map(c => c && c[2]);\nreturn p.every(x => x >= 0 && x <= 400);"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Collision : <code>fy &gt;= 280 and fx &gt;= px and fx &lt;= px + 80<\/code>.",
+     "solution": "local px = 200\nlocal fx, fy = hasard(20, 460), 0\nlocal score = 0\n\nlocal function nouveauFruit()\n  fx = hasard(20, 460)\n  fy = 0\nend\n\nfunction update(dt)\n  if touche(\"droite\") then px = px + 6 end\n  if touche(\"gauche\") then px = px - 6 end\n  px = math.max(0, math.min(LARGEUR - 80, px))\n  fy = fy + 4\n  if fy >= 280 and fy <= 300 and fx >= px and fx <= px + 80 then\n    score = score + 1\n    nouveauFruit()\n  elseif fy > HAUTEUR then\n    nouveauFruit()\n  end\nend\n\nfunction draw()\n  effacer(\"black\")\n  rect(px, 290, 80, 12, \"white\")\n  cercle(fx, fy, 10, \"red\")\n  texte(\"Score : \" .. score, 16, 16, 24, \"white\")\nend\n"
+    }
+   ]
+  }
+ ],
+ "libre": "-- Bac à sable : console ou jeu (si tu écris draw(), le jeu démarre)\nlocal x, y, vx, vy = 240, 160, 3, 2\n\nfunction update(dt)\n  x, y = x + vx, y + vy\n  if x < 20 or x > LARGEUR - 20 then vx = -vx end\n  if y < 20 or y > HAUTEUR - 20 then vy = -vy end\nend\n\nfunction draw()\n  effacer(\"#16182b\")\n  cercle(x, y, 20, \"gold\")\n  texte(\"Bac à sable Lua\", 12, 12, 18, \"white\")\nend\n",
+ "libreTexte": "<p>Écris ce que tu veux. Si tu définis <code>draw()<\/code>, le jeu démarre ; sinon le programme s'exécute dans la console.<\/p><p class=\"lb-small\">Le jeu appelle <code>update(dt)<\/code> puis <code>draw()<\/code> 60 fois par seconde. Fonctions : <code>effacer(c)<\/code>, <code>rect(x, y, l, h, c)<\/code>, <code>cercle(x, y, r, c)<\/code>, <code>ligne(x1, y1, x2, y2, c)<\/code>, <code>texte(t, x, y, taille, c)<\/code>, <code>touche(\"droite\")<\/code>, <code>toucheAppuyee(\"espace\")<\/code>, <code>clic()<\/code>, <code>sourisX()<\/code>, <code>hasard(a, b)<\/code>, <code>LARGEUR<\/code> (480), <code>HAUTEUR<\/code> (320).<\/p>"
+};
+</script>
+  <script src="../../data/modules.js"></script>
+  <script src="../../assets/app.js"></script>
+  <script src="../../assets/jeu.js"></script>
+  <script src="../../assets/labo-code.js"></script>
+</body>
+</html>

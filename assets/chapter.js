@@ -48,7 +48,7 @@
   body.insertBefore(main, coursEl);
 
   main.innerHTML =
-    '<nav class="crumbs"><a href="../../index.html">Accueil</a><span>›</span>' +
+    '<nav class="crumbs"><a href="../../index.html">Accueil</a><span>›</span>' + (mod.bonus ? '<a href="../../bonus.html">Cours bonus</a><span>›</span>' : '') +
     '<a href="index.html">' + esc(mod.titre) + '</a><span>›</span><span>Chapitre ' + (idx + 1) + '</span></nav>' +
     '<h1>' + esc(chap.titre) + '</h1>' +
     '<div class="chap-meta" style="margin-top:8px"><span class="lvl ' + chap.niveau + '">' + LVL[chap.niveau] + '</span></div>' +
@@ -333,7 +333,7 @@
     document.getElementById("back").onclick = function () { show("cours", true); };
     var tb = header.querySelector(".top-stat b");
     if (tb) tb.textContent = EF.stats(mod).done + (function () {
-      var t = 0; (window.EF_MODULES || []).forEach(function (m) { if (m.id !== mod.id) t += EF.stats(m).done; }); return t;
+      var t = 0; (window.EF_MODULES || []).forEach(function (m) { if (m.id !== mod.id && !m.bonus) t += EF.stats(m).done; }); return t;
     })();
     window.scrollTo({ top: 0 });
   }

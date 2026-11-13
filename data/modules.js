@@ -165,5 +165,77 @@ window.EF_MODULES = [
     couleur: "sky",
     description: "Vocabulaire informatique et expression en anglais.",
     chapitres: []
+  },
+
+  /* ---------- Cours bonus : hors programme, ne comptent ni dans la progression ni au classement ---------- */
+  {
+    id: "javascript", bonus: true,
+    titre: "JavaScript",
+    sousTitre: "Bonus · le langage du web",
+    icone: "JS",
+    option: "BONUS",
+    couleur: "js",
+    description: "Variables, fonctions, tableaux, objets, DOM et événements, puis des jeux en canvas dans le navigateur.",
+    labos: [{ href: "labo-js.html", ico: "JS", titre: "Labo JavaScript", court: "JavaScript", texte: "16 missions : programmes console puis jeux (dessin, clavier, souris, rebonds, gravité, mini-jeu complet). Plus un bac à sable." }],
+    chapitres: [
+      { id: "js-bases", titre: "JavaScript : variables, types et opérateurs", niveau: "facile" },
+      { id: "js-conditions-boucles", titre: "JavaScript : conditions et boucles", niveau: "facile" },
+      { id: "js-fonctions", titre: "JavaScript : les fonctions", niveau: "moyen" },
+      { id: "js-tableaux-objets", titre: "JavaScript : tableaux et objets", niveau: "moyen" },
+      { id: "js-dom-evenements", titre: "JavaScript : le DOM et les événements", niveau: "moyen" },
+      { id: "js-jeu-canvas", titre: "JavaScript : créer un jeu dans le navigateur", niveau: "difficile" }
+    ]
+  },
+  {
+    id: "lua", bonus: true,
+    titre: "Lua",
+    sousTitre: "Bonus · le langage des jeux",
+    icone: "Lua",
+    option: "BONUS",
+    couleur: "lua",
+    description: "Le langage léger de Roblox, LÖVE et des scripts de jeux : variables, tables, fonctions, objets, puis des jeux.",
+    labos: [{ href: "labo-lua.html", ico: "Lua", titre: "Labo Lua", court: "Lua", texte: "16 missions avec du vrai Lua 5.4 : programmes console puis jeux dans le navigateur. Plus un bac à sable." }],
+    chapitres: [
+      { id: "lua-bases", titre: "Lua : variables, types et affichage", niveau: "facile" },
+      { id: "lua-conditions-boucles", titre: "Lua : conditions et boucles", niveau: "facile" },
+      { id: "lua-fonctions", titre: "Lua : les fonctions", niveau: "moyen" },
+      { id: "lua-tables", titre: "Lua : les tables", niveau: "moyen" },
+      { id: "lua-objets-jeux", titre: "Lua : objets et jeux", niveau: "difficile" }
+    ]
+  },
+  {
+    id: "cpp", bonus: true,
+    titre: "C++",
+    sousTitre: "Bonus · rapide et compilé",
+    icone: "C++",
+    option: "BONUS",
+    couleur: "cpp",
+    description: "Compilation, types, fonctions, références, vector et string, classes, puis de vrais jeux compilés en WebAssembly.",
+    labos: [{ href: "labo-cpp.html", ico: "C++", titre: "Labo C++", court: "C++", texte: "16 missions avec du vrai C++20 compilé par clang dans le navigateur : console puis jeux en temps réel. Plus un bac à sable." }],
+    chapitres: [
+      { id: "cpp-bases", titre: "C++ : compiler, afficher, lire", niveau: "facile" },
+      { id: "cpp-conditions-boucles", titre: "C++ : conditions et boucles", niveau: "facile" },
+      { id: "cpp-fonctions", titre: "C++ : fonctions et références", niveau: "moyen" },
+      { id: "cpp-vector-string", titre: "C++ : tableaux, vector et string", niveau: "moyen" },
+      { id: "cpp-classes", titre: "C++ : classes et objets", niveau: "difficile" },
+      { id: "cpp-jeu", titre: "C++ : créer un jeu dans le navigateur", niveau: "difficile" }
+    ]
+  },
+  {
+    id: "java", bonus: true,
+    titre: "Java",
+    sousTitre: "Bonus · objets et Android",
+    icone: "J",
+    option: "BONUS",
+    couleur: "java",
+    description: "Classes, types, Scanner, méthodes, tableaux et ArrayList, programmation objet, puis des jeux avec la classe Jeu.",
+    labos: [{ href: "labo-java.html", ico: "J", titre: "Labo Java", court: "Java", texte: "16 missions avec du vrai Java (javac + TeaVM) dans le navigateur : console, objets, puis jeux. Plus un bac à sable." }],
+    chapitres: [
+      { id: "java-bases", titre: "Java : la classe Main, types et Scanner", niveau: "facile" },
+      { id: "java-conditions-boucles", titre: "Java : conditions et boucles", niveau: "facile" },
+      { id: "java-methodes-tableaux", titre: "Java : méthodes, tableaux et ArrayList", niveau: "moyen" },
+      { id: "java-poo", titre: "Java : programmation orientée objet", niveau: "difficile" },
+      { id: "java-jeu", titre: "Java : créer un jeu dans le navigateur", niveau: "difficile" }
+    ]
   }
 ];

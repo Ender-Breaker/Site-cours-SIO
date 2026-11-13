@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>C++ : classes et objets — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="cpp" data-chapter="cpp-classes">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<h2>1. Classe et objet</h2>
+<pre><code>class Compte {
+private:                         // accessible seulement dans la classe
+    string titulaire;
+    double solde;
+public:                          // accessible de partout
+    Compte(string t, double s) : titulaire(t), solde(s) {}   // constructeur
+    void deposer(double m) { if (m &gt; 0) solde += m; }
+    bool retirer(double m) {
+        if (m &gt; solde) return false;
+        solde -= m;
+        return true;
+    }
+    double getSolde() const { return solde; }   // const : ne modifie pas l&#x27;objet
+};                               // ← point-virgule obligatoire
+
+Compte c(&quot;Léa&quot;, 100);
+c.deposer(50);
+cout &lt;&lt; c.getSolde();</code></pre>
+<p>Une <b>classe</b> regroupe des données (attributs) et les fonctions qui les manipulent (méthodes). Un <b>objet</b> est une instance de la classe.</p>
+
+<h2>2. L'encapsulation</h2>
+<p>Les attributs sont <code>private</code> : on ne peut les modifier que par les méthodes, qui garantissent que l'objet reste cohérent (pas de solde négatif, par exemple). Les <b>accesseurs</b> (<code>getSolde()</code>) et <b>mutateurs</b> (<code>setX()</code>) contrôlent l'accès.</p>
+<p><code>struct</code> est identique à <code>class</code>, mais tout y est public par défaut : on l'utilise pour de simples regroupements de données.</p>
+<pre><code>struct Point { double x, y; };
+Point p = {3, 4};</code></pre>
+
+<h2>3. L'héritage</h2>
+<pre><code>class Personnage {
+protected:                        // accessible aussi dans les classes filles
+    int pv = 100;
+public:
+    virtual void attaquer() { cout &lt;&lt; &quot;Coup de poing&quot; &lt;&lt; endl; }
+    virtual ~Personnage() {}
+};
+
+class Mage : public Personnage {  // Mage hérite de Personnage
+public:
+    void attaquer() override { cout &lt;&lt; &quot;Boule de feu&quot; &lt;&lt; endl; }
+};</code></pre>
+<p>Avec <code>virtual</code> et <code>override</code>, un appel à <code>attaquer()</code> sur un <code>Personnage&amp;</code> qui est en réalité un <code>Mage</code> exécute la version du Mage : c'est le <b>polymorphisme</b>.</p>
+
+<h2>4. Mémoire</h2>
+<pre><code>Compte a(&quot;Léa&quot;, 100);                         // sur la pile : détruit automatiquement
+auto b = make_unique&lt;Compte&gt;(&quot;Tom&quot;, 50);      // sur le tas, géré par un pointeur intelligent
+b-&gt;deposer(10);</code></pre>
+<div class="box retenir"><b>Pas de new sans delete</b><p>En C++ moderne, on évite <code>new</code>/<code>delete</code> à la main : les objets locaux, <code>vector</code> et <code>unique_ptr</code> libèrent la mémoire tout seuls. Il n'y a pas de ramasse-miettes comme en Java.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cpp.html">labo C++</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Qu'est-ce qu'un objet ?",
+  "options": [
+   "Un fichier",
+   "Une instance d'une classe",
+   "Un type de boucle",
+   "Une bibliothèque"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Un attribut private est accessible…",
+  "options": [
+   "de partout",
+   "seulement dans les méthodes de la classe",
+   "seulement dans main",
+   "dans les classes filles uniquement"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Comment s'appelle la méthode qui initialise un objet à sa création ?",
+  "options": [
+   "Le destructeur",
+   "Le constructeur",
+   "L'accesseur",
+   "Le prototype"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Qu'est-ce qui est obligatoire après l'accolade fermante d'une classe ?",
+  "options": [
+   "Rien",
+   "Un point-virgule",
+   "Un return",
+   "Le nom de la classe"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle est la différence entre struct et class ?",
+  "options": [
+   "Aucune différence",
+   "Dans une struct tout est public par défaut",
+   "Une struct ne peut pas avoir de méthodes",
+   "Une struct est plus rapide"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "À quoi servent virtual et override ?",
+  "options": [
+   "À rendre une méthode privée",
+   "À permettre le polymorphisme (la version de la classe fille est appelée)",
+   "À accélérer",
+   "À copier l'objet"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "`class Mage : public Personnage` signifie que…",
+  "options": [
+   "Personnage hérite de Mage",
+   "Mage hérite de Personnage",
+   "Mage contient un Personnage",
+   "Erreur"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "Le C++ libère automatiquement la mémoire allouée avec new grâce à un ramasse-miettes.",
+  "answer": false,
+  "explication": ""
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quel mot-clé rend un membre accessible dans la classe et ses classes filles, mais pas ailleurs ?",
+  "answers": [
+   "protected"
+  ],
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que garantit const dans `double getSolde() const` ?",
+  "options": [
+   "La valeur renvoyée est constante",
+   "La méthode ne modifie pas l'objet",
+   "La méthode est publique",
+   "Rien"
+  ],
+  "answer": 1,
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

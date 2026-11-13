@@ -811,3 +811,32 @@ html.compte-ouvert { overflow: hidden; }
 .sql-tb li { padding: 2px 0; border-top: 1px dashed var(--filet); }
 .sql-tb li span { color: var(--discret); }
 .lb-texte pre { white-space: pre-wrap; overflow-wrap: anywhere; max-width: 100%; }
+
+/* ===================== Cours bonus ===================== */
+.bandeau-bonus { display: flex; align-items: center; gap: 14px; margin: 18px 0 0; padding: 12px 16px; border: var(--trait); border-radius: var(--r2); background: var(--encre); color: #fff; text-decoration: none; box-shadow: var(--ombre-1); transition: transform var(--vite), box-shadow var(--vite); }
+.bandeau-bonus:hover { transform: translate(-2px, -2px); box-shadow: var(--ombre-2); }
+.bb-tag { flex: none; padding: 4px 10px; border: 2px solid #fff; border-radius: var(--r1); background: var(--safran); color: var(--encre); font-weight: 800; text-transform: uppercase; letter-spacing: .06em; font-size: .75rem; }
+.bb-txt { display: flex; flex-direction: column; min-width: 0; }
+.bb-txt b { font-family: var(--titre); font-size: 1.05rem; }
+.bb-txt span { font-size: .85rem; opacity: .85; }
+.bb-go { margin-left: auto; font-size: 1.4rem; font-weight: 800; }
+@media (max-width: 560px) { .bb-txt span { display: none; } }
+.top-nav .nav-bonus { color: var(--safran); }
+.bonus-note { max-width: 760px; }
+.c-cpp  { --m: #00599c; --m-clair: #d3e4f2; --m-fonce: #003e6d; --m-sur: #ffffff; }
+.c-java { --m: #e76f00; --m-clair: #fbe2cc; --m-fonce: #7a3d05; --m-sur: #16182b; }
+.c-lua  { --m: #2c2d72; --m-clair: #dcdcf0; --m-fonce: #1c1d4d; --m-sur: #ffffff; }
+.c-js   { --m: #f7df1e; --m-clair: #fdf7c6; --m-fonce: #6b5f00; --m-sur: #16182b; }
+
+/* zone de jeu des labos */
+.jeu-zone { padding: 10px; background: #0d0e1a; border-bottom: 2px solid var(--encre); }
+.jeu-zone canvas { display: block; width: 100%; max-width: 480px; aspect-ratio: 3 / 2; margin: 0 auto; background: #16182b; border: 2px solid #fff; border-radius: 6px; image-rendering: pixelated; outline: none; touch-action: none; }
+.jeu-zone canvas:focus { border-color: var(--safran); box-shadow: 0 0 0 3px rgba(255, 210, 63, .35); }
+.jeu-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; max-width: 480px; margin: 8px auto 0; color: #c9cbe0; font-size: .8rem; }
+.jeu-bar .btn { min-height: 34px; padding: 4px 12px; font-size: .85rem; }
+.jeu-pad { display: none; gap: 8px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
+.jeu-pad button { min-width: 52px; min-height: 48px; font: 800 1.1rem var(--corps); border: 2px solid #fff; border-radius: 8px; background: #2a2c48; color: #fff; touch-action: none; user-select: none; -webkit-user-select: none; }
+.jeu-pad button.large { min-width: 110px; font-size: .9rem; }
+.jeu-pad button:active { background: var(--safran); color: var(--encre); }
+@media (hover: none) and (pointer: coarse) { .jeu-pad { display: flex; } }
+.py-out [hidden], .jeu-zone[hidden] { display: none !important; }

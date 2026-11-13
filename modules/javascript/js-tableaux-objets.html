@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>JavaScript : tableaux et objets — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="javascript" data-chapter="js-tableaux-objets">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<h2>1. Les tableaux</h2>
+<pre><code>const notes = [12, 15, 9];
+notes[0]          // 12 (les indices commencent à 0)
+notes.length      // 3
+notes.push(18);   // ajoute à la fin
+notes.pop();      // retire le dernier
+notes.includes(9) // true
+notes.indexOf(15) // 1</code></pre>
+
+<h2>2. Les méthodes qui transforment</h2>
+<pre><code>const doubles = notes.map(n =&gt; n * 2);           // [24, 30, 18]
+const admis   = notes.filter(n =&gt; n &gt;= 10);       // [12, 15]
+const total   = notes.reduce((acc, n) =&gt; acc + n, 0);   // 36
+const trie    = [...notes].sort((a, b) =&gt; a - b);       // copie triée
+notes.forEach((n, i) =&gt; console.log(i, n));</code></pre>
+<div class="box attention"><b>sort() trie du texte par défaut</b><p><code>[10, 9, 1].sort()</code> donne <code>[1, 10, 9]</code>. Pour des nombres, donne une fonction de comparaison : <code>sort((a, b) =&gt; a - b)</code>.</p></div>
+
+<h2>3. Les objets</h2>
+<pre><code>const eleve = { nom: &quot;Léa&quot;, age: 19, option: &quot;SLAM&quot; };
+eleve.nom            // &quot;Léa&quot;
+eleve[&quot;age&quot;]         // 19
+eleve.ville = &quot;Rennes&quot;;   // ajoute une propriété
+for (const cle in eleve) console.log(cle, eleve[cle]);
+Object.keys(eleve)   // [&quot;nom&quot;, &quot;age&quot;, &quot;option&quot;, &quot;ville&quot;]</code></pre>
+
+<h2>4. Déstructuration et décomposition</h2>
+<pre><code>const { nom, age } = eleve;      // extrait des propriétés
+const [premier, second] = notes; // extrait des éléments
+const copie = { ...eleve, age: 20 };   // copie modifiée
+const tout = [...notes, 20, 14];</code></pre>
+
+<h2>5. Les classes</h2>
+<pre><code>class Compte {
+  constructor(solde) { this.solde = solde; }
+  deposer(m) { this.solde += m; }
+}
+const c = new Compte(100);
+c.deposer(50);</code></pre>
+
+<h2>6. JSON</h2>
+<p>Le format <b>JSON</b> (JavaScript Object Notation) sert à échanger des données entre un serveur et une page :</p>
+<pre><code>const texte = JSON.stringify(eleve);   // objet → texte
+const objet = JSON.parse(texte);       // texte → objet</code></pre><div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-js.html">labo JavaScript</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel est l'indice du premier élément d'un tableau ?",
+  "options": [
+   "0",
+   "1",
+   "-1"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle méthode ajoute un élément à la fin ?",
+  "options": [
+   "`add()`",
+   "`push()`",
+   "`append()`",
+   "`insert()`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que donne `[1, 2, 3].map(x => x * 10)` ?",
+  "options": [
+   "[10, 20, 30]",
+   "60",
+   "[1, 2, 3]",
+   "[11, 12, 13]"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que donne `[5, 12, 8].filter(x => x > 6)` ?",
+  "options": [
+   "[12, 8]",
+   "[5]",
+   "true",
+   "[12]"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que donne `[1, 2, 3].reduce((a, n) => a + n, 0)` ?",
+  "options": [
+   "6",
+   "[1, 2, 3]",
+   "0",
+   "123"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Que donne `[10, 9, 1].sort()` ?",
+  "options": [
+   "[1, 9, 10]",
+   "[1, 10, 9]",
+   "[10, 9, 1]",
+   "Erreur"
+  ],
+  "answer": 1,
+  "explication": "Tri alphabétique par défaut."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Comment lire la propriété nom de l'objet e ?",
+  "options": [
+   "`e->nom`",
+   "`e.nom`",
+   "`e::nom`",
+   "`e(nom)`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que fait `const { nom } = eleve;` ?",
+  "options": [
+   "Crée un objet",
+   "Extrait eleve.nom dans une variable nom",
+   "Supprime nom",
+   "Erreur"
+  ],
+  "answer": 1,
+  "explication": "Déstructuration."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle fonction transforme un objet en texte JSON ?",
+  "options": [
+   "`JSON.parse`",
+   "`JSON.stringify`",
+   "`toString`",
+   "`JSON.text`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quelle propriété donne le nombre d'éléments d'un tableau ?",
+  "answers": [
+   "length",
+   ".length"
+  ],
+  "explication": ""
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "Un objet déclaré avec const peut quand même voir ses propriétés modifiées.",
+  "answer": true,
+  "explication": "const empêche la réaffectation de la variable, pas la modification de l'objet."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

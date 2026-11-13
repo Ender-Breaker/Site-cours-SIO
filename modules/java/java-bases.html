@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Java : la classe Main, types et Scanner — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="java" data-chapter="java-bases">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p><b>Java</b> (1995) est un langage orienté objet très utilisé en entreprise (applications de gestion, serveurs avec Spring), pour Android et pour Minecraft (édition Java). Son principe : « écrire une fois, exécuter partout ». Le code est compilé en <b>bytecode</b> que la machine virtuelle Java (<b>JVM</b>) exécute sur n'importe quel système.</p>
+
+<h2>1. Le programme minimal</h2>
+<pre><code>public class Main {
+    public static void main(String[] args) {
+        System.out.println(&quot;Bonjour !&quot;);
+    }
+}</code></pre>
+<ul>
+<li>Tout le code est dans une <b>classe</b> ; le fichier porte son nom (<code>Main.java</code>).</li>
+<li><code>main</code> est le point d'entrée. <code>static</code> : elle appartient à la classe, pas à un objet.</li>
+<li><code>System.out.println</code> affiche et passe à la ligne ; <code>print</code> n'y passe pas.</li>
+</ul>
+<pre><code>javac Main.java     # compile en Main.class (bytecode)
+java Main           # exécute sur la JVM</code></pre>
+<p>Le labo compile ton code avec un vrai <b>javac</b> directement dans le navigateur.</p>
+
+<h2>2. Types primitifs et String</h2>
+<pre><code>int age = 19;
+double prix = 9.99;
+boolean majeur = true;
+char lettre = &#x27;A&#x27;;
+long grand = 3_000_000_000L;
+String nom = &quot;Léa&quot;;            // String est une classe (majuscule !)
+final double TVA = 0.2;        // constante
+var total = 12.5;              // type déduit (Java 10+)</code></pre>
+<div class="box attention"><b>Division entière et comparaison de textes</b><p><code>7 / 2</code> vaut 3 entre deux <code>int</code>. Et deux String se comparent avec <code>a.equals(b)</code>, jamais avec <code>==</code> (qui compare les références).</p></div>
+
+<h2>3. Lire au clavier avec Scanner</h2>
+<pre><code>import java.util.Scanner;
+
+Scanner sc = new Scanner(System.in);
+int n = sc.nextInt();          // un entier
+double d = sc.nextDouble();    // un décimal
+String mot = sc.next();        // un mot
+String ligne = sc.nextLine();  // une ligne</code></pre>
+
+<h2>4. Conversions</h2>
+<pre><code>int n = Integer.parseInt(&quot;42&quot;);
+double d = Double.parseDouble(&quot;3.5&quot;);
+String s = String.valueOf(42);   // ou &quot;&quot; + 42
+int arrondi = (int) 3.9;         // cast : 3 (troncature)</code></pre><div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-java.html">labo Java</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle méthode est le point d'entrée d'un programme Java ?",
+  "options": [
+   "`start()`",
+   "`main()`",
+   "`run()`",
+   "`init()`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Comment afficher une ligne ?",
+  "options": [
+   "`print(\"x\")`",
+   "`System.out.println(\"x\");`",
+   "`console.log(\"x\");`",
+   "`cout << \"x\";`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Qu'exécute la JVM ?",
+  "options": [
+   "Le code source .java",
+   "Le bytecode (.class)",
+   "Du HTML",
+   "Du code machine uniquement"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Comment comparer le contenu de deux String a et b ?",
+  "options": [
+   "`a == b`",
+   "`a.equals(b)`",
+   "`a === b`",
+   "`compare(a, b)`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que vaut `7 / 2` entre deux int ?",
+  "options": [
+   "3.5",
+   "3",
+   "4",
+   "Erreur"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle classe sert à lire au clavier ?",
+  "options": [
+   "`Reader`",
+   "`Scanner`",
+   "`Input`",
+   "`Console` uniquement"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Comment convertir \"42\" en int ?",
+  "options": [
+   "`(int) \"42\"`",
+   "`Integer.parseInt(\"42\")`",
+   "`int(\"42\")`",
+   "`\"42\".toInt()`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "String s'écrit avec une majuscule car c'est une classe.",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quel mot-clé rend une variable constante en Java ?",
+  "answers": [
+   "final"
+  ],
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Que vaut `(int) 3.9` ?",
+  "options": [
+   "4",
+   "3",
+   "3.9",
+   "Erreur"
+  ],
+  "answer": 1,
+  "explication": "Le cast tronque."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Comment s'appelle le fichier qui contient public class Main ?",
+  "options": [
+   "main.java",
+   "Main.java",
+   "Main.class",
+   "Programme.java"
+  ],
+  "answer": 1,
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

@@ -2,7 +2,7 @@
 (function () {
   "use strict";
   var EF = window.EtudeFacile, esc = EF.esc, el = EF.el, I = EF.icon;
-  var MODS = (window.EF_MODULES || []).filter(function (m) { return m.chapitres.length; });
+  var MODS = (window.EF_MODULES || []).filter(function (m) { return m.chapitres.length && (!m.bonus); });
   var TYPES = { examen: "Examen blanc", questionnaire: "Questionnaire", textuel: "Textuel", pratique: "Pratique" };
 
   document.body.appendChild(EF.header(""));

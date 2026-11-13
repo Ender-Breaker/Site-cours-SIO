@@ -6,7 +6,7 @@
 (function () {
   "use strict";
   var EF = window.EtudeFacile, esc = EF.esc, el = EF.el, I = EF.icon;
-  var MODS = (window.EF_MODULES || []).filter(function (m) { return m.chapitres.length; });
+  var MODS = (window.EF_MODULES || []).filter(function (m) { return m.chapitres.length && (true); });
   var TEXTES = window.EF_EVAL_TEXTES || {};
   var TYPES = {
     questionnaire: { nom: "Questionnaire", duree: 360, coef: 100, desc: "10 questions tirées au hasard dans tous les chapitres (QCM, vrai/faux, saisie, association)." },
@@ -68,7 +68,9 @@
       }).join("") + '</div>' +
       '<p class="lb-small">Chaque chapitre a aussi sa propre évaluation (8 questions, 4 min) : ouvre une matière puis « Évaluer ce chapitre ».</p>' +
       '<h2 class="ev-h2">Choisis une matière</h2><div class="ev-grid">';
-    MODS.forEach(function (m) {
+    var bonusVu = false;
+    MODS.filter(function (m) { return !m.bonus; }).concat(MODS.filter(function (m) { return m.bonus; })).forEach(function (m) {
+      if (m.bonus && !bonusVu) { bonusVu = true; h += '</div><h2 class="ev-h2">Cours bonus <small class="lb-small">· hors classement</small></h2><div class="ev-grid">'; }
       var types = ["questionnaire"];
       if (TEXTES[m.id]) types.push("textuel");
       (m.labos || []).forEach(function (x, i) { types.push("pratique:" + i); });

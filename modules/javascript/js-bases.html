@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>JavaScript : variables, types et opérateurs — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="javascript" data-chapter="js-bases">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p><b>JavaScript</b> est le langage des navigateurs : c'est lui qui rend les pages interactives (menus, formulaires, jeux). Il tourne aussi côté serveur avec Node.js. Malgré son nom, il n'a presque rien à voir avec Java.</p>
+
+<h2>1. Où écrire du JavaScript ?</h2>
+<pre><code>&lt;!-- dans une page HTML, juste avant &lt;/body&gt; --&gt;
+&lt;script src=&quot;script.js&quot;&gt;&lt;/script&gt;</code></pre>
+<p>Pour tester une ligne, ouvre la <b>console</b> du navigateur (F12, onglet Console). Dans le labo, ton code tourne directement dans la page.</p>
+<pre><code>console.log(&quot;Bonjour !&quot;);   // affiche dans la console
+// commentaire sur une ligne
+/* commentaire
+   sur plusieurs lignes */</code></pre>
+
+<h2>2. Les variables : let et const</h2>
+<pre><code>let score = 0;          // modifiable
+score = score + 10;
+const PRENOM = &quot;Léa&quot;;    // constante : ne peut pas être réaffectée
+let x;                   // déclarée sans valeur : undefined</code></pre>
+<p>On utilise <code>const</code> par défaut, et <code>let</code> seulement quand la valeur doit changer. Le vieux mot-clé <code>var</code> est à éviter (sa portée est piégeuse).</p>
+
+<h2>3. Les types</h2>
+<table><tr><th>Type</th><th>Exemples</th></tr>
+<tr><td>number</td><td><code>42</code>, <code>3.14</code>, <code>-7</code> (un seul type pour entiers et décimaux)</td></tr>
+<tr><td>string</td><td><code>"texte"</code>, <code>'texte'</code>, <code>`texte`</code></td></tr>
+<tr><td>boolean</td><td><code>true</code>, <code>false</code></td></tr>
+<tr><td>undefined / null</td><td>pas de valeur / valeur volontairement vide</td></tr>
+<tr><td>object</td><td>tableaux <code>[1, 2]</code>, objets <code>{ nom: "Léa" }</code></td></tr></table>
+<p><code>typeof x</code> donne le type d'une valeur. JavaScript est <b>typé dynamiquement</b> : une variable peut changer de type.</p>
+
+<h2>4. Opérateurs et conversions</h2>
+<pre><code>10 / 4        // 2.5
+10 % 4        // 2 (reste)
+2 ** 3        // 8 (puissance)
+&quot;5&quot; + 3       // &quot;53&quot;  ← le + colle les textes !
+&quot;5&quot; * 3       // 15    ← les autres opérateurs convertissent en nombre
+Number(&quot;42&quot;)  // 42
+String(42)    // &quot;42&quot;
+parseInt(&quot;12px&quot;)  // 12</code></pre>
+<div class="box attention"><b>Le piège du +</b><p>Une valeur lue dans un formulaire ou au clavier est toujours du <b>texte</b>. <code>"17" + 10</code> donne <code>"1710"</code> : convertis avec <code>Number()</code> avant de calculer.</p></div>
+
+<h2>5. Les chaînes et les gabarits</h2>
+<pre><code>const nom = &quot;Léa&quot;, age = 19;
+console.log(&quot;Bonjour &quot; + nom + &quot;, tu as &quot; + age + &quot; ans&quot;);
+console.log(`Bonjour ${nom}, tu as ${age} ans`);   // gabarit (backticks)
+nom.length          // 3
+nom.toUpperCase()   // &quot;LÉA&quot;
+&quot;a-b-c&quot;.split(&quot;-&quot;)  // [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]</code></pre>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-js.html">labo JavaScript</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel mot-clé déclare une variable qu'on ne réaffectera pas ?",
+  "options": [
+   "`let`",
+   "`const`",
+   "`var`",
+   "`fix`"
+  ],
+  "answer": 1,
+  "explication": "const empêche la réaffectation."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que vaut `\"5\" + 3` ?",
+  "options": [
+   "8",
+   "\"53\"",
+   "15",
+   "Une erreur"
+  ],
+  "answer": 1,
+  "explication": "Avec un texte, + concatène."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que vaut `\"5\" * 3` ?",
+  "options": [
+   "\"555\"",
+   "15",
+   "\"53\"",
+   "NaN"
+  ],
+  "answer": 1,
+  "explication": "* convertit en nombre."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle instruction affiche dans la console ?",
+  "options": [
+   "`print()`",
+   "`echo`",
+   "`console.log()`",
+   "`System.out.println()`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que donne `typeof 3.5` ?",
+  "options": [
+   "\"float\"",
+   "\"double\"",
+   "\"number\"",
+   "\"decimal\""
+  ],
+  "answer": 2,
+  "explication": "Un seul type number."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Comment écrire « Bonjour Léa » avec un gabarit si nom = \"Léa\" ?",
+  "options": [
+   "`\"Bonjour ${nom}\"`",
+   "``Bonjour ${nom}`` avec des backticks",
+   "`'Bonjour {nom}'`",
+   "`Bonjour + nom`"
+  ],
+  "answer": 1,
+  "explication": "Les gabarits utilisent les backticks."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "JavaScript et Java sont le même langage.",
+  "answer": false,
+  "explication": "Seul le nom se ressemble."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que vaut `10 % 3` ?",
+  "options": [
+   "3",
+   "1",
+   "3.33",
+   "0"
+  ],
+  "answer": 1,
+  "explication": "Reste de la division."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quelle fonction convertit le texte \"42\" en nombre ? (sans parenthèses)",
+  "answers": [
+   "Number",
+   "parseInt",
+   "parseFloat"
+  ],
+  "explication": "Number(\"42\")."
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "Une variable déclarée avec let peut changer de type.",
+  "answer": true,
+  "explication": "Typage dynamique."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Pourquoi éviter `var` ?",
+  "options": [
+   "Il est plus lent",
+   "Sa portée (fonction, pas bloc) crée des pièges",
+   "Il n'existe plus",
+   "Il n'accepte que des nombres"
+  ],
+  "answer": 1,
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

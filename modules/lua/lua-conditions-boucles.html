@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Lua : conditions et boucles — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="lua" data-chapter="lua-conditions-boucles">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<h2>1. Comparaisons et logique</h2>
+<pre><code>a == b    a ~= b    -- égal, différent (~= et non !=)
+a &lt; b     a &gt;= b
+and   or   not</code></pre>
+<p>Seuls <code>false</code> et <code>nil</code> sont faux. <b>Attention</b> : <code>0</code> et <code>""</code> sont <b>vrais</b> en Lua (contrairement à JavaScript ou PHP).</p>
+
+<h2>2. if … then … end</h2>
+<pre><code>if note &gt;= 16 then
+  print(&quot;Très bien&quot;)
+elseif note &gt;= 10 then
+  print(&quot;Admis&quot;)
+else
+  print(&quot;Recalé&quot;)
+end
+
+local statut = (age &gt;= 18) and &quot;majeur&quot; or &quot;mineur&quot;   -- équivalent du ternaire</code></pre>
+
+<h2>3. Les boucles</h2>
+<pre><code>for i = 1, 10 do            -- de 1 à 10 inclus
+  print(i)
+end
+for i = 10, 1, -1 do        -- à rebours (pas de -1)
+  print(i)
+end
+
+local n = 100
+while n &gt; 1 do
+  n = n // 2
+end
+
+repeat                       -- s&#x27;exécute au moins une fois
+  local r = io.read(&quot;n&quot;)
+until r == 0</code></pre>
+<p><code>break</code> sort d'une boucle. Lua n'a pas de <code>continue</code> (on utilise un <code>if</code> ou <code>goto</code>).</p>
+<div class="box retenir"><b>Les mots-clés de bloc</b><p><code>if … then … end</code>, <code>for … do … end</code>, <code>while … do … end</code>, <code>repeat … until</code>, <code>function … end</code>. Un <code>end</code> oublié est l'erreur la plus fréquente.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-lua.html">labo Lua</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Comment écrit-on « différent de » en Lua ?",
+  "options": [
+   "`!=`",
+   "`<>`",
+   "`~=`",
+   "`=/=`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Dans un if, la valeur 0 est…",
+  "options": [
+   "fausse",
+   "vraie",
+   "une erreur",
+   "nil"
+  ],
+  "answer": 1,
+  "explication": "Seuls false et nil sont faux."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel mot termine un bloc if ?",
+  "options": [
+   "`fi`",
+   "`end`",
+   "`endif`",
+   "`}`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Comment écrit-on « sinon si » ?",
+  "options": [
+   "`else if`",
+   "`elif`",
+   "`elseif`",
+   "`elsif`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Combien de tours fait `for i = 1, 5 do … end` ?",
+  "options": [
+   "4",
+   "5",
+   "6"
+  ],
+  "answer": 1,
+  "explication": "Les deux bornes sont incluses."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Comment compter de 10 à 1 ?",
+  "options": [
+   "`for i = 10, 1 do`",
+   "`for i = 10, 1, -1 do`",
+   "`for i = 1, 10, -1 do`",
+   "`for i in 10..1`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle boucle s'exécute toujours au moins une fois ?",
+  "options": [
+   "`while`",
+   "`for`",
+   "`repeat … until`",
+   "Aucune"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "Lua possède un mot-clé continue.",
+  "answer": false,
+  "explication": ""
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Quel mot-clé suit la condition d'un if en Lua ?",
+  "answers": [
+   "then"
+  ],
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Que vaut `(5 > 3) and \"oui\" or \"non\"` ?",
+  "options": [
+   "true",
+   "\"oui\"",
+   "\"non\"",
+   "Erreur"
+  ],
+  "answer": 1,
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

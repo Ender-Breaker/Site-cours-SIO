@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Lua : les fonctions — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="lua" data-chapter="lua-fonctions">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<h2>1. Définir et appeler</h2>
+<pre><code>function carre(x)
+  return x * x
+end
+print(carre(5))              -- 25
+
+local function aire(l, h)    -- fonction locale (à préférer)
+  return l * h
+end</code></pre>
+<p>Un paramètre non fourni vaut <code>nil</code> ; pour une valeur par défaut : <code>nom = nom or "inconnu"</code>.</p>
+
+<h2>2. Plusieurs valeurs de retour</h2>
+<pre><code>local function divmod(a, b)
+  return a // b, a % b
+end
+local q, r = divmod(17, 5)   -- q = 3, r = 2</code></pre>
+
+<h2>3. Fonctions anonymes et callbacks</h2>
+<pre><code>local double = function(x) return x * 2 end
+
+local function appliquer(t, f)
+  for i, v in ipairs(t) do t[i] = f(v) end
+end
+appliquer(notes, function(n) return n + 1 end)
+
+table.sort(noms, function(a, b) return a &gt; b end)   -- tri décroissant</code></pre>
+
+<h2>4. Nombre variable d'arguments</h2>
+<pre><code>local function somme(...)
+  local s = 0
+  for _, v in ipairs({...}) do s = s + v end
+  return s
+end
+somme(1, 2, 3)   -- 6</code></pre>
+
+<h2>5. Fermetures (closures)</h2>
+<pre><code>local function compteur()
+  local n = 0
+  return function()
+    n = n + 1
+    return n
+  end
+end
+local c = compteur()
+c()  c()   -- 1, puis 2 : la fonction se souvient de n</code></pre><div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-lua.html">labo Lua</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel mot termine une fonction Lua ?",
+  "options": [
+   "`}`",
+   "`end`",
+   "`endfunction`",
+   "`return`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que vaut un paramètre non fourni lors de l'appel ?",
+  "options": [
+   "0",
+   "nil",
+   "\"\"",
+   "Erreur"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Comment donner une valeur par défaut à nom ?",
+  "options": [
+   "`nom = nom or \"inconnu\"`",
+   "`nom ?= \"inconnu\"`",
+   "`default nom = \"inconnu\"`",
+   "Impossible"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Une fonction Lua peut-elle renvoyer plusieurs valeurs ?",
+  "options": [
+   "Non",
+   "Oui : return a, b",
+   "Seulement dans une table",
+   "Seulement deux"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que reçoivent q et r avec `local q, r = divmod(17, 5)` (quotient, reste) ?",
+  "options": [
+   "3 et 2",
+   "2 et 3",
+   "3.4 et 0",
+   "17 et 5"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Que représente `...` dans les paramètres ?",
+  "options": [
+   "Une erreur",
+   "Un nombre variable d'arguments",
+   "Une table vide",
+   "La fin du fichier"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Une fonction qui garde l'accès à une variable locale de la fonction qui l'a créée s'appelle…",
+  "options": [
+   "une métaméthode",
+   "une fermeture (closure)",
+   "une coroutine",
+   "un module"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "En Lua, une fonction peut être rangée dans une variable.",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quel mot-clé, placé devant function, rend la fonction visible seulement dans le fichier ?",
+  "answers": [
+   "local"
+  ],
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle fonction de la bibliothèque standard trie une table ?",
+  "options": [
+   "`sort(t)`",
+   "`table.sort(t)`",
+   "`t:sort()` obligatoirement",
+   "`table.order(t)`"
+  ],
+  "answer": 1,
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

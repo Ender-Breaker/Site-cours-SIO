@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Lua : objets et jeux — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="lua" data-chapter="lua-objets-jeux">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<h2>1. Des objets avec des tables</h2>
+<p>Lua n'a pas de mot-clé <code>class</code>, mais une table peut contenir des données <b>et</b> des fonctions. La syntaxe <code>:</code> passe automatiquement l'objet en premier paramètre, nommé <code>self</code>.</p>
+<pre><code>local joueur = { nom = &quot;Léa&quot;, pv = 10 }
+function joueur:blesser(n)          -- équivaut à joueur.blesser(self, n)
+  self.pv = self.pv - n
+end
+joueur:blesser(3)                   -- équivaut à joueur.blesser(joueur, 3)</code></pre>
+
+<h2>2. Une « classe » avec une métatable</h2>
+<pre><code>local Ennemi = {}
+Ennemi.__index = Ennemi              -- les méthodes manquantes sont cherchées dans Ennemi
+
+function Ennemi.nouveau(x, y)
+  local e = { x = x, y = y, pv = 3 }
+  return setmetatable(e, Ennemi)
+end
+
+function Ennemi:avancer(dy)
+  self.y = self.y + dy
+end
+
+local e = Ennemi.nouveau(100, 0)
+e:avancer(2)</code></pre>
+<p>Une <b>métatable</b> modifie le comportement d'une table. Avec <code>__index</code>, quand on demande <code>e.avancer</code> et que <code>e</code> ne l'a pas, Lua la cherche dans <code>Ennemi</code> : toutes les instances partagent les mêmes méthodes. D'autres métaméthodes redéfinissent les opérateurs (<code>__add</code>, <code>__eq</code>, <code>__tostring</code>…).</p>
+
+<h2>3. Lua dans les jeux</h2>
+<p>Les moteurs de jeu appellent des fonctions Lua à des moments précis. Avec <b>LÖVE</b> : <code>love.load()</code> au démarrage, <code>love.update(dt)</code> et <code>love.draw()</code> à chaque image. Le labo reprend ce principe :</p>
+<pre><code>local ennemis = {}
+
+function setup()                      -- une fois au début
+  for i = 1, 5 do
+    ennemis[#ennemis + 1] = Ennemi.nouveau(i * 80, 0)
+  end
+end
+
+function update(dt)                   -- 60 fois par seconde
+  for _, e in ipairs(ennemis) do e:avancer(1) end
+  if touche(&quot;gauche&quot;) then joueurX = joueurX - 5 end
+end
+
+function draw()
+  effacer(&quot;black&quot;)
+  for _, e in ipairs(ennemis) do cercle(e.x, e.y, 12, &quot;red&quot;) end
+end</code></pre>
+<div class="box retenir"><b>Supprimer pendant un parcours</b><p>Pour retirer des ennemis touchés, parcours la table <b>à l'envers</b> : <code>for i = #ennemis, 1, -1 do if ennemis[i].pv &lt;= 0 then table.remove(ennemis, i) end end</code>. À l'endroit, on sauterait un élément.</p></div>
+
+<h2>4. Modules</h2>
+<pre><code>-- fichier vecteur.lua
+local M = {}
+function M.longueur(x, y) return math.sqrt(x * x + y * y) end
+return M
+
+-- ailleurs
+local vecteur = require(&quot;vecteur&quot;)
+vecteur.longueur(3, 4)   -- 5.0</code></pre><div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-lua.html">labo Lua</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Avec `obj:methode(5)`, que reçoit la méthode en premier paramètre ?",
+  "options": [
+   "5",
+   "l'objet obj (self)",
+   "nil",
+   "la métatable"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "`obj:f(x)` est équivalent à…",
+  "options": [
+   "`obj.f(x)`",
+   "`obj.f(obj, x)`",
+   "`f(obj)`",
+   "`obj[f](x)`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "À quoi sert `Ennemi.__index = Ennemi` ?",
+  "options": [
+   "À compter les ennemis",
+   "À faire chercher les méthodes manquantes dans Ennemi",
+   "À trier",
+   "À copier la table"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle fonction associe une métatable à une table ?",
+  "options": [
+   "`setmeta`",
+   "`setmetatable`",
+   "`metatable.set`",
+   "`table.meta`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Dans LÖVE, quelle fonction est appelée à chaque image pour dessiner ?",
+  "options": [
+   "`love.load`",
+   "`love.draw`",
+   "`love.paint`",
+   "`love.render`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Pourquoi parcourir une table à l'envers pour en supprimer des éléments ?",
+  "options": [
+   "C'est plus rapide",
+   "À l'endroit, table.remove décale les éléments et on en saute un",
+   "C'est obligatoire en Lua",
+   "Pour l'ordre d'affichage"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle métaméthode personnalise l'affichage d'un objet avec print/tostring ?",
+  "options": [
+   "`__index`",
+   "`__tostring`",
+   "`__print`",
+   "`__name`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "Lua possède un mot-clé class.",
+  "answer": false,
+  "explication": ""
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Comment s'appelle le paramètre implicite qui désigne l'objet dans une méthode définie avec « : » ?",
+  "answers": [
+   "self"
+  ],
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle fonction charge un module Lua ?",
+  "options": [
+   "`import`",
+   "`include`",
+   "`require`",
+   "`load`"
+  ],
+  "answer": 2,
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

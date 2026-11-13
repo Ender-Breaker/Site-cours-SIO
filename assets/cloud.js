@@ -18,7 +18,7 @@ const EF = window.EtudeFacile;
 const esc = EF.esc;
 const racine = new URL("../", import.meta.url).href;
 
-const CLES = ["ef-progress", "ef-best", "ef-labo-terminal", "ef-labo-html", "ef-labo-php", "ef-labo-python", "ef-labo-conjugaison", "ef-labo-ipv4", "ef-labo-b1html", "ef-labo-b1css", "ef-labo-sql", "ef-evals"];
+const CLES = ["ef-progress", "ef-best", "ef-labo-terminal", "ef-labo-html", "ef-labo-php", "ef-labo-python", "ef-labo-conjugaison", "ef-labo-ipv4", "ef-labo-b1html", "ef-labo-b1css", "ef-labo-sql", "ef-labo-js", "ef-labo-lua", "ef-labo-cpp", "ef-labo-java", "ef-evals"];
 /* évaluations qui comptent au classement (les évaluations de chapitre « <matière>_chap_<id> » restent privées) */
 const VERSION_CGU = "2026-11-10";
 const PUBLIQUE = /^[a-z0-9-]+_(questionnaire|textuel|pratique|examen)$/;
@@ -314,16 +314,19 @@ async function choisirPseudo(p) {
 
 /* ---------- statistiques (pour le classement) ---------- */
 function lit(k) { try { return JSON.parse(localStorage.getItem(k)) || {}; } catch (e) { return {}; } }
+/* les cours bonus ne comptent pas au classement */
+const BONUS = new Set((window.EF_MODULES || []).filter((m) => m.bonus).map((m) => m.id));
+const compte = (k) => PUBLIQUE.test(k) && !BONUS.has(k.split("_")[0]);
 function stats() {
   const prog = lit("ef-progress");
-  const chapitres = Object.keys(prog).reduce((n, m) => n + (prog[m] || []).length, 0);
+  const chapitres = Object.keys(prog).filter((m) => !BONUS.has(m)).reduce((n, m) => n + (prog[m] || []).length, 0);
   const missions = LABOS.reduce((n, k) => n + Object.keys(lit(k).done || {}).length, 0);
-  const ev = lit("ef-evals"), evals = Object.keys(ev).filter((k) => PUBLIQUE.test(k)).reduce((n, k) => n + (ev[k].points || 0), 0);
+  const ev = lit("ef-evals"), evals = Object.keys(ev).filter(compte).reduce((n, k) => n + (ev[k].points || 0), 0);
   return { chapitres, missions, evals, score: chapitres * 100 + missions * 20 + evals };
 }
 function evalsPubliques() {
   const ev = lit("ef-evals"), r = {};
-  Object.keys(ev).forEach((k) => { if (PUBLIQUE.test(k)) r[k] = { points: ev[k].points, pct: ev[k].pct, duree: ev[k].duree, date: ev[k].date }; });
+  Object.keys(ev).forEach((k) => { if (compte(k)) r[k] = { points: ev[k].points, pct: ev[k].pct, duree: ev[k].duree, date: ev[k].date }; });
   return r;
 }
 

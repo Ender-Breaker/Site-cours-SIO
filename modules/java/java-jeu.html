@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Java : créer un jeu dans le navigateur — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="java" data-chapter="java-jeu">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>Java a servi à écrire Minecraft et de nombreux jeux Android. Sur ordinateur, on utilise des bibliothèques comme <b>libGDX</b> ou <b>LWJGL</b> ; dans le labo, ton code Java est compilé dans le navigateur (javac, puis TeaVM qui le traduit en WebAssembly) et dessine dans un canvas.</p>
+
+<h2>1. La structure d'un jeu</h2>
+<pre><code>public class Main extends Jeu {
+    double x = 200;                       // l&#x27;état du jeu : des attributs
+
+    public void setup() {                 // une fois au démarrage
+    }
+
+    public void update(double dt) {       // 60 fois par seconde : logique
+        if (touche(&quot;droite&quot;)) x += 5;
+    }
+
+    public void draw() {                  // 60 fois par seconde : dessin
+        effacer(&quot;black&quot;);
+        rect(x, 140, 40, 40, &quot;blue&quot;);
+    }
+
+    public static void main(String[] args) {
+        lancer(new Main());               // démarre la boucle de jeu
+    }
+}</code></pre>
+<p>La classe abstraite <code>Jeu</code> (fournie par le labo) contient la boucle et les méthodes de dessin. Tu en hérites et tu <b>redéfinis</b> <code>setup</code>, <code>update</code> et <code>draw</code> : c'est le patron de conception <i>méthode modèle</i>.</p>
+<table><tr><th>Méthode de Jeu</th><th>Rôle</th></tr>
+<tr><td><code>effacer(c)</code>, <code>rect(…)</code>, <code>cercle(…)</code>, <code>ligne(…)</code>, <code>texte(t, x, y, taille, c)</code></td><td>dessin sur un écran de 480 × 320</td></tr>
+<tr><td><code>touche("gauche")</code>, <code>toucheAppuyee("espace")</code></td><td>clavier</td></tr>
+<tr><td><code>sourisX()</code>, <code>sourisY()</code>, <code>clic()</code></td><td>souris</td></tr>
+<tr><td><code>hasard(a, b)</code>, <code>LARGEUR</code>, <code>HAUTEUR</code></td><td>outils</td></tr>
+<tr><td><code>afficher(texte)</code></td><td>écrire dans la console pendant le jeu</td></tr></table>
+
+<h2>2. Des objets pour les entités</h2>
+<pre><code>import java.util.ArrayList;
+
+class Ennemi {
+    double x, y, vitesse;
+    Ennemi(double x, double vitesse) { this.x = x; this.y = 0; this.vitesse = vitesse; }
+    void avancer() { y += vitesse; }
+    boolean sorti() { return y &gt; Jeu.HAUTEUR; }
+}
+
+public class Main extends Jeu {
+    ArrayList&lt;Ennemi&gt; ennemis = new ArrayList&lt;&gt;();
+    int score = 0;
+
+    public void update(double dt) {
+        if (hasard(1, 30) == 1) ennemis.add(new Ennemi(hasard(20, 460), hasard(2, 5)));
+        for (Ennemi e : ennemis) e.avancer();
+        ennemis.removeIf(Ennemi::sorti);           // retire ceux qui sont sortis
+    }
+
+    public void draw() {
+        effacer(&quot;black&quot;);
+        for (Ennemi e : ennemis) cercle(e.x, e.y, 10, &quot;red&quot;);
+        texte(&quot;Score : &quot; + score, 10, 10, 20, &quot;white&quot;);
+    }
+
+    public static void main(String[] args) { lancer(new Main()); }
+}</code></pre>
+<div class="box attention"><b>Supprimer en parcourant</b><p>Retirer un élément d'une <code>ArrayList</code> pendant un <code>for (Ennemi e : ennemis)</code> provoque une <code>ConcurrentModificationException</code>. Utilise <code>removeIf</code> ou un <code>Iterator</code>.</p></div>
+
+<h2>3. Collisions et états</h2>
+<pre><code>boolean collision(double ax, double ay, double aw, double ah,
+                  double bx, double by, double bw, double bh) {
+    return ax &lt; bx + bw &amp;&amp; ax + aw &gt; bx &amp;&amp; ay &lt; by + bh &amp;&amp; ay + ah &gt; by;
+}
+
+enum Etat { MENU, JEU, PERDU }
+Etat etat = Etat.MENU;</code></pre>
+<p>Une <b>énumération</b> représente proprement les états du jeu ; <code>update</code> et <code>draw</code> font un <code>switch (etat)</code>.</p>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-java.html">labo Java</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle classe ta classe Main doit-elle étendre dans le labo ?",
+  "options": [
+   "`Game`",
+   "`Jeu`",
+   "`Canvas`",
+   "`Thread`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que fait `lancer(new Main());` ?",
+  "options": [
+   "Compile le jeu",
+   "Crée l'objet jeu et démarre la boucle (setup puis update/draw)",
+   "Affiche Main",
+   "Rien"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Comment appelle-t-on le fait de réécrire update() dans Main ?",
+  "options": [
+   "Surcharge",
+   "Redéfinition (override)",
+   "Encapsulation",
+   "Instanciation"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Où stocker la position du joueur pour qu'elle survive d'une image à l'autre ?",
+  "options": [
+   "Dans une variable locale de draw()",
+   "Dans un attribut de la classe",
+   "Dans main()",
+   "Dans un String"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Que provoque `ennemis.remove(e)` dans un `for (Ennemi e : ennemis)` ?",
+  "options": [
+   "Rien",
+   "ConcurrentModificationException",
+   "Une boucle infinie",
+   "Une erreur de compilation"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle méthode retire d'une ArrayList tous les éléments qui vérifient une condition ?",
+  "options": [
+   "`removeAll`",
+   "`removeIf`",
+   "`filter`",
+   "`deleteWhere`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "À quoi sert une enum Etat { MENU, JEU, PERDU } ?",
+  "options": [
+   "À compter les points",
+   "À représenter les états du jeu de façon sûre",
+   "À dessiner",
+   "À lire le clavier"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "Minecraft (édition Java) est écrit en Java.",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quelle méthode de Jeu écrit un message dans la console pendant le jeu ?",
+  "answers": [
+   "afficher",
+   "afficher()"
+  ],
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle bibliothèque Java est utilisée pour des jeux sur ordinateur et Android ?",
+  "options": [
+   "React",
+   "libGDX",
+   "Django",
+   "jQuery"
+  ],
+  "answer": 1,
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

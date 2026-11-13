@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Java : conditions et boucles — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="java" data-chapter="java-conditions-boucles">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<h2>1. Conditions</h2>
+<pre><code>if (note &gt;= 16) {
+    System.out.println(&quot;Très bien&quot;);
+} else if (note &gt;= 10) {
+    System.out.println(&quot;Admis&quot;);
+} else {
+    System.out.println(&quot;Recalé&quot;);
+}
+String statut = age &gt;= 18 ? &quot;majeur&quot; : &quot;mineur&quot;;</code></pre>
+<p>Opérateurs : <code>== != &lt; &gt; &lt;= &gt;=</code>, <code>&amp;&amp;</code>, <code>||</code>, <code>!</code>. La condition doit être un <code>boolean</code> : <code>if (n)</code> ne compile pas.</p>
+
+<h2>2. switch</h2>
+<pre><code>switch (jour) {                     // fonctionne aussi avec des String
+    case &quot;samedi&quot;, &quot;dimanche&quot; -&gt; System.out.println(&quot;Week-end&quot;);
+    default -&gt; System.out.println(&quot;Semaine&quot;);
+}
+
+String type = switch (note / 5) {   // switch-expression (Java 14+)
+    case 4 -&gt; &quot;excellent&quot;;
+    case 2, 3 -&gt; &quot;moyen&quot;;
+    default -&gt; &quot;faible&quot;;
+};</code></pre>
+
+<h2>3. Boucles</h2>
+<pre><code>for (int i = 1; i &lt;= 10; i++) {
+    System.out.print(i + &quot; &quot;);
+}
+
+int n = 100;
+while (n &gt; 1) n /= 2;
+
+do {
+    x = sc.nextInt();
+} while (x &lt; 0);
+
+int[] notes = {12, 15, 9};
+for (int note : notes) {            // boucle « pour chaque »
+    System.out.println(note);
+}</code></pre>
+<p><code>break</code> sort de la boucle, <code>continue</code> passe au tour suivant.</p>
+<div class="box retenir"><b>Bonnes habitudes</b><p>Toujours des accolades, même pour une seule instruction ; une indentation de 4 espaces ; des noms de variables en camelCase (<code>nombreDeVies</code>).</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-java.html">labo Java</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel opérateur signifie « et » ?",
+  "options": [
+   "`and`",
+   "`&&`",
+   "`&`",
+   "`+`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "`if (n)` avec n de type int…",
+  "options": [
+   "teste si n vaut 0",
+   "ne compile pas : il faut un boolean",
+   "est toujours vrai",
+   "est toujours faux"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Un switch Java peut-il porter sur une String ?",
+  "options": [
+   "Non",
+   "Oui",
+   "Seulement en Java 1",
+   "Seulement avec des majuscules"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que fait `System.out.print` par rapport à println ?",
+  "options": [
+   "Rien de différent",
+   "Ne passe pas à la ligne",
+   "Affiche en couleur",
+   "Imprime sur papier"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle boucle parcourt chaque élément d'un tableau ?",
+  "options": [
+   "`for (int x : t)`",
+   "`foreach (t as x)`",
+   "`for x in t`",
+   "`loop t`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Combien de tours fait `for (int i = 10; i > 0; i -= 3)` ?",
+  "options": [
+   "3",
+   "4",
+   "10",
+   "Infini"
+  ],
+  "answer": 1,
+  "explication": "10, 7, 4, 1."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle boucle s'exécute au moins une fois ?",
+  "options": [
+   "`for`",
+   "`while`",
+   "`do … while`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "La convention de nommage des variables Java est le camelCase.",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quel mot-clé sort immédiatement d'une boucle ?",
+  "answers": [
+   "break"
+  ],
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Quelle écriture est un switch-expression valide ?",
+  "options": [
+   "`String t = switch (n) { case 1 -> \"un\"; default -> \"autre\"; };`",
+   "`switch n: 1 => \"un\"`",
+   "`match (n) { 1 -> \"un\" }`",
+   "Aucune"
+  ],
+  "answer": 0,
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

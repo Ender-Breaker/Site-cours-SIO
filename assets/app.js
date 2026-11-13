@@ -59,6 +59,7 @@
   function write(key, v) {
     try { localStorage.setItem(key, JSON.stringify(v)); } catch (e) {}
   }
+  function estBonus(mid) { return (window.EF_MODULES || []).some(function (m) { return m.bonus && m.id === mid; }); }
   function esc(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
@@ -141,7 +142,7 @@
         '<div class="ev-score"><b>' + reussies + '<small>/' + o.missions.length + '</small></b><div><span class="ev-pts">' + pts + ' pts</span>' +
         '<span>' + icon("timer") + ' ' + Math.floor(duree / 60) + ':' + ("0" + (duree % 60)).slice(-2) + (o.restant <= 0 ? " (temps écoulé)" : "") + '</span>' +
         (sv.record ? '<span class="ev-record">Nouveau record !</span>' : '<span>Record : ' + sv.best.points + ' pts</span>') + '</div></div>' +
-        (window.EF_FIREBASE_CONFIG && !connecte ? '<p class="ev-login">Connecte-toi pour que ce résultat compte dans le classement. <button type="button" class="btn" data-ex="login">Se connecter</button></p>' : '') +
+        (window.EF_FIREBASE_CONFIG && !connecte && !estBonus(o.mid || (o.ctx && o.ctx.mid)) ? '<p class="ev-login">Connecte-toi pour que ce résultat compte dans le classement. <button type="button" class="btn" data-ex="login">Se connecter</button></p>' : '') +
         '<div class="btns"><button type="button" class="btn primary" data-ex="rejouer">' + icon("rotate-ccw") + ' Recommencer</button>' +
         '<a class="btn" href="' + o.racine + 'evaluation.html">Autre évaluation</a><a class="btn" href="' + o.racine + 'classement.html">' + icon("trophy") + ' Classement</a>' +
         '<a class="btn" href="' + (o.retour || "#") + '">Retour au labo</a></div></div>' +
@@ -174,7 +175,7 @@
         '<span>' + icon("timer") + ' ' + Math.floor(duree / 60) + ':' + ("0" + (duree % 60)).slice(-2) + (o.restant <= 0 ? " (temps écoulé)" : "") + '</span>' +
         (sv.record ? '<span class="ev-record">Nouveau record !</span>' : '<span>Record : ' + sv.best.points + ' pts</span>') + '</div></div>' +
         '<div class="ev-parts">' + c.parties.map(function (p) { return '<span><b>' + Math.round((p.pct || 0) * 100) + ' %</b> ' + esc(p.titre) + '</span>'; }).join("") + '</div>' +
-        (window.EF_FIREBASE_CONFIG && !connecte ? '<p class="ev-login">Connecte-toi pour que ce résultat compte dans le classement. <button type="button" class="btn" data-ex="login">Se connecter</button></p>' : '') +
+        (window.EF_FIREBASE_CONFIG && !connecte && !estBonus(o.mid || (o.ctx && o.ctx.mid)) ? '<p class="ev-login">Connecte-toi pour que ce résultat compte dans le classement. <button type="button" class="btn" data-ex="login">Se connecter</button></p>' : '') +
         '<div class="btns"><a class="btn primary" href="' + o.racine + 'evaluation.html#m=' + c.mid + '&t=examen">' + icon("rotate-ccw") + ' Recommencer</a>' +
         '<a class="btn" href="' + o.racine + 'evaluation.html">Autre évaluation</a><a class="btn" href="' + o.racine + 'classement.html">' + icon("trophy") + ' Classement</a></div></div>' +
         '<h2 class="ev-h2">Correction</h2>' + c.parties.map(function (p, i) {
@@ -202,14 +203,17 @@
         '<span class="logo-mark">&gt;_</span> <span class="logo-txt">Étude Facile</span></a>' +
         '<nav class="top-nav"><a href="' + prefix + 'evaluation.html">' + icon("timer") + '<span>Évaluation</span></a>' +
         '<a href="' + prefix + 'classement.html">' + icon("trophy") + '<span>Classement</span></a>' +
-        '<a href="' + prefix + 'forum.html">' + icon("message") + '<span>Forum</span></a></nav>' +
+        '<a href="' + prefix + 'forum.html">' + icon("message") + '<span>Forum</span></a>' +
+        '<a href="' + prefix + 'bonus.html" class="nav-bonus">' + icon("zap") + '<span>Bonus</span></a></nav>' +
         '<div class="top-stat"><b>' + total().done + '</b> chapitres validés</div></div>';
       return h;
     },
     stats: stats
   };
 
-  var modules = window.EF_MODULES || [];
+  /* les cours bonus (bonus: true) ne comptent ni dans la progression ni au classement */
+  var tousModules = window.EF_MODULES || [];
+  var modules = tousModules.filter(function (m) { return !m.bonus; });
 
   function stats(m, prog) {
     prog = prog || read(KEY);
@@ -225,13 +229,35 @@
     return { done: d, total: t };
   }
 
+  var gridBonus = document.getElementById("grid-bonus");
+  if (gridBonus) {
+    var rendBonus = function () {
+      var prog = read(KEY);
+      gridBonus.innerHTML = "";
+      tousModules.filter(function (m) { return m.bonus; }).forEach(function (m) {
+        var s = stats(m, prog), ready = m.chapitres.length > 0;
+        var card = el(ready ? "a" : "div", "card c-" + m.couleur + (ready ? "" : " soon"));
+        if (ready) card.href = "modules/" + m.id + "/index.html";
+        card.innerHTML =
+          '<div class="card-head"><div class="ico">' + esc(m.icone) + '</div><div><h3>' + esc(m.titre) +
+          '</h3><div class="sub">' + esc(m.sousTitre) + '</div></div></div>' +
+          '<p class="desc">' + esc(m.description) + '</p>' +
+          '<div class="bar" role="progressbar" aria-valuenow="' + s.pct + '" aria-valuemin="0" aria-valuemax="100"><i style="width:' + s.pct + '%"></i></div>' +
+          '<div class="meta"><span>' + s.done + " / " + s.total + " chapitre" + (s.total > 1 ? "s" : "") + '</span><span class="tag">Bonus</span></div>';
+        gridBonus.appendChild(card);
+      });
+    };
+    rendBonus();
+    window.addEventListener("pageshow", rendBonus);
+    return;
+  }
   var grid = document.getElementById("grid");
   if (!grid) return; // pas sur la page d'accueil
   (function () {
     var w = document.querySelector(".topbar .wrap"), logo = w && w.querySelector(".logo");
     if (!logo || w.querySelector(".top-nav")) return;
     var n = document.createElement("nav"); n.className = "top-nav";
-    n.innerHTML = '<a href="evaluation.html">' + icon("timer") + '<span>Évaluation</span></a><a href="classement.html">' + icon("trophy") + '<span>Classement</span></a><a href="forum.html">' + icon("message") + '<span>Forum</span></a>';
+    n.innerHTML = '<a href="evaluation.html">' + icon("timer") + '<span>Évaluation</span></a><a href="classement.html">' + icon("trophy") + '<span>Classement</span></a><a href="forum.html">' + icon("message") + '<span>Forum</span></a><a href="bonus.html" class="nav-bonus">' + icon("zap") + '<span>Bonus</span></a>';
     logo.insertAdjacentElement("afterend", n);
   })();
 

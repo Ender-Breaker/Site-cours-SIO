@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>JavaScript : conditions et boucles — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="javascript" data-chapter="js-conditions-boucles">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<h2>1. Comparaisons</h2>
+<pre><code>5 === 5       // true  : égalité stricte (même valeur ET même type)
+5 === &quot;5&quot;     // false
+5 == &quot;5&quot;      // true  : égalité large (convertit) → à éviter
+5 !== 3       // true  : différent
+a &gt; b, a &lt;= b
+&amp;&amp; (et)   || (ou)   ! (non)</code></pre>
+<div class="box retenir"><b>Toujours === et !==</b><p>L'égalité large <code>==</code> fait des conversions surprenantes (<code>0 == ""</code> est vrai). Utilise <code>===</code>.</p></div>
+
+<h2>2. if, else if, else</h2>
+<pre><code>if (note &gt;= 16) {
+  console.log(&quot;Très bien&quot;);
+} else if (note &gt;= 10) {
+  console.log(&quot;Admis&quot;);
+} else {
+  console.log(&quot;Recalé&quot;);
+}
+
+const statut = age &gt;= 18 ? &quot;majeur&quot; : &quot;mineur&quot;;   // opérateur ternaire</code></pre>
+<p>Valeurs « fausses » (falsy) : <code>false</code>, <code>0</code>, <code>""</code>, <code>null</code>, <code>undefined</code>, <code>NaN</code>. Tout le reste est vrai dans un <code>if</code>.</p>
+
+<h2>3. switch</h2>
+<pre><code>switch (jour) {
+  case &quot;samedi&quot;:
+  case &quot;dimanche&quot;:
+    console.log(&quot;Week-end&quot;);
+    break;
+  default:
+    console.log(&quot;Semaine&quot;);
+}</code></pre>
+
+<h2>4. Les boucles</h2>
+<pre><code>for (let i = 1; i &lt;= 5; i++) {      // compteur
+  console.log(i);
+}
+
+let n = 100;
+while (n &gt; 1) {                      // tant que
+  n = n / 2;
+}
+
+const fruits = [&quot;pomme&quot;, &quot;kiwi&quot;];
+for (const f of fruits) {            // chaque élément d&#x27;un tableau
+  console.log(f);
+}</code></pre>
+<p><code>break</code> sort de la boucle, <code>continue</code> passe au tour suivant. Une boucle dont la condition ne devient jamais fausse bloque la page : le labo l'arrête au bout de quelques secondes.</p>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-js.html">labo JavaScript</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel opérateur teste l'égalité stricte ?",
+  "options": [
+   "`=`",
+   "`==`",
+   "`===`",
+   "`!=`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que vaut `5 == \"5\"` ?",
+  "options": [
+   "true",
+   "false",
+   "Erreur",
+   "undefined"
+  ],
+  "answer": 0,
+  "explication": "== convertit : à éviter."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que vaut `5 === \"5\"` ?",
+  "options": [
+   "true",
+   "false"
+  ],
+  "answer": 1,
+  "explication": "Types différents."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Comment écrit-on « et » logique ?",
+  "options": [
+   "`and`",
+   "`&&`",
+   "`&`",
+   "`et`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Laquelle de ces valeurs est « fausse » dans un if ?",
+  "options": [
+   "`\"0\"`",
+   "`[]`",
+   "`0`",
+   "`\"false\"`"
+  ],
+  "answer": 2,
+  "explication": "Le nombre 0 est falsy ; la chaîne \"0\" est vraie."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que fait `x = age >= 18 ? \"majeur\" : \"mineur\"` ?",
+  "options": [
+   "Erreur de syntaxe",
+   "Choisit une valeur selon la condition",
+   "Compare deux textes",
+   "Crée une boucle"
+  ],
+  "answer": 1,
+  "explication": "Opérateur ternaire."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle boucle parcourt chaque élément d'un tableau ?",
+  "options": [
+   "`for (const x of t)`",
+   "`for (const x in t)` uniquement",
+   "`foreach t as x`",
+   "`loop t`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Combien de fois s'exécute `for (let i = 0; i < 5; i++)` ?",
+  "options": [
+   "4",
+   "5",
+   "6",
+   "Infini"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quel mot-clé sort immédiatement d'une boucle ?",
+  "answers": [
+   "break"
+  ],
+  "explication": ""
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "Dans un switch, oublier break fait continuer l'exécution dans le cas suivant.",
+  "answer": true,
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

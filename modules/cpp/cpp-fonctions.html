@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>C++ : fonctions et références — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="cpp" data-chapter="cpp-fonctions">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<h2>1. Définir une fonction</h2>
+<pre><code>int carre(int x) {          // type de retour, nom, paramètres typés
+    return x * x;
+}
+
+void afficherLigne(int n) { // void : ne renvoie rien
+    for (int i = 0; i &lt; n; i++) cout &lt;&lt; &#x27;-&#x27;;
+    cout &lt;&lt; endl;
+}</code></pre>
+<p>Une fonction doit être <b>déclarée avant</b> d'être utilisée. Si elle est écrite après <code>main</code>, on place son <b>prototype</b> en haut : <code>int carre(int x);</code></p>
+
+<h2>2. Passage par valeur ou par référence</h2>
+<pre><code>void plusUnCopie(int n) { n++; }     // reçoit une COPIE
+void plusUn(int&amp; n) { n++; }         // reçoit une RÉFÉRENCE : modifie l&#x27;original
+
+int a = 5;
+plusUnCopie(a);   // a vaut toujours 5
+plusUn(a);        // a vaut 6
+
+void afficher(const string&amp; s) {     // référence constante : pas de copie, pas de modification
+    cout &lt;&lt; s &lt;&lt; endl;
+}</code></pre>
+<div class="box retenir"><b>Quand utiliser &amp; ?</b><p>Pour <b>modifier</b> la variable de l'appelant, ou pour <b>éviter de copier</b> un gros objet (string, vector) : dans ce dernier cas, ajoute <code>const</code>.</p></div>
+
+<h2>3. Surcharge et valeurs par défaut</h2>
+<pre><code>double aire(double r) { return 3.14159 * r * r; }        // cercle
+double aire(double l, double h) { return l * h; }         // rectangle
+void saluer(string nom = &quot;inconnu&quot;) { cout &lt;&lt; &quot;Salut &quot; &lt;&lt; nom; }</code></pre>
+<p>Plusieurs fonctions peuvent porter le même nom si leurs paramètres diffèrent : c'est la <b>surcharge</b>.</p>
+
+<h2>4. Pointeurs (aperçu)</h2>
+<pre><code>int a = 5;
+int* p = &amp;a;     // p contient l&#x27;ADRESSE de a
+*p = 8;          // modifie ce qui est pointé : a vaut 8</code></pre>
+<p>Les pointeurs sont puissants mais dangereux (accès à une zone mémoire invalide = plantage). En C++ moderne, on les remplace souvent par des références, <code>vector</code> et des pointeurs intelligents (<code>unique_ptr</code>).</p>
+
+<h2>5. Fonctions mathématiques</h2>
+<pre><code>#include &lt;cmath&gt;
+sqrt(16.0)    pow(2, 10)    abs(-3)    round(2.6)    hypot(3, 4)</code></pre><div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cpp.html">labo C++</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que signifie le type de retour void ?",
+  "options": [
+   "La fonction renvoie 0",
+   "La fonction ne renvoie rien",
+   "La fonction renvoie du texte",
+   "La fonction est vide"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que vaut a après `int a = 5; plusUnCopie(a);` si plusUnCopie(int n) fait n++ ?",
+  "options": [
+   "5",
+   "6",
+   "Erreur",
+   "0"
+  ],
+  "answer": 0,
+  "explication": "Passage par valeur : une copie."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que vaut a après `int a = 5; plusUn(a);` si plusUn(int& n) fait n++ ?",
+  "options": [
+   "5",
+   "6",
+   "Erreur",
+   "0"
+  ],
+  "answer": 1,
+  "explication": "Passage par référence."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Pourquoi écrire `const string& s` en paramètre ?",
+  "options": [
+   "Pour modifier s",
+   "Pour éviter une copie sans permettre la modification",
+   "C'est obligatoire",
+   "Pour convertir en string"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'un prototype de fonction ?",
+  "options": [
+   "Une version de test",
+   "La déclaration de la fonction (sans son corps) avant son utilisation",
+   "Une fonction vide",
+   "Une classe"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Deux fonctions aire(double) et aire(double, double) peuvent coexister grâce à…",
+  "options": [
+   "l'héritage",
+   "la surcharge",
+   "la récursivité",
+   "un pointeur"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Que contient `int* p = &a;` ?",
+  "options": [
+   "La valeur de a",
+   "L'adresse de a",
+   "Une copie de a",
+   "Rien"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "Une fonction doit être déclarée avant d'être appelée.",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quel en-tête inclure pour sqrt et pow ? (entre chevrons)",
+  "answers": [
+   "<cmath>",
+   "cmath"
+  ],
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que renvoie `hypot(3, 4)` ?",
+  "options": [
+   "7",
+   "5",
+   "12",
+   "25"
+  ],
+  "answer": 1,
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

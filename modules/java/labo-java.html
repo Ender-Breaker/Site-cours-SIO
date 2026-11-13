@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Labo Java — Étude Facile</title>
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="java">
+<script>
+window.EF_CODE = {
+ "langue": "java",
+ "key": "ef-labo-java",
+ "titre": "Labo Java",
+ "sousTitre": "Du vrai Java (javac + TeaVM) dans ton navigateur : programmes console, objets, puis jeux avec la classe Jeu.",
+ "ico": "J",
+ "couleur": "java",
+ "fichier": "Main.java",
+ "module": {
+  "titre": "Java",
+  "href": "index.html"
+ },
+ "lecons": [
+  {
+   "titre": "Afficher et calculer",
+   "missions": [
+    {
+     "id": "java-afficher",
+     "titre": "Afficher un message",
+     "texte": "<p>Premier programme : il écrit une ligne dans la console. Affiche exactement <b>Bonjour, monde !<\/b><\/p><p><b>Exemple<\/b><\/p><pre><code>System.out.println(&quot;Salut&quot;);<\/code><\/pre>",
+     "depart": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        // à toi de jouer\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Le programme affiche <code>Bonjour, monde !<\/code>",
+       "r": [
+        {
+         "out": "Bonjour, monde !"
+        },
+        {
+         "noerr": true
+        }
+       ]
+      }
+     ],
+     "indice": "Dans <code>main<\/code> : <code>System.out.println(\"Bonjour, monde !\");<\/code>",
+     "solution": "public class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Bonjour, monde !\");\n    }\n}\n"
+    },
+    {
+     "id": "java-age",
+     "titre": "Lire une valeur",
+     "texte": "<p>Le programme lit l'âge de l'utilisateur (dans « Entrées du programme ») et affiche <b>Dans 10 ans, tu auras X ans.<\/b><\/p><p><b>Exemple<\/b><\/p><pre><code>int n = sc.nextInt();\nSystem.out.println(&quot;Tu as &quot; + n + &quot; ans&quot;);<\/code><\/pre>",
+     "depart": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        // à toi de jouer\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Avec 17 en entrée : <code>Dans 10 ans, tu auras 27 ans.<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "17"
+          ],
+          "out": "Dans 10 ans, tu auras 27 ans\\."
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Ça marche avec d'autres âges (40 → 50)",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "40"
+          ],
+          "out": "Dans 10 ans, tu auras 50 ans\\."
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>int age = sc.nextInt();<\/code> et attention aux parenthèses : <code>(age + 10)<\/code>.",
+     "solution": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int age = sc.nextInt();\n        System.out.println(\"Dans 10 ans, tu auras \" + (age + 10) + \" ans.\");\n    }\n}\n",
+     "stdin": [
+      "17"
+     ]
+    },
+    {
+     "id": "java-ttc",
+     "titre": "Un calcul",
+     "texte": "<p>Lis un prix hors taxes et affiche <b>Prix TTC : X<\/b> avec une TVA de 20 % (prix × 1.2).<\/p><p><b>Exemple<\/b><\/p><pre><code>double ht = sc.nextDouble();<\/code><\/pre>",
+     "depart": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        // à toi de jouer\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "100 → <code>Prix TTC : 120<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "100"
+          ],
+          "out": "Prix TTC : 120(\\.0+)?(?![\\d.])"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "50 → <code>Prix TTC : 60<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "50"
+          ],
+          "out": "Prix TTC : 60(\\.0+)?(?![\\d.])"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>double ht = sc.nextDouble();<\/code>",
+     "solution": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        double ht = sc.nextDouble();\n        System.out.println(\"Prix TTC : \" + ht * 1.2);\n    }\n}\n",
+     "stdin": [
+      "100"
+     ]
+    }
+   ]
+  },
+  {
+   "titre": "Conditions et boucles",
+   "missions": [
+    {
+     "id": "java-parite",
+     "titre": "Pair ou impair",
+     "texte": "<p>Lis un entier et affiche <b>pair<\/b> ou <b>impair<\/b>. Le reste de la division par 2 se calcule avec l'opérateur modulo.<\/p><p><b>Exemple<\/b><\/p><pre><code>if (n % 2 == 0) {\n    …\n} else {\n    …\n}<\/code><\/pre>",
+     "depart": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        // à toi de jouer\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "4 → <code>pair<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "4"
+          ],
+          "out": "^pair\\s*$",
+          "notout": "impair"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "7 → <code>impair<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "7"
+          ],
+          "out": "^impair\\s*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Utilise une condition",
+       "r": [
+        {
+         "codei": "\\bif\\b|\\?"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>if (n % 2 == 0) { … } else { … }<\/code>",
+     "solution": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        if (n % 2 == 0) {\n            System.out.println(\"pair\");\n        } else {\n            System.out.println(\"impair\");\n        }\n    }\n}\n",
+     "stdin": [
+      "4"
+     ]
+    },
+    {
+     "id": "java-table",
+     "titre": "Table de multiplication",
+     "texte": "<p>Lis un entier n et affiche sa table de 1 à 10, une ligne par calcul : <b>n x i = résultat<\/b> (par exemple <code>7 x 3 = 21<\/code>).<\/p><p><b>Exemple<\/b><\/p><pre><code>for (int i = 1; i &lt;= 10; i++) {\n    …\n}<\/code><\/pre>",
+     "depart": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        // à toi de jouer\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "7 → de <code>7 x 1 = 7<\/code> à <code>7 x 10 = 70<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "7"
+          ],
+          "out": "7 x 1 = 7\\n[\\s\\S]*7 x 5 = 35\\n[\\s\\S]*7 x 10 = 70"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Pas de ligne en trop (pas de 7 x 11)",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "7"
+          ],
+          "out": "7 x 10 = 70",
+          "notout": "7 x (0|11) ="
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Utilise une boucle",
+       "r": [
+        {
+         "codei": "\\b(for|while)\\b"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>for (int i = 1; i &lt;= 10; i++)<\/code>",
+     "solution": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        for (int i = 1; i <= 10; i++) {\n            System.out.println(n + \" x \" + i + \" = \" + n * i);\n        }\n    }\n}\n",
+     "stdin": [
+      "7"
+     ]
+    },
+    {
+     "id": "java-somme",
+     "titre": "Additionner jusqu'à zéro",
+     "texte": "<p>Lis des nombres un par un et additionne-les, jusqu'à lire <b>0<\/b>. Affiche alors <b>Somme : X<\/b>. On ne sait pas à l'avance combien il y aura de nombres : c'est le travail d'une boucle <i>while<\/i>.<\/p><p><b>Exemple<\/b><\/p><pre><code>int x = sc.nextInt();\nwhile (x != 0) {\n    …\n    x = sc.nextInt();\n}<\/code><\/pre>",
+     "depart": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        // à toi de jouer\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "3, 4, 5, 0 → <code>Somme : 12<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "4",
+           "5",
+           "0"
+          ],
+          "out": "Somme : 12(?!\\d)"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "0 tout de suite → <code>Somme : 0<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "0"
+          ],
+          "out": "Somme : 0(?!\\d)"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Utilise une boucle while",
+       "r": [
+        {
+         "codei": "\\bwhile\\b|\\brepeat\\b"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>while (x != 0) { somme += x; x = sc.nextInt(); }<\/code>",
+     "solution": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int somme = 0;\n        int x = sc.nextInt();\n        while (x != 0) {\n            somme += x;\n            x = sc.nextInt();\n        }\n        System.out.println(\"Somme : \" + somme);\n    }\n}\n",
+     "stdin": [
+      "3",
+      "4",
+      "5",
+      "0"
+     ]
+    }
+   ]
+  },
+  {
+   "titre": "Fonctions, tableaux, objets",
+   "missions": [
+    {
+     "id": "java-premier",
+     "titre": "Une fonction",
+     "texte": "<p>Écris une fonction <b>estPremier(n)<\/b> qui renvoie vrai si n est premier (divisible seulement par 1 et par lui-même, et n ≥ 2). Le programme lit n et affiche <b>premier<\/b> ou <b>pas premier<\/b>.<\/p><p><b>Exemple<\/b><\/p><pre><code>static int doubler(int x) {\n    return x * 2;\n}<\/code><\/pre>",
+     "depart": "import java.util.Scanner;\n\npublic class Main {\n    static boolean estPremier(int n) {\n        // à compléter\n        return false;\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "La fonction <code>estPremier<\/code> existe et renvoie un booléen",
+       "r": [
+        {
+         "code": "static\\s+boolean\\s+estPremier\\s*\\("
+        }
+       ]
+      },
+      {
+       "txt": "7 → <code>premier<\/code>, 9 → <code>pas premier<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "7"
+          ],
+          "out": "^premier\\s*$"
+         }
+        },
+        {
+         "test": {
+          "stdin": [
+           "9"
+          ],
+          "out": "pas premier"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "1 → <code>pas premier<\/code>, 2 et 97 → <code>premier<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1"
+          ],
+          "out": "pas premier"
+         }
+        },
+        {
+         "test": {
+          "stdin": [
+           "2"
+          ],
+          "out": "^premier\\s*$"
+         }
+        },
+        {
+         "test": {
+          "stdin": [
+           "97"
+          ],
+          "out": "^premier\\s*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Méthode <code>static boolean<\/code> ; boucle sur d de 2 à √n.",
+     "solution": "import java.util.Scanner;\n\npublic class Main {\n    static boolean estPremier(int n) {\n        if (n < 2) return false;\n        for (int d = 2; d * d <= n; d++) {\n            if (n % d == 0) return false;\n        }\n        return true;\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        System.out.println(estPremier(n) ? \"premier\" : \"pas premier\");\n    }\n}\n",
+     "stdin": [
+      "7"
+     ]
+    },
+    {
+     "id": "java-tableau",
+     "titre": "Un tableau",
+     "texte": "<p>Lis un entier n, puis n nombres que tu ranges dans un tableau. Affiche ensuite <b>max = …<\/b> puis <b>moyenne = …<\/b>.<\/p><p><b>Exemple<\/b><\/p><pre><code>int[] t = new int[n];\nfor (int x : t) { … }<\/code><\/pre>",
+     "depart": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Les nombres sont rangés dans un tableau",
+       "r": [
+        {
+         "code": "\\[\\s*\\]|ArrayList"
+        }
+       ]
+      },
+      {
+       "txt": "4 nombres 3, 9, 2, 6 → <code>max = 9<\/code> et <code>moyenne = 5<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "4",
+           "3",
+           "9",
+           "2",
+           "6"
+          ],
+          "out": "max = 9(?!\\d)[\\s\\S]*moyenne = 5(\\.0+)?(?![\\d.])"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Fonctionne avec des négatifs : -1, -5, -2 → <code>max = -1<\/code>, moyenne ≈ -2.67",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "-1",
+           "-5",
+           "-2"
+          ],
+          "out": "max = -1(?!\\d)[\\s\\S]*moyenne = -2\\.66"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>int[] t = new int[n];<\/code> ; pour la moyenne, divise un <code>double<\/code> (sinon division entière).",
+     "solution": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        int[] t = new int[n];\n        for (int i = 0; i < n; i++) t[i] = sc.nextInt();\n        int max = t[0];\n        double total = 0;\n        for (int x : t) {\n            if (x > max) max = x;\n            total += x;\n        }\n        System.out.println(\"max = \" + max);\n        System.out.println(\"moyenne = \" + total / n);\n    }\n}\n",
+     "stdin": [
+      "4",
+      "3",
+      "9",
+      "2",
+      "6"
+     ]
+    },
+    {
+     "id": "java-palindrome",
+     "titre": "Les chaînes de caractères",
+     "texte": "<p>Lis un mot, affiche-le <b>à l'envers<\/b> sur une ligne, puis <b>palindrome<\/b> s'il se lit pareil dans les deux sens, sinon <b>pas un palindrome<\/b>.<\/p><p><b>Exemple<\/b><\/p><pre><code>new StringBuilder(s).reverse().toString()\ns1.equals(s2)<\/code><\/pre>",
+     "depart": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String mot = sc.next();\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "radar → <code>radar<\/code> puis <code>palindrome<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "radar"
+          ],
+          "out": "^radar\\s*\\n[\\s\\S]*^palindrome\\s*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "code → <code>edoc<\/code> puis <code>pas un palindrome<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "code"
+          ],
+          "out": "edoc[\\s\\S]*pas un palindrome"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Compare deux String avec <code>.equals()<\/code>, jamais avec <code>==<\/code>.",
+     "solution": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String mot = sc.next();\n        String inv = new StringBuilder(mot).reverse().toString();\n        System.out.println(inv);\n        System.out.println(inv.equals(mot) ? \"palindrome\" : \"pas un palindrome\");\n    }\n}\n",
+     "stdin": [
+      "radar"
+     ]
+    },
+    {
+     "id": "java-compte",
+     "titre": "Un objet : le compte bancaire",
+     "texte": "<p>Crée un type <b>Compte<\/b> qui garde un solde, avec deux opérations : <b>deposer(montant)<\/b> et <b>retirer(montant)<\/b>. Si le solde ne suffit pas, <b>retirer<\/b> affiche <code>Solde insuffisant<\/code> et ne change rien. Le programme principal est déjà écrit en bas.<\/p><p><b>Exemple<\/b><\/p><pre><code>class Chien {\n    private String nom;\n    Chien(String nom) { this.nom = nom; }\n    void aboyer() { System.out.println(nom + &quot; : Ouaf&quot;); }\n}<\/code><\/pre>",
+     "depart": "// Écris la classe Compte ici (sans « public » devant)\n\npublic class Main {\n    public static void main(String[] args) {\n        Compte c = new Compte(100);\n        c.deposer(50);\n        c.retirer(30);\n        c.retirer(500);\n        System.out.println(\"Solde : \" + c.getSolde());\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Le type Compte est défini",
+       "r": [
+        {
+         "code": "class\\s+Compte\\b"
+        }
+       ]
+      },
+      {
+       "txt": "Le retrait trop gros affiche <code>Solde insuffisant<\/code>",
+       "r": [
+        {
+         "out": "Solde insuffisant"
+        },
+        {
+         "noerr": true
+        }
+       ]
+      },
+      {
+       "txt": "Le solde final est <code>120<\/code>",
+       "r": [
+        {
+         "out": "Solde : 120(?![\\d.])"
+        }
+       ]
+      }
+     ],
+     "indice": "Un seul <code>public class<\/code> par fichier (Main) : écris <code>class Compte<\/code> au-dessus.",
+     "solution": "class Compte {\n    private int solde;\n\n    Compte(int solde) {\n        this.solde = solde;\n    }\n\n    void deposer(int m) {\n        solde += m;\n    }\n\n    void retirer(int m) {\n        if (m > solde) {\n            System.out.println(\"Solde insuffisant\");\n            return;\n        }\n        solde -= m;\n    }\n\n    int getSolde() {\n        return solde;\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        Compte c = new Compte(100);\n        c.deposer(50);\n        c.retirer(30);\n        c.retirer(500);\n        System.out.println(\"Solde : \" + c.getSolde());\n    }\n}\n"
+    }
+   ]
+  },
+  {
+   "titre": "Dessiner et bouger",
+   "missions": [
+    {
+     "id": "java-dessin",
+     "titre": "Premier dessin",
+     "texte": "<p>Ton premier écran de jeu (480 × 320 pixels, origine en haut à gauche, y vers le bas). Dans <b>draw()<\/b> : efface l'écran en noir, puis dessine un rectangle rouge en (40, 40) de 100 × 60, un cercle jaune de centre (300, 160) et de rayon 40, et le texte <b>Mon jeu<\/b> en (20, 280).<\/p><p class=\"lb-small\">Ta classe <code>Main extends Jeu<\/code> redéfinit <code>update(double dt)<\/code> et <code>draw()<\/code>, appelées 60 fois par seconde ; <code>main<\/code> lance le jeu avec <code>lancer(new Main());<\/code>. Méthodes : <code>effacer(c)<\/code>, <code>rect(x, y, l, h, c)<\/code>, <code>cercle(x, y, r, c)<\/code>, <code>ligne(…)<\/code>, <code>texte(t, x, y, taille, c)<\/code>, <code>touche(\"droite\")<\/code>, <code>toucheAppuyee(\"espace\")<\/code>, <code>clic()<\/code>, <code>sourisX()<\/code>, <code>hasard(a, b)<\/code>, <code>LARGEUR<\/code>, <code>HAUTEUR<\/code>.<\/p><p><b>Exemple<\/b><\/p><pre><code>rect(10, 10, 50, 30, &quot;blue&quot;);<\/code><\/pre>",
+     "depart": "public class Main extends Jeu {\n    public void draw() {\n        effacer(\"black\");\n        // à toi : rect, cercle, texte\n    }\n\n    public static void main(String[] args) {\n        lancer(new Main());\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "L'écran est effacé en noir",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 2
+           }
+          ],
+          "test": "return T(D, 'efface').some(c => c[1] === 'black');"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Rectangle rouge en (40, 40), 100 × 60",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 2
+           }
+          ],
+          "test": "return T(D, 'rect').some(c => c[1] === 40 && c[2] === 40 && c[3] === 100 && c[4] === 60 && c[5] === 'red');"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Cercle jaune de centre (300, 160), rayon 40",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 2
+           }
+          ],
+          "test": "return T(D, 'cercle').some(c => c[1] === 300 && c[2] === 160 && c[3] === 40 && c[4] === 'yellow');"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Le texte « Mon jeu » en (20, 280)",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 2
+           }
+          ],
+          "test": "return T(D, 'texte').some(c => /Mon jeu/.test(c[1]) && c[2] === 20 && c[3] === 280);"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>rect(40, 40, 100, 60, \"red\");<\/code>",
+     "solution": "public class Main extends Jeu {\n    public void draw() {\n        effacer(\"black\");\n        rect(40, 40, 100, 60, \"red\");\n        cercle(300, 160, 40, \"yellow\");\n        texte(\"Mon jeu\", 20, 280, 24, \"white\");\n    }\n\n    public static void main(String[] args) {\n        lancer(new Main());\n    }\n}\n"
+    },
+    {
+     "id": "java-bouger",
+     "titre": "Bouger avec les flèches",
+     "texte": "<p>Un carré bleu de 40 × 40 démarre en x = 200, y = 140. Chaque image, il avance de <b>5 pixels<\/b> vers la droite si la flèche droite est enfoncée, vers la gauche avec la flèche gauche. Il ne doit jamais sortir de l'écran (x entre 0 et LARGEUR − 40).<\/p><p>Clique sur l'écran du jeu pour lui donner le clavier.<\/p><p><b>Exemple<\/b><\/p><pre><code>if (touche(&quot;droite&quot;)) x += 5;<\/code><\/pre>",
+     "depart": "public class Main extends Jeu {\n    double x = 200;\n\n    public void update(double dt) {\n        // if (touche(\"droite\")) …\n    }\n\n    public void draw() {\n        effacer(\"black\");\n        rect(x, 140, 40, 40, \"blue\");\n    }\n\n    public static void main(String[] args) {\n        lancer(new Main());\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "La flèche droite fait avancer le carré, la gauche le fait reculer",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1
+           },
+           {
+            "n": 10,
+            "k": [
+             "droite"
+            ]
+           },
+           {
+            "n": 10,
+            "k": [
+             "gauche"
+            ]
+           }
+          ],
+          "test": "const xs = P('rect', 'blue').map(c => c && c[1]);\nreturn xs[0] === 200 && xs[10] > xs[0] && xs[20] < xs[10];"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "5 pixels par image",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1
+           },
+           {
+            "n": 10,
+            "k": [
+             "droite"
+            ]
+           },
+           {
+            "n": 10,
+            "k": [
+             "gauche"
+            ]
+           }
+          ],
+          "test": "const xs = P('rect', 'blue').map(c => c && c[1]);\nreturn xs[10] - xs[0] === 50 && xs[20] === xs[0];"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Le carré reste dans l'écran",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 100,
+            "k": [
+             "droite"
+            ]
+           },
+           {
+            "n": 150,
+            "k": [
+             "gauche"
+            ]
+           }
+          ],
+          "test": "const xs = P('rect', 'blue').map(c => c && c[1]);\nreturn xs.every(x => x >= 0 && x <= 440) && Math.max(...xs) === 440 && Math.min(...xs) === 0;"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "x est un attribut de Main : il garde sa valeur entre deux images.",
+     "solution": "public class Main extends Jeu {\n    double x = 200;\n\n    public void update(double dt) {\n        if (touche(\"droite\")) x += 5;\n        if (touche(\"gauche\")) x -= 5;\n        if (x < 0) x = 0;\n        if (x > LARGEUR - 40) x = LARGEUR - 40;\n    }\n\n    public void draw() {\n        effacer(\"black\");\n        rect(x, 140, 40, 40, \"blue\");\n    }\n\n    public static void main(String[] args) {\n        lancer(new Main());\n    }\n}\n"
+    },
+    {
+     "id": "java-rebond",
+     "titre": "La balle qui rebondit",
+     "texte": "<p>Une balle rouge de rayon 12 part de (100, 80) avec une vitesse de 4 pixels par image en x et 3 en y. Quand elle touche un bord, sa vitesse s'inverse dans cette direction : elle rebondit et ne sort jamais de l'écran.<\/p><p><b>Exemple<\/b><\/p><pre><code>if (x &lt; 12 || x &gt; LARGEUR - 12) vx = -vx;<\/code><\/pre>",
+     "depart": "public class Main extends Jeu {\n    double x = 100, y = 80;\n    double vx = 4, vy = 3;\n\n    public void update(double dt) {\n        x += vx;\n        // et y ? et les rebonds ?\n    }\n\n    public void draw() {\n        effacer(\"black\");\n        cercle(x, y, 12, \"red\");\n    }\n\n    public static void main(String[] args) {\n        lancer(new Main());\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "La balle bouge en diagonale",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 60
+           }
+          ],
+          "test": "const c = P('cercle', 'red');\nconst xs = c.map(v => v[1]), ys = c.map(v => v[2]);\nconst sens = a => a.some((v, i) => i && v > a[i - 1]) && a.some((v, i) => i && v < a[i - 1]);\nreturn xs[10] > xs[0] && ys[10] > ys[0];"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Elle rebondit sur les bords gauche/droite et haut/bas",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 400
+           }
+          ],
+          "test": "const c = P('cercle', 'red');\nconst xs = c.map(v => v[1]), ys = c.map(v => v[2]);\nconst sens = a => a.some((v, i) => i && v > a[i - 1]) && a.some((v, i) => i && v < a[i - 1]);\nreturn sens(xs) && sens(ys);"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Elle ne sort jamais de l'écran",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 400
+           }
+          ],
+          "test": "const c = P('cercle', 'red');\nconst xs = c.map(v => v[1]), ys = c.map(v => v[2]);\nconst sens = a => a.some((v, i) => i && v > a[i - 1]) && a.some((v, i) => i && v < a[i - 1]);\nreturn xs.every(x => x >= 0 && x <= 480) && ys.every(y => y >= 0 && y <= 320);"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>vx = -vx;<\/code> quand la balle touche un bord.",
+     "solution": "public class Main extends Jeu {\n    double x = 100, y = 80;\n    double vx = 4, vy = 3;\n\n    public void update(double dt) {\n        x += vx;\n        y += vy;\n        if (x < 12 || x > LARGEUR - 12) vx = -vx;\n        if (y < 12 || y > HAUTEUR - 12) vy = -vy;\n    }\n\n    public void draw() {\n        effacer(\"black\");\n        cercle(x, y, 12, \"red\");\n    }\n\n    public static void main(String[] args) {\n        lancer(new Main());\n    }\n}\n"
+    }
+   ]
+  },
+  {
+   "titre": "Mini-jeux",
+   "missions": [
+    {
+     "id": "java-clics",
+     "titre": "Compter les clics",
+     "texte": "<p>Affiche <b>Score : N<\/b> en haut à gauche, où N est le nombre de clics de souris sur le jeu depuis le début. Dessine aussi un petit cercle jaune (rayon 10) qui suit la souris.<\/p><p><b>Exemple<\/b><\/p><pre><code>texte(&quot;Score : &quot; + score, 16, 16, 28, &quot;white&quot;);<\/code><\/pre>",
+     "depart": "public class Main extends Jeu {\n    int score = 0;\n\n    public void update(double dt) {\n        // if (clic()) …\n    }\n\n    public void draw() {\n        effacer(\"black\");\n    }\n\n    public static void main(String[] args) {\n        lancer(new Main());\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Au départ : <code>Score : 0<\/code>",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 2
+           },
+           {
+            "n": 3,
+            "souris": {
+             "x": 100,
+             "y": 100,
+             "clic": true
+            }
+           },
+           {
+            "n": 3,
+            "souris": {
+             "x": 50,
+             "y": 60,
+             "clic": true
+            }
+           },
+           {
+            "n": 3,
+            "souris": {
+             "x": 200,
+             "y": 150,
+             "clic": true
+            }
+           }
+          ],
+          "test": "return T(F[0], 'texte').some(c => /Score : 0\\b/.test(c[1]));"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Après 3 clics : <code>Score : 3<\/code>",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 2
+           },
+           {
+            "n": 3,
+            "souris": {
+             "x": 100,
+             "y": 100,
+             "clic": true
+            }
+           },
+           {
+            "n": 3,
+            "souris": {
+             "x": 50,
+             "y": 60,
+             "clic": true
+            }
+           },
+           {
+            "n": 3,
+            "souris": {
+             "x": 200,
+             "y": 150,
+             "clic": true
+            }
+           }
+          ],
+          "test": "return T(D, 'texte').some(c => /Score : 3\\b/.test(c[1]));"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Un cercle jaune suit la souris",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 2
+           },
+           {
+            "n": 3,
+            "souris": {
+             "x": 100,
+             "y": 100,
+             "clic": true
+            }
+           },
+           {
+            "n": 3,
+            "souris": {
+             "x": 50,
+             "y": 60,
+             "clic": true
+            }
+           },
+           {
+            "n": 3,
+            "souris": {
+             "x": 200,
+             "y": 150,
+             "clic": true
+            }
+           }
+          ],
+          "test": "return T(D, 'cercle').some(c => c[1] === 200 && c[2] === 150 && c[4] === 'yellow');"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>if (clic()) score++;<\/code>",
+     "solution": "public class Main extends Jeu {\n    int score = 0;\n\n    public void update(double dt) {\n        if (clic()) score++;\n    }\n\n    public void draw() {\n        effacer(\"black\");\n        texte(\"Score : \" + score, 16, 16, 28, \"white\");\n        cercle(sourisX(), sourisY(), 10, \"yellow\");\n    }\n\n    public static void main(String[] args) {\n        lancer(new Main());\n    }\n}\n"
+    },
+    {
+     "id": "java-saut",
+     "titre": "Sauter avec la gravité",
+     "texte": "<p>Un joueur (carré bleu 40 × 40 en x = 60) est posé sur un sol vert (rectangle en y = 300). Sa position y (le haut du carré) vaut 260 au sol. Quand on appuie sur <b>espace<\/b> et qu'il est au sol, sa vitesse verticale vy devient −12. À chaque image : vy augmente de 0,6 (la gravité), y augmente de vy, et s'il passe sous le sol on le replace à 260 avec vy = 0. Pas de double saut !<\/p><p><b>Exemple<\/b><\/p><pre><code>if (toucheAppuyee(&quot;espace&quot;) &amp;&amp; y &gt;= 260) vy = -12;<\/code><\/pre>",
+     "depart": "public class Main extends Jeu {\n    double y = 260, vy = 0;\n\n    public void update(double dt) {\n        // saut, gravité, sol\n    }\n\n    public void draw() {\n        effacer(\"skyblue\");\n        rect(0, 300, 480, 20, \"green\");\n        rect(60, y, 40, 40, \"blue\");\n    }\n\n    public static void main(String[] args) {\n        lancer(new Main());\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Un sol vert est dessiné",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 2
+           }
+          ],
+          "test": "return T(D, 'rect').some(c => c[5] === 'green' && c[2] === 300);"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Sans appui, le joueur reste au sol (y = 260)",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 20
+           }
+          ],
+          "test": "const ys = P('rect', 'blue').map(c => c && c[2]);\nreturn ys.every(y => y === 260);"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Espace : il monte puis retombe au sol",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 5
+           },
+           {
+            "n": 1,
+            "p": [
+             "espace"
+            ]
+           },
+           {
+            "n": 70
+           }
+          ],
+          "test": "const ys = P('rect', 'blue').map(c => c && c[2]);\nreturn ys[4] === 260 && Math.min(...ys) < 180 && ys[ys.length - 1] === 260;"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Pas de double saut en l'air",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1,
+            "p": [
+             "espace"
+            ]
+           },
+           {
+            "n": 5
+           },
+           {
+            "n": 1,
+            "p": [
+             "espace"
+            ]
+           },
+           {
+            "n": 50
+           }
+          ],
+          "test": "const ys = P('rect', 'blue').map(c => c && c[2]);\nreturn Math.min(...ys) > 120;"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Ordre : saut, gravité, déplacement, sol.",
+     "solution": "public class Main extends Jeu {\n    double y = 260, vy = 0;\n\n    public void update(double dt) {\n        if (toucheAppuyee(\"espace\") && y >= 260) vy = -12;\n        vy += 0.6;\n        y += vy;\n        if (y > 260) {\n            y = 260;\n            vy = 0;\n        }\n    }\n\n    public void draw() {\n        effacer(\"skyblue\");\n        rect(0, 300, 480, 20, \"green\");\n        rect(60, y, 40, 40, \"blue\");\n    }\n\n    public static void main(String[] args) {\n        lancer(new Main());\n    }\n}\n"
+    },
+    {
+     "id": "java-fruits",
+     "titre": "Attrape les fruits",
+     "texte": "<p>Le vrai mini-jeu ! Une raquette blanche (80 × 12, en y = 290, x de départ 200) se déplace de 6 pixels par image avec les flèches, sans sortir de l'écran. Un fruit (cercle rouge de rayon 10) tombe de 4 pixels par image depuis le haut, à une position x tirée au hasard. S'il touche la raquette, le score augmente de 1 ; dans tous les cas, quand il est attrapé ou qu'il sort en bas, il repart du haut. Affiche <b>Score : N<\/b>.<\/p><p><b>Exemple<\/b><\/p><pre><code>px = Math.max(0, Math.min(LARGEUR - 80, px));<\/code><\/pre>",
+     "depart": "public class Main extends Jeu {\n    double px = 200;\n    double fx = 240, fy = 0;\n    int score = 0;\n\n    public void setup() {\n        fx = hasard(20, 460);\n    }\n\n    public void update(double dt) {\n        // raquette, chute, collision, score\n    }\n\n    public void draw() {\n        effacer(\"black\");\n        rect(px, 290, 80, 12, \"white\");\n        cercle(fx, fy, 10, \"red\");\n        texte(\"Score : \" + score, 16, 16, 24, \"white\");\n    }\n\n    public static void main(String[] args) {\n        lancer(new Main());\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "La raquette se déplace avec les flèches",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1
+           },
+           {
+            "n": 30,
+            "k": [
+             "droite"
+            ]
+           },
+           {
+            "n": 120
+           }
+          ],
+          "test": "const p = P('rect', 'white').map(c => c && c[1]);\nconst f = P('cercle', 'red').map(c => c && c[2]);\nreturn p[0] === 200 && p[30] > p[0];"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Le fruit tombe",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1
+           },
+           {
+            "n": 30,
+            "k": [
+             "droite"
+            ]
+           },
+           {
+            "n": 120
+           }
+          ],
+          "test": "const p = P('rect', 'white').map(c => c && c[1]);\nconst f = P('cercle', 'red').map(c => c && c[2]);\nreturn f[20] > f[0];"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Le fruit repart du haut quand il arrive en bas",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1
+           },
+           {
+            "n": 30,
+            "k": [
+             "droite"
+            ]
+           },
+           {
+            "n": 120
+           }
+          ],
+          "test": "const p = P('rect', 'white').map(c => c && c[1]);\nconst f = P('cercle', 'red').map(c => c && c[2]);\nreturn f.some((v, i) => i && v < f[i - 1] - 100);"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Le score est affiché",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1
+           },
+           {
+            "n": 30,
+            "k": [
+             "droite"
+            ]
+           },
+           {
+            "n": 120
+           }
+          ],
+          "test": "return T(D, 'texte').some(c => /Score : \\d+/.test(c[1]));"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "La raquette ne sort pas de l'écran",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 120,
+            "k": [
+             "droite"
+            ]
+           },
+           {
+            "n": 150,
+            "k": [
+             "gauche"
+            ]
+           }
+          ],
+          "test": "const p = P('rect', 'white').map(c => c && c[1]);\nconst f = P('cercle', 'red').map(c => c && c[2]);\nreturn p.every(x => x >= 0 && x <= 400);"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Écris une méthode <code>nouveauFruit()<\/code> appelée dans <code>setup()<\/code> et après chaque chute.",
+     "solution": "public class Main extends Jeu {\n    double px = 200;\n    double fx = 240, fy = 0;\n    int score = 0;\n\n    void nouveauFruit() {\n        fx = hasard(20, 460);\n        fy = 0;\n    }\n\n    public void setup() {\n        nouveauFruit();\n    }\n\n    public void update(double dt) {\n        if (touche(\"droite\")) px += 6;\n        if (touche(\"gauche\")) px -= 6;\n        px = Math.max(0, Math.min(LARGEUR - 80, px));\n        fy += 4;\n        if (fy >= 280 && fy <= 300 && fx >= px && fx <= px + 80) {\n            score++;\n            nouveauFruit();\n        } else if (fy > HAUTEUR) {\n            nouveauFruit();\n        }\n    }\n\n    public void draw() {\n        effacer(\"black\");\n        rect(px, 290, 80, 12, \"white\");\n        cercle(fx, fy, 10, \"red\");\n        texte(\"Score : \" + score, 16, 16, 24, \"white\");\n    }\n\n    public static void main(String[] args) {\n        lancer(new Main());\n    }\n}\n"
+    }
+   ]
+  }
+ ],
+ "libre": "// Bac à sable : sans « extends Jeu », c'est un programme console\npublic class Main extends Jeu {\n    double x = 240, y = 160, vx = 3, vy = 2;\n\n    public void update(double dt) {\n        x += vx; y += vy;\n        if (x < 20 || x > LARGEUR - 20) vx = -vx;\n        if (y < 20 || y > HAUTEUR - 20) vy = -vy;\n    }\n\n    public void draw() {\n        effacer(\"#16182b\");\n        cercle(x, y, 20, \"gold\");\n        texte(\"Bac à sable Java\", 12, 12, 18, \"white\");\n    }\n\n    public static void main(String[] args) {\n        lancer(new Main());\n    }\n}\n",
+ "libreTexte": "<p>Écris ce que tu veux. Si ta classe étend <code>Jeu<\/code>, le jeu démarre ; sinon le programme s'exécute dans la console.<\/p><p class=\"lb-small\">Ta classe <code>Main extends Jeu<\/code> redéfinit <code>update(double dt)<\/code> et <code>draw()<\/code>, appelées 60 fois par seconde ; <code>main<\/code> lance le jeu avec <code>lancer(new Main());<\/code>. Méthodes : <code>effacer(c)<\/code>, <code>rect(x, y, l, h, c)<\/code>, <code>cercle(x, y, r, c)<\/code>, <code>ligne(…)<\/code>, <code>texte(t, x, y, taille, c)<\/code>, <code>touche(\"droite\")<\/code>, <code>toucheAppuyee(\"espace\")<\/code>, <code>clic()<\/code>, <code>sourisX()<\/code>, <code>hasard(a, b)<\/code>, <code>LARGEUR<\/code>, <code>HAUTEUR<\/code>.<\/p>"
+};
+</script>
+  <script src="../../data/modules.js"></script>
+  <script src="../../assets/app.js"></script>
+  <script src="../../assets/jeu.js"></script>
+  <script src="../../assets/labo-code.js"></script>
+</body>
+</html>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Java : programmation orientée objet — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="java" data-chapter="java-poo">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>Java est un langage <b>orienté objet</b> : un programme est un ensemble d'objets qui collaborent. C'est aussi le langage de référence pour apprendre les concepts objet au BTS (modélisation UML, design patterns).</p>
+
+<h2>1. Classe, attributs, constructeur, méthodes</h2>
+<pre><code>class Compte {
+    private String titulaire;          // attributs privés
+    private double solde;
+
+    public Compte(String titulaire, double solde) {   // constructeur
+        this.titulaire = titulaire;    // this = l&#x27;objet en cours de création
+        this.solde = solde;
+    }
+
+    public void deposer(double m) { if (m &gt; 0) solde += m; }
+    public double getSolde() { return solde; }        // accesseur
+}
+
+Compte c = new Compte(&quot;Léa&quot;, 100);     // new crée un objet (une instance)
+c.deposer(50);</code></pre>
+
+<h2>2. Encapsulation et visibilité</h2>
+<table><tr><th>Mot-clé</th><th>Accessible depuis</th></tr>
+<tr><td><code>private</code></td><td>la classe seulement</td></tr>
+<tr><td>(rien)</td><td>les classes du même paquetage</td></tr>
+<tr><td><code>protected</code></td><td>le paquetage et les classes filles</td></tr>
+<tr><td><code>public</code></td><td>partout</td></tr></table>
+<p>On met les attributs en <code>private</code> et on expose des méthodes : l'objet contrôle lui-même la validité de son état.</p>
+
+<h2>3. Héritage</h2>
+<pre><code>class Personnage {
+    protected int pv = 100;
+    public void attaquer() { System.out.println(&quot;Coup de poing&quot;); }
+}
+
+class Mage extends Personnage {           // Mage EST UN Personnage
+    @Override
+    public void attaquer() { System.out.println(&quot;Boule de feu&quot;); }
+}
+
+Personnage p = new Mage();
+p.attaquer();          // « Boule de feu » : polymorphisme</code></pre>
+<p>Toutes les classes héritent de <code>Object</code>, qui fournit <code>toString()</code>, <code>equals()</code>, <code>hashCode()</code>. Java n'autorise qu'<b>un seul</b> parent par classe.</p>
+
+<h2>4. Classes abstraites et interfaces</h2>
+<pre><code>abstract class Forme {                    // ne peut pas être instanciée
+    abstract double aire();               // à définir dans les classes filles
+}
+class Cercle extends Forme {
+    double r;
+    Cercle(double r) { this.r = r; }
+    double aire() { return Math.PI * r * r; }
+}
+
+interface Affichable {                    // un contrat
+    void afficher();
+}
+class Produit implements Affichable {
+    public void afficher() { System.out.println(&quot;Produit&quot;); }
+}</code></pre>
+<div class="box retenir"><b>Le labo de jeux utilise tout ça</b><p>Ta classe <code>Main extends Jeu</code> hérite d'une classe abstraite <code>Jeu</code> qui fournit les méthodes de dessin, et tu <b>redéfinis</b> <code>update</code> et <code>draw</code>.</p></div>
+
+<h2>5. static et la mémoire</h2>
+<p>Un attribut <code>static</code> est partagé par tous les objets de la classe (un compteur d'instances, une constante). La mémoire des objets est libérée automatiquement par le <b>ramasse-miettes</b> (garbage collector) quand plus rien ne les référence.</p>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-java.html">labo Java</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel mot-clé crée un nouvel objet ?",
+  "options": [
+   "`create`",
+   "`new`",
+   "`make`",
+   "`object`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Dans un constructeur, que désigne this ?",
+  "options": [
+   "La classe parente",
+   "L'objet en cours de création",
+   "La méthode main",
+   "Une variable globale"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle visibilité pour un attribut, en respectant l'encapsulation ?",
+  "options": [
+   "public",
+   "private",
+   "static",
+   "final"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quel mot-clé indique qu'une classe hérite d'une autre ?",
+  "options": [
+   "`implements`",
+   "`extends`",
+   "`inherits`",
+   "`:`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quel mot-clé indique qu'une classe respecte une interface ?",
+  "options": [
+   "`extends`",
+   "`implements`",
+   "`uses`",
+   "`with`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "`Personnage p = new Mage(); p.attaquer();` appelle la version…",
+  "options": [
+   "de Personnage",
+   "de Mage (polymorphisme)",
+   "aucune : erreur",
+   "des deux"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Une classe abstraite…",
+  "options": [
+   "ne peut pas être instanciée directement",
+   "ne peut pas avoir de méthodes",
+   "est toujours finale",
+   "n'a pas de constructeur"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "Une classe Java peut hériter de plusieurs classes à la fois.",
+  "answer": false,
+  "explication": "Un seul parent ; mais plusieurs interfaces."
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "La mémoire des objets Java est libérée automatiquement par le ramasse-miettes.",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quelle annotation signale qu'une méthode redéfinit celle du parent ?",
+  "answers": [
+   "@Override",
+   "Override"
+  ],
+  "explication": ""
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "De quelle classe héritent toutes les classes Java ?",
+  "options": [
+   "`Main`",
+   "`Object`",
+   "`Class`",
+   "`Base`"
+  ],
+  "answer": 1,
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

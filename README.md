@@ -64,6 +64,21 @@ Le site est utilisable sur téléphone : barre du haut compacte, pastilles et le
 
 `modules/culture-generale/conjugaison.html` (labo de conjugaison, styles `assets/conjugaison.css`) et `modules/sisr/adressage-ipv4.html` (chapitre standard avec ses outils de calcul et schémas, styles `assets/ipv4.css`) sont passés au design du site. Le chapitre IPv4 ajoute à chaque chargement des questions de calcul tirées au hasard.
 
+## Cours bonus (hors programme)
+
+Page `bonus.html` (lien « Bonus » dans la barre du haut et bandeau sur l'accueil). Les matières marquées `bonus: true` dans `data/modules.js` (JavaScript, Lua, C++, Java) ne comptent ni dans la progression générale ni au classement.
+
+Chaque langage a ses chapitres (cours + exercices, donc évaluations) et un labo de 16 missions (console puis jeux) :
+
+| Langage | Exécution dans le navigateur |
+|---|---|
+| JavaScript | Web Worker (`assets/run-jeu.js`) |
+| Lua 5.4 | wasmoon (`assets/vendor/wasmoon/`) |
+| C++20 | clang compilé en WebAssembly (`assets/vendor/clang/`, @browserrun/clang), exécution WASI maison |
+| Java | javac + TeaVM en WebAssembly (`assets/vendor/java/`, @live-codes/java-wasm) |
+
+`assets/jeu.js` fournit une même API de jeu aux quatre langages (`effacer`, `rect`, `cercle`, `ligne`, `texte`, `touche`, `toucheAppuyee`, `clic`, `sourisX/Y`, `hasard`, 480 × 320, `update(dt)` / `draw()` à 60 images/s), l'écran (canvas, clavier, souris, croix tactile) et les scénarios de test sans affichage utilisés par la règle `jeu { etapes, test }` des labos. En C++ : `#include "jeu.h"` ; en Java : `public class Main extends Jeu` puis `lancer(new Main())`.
+
 ## Lancer en local
 
 Aucune installation : c'est un site statique (HTML, CSS, JavaScript).

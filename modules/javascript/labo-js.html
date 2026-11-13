@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Labo JavaScript — Étude Facile</title>
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="javascript">
+<script>
+window.EF_CODE = {
+ "langue": "js",
+ "key": "ef-labo-js",
+ "titre": "Labo JavaScript",
+ "sousTitre": "Du vrai JavaScript exécuté dans ton navigateur : programmes console puis jeux (dessin, clavier, souris, collisions).",
+ "ico": "JS",
+ "couleur": "js",
+ "fichier": "main.js",
+ "module": {
+  "titre": "JavaScript",
+  "href": "index.html"
+ },
+ "lecons": [
+  {
+   "titre": "Afficher et calculer",
+   "missions": [
+    {
+     "id": "js-afficher",
+     "titre": "Afficher un message",
+     "texte": "<p>Premier programme : il écrit une ligne dans la console. Affiche exactement <b>Bonjour, monde !<\/b><\/p><p><b>Exemple<\/b><\/p><pre><code>console.log(&quot;Salut&quot;);<\/code><\/pre>",
+     "depart": "// Affiche le message\n",
+     "objectifs": [
+      {
+       "txt": "Le programme affiche <code>Bonjour, monde !<\/code>",
+       "r": [
+        {
+         "out": "Bonjour, monde !"
+        },
+        {
+         "noerr": true
+        }
+       ]
+      }
+     ],
+     "indice": "<code>console.log(\"Bonjour, monde !\");<\/code>",
+     "solution": "console.log(\"Bonjour, monde !\");\n"
+    },
+    {
+     "id": "js-age",
+     "titre": "Lire une valeur",
+     "texte": "<p>Le programme lit l'âge de l'utilisateur (dans « Entrées du programme ») et affiche <b>Dans 10 ans, tu auras X ans.<\/b><\/p><p><b>Exemple<\/b><\/p><pre><code>const n = Number(lire());   // texte → nombre\nconsole.log(&quot;Tu as &quot; + n + &quot; ans&quot;);<\/code><\/pre>",
+     "depart": "// lire() renvoie la ligne suivante des entrées, sous forme de texte\nconst age = lire();\n",
+     "objectifs": [
+      {
+       "txt": "Avec 17 en entrée : <code>Dans 10 ans, tu auras 27 ans.<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "17"
+          ],
+          "out": "Dans 10 ans, tu auras 27 ans\\."
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Ça marche avec d'autres âges (40 → 50)",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "40"
+          ],
+          "out": "Dans 10 ans, tu auras 50 ans\\."
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>lire()<\/code> renvoie du texte : convertis avec <code>Number()<\/code>, sinon <code>\"17\" + 10<\/code> donne <code>\"1710\"<\/code>.",
+     "solution": "const age = Number(lire());\nconsole.log(\"Dans 10 ans, tu auras \" + (age + 10) + \" ans.\");\n",
+     "stdin": [
+      "17"
+     ]
+    },
+    {
+     "id": "js-ttc",
+     "titre": "Un calcul",
+     "texte": "<p>Lis un prix hors taxes et affiche <b>Prix TTC : X<\/b> avec une TVA de 20 % (prix × 1.2).<\/p><p><b>Exemple<\/b><\/p><pre><code>const ttc = ht * 1.2;<\/code><\/pre>",
+     "depart": "const ht = Number(lire());\n",
+     "objectifs": [
+      {
+       "txt": "100 → <code>Prix TTC : 120<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "100"
+          ],
+          "out": "Prix TTC : 120(\\.0+)?(?![\\d.])"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "50 → <code>Prix TTC : 60<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "50"
+          ],
+          "out": "Prix TTC : 60(\\.0+)?(?![\\d.])"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>console.log(\"Prix TTC : \" + ht * 1.2);<\/code>",
+     "solution": "const ht = Number(lire());\nconsole.log(\"Prix TTC : \" + ht * 1.2);\n",
+     "stdin": [
+      "100"
+     ]
+    }
+   ]
+  },
+  {
+   "titre": "Conditions et boucles",
+   "missions": [
+    {
+     "id": "js-parite",
+     "titre": "Pair ou impair",
+     "texte": "<p>Lis un entier et affiche <b>pair<\/b> ou <b>impair<\/b>. Le reste de la division par 2 se calcule avec l'opérateur modulo.<\/p><p><b>Exemple<\/b><\/p><pre><code>if (n % 2 === 0) {\n  …\n} else {\n  …\n}<\/code><\/pre>",
+     "depart": "const n = Number(lire());\n",
+     "objectifs": [
+      {
+       "txt": "4 → <code>pair<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "4"
+          ],
+          "out": "^pair\\s*$",
+          "notout": "impair"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "7 → <code>impair<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "7"
+          ],
+          "out": "^impair\\s*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Utilise une condition",
+       "r": [
+        {
+         "codei": "\\bif\\b|\\?"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>n % 2 === 0<\/code> est vrai si n est pair.",
+     "solution": "const n = Number(lire());\nif (n % 2 === 0) {\n  console.log(\"pair\");\n} else {\n  console.log(\"impair\");\n}\n",
+     "stdin": [
+      "4"
+     ]
+    },
+    {
+     "id": "js-table",
+     "titre": "Table de multiplication",
+     "texte": "<p>Lis un entier n et affiche sa table de 1 à 10, une ligne par calcul : <b>n x i = résultat<\/b> (par exemple <code>7 x 3 = 21<\/code>).<\/p><p><b>Exemple<\/b><\/p><pre><code>for (let i = 1; i &lt;= 10; i++) {\n  …\n}<\/code><\/pre>",
+     "depart": "const n = Number(lire());\n",
+     "objectifs": [
+      {
+       "txt": "7 → de <code>7 x 1 = 7<\/code> à <code>7 x 10 = 70<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "7"
+          ],
+          "out": "7 x 1 = 7\\n[\\s\\S]*7 x 5 = 35\\n[\\s\\S]*7 x 10 = 70"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Pas de ligne en trop (pas de 7 x 11)",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "7"
+          ],
+          "out": "7 x 10 = 70",
+          "notout": "7 x (0|11) ="
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Utilise une boucle",
+       "r": [
+        {
+         "codei": "\\b(for|while)\\b"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>for (let i = 1; i &lt;= 10; i++)<\/code>",
+     "solution": "const n = Number(lire());\nfor (let i = 1; i <= 10; i++) {\n  console.log(n + \" x \" + i + \" = \" + n * i);\n}\n",
+     "stdin": [
+      "7"
+     ]
+    },
+    {
+     "id": "js-somme",
+     "titre": "Additionner jusqu'à zéro",
+     "texte": "<p>Lis des nombres un par un et additionne-les, jusqu'à lire <b>0<\/b>. Affiche alors <b>Somme : X<\/b>. On ne sait pas à l'avance combien il y aura de nombres : c'est le travail d'une boucle <i>while<\/i>.<\/p><p><b>Exemple<\/b><\/p><pre><code>let x = Number(lire());\nwhile (x !== 0) {\n  …\n  x = Number(lire());\n}<\/code><\/pre>",
+     "depart": "let somme = 0;\n",
+     "objectifs": [
+      {
+       "txt": "3, 4, 5, 0 → <code>Somme : 12<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "4",
+           "5",
+           "0"
+          ],
+          "out": "Somme : 12(?!\\d)"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "0 tout de suite → <code>Somme : 0<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "0"
+          ],
+          "out": "Somme : 0(?!\\d)"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Utilise une boucle while",
+       "r": [
+        {
+         "codei": "\\bwhile\\b|\\brepeat\\b"
+        }
+       ]
+      }
+     ],
+     "indice": "Lis le premier nombre avant la boucle, puis le suivant à la fin de chaque tour.",
+     "solution": "let somme = 0;\nlet x = Number(lire());\nwhile (x !== 0) {\n  somme = somme + x;\n  x = Number(lire());\n}\nconsole.log(\"Somme : \" + somme);\n",
+     "stdin": [
+      "3",
+      "4",
+      "5",
+      "0"
+     ]
+    }
+   ]
+  },
+  {
+   "titre": "Fonctions, tableaux, objets",
+   "missions": [
+    {
+     "id": "js-premier",
+     "titre": "Une fonction",
+     "texte": "<p>Écris une fonction <b>estPremier(n)<\/b> qui renvoie vrai si n est premier (divisible seulement par 1 et par lui-même, et n ≥ 2). Le programme lit n et affiche <b>premier<\/b> ou <b>pas premier<\/b>.<\/p><p><b>Exemple<\/b><\/p><pre><code>function double(x) {\n  return x * 2;\n}<\/code><\/pre>",
+     "depart": "function estPremier(n) {\n  // à compléter\n}\n\nconst n = Number(lire());\n",
+     "objectifs": [
+      {
+       "txt": "La fonction <code>estPremier<\/code> existe et renvoie un booléen",
+       "r": [
+        {
+         "code": "function\\s+estPremier\\s*\\(|estPremier\\s*=\\s*(\\(|function)"
+        }
+       ]
+      },
+      {
+       "txt": "7 → <code>premier<\/code>, 9 → <code>pas premier<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "7"
+          ],
+          "out": "^premier\\s*$"
+         }
+        },
+        {
+         "test": {
+          "stdin": [
+           "9"
+          ],
+          "out": "pas premier"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "1 → <code>pas premier<\/code>, 2 et 97 → <code>premier<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1"
+          ],
+          "out": "pas premier"
+         }
+        },
+        {
+         "test": {
+          "stdin": [
+           "2"
+          ],
+          "out": "^premier\\s*$"
+         }
+        },
+        {
+         "test": {
+          "stdin": [
+           "97"
+          ],
+          "out": "^premier\\s*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Teste les diviseurs d de 2 à √n : dès que <code>n % d === 0<\/code>, renvoie <code>false<\/code>.",
+     "solution": "function estPremier(n) {\n  if (n < 2) return false;\n  for (let d = 2; d * d <= n; d++) {\n    if (n % d === 0) return false;\n  }\n  return true;\n}\n\nconst n = Number(lire());\nconsole.log(estPremier(n) ? \"premier\" : \"pas premier\");\n",
+     "stdin": [
+      "7"
+     ]
+    },
+    {
+     "id": "js-tableau",
+     "titre": "Un tableau",
+     "texte": "<p>Lis un entier n, puis n nombres que tu ranges dans un tableau. Affiche ensuite <b>max = …<\/b> puis <b>moyenne = …<\/b>.<\/p><p><b>Exemple<\/b><\/p><pre><code>const t = [];\nt.push(4);\nfor (const x of t) { … }<\/code><\/pre>",
+     "depart": "const n = Number(lire());\nconst t = [];\n",
+     "objectifs": [
+      {
+       "txt": "Les nombres sont rangés dans un tableau",
+       "r": [
+        {
+         "code": "\\[\\s*\\]|new Array|\\.push\\("
+        }
+       ]
+      },
+      {
+       "txt": "4 nombres 3, 9, 2, 6 → <code>max = 9<\/code> et <code>moyenne = 5<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "4",
+           "3",
+           "9",
+           "2",
+           "6"
+          ],
+          "out": "max = 9(?!\\d)[\\s\\S]*moyenne = 5(\\.0+)?(?![\\d.])"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Fonctionne avec des négatifs : -1, -5, -2 → <code>max = -1<\/code>, moyenne ≈ -2.67",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "-1",
+           "-5",
+           "-2"
+          ],
+          "out": "max = -1(?!\\d)[\\s\\S]*moyenne = -2\\.66"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Pour le max, pars du premier élément (pas de 0 : les nombres peuvent être négatifs).",
+     "solution": "const n = Number(lire());\nconst t = [];\nfor (let i = 0; i < n; i++) t.push(Number(lire()));\nlet max = t[0], total = 0;\nfor (const x of t) {\n  if (x > max) max = x;\n  total += x;\n}\nconsole.log(\"max = \" + max);\nconsole.log(\"moyenne = \" + total / n);\n",
+     "stdin": [
+      "4",
+      "3",
+      "9",
+      "2",
+      "6"
+     ]
+    },
+    {
+     "id": "js-palindrome",
+     "titre": "Les chaînes de caractères",
+     "texte": "<p>Lis un mot, affiche-le <b>à l'envers<\/b> sur une ligne, puis <b>palindrome<\/b> s'il se lit pareil dans les deux sens, sinon <b>pas un palindrome<\/b>.<\/p><p><b>Exemple<\/b><\/p><pre><code>&quot;abc&quot;.split(&quot;&quot;)   // [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]\n[&quot;a&quot;, &quot;b&quot;].reverse().join(&quot;&quot;)<\/code><\/pre>",
+     "depart": "const mot = lire();\n",
+     "objectifs": [
+      {
+       "txt": "radar → <code>radar<\/code> puis <code>palindrome<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "radar"
+          ],
+          "out": "^radar\\s*\\n[\\s\\S]*^palindrome\\s*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "code → <code>edoc<\/code> puis <code>pas un palindrome<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "code"
+          ],
+          "out": "edoc[\\s\\S]*pas un palindrome"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>mot.split(\"\").reverse().join(\"\")<\/code>",
+     "solution": "const mot = lire();\nconst inv = mot.split(\"\").reverse().join(\"\");\nconsole.log(inv);\nconsole.log(inv === mot ? \"palindrome\" : \"pas un palindrome\");\n",
+     "stdin": [
+      "radar"
+     ]
+    },
+    {
+     "id": "js-compte",
+     "titre": "Un objet : le compte bancaire",
+     "texte": "<p>Crée un type <b>Compte<\/b> qui garde un solde, avec deux opérations : <b>deposer(montant)<\/b> et <b>retirer(montant)<\/b>. Si le solde ne suffit pas, <b>retirer<\/b> affiche <code>Solde insuffisant<\/code> et ne change rien. Le programme principal est déjà écrit en bas.<\/p><p><b>Exemple<\/b><\/p><pre><code>class Chien {\n  constructor(nom) { this.nom = nom; }\n  aboyer() { console.log(this.nom + &quot; : Ouaf&quot;); }\n}<\/code><\/pre>",
+     "depart": "// Écris la classe Compte ici\n\nconst c = new Compte(100);\nc.deposer(50);\nc.retirer(30);\nc.retirer(500);\nconsole.log(\"Solde : \" + c.solde);\n",
+     "objectifs": [
+      {
+       "txt": "Le type Compte est défini",
+       "r": [
+        {
+         "code": "class\\s+Compte\\b"
+        }
+       ]
+      },
+      {
+       "txt": "Le retrait trop gros affiche <code>Solde insuffisant<\/code>",
+       "r": [
+        {
+         "out": "Solde insuffisant"
+        },
+        {
+         "noerr": true
+        }
+       ]
+      },
+      {
+       "txt": "Le solde final est <code>120<\/code>",
+       "r": [
+        {
+         "out": "Solde : 120(?![\\d.])"
+        }
+       ]
+      }
+     ],
+     "indice": "Dans les méthodes, l'objet courant est <code>this<\/code>.",
+     "solution": "class Compte {\n  constructor(solde) {\n    this.solde = solde;\n  }\n  deposer(m) {\n    this.solde += m;\n  }\n  retirer(m) {\n    if (m > this.solde) {\n      console.log(\"Solde insuffisant\");\n      return;\n    }\n    this.solde -= m;\n  }\n}\n\nconst c = new Compte(100);\nc.deposer(50);\nc.retirer(30);\nc.retirer(500);\nconsole.log(\"Solde : \" + c.solde);\n"
+    }
+   ]
+  },
+  {
+   "titre": "Dessiner et bouger",
+   "missions": [
+    {
+     "id": "js-dessin",
+     "titre": "Premier dessin",
+     "texte": "<p>Ton premier écran de jeu (480 × 320 pixels, origine en haut à gauche, y vers le bas). Dans <b>draw()<\/b> : efface l'écran en noir, puis dessine un rectangle rouge en (40, 40) de 100 × 60, un cercle jaune de centre (300, 160) et de rayon 40, et le texte <b>Mon jeu<\/b> en (20, 280).<\/p><p class=\"lb-small\">Le jeu appelle <code>update(dt)<\/code> puis <code>draw()<\/code> 60 fois par seconde. Fonctions : <code>effacer(c)<\/code>, <code>rect(x, y, l, h, c)<\/code>, <code>cercle(x, y, r, c)<\/code>, <code>ligne(x1, y1, x2, y2, c)<\/code>, <code>texte(t, x, y, taille, c)<\/code>, <code>touche(\"droite\")<\/code>, <code>toucheAppuyee(\"espace\")<\/code>, <code>clic()<\/code>, <code>sourisX()<\/code>, <code>hasard(a, b)<\/code>, <code>LARGEUR<\/code> (480), <code>HAUTEUR<\/code> (320).<\/p><p><b>Exemple<\/b><\/p><pre><code>rect(10, 10, 50, 30, &quot;blue&quot;);<\/code><\/pre>",
+     "depart": "function draw() {\n  effacer(\"black\");\n  // à toi : rect, cercle, texte\n}\n",
+     "objectifs": [
+      {
+       "txt": "L'écran est effacé en noir",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 2
+           }
+          ],
+          "test": "return T(D, 'efface').some(c => c[1] === 'black');"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Rectangle rouge en (40, 40), 100 × 60",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 2
+           }
+          ],
+          "test": "return T(D, 'rect').some(c => c[1] === 40 && c[2] === 40 && c[3] === 100 && c[4] === 60 && c[5] === 'red');"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Cercle jaune de centre (300, 160), rayon 40",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 2
+           }
+          ],
+          "test": "return T(D, 'cercle').some(c => c[1] === 300 && c[2] === 160 && c[3] === 40 && c[4] === 'yellow');"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Le texte « Mon jeu » en (20, 280)",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 2
+           }
+          ],
+          "test": "return T(D, 'texte').some(c => /Mon jeu/.test(c[1]) && c[2] === 20 && c[3] === 280);"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>rect(40, 40, 100, 60, \"red\");<\/code> — les couleurs sont des noms CSS en anglais.",
+     "solution": "function draw() {\n  effacer(\"black\");\n  rect(40, 40, 100, 60, \"red\");\n  cercle(300, 160, 40, \"yellow\");\n  texte(\"Mon jeu\", 20, 280, 24, \"white\");\n}\n"
+    },
+    {
+     "id": "js-bouger",
+     "titre": "Bouger avec les flèches",
+     "texte": "<p>Un carré bleu de 40 × 40 démarre en x = 200, y = 140. Chaque image, il avance de <b>5 pixels<\/b> vers la droite si la flèche droite est enfoncée, vers la gauche avec la flèche gauche. Il ne doit jamais sortir de l'écran (x entre 0 et LARGEUR − 40).<\/p><p>Clique sur l'écran du jeu pour lui donner le clavier.<\/p><p><b>Exemple<\/b><\/p><pre><code>if (touche(&quot;droite&quot;)) x = x + 5;<\/code><\/pre>",
+     "depart": "let x = 200;\n\nfunction update(dt) {\n  // if (touche(\"droite\")) …\n}\n\nfunction draw() {\n  effacer(\"black\");\n  rect(x, 140, 40, 40, \"blue\");\n}\n",
+     "objectifs": [
+      {
+       "txt": "La flèche droite fait avancer le carré, la gauche le fait reculer",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1
+           },
+           {
+            "n": 10,
+            "k": [
+             "droite"
+            ]
+           },
+           {
+            "n": 10,
+            "k": [
+             "gauche"
+            ]
+           }
+          ],
+          "test": "const xs = P('rect', 'blue').map(c => c && c[1]);\nreturn xs[0] === 200 && xs[10] > xs[0] && xs[20] < xs[10];"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "5 pixels par image",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1
+           },
+           {
+            "n": 10,
+            "k": [
+             "droite"
+            ]
+           },
+           {
+            "n": 10,
+            "k": [
+             "gauche"
+            ]
+           }
+          ],
+          "test": "const xs = P('rect', 'blue').map(c => c && c[1]);\nreturn xs[10] - xs[0] === 50 && xs[20] === xs[0];"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Le carré reste dans l'écran",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 100,
+            "k": [
+             "droite"
+            ]
+           },
+           {
+            "n": 150,
+            "k": [
+             "gauche"
+            ]
+           }
+          ],
+          "test": "const xs = P('rect', 'blue').map(c => c && c[1]);\nreturn xs.every(x => x >= 0 && x <= 440) && Math.max(...xs) === 440 && Math.min(...xs) === 0;"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Après le déplacement, ramène x dans les limites : <code>if (x &lt; 0) x = 0;<\/code> …",
+     "solution": "let x = 200;\n\nfunction update(dt) {\n  if (touche(\"droite\")) x = x + 5;\n  if (touche(\"gauche\")) x = x - 5;\n  if (x < 0) x = 0;\n  if (x > LARGEUR - 40) x = LARGEUR - 40;\n}\n\nfunction draw() {\n  effacer(\"black\");\n  rect(x, 140, 40, 40, \"blue\");\n}\n"
+    },
+    {
+     "id": "js-rebond",
+     "titre": "La balle qui rebondit",
+     "texte": "<p>Une balle rouge de rayon 12 part de (100, 80) avec une vitesse de 4 pixels par image en x et 3 en y. Quand elle touche un bord, sa vitesse s'inverse dans cette direction : elle rebondit et ne sort jamais de l'écran.<\/p><p><b>Exemple<\/b><\/p><pre><code>if (x &lt; 12 || x &gt; LARGEUR - 12) vx = -vx;<\/code><\/pre>",
+     "depart": "let x = 100, y = 80;\nlet vx = 4, vy = 3;\n\nfunction update(dt) {\n  x = x + vx;\n  // et y ? et les rebonds ?\n}\n\nfunction draw() {\n  effacer(\"black\");\n  cercle(x, y, 12, \"red\");\n}\n",
+     "objectifs": [
+      {
+       "txt": "La balle bouge en diagonale",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 60
+           }
+          ],
+          "test": "const c = P('cercle', 'red');\nconst xs = c.map(v => v[1]), ys = c.map(v => v[2]);\nconst sens = a => a.some((v, i) => i && v > a[i - 1]) && a.some((v, i) => i && v < a[i - 1]);\nreturn xs[10] > xs[0] && ys[10] > ys[0];"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Elle rebondit sur les bords gauche/droite et haut/bas",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 400
+           }
+          ],
+          "test": "const c = P('cercle', 'red');\nconst xs = c.map(v => v[1]), ys = c.map(v => v[2]);\nconst sens = a => a.some((v, i) => i && v > a[i - 1]) && a.some((v, i) => i && v < a[i - 1]);\nreturn sens(xs) && sens(ys);"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Elle ne sort jamais de l'écran",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 400
+           }
+          ],
+          "test": "const c = P('cercle', 'red');\nconst xs = c.map(v => v[1]), ys = c.map(v => v[2]);\nconst sens = a => a.some((v, i) => i && v > a[i - 1]) && a.some((v, i) => i && v < a[i - 1]);\nreturn xs.every(x => x >= 0 && x <= 480) && ys.every(y => y >= 0 && y <= 320);"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Rebondir = changer le signe de la vitesse : <code>vx = -vx<\/code>.",
+     "solution": "let x = 100, y = 80;\nlet vx = 4, vy = 3;\n\nfunction update(dt) {\n  x = x + vx;\n  y = y + vy;\n  if (x < 12 || x > LARGEUR - 12) vx = -vx;\n  if (y < 12 || y > HAUTEUR - 12) vy = -vy;\n}\n\nfunction draw() {\n  effacer(\"black\");\n  cercle(x, y, 12, \"red\");\n}\n"
+    }
+   ]
+  },
+  {
+   "titre": "Mini-jeux",
+   "missions": [
+    {
+     "id": "js-clics",
+     "titre": "Compter les clics",
+     "texte": "<p>Affiche <b>Score : N<\/b> en haut à gauche, où N est le nombre de clics de souris sur le jeu depuis le début. Dessine aussi un petit cercle jaune (rayon 10) qui suit la souris.<\/p><p><b>Exemple<\/b><\/p><pre><code>if (clic()) score = score + 1;\ntexte(&quot;Score : &quot; + score, 16, 16, 28, &quot;white&quot;);<\/code><\/pre>",
+     "depart": "let score = 0;\n\nfunction update(dt) {\n  // if (clic()) …\n}\n\nfunction draw() {\n  effacer(\"black\");\n}\n",
+     "objectifs": [
+      {
+       "txt": "Au départ : <code>Score : 0<\/code>",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 2
+           },
+           {
+            "n": 3,
+            "souris": {
+             "x": 100,
+             "y": 100,
+             "clic": true
+            }
+           },
+           {
+            "n": 3,
+            "souris": {
+             "x": 50,
+             "y": 60,
+             "clic": true
+            }
+           },
+           {
+            "n": 3,
+            "souris": {
+             "x": 200,
+             "y": 150,
+             "clic": true
+            }
+           }
+          ],
+          "test": "return T(F[0], 'texte').some(c => /Score : 0\\b/.test(c[1]));"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Après 3 clics : <code>Score : 3<\/code>",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 2
+           },
+           {
+            "n": 3,
+            "souris": {
+             "x": 100,
+             "y": 100,
+             "clic": true
+            }
+           },
+           {
+            "n": 3,
+            "souris": {
+             "x": 50,
+             "y": 60,
+             "clic": true
+            }
+           },
+           {
+            "n": 3,
+            "souris": {
+             "x": 200,
+             "y": 150,
+             "clic": true
+            }
+           }
+          ],
+          "test": "return T(D, 'texte').some(c => /Score : 3\\b/.test(c[1]));"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Un cercle jaune suit la souris",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 2
+           },
+           {
+            "n": 3,
+            "souris": {
+             "x": 100,
+             "y": 100,
+             "clic": true
+            }
+           },
+           {
+            "n": 3,
+            "souris": {
+             "x": 50,
+             "y": 60,
+             "clic": true
+            }
+           },
+           {
+            "n": 3,
+            "souris": {
+             "x": 200,
+             "y": 150,
+             "clic": true
+            }
+           }
+          ],
+          "test": "return T(D, 'cercle').some(c => c[1] === 200 && c[2] === 150 && c[4] === 'yellow');"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>clic()<\/code> n'est vrai qu'à l'image du clic : parfait pour compter.",
+     "solution": "let score = 0;\n\nfunction update(dt) {\n  if (clic()) score = score + 1;\n}\n\nfunction draw() {\n  effacer(\"black\");\n  texte(\"Score : \" + score, 16, 16, 28, \"white\");\n  cercle(sourisX(), sourisY(), 10, \"yellow\");\n}\n"
+    },
+    {
+     "id": "js-saut",
+     "titre": "Sauter avec la gravité",
+     "texte": "<p>Un joueur (carré bleu 40 × 40 en x = 60) est posé sur un sol vert (rectangle en y = 300). Sa position y (le haut du carré) vaut 260 au sol. Quand on appuie sur <b>espace<\/b> et qu'il est au sol, sa vitesse verticale vy devient −12. À chaque image : vy augmente de 0,6 (la gravité), y augmente de vy, et s'il passe sous le sol on le replace à 260 avec vy = 0. Pas de double saut !<\/p><p><b>Exemple<\/b><\/p><pre><code>if (toucheAppuyee(&quot;espace&quot;) &amp;&amp; y &gt;= 260) vy = -12;<\/code><\/pre>",
+     "depart": "let y = 260, vy = 0;\n\nfunction update(dt) {\n  // saut, gravité, sol\n}\n\nfunction draw() {\n  effacer(\"skyblue\");\n  rect(0, 300, 480, 20, \"green\");\n  rect(60, y, 40, 40, \"blue\");\n}\n",
+     "objectifs": [
+      {
+       "txt": "Un sol vert est dessiné",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 2
+           }
+          ],
+          "test": "return T(D, 'rect').some(c => c[5] === 'green' && c[2] === 300);"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Sans appui, le joueur reste au sol (y = 260)",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 20
+           }
+          ],
+          "test": "const ys = P('rect', 'blue').map(c => c && c[2]);\nreturn ys.every(y => y === 260);"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Espace : il monte puis retombe au sol",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 5
+           },
+           {
+            "n": 1,
+            "p": [
+             "espace"
+            ]
+           },
+           {
+            "n": 70
+           }
+          ],
+          "test": "const ys = P('rect', 'blue').map(c => c && c[2]);\nreturn ys[4] === 260 && Math.min(...ys) < 180 && ys[ys.length - 1] === 260;"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Pas de double saut en l'air",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1,
+            "p": [
+             "espace"
+            ]
+           },
+           {
+            "n": 5
+           },
+           {
+            "n": 1,
+            "p": [
+             "espace"
+            ]
+           },
+           {
+            "n": 50
+           }
+          ],
+          "test": "const ys = P('rect', 'blue').map(c => c && c[2]);\nreturn Math.min(...ys) > 120;"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Au sol = <code>y &gt;= 260<\/code>. Ordre : saut, puis <code>vy += 0.6<\/code>, puis <code>y += vy<\/code>, puis le sol.",
+     "solution": "let y = 260, vy = 0;\n\nfunction update(dt) {\n  if (toucheAppuyee(\"espace\") && y >= 260) vy = -12;\n  vy = vy + 0.6;\n  y = y + vy;\n  if (y > 260) {\n    y = 260;\n    vy = 0;\n  }\n}\n\nfunction draw() {\n  effacer(\"skyblue\");\n  rect(0, 300, 480, 20, \"green\");\n  rect(60, y, 40, 40, \"blue\");\n}\n"
+    },
+    {
+     "id": "js-fruits",
+     "titre": "Attrape les fruits",
+     "texte": "<p>Le vrai mini-jeu ! Une raquette blanche (80 × 12, en y = 290, x de départ 200) se déplace de 6 pixels par image avec les flèches, sans sortir de l'écran. Un fruit (cercle rouge de rayon 10) tombe de 4 pixels par image depuis le haut, à une position x tirée au hasard. S'il touche la raquette, le score augmente de 1 ; dans tous les cas, quand il est attrapé ou qu'il sort en bas, il repart du haut. Affiche <b>Score : N<\/b>.<\/p><p><b>Exemple<\/b><\/p><pre><code>if (fy &gt;= 280 &amp;&amp; fx &gt;= px &amp;&amp; fx &lt;= px + 80) { … }<\/code><\/pre>",
+     "depart": "let px = 200;\nlet fx = hasard(20, 460), fy = 0;\nlet score = 0;\n\nfunction update(dt) {\n  // raquette, chute, collision, score\n}\n\nfunction draw() {\n  effacer(\"black\");\n  rect(px, 290, 80, 12, \"white\");\n  cercle(fx, fy, 10, \"red\");\n  texte(\"Score : \" + score, 16, 16, 24, \"white\");\n}\n",
+     "objectifs": [
+      {
+       "txt": "La raquette se déplace avec les flèches",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1
+           },
+           {
+            "n": 30,
+            "k": [
+             "droite"
+            ]
+           },
+           {
+            "n": 120
+           }
+          ],
+          "test": "const p = P('rect', 'white').map(c => c && c[1]);\nconst f = P('cercle', 'red').map(c => c && c[2]);\nreturn p[0] === 200 && p[30] > p[0];"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Le fruit tombe",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1
+           },
+           {
+            "n": 30,
+            "k": [
+             "droite"
+            ]
+           },
+           {
+            "n": 120
+           }
+          ],
+          "test": "const p = P('rect', 'white').map(c => c && c[1]);\nconst f = P('cercle', 'red').map(c => c && c[2]);\nreturn f[20] > f[0];"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Le fruit repart du haut quand il arrive en bas",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1
+           },
+           {
+            "n": 30,
+            "k": [
+             "droite"
+            ]
+           },
+           {
+            "n": 120
+           }
+          ],
+          "test": "const p = P('rect', 'white').map(c => c && c[1]);\nconst f = P('cercle', 'red').map(c => c && c[2]);\nreturn f.some((v, i) => i && v < f[i - 1] - 100);"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Le score est affiché",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1
+           },
+           {
+            "n": 30,
+            "k": [
+             "droite"
+            ]
+           },
+           {
+            "n": 120
+           }
+          ],
+          "test": "return T(D, 'texte').some(c => /Score : \\d+/.test(c[1]));"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "La raquette ne sort pas de l'écran",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 120,
+            "k": [
+             "droite"
+            ]
+           },
+           {
+            "n": 150,
+            "k": [
+             "gauche"
+            ]
+           }
+          ],
+          "test": "const p = P('rect', 'white').map(c => c && c[1]);\nconst f = P('cercle', 'red').map(c => c && c[2]);\nreturn p.every(x => x >= 0 && x <= 400);"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Collision : le fruit est à hauteur de la raquette (<code>fy<\/code> entre 280 et 300) ET au-dessus d'elle (<code>fx<\/code> entre <code>px<\/code> et <code>px + 80<\/code>).",
+     "solution": "let px = 200;\nlet fx = hasard(20, 460), fy = 0;\nlet score = 0;\n\nfunction nouveauFruit() {\n  fx = hasard(20, 460);\n  fy = 0;\n}\n\nfunction update(dt) {\n  if (touche(\"droite\")) px += 6;\n  if (touche(\"gauche\")) px -= 6;\n  px = Math.max(0, Math.min(LARGEUR - 80, px));\n  fy += 4;\n  if (fy >= 280 && fy <= 300 && fx >= px && fx <= px + 80) {\n    score++;\n    nouveauFruit();\n  } else if (fy > HAUTEUR) {\n    nouveauFruit();\n  }\n}\n\nfunction draw() {\n  effacer(\"black\");\n  rect(px, 290, 80, 12, \"white\");\n  cercle(fx, fy, 10, \"red\");\n  texte(\"Score : \" + score, 16, 16, 24, \"white\");\n}\n"
+    }
+   ]
+  }
+ ],
+ "libre": "// Bac à sable : console ou jeu (si tu écris draw(), le jeu démarre)\nlet x = 240, y = 160, vx = 3, vy = 2;\n\nfunction update(dt) {\n  x += vx; y += vy;\n  if (x < 20 || x > LARGEUR - 20) vx = -vx;\n  if (y < 20 || y > HAUTEUR - 20) vy = -vy;\n}\n\nfunction draw() {\n  effacer(\"#16182b\");\n  cercle(x, y, 20, \"gold\");\n  texte(\"Bac à sable JavaScript\", 12, 12, 18, \"white\");\n}\n",
+ "libreTexte": "<p>Écris ce que tu veux. Si tu définis <code>draw()<\/code>, le jeu démarre ; sinon le programme s'exécute dans la console.<\/p><p class=\"lb-small\">Le jeu appelle <code>update(dt)<\/code> puis <code>draw()<\/code> 60 fois par seconde. Fonctions : <code>effacer(c)<\/code>, <code>rect(x, y, l, h, c)<\/code>, <code>cercle(x, y, r, c)<\/code>, <code>ligne(x1, y1, x2, y2, c)<\/code>, <code>texte(t, x, y, taille, c)<\/code>, <code>touche(\"droite\")<\/code>, <code>toucheAppuyee(\"espace\")<\/code>, <code>clic()<\/code>, <code>sourisX()<\/code>, <code>hasard(a, b)<\/code>, <code>LARGEUR<\/code> (480), <code>HAUTEUR<\/code> (320).<\/p>"
+};
+</script>
+  <script src="../../data/modules.js"></script>
+  <script src="../../assets/app.js"></script>
+  <script src="../../assets/jeu.js"></script>
+  <script src="../../assets/labo-code.js"></script>
+</body>
+</html>
