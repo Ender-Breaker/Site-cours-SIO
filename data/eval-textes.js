@@ -320,5 +320,56 @@ window.EF_EVAL_TEXTES = {
         { n: "obj:m(a) équivaut à obj.m(obj, a)", rx: "equiva|revient|raccourci|pareil|meme chose|identique" },
         { n: "erreur classique si on se trompe", rx: "erreur|nil|number|bug|piege|oubli" }],
       corrige: "<p>Le deux-points est un <b>raccourci</b> : <code>obj:m(a)</code> équivaut à <code>obj.m(obj, a)</code>. Il passe <b>automatiquement</b> l'objet en premier argument, que la méthode reçoit sous le nom <code>self</code>. Appeler une méthode avec un point par erreur donne à <code>self</code> une mauvaise valeur : c'est le piège classique.</p>" }
+  ],
+  "cpp": [
+    { q: "Explique la différence entre le passage par valeur, par référence et par référence constante en C++.",
+      notions: [
+        { n: "par valeur : la fonction reçoit une copie", rx: "copie" },
+        { n: "par référence (&) : la fonction modifie l'original", rx: "original|modifi|meme variable|directement" },
+        { n: "const & : pas de copie et pas de modification", rx: "const" },
+        { n: "const & pour les gros objets (string, vector)", rx: "gros|string|vector|objet|cout|performan|rapide|lourd" }],
+      corrige: "<p><b>Par valeur</b> (<code>int n</code>) : la fonction travaille sur une <b>copie</b>. <b>Par référence</b> (<code>int&amp; n</code>) : elle agit sur la variable <b>d'origine</b> et peut la modifier. <b>Par référence constante</b> (<code>const string&amp; s</code>) : ni copie ni modification ; c'est la forme à utiliser pour les objets volumineux (string, vector).</p>" },
+    { q: "Qu'est-ce qu'un pointeur ? Explique <code>&amp;</code>, <code>*</code> et <code>nullptr</code>.",
+      notions: [
+        { n: "un pointeur contient une adresse mémoire", rx: "adresse" },
+        { n: "& donne l'adresse d'une variable", rx: "&|esperluette|adresse de" },
+        { n: "* donne la valeur pointée (déréférencement)", rx: "valeur|dereferenc|contenu|pointe" },
+        { n: "nullptr : ne pointe sur rien, à tester avant usage", rx: "nullptr|nul|rien" }],
+      corrige: "<p>Un pointeur est une variable qui contient l'<b>adresse</b> d'une autre. <code>&amp;x</code> donne l'adresse de <code>x</code> ; <code>*p</code> donne la <b>valeur</b> à l'adresse contenue dans <code>p</code> (déréférencement). <code>nullptr</code> est le pointeur qui ne pointe sur <b>rien</b> : il faut tester un pointeur avant de le déréférencer.</p>" },
+    { q: "Quelle est la différence entre la pile et le tas ? Qu'est-ce qu'une fuite de mémoire ?",
+      notions: [
+        { n: "pile : variables locales, libération automatique", rx: "pile|stack|local|automatique" },
+        { n: "tas : mémoire réservée avec new", rx: "tas|heap|new|dynamique" },
+        { n: "libération manuelle avec delete", rx: "delete|liber" },
+        { n: "fuite : mémoire réservée jamais libérée", rx: "fuite|jamais liber|oubli|perdu|non liber" }],
+      corrige: "<p>La <b>pile</b> contient les variables locales : elles sont libérées <b>automatiquement</b> à la fin de leur bloc. Le <b>tas</b> contient ce qu'on réserve avec <code>new</code> et qu'on doit libérer avec <code>delete</code>. Une <b>fuite de mémoire</b> est une zone réservée qui n'est jamais libérée. Les pointeurs intelligents évitent ce problème.</p>" },
+    { q: "Qu'est-ce que l'encapsulation ? Quel est le rôle du constructeur et du mot-clé <code>private</code> ?",
+      notions: [
+        { n: "regrouper données et méthodes dans une classe", rx: "classe|methode|attribut|regroup" },
+        { n: "private : inaccessible de l'extérieur", rx: "private|prive|exterieur|cach|inaccessible|proteg" },
+        { n: "on passe par des méthodes publiques qui gardent l'objet cohérent", rx: "public|accesseur|getter|coheren|valide|control|verifi" },
+        { n: "le constructeur initialise l'objet à sa création", rx: "constructeur|initialis|creation" }],
+      corrige: "<p>L'encapsulation consiste à regrouper données et <b>méthodes</b> dans une classe et à rendre les données <b>privées</b> (<code>private</code>) : on ne peut les modifier que par des méthodes <b>publiques</b>, qui garantissent un état cohérent. Le <b>constructeur</b>, appelé automatiquement à la création, initialise les attributs.</p>" },
+    { q: "Explique le polymorphisme en C++ : à quoi servent <code>virtual</code>, <code>override</code> et une classe abstraite ?",
+      notions: [
+        { n: "héritage : une classe fille redéfinit une méthode de la mère", rx: "herit|fille|derive|mere|base|redefini" },
+        { n: "virtual : la méthode appelée dépend du type réel de l'objet", rx: "virtual|virtuel|type reel|reel|dynami" },
+        { n: "override : redéfinition vérifiée par le compilateur", rx: "override|verifi|compilateur" },
+        { n: "classe abstraite : méthode virtuelle pure, non instanciable", rx: "abstrait|pure|= ?0|instanci|interface" }],
+      corrige: "<p>Une classe fille peut <b>redéfinir</b> une méthode de sa classe mère. Si la méthode est <code>virtual</code>, c'est la version de la <b>classe réelle</b> de l'objet qui est appelée, même à travers un pointeur ou une référence de la mère. <code>override</code> fait vérifier la redéfinition par le compilateur. Une méthode <code>= 0</code> est virtuelle pure : la classe est <b>abstraite</b>, non instanciable.</p>" },
+    { q: "Qu'est-ce que le principe RAII ? Quel est le lien avec <code>unique_ptr</code> ?",
+      notions: [
+        { n: "ressource acquise dans le constructeur", rx: "constructeur|acqui|creation|initialis" },
+        { n: "libérée dans le destructeur", rx: "destructeur|liber|detrui" },
+        { n: "automatiquement, à la fin du bloc", rx: "automatique|fin du bloc|portee|sort" },
+        { n: "unique_ptr : un seul propriétaire, plus de delete", rx: "unique_ptr|proprietaire|delete|make_unique|intelligent" }],
+      corrige: "<p>RAII : une ressource est <b>acquise dans le constructeur</b> et <b>libérée dans le destructeur</b>. Comme le destructeur d'une variable locale est appelé <b>automatiquement</b> à la fin du bloc, rien ne fuit. <code>unique_ptr</code> applique ce principe à la mémoire du tas : il possède l'objet, le détruit tout seul, et rend <code>delete</code> inutile.</p>" },
+    { q: "À quoi sert un template ? Donne un exemple.",
+      notions: [
+        { n: "écrire un code valable pour plusieurs types", rx: "plusieurs types|n'importe quel type|generique|tout type|different" },
+        { n: "le type est un paramètre (typename T)", rx: "typename|parametre|\\bt\\b|<" },
+        { n: "le compilateur génère une version par type", rx: "compilateur|compilation|genere|instanci" },
+        { n: "un exemple : maxi, vector, map, Pile…", rx: "vector|map|max|pile|somme|unique_ptr|echang" }],
+      corrige: "<p>Un template permet d'écrire une fonction ou une classe <b>valable pour plusieurs types</b> : le type est un <b>paramètre</b> (<code>template &lt;typename T&gt;</code>). Le <b>compilateur</b> génère une version pour chaque type utilisé. Exemples : <code>T maxi(T a, T b)</code>, ou les conteneurs <code>vector&lt;int&gt;</code> et <code>map&lt;string, int&gt;</code>.</p>" }
   ]
 };

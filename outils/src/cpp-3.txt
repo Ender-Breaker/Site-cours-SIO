@@ -1,0 +1,855 @@
+=== cpp-stl | C++ : la STL, conteneurs, algorithmes et lambdas | d
+La **STL** (*Standard Template Library*) est la boîte à outils du C++ : des **conteneurs** pour ranger les données, des **algorithmes** pour les traiter, et des **itérateurs** pour relier les deux. La connaître évite de réécrire (mal) ce qui existe déjà.
+
+## 1. `map` : le dictionnaire
+
+`map<Clé, Valeur>` associe une valeur à chaque clé, et garde les clés **triées**.
+
+```run h=iostream,map,string main
+map<string, int> stock;
+stock["souris"] = 3;
+stock["clavier"] = 2;
+stock["souris"] += 5;                       // modifie
+stock["ecran"]++;                           // clé absente : créée avec la valeur 0, puis +1
+cout << stock["souris"] << " " << stock.size() << endl;
+
+for (const auto& [nom, quantite] : stock) {     // parcours dans l'ordre des clés
+    cout << nom << " : " << quantite << endl;
+}
+if (stock.count("webcam") == 0) cout << "pas de webcam" << endl;
+if (stock.contains("clavier")) cout << "clavier présent" << endl;     // C++20
+stock.erase("clavier");
+cout << stock.size() << endl;
+```
+
+!attention `m[cle]` crée la clé | Lire `stock["webcam"]` **ajoute** la clé avec la valeur 0 si elle n'existe pas. Pour tester la présence sans rien créer, utilise `count`, `contains` ou `find`.
+
+## 2. `set`, `unordered_map`, `pair`
+
+```run h=iostream,set,unordered_map,string,utility main
+set<int> vus = {5, 2, 5, 8, 2};             // ensemble : pas de doublon, trié
+vus.insert(1);
+for (int v : vus) cout << v << " ";
+cout << "(" << vus.size() << " valeurs)" << endl;
+
+unordered_map<string, double> prix;         // table de hachage : accès très rapide, pas d'ordre
+prix["souris"] = 19.9;
+cout << prix["souris"] << endl;
+
+pair<string, int> p = {"Léa", 17};          // deux valeurs réunies
+cout << p.first << " " << p.second << endl;
+auto [nom, age] = p;                        // décomposition (C++17)
+cout << nom << " a " << age << " ans" << endl;
+```
+
+| Conteneur | Contenu | Particularité |
+| `vector<T>` | suite d'éléments | accès par indice, le choix par défaut |
+| `map<K, V>` | clé → valeur | clés triées |
+| `unordered_map<K, V>` | clé → valeur | plus rapide, sans ordre |
+| `set<T>` | valeurs uniques | triées |
+| `pair<A, B>` | deux valeurs | `.first`, `.second` |
+| `deque`, `list`, `stack`, `queue` | variantes | file, pile, liste chaînée |
+
+## 3. Les lambdas : des fonctions écrites sur place
+
+```run h=iostream main
+auto carre = [](int x) { return x * x; };          // [] capture, () paramètres, {} corps
+cout << carre(7) << endl;
+
+int seuil = 10;
+auto auDessus = [seuil](int x) { return x > seuil; };   // capture seuil par copie
+cout << auDessus(15) << " " << auDessus(3) << endl;
+
+int total = 0;
+auto ajouter = [&total](int x) { total += x; };         // capture par référence : peut modifier
+ajouter(5);
+ajouter(7);
+cout << total << endl;
+```
+
+| Capture | Signifie |
+| `[]` | rien |
+| `[x]` | une copie de x |
+| `[&x]` | x par référence |
+| `[=]` | tout ce qui est utilisé, par copie |
+| `[&]` | tout ce qui est utilisé, par référence |
+
+## 4. Les algorithmes
+
+Ils travaillent sur un intervalle `[begin, end)` et prennent souvent une lambda.
+
+```run h=iostream,vector,algorithm,numeric main
+vector<int> v = {12, 5, 19, 8, 10};
+
+sort(v.begin(), v.end());                                         // croissant
+sort(v.begin(), v.end(), [](int a, int b) { return a > b; });     // décroissant
+for (int x : v) cout << x << " ";
+cout << endl;
+
+cout << count_if(v.begin(), v.end(), [](int x) { return x >= 10; }) << " notes >= 10" << endl;
+cout << accumulate(v.begin(), v.end(), 0) << endl;                // somme (<numeric>)
+cout << *max_element(v.begin(), v.end()) << " " << *min_element(v.begin(), v.end()) << endl;
+
+auto it = find(v.begin(), v.end(), 19);                           // renvoie un itérateur
+if (it != v.end()) cout << "19 trouvé à l'indice " << it - v.begin() << endl;
+cout << any_of(v.begin(), v.end(), [](int x) { return x < 6; }) << endl;
+cout << all_of(v.begin(), v.end(), [](int x) { return x > 0; }) << endl;
+```
+
+### Transformer et filtrer
+
+```run h=iostream,vector,algorithm main
+vector<int> v = {1, 2, 3, 4, 5, 6};
+
+vector<int> doubles(v.size());
+transform(v.begin(), v.end(), doubles.begin(), [](int x) { return x * 2; });
+
+vector<int> pairs;
+copy_if(v.begin(), v.end(), back_inserter(pairs), [](int x) { return x % 2 == 0; });
+
+v.erase(remove_if(v.begin(), v.end(), [](int x) { return x > 4; }), v.end());   // supprime selon un critère
+
+for (int x : doubles) cout << x << " ";
+cout << "| ";
+for (int x : pairs) cout << x << " ";
+cout << "| ";
+for (int x : v) cout << x << " ";
+cout << endl;
+```
+
+## 5. Trier des objets
+
+```run h=iostream,vector,algorithm,string main
+struct Eleve {
+    string nom;
+    double note;
+};
+@@
+vector<Eleve> classe = {{"Léa", 15}, {"Sam", 9}, {"Zoé", 18}};
+sort(classe.begin(), classe.end(), [](const Eleve& a, const Eleve& b) {
+    return a.note > b.note;                  // vrai si a doit passer avant b
+});
+for (const Eleve& e : classe) cout << e.nom << " " << e.note << endl;
+```
+
+!tuto Compter les mots d'un texte
+# Découper le texte en mots
+`cin >> mot` lit un mot à la fois et renvoie faux quand il n'y a plus rien à lire.
+```run stdin=le~chat~et~le~chien~et~le~lapin h=iostream,string,vector main
+vector<string> mots;
+string mot;
+while (cin >> mot) mots.push_back(mot);
+cout << mots.size() << " mots" << endl;
+```
+# Compter avec une map
+`compte[mot]++` suffit : une clé absente démarre à 0.
+```run stdin=le~chat~et~le~chien~et~le~lapin h=iostream,string,map main
+map<string, int> compte;
+string mot;
+while (cin >> mot) compte[mot]++;
+for (const auto& [m, n] : compte) cout << m << " : " << n << endl;
+```
+# Classer par fréquence
+Une map est triée par clé. Pour trier par valeur, on copie les paires dans un vector.
+```run stdin=le~chat~et~le~chien~et~le~lapin h=iostream,string,map,vector,algorithm main
+map<string, int> compte;
+string mot;
+while (cin >> mot) compte[mot]++;
+vector<pair<string, int>> liste(compte.begin(), compte.end());
+sort(liste.begin(), liste.end(), [](const auto& a, const auto& b) { return a.second > b.second; });
+for (const auto& [m, n] : liste) cout << n << " x " << m << endl;
+```
+!fin
+
+!defi Défi : l'inventaire | Une `map` fait presque tout le travail. | cpp-inventaire
+!defi Défi : supprimer les doublons | Un `set` pour savoir ce qu'on a déjà vu. | cpp-doublons
+!defi Défi : une lambda | Compte selon un critère avec `count_if`. | cpp-lambda
+
+!retenir À retenir | `map<K, V>` : dictionnaire trié ; `m[cle]` crée la clé si elle manque. ¶ `set<T>` : valeurs uniques. ¶ Lambda : `[capture](paramètres) { corps }`. ¶ Algorithmes sur `v.begin(), v.end()` : `sort`, `find`, `count_if`, `accumulate`, `transform`, `remove_if`. ¶ Trier des objets : `sort` avec une lambda de comparaison.
+--- exos
+Q¤m¤Quel conteneur associe une valeur à une clé en gardant les clés triées ?¤`map`;;`vector`;;`set`;;`array`¤
+Q¤m¤Quel conteneur ne garde que des valeurs uniques ?¤`set`;;`vector`;;`map`;;`pair`¤
+Q¤d¤Que fait la lecture `stock["webcam"]` si la clé n'existe pas dans la map ?¤Elle crée la clé avec la valeur par défaut (0);;Elle provoque une erreur;;Elle renvoie nullptr;;Elle ne fait rien¤
+Q¤m¤Comment tester la présence d'une clé sans la créer ?¤`m.count(cle)` ou `m.contains(cle)`;;`m[cle] != 0`;;`m.has(cle)`;;`cle in m`¤
+Q¤m¤Comment accéder aux deux valeurs d'un `pair` p ?¤`p.first` et `p.second`;;`p[0]` et `p[1]`;;`p.a` et `p.b`;;`p.left` et `p.right`¤
+Q¤m¤Dans la lambda `[seuil](int x) { return x > seuil; }`, que signifie `[seuil]` ?¤seuil est capturé par copie;;seuil est un paramètre;;seuil est le type de retour;;seuil est un tableau¤
+Q¤m¤Quelle capture permet à la lambda de modifier la variable total ?¤`[&total]`;;`[total]`;;`[=]`;;`[]`¤
+Q¤m¤Quel algorithme compte les éléments qui vérifient une condition ?¤`count_if`;;`find`;;`accumulate`;;`sort`¤
+Q¤m¤Quel algorithme calcule la somme des éléments ?¤`accumulate`;;`sum`;;`count`;;`total`¤Il est dans `<numeric>`.
+Q¤d¤Que renvoie `find(v.begin(), v.end(), x)` si x est absent ?¤`v.end()`;;-1;;`nullptr`;;Une exception¤
+Q¤d¤Pour trier en ordre décroissant, quelle lambda donner à sort ?¤`[](int a, int b) { return a > b; }`;;`[](int a, int b) { return a < b; }`;;`[](int a) { return -a; }`;;`[] { return false; }`¤
+Q¤m¤Quelle est la différence entre map et unordered_map ?¤unordered_map est plus rapide mais ne trie pas les clés;;unordered_map accepte les doublons;;map n'accepte que des int;;Aucune¤
+Q¤d¤Que fait `v.erase(remove_if(v.begin(), v.end(), test), v.end());` ?¤Supprime tous les éléments pour lesquels test est vrai;;Trie le vector;;Supprime le premier élément;;Vide le vector¤
+Q¤d¤Que permet `for (const auto& [nom, qte] : stock)` ?¤De parcourir une map en nommant directement la clé et la valeur;;De trier la map;;De copier la map;;De supprimer les éléments¤
+V¤m¤Une map peut contenir deux fois la même clé.¤F¤Chaque clé est unique.
+V¤m¤Les éléments d'un set sont automatiquement triés.¤V¤
+V¤d¤Une lambda `[]` (capture vide) peut utiliser les variables locales de la fonction qui la contient.¤F¤Il faut les capturer.
+S¤m¤Quelle bibliothèque contient sort, find et count_if ?¤algorithm;;<algorithm>¤
+A¤m¤Associe chaque algorithme à son rôle.¤`sort`=>trier;;`find`=>chercher une valeur;;`transform`=>appliquer une fonction à chaque élément;;`accumulate`=>additionner¤
+
+=== cpp-templates | C++ : templates et surcharge d'opérateurs | d
+## 1. Le problème : le même code pour plusieurs types
+
+Écrire `maxi` pour les `int`, puis pour les `double`, puis pour les `string`, c'est trois fois le même code. Un **template** est un modèle de fonction dont le type est un **paramètre**.
+
+```run h=iostream,string main
+template <typename T>
+T maxi(T a, T b) {
+    return a > b ? a : b;
+}
+@@
+cout << maxi(3, 8) << endl;                          // T = int, déduit
+cout << maxi(2.5, 1.5) << endl;                      // T = double
+cout << maxi(string("abc"), string("abd")) << endl;  // T = string
+cout << maxi<double>(3, 2.5) << endl;                // T imposé : sinon ambigu (int et double)
+```
+
+Le compilateur fabrique une version de la fonction **pour chaque type utilisé**. Il n'y a aucun coût à l'exécution.
+
+## 2. Templates et conteneurs
+
+```run h=iostream,vector,string main
+template <typename T>
+void afficher(const vector<T>& v) {
+    for (const T& x : v) cout << x << " ";
+    cout << endl;
+}
+
+template <typename T>
+T somme(const vector<T>& v) {
+    T total = T();                 // valeur par défaut du type : 0, 0.0, ""
+    for (const T& x : v) total += x;
+    return total;
+}
+@@
+afficher(vector<int>{1, 2, 3});
+afficher(vector<string>{"a", "b"});
+cout << somme(vector<double>{1.5, 2.5}) << " " << somme(vector<string>{"ab", "cd"}) << endl;
+```
+
+## 3. Classes template
+
+`vector<int>`, `map<string, int>`, `unique_ptr<Forme>` sont des classes template. On peut écrire les siennes :
+
+```run h=iostream,vector,string main
+template <typename T>
+class Pile {
+    vector<T> elements;
+public:
+    void empiler(const T& x) { elements.push_back(x); }
+    T depiler() {
+        T haut = elements.back();
+        elements.pop_back();
+        return haut;
+    }
+    bool vide() const { return elements.empty(); }
+    size_t taille() const { return elements.size(); }
+};
+@@
+Pile<int> p;
+p.empiler(1); p.empiler(2); p.empiler(3);
+cout << p.depiler() << " " << p.depiler() << " " << p.taille() << endl;
+
+Pile<string> mots;
+mots.empiler("monde"); mots.empiler("bonjour");
+while (!mots.vide()) cout << mots.depiler() << " ";
+cout << endl;
+```
+
+!attention Les messages d'erreur des templates | Une erreur dans l'utilisation d'un template produit souvent des dizaines de lignes. Remonte toujours à la **première** erreur : elle dit quel type a été utilisé et quelle opération lui manque.
+
+## 4. Surcharger les opérateurs
+
+On peut donner un sens à `+`, `==`, `<`, `<<`… pour ses propres classes. Un opérateur n'est qu'une fonction au nom spécial.
+
+```run h=iostream main
+struct Vec {
+    double x, y;
+
+    Vec operator+(const Vec& o) const { return {x + o.x, y + o.y}; }
+    Vec operator*(double k) const { return {x * k, y * k}; }
+    bool operator==(const Vec& o) const { return x == o.x && y == o.y; }
+    Vec& operator+=(const Vec& o) { x += o.x; y += o.y; return *this; }
+};
+
+ostream& operator<<(ostream& flux, const Vec& v) {      // pour cout << v
+    return flux << "(" << v.x << ", " << v.y << ")";
+}
+@@
+Vec a{1, 2}, b{3, 4};
+cout << a + b << endl;
+cout << a * 10 << endl;
+cout << (a == Vec{1, 2}) << endl;
+a += b;
+cout << a << endl;
+```
+
+`operator<<` est une fonction **hors de la classe** : son opérande de gauche est le flux (`cout`), pas l'objet. Elle renvoie le flux pour permettre d'enchaîner `cout << a << b`.
+
+## 5. Rendre une classe triable
+
+`sort`, `set` et `map` ont besoin de savoir comparer : il suffit de définir `operator<`.
+
+```run h=iostream,vector,algorithm,string,set main
+struct Version {
+    int majeur, mineur;
+    bool operator<(const Version& o) const {
+        if (majeur != o.majeur) return majeur < o.majeur;
+        return mineur < o.mineur;
+    }
+};
+ostream& operator<<(ostream& f, const Version& v) { return f << v.majeur << "." << v.mineur; }
+@@
+vector<Version> v = {{2, 1}, {1, 9}, {2, 0}, {1, 10}};
+sort(v.begin(), v.end());                 // utilise operator<
+for (const Version& x : v) cout << x << " ";
+cout << endl;
+set<Version> uniques(v.begin(), v.end());
+cout << uniques.size() << " " << *uniques.rbegin() << endl;     // la plus grande
+```
+
+!tuto Une fraction qui se comporte comme un nombre
+# La structure et l'affichage
+```run h=iostream main
+struct Fraction {
+    int num, den;
+};
+ostream& operator<<(ostream& f, const Fraction& q) { return f << q.num << "/" << q.den; }
+@@
+Fraction a{1, 2};
+cout << a << endl;
+```
+# L'addition
+a/b + c/d = (ad + cb) / bd.
+```run h=iostream main
+struct Fraction {
+    int num, den;
+    Fraction operator+(const Fraction& o) const {
+        return {num * o.den + o.num * den, den * o.den};
+    }
+};
+ostream& operator<<(ostream& f, const Fraction& q) { return f << q.num << "/" << q.den; }
+@@
+cout << Fraction{1, 2} + Fraction{1, 3} << endl;
+```
+# Simplifier avec le PGCD
+Le constructeur garantit qu'une fraction est toujours simplifiée : c'est un *invariant* de la classe. Ajoute la multiplication.
+```run h=iostream,numeric main
+struct Fraction {
+    int num, den;
+    Fraction(int n, int d) : num(n / gcd(n, d)), den(d / gcd(n, d)) {}      // gcd : <numeric>
+    Fraction operator+(const Fraction& o) const {
+        return Fraction(num * o.den + o.num * den, den * o.den);
+    }
+    bool operator==(const Fraction& o) const { return num == o.num && den == o.den; }
+};
+ostream& operator<<(ostream& f, const Fraction& q) { return f << q.num << "/" << q.den; }
+@@
+cout << Fraction(1, 2) + Fraction(1, 6) << endl;             // 2/3
+cout << (Fraction(2, 4) == Fraction(1, 2)) << endl;          // 1
+```
+!fin
+
+!defi Défi : une fonction template | Une seule fonction pour tous les types. | cpp-template
+!defi Défi : des vecteurs | Surcharge `+` et `<<`. | cpp-vecteur
+
+!retenir À retenir | `template <typename T>` avant une fonction ou une classe : T est un type choisi à l'utilisation. ¶ Le compilateur génère une version par type utilisé. ¶ `T operator+(const T& o) const` surcharge `+` ; `operator==`, `operator<` de même. ¶ `ostream& operator<<(ostream& f, const T& x)` se définit hors de la classe et renvoie le flux. ¶ `operator<` rend une classe utilisable par `sort`, `set` et `map`.
+--- exos
+Q¤m¤À quoi sert un template ?¤À écrire une fonction ou une classe valable pour plusieurs types;;À accélérer l'exécution;;À cacher des attributs;;À créer un fichier modèle¤
+Q¤m¤Quelle ligne précède une fonction template ?¤`template <typename T>`;;`generic <T>`;;`<T> function`;;`typedef T`¤
+Q¤m¤Dans `maxi(3, 8)`, comment le compilateur connaît-il T ?¤Il le déduit des arguments;;Il faut toujours l'écrire;;T vaut int par défaut;;Il le lit dans un fichier¤
+Q¤d¤Pourquoi `maxi(3, 2.5)` ne compile-t-il pas avec `T maxi(T a, T b)` ?¤T ne peut pas être à la fois int et double;;maxi n'accepte que des entiers;;Il manque un point-virgule;;2.5 n'est pas un nombre valide¤On écrit alors `maxi<double>(3, 2.5)`.
+Q¤m¤`vector<int>` est…¤une classe template instanciée avec int;;un mot-clé du langage;;un tableau C;;une fonction¤
+Q¤d¤Quand le compilateur génère-t-il le code d'un template ?¤À la compilation, pour chaque type utilisé;;À l'exécution;;Jamais;;Une seule fois pour tous les types¤
+Q¤m¤Comment s'appelle la fonction qui définit `a + b` pour une classe ?¤`operator+`;;`add`;;`plus`;;`__add__`¤
+Q¤d¤Pourquoi `operator<<` pour cout se définit-il hors de la classe ?¤Parce que son opérande de gauche est le flux, pas l'objet;;Parce que c'est interdit dans une classe;;Pour aller plus vite;;Parce qu'il est privé¤
+Q¤d¤Que doit renvoyer `operator<<` ?¤Le flux, pour pouvoir enchaîner les <<;;L'objet affiché;;`void`;;Un booléen¤
+Q¤m¤Quel opérateur faut-il définir pour utiliser sort sur ses propres objets ?¤`operator<`;;`operator==`;;`operator+`;;`operator[]`¤
+Q¤d¤Que renvoie en général `operator+=` ?¤Une référence vers l'objet lui-même (`*this`);;Une copie;;`void`;;Un booléen¤
+Q¤m¤Que vaut `T()` quand T est int ?¤0;;Une valeur indéterminée;;1;;Une erreur¤C'est la valeur par défaut du type.
+V¤m¤Un template ralentit le programme à l'exécution.¤F¤Tout est résolu à la compilation.
+V¤m¤On peut surcharger `==` pour comparer deux objets de sa classe.¤V¤
+V¤d¤On peut créer de nouveaux opérateurs, par exemple `**`.¤F¤On ne peut surcharger que les opérateurs existants.
+V¤m¤Une classe template peut avoir plusieurs paramètres de type, comme `map<K, V>`.¤V¤
+S¤m¤Quel mot-clé introduit un paramètre de type dans un template (avec ou à la place de class) ?¤typename¤
+A¤m¤Associe chaque opérateur à sa signature habituelle.¤`+`=>renvoie un nouvel objet;;`==`=>renvoie un bool;;`+=`=>renvoie `*this`;;`<<`=>renvoie le flux¤
+
+=== cpp-projets | C++ : exceptions, fichiers et organisation d'un projet | m
+Ce chapitre couvre ce qui transforme un exercice en vrai programme : gérer les erreurs, lire et écrire des fichiers, découper le code en plusieurs fichiers.
+
+!info Dans le navigateur | Le compilateur du site tourne sans disque et sans gestion des exceptions : les exemples d'exceptions et de fichiers de ce chapitre ne sont pas exécutables ici. Ils fonctionnent tels quels sur ton ordinateur avec `g++`.
+
+## 1. Les exceptions
+
+Une **exception** signale une erreur en interrompant le déroulement normal. Elle remonte d'appel en appel jusqu'à un bloc `catch` capable de la traiter.
+
+```
+#include <iostream>
+#include <stdexcept>
+using namespace std;
+
+double diviser(double a, double b) {
+    if (b == 0) throw invalid_argument("division par zéro");     // lève l'exception
+    return a / b;
+}
+
+int main() {
+    try {
+        cout << diviser(10, 2) << endl;
+        cout << diviser(1, 0) << endl;        // lève : la suite du bloc try est sautée
+        cout << "jamais affiché" << endl;
+    } catch (const invalid_argument& e) {     // attrape par référence constante
+        cout << "Erreur : " << e.what() << endl;
+    } catch (const exception& e) {            // toute autre exception standard
+        cout << "Erreur inattendue : " << e.what() << endl;
+    }
+    cout << "le programme continue" << endl;
+}
+```
+
+| Exception standard | Usage |
+| `invalid_argument` | argument incorrect |
+| `out_of_range` | indice hors bornes (`v.at(i)`, `stoi`) |
+| `runtime_error` | erreur détectée à l'exécution |
+| `logic_error` | erreur de logique du programme |
+| `bad_alloc` | plus de mémoire (`new`) |
+
+Toutes dérivent de `std::exception` et ont une méthode `what()`. On crée la sienne en héritant de l'une d'elles :
+
+```
+class SoldeInsuffisant : public runtime_error {
+public:
+    SoldeInsuffisant() : runtime_error("solde insuffisant") {}
+};
+```
+
+Grâce à RAII, les destructeurs des objets locaux sont appelés pendant la remontée de l'exception : rien ne fuit. Sans exceptions, on signale une erreur par une **valeur de retour**, comme dans cet exemple exécutable :
+
+```run h=iostream,optional,string main
+optional<double> diviser(double a, double b) {        // optional : une valeur, ou rien
+    if (b == 0) return nullopt;
+    return a / b;
+}
+@@
+for (double b : {2.0, 0.0}) {
+    optional<double> r = diviser(10, b);
+    if (r) cout << "Résultat : " << *r << endl;
+    else cout << "Erreur : division par zéro" << endl;
+}
+```
+
+## 2. Lire et écrire des fichiers
+
+La bibliothèque `<fstream>` fournit `ofstream` (écriture) et `ifstream` (lecture). Ils s'utilisent exactement comme `cout` et `cin`.
+
+```
+#include <fstream>
+#include <iostream>
+#include <string>
+using namespace std;
+
+int main() {
+    ofstream sortie("scores.txt");               // crée ou écrase le fichier
+    if (!sortie) { cerr << "Impossible d'ouvrir le fichier" << endl; return 1; }
+    sortie << "Léa 120" << endl;
+    sortie << "Sam 95" << endl;
+    sortie.close();                              // facultatif : fermé par le destructeur (RAII)
+
+    ifstream entree("scores.txt");
+    string nom;
+    int score;
+    while (entree >> nom >> score) {             // lit tant qu'il y a des données
+        cout << nom << " a " << score << " points" << endl;
+    }
+
+    ifstream lignes("scores.txt");
+    string ligne;
+    while (getline(lignes, ligne)) cout << ligne << endl;     // ligne par ligne
+
+    ofstream ajout("scores.txt", ios::app);      // ios::app : ajoute à la fin
+    ajout << "Zoé 150" << endl;
+}
+```
+
+`cerr` est la sortie d'erreur ; `return 1` dans `main` signale au système que le programme a échoué. Pour découper une ligne, `stringstream` transforme une chaîne en flux, et celui-ci est exécutable :
+
+```run h=iostream,sstream,string main
+string ligne = "Léa 120 15.5";
+stringstream flux(ligne);
+string nom;
+int score;
+double note;
+flux >> nom >> score >> note;
+cout << nom << " | " << score + 1 << " | " << note * 2 << endl;
+```
+
+## 3. Plusieurs fichiers : `.h` et `.cpp`
+
+Un vrai projet sépare la **déclaration** (ce qui existe : fichier d'en-tête `.h`) de la **définition** (le code : fichier `.cpp`).
+
+```
+// ---------- compte.h : la déclaration ----------
+#pragma once                       // empêche d'inclure deux fois le même en-tête
+#include <string>
+
+class Compte {
+    std::string titulaire;         // jamais de « using namespace std » dans un .h
+    double solde;
+public:
+    Compte(const std::string& t, double s);
+    void deposer(double montant);
+    double getSolde() const;
+};
+```
+
+```
+// ---------- compte.cpp : la définition ----------
+#include "compte.h"                // guillemets : fichier du projet
+
+Compte::Compte(const std::string& t, double s) : titulaire(t), solde(s) {}
+void Compte::deposer(double montant) { solde += montant; }      // Compte:: = « de la classe Compte »
+double Compte::getSolde() const { return solde; }
+```
+
+```
+// ---------- main.cpp ----------
+#include <iostream>
+#include "compte.h"
+
+int main() {
+    Compte c("Léa", 100);
+    c.deposer(50);
+    std::cout << c.getSolde() << std::endl;
+}
+```
+
+```
+g++ -Wall -std=c++20 main.cpp compte.cpp -o banque
+```
+
+La construction se fait en deux temps : la **compilation** transforme chaque `.cpp` en fichier objet `.o`, puis l'**édition de liens** (*link*) les assemble. D'où deux familles d'erreurs : `error: …` (compilation) et `undefined reference to …` (édition de liens : la fonction est déclarée mais sa définition n'a pas été fournie).
+
+## 4. Les espaces de noms
+
+Un `namespace` regroupe des noms pour éviter les collisions : c'est ce qu'est `std`.
+
+```run h=iostream main
+namespace geometrie {
+    const double PI = 3.14159;
+    double aireCercle(double r) { return PI * r * r; }
+}
+namespace finance {
+    double aireCercle(double) { return 0; }       // même nom, aucun conflit
+}
+@@
+cout << geometrie::aireCercle(1) << endl;
+using geometrie::PI;                              // n'importe qu'un nom
+cout << PI << endl;
+```
+
+## 5. Automatiser la construction
+
+Dès qu'il y a plusieurs fichiers, on ne tape plus la commande à la main. **CMake** est l'outil le plus répandu :
+
+```
+# CMakeLists.txt
+cmake_minimum_required(VERSION 3.16)
+project(Banque CXX)
+set(CMAKE_CXX_STANDARD 20)
+add_executable(banque main.cpp compte.cpp)
+```
+
+```
+cmake -B build          # prépare
+cmake --build build     # compile seulement ce qui a changé
+./build/banque
+```
+
+## 6. Lire les erreurs du compilateur
+
+| Message | Cause habituelle |
+| `expected ';'` | point-virgule oublié, souvent à la ligne **précédente** |
+| `'x' was not declared in this scope` | faute de frappe, `#include` manquant, variable hors de portée |
+| `no matching function for call to` | mauvais nombre ou mauvais type d'arguments |
+| `invalid conversion` / `cannot convert` | types incompatibles |
+| `undefined reference to` | définition absente à l'édition de liens (fichier `.cpp` oublié) |
+| `segmentation fault` (à l'exécution) | pointeur nul ou indice hors bornes |
+
+Compile toujours avec `-Wall -Wextra` : les avertissements signalent de vrais bugs (variable non initialisée, `=` au lieu de `==`).
+
+!tuto Découper un programme en modules
+# Tout dans un seul fichier
+```run h=iostream main
+double tva(double ht) { return ht * 0.2; }
+double ttc(double ht) { return ht + tva(ht); }
+@@
+cout << ttc(100) << endl;
+```
+# Ranger dans un espace de noms
+Dans un projet, ce bloc deviendrait `facture.h` (les deux déclarations) et `facture.cpp` (les deux définitions).
+```run h=iostream main
+namespace facture {
+    double tva(double ht);                 // déclarations : le contenu du futur .h
+    double ttc(double ht);
+}
+namespace facture {
+    double tva(double ht) { return ht * 0.2; }      // définitions : le contenu du futur .cpp
+    double ttc(double ht) { return ht + tva(ht); }
+}
+@@
+cout << facture::ttc(100) << endl;
+```
+# Chez toi
+Crée les trois fichiers `facture.h`, `facture.cpp`, `main.cpp`, puis compile avec `g++ main.cpp facture.cpp -o facture`. Oublie volontairement `facture.cpp` dans la commande pour voir l'erreur `undefined reference`.
+!fin
+
+!retenir À retenir | `throw` lève une exception, `try { … } catch (const exception& e) { … }` l'attrape ; `e.what()` donne le message. ¶ `ofstream` écrit, `ifstream` lit, comme `cout` et `cin`. ¶ `.h` = déclarations (avec `#pragma once`), `.cpp` = définitions (`Classe::methode`). ¶ Compilation puis édition de liens ; `undefined reference` = définition manquante. ¶ `namespace` évite les conflits de noms.
+--- exos
+Q¤m¤Quel mot-clé lève une exception ?¤`throw`;;`raise`;;`error`;;`except`¤
+Q¤m¤Quel bloc attrape une exception ?¤`catch`;;`except`;;`rescue`;;`finally`¤
+Q¤m¤Quelle méthode d'une exception standard donne son message ?¤`what()`;;`message()`;;`text()`;;`toString()`¤
+Q¤m¤Comment attrape-t-on habituellement une exception ?¤Par référence constante : `catch (const exception& e)`;;Par valeur : `catch (exception e)`;;Par pointeur : `catch (exception* e)`;;Avec `catch (e)`¤
+Q¤m¤Quelle classe sert à écrire dans un fichier ?¤`ofstream`;;`ifstream`;;`fileout`;;`cout`¤
+Q¤m¤Quelle classe sert à lire un fichier ?¤`ifstream`;;`ofstream`;;`filein`;;`cin`¤
+Q¤m¤Que contient un fichier d'en-tête `.h` ?¤Les déclarations (classes, prototypes);;Le code de toutes les fonctions;;Le programme compilé;;Les données du programme¤
+Q¤m¤À quoi sert `#pragma once` ?¤À empêcher qu'un en-tête soit inclus deux fois;;À compiler une seule fois;;À exécuter le programme une fois;;À désactiver les avertissements¤
+Q¤m¤Dans un .cpp, que signifie `Compte::deposer` ?¤La méthode deposer de la classe Compte;;Un espace de noms;;Un pointeur;;Un héritage¤
+Q¤d¤Que signale l'erreur `undefined reference to` ?¤Une fonction déclarée dont la définition manque à l'édition de liens;;Une faute de syntaxe;;Un pointeur nul;;Un fichier introuvable¤
+Q¤d¤Quelles sont les deux étapes de la construction d'un programme ?¤Compilation puis édition de liens;;Exécution puis compilation;;Édition de liens puis compilation;;Interprétation puis exécution¤
+Q¤m¤À quoi sert un namespace ?¤À éviter les conflits entre noms identiques;;À cacher des attributs;;À accélérer le code;;À créer une classe¤
+Q¤d¤Pourquoi ne met-on pas `using namespace std;` dans un fichier .h ?¤Cela l'imposerait à tous les fichiers qui incluent cet en-tête;;C'est interdit par le compilateur;;Cela ralentit le programme;;std n'existe pas dans les .h¤
+Q¤m¤Quelle différence entre `#include <iostream>` et `#include "compte.h"` ?¤Chevrons : bibliothèque du système ; guillemets : fichier du projet;;Aucune;;Guillemets : plus rapide;;Chevrons : fichiers C seulement¤
+Q¤d¤Que représente `optional<double>` ?¤Une valeur de type double, ou l'absence de valeur;;Un double facultatif dans une fonction;;Un pointeur vers un double;;Un double arrondi¤
+V¤m¤Après une exception attrapée par catch, le programme peut continuer.¤V¤
+V¤m¤Un ofstream doit obligatoirement être fermé avec close(), sinon le fichier reste ouvert.¤F¤Son destructeur le ferme (RAII).
+V¤d¤Pendant la remontée d'une exception, les destructeurs des objets locaux sont appelés.¤V¤C'est ce qui évite les fuites.
+S¤m¤Quel flux standard sert à afficher les messages d'erreur ?¤cerr¤
+A¤m¤Associe chaque message à sa cause.¤`expected ';'`=>point-virgule oublié;;`was not declared`=>nom inconnu ou include manquant;;`undefined reference`=>définition absente;;`segmentation fault`=>accès mémoire invalide¤
+
+=== cpp-jeu | C++ : créer un jeu dans le navigateur | d
+La plupart des grands jeux sont écrits en C++ (Unreal Engine, les moteurs maison des studios) : il est rapide et contrôle précisément la mémoire. Dans le navigateur, le C++ est compilé en **WebAssembly**, un format binaire exécuté presque aussi vite que du code natif. C'est ce que fait le labo.
+
+!info Où tester ? | Les jeux ont besoin d'un écran : ils se lancent dans le [bac à sable du labo](labo-cpp.html#libre). Copie les exemples de ce chapitre et modifie-les.
+
+## 1. La boucle de jeu
+
+Le programme n'a pas de `main` : c'est le moteur qui appelle tes fonctions.
+
+```
+#include "jeu.h"                 // l'API du labo
+
+double x = 200;                  // l'état du jeu
+
+void setup() {                   // une fois, au démarrage
+    x = 50;
+}
+
+void update(double dt) {         // 60 fois par seconde : la logique
+    if (touche("droite")) x += 200 * dt;      // 200 pixels par seconde
+}
+
+void draw() {                    // 60 fois par seconde : l'affichage
+    effacer("black");
+    rect(x, 140, 40, 40, "gold");
+}
+```
+
+`dt` est le temps écoulé depuis l'image précédente (environ 0,016 s). Multiplier une vitesse par `dt` donne un mouvement identique sur toutes les machines.
+
+| Fonction | Rôle |
+| `effacer(c)` | remplit l'écran (480 × 320) |
+| `rect(x, y, l, h, c)` | rectangle plein (coin haut gauche) |
+| `cercle(x, y, r, c)` | disque (centre) |
+| `ligne(x1, y1, x2, y2, c)` | segment |
+| `texte(t, x, y, taille, c)` | texte (`std::to_string` pour les nombres) |
+| `touche("gauche")` | vrai tant que la touche est enfoncée |
+| `toucheAppuyee("espace")` | vrai une seule image, à l'appui |
+| `sourisX()`, `sourisY()`, `clic()` | souris |
+| `hasard(a, b)` | entier au hasard entre a et b |
+| `LARGEUR`, `HAUTEUR` | 480 et 320 |
+
+L'origine est en **haut à gauche** et `y` augmente vers le **bas**.
+
+## 2. Des entités avec des `struct`
+
+```
+#include "jeu.h"
+#include <vector>
+
+struct Balle {
+    double x, y, vx, vy;
+    void avancer() {
+        x += vx; y += vy;
+        if (x < 10 || x > LARGEUR - 10) vx = -vx;
+        if (y < 10 || y > HAUTEUR - 10) vy = -vy;
+    }
+};
+
+std::vector<Balle> balles;
+
+void setup() {
+    for (int i = 0; i < 5; i++)
+        balles.push_back({ (double)hasard(20, 460), (double)hasard(20, 300), 3.0, 2.0 });
+}
+
+void update(double dt) {
+    for (Balle& b : balles) b.avancer();          // Balle& : on modifie l'original
+}
+
+void draw() {
+    effacer("#16182b");
+    for (const Balle& b : balles) cercle(b.x, b.y, 10, "gold");
+}
+```
+
+## 3. Gravité et saut
+
+```
+double y = 260, vy = 0;
+const double SOL = 260;
+
+void update(double dt) {
+    if (toucheAppuyee("espace") && y >= SOL) vy = -9;     // saut seulement au sol
+    vy += 0.5;                                            // gravité
+    y += vy;
+    if (y > SOL) { y = SOL; vy = 0; }
+}
+```
+
+## 4. Collisions
+
+Le test de chevauchement de deux rectangles (AABB), exécutable ici car il n'a pas besoin d'écran :
+
+```run h=iostream main
+struct Boite { double x, y, l, h; };
+
+bool collision(const Boite& a, const Boite& b) {
+    return a.x < b.x + b.l && b.x < a.x + a.l
+        && a.y < b.y + b.h && b.y < a.y + a.h;
+}
+@@
+Boite joueur{100, 100, 40, 40};
+cout << collision(joueur, {130, 120, 20, 20}) << endl;     // 1 : se chevauchent
+cout << collision(joueur, {300, 100, 20, 20}) << endl;     // 0 : trop loin
+```
+
+## 5. Créer et supprimer des objets
+
+On supprime avec l'idiome *erase-remove* : `remove_if` regroupe les éléments à garder, `erase` coupe le reste.
+
+```run h=iostream,vector,algorithm main
+struct Tir { double x, y; };
+@@
+vector<Tir> tirs = {{10, 50}, {20, -5}, {30, 120}, {40, -30}};
+for (Tir& t : tirs) t.y -= 10;
+tirs.erase(remove_if(tirs.begin(), tirs.end(), [](const Tir& t) { return t.y < 0; }), tirs.end());
+cout << tirs.size() << " tirs encore à l'écran" << endl;
+```
+
+## 6. Les états du jeu
+
+```
+enum class Etat { Menu, Jeu, Fin };
+Etat etat = Etat::Menu;
+int score = 0;
+
+void update(double dt) {
+    switch (etat) {
+        case Etat::Menu: if (toucheAppuyee("espace")) { etat = Etat::Jeu; score = 0; } break;
+        case Etat::Jeu:  score++; if (score > 300) etat = Etat::Fin; break;
+        case Etat::Fin:  if (toucheAppuyee("espace")) etat = Etat::Menu; break;
+    }
+}
+
+void draw() {
+    effacer("black");
+    if (etat == Etat::Menu) texte("ESPACE pour jouer", 130, 150, 24, "white");
+    else if (etat == Etat::Jeu) texte("Score : " + std::to_string(score), 16, 16, 24, "white");
+    else texte("Perdu ! Score : " + std::to_string(score), 130, 150, 24, "tomato");
+}
+```
+
+!tuto Un jeu complet : esquive les météorites
+# Le vaisseau
+Colle ce code dans le [bac à sable](labo-cpp.html#libre).
+```
+#include "jeu.h"
+#include <vector>
+#include <algorithm>
+#include <string>
+
+struct Boite { double x, y, l, h; };
+Boite vaisseau{220, 280, 40, 20};
+
+void update(double dt) {
+    if (touche("gauche")) vaisseau.x -= 5;
+    if (touche("droite")) vaisseau.x += 5;
+    vaisseau.x = std::clamp(vaisseau.x, 0.0, LARGEUR - vaisseau.l);     // reste dans l'écran
+}
+
+void draw() {
+    effacer("#0d0e1a");
+    rect(vaisseau.x, vaisseau.y, vaisseau.l, vaisseau.h, "deepskyblue");
+}
+```
+# Des météorites qui tombent
+```
+std::vector<Boite> meteores;
+int chrono = 0;
+
+// dans update :
+    chrono++;
+    if (chrono % 30 == 0) meteores.push_back({ (double)hasard(0, LARGEUR - 20), -20, 20, 20 });
+    for (Boite& m : meteores) m.y += 3;
+    meteores.erase(std::remove_if(meteores.begin(), meteores.end(),
+        [](const Boite& m) { return m.y > HAUTEUR; }), meteores.end());
+
+// dans draw :
+    for (const Boite& m : meteores) rect(m.x, m.y, m.l, m.h, "orange");
+```
+# La collision et la fin de partie
+```
+bool perdu = false;
+int score = 0;
+
+bool collision(const Boite& a, const Boite& b) {
+    return a.x < b.x + b.l && b.x < a.x + a.l && a.y < b.y + b.h && b.y < a.y + a.h;
+}
+
+// au début de update :
+    if (perdu) return;
+    score++;
+// après le déplacement des météorites :
+    for (const Boite& m : meteores) if (collision(vaisseau, m)) perdu = true;
+// à la fin de draw :
+    texte("Score : " + std::to_string(score), 12, 12, 20, "white");
+    if (perdu) texte("PERDU", 190, 140, 36, "tomato");
+```
+# À toi d'améliorer
+Fais accélérer les météorites avec le score, ajoute une touche pour recommencer, des vies, une classe `Meteore` avec ses propres méthodes `avancer()` et `dessiner()`.
+!fin
+
+!defi Défi : la pluie d'étoiles | Un `vector` de `struct` mis à jour à chaque image. | cpp-etoiles
+!defi Défi : tirer des projectiles | Créer et supprimer des objets en cours de partie. | cpp-tir
+!defi Défi : attrape les fruits | Un mini-jeu complet avec score. | cpp-fruits
+
+!retenir À retenir | `#include "jeu.h"`, puis `setup()`, `update(double dt)` et `draw()` : pas de `main`. ¶ L'état du jeu vit dans des variables globales ou des `struct`. ¶ Un `vector<struct>` par famille d'objets ; `for (T& x : v)` pour les modifier. ¶ Suppression : `v.erase(remove_if(…), v.end())`. ¶ `enum class` pour les états (menu, jeu, fin).
+--- exos
+Q¤f¤Quelle fonction est appelée une seule fois, au démarrage du jeu ?¤`setup`;;`update`;;`draw`;;`main`¤
+Q¤f¤Quel en-tête donne accès aux fonctions de dessin du labo ?¤`"jeu.h"`;;`<game>`;;`<canvas.h>`;;`"dessin.h"`¤
+Q¤m¤Que représente `dt` dans `update(double dt)` ?¤Le temps écoulé depuis l'image précédente, en secondes;;Le numéro de l'image;;La durée totale;;La largeur de l'écran¤
+Q¤m¤En quel format le C++ est-il compilé pour tourner dans le navigateur ?¤WebAssembly;;JavaScript;;Java bytecode;;HTML¤
+Q¤m¤Où se trouve le point (0, 0) ?¤En haut à gauche;;En bas à gauche;;Au centre;;En bas à droite¤
+Q¤m¤Quelle fonction utiliser pour un saut déclenché une seule fois par appui ?¤`toucheAppuyee`;;`touche`;;`clic`;;`hasard`¤
+Q¤m¤Pourquoi écrire `for (Balle& b : balles) b.avancer();` avec un `&` ?¤Pour modifier les balles du vector et non des copies;;Pour aller plus vite uniquement;;Pour parcourir à l'envers;;Parce que c'est obligatoire¤
+Q¤d¤Que fait `v.erase(remove_if(v.begin(), v.end(), test), v.end());` ?¤Supprime tous les éléments pour lesquels test est vrai;;Supprime le dernier élément;;Trie le vector;;Vide le vector¤
+Q¤d¤Deux rectangles sont en collision quand…¤ils se chevauchent sur l'axe x ET sur l'axe y;;ils se chevauchent sur un seul axe;;ils ont la même taille;;leurs coins sont identiques¤
+Q¤m¤Comment afficher un score entier avec `texte` ?¤`"Score : " + std::to_string(score)`;;`"Score : " + score`;;`"Score : " << score`;;`score.str()`¤
+Q¤m¤Quel outil convient pour représenter les états menu / jeu / fin ?¤`enum class`;;Un double;;Un vector;;Un pointeur¤
+Q¤m¤Que fait `std::clamp(x, 0.0, 440.0)` ?¤Ramène x entre 0 et 440;;Arrondit x;;Renvoie le maximum;;Teste une collision¤
+Q¤d¤Pourquoi multiplier une vitesse par dt ?¤Pour un mouvement identique quelle que soit la vitesse de la machine;;Pour ralentir le jeu;;Pour éviter les collisions;;Pour arrondir¤
+V¤m¤Dans le labo, un jeu C++ a besoin d'une fonction main.¤F¤Le moteur appelle setup, update et draw.
+V¤m¤La fonction draw ne doit faire que de l'affichage.¤V¤La logique va dans update.
+V¤m¤Quand y augmente, l'objet descend à l'écran.¤V¤
+S¤m¤Quelle constante contient la hauteur de l'écran ?¤HAUTEUR¤
+A¤m¤Associe chaque fonction à son rôle.¤`effacer`=>remplir l'écran;;`cercle`=>dessiner un disque;;`hasard`=>entier aléatoire;;`texte`=>écrire à l'écran¤

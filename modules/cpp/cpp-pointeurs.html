@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>C++ : pointeurs et mémoire — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="cpp" data-chapter="cpp-pointeurs">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/cpp.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>Les pointeurs sont ce qui distingue vraiment le C++ : ils donnent un accès direct à la <b>mémoire</b>. C'est la notion qui fait peur, alors qu'elle se résume à une idée : une variable peut contenir <b>l'adresse</b> d'une autre.</p>
+<h2>1. Adresse et pointeur</h2>
+<p>Chaque variable occupe une case de la mémoire, repérée par une <b>adresse</b>. L'opérateur <code>&amp;</code> donne cette adresse ; un <b>pointeur</b> est une variable qui la stocke.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    int age = 17;
+    int* p = &amp;age;             // p contient l'adresse de age : « p pointe sur age »
+    cout &lt;&lt; age &lt;&lt; endl;       // 17
+    cout &lt;&lt; (p == &amp;age) &lt;&lt; endl;   // 1 : même adresse
+    cout &lt;&lt; *p &lt;&lt; endl;        // 17 : *p = la valeur à l'adresse pointée
+    *p = 18;                   // modifie age à travers le pointeur
+    cout &lt;&lt; age &lt;&lt; endl;       // 18
+}</code></pre></div>
+<table><tr><th>Écriture</th><th>Signifie</th></tr><tr><td><code>int* p</code></td><td>p est un pointeur vers un <code>int</code></td></tr><tr><td><code>&amp;x</code></td><td>l'adresse de x</td></tr><tr><td><code>*p</code></td><td>la valeur à l'adresse contenue dans p (*déréférencement*)</td></tr><tr><td><code>nullptr</code></td><td>le pointeur qui ne pointe sur rien</td></tr></table>
+<h2>2. <code>nullptr</code> et les pointeurs dangereux</h2>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    int* p = nullptr;            // toujours initialiser un pointeur
+    if (p == nullptr) cout &lt;&lt; "p ne pointe sur rien" &lt;&lt; endl;
+    int x = 5;
+    p = &amp;x;
+    if (p) cout &lt;&lt; "p pointe sur " &lt;&lt; *p &lt;&lt; endl;     // if (p) : vrai si non nul
+}</code></pre></div>
+<div class="box attention"><b>Déréférencer nullptr</b><p>Écrire <code>*p</code> quand <code>p</code> vaut <code>nullptr</code>, ou quand il pointe sur une variable qui n'existe plus, est un <b>comportement indéfini</b> : le programme plante (*segmentation fault*) ou, pire, continue avec des données fausses. Teste toujours un pointeur avant de l'utiliser.</p></div>
+<h2>3. Pointeur ou référence ?</h2>
+<p>Les deux permettent à une fonction d'agir sur une variable de l'appelant.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+void parReference(int&amp; n) { n = n + 1; }
+void parPointeur(int* n) { if (n) *n = *n + 1; }
+
+int main() {
+    int x = 10;
+    parReference(x);           // rien de spécial à l'appel
+    parPointeur(&amp;x);           // on passe l'adresse
+    cout &lt;&lt; x &lt;&lt; endl;
+    parPointeur(nullptr);      // un pointeur peut être nul : la fonction doit le prévoir
+}</code></pre></div>
+<table><tr><th></th><th>Référence <code>int&amp;</code></th><th>Pointeur <code>int*</code></th></tr><tr><td>Peut ne désigner rien</td><td>non</td><td>oui (<code>nullptr</code>)</td></tr><tr><td>Peut changer de cible</td><td>non</td><td>oui</td></tr><tr><td>Syntaxe d'accès</td><td>comme une variable</td><td><code>*p</code>, <code>p-&gt;membre</code></td></tr><tr><td>À utiliser</td><td>par défaut</td><td>quand « rien » est possible, ou pour la mémoire dynamique</td></tr></table>
+<h2>4. Pointeurs et tableaux</h2>
+<p>Le nom d'un tableau C se comporte comme un pointeur vers son premier élément, et <code>p + 1</code> désigne l'élément suivant.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    int t[4] = {10, 20, 30, 40};
+    int* p = t;                          // pointe sur t[0]
+    cout &lt;&lt; *p &lt;&lt; " " &lt;&lt; *(p + 2) &lt;&lt; " " &lt;&lt; p[3] &lt;&lt; endl;   // p[i] équivaut à *(p + i)
+    for (int* q = t; q != t + 4; q++) cout &lt;&lt; *q &lt;&lt; " ";    // parcours par pointeur
+    cout &lt;&lt; endl;
+}</code></pre></div>
+<p>C'est exactement le principe des itérateurs <code>begin()</code> et <code>end()</code> des conteneurs.</p>
+<h2>5. La pile et le tas</h2>
+<table><tr><th></th><th>La pile (*stack*)</th><th>Le tas (*heap*)</th></tr><tr><td>Contient</td><td>les variables locales</td><td>ce qu'on réserve avec <code>new</code></td></tr><tr><td>Libération</td><td>automatique, à la fin du bloc</td><td>manuelle, avec <code>delete</code></td></tr><tr><td>Taille</td><td>petite et fixe</td><td>grande</td></tr><tr><td>Durée de vie</td><td>celle du bloc</td><td>jusqu'au <code>delete</code></td></tr></table>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    int* p = new int(42);          // réserve un int sur le tas
+    cout &lt;&lt; *p &lt;&lt; endl;
+    delete p;                      // libère : obligatoire
+    p = nullptr;                   // bonne habitude : ne plus pointer sur la zone libérée
+
+    int n = 5;
+    int* tab = new int[n];         // tableau de taille connue à l'exécution
+    for (int i = 0; i &lt; n; i++) tab[i] = i * i;
+    cout &lt;&lt; tab[4] &lt;&lt; endl;
+    delete[] tab;                  // delete[] pour un tableau
+}</code></pre></div>
+<p>Les trois erreurs classiques :</p>
+<ul><li><b>fuite de mémoire</b> : un <code>new</code> sans <code>delete</code> ; la mémoire reste occupée jusqu'à la fin du programme ;</li><li><b>pointeur pendant</b> (*dangling*) : utiliser un pointeur après le <code>delete</code>, ou renvoyer l'adresse d'une variable locale ;</li><li><b>double libération</b> : deux <code>delete</code> sur la même adresse.</li></ul>
+<div class="box"><b>En C++ moderne</b><p>On n'écrit presque plus <code>new</code> et <code>delete</code> à la main : <code>vector</code> gère sa mémoire tout seul, et les <b>pointeurs intelligents</b> (chapitre « Mémoire moderne ») libèrent automatiquement. Il faut pourtant comprendre ce mécanisme : il est sous tout le reste.</p></div>
+<h2>6. Pointeurs vers des structures : <code>-&gt;</code></h2>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+struct Joueur {
+    string nom;
+    int pv;
+};
+
+int main() {
+    Joueur j = {"Léa", 10};
+    Joueur* p = &amp;j;
+    cout &lt;&lt; (*p).nom &lt;&lt; endl;      // écriture lourde…
+    cout &lt;&lt; p-&gt;nom &lt;&lt; endl;        // … remplacée par la flèche
+    p-&gt;pv -= 3;
+    cout &lt;&lt; j.pv &lt;&lt; endl;
+}</code></pre></div>
+<section class="tuto"><h3><small>Tutoriel</small>Comprendre en dessinant la mémoire</h3>
+<div class="etape"><h4>Deux pointeurs sur la même variable</h4>
+<p>Avant d'exécuter, prédis la valeur affichée.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    int score = 100;
+    int* a = &amp;score;
+    int* b = a;          // b reçoit la même adresse
+    *a += 50;
+    *b *= 2;
+    cout &lt;&lt; score &lt;&lt; endl;
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Changer la cible d'un pointeur</h4>
+<p><code>p = &amp;y</code> change <b>où</b> pointe p ; <code>*p = …</code> change la <b>valeur</b> pointée. Ne confonds pas les deux.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    int x = 1, y = 2;
+    int* p = &amp;x;
+    *p = 10;             // x vaut 10
+    p = &amp;y;              // p pointe maintenant sur y
+    *p = 20;             // y vaut 20
+    cout &lt;&lt; x &lt;&lt; " " &lt;&lt; y &lt;&lt; endl;
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Une fonction qui « renvoie » par pointeur</h4>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+bool diviser(int a, int b, int* resultat) {
+    if (b == 0 || resultat == nullptr) return false;
+    *resultat = a / b;
+    return true;
+}
+
+int main() {
+    int r = 0;
+    if (diviser(17, 5, &amp;r)) cout &lt;&lt; "17 / 5 = " &lt;&lt; r &lt;&lt; endl;
+    if (!diviser(1, 0, &amp;r)) cout &lt;&lt; "division impossible" &lt;&lt; endl;
+}</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : agir par pointeur</b><p>Modifie une variable à travers son adresse.</p><a class="defi-go" href="labo-cpp.html#m=cpp-pointeur">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p><code>&amp;x</code> : l'adresse de x. <code>int* p = &amp;x;</code> : p pointe sur x. <code>*p</code> : la valeur pointée. </p><p> <code>nullptr</code> : ne pointe sur rien ; toujours tester avant <code>*p</code>. </p><p> <code>p-&gt;membre</code> équivaut à <code>(*p).membre</code>. </p><p> Pile : libération automatique. Tas : <code>new</code> puis <code>delete</code> (<code>delete[]</code> pour un tableau). </p><p> Préfère les références, <code>vector</code> et les pointeurs intelligents.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cpp.html">Labo C++</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "Que contient un pointeur ?",
+  "type": "qcm",
+  "options": [
+   "Un type",
+   "Une copie de la variable",
+   "Une adresse mémoire",
+   "Un nom de variable"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que donne `&x` ?",
+  "type": "qcm",
+  "options": [
+   "Le type de x",
+   "Une copie de x",
+   "L'adresse de x",
+   "La valeur de x"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Avec `int* p = &x;`, que désigne `*p` ?",
+  "type": "qcm",
+  "options": [
+   "L'adresse de p",
+   "La valeur de x",
+   "L'adresse de x",
+   "Le type de x"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle valeur désigne un pointeur qui ne pointe sur rien ?",
+  "type": "qcm",
+  "options": [
+   "`nullptr`",
+   "`none`",
+   "`0x0`",
+   "`void`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Après `int x = 5; int* p = &x; *p = 9;`, que vaut x ?",
+  "type": "qcm",
+  "options": [
+   "Indéterminé",
+   "Une adresse",
+   "5",
+   "9"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Après `int x = 1, y = 2; int* p = &x; p = &y; *p = 7;`, que valent x et y ?",
+  "type": "qcm",
+  "options": [
+   "1 et 7",
+   "1 et 2",
+   "7 et 2",
+   "7 et 7"
+  ],
+  "answer": 0,
+  "explication": "p a changé de cible avant l'écriture."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel opérateur accède à un membre à travers un pointeur ?",
+  "type": "qcm",
+  "options": [
+   "`::`",
+   "`.`",
+   "`=>`",
+   "`->`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel mot-clé réserve de la mémoire sur le tas ?",
+  "type": "qcm",
+  "options": [
+   "`malloc_ptr`",
+   "`create`",
+   "`new`",
+   "`alloc`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment libérer un tableau créé avec `new int[n]` ?",
+  "type": "qcm",
+  "options": [
+   "`delete[] tab;`",
+   "`free tab;`",
+   "`tab.clear();`",
+   "`delete tab;`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Qu'est-ce qu'une fuite de mémoire ?",
+  "type": "qcm",
+  "options": [
+   "Une variable non initialisée",
+   "De la mémoire réservée avec new et jamais libérée",
+   "Un pointeur nul",
+   "Un tableau trop petit"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Qu'est-ce qu'un pointeur pendant (dangling) ?",
+  "type": "qcm",
+  "options": [
+   "Un pointeur vers une zone déjà libérée ou détruite",
+   "Un pointeur vers un tableau",
+   "Un pointeur nul",
+   "Un pointeur constant"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi ne faut-il pas renvoyer l'adresse d'une variable locale ?",
+  "type": "qcm",
+  "options": [
+   "Le compilateur l'interdit toujours",
+   "Elle devient globale",
+   "C'est trop lent",
+   "Elle est détruite à la fin de la fonction"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Où sont rangées les variables locales ?",
+  "type": "qcm",
+  "options": [
+   "Dans le fichier source",
+   "Sur la pile",
+   "Sur le tas",
+   "Dans le processeur"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Avec `int t[3] = {4, 5, 6}; int* p = t;`, que vaut `*(p + 1)` ?",
+  "type": "qcm",
+  "options": [
+   "Une adresse",
+   "6",
+   "4",
+   "5"
+  ],
+  "answer": 3,
+  "explication": "p + 1 désigne l'élément suivant."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Une référence peut valoir nullptr.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Une référence désigne toujours une variable ; seul un pointeur peut être nul."
+ },
+ {
+  "niveau": "moyen",
+  "q": "La mémoire de la pile est libérée automatiquement à la fin du bloc.",
+  "type": "vf",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Appeler delete deux fois sur la même adresse est sans danger.",
+  "type": "vf",
+  "answer": false,
+  "explication": "C'est une double libération : comportement indéfini."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel mot-clé libère la mémoire réservée par new ?",
+  "type": "saisie",
+  "answers": [
+   "delete"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque écriture à sa signification.",
+  "type": "associer",
+  "paires": [
+   [
+    "`int* p`",
+    "déclaration d'un pointeur"
+   ],
+   [
+    "`&x`",
+    "adresse de x"
+   ],
+   [
+    "`*p`",
+    "valeur pointée"
+   ],
+   [
+    "`p->m`",
+    "membre de l'objet pointé"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

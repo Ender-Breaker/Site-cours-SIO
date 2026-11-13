@@ -1,0 +1,725 @@
+=== cpp-bases | C++ : compiler, afficher, lire | f
+Le **C++** est né en 1985 comme une extension du langage C. C'est un langage **compilé** et **typé** : rapide, précis, exigeant. Il fait tourner les moteurs de jeu (Unreal Engine), les navigateurs web, les systèmes d'exploitation, les bases de données, les logiciels embarqués. Si tu comprends le C++, tu comprends ce que font réellement les autres langages derrière ton dos.
+
+!info Comment suivre ce cours | Chaque bloc avec un bouton **Exécuter** est compilé par un vrai compilateur C++20 (clang) dans ton navigateur. La première compilation prend quelques secondes. Modifie le code, provoque des erreurs, lis les messages du compilateur : c'est lui ton meilleur professeur.
+
+## 1. Le programme minimal
+
+```run
+#include <iostream>
+using namespace std;
+
+int main() {
+    cout << "Bonjour !" << endl;
+    return 0;
+}
+```
+
+| Élément | Rôle |
+| `#include <iostream>` | charge la bibliothèque d'entrées-sorties (`cout`, `cin`) |
+| `using namespace std;` | évite d'écrire `std::cout`, `std::string`… |
+| `int main() { … }` | la fonction par laquelle le programme commence |
+| `cout << …` | envoie une valeur vers l'écran (*character output*) |
+| `endl` | retour à la ligne (on peut aussi écrire `"\n"`) |
+| `return 0;` | le programme s'est bien terminé |
+| `;` | termine **chaque instruction** : l'oubli le plus fréquent |
+
+## 2. De la source au programme : la compilation
+
+Un programme C++ ne s'exécute pas directement. Le **compilateur** traduit le fichier source `.cpp` en langage machine :
+
+```
+g++ main.cpp -o programme     # compile (g++ ou clang++)
+./programme                   # exécute
+g++ -Wall -Wextra -std=c++20 main.cpp -o programme   # avec tous les avertissements
+```
+
+Conséquence : beaucoup d'erreurs sont détectées **avant** l'exécution. Une *erreur de compilation* (faute de syntaxe, type incorrect) empêche de produire le programme ; une *erreur d'exécution* survient pendant qu'il tourne.
+
+```run err h=iostream main
+cout << "Il manque quelque chose" << endl
+```
+
+Lis toujours la **première** erreur : elle indique la ligne et ce que le compilateur attendait. Les suivantes en sont souvent des conséquences.
+
+## 3. Variables et types
+
+En C++, chaque variable a un **type** fixé à sa création, qui ne changera jamais.
+
+```run h=iostream,string main
+int age = 17;                // entier
+double prix = 19.99;         // nombre à virgule
+char initiale = 'L';         // UN caractère, entre apostrophes
+bool majeur = false;         // true ou false
+string prenom = "Léa";       // texte, entre guillemets
+cout << prenom << " a " << age << " ans" << endl;
+cout << prix << " " << initiale << " " << majeur << endl;   // false s'affiche 0
+age = age + 1;
+cout << age << endl;
+```
+
+| Type | Contenu | Exemple |
+| `int` | entier (environ ±2 milliards) | `42` |
+| `long long` | très grand entier | `9000000000LL` |
+| `double` | nombre à virgule | `3.14` |
+| `char` | un caractère | `'A'` |
+| `bool` | vrai ou faux | `true` |
+| `string` | texte (bibliothèque `<string>`) | `"Bonjour"` |
+
+!attention Une variable non initialisée contient n'importe quoi | `int x;` sans valeur ne vaut pas 0 : elle contient ce qui traînait en mémoire. Donne toujours une valeur de départ : `int x = 0;`.
+
+### `const` et `auto`
+
+```run h=iostream,string main
+const double TVA = 0.2;      // constante : toute modification est refusée à la compilation
+auto quantite = 3;           // auto : le compilateur déduit int
+auto total = quantite * 9.99;   // … et ici double
+auto nom = string("Sam");
+cout << total * (1 + TVA) << " " << nom << endl;
+```
+
+## 4. Les opérateurs et leurs pièges
+
+```run h=iostream main
+cout << 7 / 2 << endl;          // 3   : entier / entier = entier !
+cout << 7.0 / 2 << endl;        // 3.5 : dès qu'un des deux est double
+cout << 7 % 2 << endl;          // 1   : reste de la division
+int a = 7, b = 2;
+cout << static_cast<double>(a) / b << endl;   // 3.5 : conversion explicite
+int i = 5;
+i++;            // i = i + 1
+i += 10;        // i = i + 10
+i *= 2;
+cout << i << endl;
+cout << (5 > 3) << " " << (5 == 3) << " " << (5 != 3) << endl;
+```
+
+!attention Division entière | `7 / 2` vaut `3`, pas `3.5`. Pour une moyenne, écris `somme / 3.0` ou convertis avec `static_cast<double>(somme)`.
+
+## 5. Lire au clavier
+
+`cin >> variable` lit une valeur et la convertit dans le type de la variable. Les valeurs sont séparées par des espaces ou des retours à la ligne.
+
+```run stdin=Léa|17 h=iostream,string main
+string prenom;
+int age;
+cin >> prenom >> age;
+cout << "Bonjour " << prenom << ", dans 10 ans tu auras " << age + 10 << " ans." << endl;
+```
+
+`cin >>` s'arrête au premier espace. Pour lire une **ligne entière**, on utilise `getline` :
+
+```run stdin=Jean~Dupont h=iostream,string main
+string nomComplet;
+getline(cin, nomComplet);
+cout << "Bonjour " << nomComplet << " (" << nomComplet.size() << " caractères)" << endl;
+```
+
+## 6. Mettre en forme les nombres
+
+```run h=iostream,iomanip main
+double prix = 12.5;
+cout << prix << endl;                              // 12.5
+cout << fixed << setprecision(2) << prix << endl;  // 12.50 : deux décimales
+cout << setw(8) << 42 << "|" << endl;              // sur 8 caractères, aligné à droite
+```
+
+!tuto Ton premier vrai programme : le ticket de caisse
+# Lire le prix et la quantité
+```run stdin=4.5|3 h=iostream main
+double prix;
+int quantite;
+cin >> prix >> quantite;
+cout << prix << " x " << quantite << endl;
+```
+# Calculer
+`double * int` donne un `double` : aucun problème de division entière ici.
+```run stdin=4.5|3 h=iostream main
+double prix;
+int quantite;
+cin >> prix >> quantite;
+double total = prix * quantite;
+cout << "Total : " << total << endl;
+```
+# Ajouter la TVA et mettre en forme
+Change les entrées et relance. Essaie aussi de modifier `TVA` après sa déclaration : le compilateur refuse.
+```run stdin=4.5|3 h=iostream,iomanip main
+const double TVA = 0.2;
+double prix;
+int quantite;
+cin >> prix >> quantite;
+double ht = prix * quantite;
+cout << fixed << setprecision(2);
+cout << "HT : " << ht << " €" << endl;
+cout << "TVA : " << ht * TVA << " €" << endl;
+cout << "TTC : " << ht * (1 + TVA) << " €" << endl;
+```
+!fin
+
+!defi Défi : heures, minutes, secondes | Division entière et modulo. | cpp-conv
+!defi Défi : la moyenne | Attention à la division entière, et affiche deux décimales. | cpp-moyenne
+
+!retenir À retenir | Tout programme commence dans `int main()`. Chaque instruction finit par `;`. ¶ `cout << valeur << endl;` affiche, `cin >> variable;` lit, `getline(cin, ligne)` lit une ligne entière. ¶ Types de base : `int`, `double`, `char`, `bool`, `string`. ¶ `int / int` donne un entier. ¶ `const` interdit la modification, `auto` laisse le compilateur déduire le type.
+--- exos
+Q¤f¤Par quelle fonction commence l'exécution d'un programme C++ ?¤`main`;;`start`;;`run`;;`begin`¤
+Q¤f¤Quel caractère termine chaque instruction ?¤`;`;;`.`;;`:`;;Un retour à la ligne¤
+Q¤f¤Quel objet affiche du texte à l'écran ?¤`cout`;;`cin`;;`print`;;`echo`¤
+Q¤f¤Quel objet lit une valeur au clavier ?¤`cin`;;`cout`;;`input`;;`scanf`¤
+Q¤m¤Que vaut `7 / 2` en C++ ?¤3;;3.5;;4;;1¤Entier divisé par entier donne un entier.
+Q¤m¤Que vaut `7.0 / 2` ?¤3.5;;3;;4;;Une erreur¤Dès qu'un opérande est un double, le résultat est un double.
+Q¤m¤Que vaut `7 % 2` ?¤1;;3;;3.5;;0¤Le reste de la division entière.
+Q¤m¤Quel type choisir pour un prix comme 19.99 ?¤`double`;;`int`;;`char`;;`bool`¤
+Q¤m¤Comment s'écrit UN caractère ?¤`'A'`;;`"A"`;;`A`;;`(A)`¤Les guillemets doubles créent une chaîne.
+Q¤m¤Quel mot-clé rend une variable non modifiable ?¤`const`;;`final`;;`static`;;`fixed`¤
+Q¤m¤Que fait `auto x = 3.5;` ?¤Le compilateur déduit que x est un double;;x peut changer de type plus tard;;x est une constante;;C'est une erreur¤
+Q¤m¤Quelle fonction lit une ligne entière, espaces compris ?¤`getline(cin, s)`;;`cin >> s`;;`readline(s)`;;`cin.line(s)`¤
+Q¤d¤Que contient `int x;` (variable locale non initialisée) ?¤Une valeur indéterminée;;0;;Une erreur de compilation;;`null`¤
+Q¤d¤Comment obtenir 3.5 avec `int a = 7, b = 2;` ?¤`static_cast<double>(a) / b`;;`a / b`;;`double(a / b)`;;`a // b`¤Il faut convertir avant la division.
+V¤m¤Une variable C++ peut changer de type pendant l'exécution.¤F¤Le type est fixé à la déclaration.
+V¤m¤Une erreur de compilation empêche la création du programme exécutable.¤V¤
+V¤f¤`i++` ajoute 1 à la variable i.¤V¤
+S¤m¤Quelle bibliothèque faut-il inclure pour utiliser cout et cin ?¤iostream;;<iostream>¤
+S¤d¤Quel manipulateur, utilisé avec fixed, fixe le nombre de décimales ?¤setprecision¤
+A¤m¤Associe chaque type à une valeur possible.¤`int`=>42;;`double`=>3.14;;`char`=>'A';;`bool`=>true;;`string`=>"Bonjour"¤
+
+=== cpp-conditions-boucles | C++ : conditions et boucles | f
+## 1. `if`, `else if`, `else`
+
+```run stdin=15 h=iostream main
+double note;
+cin >> note;
+if (note >= 16) {
+    cout << "Très bien" << endl;
+} else if (note >= 10) {
+    cout << "Admis" << endl;
+} else {
+    cout << "Recalé" << endl;
+}
+```
+
+La condition est entre **parenthèses**, le bloc entre **accolades**. Les accolades sont facultatives pour une seule instruction, mais mets-les toujours : cela évite des bugs célèbres.
+
+## 2. Comparer et combiner
+
+| Opérateur | Sens |
+| `==` `!=` | égal, différent |
+| `<` `<=` `>` `>=` | comparaisons |
+| `&&` | et |
+| `||` | ou |
+| `!` | non |
+
+```run h=iostream main
+int age = 17;
+bool carte = true;
+cout << (age >= 18 && carte) << endl;     // 0
+cout << (age >= 18 || carte) << endl;     // 1
+cout << !carte << endl;                   // 0
+cout << boolalpha << (age > 10) << endl;  // boolalpha : affiche true / false
+```
+
+!attention `=` n'est pas `==` | `if (x = 5)` **affecte** 5 à x puis teste 5, qui est toujours vrai. Le compilateur ne te prévient que si tu actives les avertissements (`-Wall`). En C++, tout nombre différent de 0 est vrai.
+
+## 3. L'opérateur ternaire et `switch`
+
+```run stdin=3 h=iostream,string main
+int jour;
+cin >> jour;
+string type = (jour >= 6) ? "week-end" : "semaine";   // condition ? si vrai : si faux
+cout << type << endl;
+
+switch (jour) {
+    case 1: cout << "lundi" << endl; break;
+    case 2: cout << "mardi" << endl; break;
+    case 3: cout << "mercredi" << endl; break;
+    case 6:
+    case 7: cout << "repos" << endl; break;      // deux cas, même traitement
+    default: cout << "autre jour" << endl;
+}
+```
+
+`switch` compare une valeur **entière** (ou un `char`, un `enum`) à des constantes. Sans `break`, l'exécution **continue dans le cas suivant**.
+
+## 4. `while` et `do … while`
+
+```run h=iostream main
+int n = 1;
+while (n < 100) {        // teste AVANT chaque tour
+    n *= 2;
+}
+cout << n << endl;
+
+int essais = 0;
+do {                     // teste APRÈS : au moins un tour
+    essais++;
+} while (essais * essais <= 50);
+cout << essais << endl;
+```
+
+## 5. `for`
+
+`for (départ; condition; évolution)` : le départ s'exécute une fois, la condition avant chaque tour, l'évolution après chaque tour.
+
+```run h=iostream main
+for (int i = 1; i <= 5; i++) {
+    cout << i << " ";
+}
+cout << endl;
+for (int i = 10; i > 0; i -= 3) cout << i << " ";
+cout << endl;
+for (int ligne = 1; ligne <= 3; ligne++) {          // boucles imbriquées
+    for (int col = 1; col <= ligne; col++) cout << "*";
+    cout << endl;
+}
+```
+
+## 6. `break` et `continue`
+
+```run h=iostream main
+for (int i = 1; i <= 10; i++) {
+    if (i % 2 == 0) continue;    // passe directement au tour suivant
+    if (i > 7) break;            // sort de la boucle
+    cout << i << " ";
+}
+cout << endl;
+```
+
+!attention Les boucles infinies | Une boucle dont la condition ne devient jamais fausse ne s'arrête pas : vérifie toujours que la variable testée **change** dans la boucle. Dans le labo, le programme est coupé au bout de quelques secondes.
+
+!tuto Le jeu du « plus ou moins »
+# Une seule comparaison
+```run stdin=50 h=iostream main
+const int SECRET = 42;
+int essai;
+cin >> essai;
+if (essai < SECRET) cout << "Trop petit" << endl;
+else if (essai > SECRET) cout << "Trop grand" << endl;
+else cout << "Gagné !" << endl;
+```
+# Répéter jusqu'à trouver
+On ne sait pas combien d'essais il faudra, mais il y en a au moins un : `do … while`.
+```run stdin=50|30|42 h=iostream main
+const int SECRET = 42;
+int essai;
+do {
+    cin >> essai;
+    if (essai < SECRET) cout << "Trop petit" << endl;
+    else if (essai > SECRET) cout << "Trop grand" << endl;
+} while (essai != SECRET);
+cout << "Gagné !" << endl;
+```
+# Compter les essais
+```run stdin=50|30|42 h=iostream main
+const int SECRET = 42;
+int essai, essais = 0;
+do {
+    cin >> essai;
+    essais++;
+    if (essai < SECRET) cout << "Trop petit" << endl;
+    else if (essai > SECRET) cout << "Trop grand" << endl;
+} while (essai != SECRET);
+cout << "Gagné ! Essais : " << essais << endl;
+```
+!fin
+
+!defi Défi : la mention | Une cascade de `else if`. | cpp-mention
+!defi Défi : FizzBuzz | Le grand classique des entretiens d'embauche. | cpp-fizzbuzz
+!defi Défi : le PGCD | L'algorithme d'Euclide avec un `while`. | cpp-pgcd
+
+!retenir À retenir | `if (condition) { … } else if (…) { … } else { … }`. ¶ `&&` et, `||` ou, `!` non ; `==` compare, `=` affecte. ¶ `while` teste avant, `do … while` après. ¶ `for (int i = 0; i < n; i++)` pour un nombre de tours connu. ¶ `break` sort de la boucle, `continue` passe au tour suivant ; dans un `switch`, chaque `case` se termine par `break`.
+--- exos
+Q¤f¤Comment s'écrit « et » logique en C++ ?¤`&&`;;`and then`;;`&`;;`+`¤
+Q¤f¤Comment s'écrit « différent » ?¤`!=`;;`<>`;;`~=`;;`=/=`¤
+Q¤m¤Combien de tours fait `for (int i = 0; i < 5; i++)` ?¤5;;4;;6;;Une infinité¤i vaut 0, 1, 2, 3, 4.
+Q¤m¤Quelle boucle exécute son bloc au moins une fois ?¤`do … while`;;`while`;;`for`;;Aucune¤
+Q¤m¤Que fait `continue` ?¤Passe directement au tour suivant;;Sort de la boucle;;Arrête le programme;;Recommence la boucle au début¤
+Q¤m¤Que fait `break` dans une boucle ?¤Il sort de la boucle;;Il passe au tour suivant;;Il met le programme en pause;;Il provoque une erreur¤
+Q¤d¤Que se passe-t-il si on oublie `break` dans un `case` ?¤L'exécution continue dans le cas suivant;;Une erreur de compilation;;Le switch s'arrête;;Rien¤
+Q¤d¤Que fait `if (x = 5)` ?¤Affecte 5 à x, et la condition est vraie;;Compare x à 5;;Erreur de compilation;;La condition est fausse¤
+Q¤m¤Que vaut `(age >= 18) ? "majeur" : "mineur"` si age vaut 20 ?¤`"majeur"`;;`"mineur"`;;`true`;;20¤
+Q¤m¤Qu'affiche `for (int i = 10; i > 0; i -= 3) cout << i << " ";` ?¤10 7 4 1;;10 7 4;;10 9 8;;Rien¤
+Q¤d¤Sur quels types `switch` peut-il porter ?¤Les entiers, les char et les enum;;Tous les types;;Les string uniquement;;Les double uniquement¤
+Q¤d¤En C++, quelle valeur numérique est considérée comme fausse ?¤0;;-1;;1;;Aucune¤Tout ce qui est différent de 0 est vrai.
+V¤f¤La condition d'un if s'écrit entre parenthèses.¤V¤
+V¤m¤Une boucle while dont la condition est fausse dès le départ exécute son bloc une fois.¤F¤Elle ne l'exécute pas du tout.
+V¤m¤La variable i déclarée dans `for (int i = 0; …)` existe encore après la boucle.¤F¤Elle est locale à la boucle.
+S¤m¤Quel mot-clé désigne le cas par défaut d'un switch ?¤default¤
+S¤m¤Quel manipulateur fait afficher true/false au lieu de 1/0 ?¤boolalpha¤
+A¤m¤Associe chaque boucle à son usage.¤`for`=>nombre de tours connu;;`while`=>tester avant chaque tour;;`do … while`=>au moins un tour;;`break`=>sortir tout de suite¤
+
+=== cpp-fonctions | C++ : fonctions et références | m
+## 1. Déclarer et appeler
+
+Une fonction annonce le **type de ce qu'elle renvoie**, son nom, et le type de chaque paramètre. `void` signifie « ne renvoie rien ».
+
+```run h=iostream,string main
+double aire(double largeur, double hauteur) {
+    return largeur * hauteur;
+}
+
+void saluer(string nom) {
+    cout << "Bonjour " << nom << " !" << endl;
+}
+@@
+cout << aire(3, 4.5) << endl;
+saluer("Léa");
+```
+
+Une fonction doit être **connue avant d'être utilisée**. Soit on la définit au-dessus de `main`, soit on écrit d'abord son **prototype** (la première ligne suivie d'un point-virgule) et sa définition plus bas :
+
+```run h=iostream
+int carre(int x);              // prototype : promesse que la fonction existe
+
+int main() {
+    cout << carre(7) << endl;
+}
+
+int carre(int x) {             // définition
+    return x * x;
+}
+```
+
+## 2. Passage par valeur : la fonction reçoit une copie
+
+```run h=iostream main
+void doubler(int n) {
+    n = n * 2;                 // modifie la COPIE
+}
+@@
+int x = 5;
+doubler(x);
+cout << x << endl;             // 5 : x n'a pas changé
+```
+
+## 3. Passage par référence : la fonction agit sur l'original
+
+Un `&` après le type crée une **référence** : un autre nom pour la même variable.
+
+```run h=iostream main
+void doubler(int& n) {
+    n = n * 2;                 // modifie l'ORIGINAL
+}
+
+void echanger(int& a, int& b) {
+    int temp = a;
+    a = b;
+    b = temp;
+}
+@@
+int x = 5, y = 9;
+doubler(x);
+echanger(x, y);
+cout << x << " " << y << endl;     // 9 10
+```
+
+### `const &` : sans copie et sans modification
+
+Copier un gros objet (un long texte, un tableau) coûte cher. On le passe alors par **référence constante** : pas de copie, et la fonction s'engage à ne pas le modifier.
+
+```run h=iostream,string main
+int compterA(const string& texte) {      // la forme à retenir pour les objets
+    int n = 0;
+    for (char c : texte) {
+        if (c == 'a') n++;
+    }
+    return n;
+}
+@@
+cout << compterA("abracadabra") << endl;
+```
+
+| Passage | Écriture | Quand |
+| par valeur | `int n` | petits types (`int`, `double`, `char`, `bool`) |
+| par référence | `int& n` | la fonction doit **modifier** la variable |
+| par référence constante | `const string& s` | gros objets en lecture seule |
+
+## 4. Valeurs par défaut et surcharge
+
+```run h=iostream,string main
+double prixTTC(double ht, double taux = 0.2) {        // valeur par défaut
+    return ht * (1 + taux);
+}
+
+int maxi(int a, int b) { return a > b ? a : b; }                   // même nom,
+double maxi(double a, double b) { return a > b ? a : b; }          // paramètres différents :
+string maxi(const string& a, const string& b) { return a > b ? a : b; }   // surcharge
+@@
+cout << prixTTC(100) << " " << prixTTC(100, 0.055) << endl;
+cout << maxi(3, 8) << " " << maxi(2.5, 1.5) << " " << maxi(string("abc"), string("abd")) << endl;
+```
+
+Le compilateur choisit la bonne version d'après les **types des arguments**. Les paramètres avec valeur par défaut se placent en dernier.
+
+## 5. Récursivité
+
+```run h=iostream main
+long long factorielle(int n) {
+    if (n <= 1) return 1;                  // cas d'arrêt
+    return n * factorielle(n - 1);         // appel récursif
+}
+@@
+cout << factorielle(5) << " " << factorielle(20) << endl;
+```
+
+## 6. Portée des variables
+
+Une variable existe de sa déclaration jusqu'à l'accolade fermante de son bloc. Une variable déclarée hors de toute fonction est **globale** : à éviter, sauf pour des constantes.
+
+```run h=iostream main
+const int MAX = 3;                  // constante globale : acceptable
+
+int compteur() {
+    static int n = 0;               // static : garde sa valeur entre les appels
+    n++;
+    return n;
+}
+@@
+for (int i = 0; i < MAX; i++) cout << compteur() << " ";
+cout << endl;
+```
+
+!tuto Une boîte à outils de statistiques
+# Une fonction qui calcule
+```run h=iostream,vector main
+double moyenne(const vector<double>& notes) {
+    double somme = 0;
+    for (double n : notes) somme += n;
+    return somme / notes.size();
+}
+@@
+cout << moyenne({12, 5, 19, 8}) << endl;
+```
+# Renvoyer deux résultats par référence
+Une fonction ne renvoie qu'une valeur avec `return` ; les références permettent d'en « sortir » plusieurs.
+```run h=iostream,vector main
+void minmax(const vector<double>& t, double& mini, double& maxi) {
+    mini = maxi = t[0];
+    for (double v : t) {
+        if (v < mini) mini = v;
+        if (v > maxi) maxi = v;
+    }
+}
+@@
+double a, b;
+minmax({12, 5, 19, 8}, a, b);
+cout << a << " " << b << endl;
+```
+# Composer les fonctions
+```run h=iostream,vector main
+double moyenne(const vector<double>& t) {
+    double s = 0;
+    for (double v : t) s += v;
+    return s / t.size();
+}
+int auDessus(const vector<double>& t, double seuil) {
+    int n = 0;
+    for (double v : t) if (v > seuil) n++;
+    return n;
+}
+@@
+vector<double> notes = {12, 5, 19, 8, 10};
+cout << auDessus(notes, moyenne(notes)) << " notes au-dessus de la moyenne" << endl;
+```
+!fin
+
+!defi Défi : échanger par référence | Écris une fonction qui modifie ses arguments. | cpp-reference
+!defi Défi : minimum et maximum | Deux résultats grâce aux références. | cpp-minmax
+!defi Défi : la factorielle | Une fonction récursive. | cpp-factorielle
+
+!retenir À retenir | `type nom(type param) { … return valeur; }` ; `void` si rien n'est renvoyé. ¶ Par valeur : copie. `int&` : l'original, modifiable. `const string&` : l'original, en lecture seule (à utiliser pour les objets). ¶ Surcharge : même nom, paramètres différents. ¶ Une fonction doit être déclarée (prototype) avant son utilisation.
+--- exos
+Q¤f¤Quel type de retour indique qu'une fonction ne renvoie rien ?¤`void`;;`null`;;`none`;;`empty`¤
+Q¤m¤Avec `void f(int n) { n = 0; }`, que vaut x après `int x = 5; f(x);` ?¤5;;0;;Indéterminé;;Erreur de compilation¤Passage par valeur : f modifie une copie.
+Q¤m¤Avec `void f(int& n) { n = 0; }`, que vaut x après `int x = 5; f(x);` ?¤0;;5;;Indéterminé;;Erreur de compilation¤Passage par référence : f modifie l'original.
+Q¤m¤Quelle est la meilleure façon de passer une longue chaîne en lecture seule ?¤`const string& s`;;`string s`;;`string& s`;;`string* s`¤Pas de copie, pas de modification.
+Q¤m¤Qu'est-ce qu'un prototype de fonction ?¤Sa déclaration, sans le corps, suivie d'un point-virgule;;Une version de test;;Une fonction sans paramètre;;Un commentaire¤
+Q¤m¤Qu'est-ce que la surcharge de fonctions ?¤Plusieurs fonctions de même nom avec des paramètres différents;;Une fonction trop longue;;Une fonction qui s'appelle elle-même;;Une fonction globale¤
+Q¤d¤Deux fonctions surchargées peuvent-elles ne différer que par leur type de retour ?¤Non;;Oui;;Seulement si elles sont const;;Seulement dans une classe¤Le compilateur choisit d'après les arguments.
+Q¤m¤Avec `double ttc(double ht, double taux = 0.2)`, que vaut `ttc(100)` ?¤120;;100;;20;;Erreur¤
+Q¤d¤Où doivent se placer les paramètres avec valeur par défaut ?¤En dernier;;En premier;;N'importe où;;Dans le prototype uniquement¤
+Q¤d¤Que fait `static int n = 0;` dans une fonction ?¤n garde sa valeur d'un appel à l'autre;;n est une constante;;n est globale;;n vaut 0 à chaque appel¤
+Q¤m¤Que manque-t-il à une fonction récursive qui ne s'arrête jamais ?¤Un cas d'arrêt;;Un `break`;;Un prototype;;Une référence¤
+Q¤m¤Que signifie le `&` dans `void f(int& n)` ?¤n est une référence : un autre nom pour la variable de l'appelant;;n est une adresse;;n est une constante;;n est facultatif¤
+V¤m¤Une fonction C++ peut renvoyer plusieurs valeurs avec `return a, b;`.¤F¤return ne renvoie qu'une valeur ; on utilise des références, une struct ou un pair.
+V¤m¤Une fonction doit être déclarée avant la ligne où elle est appelée.¤V¤D'où l'utilité des prototypes.
+V¤d¤On peut passer la valeur littérale 5 à une fonction `void f(int& n)`.¤F¤Une référence non constante doit désigner une variable.
+S¤m¤Quel mot-clé renvoie une valeur depuis une fonction ?¤return¤
+Q¤d¤Pourquoi `factorielle` renvoie-t-elle un `long long` dans le cours ?¤Parce que le résultat dépasse vite la capacité d'un int;;Parce que c'est obligatoire pour la récursivité;;Pour aller plus vite;;Pour éviter les nombres négatifs¤
+A¤m¤Associe chaque écriture à son effet.¤`int n`=>copie de l'argument;;`int& n`=>l'original, modifiable;;`const string& s`=>l'original, non modifiable;;`int n = 0`=>valeur par défaut¤
+
+=== cpp-vector-string | C++ : tableaux, vector et string | m
+## 1. `vector` : le tableau qui grandit
+
+`vector<T>` (bibliothèque `<vector>`) est le conteneur à utiliser par défaut : une suite d'éléments du même type `T`, dont la taille peut changer.
+
+```run h=iostream,vector main
+vector<int> notes = {12, 15, 9};
+notes.push_back(18);                 // ajoute à la fin
+cout << notes[0] << " " << notes.size() << endl;    // premier élément : indice 0
+notes[1] = 16;                       // modifie
+cout << notes.front() << " " << notes.back() << endl;   // premier et dernier
+notes.pop_back();                    // retire le dernier
+cout << notes.size() << " " << notes.empty() << endl;
+
+vector<double> zeros(5, 0.0);        // 5 éléments à 0.0
+vector<string> vide;                 // vide
+cout << zeros.size() << " " << vide.size() << endl;
+```
+
+Les indices vont de **0** à `size() - 1`.
+
+!attention Dépasser les bornes | `notes[10]` sur un vector de 3 éléments ne provoque **pas** d'erreur claire : c'est un *comportement indéfini*, le programme lit n'importe quoi ou plante. `notes.at(10)` vérifie l'indice et arrête proprement le programme.
+
+## 2. Parcourir
+
+```run h=iostream,vector main
+vector<int> notes = {12, 15, 9, 18};
+
+for (int n : notes) cout << n << " ";            // for « range » : chaque valeur (copie)
+cout << endl;
+
+for (int& n : notes) n += 1;                     // int& : modifie les éléments
+
+for (size_t i = 0; i < notes.size(); i++) {      // avec l'indice
+    cout << i << ":" << notes[i] << " ";
+}
+cout << endl;
+
+int somme = 0;
+for (const auto& n : notes) somme += n;          // const auto& : la forme générale
+cout << "Moyenne : " << static_cast<double>(somme) / notes.size() << endl;
+```
+
+## 3. Insérer, supprimer, trier
+
+```run h=iostream,vector,algorithm main
+vector<int> v = {5, 2, 8, 1};
+v.insert(v.begin() + 1, 99);          // insère 99 à l'indice 1
+v.erase(v.begin());                   // supprime l'élément d'indice 0
+sort(v.begin(), v.end());             // trie (bibliothèque <algorithm>)
+for (int x : v) cout << x << " ";
+cout << endl;
+reverse(v.begin(), v.end());
+cout << v[0] << " " << *max_element(v.begin(), v.end()) << endl;
+v.clear();
+cout << v.size() << endl;
+```
+
+`v.begin()` et `v.end()` sont des **itérateurs** : ils désignent le début et la fin (juste après le dernier élément). Presque tous les algorithmes de la bibliothèque standard les utilisent.
+
+## 4. Tableaux à deux dimensions
+
+```run h=iostream,vector main
+vector<vector<int>> grille(3, vector<int>(4, 0));    // 3 lignes de 4 zéros
+grille[1][2] = 7;
+for (const auto& ligne : grille) {
+    for (int c : ligne) cout << c << " ";
+    cout << endl;
+}
+```
+
+## 5. Les tableaux hérités du C
+
+Tu les croiseras dans du code existant. Leur taille est **fixe** et ils ne connaissent pas leur propre taille.
+
+```run h=iostream,array main
+int ancien[3] = {10, 20, 30};            // tableau C : à éviter dans du code neuf
+array<int, 3> moderne = {10, 20, 30};    // std::array : taille fixe, mais sûr
+cout << ancien[1] << " " << moderne[1] << " " << moderne.size() << endl;
+```
+
+## 6. `string`
+
+```run h=iostream,string main
+string s = "Bonjour";
+s += " C++";                              // concaténation
+cout << s << " " << s.size() << endl;
+cout << s[0] << " " << s.back() << endl;  // un caractère (char)
+cout << s.substr(0, 7) << endl;           // 7 caractères à partir de l'indice 0
+cout << s.find("C++") << endl;            // position, ou string::npos si absent
+if (s.find("Java") == string::npos) cout << "pas de Java" << endl;
+s.replace(0, 7, "Salut");                 // remplace 7 caractères à partir de 0
+cout << s << endl;
+cout << (s == "Salut C++") << " " << (string("abc") < string("abd")) << endl;
+```
+
+### Convertir et parcourir
+
+```run h=iostream,string,cctype main
+int n = stoi("42") + 1;                   // string → int   (stod pour double)
+string t = "Total : " + to_string(n);     // nombre → string
+cout << t << endl;
+
+string mot = "Bonjour";
+for (char& c : mot) c = toupper(c);       // <cctype> : toupper, tolower, isdigit, isalpha…
+cout << mot << endl;
+cout << (int)'A' << " " << (char)('A' + 2) << endl;   // un char est un petit entier
+```
+
+!attention `"a" + "b"` ne compile pas | Deux textes entre guillemets sont des tableaux de caractères hérités du C, pas des `string`. Il faut qu'au moins un des deux soit un `string` : `string("a") + "b"`. De même, `"Total : " + 5` ne fait pas ce que tu crois : utilise `to_string(5)`.
+
+!tuto Analyser des températures
+# Lire un nombre inconnu de valeurs
+On lit le nombre de relevés, puis les relevés. Change les entrées.
+```run stdin=5|12.5|14|9.5|17|11 h=iostream,vector main
+int n;
+cin >> n;
+vector<double> temp(n);
+for (double& t : temp) cin >> t;
+cout << temp.size() << " relevés" << endl;
+```
+# Calculer la moyenne et l'écart
+```run stdin=5|12.5|14|9.5|17|11 h=iostream,vector,algorithm main
+int n;
+cin >> n;
+vector<double> temp(n);
+for (double& t : temp) cin >> t;
+double somme = 0;
+for (double t : temp) somme += t;
+double mini = *min_element(temp.begin(), temp.end());
+double maxi = *max_element(temp.begin(), temp.end());
+cout << "Moyenne : " << somme / n << endl;
+cout << "Amplitude : " << maxi - mini << endl;
+```
+# Garder seulement certaines valeurs
+On construit un second vector avec les relevés au-dessus de la moyenne.
+```run stdin=5|12.5|14|9.5|17|11 h=iostream,vector main
+int n;
+cin >> n;
+vector<double> temp(n);
+for (double& t : temp) cin >> t;
+double somme = 0;
+for (double t : temp) somme += t;
+vector<double> chauds;
+for (double t : temp) {
+    if (t > somme / n) chauds.push_back(t);
+}
+for (double t : chauds) cout << t << " ";
+cout << endl;
+```
+!fin
+
+!defi Défi : inverser une liste | Un vector et un parcours à l'envers. | cpp-inverser
+!defi Défi : trier | `sort` de `<algorithm>`. | cpp-tri
+!defi Défi : le chiffre de César | Un `char` est un nombre : fais des calculs dessus. | cpp-cesar
+
+!retenir À retenir | `vector<T>` : `push_back`, `size()`, `v[i]` (indices à partir de 0), `for (const auto& x : v)`. ¶ `sort(v.begin(), v.end())` avec `<algorithm>`. ¶ `string` : `+`, `size()`, `substr(pos, longueur)`, `find` (renvoie `string::npos` si absent). ¶ `stoi` / `to_string` pour convertir. ¶ Sortir des bornes avec `[]` est un comportement indéfini.
+--- exos
+Q¤f¤Quel est l'indice du premier élément d'un vector ?¤0;;1;;-1;;Au choix¤
+Q¤f¤Quelle méthode ajoute un élément à la fin d'un vector ?¤`push_back`;;`add`;;`append`;;`insert_end`¤
+Q¤f¤Quelle méthode donne le nombre d'éléments ?¤`size()`;;`length`;;`count()`;;`len()`¤
+Q¤m¤Que vaut `v.back()` pour `vector<int> v = {4, 7, 9};` ?¤9;;4;;7;;3¤
+Q¤m¤Comment déclarer un vector de 5 entiers valant 0 ?¤`vector<int> v(5, 0);`;;`vector<int> v[5];`;;`vector v = 5;`;;`int v<5>;`¤
+Q¤d¤Que se passe-t-il avec `v[10]` si v n'a que 3 éléments ?¤Un comportement indéfini;;Une exception claire;;Renvoie 0;;Une erreur de compilation¤Utilise `v.at(10)` pour un accès vérifié.
+Q¤m¤Dans `for (int& n : notes) n += 1;`, à quoi sert le `&` ?¤À modifier les éléments du vector;;À aller plus vite;;À parcourir à l'envers;;À rien¤Sans &, n est une copie.
+Q¤m¤Quelle instruction trie un vector v ?¤`sort(v.begin(), v.end());`;;`v.sort();`;;`sort(v);`;;`v.order();`¤
+Q¤m¤Que renvoie `string("Bonjour").substr(0, 3)` ?¤`"Bon"`;;`"Bonj"`;;`"onj"`;;`"jour"`¤Position de départ puis longueur.
+Q¤d¤Que renvoie `s.find("x")` si x est absent de s ?¤`string::npos`;;-1;;0;;Une exception¤
+Q¤m¤Quelle fonction convertit le texte "42" en entier ?¤`stoi`;;`atoi_s`;;`to_int`;;`parse`¤
+Q¤m¤Quelle fonction convertit un nombre en string ?¤`to_string`;;`str`;;`tostring`;;`itoa_s`¤
+Q¤d¤Pourquoi `"a" + "b"` ne compile-t-il pas ?¤Ce sont deux tableaux de caractères du C, pas des string;;Il manque un point-virgule;;L'opérateur + n'existe pas pour le texte;;Il faut utiliser concat¤
+Q¤m¤Que désigne `v.end()` ?¤La position juste après le dernier élément;;Le dernier élément;;La taille;;Le premier élément¤
+V¤m¤La taille d'un vector peut changer pendant l'exécution.¤V¤C'est sa différence avec un tableau C ou un std::array.
+V¤m¤Un tableau C comme `int t[3]` connaît sa propre taille avec `t.size()`.¤F¤Seuls vector et std::array ont une méthode size().
+V¤d¤Un char est en réalité un petit nombre entier.¤V¤'A' vaut 65 ; on peut calculer avec.
+S¤m¤Quelle bibliothèque faut-il inclure pour sort, reverse, max_element ?¤algorithm;;<algorithm>¤
+A¤m¤Associe chaque méthode à son rôle.¤`push_back`=>ajouter à la fin;;`pop_back`=>retirer le dernier;;`clear`=>tout vider;;`empty`=>savoir si c'est vide;;`at`=>accès vérifié¤

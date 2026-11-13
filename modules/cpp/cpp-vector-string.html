@@ -11,173 +11,434 @@
 </head>
 <body data-module="cpp" data-chapter="cpp-vector-string">
 
-<!-- ============ COURS ============ -->
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/cpp.txt) -->
 <article id="cours">
 <div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
-<h2>1. std::vector : le tableau dynamique</h2>
-<pre><code>#include &lt;vector&gt;
-vector&lt;int&gt; notes = {12, 15, 9};
-notes.push_back(18);      // ajoute à la fin
-notes.size()              // 4
-notes[0]                  // 12 (indice 0)
-notes.back()              // 18 (dernier)
-notes.pop_back();         // retire le dernier
-vector&lt;double&gt; v(5, 0.0); // 5 cases à 0</code></pre>
-<p>Un <code>vector</code> grandit tout seul et connaît sa taille : c'est le choix par défaut en C++.</p>
+<h2>1. <code>vector</code> : le tableau qui grandit</h2>
+<p><code>vector&lt;T&gt;</code> (bibliothèque <code>&lt;vector&gt;</code>) est le conteneur à utiliser par défaut : une suite d'éléments du même type <code>T</code>, dont la taille peut changer.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+using namespace std;
 
+int main() {
+    vector&lt;int&gt; notes = {12, 15, 9};
+    notes.push_back(18);                 // ajoute à la fin
+    cout &lt;&lt; notes[0] &lt;&lt; " " &lt;&lt; notes.size() &lt;&lt; endl;    // premier élément : indice 0
+    notes[1] = 16;                       // modifie
+    cout &lt;&lt; notes.front() &lt;&lt; " " &lt;&lt; notes.back() &lt;&lt; endl;   // premier et dernier
+    notes.pop_back();                    // retire le dernier
+    cout &lt;&lt; notes.size() &lt;&lt; " " &lt;&lt; notes.empty() &lt;&lt; endl;
+
+    vector&lt;double&gt; zeros(5, 0.0);        // 5 éléments à 0.0
+    vector&lt;string&gt; vide;                 // vide
+    cout &lt;&lt; zeros.size() &lt;&lt; " " &lt;&lt; vide.size() &lt;&lt; endl;
+}</code></pre></div>
+<p>Les indices vont de <b>0</b> à <code>size() - 1</code>.</p>
+<div class="box attention"><b>Dépasser les bornes</b><p><code>notes[10]</code> sur un vector de 3 éléments ne provoque <b>pas</b> d'erreur claire : c'est un *comportement indéfini*, le programme lit n'importe quoi ou plante. <code>notes.at(10)</code> vérifie l'indice et arrête proprement le programme.</p></div>
 <h2>2. Parcourir</h2>
-<pre><code>for (int i = 0; i &lt; (int)notes.size(); i++) cout &lt;&lt; notes[i] &lt;&lt; &quot; &quot;;
-for (int n : notes) cout &lt;&lt; n &lt;&lt; &quot; &quot;;        // boucle sur les éléments (copie)
-for (int&amp; n : notes) n += 1;                 // par référence : modifie le vector</code></pre>
-<div class="box attention"><b>Hors limites</b><p><code>notes[10]</code> sur un vector de 4 éléments n'est pas vérifié : comportement indéfini (plantage ou valeur aléatoire). <code>notes.at(10)</code>, lui, vérifie l'indice.</p></div>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+using namespace std;
 
-<h2>3. Les algorithmes</h2>
-<pre><code>#include &lt;algorithm&gt;
-#include &lt;numeric&gt;
-sort(notes.begin(), notes.end());                      // trier
-int total = accumulate(notes.begin(), notes.end(), 0); // somme
-int mx = *max_element(notes.begin(), notes.end());     // maximum
-reverse(notes.begin(), notes.end());</code></pre>
+int main() {
+    vector&lt;int&gt; notes = {12, 15, 9, 18};
 
-<h2>4. std::string</h2>
-<pre><code>#include &lt;string&gt;
-string s = &quot;Bonjour&quot;;
-s.size()              // 7
-s[0]                  // &#x27;B&#x27;
-s + &quot; Léa&quot;            // concaténation
-s.substr(0, 3)        // &quot;Bon&quot;
-s.find(&quot;jour&quot;)        // 3
-to_string(42)         // &quot;42&quot;
-stoi(&quot;42&quot;)            // 42</code></pre>
+    for (int n : notes) cout &lt;&lt; n &lt;&lt; " ";            // for « range » : chaque valeur (copie)
+    cout &lt;&lt; endl;
 
-<h2>5. Les tableaux « à la C »</h2>
-<pre><code>int t[5] = {1, 2, 3, 4, 5};   // taille fixe, ne connaît pas sa taille
-int grille[3][3] = {};          // tableau à deux dimensions</code></pre>
-<p>On les rencontre dans du code ancien ou très optimisé ; préfère <code>vector</code> (ou <code>array&lt;int, 5&gt;</code> pour une taille fixe).</p>
-<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cpp.html">labo C++</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+    for (int&amp; n : notes) n += 1;                     // int&amp; : modifie les éléments
+
+    for (size_t i = 0; i &lt; notes.size(); i++) {      // avec l'indice
+        cout &lt;&lt; i &lt;&lt; ":" &lt;&lt; notes[i] &lt;&lt; " ";
+    }
+    cout &lt;&lt; endl;
+
+    int somme = 0;
+    for (const auto&amp; n : notes) somme += n;          // const auto&amp; : la forme générale
+    cout &lt;&lt; "Moyenne : " &lt;&lt; static_cast&lt;double&gt;(somme) / notes.size() &lt;&lt; endl;
+}</code></pre></div>
+<h2>3. Insérer, supprimer, trier</h2>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; v = {5, 2, 8, 1};
+    v.insert(v.begin() + 1, 99);          // insère 99 à l'indice 1
+    v.erase(v.begin());                   // supprime l'élément d'indice 0
+    sort(v.begin(), v.end());             // trie (bibliothèque &lt;algorithm&gt;)
+    for (int x : v) cout &lt;&lt; x &lt;&lt; " ";
+    cout &lt;&lt; endl;
+    reverse(v.begin(), v.end());
+    cout &lt;&lt; v[0] &lt;&lt; " " &lt;&lt; *max_element(v.begin(), v.end()) &lt;&lt; endl;
+    v.clear();
+    cout &lt;&lt; v.size() &lt;&lt; endl;
+}</code></pre></div>
+<p><code>v.begin()</code> et <code>v.end()</code> sont des <b>itérateurs</b> : ils désignent le début et la fin (juste après le dernier élément). Presque tous les algorithmes de la bibliothèque standard les utilisent.</p>
+<h2>4. Tableaux à deux dimensions</h2>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+using namespace std;
+
+int main() {
+    vector&lt;vector&lt;int&gt;&gt; grille(3, vector&lt;int&gt;(4, 0));    // 3 lignes de 4 zéros
+    grille[1][2] = 7;
+    for (const auto&amp; ligne : grille) {
+        for (int c : ligne) cout &lt;&lt; c &lt;&lt; " ";
+        cout &lt;&lt; endl;
+    }
+}</code></pre></div>
+<h2>5. Les tableaux hérités du C</h2>
+<p>Tu les croiseras dans du code existant. Leur taille est <b>fixe</b> et ils ne connaissent pas leur propre taille.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;array&gt;
+using namespace std;
+
+int main() {
+    int ancien[3] = {10, 20, 30};            // tableau C : à éviter dans du code neuf
+    array&lt;int, 3&gt; moderne = {10, 20, 30};    // std::array : taille fixe, mais sûr
+    cout &lt;&lt; ancien[1] &lt;&lt; " " &lt;&lt; moderne[1] &lt;&lt; " " &lt;&lt; moderne.size() &lt;&lt; endl;
+}</code></pre></div>
+<h2>6. <code>string</code></h2>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    string s = "Bonjour";
+    s += " C++";                              // concaténation
+    cout &lt;&lt; s &lt;&lt; " " &lt;&lt; s.size() &lt;&lt; endl;
+    cout &lt;&lt; s[0] &lt;&lt; " " &lt;&lt; s.back() &lt;&lt; endl;  // un caractère (char)
+    cout &lt;&lt; s.substr(0, 7) &lt;&lt; endl;           // 7 caractères à partir de l'indice 0
+    cout &lt;&lt; s.find("C++") &lt;&lt; endl;            // position, ou string::npos si absent
+    if (s.find("Java") == string::npos) cout &lt;&lt; "pas de Java" &lt;&lt; endl;
+    s.replace(0, 7, "Salut");                 // remplace 7 caractères à partir de 0
+    cout &lt;&lt; s &lt;&lt; endl;
+    cout &lt;&lt; (s == "Salut C++") &lt;&lt; " " &lt;&lt; (string("abc") &lt; string("abd")) &lt;&lt; endl;
+}</code></pre></div>
+<h3>Convertir et parcourir</h3>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;cctype&gt;
+using namespace std;
+
+int main() {
+    int n = stoi("42") + 1;                   // string → int   (stod pour double)
+    string t = "Total : " + to_string(n);     // nombre → string
+    cout &lt;&lt; t &lt;&lt; endl;
+
+    string mot = "Bonjour";
+    for (char&amp; c : mot) c = toupper(c);       // &lt;cctype&gt; : toupper, tolower, isdigit, isalpha…
+    cout &lt;&lt; mot &lt;&lt; endl;
+    cout &lt;&lt; (int)'A' &lt;&lt; " " &lt;&lt; (char)('A' + 2) &lt;&lt; endl;   // un char est un petit entier
+}</code></pre></div>
+<div class="box attention"><b><code>"a" + "b"</code> ne compile pas</b><p>Deux textes entre guillemets sont des tableaux de caractères hérités du C, pas des <code>string</code>. Il faut qu'au moins un des deux soit un <code>string</code> : <code>string("a") + "b"</code>. De même, <code>"Total : " + 5</code> ne fait pas ce que tu crois : utilise <code>to_string(5)</code>.</p></div>
+<section class="tuto"><h3><small>Tutoriel</small>Analyser des températures</h3>
+<div class="etape"><h4>Lire un nombre inconnu de valeurs</h4>
+<p>On lit le nombre de relevés, puis les relevés. Change les entrées.</p>
+<div class="essai" data-langue="cpp" data-stdin="5&#10;12.5&#10;14&#10;9.5&#10;17&#10;11"><pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+using namespace std;
+
+int main() {
+    int n;
+    cin &gt;&gt; n;
+    vector&lt;double&gt; temp(n);
+    for (double&amp; t : temp) cin &gt;&gt; t;
+    cout &lt;&lt; temp.size() &lt;&lt; " relevés" &lt;&lt; endl;
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Calculer la moyenne et l'écart</h4>
+<div class="essai" data-langue="cpp" data-stdin="5&#10;12.5&#10;14&#10;9.5&#10;17&#10;11"><pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+using namespace std;
+
+int main() {
+    int n;
+    cin &gt;&gt; n;
+    vector&lt;double&gt; temp(n);
+    for (double&amp; t : temp) cin &gt;&gt; t;
+    double somme = 0;
+    for (double t : temp) somme += t;
+    double mini = *min_element(temp.begin(), temp.end());
+    double maxi = *max_element(temp.begin(), temp.end());
+    cout &lt;&lt; "Moyenne : " &lt;&lt; somme / n &lt;&lt; endl;
+    cout &lt;&lt; "Amplitude : " &lt;&lt; maxi - mini &lt;&lt; endl;
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Garder seulement certaines valeurs</h4>
+<p>On construit un second vector avec les relevés au-dessus de la moyenne.</p>
+<div class="essai" data-langue="cpp" data-stdin="5&#10;12.5&#10;14&#10;9.5&#10;17&#10;11"><pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+using namespace std;
+
+int main() {
+    int n;
+    cin &gt;&gt; n;
+    vector&lt;double&gt; temp(n);
+    for (double&amp; t : temp) cin &gt;&gt; t;
+    double somme = 0;
+    for (double t : temp) somme += t;
+    vector&lt;double&gt; chauds;
+    for (double t : temp) {
+        if (t &gt; somme / n) chauds.push_back(t);
+    }
+    for (double t : chauds) cout &lt;&lt; t &lt;&lt; " ";
+    cout &lt;&lt; endl;
+}</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : inverser une liste</b><p>Un vector et un parcours à l'envers.</p><a class="defi-go" href="labo-cpp.html#m=cpp-inverser">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : trier</b><p><code>sort</code> de <code>&lt;algorithm&gt;</code>.</p><a class="defi-go" href="labo-cpp.html#m=cpp-tri">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : le chiffre de César</b><p>Un <code>char</code> est un nombre : fais des calculs dessus.</p><a class="defi-go" href="labo-cpp.html#m=cpp-cesar">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p><code>vector&lt;T&gt;</code> : <code>push_back</code>, <code>size()</code>, <code>v[i]</code> (indices à partir de 0), <code>for (const auto&amp; x : v)</code>. </p><p> <code>sort(v.begin(), v.end())</code> avec <code>&lt;algorithm&gt;</code>. </p><p> <code>string</code> : <code>+</code>, <code>size()</code>, <code>substr(pos, longueur)</code>, <code>find</code> (renvoie <code>string::npos</code> si absent). </p><p> <code>stoi</code> / <code>to_string</code> pour convertir. </p><p> Sortir des bornes avec <code>[]</code> est un comportement indéfini.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cpp.html">Labo C++</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
 </article>
 
 <!-- ============ EXERCICES ============ -->
 <script>
 window.EF_EXERCICES = [
  {
+  "niveau": "facile",
+  "q": "Quel est l'indice du premier élément d'un vector ?",
   "type": "qcm",
+  "options": [
+   "-1",
+   "1",
+   "Au choix",
+   "0"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
   "niveau": "facile",
   "q": "Quelle méthode ajoute un élément à la fin d'un vector ?",
+  "type": "qcm",
   "options": [
-   "`add()`",
-   "`push_back()`",
-   "`append()`",
-   "`insert_end()`"
+   "`insert_end`",
+   "`add`",
+   "`push_back`",
+   "`append`"
   ],
-  "answer": 1,
+  "answer": 2,
   "explication": ""
  },
  {
-  "type": "qcm",
   "niveau": "facile",
-  "q": "Quelle méthode donne le nombre d'éléments d'un vector ?",
+  "q": "Quelle méthode donne le nombre d'éléments ?",
+  "type": "qcm",
   "options": [
-   "`length()`",
+   "`length`",
    "`size()`",
-   "`count()`",
-   "`len()`"
+   "`len()`",
+   "`count()`"
   ],
   "answer": 1,
   "explication": ""
  },
  {
-  "type": "qcm",
   "niveau": "moyen",
-  "q": "Que fait `for (int& n : v) n *= 2;` ?",
+  "q": "Que vaut `v.back()` pour `vector<int> v = {4, 7, 9};` ?",
+  "type": "qcm",
   "options": [
-   "Rien sur v",
-   "Double chaque élément de v",
-   "Erreur",
-   "Affiche v"
+   "3",
+   "4",
+   "7",
+   "9"
   ],
-  "answer": 1,
-  "explication": "Par référence."
+  "answer": 3,
+  "explication": ""
  },
  {
-  "type": "qcm",
   "niveau": "moyen",
-  "q": "Que se passe-t-il avec v[10] si v a 4 éléments ?",
+  "q": "Comment déclarer un vector de 5 entiers valant 0 ?",
+  "type": "qcm",
   "options": [
-   "Erreur de compilation",
-   "Comportement indéfini (plantage possible)",
+   "`vector<int> v[5];`",
+   "`int v<5>;`",
+   "`vector v = 5;`",
+   "`vector<int> v(5, 0);`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que se passe-t-il avec `v[10]` si v n'a que 3 éléments ?",
+  "type": "qcm",
+  "options": [
+   "Une exception claire",
    "Renvoie 0",
-   "Ajoute un élément"
+   "Une erreur de compilation",
+   "Un comportement indéfini"
   ],
-  "answer": 1,
-  "explication": ""
+  "answer": 3,
+  "explication": "Utilise `v.at(10)` pour un accès vérifié."
  },
  {
-  "type": "qcm",
   "niveau": "moyen",
-  "q": "Comment trier un vector v ?",
+  "q": "Dans `for (int& n : notes) n += 1;`, à quoi sert le `&` ?",
+  "type": "qcm",
   "options": [
-   "`v.sort();`",
-   "`sort(v.begin(), v.end());`",
+   "À modifier les éléments du vector",
+   "À rien",
+   "À parcourir à l'envers",
+   "À aller plus vite"
+  ],
+  "answer": 0,
+  "explication": "Sans &, n est une copie."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle instruction trie un vector v ?",
+  "type": "qcm",
+  "options": [
    "`sort(v);`",
-   "`v = sorted(v);`"
+   "`v.order();`",
+   "`v.sort();`",
+   "`sort(v.begin(), v.end());`"
   ],
-  "answer": 1,
+  "answer": 3,
   "explication": ""
  },
  {
-  "type": "qcm",
   "niveau": "moyen",
-  "q": "Que donne `string(\"Bonjour\").substr(0, 3)` ?",
+  "q": "Que renvoie `string(\"Bonjour\").substr(0, 3)` ?",
+  "type": "qcm",
   "options": [
-   "\"Bon\"",
-   "\"onj\"",
-   "\"jour\"",
-   "3"
+   "`\"jour\"`",
+   "`\"Bon\"`",
+   "`\"onj\"`",
+   "`\"Bonj\"`"
+  ],
+  "answer": 1,
+  "explication": "Position de départ puis longueur."
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que renvoie `s.find(\"x\")` si x est absent de s ?",
+  "type": "qcm",
+  "options": [
+   "`string::npos`",
+   "Une exception",
+   "-1",
+   "0"
   ],
   "answer": 0,
   "explication": ""
  },
  {
-  "type": "qcm",
   "niveau": "moyen",
-  "q": "Comment transformer l'entier 42 en texte ?",
+  "q": "Quelle fonction convertit le texte \"42\" en entier ?",
+  "type": "qcm",
   "options": [
-   "`string(42)`",
-   "`to_string(42)`",
-   "`str(42)`",
-   "`(string)42`"
+   "`to_int`",
+   "`atoi_s`",
+   "`stoi`",
+   "`parse`"
   ],
-  "answer": 1,
+  "answer": 2,
   "explication": ""
  },
  {
-  "type": "vf",
   "niveau": "moyen",
-  "q": "Un vector peut changer de taille pendant l'exécution.",
-  "answer": true,
-  "explication": ""
- },
- {
-  "type": "saisie",
-  "niveau": "moyen",
-  "q": "Quelle fonction convertit le texte \"42\" en int ?",
-  "answers": [
-   "stoi"
-  ],
-  "explication": ""
- },
- {
+  "q": "Quelle fonction convertit un nombre en string ?",
   "type": "qcm",
+  "options": [
+   "`to_string`",
+   "`tostring`",
+   "`itoa_s`",
+   "`str`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
   "niveau": "difficile",
-  "q": "Quelle méthode accède à un élément en vérifiant l'indice ?",
+  "q": "Pourquoi `\"a\" + \"b\"` ne compile-t-il pas ?",
+  "type": "qcm",
   "options": [
-   "`v[i]`",
-   "`v.at(i)`",
-   "`v.get(i)`",
-   "`v.safe(i)`"
+   "Il manque un point-virgule",
+   "L'opérateur + n'existe pas pour le texte",
+   "Ce sont deux tableaux de caractères du C, pas des string",
+   "Il faut utiliser concat"
   ],
-  "answer": 1,
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que désigne `v.end()` ?",
+  "type": "qcm",
+  "options": [
+   "La position juste après le dernier élément",
+   "Le premier élément",
+   "La taille",
+   "Le dernier élément"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "La taille d'un vector peut changer pendant l'exécution.",
+  "type": "vf",
+  "answer": true,
+  "explication": "C'est sa différence avec un tableau C ou un std::array."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Un tableau C comme `int t[3]` connaît sa propre taille avec `t.size()`.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Seuls vector et std::array ont une méthode size()."
+ },
+ {
+  "niveau": "difficile",
+  "q": "Un char est en réalité un petit nombre entier.",
+  "type": "vf",
+  "answer": true,
+  "explication": "'A' vaut 65 ; on peut calculer avec."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle bibliothèque faut-il inclure pour sort, reverse, max_element ?",
+  "type": "saisie",
+  "answers": [
+   "algorithm",
+   "<algorithm>"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque méthode à son rôle.",
+  "type": "associer",
+  "paires": [
+   [
+    "`push_back`",
+    "ajouter à la fin"
+   ],
+   [
+    "`pop_back`",
+    "retirer le dernier"
+   ],
+   [
+    "`clear`",
+    "tout vider"
+   ],
+   [
+    "`empty`",
+    "savoir si c'est vide"
+   ],
+   [
+    "`at`",
+    "accès vérifié"
+   ]
+  ],
   "explication": ""
  }
 ];
@@ -185,6 +446,8 @@ window.EF_EXERCICES = [
 <script src="../../data/modules.js"></script>
 <script src="../../assets/app.js"></script>
 <script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
 <script src="../../assets/chapter.js"></script>
 </body>
 </html>

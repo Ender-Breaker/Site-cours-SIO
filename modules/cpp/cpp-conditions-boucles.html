@@ -11,171 +11,381 @@
 </head>
 <body data-module="cpp" data-chapter="cpp-conditions-boucles">
 
-<!-- ============ COURS ============ -->
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/cpp.txt) -->
 <article id="cours">
 <div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
-<h2>1. Conditions</h2>
-<pre><code>if (note &gt;= 16) {
-    cout &lt;&lt; &quot;Très bien&quot; &lt;&lt; endl;
-} else if (note &gt;= 10) {
-    cout &lt;&lt; &quot;Admis&quot; &lt;&lt; endl;
-} else {
-    cout &lt;&lt; &quot;Recalé&quot; &lt;&lt; endl;
-}
-string statut = (age &gt;= 18) ? &quot;majeur&quot; : &quot;mineur&quot;;</code></pre>
-<p>Opérateurs : <code>== != &lt; &gt; &lt;= &gt;=</code>, et logiques <code>&amp;&amp;</code> (et), <code>||</code> (ou), <code>!</code> (non).</p>
-<div class="box attention"><b>= ou == ?</b><p><code>if (x = 5)</code> <b>affecte</b> 5 à x et vaut toujours vrai ! La comparaison s'écrit <code>==</code>. L'option <code>-Wall</code> du compilateur signale ce genre d'erreur.</p></div>
+<h2>1. <code>if</code>, <code>else if</code>, <code>else</code></h2>
+<div class="essai" data-langue="cpp" data-stdin="15"><pre><code>#include &lt;iostream&gt;
+using namespace std;
 
-<h2>2. switch</h2>
-<pre><code>switch (choix) {
-    case 1: cout &lt;&lt; &quot;Jouer&quot;; break;
-    case 2: cout &lt;&lt; &quot;Options&quot;; break;
-    default: cout &lt;&lt; &quot;Quitter&quot;;
-}</code></pre>
-<p><code>switch</code> ne fonctionne qu'avec des entiers (ou des caractères, des énumérations), pas avec des string.</p>
+int main() {
+    double note;
+    cin &gt;&gt; note;
+    if (note &gt;= 16) {
+        cout &lt;&lt; "Très bien" &lt;&lt; endl;
+    } else if (note &gt;= 10) {
+        cout &lt;&lt; "Admis" &lt;&lt; endl;
+    } else {
+        cout &lt;&lt; "Recalé" &lt;&lt; endl;
+    }
+}</code></pre></div>
+<p>La condition est entre <b>parenthèses</b>, le bloc entre <b>accolades</b>. Les accolades sont facultatives pour une seule instruction, mais mets-les toujours : cela évite des bugs célèbres.</p>
+<h2>2. Comparer et combiner</h2>
+<table><tr><th>Opérateur</th><th>Sens</th></tr><tr><td><code>==</code> <code>!=</code></td><td>égal, différent</td></tr><tr><td><code>&lt;</code> <code>&lt;=</code> <code>&gt;</code> <code>&gt;=</code></td><td>comparaisons</td></tr><tr><td><code>&amp;&amp;</code></td><td>et</td></tr><tr><td><code>||</code></td><td>ou</td></tr><tr><td><code>!</code></td><td>non</td></tr></table>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+using namespace std;
 
-<h2>3. Boucles</h2>
-<pre><code>for (int i = 1; i &lt;= 10; i++) {
-    cout &lt;&lt; i &lt;&lt; &quot; &quot;;
-}
+int main() {
+    int age = 17;
+    bool carte = true;
+    cout &lt;&lt; (age &gt;= 18 &amp;&amp; carte) &lt;&lt; endl;     // 0
+    cout &lt;&lt; (age &gt;= 18 || carte) &lt;&lt; endl;     // 1
+    cout &lt;&lt; !carte &lt;&lt; endl;                   // 0
+    cout &lt;&lt; boolalpha &lt;&lt; (age &gt; 10) &lt;&lt; endl;  // boolalpha : affiche true / false
+}</code></pre></div>
+<div class="box attention"><b><code>=</code> n'est pas <code>==</code></b><p><code>if (x = 5)</code> <b>affecte</b> 5 à x puis teste 5, qui est toujours vrai. Le compilateur ne te prévient que si tu actives les avertissements (<code>-Wall</code>). En C++, tout nombre différent de 0 est vrai.</p></div>
+<h2>3. L'opérateur ternaire et <code>switch</code></h2>
+<div class="essai" data-langue="cpp" data-stdin="3"><pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+using namespace std;
 
-int n = 100;
-while (n &gt; 1) {
-    n /= 2;
-}
+int main() {
+    int jour;
+    cin &gt;&gt; jour;
+    string type = (jour &gt;= 6) ? "week-end" : "semaine";   // condition ? si vrai : si faux
+    cout &lt;&lt; type &lt;&lt; endl;
 
-int x;
-do {                        // au moins une fois
-    cin &gt;&gt; x;
-} while (x &lt; 0);</code></pre>
-<p><code>i++</code> ajoute 1, <code>n /= 2</code> divise n par 2 (aussi <code>+=</code>, <code>-=</code>, <code>*=</code>). <code>break</code> sort de la boucle, <code>continue</code> passe au tour suivant.</p>
+    switch (jour) {
+        case 1: cout &lt;&lt; "lundi" &lt;&lt; endl; break;
+        case 2: cout &lt;&lt; "mardi" &lt;&lt; endl; break;
+        case 3: cout &lt;&lt; "mercredi" &lt;&lt; endl; break;
+        case 6:
+        case 7: cout &lt;&lt; "repos" &lt;&lt; endl; break;      // deux cas, même traitement
+        default: cout &lt;&lt; "autre jour" &lt;&lt; endl;
+    }
+}</code></pre></div>
+<p><code>switch</code> compare une valeur <b>entière</b> (ou un <code>char</code>, un <code>enum</code>) à des constantes. Sans <code>break</code>, l'exécution <b>continue dans le cas suivant</b>.</p>
+<h2>4. <code>while</code> et <code>do … while</code></h2>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+using namespace std;
 
-<h2>4. Portée</h2>
-<p>Une variable déclarée dans un bloc <code>{ }</code> (par exemple le <code>i</code> d'un <code>for</code>) n'existe que dans ce bloc.</p>
-<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cpp.html">labo C++</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+int main() {
+    int n = 1;
+    while (n &lt; 100) {        // teste AVANT chaque tour
+        n *= 2;
+    }
+    cout &lt;&lt; n &lt;&lt; endl;
+
+    int essais = 0;
+    do {                     // teste APRÈS : au moins un tour
+        essais++;
+    } while (essais * essais &lt;= 50);
+    cout &lt;&lt; essais &lt;&lt; endl;
+}</code></pre></div>
+<h2>5. <code>for</code></h2>
+<p><code>for (départ; condition; évolution)</code> : le départ s'exécute une fois, la condition avant chaque tour, l'évolution après chaque tour.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    for (int i = 1; i &lt;= 5; i++) {
+        cout &lt;&lt; i &lt;&lt; " ";
+    }
+    cout &lt;&lt; endl;
+    for (int i = 10; i &gt; 0; i -= 3) cout &lt;&lt; i &lt;&lt; " ";
+    cout &lt;&lt; endl;
+    for (int ligne = 1; ligne &lt;= 3; ligne++) {          // boucles imbriquées
+        for (int col = 1; col &lt;= ligne; col++) cout &lt;&lt; "*";
+        cout &lt;&lt; endl;
+    }
+}</code></pre></div>
+<h2>6. <code>break</code> et <code>continue</code></h2>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    for (int i = 1; i &lt;= 10; i++) {
+        if (i % 2 == 0) continue;    // passe directement au tour suivant
+        if (i &gt; 7) break;            // sort de la boucle
+        cout &lt;&lt; i &lt;&lt; " ";
+    }
+    cout &lt;&lt; endl;
+}</code></pre></div>
+<div class="box attention"><b>Les boucles infinies</b><p>Une boucle dont la condition ne devient jamais fausse ne s'arrête pas : vérifie toujours que la variable testée <b>change</b> dans la boucle. Dans le labo, le programme est coupé au bout de quelques secondes.</p></div>
+<section class="tuto"><h3><small>Tutoriel</small>Le jeu du « plus ou moins »</h3>
+<div class="etape"><h4>Une seule comparaison</h4>
+<div class="essai" data-langue="cpp" data-stdin="50"><pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    const int SECRET = 42;
+    int essai;
+    cin &gt;&gt; essai;
+    if (essai &lt; SECRET) cout &lt;&lt; "Trop petit" &lt;&lt; endl;
+    else if (essai &gt; SECRET) cout &lt;&lt; "Trop grand" &lt;&lt; endl;
+    else cout &lt;&lt; "Gagné !" &lt;&lt; endl;
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Répéter jusqu'à trouver</h4>
+<p>On ne sait pas combien d'essais il faudra, mais il y en a au moins un : <code>do … while</code>.</p>
+<div class="essai" data-langue="cpp" data-stdin="50&#10;30&#10;42"><pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    const int SECRET = 42;
+    int essai;
+    do {
+        cin &gt;&gt; essai;
+        if (essai &lt; SECRET) cout &lt;&lt; "Trop petit" &lt;&lt; endl;
+        else if (essai &gt; SECRET) cout &lt;&lt; "Trop grand" &lt;&lt; endl;
+    } while (essai != SECRET);
+    cout &lt;&lt; "Gagné !" &lt;&lt; endl;
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Compter les essais</h4>
+<div class="essai" data-langue="cpp" data-stdin="50&#10;30&#10;42"><pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    const int SECRET = 42;
+    int essai, essais = 0;
+    do {
+        cin &gt;&gt; essai;
+        essais++;
+        if (essai &lt; SECRET) cout &lt;&lt; "Trop petit" &lt;&lt; endl;
+        else if (essai &gt; SECRET) cout &lt;&lt; "Trop grand" &lt;&lt; endl;
+    } while (essai != SECRET);
+    cout &lt;&lt; "Gagné ! Essais : " &lt;&lt; essais &lt;&lt; endl;
+}</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : la mention</b><p>Une cascade de <code>else if</code>.</p><a class="defi-go" href="labo-cpp.html#m=cpp-mention">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : FizzBuzz</b><p>Le grand classique des entretiens d'embauche.</p><a class="defi-go" href="labo-cpp.html#m=cpp-fizzbuzz">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : le PGCD</b><p>L'algorithme d'Euclide avec un <code>while</code>.</p><a class="defi-go" href="labo-cpp.html#m=cpp-pgcd">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p><code>if (condition) { … } else if (…) { … } else { … }</code>. </p><p> <code>&amp;&amp;</code> et, <code>||</code> ou, <code>!</code> non ; <code>==</code> compare, <code>=</code> affecte. </p><p> <code>while</code> teste avant, <code>do … while</code> après. </p><p> <code>for (int i = 0; i &lt; n; i++)</code> pour un nombre de tours connu. </p><p> <code>break</code> sort de la boucle, <code>continue</code> passe au tour suivant ; dans un <code>switch</code>, chaque <code>case</code> se termine par <code>break</code>.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cpp.html">Labo C++</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
 </article>
 
 <!-- ============ EXERCICES ============ -->
 <script>
 window.EF_EXERCICES = [
  {
-  "type": "qcm",
   "niveau": "facile",
-  "q": "Quel opérateur compare deux valeurs pour l'égalité ?",
-  "options": [
-   "`=`",
-   "`==`",
-   "`===`",
-   "`eq`"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
+  "q": "Comment s'écrit « et » logique en C++ ?",
   "type": "qcm",
-  "niveau": "moyen",
-  "q": "Que fait `if (x = 5)` ?",
   "options": [
-   "Compare x à 5",
-   "Affecte 5 à x et la condition est vraie",
-   "Erreur de compilation toujours",
-   "Rien"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "qcm",
-  "niveau": "facile",
-  "q": "Comment écrit-on « ou » logique ?",
-  "options": [
-   "`or`",
-   "`||`",
-   "`|`",
-   "`ou`"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "qcm",
-  "niveau": "moyen",
-  "q": "Quel type de valeur ne peut pas être utilisé dans un switch ?",
-  "options": [
-   "int",
-   "char",
-   "string",
-   "enum"
+   "`+`",
+   "`&`",
+   "`&&`",
+   "`and then`"
   ],
   "answer": 2,
   "explication": ""
  },
  {
+  "niveau": "facile",
+  "q": "Comment s'écrit « différent » ?",
   "type": "qcm",
-  "niveau": "moyen",
-  "q": "Que fait `n /= 2;` ?",
   "options": [
-   "n = 2",
-   "n = n / 2",
-   "n = n % 2",
-   "Erreur"
+   "`<>`",
+   "`=/=`",
+   "`~=`",
+   "`!=`"
   ],
-  "answer": 1,
+  "answer": 3,
   "explication": ""
  },
  {
-  "type": "qcm",
   "niveau": "moyen",
-  "q": "Quelle boucle s'exécute au moins une fois ?",
-  "options": [
-   "`for`",
-   "`while`",
-   "`do … while`",
-   "Aucune"
-  ],
-  "answer": 2,
-  "explication": ""
- },
- {
+  "q": "Combien de tours fait `for (int i = 0; i < 5; i++)` ?",
   "type": "qcm",
-  "niveau": "moyen",
-  "q": "Combien de tours fait `for (int i = 0; i < 10; i += 2)` ?",
   "options": [
-   "10",
+   "6",
+   "Une infinité",
    "5",
-   "4",
-   "6"
+   "4"
+  ],
+  "answer": 2,
+  "explication": "i vaut 0, 1, 2, 3, 4."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle boucle exécute son bloc au moins une fois ?",
+  "type": "qcm",
+  "options": [
+   "Aucune",
+   "`do … while`",
+   "`for`",
+   "`while`"
   ],
   "answer": 1,
   "explication": ""
  },
  {
-  "type": "vf",
   "niveau": "moyen",
-  "q": "La variable i déclarée dans un for n'existe plus après la boucle.",
+  "q": "Que fait `continue` ?",
+  "type": "qcm",
+  "options": [
+   "Recommence la boucle au début",
+   "Sort de la boucle",
+   "Passe directement au tour suivant",
+   "Arrête le programme"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait `break` dans une boucle ?",
+  "type": "qcm",
+  "options": [
+   "Il sort de la boucle",
+   "Il passe au tour suivant",
+   "Il met le programme en pause",
+   "Il provoque une erreur"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que se passe-t-il si on oublie `break` dans un `case` ?",
+  "type": "qcm",
+  "options": [
+   "Une erreur de compilation",
+   "L'exécution continue dans le cas suivant",
+   "Rien",
+   "Le switch s'arrête"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que fait `if (x = 5)` ?",
+  "type": "qcm",
+  "options": [
+   "La condition est fausse",
+   "Compare x à 5",
+   "Erreur de compilation",
+   "Affecte 5 à x, et la condition est vraie"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que vaut `(age >= 18) ? \"majeur\" : \"mineur\"` si age vaut 20 ?",
+  "type": "qcm",
+  "options": [
+   "`\"majeur\"`",
+   "20",
+   "`\"mineur\"`",
+   "`true`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'affiche `for (int i = 10; i > 0; i -= 3) cout << i << \" \";` ?",
+  "type": "qcm",
+  "options": [
+   "10 7 4 1",
+   "Rien",
+   "10 7 4",
+   "10 9 8"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Sur quels types `switch` peut-il porter ?",
+  "type": "qcm",
+  "options": [
+   "Les entiers, les char et les enum",
+   "Les string uniquement",
+   "Les double uniquement",
+   "Tous les types"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "En C++, quelle valeur numérique est considérée comme fausse ?",
+  "type": "qcm",
+  "options": [
+   "Aucune",
+   "-1",
+   "0",
+   "1"
+  ],
+  "answer": 2,
+  "explication": "Tout ce qui est différent de 0 est vrai."
+ },
+ {
+  "niveau": "facile",
+  "q": "La condition d'un if s'écrit entre parenthèses.",
+  "type": "vf",
   "answer": true,
   "explication": ""
  },
  {
-  "type": "saisie",
   "niveau": "moyen",
-  "q": "Quel mot-clé passe directement au tour suivant d'une boucle ?",
+  "q": "Une boucle while dont la condition est fausse dès le départ exécute son bloc une fois.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Elle ne l'exécute pas du tout."
+ },
+ {
+  "niveau": "moyen",
+  "q": "La variable i déclarée dans `for (int i = 0; …)` existe encore après la boucle.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Elle est locale à la boucle."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel mot-clé désigne le cas par défaut d'un switch ?",
+  "type": "saisie",
   "answers": [
-   "continue"
+   "default"
   ],
   "explication": ""
  },
  {
-  "type": "qcm",
-  "niveau": "difficile",
-  "q": "Que signale l'option -Wall du compilateur ?",
-  "options": [
-   "Toutes les erreurs de connexion",
-   "Des avertissements sur du code suspect",
-   "Les murs du jeu",
-   "Rien"
+  "niveau": "moyen",
+  "q": "Quel manipulateur fait afficher true/false au lieu de 1/0 ?",
+  "type": "saisie",
+  "answers": [
+   "boolalpha"
   ],
-  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque boucle à son usage.",
+  "type": "associer",
+  "paires": [
+   [
+    "`for`",
+    "nombre de tours connu"
+   ],
+   [
+    "`while`",
+    "tester avant chaque tour"
+   ],
+   [
+    "`do … while`",
+    "au moins un tour"
+   ],
+   [
+    "`break`",
+    "sortir tout de suite"
+   ]
+  ],
   "explication": ""
  }
 ];
@@ -183,6 +393,8 @@ window.EF_EXERCICES = [
 <script src="../../data/modules.js"></script>
 <script src="../../assets/app.js"></script>
 <script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
 <script src="../../assets/chapter.js"></script>
 </body>
 </html>

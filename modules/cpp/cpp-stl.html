@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>C++ : la STL, conteneurs, algorithmes et lambdas — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="cpp" data-chapter="cpp-stl">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/cpp.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>La <b>STL</b> (*Standard Template Library*) est la boîte à outils du C++ : des <b>conteneurs</b> pour ranger les données, des <b>algorithmes</b> pour les traiter, et des <b>itérateurs</b> pour relier les deux. La connaître évite de réécrire (mal) ce qui existe déjà.</p>
+<h2>1. <code>map</code> : le dictionnaire</h2>
+<p><code>map&lt;Clé, Valeur&gt;</code> associe une valeur à chaque clé, et garde les clés <b>triées</b>.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;map&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    map&lt;string, int&gt; stock;
+    stock["souris"] = 3;
+    stock["clavier"] = 2;
+    stock["souris"] += 5;                       // modifie
+    stock["ecran"]++;                           // clé absente : créée avec la valeur 0, puis +1
+    cout &lt;&lt; stock["souris"] &lt;&lt; " " &lt;&lt; stock.size() &lt;&lt; endl;
+
+    for (const auto&amp; [nom, quantite] : stock) {     // parcours dans l'ordre des clés
+        cout &lt;&lt; nom &lt;&lt; " : " &lt;&lt; quantite &lt;&lt; endl;
+    }
+    if (stock.count("webcam") == 0) cout &lt;&lt; "pas de webcam" &lt;&lt; endl;
+    if (stock.contains("clavier")) cout &lt;&lt; "clavier présent" &lt;&lt; endl;     // C++20
+    stock.erase("clavier");
+    cout &lt;&lt; stock.size() &lt;&lt; endl;
+}</code></pre></div>
+<div class="box attention"><b><code>m[cle]</code> crée la clé</b><p>Lire <code>stock["webcam"]</code> <b>ajoute</b> la clé avec la valeur 0 si elle n'existe pas. Pour tester la présence sans rien créer, utilise <code>count</code>, <code>contains</code> ou <code>find</code>.</p></div>
+<h2>2. <code>set</code>, <code>unordered_map</code>, <code>pair</code></h2>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;set&gt;
+#include &lt;unordered_map&gt;
+#include &lt;string&gt;
+#include &lt;utility&gt;
+using namespace std;
+
+int main() {
+    set&lt;int&gt; vus = {5, 2, 5, 8, 2};             // ensemble : pas de doublon, trié
+    vus.insert(1);
+    for (int v : vus) cout &lt;&lt; v &lt;&lt; " ";
+    cout &lt;&lt; "(" &lt;&lt; vus.size() &lt;&lt; " valeurs)" &lt;&lt; endl;
+
+    unordered_map&lt;string, double&gt; prix;         // table de hachage : accès très rapide, pas d'ordre
+    prix["souris"] = 19.9;
+    cout &lt;&lt; prix["souris"] &lt;&lt; endl;
+
+    pair&lt;string, int&gt; p = {"Léa", 17};          // deux valeurs réunies
+    cout &lt;&lt; p.first &lt;&lt; " " &lt;&lt; p.second &lt;&lt; endl;
+    auto [nom, age] = p;                        // décomposition (C++17)
+    cout &lt;&lt; nom &lt;&lt; " a " &lt;&lt; age &lt;&lt; " ans" &lt;&lt; endl;
+}</code></pre></div>
+<table><tr><th>Conteneur</th><th>Contenu</th><th>Particularité</th></tr><tr><td><code>vector&lt;T&gt;</code></td><td>suite d'éléments</td><td>accès par indice, le choix par défaut</td></tr><tr><td><code>map&lt;K, V&gt;</code></td><td>clé → valeur</td><td>clés triées</td></tr><tr><td><code>unordered_map&lt;K, V&gt;</code></td><td>clé → valeur</td><td>plus rapide, sans ordre</td></tr><tr><td><code>set&lt;T&gt;</code></td><td>valeurs uniques</td><td>triées</td></tr><tr><td><code>pair&lt;A, B&gt;</code></td><td>deux valeurs</td><td><code>.first</code>, <code>.second</code></td></tr><tr><td><code>deque</code>, <code>list</code>, <code>stack</code>, <code>queue</code></td><td>variantes</td><td>file, pile, liste chaînée</td></tr></table>
+<h2>3. Les lambdas : des fonctions écrites sur place</h2>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    auto carre = [](int x) { return x * x; };          // [] capture, () paramètres, {} corps
+    cout &lt;&lt; carre(7) &lt;&lt; endl;
+
+    int seuil = 10;
+    auto auDessus = [seuil](int x) { return x &gt; seuil; };   // capture seuil par copie
+    cout &lt;&lt; auDessus(15) &lt;&lt; " " &lt;&lt; auDessus(3) &lt;&lt; endl;
+
+    int total = 0;
+    auto ajouter = [&amp;total](int x) { total += x; };         // capture par référence : peut modifier
+    ajouter(5);
+    ajouter(7);
+    cout &lt;&lt; total &lt;&lt; endl;
+}</code></pre></div>
+<table><tr><th>Capture</th><th>Signifie</th></tr><tr><td><code>[]</code></td><td>rien</td></tr><tr><td><code>[x]</code></td><td>une copie de x</td></tr><tr><td><code>[&amp;x]</code></td><td>x par référence</td></tr><tr><td><code>[=]</code></td><td>tout ce qui est utilisé, par copie</td></tr><tr><td><code>[&amp;]</code></td><td>tout ce qui est utilisé, par référence</td></tr></table>
+<h2>4. Les algorithmes</h2>
+<p>Ils travaillent sur un intervalle <code>[begin, end)</code> et prennent souvent une lambda.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+#include &lt;numeric&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; v = {12, 5, 19, 8, 10};
+
+    sort(v.begin(), v.end());                                         // croissant
+    sort(v.begin(), v.end(), [](int a, int b) { return a &gt; b; });     // décroissant
+    for (int x : v) cout &lt;&lt; x &lt;&lt; " ";
+    cout &lt;&lt; endl;
+
+    cout &lt;&lt; count_if(v.begin(), v.end(), [](int x) { return x &gt;= 10; }) &lt;&lt; " notes &gt;= 10" &lt;&lt; endl;
+    cout &lt;&lt; accumulate(v.begin(), v.end(), 0) &lt;&lt; endl;                // somme (&lt;numeric&gt;)
+    cout &lt;&lt; *max_element(v.begin(), v.end()) &lt;&lt; " " &lt;&lt; *min_element(v.begin(), v.end()) &lt;&lt; endl;
+
+    auto it = find(v.begin(), v.end(), 19);                           // renvoie un itérateur
+    if (it != v.end()) cout &lt;&lt; "19 trouvé à l'indice " &lt;&lt; it - v.begin() &lt;&lt; endl;
+    cout &lt;&lt; any_of(v.begin(), v.end(), [](int x) { return x &lt; 6; }) &lt;&lt; endl;
+    cout &lt;&lt; all_of(v.begin(), v.end(), [](int x) { return x &gt; 0; }) &lt;&lt; endl;
+}</code></pre></div>
+<h3>Transformer et filtrer</h3>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; v = {1, 2, 3, 4, 5, 6};
+
+    vector&lt;int&gt; doubles(v.size());
+    transform(v.begin(), v.end(), doubles.begin(), [](int x) { return x * 2; });
+
+    vector&lt;int&gt; pairs;
+    copy_if(v.begin(), v.end(), back_inserter(pairs), [](int x) { return x % 2 == 0; });
+
+    v.erase(remove_if(v.begin(), v.end(), [](int x) { return x &gt; 4; }), v.end());   // supprime selon un critère
+
+    for (int x : doubles) cout &lt;&lt; x &lt;&lt; " ";
+    cout &lt;&lt; "| ";
+    for (int x : pairs) cout &lt;&lt; x &lt;&lt; " ";
+    cout &lt;&lt; "| ";
+    for (int x : v) cout &lt;&lt; x &lt;&lt; " ";
+    cout &lt;&lt; endl;
+}</code></pre></div>
+<h2>5. Trier des objets</h2>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+#include &lt;string&gt;
+using namespace std;
+
+struct Eleve {
+    string nom;
+    double note;
+};
+
+int main() {
+    vector&lt;Eleve&gt; classe = {{"Léa", 15}, {"Sam", 9}, {"Zoé", 18}};
+    sort(classe.begin(), classe.end(), [](const Eleve&amp; a, const Eleve&amp; b) {
+        return a.note &gt; b.note;                  // vrai si a doit passer avant b
+    });
+    for (const Eleve&amp; e : classe) cout &lt;&lt; e.nom &lt;&lt; " " &lt;&lt; e.note &lt;&lt; endl;
+}</code></pre></div>
+<section class="tuto"><h3><small>Tutoriel</small>Compter les mots d'un texte</h3>
+<div class="etape"><h4>Découper le texte en mots</h4>
+<p><code>cin &gt;&gt; mot</code> lit un mot à la fois et renvoie faux quand il n'y a plus rien à lire.</p>
+<div class="essai" data-langue="cpp" data-stdin="le chat et le chien et le lapin"><pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+using namespace std;
+
+int main() {
+    vector&lt;string&gt; mots;
+    string mot;
+    while (cin &gt;&gt; mot) mots.push_back(mot);
+    cout &lt;&lt; mots.size() &lt;&lt; " mots" &lt;&lt; endl;
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Compter avec une map</h4>
+<p><code>compte[mot]++</code> suffit : une clé absente démarre à 0.</p>
+<div class="essai" data-langue="cpp" data-stdin="le chat et le chien et le lapin"><pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;map&gt;
+using namespace std;
+
+int main() {
+    map&lt;string, int&gt; compte;
+    string mot;
+    while (cin &gt;&gt; mot) compte[mot]++;
+    for (const auto&amp; [m, n] : compte) cout &lt;&lt; m &lt;&lt; " : " &lt;&lt; n &lt;&lt; endl;
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Classer par fréquence</h4>
+<p>Une map est triée par clé. Pour trier par valeur, on copie les paires dans un vector.</p>
+<div class="essai" data-langue="cpp" data-stdin="le chat et le chien et le lapin"><pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;map&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+using namespace std;
+
+int main() {
+    map&lt;string, int&gt; compte;
+    string mot;
+    while (cin &gt;&gt; mot) compte[mot]++;
+    vector&lt;pair&lt;string, int&gt;&gt; liste(compte.begin(), compte.end());
+    sort(liste.begin(), liste.end(), [](const auto&amp; a, const auto&amp; b) { return a.second &gt; b.second; });
+    for (const auto&amp; [m, n] : liste) cout &lt;&lt; n &lt;&lt; " x " &lt;&lt; m &lt;&lt; endl;
+}</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : l'inventaire</b><p>Une <code>map</code> fait presque tout le travail.</p><a class="defi-go" href="labo-cpp.html#m=cpp-inventaire">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : supprimer les doublons</b><p>Un <code>set</code> pour savoir ce qu'on a déjà vu.</p><a class="defi-go" href="labo-cpp.html#m=cpp-doublons">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : une lambda</b><p>Compte selon un critère avec <code>count_if</code>.</p><a class="defi-go" href="labo-cpp.html#m=cpp-lambda">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p><code>map&lt;K, V&gt;</code> : dictionnaire trié ; <code>m[cle]</code> crée la clé si elle manque. </p><p> <code>set&lt;T&gt;</code> : valeurs uniques. </p><p> Lambda : <code>[capture](paramètres) { corps }</code>. </p><p> Algorithmes sur <code>v.begin(), v.end()</code> : <code>sort</code>, <code>find</code>, <code>count_if</code>, <code>accumulate</code>, <code>transform</code>, <code>remove_if</code>. </p><p> Trier des objets : <code>sort</code> avec une lambda de comparaison.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cpp.html">Labo C++</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "Quel conteneur associe une valeur à une clé en gardant les clés triées ?",
+  "type": "qcm",
+  "options": [
+   "`array`",
+   "`map`",
+   "`vector`",
+   "`set`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel conteneur ne garde que des valeurs uniques ?",
+  "type": "qcm",
+  "options": [
+   "`vector`",
+   "`map`",
+   "`set`",
+   "`pair`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que fait la lecture `stock[\"webcam\"]` si la clé n'existe pas dans la map ?",
+  "type": "qcm",
+  "options": [
+   "Elle renvoie nullptr",
+   "Elle crée la clé avec la valeur par défaut (0)",
+   "Elle provoque une erreur",
+   "Elle ne fait rien"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment tester la présence d'une clé sans la créer ?",
+  "type": "qcm",
+  "options": [
+   "`cle in m`",
+   "`m.has(cle)`",
+   "`m[cle] != 0`",
+   "`m.count(cle)` ou `m.contains(cle)`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment accéder aux deux valeurs d'un `pair` p ?",
+  "type": "qcm",
+  "options": [
+   "`p.left` et `p.right`",
+   "`p[0]` et `p[1]`",
+   "`p.a` et `p.b`",
+   "`p.first` et `p.second`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Dans la lambda `[seuil](int x) { return x > seuil; }`, que signifie `[seuil]` ?",
+  "type": "qcm",
+  "options": [
+   "seuil est un tableau",
+   "seuil est le type de retour",
+   "seuil est un paramètre",
+   "seuil est capturé par copie"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle capture permet à la lambda de modifier la variable total ?",
+  "type": "qcm",
+  "options": [
+   "`[&total]`",
+   "`[=]`",
+   "`[total]`",
+   "`[]`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel algorithme compte les éléments qui vérifient une condition ?",
+  "type": "qcm",
+  "options": [
+   "`accumulate`",
+   "`find`",
+   "`count_if`",
+   "`sort`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel algorithme calcule la somme des éléments ?",
+  "type": "qcm",
+  "options": [
+   "`sum`",
+   "`total`",
+   "`accumulate`",
+   "`count`"
+  ],
+  "answer": 2,
+  "explication": "Il est dans `<numeric>`."
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que renvoie `find(v.begin(), v.end(), x)` si x est absent ?",
+  "type": "qcm",
+  "options": [
+   "-1",
+   "`v.end()`",
+   "Une exception",
+   "`nullptr`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pour trier en ordre décroissant, quelle lambda donner à sort ?",
+  "type": "qcm",
+  "options": [
+   "`[] { return false; }`",
+   "`[](int a, int b) { return a < b; }`",
+   "`[](int a) { return -a; }`",
+   "`[](int a, int b) { return a > b; }`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle est la différence entre map et unordered_map ?",
+  "type": "qcm",
+  "options": [
+   "unordered_map accepte les doublons",
+   "Aucune",
+   "map n'accepte que des int",
+   "unordered_map est plus rapide mais ne trie pas les clés"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que fait `v.erase(remove_if(v.begin(), v.end(), test), v.end());` ?",
+  "type": "qcm",
+  "options": [
+   "Supprime le premier élément",
+   "Supprime tous les éléments pour lesquels test est vrai",
+   "Vide le vector",
+   "Trie le vector"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que permet `for (const auto& [nom, qte] : stock)` ?",
+  "type": "qcm",
+  "options": [
+   "De trier la map",
+   "De copier la map",
+   "De parcourir une map en nommant directement la clé et la valeur",
+   "De supprimer les éléments"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Une map peut contenir deux fois la même clé.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Chaque clé est unique."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Les éléments d'un set sont automatiquement triés.",
+  "type": "vf",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Une lambda `[]` (capture vide) peut utiliser les variables locales de la fonction qui la contient.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Il faut les capturer."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle bibliothèque contient sort, find et count_if ?",
+  "type": "saisie",
+  "answers": [
+   "algorithm",
+   "<algorithm>"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque algorithme à son rôle.",
+  "type": "associer",
+  "paires": [
+   [
+    "`sort`",
+    "trier"
+   ],
+   [
+    "`find`",
+    "chercher une valeur"
+   ],
+   [
+    "`transform`",
+    "appliquer une fonction à chaque élément"
+   ],
+   [
+    "`accumulate`",
+    "additionner"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

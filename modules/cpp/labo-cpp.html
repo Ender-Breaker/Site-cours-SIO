@@ -14,7 +14,7 @@ window.EF_CODE = {
  "langue": "cpp",
  "key": "ef-labo-cpp",
  "titre": "Labo C++",
- "sousTitre": "Du vrai C++20 compilé par clang dans ton navigateur : programmes console puis jeux en temps réel.",
+ "sousTitre": "Du vrai C++20 compilé par clang dans le navigateur : des bases aux classes, à l'héritage, à la STL et aux templates, puis des jeux en temps réel.",
  "ico": "C++",
  "couleur": "cpp",
  "fichier": "main.cpp",
@@ -124,6 +124,118 @@ window.EF_CODE = {
      "stdin": [
       "100"
      ]
+    },
+    {
+     "id": "cpp-conv",
+     "titre": "Heures, minutes, secondes",
+     "texte": "<p>Lis un nombre de secondes et affiche-le sous la forme <b>H h M min S s<\/b>. La division entière donne les heures, le reste donne ce qu'il reste à convertir.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>cout &lt;&lt; 7 / 2 &lt;&lt; \" \" &lt;&lt; 7 % 2;   // 3 1<\/code><\/pre>",
+     "depart": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int s;\n    cin >> s;\n    return 0;\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>3725<\/code> → <code>1 h 2 min 5 s<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3725"
+          ],
+          "out": "^1 h 2 min 5 s[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>59<\/code> → <code>0 h 0 min 59 s<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "59"
+          ],
+          "out": "^0 h 0 min 59 s[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>86399<\/code> → <code>23 h 59 min 59 s<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "86399"
+          ],
+          "out": "^23 h 59 min 59 s[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>s / 3600<\/code> donne les heures (division entière) ; <code>(s % 3600) / 60<\/code> les minutes ; <code>s % 60<\/code> les secondes.",
+     "solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int s;\n    cin >> s;\n    int h = s / 3600;\n    int m = (s % 3600) / 60;\n    cout << h << \" h \" << m << \" min \" << s % 60 << \" s\" << endl;\n    return 0;\n}\n",
+     "stdin": [
+      "3725"
+     ]
+    },
+    {
+     "id": "cpp-moyenne",
+     "titre": "La moyenne de trois notes",
+     "texte": "<p>Lis trois notes (une par ligne) et affiche <b>Moyenne : X<\/b> avec exactement <b>deux décimales<\/b>.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>#include &lt;iomanip&gt;\ncout &lt;&lt; fixed &lt;&lt; setprecision(2) &lt;&lt; 3.14159;   // 3.14<\/code><\/pre>",
+     "depart": "#include <iostream>\nusing namespace std;\n\nint main() {\n    double a, b, c;\n    cin >> a >> b >> c;\n    return 0;\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>12, 15, 9<\/code> → <code>Moyenne : 12.00<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "12",
+           "15",
+           "9"
+          ],
+          "out": "^Moyenne : 12\\.00[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>10, 11, 11<\/code> → <code>Moyenne : 10.67<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "10",
+           "11",
+           "11"
+          ],
+          "out": "^Moyenne : 10\\.67[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>20, 20, 19<\/code> → <code>Moyenne : 19.67<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "20",
+           "20",
+           "19"
+          ],
+          "out": "^Moyenne : 19\\.67[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Inclus <code>&lt;iomanip&gt;<\/code> puis écris <code>cout &lt;&lt; fixed &lt;&lt; setprecision(2)<\/code> avant la valeur. Lis les notes dans des <code>double<\/code>.",
+     "solution": "#include <iostream>\n#include <iomanip>\nusing namespace std;\n\nint main() {\n    double a, b, c;\n    cin >> a >> b >> c;\n    cout << fixed << setprecision(2) << \"Moyenne : \" << (a + b + c) / 3 << endl;\n    return 0;\n}\n",
+     "stdin": [
+      "12",
+      "15",
+      "9"
+     ]
     }
    ]
   },
@@ -176,6 +288,84 @@ window.EF_CODE = {
      "solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    if (n % 2 == 0) {\n        cout << \"pair\" << endl;\n    } else {\n        cout << \"impair\" << endl;\n    }\n    return 0;\n}\n",
      "stdin": [
       "4"
+     ]
+    },
+    {
+     "id": "cpp-mention",
+     "titre": "La mention",
+     "texte": "<p>Lis une note sur 20 et affiche la mention : <b>Insuffisant<\/b> (moins de 10), <b>Passable<\/b> (de 10 à moins de 12), <b>Assez bien<\/b> (de 12 à moins de 14), <b>Bien<\/b> (de 14 à moins de 16), <b>Très bien<\/b> (16 et plus).<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>if (x &lt; 10) { … }\nelse if (x &lt; 20) { … }\nelse { … }<\/code><\/pre>",
+     "depart": "#include <iostream>\nusing namespace std;\n\nint main() {\n    double note;\n    cin >> note;\n    return 0;\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>8<\/code> → <code>Insuffisant<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "8"
+          ],
+          "out": "^Insuffisant[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>10<\/code> → <code>Passable<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "10"
+          ],
+          "out": "^Passable[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>13<\/code> → <code>Assez bien<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "13"
+          ],
+          "out": "^Assez bien[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>15.5<\/code> → <code>Bien<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "15.5"
+          ],
+          "out": "^Bien[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>18<\/code> → <code>Très bien<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "18"
+          ],
+          "out": "^Très bien[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Enchaîne les <code>else if<\/code> du plus petit seuil au plus grand.",
+     "solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    double note;\n    cin >> note;\n    if (note < 10) cout << \"Insuffisant\" << endl;\n    else if (note < 12) cout << \"Passable\" << endl;\n    else if (note < 14) cout << \"Assez bien\" << endl;\n    else if (note < 16) cout << \"Bien\" << endl;\n    else cout << \"Très bien\" << endl;\n    return 0;\n}\n",
+     "stdin": [
+      "8"
      ]
     },
     {
@@ -278,11 +468,223 @@ window.EF_CODE = {
       "5",
       "0"
      ]
+    },
+    {
+     "id": "cpp-fizzbuzz",
+     "titre": "FizzBuzz",
+     "texte": "<p>Lis un entier n et affiche les nombres de 1 à n, un par ligne. Mais : pour un multiple de 3 affiche <b>Fizz<\/b>, pour un multiple de 5 affiche <b>Buzz<\/b>, et pour un multiple des deux affiche <b>FizzBuzz<\/b>. C'est l'exercice le plus célèbre des entretiens d'embauche.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>if (i % 3 == 0) { … }   // i est un multiple de 3<\/code><\/pre>",
+     "depart": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    return 0;\n}\n",
+     "objectifs": [
+      {
+       "txt": "Avec 15 : de <code>1<\/code> à <code>FizzBuzz<\/code>, 15 lignes",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "15"
+          ],
+          "out": "^1[ \\t]*\\n2[ \\t]*\\nFizz[ \\t]*\\n4[ \\t]*\\nBuzz[ \\t]*\\nFizz[ \\t]*\\n7[ \\t]*\\n8[ \\t]*\\nFizz[ \\t]*\\nBuzz[ \\t]*\\n11[ \\t]*\\nFizz[ \\t]*\\n13[ \\t]*\\n14[ \\t]*\\nFizzBuzz[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Avec 5 : on s'arrête à <code>Buzz<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "5"
+          ],
+          "out": "^1[ \\t]*\\n2[ \\t]*\\nFizz[ \\t]*\\n4[ \\t]*\\nBuzz[ \\t]*$",
+          "notout": "^7\\s*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Teste d'abord le cas « multiple de 15 », sinon il ne sera jamais atteint.",
+     "solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    for (int i = 1; i <= n; i++) {\n        if (i % 15 == 0) cout << \"FizzBuzz\" << endl;\n        else if (i % 3 == 0) cout << \"Fizz\" << endl;\n        else if (i % 5 == 0) cout << \"Buzz\" << endl;\n        else cout << i << endl;\n    }\n    return 0;\n}\n",
+     "stdin": [
+      "15"
+     ]
+    },
+    {
+     "id": "cpp-rebours",
+     "titre": "Compte à rebours",
+     "texte": "<p>Lis un entier n et affiche le compte à rebours de n à 1, un nombre par ligne, puis <b>Décollage !<\/b><\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>for (int i = 10; i &gt;= 1; i--) { … }<\/code><\/pre>",
+     "depart": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    return 0;\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>3<\/code> → <code>3 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3"
+          ],
+          "out": "^3[ \\t]*\\n2[ \\t]*\\n1[ \\t]*\\nDécollage ![ \\t]*$",
+          "notout": "^[4-9]"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>1<\/code> → <code>1 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1"
+          ],
+          "out": "^1[ \\t]*\\nDécollage ![ \\t]*$",
+          "notout": "^[2-9]"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>10<\/code> → <code>10 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "10"
+          ],
+          "out": "^10[ \\t]*\\n9[ \\t]*\\n8[ \\t]*\\n7[ \\t]*\\n6[ \\t]*\\n5[ \\t]*\\n4[ \\t]*\\n3[ \\t]*\\n2[ \\t]*\\n1[ \\t]*\\nDécollage ![ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>for (int i = n; i &gt;= 1; i--)<\/code>",
+     "solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    for (int i = n; i >= 1; i--) {\n        cout << i << endl;\n    }\n    cout << \"Décollage !\" << endl;\n    return 0;\n}\n",
+     "stdin": [
+      "3"
+     ]
+    },
+    {
+     "id": "cpp-devine",
+     "titre": "Plus ou moins",
+     "texte": "<p>Le nombre secret est <b>42<\/b>. Lis des essais (un par ligne) jusqu'à ce que le joueur trouve. Pour chaque essai raté, affiche <b>Trop petit<\/b> ou <b>Trop grand<\/b>. Quand il trouve, affiche <b>Gagné ! Essais : N<\/b> où N est le nombre total d'essais.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>do {\n    …\n} while (condition);   // au moins un tour<\/code><\/pre>",
+     "depart": "#include <iostream>\nusing namespace std;\n\nint main() {\n    const int SECRET = 42;\n    int essais = 0;\n    return 0;\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>50, 30, 42<\/code> → <code>Trop grand …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "50",
+           "30",
+           "42"
+          ],
+          "out": "^Trop grand[ \\t]*\\nTrop petit[ \\t]*\\nGagné ! Essais : 3[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>42<\/code> → <code>Gagné ! Essais : 1<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "42"
+          ],
+          "out": "^Gagné ! Essais : 1[ \\t]*$",
+          "notout": "Trop"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>1, 2, 3, 41, 43, 42<\/code> → <code>Gagné ! Essais : 6<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1",
+           "2",
+           "3",
+           "41",
+           "43",
+           "42"
+          ],
+          "out": "^Gagné ! Essais : 6[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Une boucle <code>do { … } while (essai != SECRET);<\/code> : il y a toujours au moins un essai.",
+     "solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    const int SECRET = 42;\n    int essai, essais = 0;\n    do {\n        cin >> essai;\n        essais++;\n        if (essai < SECRET) cout << \"Trop petit\" << endl;\n        else if (essai > SECRET) cout << \"Trop grand\" << endl;\n    } while (essai != SECRET);\n    cout << \"Gagné ! Essais : \" << essais << endl;\n    return 0;\n}\n",
+     "stdin": [
+      "50",
+      "30",
+      "42"
+     ]
+    },
+    {
+     "id": "cpp-pgcd",
+     "titre": "Le PGCD par l'algorithme d'Euclide",
+     "texte": "<p>Lis deux entiers a et b et affiche <b>PGCD : X<\/b>. Algorithme d'Euclide : tant que b n'est pas nul, on remplace (a, b) par (b, reste de a divisé par b). À la fin, le PGCD est a.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>int reste = a % b;   // garde le reste avant de modifier a<\/code><\/pre>",
+     "depart": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int a, b;\n    cin >> a >> b;\n    return 0;\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>48, 18<\/code> → <code>PGCD : 6<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "48",
+           "18"
+          ],
+          "out": "^PGCD : 6[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>17, 5<\/code> → <code>PGCD : 1<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "17",
+           "5"
+          ],
+          "out": "^PGCD : 1[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>100, 75<\/code> → <code>PGCD : 25<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "100",
+           "75"
+          ],
+          "out": "^PGCD : 25[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Dans la boucle : calcule le reste, puis <code>a = b; b = reste;<\/code>.",
+     "solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int a, b;\n    cin >> a >> b;\n    while (b != 0) {\n        int reste = a % b;\n        a = b;\n        b = reste;\n    }\n    cout << \"PGCD : \" << a << endl;\n    return 0;\n}\n",
+     "stdin": [
+      "48",
+      "18"
+     ]
     }
    ]
   },
   {
-   "titre": "Fonctions, tableaux, objets",
+   "titre": "Fonctions et références",
    "missions": [
     {
      "id": "cpp-premier",
@@ -356,6 +758,310 @@ window.EF_CODE = {
      ]
     },
     {
+     "id": "cpp-reference",
+     "titre": "Échanger par référence",
+     "texte": "<p>La fonction <b>echanger<\/b> doit échanger les valeurs de ses deux arguments. Telle qu'elle est écrite, elle ne modifie que des copies : corrige sa première ligne pour qu'elle agisse sur les variables de <code>main<\/code>. Le programme lit a et b puis les affiche après l'échange.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>void doubler(int&amp; n) {   // &amp; : n désigne la variable d'origine\n    n = n * 2;\n}<\/code><\/pre>",
+     "depart": "#include <iostream>\nusing namespace std;\n\nvoid echanger(int a, int b) {\n    int temp = a;\n    a = b;\n    b = temp;\n}\n\nint main() {\n    int a, b;\n    cin >> a >> b;\n    echanger(a, b);\n    cout << a << \" \" << b << endl;\n    return 0;\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>3, 7<\/code> → <code>7 3<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "7"
+          ],
+          "out": "^7 3[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>-1, 5<\/code> → <code>5 -1<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "-1",
+           "5"
+          ],
+          "out": "^5 -1[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Les paramètres sont des références",
+       "r": [
+        {
+         "code": "echanger\\s*\\(\\s*int\\s*&\\s*\\w+\\s*,\\s*int\\s*&"
+        }
+       ]
+      }
+     ],
+     "indice": "Ajoute <code>&amp;<\/code> après le type de chaque paramètre : <code>void echanger(int&amp; a, int&amp; b)<\/code>.",
+     "solution": "#include <iostream>\nusing namespace std;\n\nvoid echanger(int& a, int& b) {\n    int temp = a;\n    a = b;\n    b = temp;\n}\n\nint main() {\n    int a, b;\n    cin >> a >> b;\n    echanger(a, b);\n    cout << a << \" \" << b << endl;\n    return 0;\n}\n",
+     "stdin": [
+      "3",
+      "7"
+     ]
+    },
+    {
+     "id": "cpp-minmax",
+     "titre": "Minimum et maximum",
+     "texte": "<p>Lis un entier n, puis n nombres (un par ligne). Affiche <b>Min : X<\/b> puis <b>Max : Y<\/b> sur deux lignes. Écris une fonction qui reçoit la liste et calcule les deux valeurs.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>void f(const vector&lt;int&gt;&amp; t, int&amp; a, int&amp; b) {   // deux résultats par référence\n    a = t[0];\n    b = t[1];\n}<\/code><\/pre>",
+     "depart": "#include <iostream>\n#include <vector>\nusing namespace std;\n\n// écris ici une fonction qui calcule le minimum et le maximum\n\nint main() {\n    int n;\n    cin >> n;\n    return 0;\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>4, 12, 5, 19, 8<\/code> → <code>Min : 5 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "4",
+           "12",
+           "5",
+           "19",
+           "8"
+          ],
+          "out": "^Min : 5[ \\t]*\\nMax : 19[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>3, -2, -7, -1<\/code> → <code>Min : -7 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "-2",
+           "-7",
+           "-1"
+          ],
+          "out": "^Min : -7[ \\t]*\\nMax : -1[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>1, 6<\/code> → <code>Min : 6 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1",
+           "6"
+          ],
+          "out": "^Min : 6[ \\t]*\\nMax : 6[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Une fonction transmet les deux résultats (références, pair ou struct)",
+       "r": [
+        {
+         "code": "&\\s*\\w+\\s*,[^)]*&\\s*\\w+\\s*\\)|pair\\s*<|struct\\s+\\w+"
+        }
+       ]
+      }
+     ],
+     "indice": "Une fonction ne renvoie qu'une valeur : passe <code>mini<\/code> et <code>maxi<\/code> <b>par référence<\/b> (<code>int&amp; mini, int&amp; maxi<\/code>).",
+     "solution": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nvoid minmax(const vector<int>& t, int& mini, int& maxi) {\n    mini = maxi = t[0];\n    for (int v : t) {\n        if (v < mini) mini = v;\n        if (v > maxi) maxi = v;\n    }\n}\n\nint main() {\n    int n;\n    cin >> n;\n    vector<int> t(n);\n    for (int& v : t) cin >> v;\n    int mini, maxi;\n    minmax(t, mini, maxi);\n    cout << \"Min : \" << mini << endl;\n    cout << \"Max : \" << maxi << endl;\n    return 0;\n}\n",
+     "stdin": [
+      "4",
+      "12",
+      "5",
+      "19",
+      "8"
+     ]
+    },
+    {
+     "id": "cpp-factorielle",
+     "titre": "La factorielle, en récursif",
+     "texte": "<p>Lis un entier n et affiche <b>n! = résultat<\/b>. La factorielle de n est n × (n − 1) × … × 1, et 0! vaut 1. Écris une fonction <b>récursive<\/b> : elle s'appelle elle-même avec n − 1.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>int compte(int n) {\n    if (n == 0) return 0;        // cas d'arrêt\n    return 1 + compte(n - 1);    // appel récursif\n}<\/code><\/pre>",
+     "depart": "#include <iostream>\nusing namespace std;\n\nlong long factorielle(int n) {\n    // à compléter\n    return 0;\n}\n\nint main() {\n    int n;\n    cin >> n;\n    return 0;\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>5<\/code> → <code>5! = 120<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "5"
+          ],
+          "out": "^5! = 120[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>0<\/code> → <code>0! = 1<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "0"
+          ],
+          "out": "^0! = 1[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>10<\/code> → <code>10! = 3628800<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "10"
+          ],
+          "out": "^10! = 3628800[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "La fonction s'appelle elle-même",
+       "r": [
+        {
+         "code": "\\b(\\w+)\\s*\\(\\s*(?:int|long|unsigned)[^)]*\\)\\s*\\{[\\s\\S]*\\b\\1\\s*\\([\\s\\S]*\\b\\1\\s*\\("
+        }
+       ]
+      }
+     ],
+     "indice": "Cas d'arrêt : <code>if (n &lt;= 1) return 1;<\/code>. Sinon <code>return n * factorielle(n - 1);<\/code>.",
+     "solution": "#include <iostream>\nusing namespace std;\n\nlong long factorielle(int n) {\n    if (n <= 1) return 1;\n    return n * factorielle(n - 1);\n}\n\nint main() {\n    int n;\n    cin >> n;\n    cout << n << \"! = \" << factorielle(n) << endl;\n    return 0;\n}\n",
+     "stdin": [
+      "5"
+     ]
+    },
+    {
+     "id": "cpp-fibo",
+     "titre": "La suite de Fibonacci",
+     "texte": "<p>Lis un entier n (au moins 1) et affiche les n premiers termes de la suite de Fibonacci, séparés par un espace. La suite commence par 0 et 1, puis chaque terme est la somme des deux précédents.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>long long suivant = a + b;\na = b;\nb = suivant;<\/code><\/pre>",
+     "depart": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    return 0;\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>8<\/code> → <code>0 1 1 2 3 5 8 13<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "8"
+          ],
+          "out": "^0 1 1 2 3 5 8 13[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>1<\/code> → <code>0<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1"
+          ],
+          "out": "^0[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>12<\/code> → <code>0 1 1 2 3 5 8 13 21 34 55 89<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "12"
+          ],
+          "out": "^0 1 1 2 3 5 8 13 21 34 55 89[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Deux variables <code>a<\/code> et <code>b<\/code> ; à chaque tour affiche <code>a<\/code>, puis avance : <code>suivant = a + b; a = b; b = suivant;<\/code>.",
+     "solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    long long a = 0, b = 1;\n    for (int i = 0; i < n; i++) {\n        if (i > 0) cout << \" \";\n        cout << a;\n        long long suivant = a + b;\n        a = b;\n        b = suivant;\n    }\n    cout << endl;\n    return 0;\n}\n",
+     "stdin": [
+      "8"
+     ]
+    },
+    {
+     "id": "cpp-binaire",
+     "titre": "Du décimal au binaire",
+     "texte": "<p>Lis un entier positif et affiche son écriture en <b>binaire<\/b>. Méthode des divisions successives : on divise par 2 tant que le nombre n'est pas nul, et les restes lus du dernier au premier donnent le résultat. N'utilise pas de fonction de conversion toute faite.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>string s = to_string(1) + \"0\";   // \"10\"<\/code><\/pre>",
+     "depart": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    return 0;\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>10<\/code> → <code>1010<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "10"
+          ],
+          "out": "^1010[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>255<\/code> → <code>11111111<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "255"
+          ],
+          "out": "^11111111[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>1<\/code> → <code>1<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1"
+          ],
+          "out": "^1[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>0<\/code> → <code>0<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "0"
+          ],
+          "out": "^0[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Ajoute chaque reste <b>devant<\/b> : <code>bits = to_string(n % 2) + bits;<\/code>. Pense au cas n = 0.",
+     "solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    string bits = \"\";\n    if (n == 0) bits = \"0\";\n    while (n > 0) {\n        bits = to_string(n % 2) + bits;\n        n /= 2;\n    }\n    cout << bits << endl;\n    return 0;\n}\n",
+     "stdin": [
+      "10"
+     ]
+    }
+   ]
+  },
+  {
+   "titre": "Vector et string",
+   "missions": [
+    {
      "id": "cpp-tableau",
      "titre": "Un tableau",
      "texte": "<p>Lis un entier n, puis n nombres que tu ranges dans un tableau. Affiche ensuite <b>max = …<\/b> puis <b>moyenne = …<\/b>.<\/p><p><b>Exemple<\/b><\/p><pre><code>vector&lt;double&gt; t(n);\nfor (double x : t) { … }<\/code><\/pre>",
@@ -414,6 +1120,138 @@ window.EF_CODE = {
      ]
     },
     {
+     "id": "cpp-inverser",
+     "titre": "Inverser une liste",
+     "texte": "<p>Lis un entier n, puis n mots (un par ligne). Range-les dans une liste, puis affiche-les <b>dans l'ordre inverse<\/b>, séparés par un espace.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>for (int i = n - 1; i &gt;= 0; i--) { … }   // du dernier au premier<\/code><\/pre>",
+     "depart": "#include <iostream>\n#include <vector>\n#include <string>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    vector<string> t(n);\n    return 0;\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>3, a, b, c<\/code> → <code>c b a<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "a",
+           "b",
+           "c"
+          ],
+          "out": "^c b a[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>4, 10, 20, 30, 40<\/code> → <code>40 30 20 10<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "4",
+           "10",
+           "20",
+           "30",
+           "40"
+          ],
+          "out": "^40 30 20 10[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>1, seul<\/code> → <code>seul<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1",
+           "seul"
+          ],
+          "out": "^seul[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Parcours les indices de <code>n - 1<\/code> à <code>0<\/code>.",
+     "solution": "#include <iostream>\n#include <vector>\n#include <string>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    vector<string> t(n);\n    for (string& s : t) cin >> s;\n    for (int i = n - 1; i >= 0; i--) {\n        cout << t[i];\n        if (i > 0) cout << \" \";\n    }\n    cout << endl;\n    return 0;\n}\n",
+     "stdin": [
+      "3",
+      "a",
+      "b",
+      "c"
+     ]
+    },
+    {
+     "id": "cpp-tri",
+     "titre": "Trier des nombres",
+     "texte": "<p>Lis un entier n, puis n entiers (un par ligne). Affiche-les triés dans l'ordre <b>croissant<\/b>, séparés par un espace. Utilise la fonction de tri du langage. Attention : ce sont des nombres, 9 doit passer avant 10.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>#include &lt;algorithm&gt;\nsort(t.begin(), t.end());<\/code><\/pre>",
+     "depart": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    vector<int> t(n);\n    return 0;\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>5, 5, 2, 8, 1, 9<\/code> → <code>1 2 5 8 9<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "5",
+           "5",
+           "2",
+           "8",
+           "1",
+           "9"
+          ],
+          "out": "^1 2 5 8 9[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>3, 10, 9, 100<\/code> → <code>9 10 100<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "10",
+           "9",
+           "100"
+          ],
+          "out": "^9 10 100[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>4, -1, 3, -5, 0<\/code> → <code>-5 -1 0 3<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "4",
+           "-1",
+           "3",
+           "-5",
+           "0"
+          ],
+          "out": "^-5 -1 0 3[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Inclus <code>&lt;algorithm&gt;<\/code> puis <code>sort(t.begin(), t.end());<\/code>.",
+     "solution": "#include <iostream>\n#include <vector>\n#include <algorithm>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    vector<int> t(n);\n    for (int& v : t) cin >> v;\n    sort(t.begin(), t.end());\n    for (int i = 0; i < n; i++) {\n        if (i > 0) cout << \" \";\n        cout << t[i];\n    }\n    cout << endl;\n    return 0;\n}\n",
+     "stdin": [
+      "5",
+      "5",
+      "2",
+      "8",
+      "1",
+      "9"
+     ]
+    },
+    {
      "id": "cpp-palindrome",
      "titre": "Les chaînes de caractères",
      "texte": "<p>Lis un mot, affiche-le <b>à l'envers<\/b> sur une ligne, puis <b>palindrome<\/b> s'il se lit pareil dans les deux sens, sinon <b>pas un palindrome<\/b>.<\/p><p><b>Exemple<\/b><\/p><pre><code>string inv(mot.rbegin(), mot.rend());<\/code><\/pre>",
@@ -453,6 +1291,341 @@ window.EF_CODE = {
      ]
     },
     {
+     "id": "cpp-voyelles",
+     "titre": "Compter les voyelles",
+     "texte": "<p>Lis un mot écrit en minuscules sans accent et affiche <b>Voyelles : N<\/b>. Les voyelles sont a, e, i, o, u et y.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>for (char c : mot) { … }                       // chaque caractère\nif (string(\"abc\").find(c) != string::npos) { … }   // c est-il dans \"abc\" ?<\/code><\/pre>",
+     "depart": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string mot;\n    cin >> mot;\n    return 0;\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>bonjour<\/code> → <code>Voyelles : 3<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "bonjour"
+          ],
+          "out": "^Voyelles : 3[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>rythme<\/code> → <code>Voyelles : 2<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "rythme"
+          ],
+          "out": "^Voyelles : 2[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>brrr<\/code> → <code>Voyelles : 0<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "brrr"
+          ],
+          "out": "^Voyelles : 0[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Parcours le mot avec <code>for (char c : mot)<\/code> et teste si <code>c<\/code> fait partie de <code>\"aeiouy\"<\/code>.",
+     "solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string mot;\n    cin >> mot;\n    int n = 0;\n    for (char c : mot) {\n        if (string(\"aeiouy\").find(c) != string::npos) n++;\n    }\n    cout << \"Voyelles : \" << n << endl;\n    return 0;\n}\n",
+     "stdin": [
+      "bonjour"
+     ]
+    },
+    {
+     "id": "cpp-mots",
+     "titre": "Compter les mots",
+     "texte": "<p>Lis une phrase et affiche <b>Mots : N<\/b>. Les mots sont séparés par un ou <b>plusieurs<\/b> espaces.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>while (cin &gt;&gt; mot) { … }   // lit un mot à la fois, tant qu'il en reste<\/code><\/pre>",
+     "depart": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string mot;\n    int n = 0;\n    return 0;\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>le chat dort<\/code> → <code>Mots : 3<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "le chat dort"
+          ],
+          "out": "^Mots : 3[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>bonjour<\/code> → <code>Mots : 1<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "bonjour"
+          ],
+          "out": "^Mots : 1[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>un  deux   trois quatre<\/code> → <code>Mots : 4<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "un  deux   trois quatre"
+          ],
+          "out": "^Mots : 4[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>cin &gt;&gt; mot<\/code> saute tous les espaces et renvoie faux quand il n'y a plus rien à lire.",
+     "solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string mot;\n    int n = 0;\n    while (cin >> mot) n++;\n    cout << \"Mots : \" << n << endl;\n    return 0;\n}\n",
+     "stdin": [
+      "le chat dort"
+     ]
+    },
+    {
+     "id": "cpp-cesar",
+     "titre": "Le chiffre de César",
+     "texte": "<p>Lis un texte en minuscules sans accent et affiche-le <b>chiffré<\/b> : chaque lettre est décalée de 3 rangs dans l'alphabet (a devient d, b devient e…), et après z on revient à a (x devient a). Les espaces ne changent pas.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>char c = 'a' + 2;        // 'c' : un char est un nombre\nint rang = 'e' - 'a';    // 4<\/code><\/pre>",
+     "depart": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string texte;\n    getline(cin, texte);\n    return 0;\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>abc<\/code> → <code>def<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "abc"
+          ],
+          "out": "^def[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>xyz<\/code> → <code>abc<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "xyz"
+          ],
+          "out": "^abc[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>bonjour le monde<\/code> → <code>erqmrxu oh prqgh<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "bonjour le monde"
+          ],
+          "out": "^erqmrxu oh prqgh[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>c - 'a'<\/code> donne le rang de 0 à 25 ; ajoute 3, prends le reste modulo 26, rajoute <code>'a'<\/code>. Parcours avec <code>char&amp;<\/code> pour modifier.",
+     "solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string texte;\n    getline(cin, texte);\n    for (char& c : texte) {\n        if (c >= 'a' && c <= 'z') c = 'a' + (c - 'a' + 3) % 26;\n    }\n    cout << texte << endl;\n    return 0;\n}\n",
+     "stdin": [
+      "abc"
+     ]
+    },
+    {
+     "id": "cpp-parentheses",
+     "titre": "Parenthèses équilibrées",
+     "texte": "<p>Lis une expression et affiche <b>équilibré<\/b> si ses parenthèses sont correctement ouvertes et fermées, sinon <b>non équilibré<\/b>. Parcours le texte avec un compteur : +1 pour une ouvrante, −1 pour une fermante. Le compteur ne doit jamais devenir négatif et doit finir à 0.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>if (c == '(') niveau++;<\/code><\/pre>",
+     "depart": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string expr;\n    getline(cin, expr);\n    int niveau = 0;\n    return 0;\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>(()())<\/code> → <code>équilibré<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "(()())"
+          ],
+          "out": "^équilibré[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>(()<\/code> → <code>non équilibré<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "(()"
+          ],
+          "out": "^non équilibré[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>)(<\/code> → <code>non équilibré<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           ")("
+          ],
+          "out": "^non équilibré[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>((a+b)*c)<\/code> → <code>équilibré<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "((a+b)*c)"
+          ],
+          "out": "^équilibré[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Deux conditions : le compteur ne passe jamais sous 0, et il vaut 0 à la fin.",
+     "solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string expr;\n    getline(cin, expr);\n    int niveau = 0;\n    bool ok = true;\n    for (char c : expr) {\n        if (c == '(') niveau++;\n        else if (c == ')') {\n            niveau--;\n            if (niveau < 0) ok = false;\n        }\n    }\n    cout << (ok && niveau == 0 ? \"équilibré\" : \"non équilibré\") << endl;\n    return 0;\n}\n",
+     "stdin": [
+      "(()())"
+     ]
+    }
+   ]
+  },
+  {
+   "titre": "Pointeurs, classes et héritage",
+   "missions": [
+    {
+     "id": "cpp-pointeur",
+     "titre": "Agir à travers un pointeur",
+     "texte": "<p>Complète <b>doubler<\/b> : elle reçoit un <b>pointeur<\/b> vers un entier et double la valeur pointée. Si le pointeur est <code>nullptr<\/code>, elle ne fait rien (sans planter). Le programme lit n, appelle <code>doubler(&amp;n)<\/code> puis <code>doubler(nullptr)<\/code>, et affiche n.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>void zero(int* p) {\n    if (p != nullptr) *p = 0;   // *p : la valeur pointée\n}<\/code><\/pre>",
+     "depart": "#include <iostream>\nusing namespace std;\n\nvoid doubler(int* p) {\n    // à compléter\n}\n\nint main() {\n    int n;\n    cin >> n;\n    doubler(&n);\n    doubler(nullptr);\n    cout << n << endl;\n    return 0;\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>21<\/code> → <code>42<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "21"
+          ],
+          "out": "^42[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>-4<\/code> → <code>-8<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "-4"
+          ],
+          "out": "^-8[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Le pointeur est testé avant d'être utilisé",
+       "r": [
+        {
+         "code": "nullptr|if\\s*\\(\\s*!?\\s*p\\s*\\)"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>if (p != nullptr) *p = *p * 2;<\/code>",
+     "solution": "#include <iostream>\nusing namespace std;\n\nvoid doubler(int* p) {\n    if (p != nullptr) *p = *p * 2;\n}\n\nint main() {\n    int n;\n    cin >> n;\n    doubler(&n);\n    doubler(nullptr);\n    cout << n << endl;\n    return 0;\n}\n",
+     "stdin": [
+      "21"
+     ]
+    },
+    {
+     "id": "cpp-struct",
+     "titre": "Une struct et un vector",
+     "texte": "<p>Définis une struct <b>Produit<\/b> (nom, prix, quantité : des entiers pour le prix et la quantité). Lis un entier n, puis n produits : nom, prix et quantité, chacun sur sa ligne. Range-les dans un <code>vector&lt;Produit&gt;<\/code>. Affiche ensuite, pour chaque produit, <b>nom : montant<\/b> (prix × quantité), puis <b>Total : X<\/b>.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>struct Point {\n    int x, y;\n};\nvector&lt;Point&gt; pts;\npts.push_back({3, 4});<\/code><\/pre>",
+     "depart": "#include <iostream>\n#include <vector>\n#include <string>\nusing namespace std;\n\n// définis ici la struct Produit\n\nint main() {\n    int n;\n    cin >> n;\n    return 0;\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>2, souris, 20, 3, clavier, 50, 1<\/code> → <code>souris : 60 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "2",
+           "souris",
+           "20",
+           "3",
+           "clavier",
+           "50",
+           "1"
+          ],
+          "out": "^souris : 60[ \\t]*\\nclavier : 50[ \\t]*\\nTotal : 110[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>1, ecran, 150, 2<\/code> → <code>ecran : 300 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1",
+           "ecran",
+           "150",
+           "2"
+          ],
+          "out": "^ecran : 300[ \\t]*\\nTotal : 300[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Une <code>struct Produit<\/code> est définie",
+       "r": [
+        {
+         "code": "struct\\s+Produit\\s*\\{"
+        }
+       ]
+      }
+     ],
+     "indice": "N'oublie pas le point-virgule après l'accolade fermante de la struct.",
+     "solution": "#include <iostream>\n#include <vector>\n#include <string>\nusing namespace std;\n\nstruct Produit {\n    string nom;\n    int prix;\n    int quantite;\n};\n\nint main() {\n    int n;\n    cin >> n;\n    vector<Produit> produits(n);\n    for (Produit& p : produits) cin >> p.nom >> p.prix >> p.quantite;\n    int total = 0;\n    for (const Produit& p : produits) {\n        cout << p.nom << \" : \" << p.prix * p.quantite << endl;\n        total += p.prix * p.quantite;\n    }\n    cout << \"Total : \" << total << endl;\n    return 0;\n}\n",
+     "stdin": [
+      "2",
+      "souris",
+      "20",
+      "3",
+      "clavier",
+      "50",
+      "1"
+     ]
+    },
+    {
      "id": "cpp-compte",
      "titre": "Un objet : le compte bancaire",
      "texte": "<p>Crée un type <b>Compte<\/b> qui garde un solde, avec deux opérations : <b>deposer(montant)<\/b> et <b>retirer(montant)<\/b>. Si le solde ne suffit pas, <b>retirer<\/b> affiche <code>Solde insuffisant<\/code> et ne change rien. Le programme principal est déjà écrit en bas.<\/p><p><b>Exemple<\/b><\/p><pre><code>class Chien {\nprivate:\n    string nom;\npublic:\n    Chien(string n) : nom(n) {}\n    void aboyer() { cout &lt;&lt; nom &lt;&lt; &quot; : Ouaf&quot; &lt;&lt; endl; }\n};<\/code><\/pre>",
@@ -488,6 +1661,352 @@ window.EF_CODE = {
      ],
      "indice": "Attribut <code>solde<\/code> en <code>private<\/code>, méthodes en <code>public<\/code>, et <code>getSolde()<\/code> pour le lire. N'oublie pas le <code>;<\/code> après l'accolade de la classe.",
      "solution": "#include <iostream>\nusing namespace std;\n\nclass Compte {\nprivate:\n    int solde;\npublic:\n    Compte(int s) : solde(s) {}\n    void deposer(int m) { solde += m; }\n    void retirer(int m) {\n        if (m > solde) {\n            cout << \"Solde insuffisant\" << endl;\n            return;\n        }\n        solde -= m;\n    }\n    int getSolde() const { return solde; }\n};\n\nint main() {\n    Compte c(100);\n    c.deposer(50);\n    c.retirer(30);\n    c.retirer(500);\n    cout << \"Solde : \" << c.getSolde() << endl;\n    return 0;\n}\n"
+    },
+    {
+     "id": "cpp-heritage",
+     "titre": "Héritage et polymorphisme",
+     "texte": "<p>La classe abstraite <b>Animal<\/b> est écrite. Crée deux classes filles : <b>Chien<\/b>, dont <code>crier()<\/code> renvoie <code>\"Ouaf\"<\/code>, et <b>Chat<\/b>, dont <code>crier()<\/code> renvoie <code>\"Miaou\"<\/code>. Le <code>main<\/code> déjà écrit les parcourt à travers des pointeurs vers <code>Animal<\/code>.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>class Fille : public Mere {\npublic:\n    Fille(const string&amp; nom) : Mere(nom) {}      // appelle le constructeur de la mère\n    string methode() const override { return \"…\"; }\n};<\/code><\/pre>",
+     "depart": "#include <iostream>\n#include <string>\n#include <vector>\nusing namespace std;\n\nclass Animal {\nprotected:\n    string nom;\npublic:\n    Animal(const string& nom) : nom(nom) {}\n    virtual string crier() const = 0;\n    void presenter() const { cout << nom << \" fait \" << crier() << endl; }\n    virtual ~Animal() = default;\n};\n\n// à compléter : les classes Chien et Chat\n\nint main() {\n    Chien rex(\"Rex\");\n    Chat tigrou(\"Tigrou\");\n    vector<const Animal*> animaux = {&rex, &tigrou};\n    for (const Animal* a : animaux) a->presenter();\n    return 0;\n}\n",
+     "objectifs": [
+      {
+       "txt": "Le programme affiche <code>Rex fait Ouaf …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [],
+          "out": "^Rex fait Ouaf[ \\t]*\\nTigrou fait Miaou[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Les deux classes héritent d'<code>Animal<\/code>",
+       "r": [
+        {
+         "code": "class\\s+Chien\\s*:\\s*public\\s+Animal[\\s\\S]*class\\s+Chat\\s*:\\s*public\\s+Animal|class\\s+Chat\\s*:\\s*public\\s+Animal[\\s\\S]*class\\s+Chien\\s*:\\s*public\\s+Animal"
+        }
+       ]
+      },
+      {
+       "txt": "<code>crier<\/code> est redéfinie avec <code>override<\/code>",
+       "r": [
+        {
+         "code": "crier\\s*\\(\\s*\\)\\s*const\\s+override"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>class Chien : public Animal { public: Chien(const string&amp; nom) : Animal(nom) {} string crier() const override { return \"Ouaf\"; } };<\/code>",
+     "solution": "#include <iostream>\n#include <string>\n#include <vector>\nusing namespace std;\n\nclass Animal {\nprotected:\n    string nom;\npublic:\n    Animal(const string& nom) : nom(nom) {}\n    virtual string crier() const = 0;\n    void presenter() const { cout << nom << \" fait \" << crier() << endl; }\n    virtual ~Animal() = default;\n};\n\nclass Chien : public Animal {\npublic:\n    Chien(const string& nom) : Animal(nom) {}\n    string crier() const override { return \"Ouaf\"; }\n};\n\nclass Chat : public Animal {\npublic:\n    Chat(const string& nom) : Animal(nom) {}\n    string crier() const override { return \"Miaou\"; }\n};\n\nint main() {\n    Chien rex(\"Rex\");\n    Chat tigrou(\"Tigrou\");\n    vector<const Animal*> animaux = {&rex, &tigrou};\n    for (const Animal* a : animaux) a->presenter();\n    return 0;\n}\n"
+    },
+    {
+     "id": "cpp-smart",
+     "titre": "Un pointeur intelligent",
+     "texte": "<p>Ce programme crée un objet avec <code>new<\/code> et oublie de le libérer : son destructeur ne s'exécute jamais (<b>fuite de mémoire<\/b>). Remplace le pointeur brut par un <b>unique_ptr<\/b> créé avec <code>make_unique<\/code> : la destruction devient automatique, sans <code>new<\/code> ni <code>delete<\/code>.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>#include &lt;memory&gt;\nauto p = make_unique&lt;Objet&gt;(\"clé\");   // détruit tout seul à la fin du bloc\ncout &lt;&lt; p-&gt;nom;<\/code><\/pre>",
+     "depart": "#include <iostream>\n#include <string>\n#include <memory>\nusing namespace std;\n\nstruct Objet {\n    string nom;\n    Objet(const string& n) : nom(n) { cout << \"création de \" << nom << endl; }\n    ~Objet() { cout << \"destruction de \" << nom << endl; }\n};\n\nint main() {\n    Objet* o = new Objet(\"potion\");\n    cout << o->nom << endl;\n    return 0;\n}\n",
+     "objectifs": [
+      {
+       "txt": "Le programme affiche <code>création de potion …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [],
+          "out": "^création de potion[ \\t]*\\npotion[ \\t]*\\ndestruction de potion[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Utilise <code>make_unique<\/code>",
+       "r": [
+        {
+         "code": "make_unique\\s*<\\s*Objet\\s*>"
+        }
+       ]
+      },
+      {
+       "txt": "Plus de <code>new<\/code> ni de <code>delete<\/code>",
+       "r": [
+        {
+         "nocode": "\\bnew\\s+Objet|\\bdelete\\b"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>auto o = make_unique&lt;Objet&gt;(\"potion\");<\/code>",
+     "solution": "#include <iostream>\n#include <string>\n#include <memory>\nusing namespace std;\n\nstruct Objet {\n    string nom;\n    Objet(const string& n) : nom(n) { cout << \"création de \" << nom << endl; }\n    ~Objet() { cout << \"destruction de \" << nom << endl; }\n};\n\nint main() {\n    auto o = make_unique<Objet>(\"potion\");\n    cout << o->nom << endl;\n    return 0;\n}\n"
+    }
+   ]
+  },
+  {
+   "titre": "STL, lambdas et templates",
+   "missions": [
+    {
+     "id": "cpp-inventaire",
+     "titre": "L'inventaire",
+     "texte": "<p>Lis un entier n, puis n articles : pour chacun, son <b>nom<\/b> sur une ligne et sa <b>quantité<\/b> sur la ligne suivante. Un même nom peut revenir plusieurs fois : additionne ses quantités dans un dictionnaire. Affiche ensuite une ligne <b>nom : total<\/b> par article, dans l'ordre <b>alphabétique<\/b>.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>stock[nom] += qte;                          // clé absente : démarre à 0\nfor (const auto&amp; [cle, valeur] : stock) { … }   // dans l'ordre des clés<\/code><\/pre>",
+     "depart": "#include <iostream>\n#include <string>\n#include <map>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    map<string, int> stock;\n    return 0;\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>3, souris, 3, clavier, 2, souris, 5<\/code> → <code>clavier : 2 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "souris",
+           "3",
+           "clavier",
+           "2",
+           "souris",
+           "5"
+          ],
+          "out": "^clavier : 2[ \\t]*\\nsouris : 8[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>4, ecran, 1, cable, 10, ecran, 1, adaptateur, 4<\/code> → <code>adaptateur : 4 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "4",
+           "ecran",
+           "1",
+           "cable",
+           "10",
+           "ecran",
+           "1",
+           "adaptateur",
+           "4"
+          ],
+          "out": "^adaptateur : 4[ \\t]*\\ncable : 10[ \\t]*\\necran : 2[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Une <code>map&lt;string, int&gt;<\/code> garde ses clés triées : il suffit de la parcourir.",
+     "solution": "#include <iostream>\n#include <string>\n#include <map>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    map<string, int> stock;\n    for (int i = 0; i < n; i++) {\n        string nom;\n        int qte;\n        cin >> nom >> qte;\n        stock[nom] += qte;\n    }\n    for (const auto& [nom, qte] : stock) {\n        cout << nom << \" : \" << qte << endl;\n    }\n    return 0;\n}\n",
+     "stdin": [
+      "3",
+      "souris",
+      "3",
+      "clavier",
+      "2",
+      "souris",
+      "5"
+     ]
+    },
+    {
+     "id": "cpp-doublons",
+     "titre": "Supprimer les doublons",
+     "texte": "<p>Lis un entier n, puis n mots (un par ligne). Affiche chaque mot <b>une seule fois<\/b>, dans l'ordre de sa première apparition, séparés par un espace.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>set&lt;string&gt; vus;\nif (vus.count(mot) == 0) { vus.insert(mot); … }   // jamais vu<\/code><\/pre>",
+     "depart": "#include <iostream>\n#include <string>\n#include <set>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    set<string> vus;\n    return 0;\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>5, a, b, a, c, b<\/code> → <code>a b c<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "5",
+           "a",
+           "b",
+           "a",
+           "c",
+           "b"
+          ],
+          "out": "^a b c[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>3, x, x, x<\/code> → <code>x<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "x",
+           "x",
+           "x"
+          ],
+          "out": "^x[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>4, lua, java, cpp, java<\/code> → <code>lua java cpp<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "4",
+           "lua",
+           "java",
+           "cpp",
+           "java"
+          ],
+          "out": "^lua java cpp[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Un <code>set<\/code> sert à savoir ce qui a déjà été vu ; un <code>vector<\/code> garde l'ordre d'apparition.",
+     "solution": "#include <iostream>\n#include <string>\n#include <set>\n#include <vector>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    set<string> vus;\n    vector<string> res;\n    for (int i = 0; i < n; i++) {\n        string mot;\n        cin >> mot;\n        if (vus.insert(mot).second) res.push_back(mot);\n    }\n    for (size_t i = 0; i < res.size(); i++) {\n        if (i > 0) cout << \" \";\n        cout << res[i];\n    }\n    cout << endl;\n    return 0;\n}\n",
+     "stdin": [
+      "5",
+      "a",
+      "b",
+      "a",
+      "c",
+      "b"
+     ]
+    },
+    {
+     "id": "cpp-lambda",
+     "titre": "Compter avec une lambda",
+     "texte": "<p>Lis un entier n, puis n notes. Affiche <b>Admis : X<\/b>, où X est le nombre de notes supérieures ou égales à 10. Utilise l'algorithme <code>count_if<\/code> avec une <b>lambda<\/b>, sans écrire de boucle de comptage.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>#include &lt;algorithm&gt;\nint n = count_if(v.begin(), v.end(), [](int x) { return x % 2 == 0; });   // nombre de pairs<\/code><\/pre>",
+     "depart": "#include <iostream>\n#include <vector>\n#include <algorithm>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    vector<double> notes(n);\n    for (double& x : notes) cin >> x;\n    return 0;\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>5, 12, 5, 19, 8, 10<\/code> → <code>Admis : 3<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "5",
+           "12",
+           "5",
+           "19",
+           "8",
+           "10"
+          ],
+          "out": "^Admis : 3[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>2, 9, 9.5<\/code> → <code>Admis : 0<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "2",
+           "9",
+           "9.5"
+          ],
+          "out": "^Admis : 0[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>1, 10<\/code> → <code>Admis : 1<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1",
+           "10"
+          ],
+          "out": "^Admis : 1[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Utilise <code>count_if<\/code> avec une lambda",
+       "r": [
+        {
+         "code": "count_if\\s*\\([\\s\\S]*\\[[^\\]]*\\]\\s*\\("
+        }
+       ]
+      }
+     ],
+     "indice": "<code>count_if(notes.begin(), notes.end(), [](double x) { return x &gt;= 10; })<\/code>",
+     "solution": "#include <iostream>\n#include <vector>\n#include <algorithm>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    vector<double> notes(n);\n    for (double& x : notes) cin >> x;\n    int admis = count_if(notes.begin(), notes.end(), [](double x) { return x >= 10; });\n    cout << \"Admis : \" << admis << endl;\n    return 0;\n}\n",
+     "stdin": [
+      "5",
+      "12",
+      "5",
+      "19",
+      "8",
+      "10"
+     ]
+    },
+    {
+     "id": "cpp-template",
+     "titre": "Une fonction template",
+     "texte": "<p>Écris <b>une seule<\/b> fonction template <b>plusGrand(a, b)<\/b> qui renvoie le plus grand de ses deux arguments, quel que soit leur type. Le <code>main<\/code> déjà écrit l'appelle avec des entiers, des réels et des chaînes.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>template &lt;typename T&gt;\nT premier(T a, T b) {\n    return a;\n}<\/code><\/pre>",
+     "depart": "#include <iostream>\n#include <string>\nusing namespace std;\n\n// à compléter : la fonction template plusGrand\n\nint main() {\n    cout << plusGrand(3, 8) << endl;\n    cout << plusGrand(2.5, 1.5) << endl;\n    cout << plusGrand(string(\"pomme\"), string(\"poire\")) << endl;\n    return 0;\n}\n",
+     "objectifs": [
+      {
+       "txt": "Le programme affiche <code>8 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [],
+          "out": "^8[ \\t]*\\n2\\.5[ \\t]*\\npomme[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Une seule fonction, déclarée avec <code>template<\/code>",
+       "r": [
+        {
+         "code": "template\\s*<\\s*(typename|class)\\s+\\w+\\s*>"
+        }
+       ]
+      },
+      {
+       "txt": "Pas de surcharge type par type",
+       "r": [
+        {
+         "nocode": "\\b(int|double|string)\\s+plusGrand\\s*\\("
+        }
+       ]
+      }
+     ],
+     "indice": "<code>template &lt;typename T&gt; T plusGrand(T a, T b) { return a &gt; b ? a : b; }<\/code>",
+     "solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\ntemplate <typename T>\nT plusGrand(T a, T b) {\n    return a > b ? a : b;\n}\n\nint main() {\n    cout << plusGrand(3, 8) << endl;\n    cout << plusGrand(2.5, 1.5) << endl;\n    cout << plusGrand(string(\"pomme\"), string(\"poire\")) << endl;\n    return 0;\n}\n"
+    },
+    {
+     "id": "cpp-vecteur",
+     "titre": "Surcharger des opérateurs",
+     "texte": "<p>Complète la struct <b>Vec<\/b> pour que deux vecteurs s'additionnent avec <code>+<\/code>, et écris l'opérateur <code>&lt;&lt;<\/code> pour qu'un vecteur s'affiche sous la forme <b>(x, y)<\/b>.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>struct P {\n    int v;\n    P operator+(const P&amp; o) const { return {v + o.v}; }\n};\nostream&amp; operator&lt;&lt;(ostream&amp; f, const P&amp; p) { return f &lt;&lt; p.v; }<\/code><\/pre>",
+     "depart": "#include <iostream>\nusing namespace std;\n\nstruct Vec {\n    double x, y;\n    // à compléter : operator+\n};\n\n// à compléter : operator<<\n\nint main() {\n    Vec a{1, 2}, b{3, 4};\n    cout << a + b << endl;\n    cout << a + b + Vec{10, 10} << endl;\n    return 0;\n}\n",
+     "objectifs": [
+      {
+       "txt": "Le programme affiche <code>(4, 6) …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [],
+          "out": "^\\(4, 6\\)[ \\t]*\\n\\(14, 16\\)[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "<code>operator+<\/code> et <code>operator&lt;&lt;<\/code> sont définis",
+       "r": [
+        {
+         "code": "operator\\s*\\+[\\s\\S]*operator\\s*<<"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>operator&lt;&lt;<\/code> s'écrit <b>hors<\/b> de la struct et renvoie le flux : <code>ostream&amp; operator&lt;&lt;(ostream&amp; f, const Vec&amp; v)<\/code>.",
+     "solution": "#include <iostream>\nusing namespace std;\n\nstruct Vec {\n    double x, y;\n    Vec operator+(const Vec& o) const { return {x + o.x, y + o.y}; }\n};\n\nostream& operator<<(ostream& f, const Vec& v) {\n    return f << \"(\" << v.x << \", \" << v.y << \")\";\n}\n\nint main() {\n    Vec a{1, 2}, b{3, 4};\n    cout << a + b << endl;\n    cout << a + b + Vec{10, 10} << endl;\n    return 0;\n}\n"
     }
    ]
   },
@@ -706,12 +2225,7 @@ window.EF_CODE = {
      ],
      "indice": "<code>vx = -vx;<\/code> quand la balle touche un bord.",
      "solution": "#include \"jeu.h\"\n\ndouble x = 100, y = 80;\ndouble vx = 4, vy = 3;\n\nvoid update(double dt) {\n    x += vx;\n    y += vy;\n    if (x < 12 || x > LARGEUR - 12) vx = -vx;\n    if (y < 12 || y > HAUTEUR - 12) vy = -vy;\n}\n\nvoid draw() {\n    effacer(\"black\");\n    cercle(x, y, 12, \"red\");\n}\n"
-    }
-   ]
-  },
-  {
-   "titre": "Mini-jeux",
-   "missions": [
+    },
     {
      "id": "cpp-clics",
      "titre": "Compter les clics",
@@ -838,7 +2352,12 @@ window.EF_CODE = {
      ],
      "indice": "Un entier se transforme en texte avec <code>std::to_string(score)<\/code>.",
      "solution": "#include \"jeu.h\"\n\nint score = 0;\n\nvoid update(double dt) {\n    if (clic()) score++;\n}\n\nvoid draw() {\n    effacer(\"black\");\n    texte(\"Score : \" + std::to_string(score), 16, 16, 28, \"white\");\n    cercle(sourisX(), sourisY(), 10, \"yellow\");\n}\n"
-    },
+    }
+   ]
+  },
+  {
+   "titre": "Mini-jeux",
+   "missions": [
     {
      "id": "cpp-saut",
      "titre": "Sauter avec la gravité",
@@ -1062,6 +2581,197 @@ window.EF_CODE = {
      ],
      "indice": "<code>setup()<\/code> est appelée une fois au début ; écris une fonction <code>nouveauFruit()<\/code> pour ne pas répéter le code.",
      "solution": "#include \"jeu.h\"\n\ndouble px = 200;\ndouble fx = 240, fy = 0;\nint score = 0;\n\nvoid nouveauFruit() {\n    fx = hasard(20, 460);\n    fy = 0;\n}\n\nvoid setup() {\n    nouveauFruit();\n}\n\nvoid update(double dt) {\n    if (touche(\"droite\")) px += 6;\n    if (touche(\"gauche\")) px -= 6;\n    if (px < 0) px = 0;\n    if (px > LARGEUR - 80) px = LARGEUR - 80;\n    fy += 4;\n    if (fy >= 280 && fy <= 300 && fx >= px && fx <= px + 80) {\n        score++;\n        nouveauFruit();\n    } else if (fy > HAUTEUR) {\n        nouveauFruit();\n    }\n}\n\nvoid draw() {\n    effacer(\"black\");\n    rect(px, 290, 80, 12, \"white\");\n    cercle(fx, fy, 10, \"red\");\n    texte(\"Score : \" + std::to_string(score), 16, 16, 24, \"white\");\n}\n"
+    },
+    {
+     "id": "cpp-etoiles",
+     "titre": "La pluie d'étoiles",
+     "texte": "<p>Fais tomber <b>5 étoiles<\/b>. Ce sont des cercles <b>blancs<\/b> (<code>\"white\"<\/code>) de rayon 3, rangés dans une <b>liste<\/b>. Leurs x valent 60, 150, 240, 330 et 420 ; leurs y de départ valent 0, 40, 80, 120 et 160. À chaque image, chaque étoile descend de <b>2 pixels<\/b> ; dès que son y dépasse 320, elle repart à y = 0. Le fond est noir.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>etoiles.push_back({60.0, 0.0});            // ajoute une étoile\nfor (Etoile&amp; e : etoiles) e.y += 2;        // &amp; : modifie l'original<\/code><\/pre>",
+     "depart": "#include \"jeu.h\"\n#include <vector>\n\nstruct Etoile { double x, y; };\nstd::vector<Etoile> etoiles;\n\nvoid setup() {\n    // crée les 5 étoiles\n}\n\nvoid update(double dt) {\n}\n\nvoid draw() {\n    effacer(\"black\");\n}\n",
+     "objectifs": [
+      {
+       "txt": "5 cercles blancs à chaque image",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 30
+           }
+          ],
+          "test": "const c = F.map(q => T(q, 'cercle').filter(v => v[4] === 'white').sort((a, b) => a[1] - b[1]));\nreturn c.every(f => f.length === 5) && [60, 150, 240, 330, 420].every((x, i) => c[0][i][1] === x);"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Chaque étoile descend de 2 pixels par image",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 30
+           }
+          ],
+          "test": "const c = F.map(q => T(q, 'cercle').filter(v => v[4] === 'white').sort((a, b) => a[1] - b[1]));\nreturn c[0].every((v, i) => c[10][i][2] - v[2] === 20 && c[1][i][2] - v[2] === 2);"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Les étoiles partent de hauteurs différentes",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 3
+           }
+          ],
+          "test": "const c = F.map(q => T(q, 'cercle').filter(v => v[4] === 'white').sort((a, b) => a[1] - b[1]));\nreturn new Set(c[0].map(v => v[2])).size === 5;"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Arrivées en bas, elles repartent du haut et ne sortent jamais",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 200
+           }
+          ],
+          "test": "const c = F.map(q => T(q, 'cercle').filter(v => v[4] === 'white').sort((a, b) => a[1] - b[1]));\nreturn c.every(f => f.every(v => v[2] >= 0 && v[2] <= 322)) && [0, 1, 2, 3, 4].every(i => c.some((f, k) => k && f[i][2] < c[k - 1][i][2]));"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Crée les étoiles dans <code>setup<\/code> : <code>etoiles.push_back({60.0 + i * 90, i * 40.0});<\/code>. Parcours avec <code>Etoile&amp;<\/code> pour les déplacer.",
+     "solution": "#include \"jeu.h\"\n#include <vector>\n\nstruct Etoile { double x, y; };\nstd::vector<Etoile> etoiles;\n\nvoid setup() {\n    for (int i = 0; i < 5; i++) {\n        etoiles.push_back({60.0 + i * 90, i * 40.0});\n    }\n}\n\nvoid update(double dt) {\n    for (Etoile& e : etoiles) {\n        e.y += 2;\n        if (e.y > 320) e.y = 0;\n    }\n}\n\nvoid draw() {\n    effacer(\"black\");\n    for (const Etoile& e : etoiles) {\n        cercle(e.x, e.y, 3, \"white\");\n    }\n}\n"
+    },
+    {
+     "id": "cpp-tir",
+     "titre": "Tirer des projectiles",
+     "texte": "<p>Un vaisseau (rectangle <b>bleu<\/b> <code>\"blue\"<\/code> de 40 × 20, en y = 290) part de x = 220 et se déplace de 5 pixels par image avec les flèches gauche et droite. À chaque <b>appui<\/b> sur espace, il crée un tir : un rectangle <b>jaune<\/b> (<code>\"yellow\"<\/code>) de 4 × 10 placé en (x du vaisseau + 18, 280). Chaque tir monte de <b>8 pixels<\/b> par image et il est <b>retiré de la liste<\/b> quand son y devient négatif. Le fond est noir.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>tirs.erase(std::remove_if(tirs.begin(), tirs.end(),\n    [](const Tir&amp; t) { return t.y &lt; 0; }), tirs.end());   // supprime les tirs sortis<\/code><\/pre>",
+     "depart": "#include \"jeu.h\"\n#include <vector>\n#include <algorithm>\n\nstruct Tir { double x, y; };\ndouble x = 220;\nstd::vector<Tir> tirs;\n\nvoid setup() {\n}\n\nvoid update(double dt) {\n}\n\nvoid draw() {\n    effacer(\"black\");\n    rect(x, 290, 40, 20, \"blue\");\n}\n",
+     "objectifs": [
+      {
+       "txt": "Le vaisseau bleu se déplace avec les flèches",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1
+           },
+           {
+            "n": 10,
+            "k": [
+             "droite"
+            ]
+           }
+          ],
+          "test": "const x = P('rect', 'blue').map(v => v && v[1]);\nreturn x[0] === 220 && x[10] === 270;"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Aucun tir tant qu'on n'appuie pas sur espace",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 5
+           }
+          ],
+          "test": "const t = F.map(q => T(q, 'rect').filter(v => v[5] === 'yellow'));\nreturn t.every(f => f.length === 0);"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Un appui sur espace crée un seul tir, qui monte de 8 pixels par image",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 2
+           },
+           {
+            "n": 1,
+            "p": [
+             "espace"
+            ]
+           },
+           {
+            "n": 6
+           }
+          ],
+          "test": "const t = F.map(q => T(q, 'rect').filter(v => v[5] === 'yellow'));\nreturn t[1].length === 0 && t[4].length === 1 && t[8].length === 1 && t[4][0][2] - t[5][0][2] === 8 && t[4][0][1] === 238;"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Deux appuis : deux tirs à l'écran",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1,
+            "p": [
+             "espace"
+            ]
+           },
+           {
+            "n": 5
+           },
+           {
+            "n": 1,
+            "p": [
+             "espace"
+            ]
+           },
+           {
+            "n": 3
+           }
+          ],
+          "test": "const t = F.map(q => T(q, 'rect').filter(v => v[5] === 'yellow'));\nreturn t[t.length - 1].length === 2;"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Un tir sorti de l'écran est retiré de la liste",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1,
+            "p": [
+             "espace"
+            ]
+           },
+           {
+            "n": 60
+           }
+          ],
+          "test": "const t = F.map(q => T(q, 'rect').filter(v => v[5] === 'yellow'));\nreturn t[2].length === 1 && t[t.length - 1].length === 0 && t.every(f => f.every(v => v[2] >= -10));"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>toucheAppuyee(\"espace\")<\/code> n'est vrai qu'une image par appui. Supprime avec l'idiome <code>erase<\/code> + <code>remove_if<\/code>.",
+     "solution": "#include \"jeu.h\"\n#include <vector>\n#include <algorithm>\n\nstruct Tir { double x, y; };\ndouble x = 220;\nstd::vector<Tir> tirs;\n\nvoid setup() {\n}\n\nvoid update(double dt) {\n    if (touche(\"gauche\")) x -= 5;\n    if (touche(\"droite\")) x += 5;\n    if (toucheAppuyee(\"espace\")) tirs.push_back({x + 18, 280});\n    for (Tir& t : tirs) t.y -= 8;\n    tirs.erase(std::remove_if(tirs.begin(), tirs.end(), [](const Tir& t) { return t.y < 0; }), tirs.end());\n}\n\nvoid draw() {\n    effacer(\"black\");\n    rect(x, 290, 40, 20, \"blue\");\n    for (const Tir& t : tirs) {\n        rect(t.x, t.y, 4, 10, \"yellow\");\n    }\n}\n"
     }
    ]
   }

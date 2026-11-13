@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>C++ : héritage et polymorphisme — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="cpp" data-chapter="cpp-heritage">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/cpp.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<h2>1. Hériter d'une classe</h2>
+<p>Une classe <b>fille</b> (ou dérivée) reprend les attributs et les méthodes de sa classe <b>mère</b> (ou de base), et peut en ajouter.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+class Personnage {
+protected:                          // accessible aux classes filles
+    string nom;
+    int pv;
+public:
+    Personnage(const string&amp; nom, int pv) : nom(nom), pv(pv) {}
+    void blesser(int d) { pv -= d; if (pv &lt; 0) pv = 0; }
+    void afficher() const { cout &lt;&lt; nom &lt;&lt; " : " &lt;&lt; pv &lt;&lt; " PV" &lt;&lt; endl; }
+};
+
+class Guerrier : public Personnage {              // Guerrier EST UN Personnage
+    int force;
+public:
+    Guerrier(const string&amp; nom, int force)
+        : Personnage(nom, 20), force(force) {}    // appelle d'abord le constructeur de la mère
+    void frapper(Personnage&amp; cible) { cible.blesser(force); }
+};
+
+int main() {
+    Guerrier g("Conan", 7);
+    Personnage p("Gobelin", 10);
+    g.frapper(p);
+    g.afficher();            // méthode héritée
+    p.afficher();
+}</code></pre></div>
+<p>L'héritage exprime une relation <b>« est un »</b> : un Guerrier est un Personnage. Si la relation est « a un » (une voiture <b>a un</b> moteur), on utilise un attribut, pas l'héritage.</p>
+<h2>2. Redéfinir une méthode : <code>virtual</code> et <code>override</code></h2>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+class Animal {
+protected:
+    string nom;
+public:
+    Animal(const string&amp; nom) : nom(nom) {}
+    virtual string crier() const { return "..."; }       // virtual : redéfinissable
+    void presenter() const { cout &lt;&lt; nom &lt;&lt; " fait " &lt;&lt; crier() &lt;&lt; endl; }
+    virtual ~Animal() = default;                         // destructeur virtuel : voir plus bas
+};
+
+class Chien : public Animal {
+public:
+    Chien(const string&amp; nom) : Animal(nom) {}
+    string crier() const override { return "Ouaf"; }     // override : vérifié par le compilateur
+};
+
+class Chat : public Animal {
+public:
+    using Animal::Animal;                                // réutilise les constructeurs de la mère
+    string crier() const override { return "Miaou"; }
+};
+
+int main() {
+    Chien rex("Rex");
+    Chat tigrou("Tigrou");
+    rex.presenter();
+    tigrou.presenter();
+}</code></pre></div>
+<p><code>presenter</code> est écrite une seule fois dans <code>Animal</code>, mais appelle le <code>crier</code> de la <b>vraie</b> classe de l'objet : c'est le <b>polymorphisme</b>.</p>
+<div class="box attention"><b>Sans <code>virtual</code>, pas de polymorphisme</b><p>Si <code>crier</code> n'est pas <code>virtual</code> dans la classe mère, c'est toujours la version de la mère qui est appelée à travers une référence ou un pointeur de type <code>Animal</code>. Et sans <code>override</code>, une faute de frappe dans la signature crée silencieusement une <b>nouvelle</b> méthode au lieu de redéfinir l'ancienne.</p></div>
+<h2>3. Le polymorphisme passe par les pointeurs et les références</h2>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+using namespace std;
+
+class Forme {
+public:
+    virtual double aire() const = 0;       // = 0 : méthode virtuelle PURE
+    virtual string nom() const = 0;
+    virtual ~Forme() = default;
+};
+
+class Rectangle : public Forme {
+    double l, h;
+public:
+    Rectangle(double l, double h) : l(l), h(h) {}
+    double aire() const override { return l * h; }
+    string nom() const override { return "rectangle"; }
+};
+
+class Cercle : public Forme {
+    double r;
+public:
+    Cercle(double r) : r(r) {}
+    double aire() const override { return 3.14159 * r * r; }
+    string nom() const override { return "cercle"; }
+};
+
+void decrire(const Forme&amp; f) {             // accepte n'importe quelle Forme
+    cout &lt;&lt; f.nom() &lt;&lt; " d'aire " &lt;&lt; f.aire() &lt;&lt; endl;
+}
+
+int main() {
+    Rectangle r(3, 4);
+    Cercle c(1);
+    decrire(r);
+    decrire(c);
+
+    vector&lt;Forme*&gt; formes = {&amp;r, &amp;c};          // une collection de formes différentes
+    double total = 0;
+    for (const Forme* f : formes) total += f-&gt;aire();
+    cout &lt;&lt; "Aire totale : " &lt;&lt; total &lt;&lt; endl;
+}</code></pre></div>
+<p>Une classe qui possède au moins une méthode virtuelle pure est <b>abstraite</b> : on ne peut pas créer d'objet <code>Forme</code>, seulement des objets de ses classes filles. C'est l'équivalent d'une <b>interface</b>.</p>
+<div class="box attention"><b>Le découpage (*slicing*)</b><p><code>vector&lt;Forme&gt;</code> ne peut pas contenir des rectangles : copier un <code>Rectangle</code> dans une variable de type <code>Forme</code> ne garde que la partie mère. Pour le polymorphisme, il faut toujours des <b>pointeurs</b> ou des <b>références</b>.</p></div>
+<h2>4. Appeler la version de la mère</h2>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+class Employe {
+protected:
+    string nom;
+    double salaire;
+public:
+    Employe(const string&amp; n, double s) : nom(n), salaire(s) {}
+    virtual double paie() const { return salaire; }
+    virtual ~Employe() = default;
+};
+
+class Commercial : public Employe {
+    double ventes;
+public:
+    Commercial(const string&amp; n, double s, double v) : Employe(n, s), ventes(v) {}
+    double paie() const override {
+        return Employe::paie() + ventes * 0.05;     // la paie de base + une commission
+    }
+};
+
+int main() {
+    Commercial c("Sam", 2000, 10000);
+    const Employe&amp; e = c;
+    cout &lt;&lt; e.paie() &lt;&lt; endl;
+}</code></pre></div>
+<h2>5. Pourquoi un destructeur virtuel ?</h2>
+<p>Quand on détruit un objet de classe fille à travers un pointeur de la classe mère, seul un destructeur <code>virtual</code> garantit que le destructeur de la fille est appelé. Règle simple : <b>une classe avec au moins une méthode virtuelle a un destructeur virtuel</b>.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+class Base {
+public:
+    virtual ~Base() { cout &lt;&lt; "destruction de Base" &lt;&lt; endl; }
+};
+class Derivee : public Base {
+public:
+    ~Derivee() override { cout &lt;&lt; "destruction de Derivee" &lt;&lt; endl; }
+};
+
+int main() {
+    Base* p = new Derivee();
+    delete p;              // appelle ~Derivee puis ~Base grâce à virtual
+}</code></pre></div>
+<section class="tuto"><h3><small>Tutoriel</small>Un système de notifications</h3>
+<div class="etape"><h4>La classe abstraite</h4>
+<p>Elle fixe ce que <b>toute</b> notification sait faire, sans dire comment.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+class Notification {
+protected:
+    string message;
+public:
+    Notification(const string&amp; m) : message(m) {}
+    virtual void envoyer() const = 0;
+    virtual ~Notification() = default;
+};
+
+int main() {
+    // Notification n("test");    // refusé : classe abstraite
+    cout &lt;&lt; "Notification est abstraite" &lt;&lt; endl;
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Deux classes concrètes</h4>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+class Notification {
+protected:
+    string message;
+public:
+    Notification(const string&amp; m) : message(m) {}
+    virtual void envoyer() const = 0;
+    virtual ~Notification() = default;
+};
+class Email : public Notification {
+    string adresse;
+public:
+    Email(const string&amp; m, const string&amp; a) : Notification(m), adresse(a) {}
+    void envoyer() const override { cout &lt;&lt; "Mail à " &lt;&lt; adresse &lt;&lt; " : " &lt;&lt; message &lt;&lt; endl; }
+};
+class Sms : public Notification {
+    string numero;
+public:
+    Sms(const string&amp; m, const string&amp; n) : Notification(m), numero(n) {}
+    void envoyer() const override { cout &lt;&lt; "SMS au " &lt;&lt; numero &lt;&lt; " : " &lt;&lt; message &lt;&lt; endl; }
+};
+
+int main() {
+    Email e("Serveur en panne", "admin@exemple.fr");
+    Sms s("Serveur en panne", "0601020304");
+    e.envoyer();
+    s.envoyer();
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Les traiter toutes de la même façon</h4>
+<p>Le code qui envoie ne connaît que <code>Notification</code>. Ajouter un nouveau type (une notification Slack) ne demande <b>aucune</b> modification de cette boucle : essaie.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+using namespace std;
+
+class Notification {
+protected:
+    string message;
+public:
+    Notification(const string&amp; m) : message(m) {}
+    virtual void envoyer() const = 0;
+    virtual ~Notification() = default;
+};
+class Email : public Notification {
+public:
+    using Notification::Notification;
+    void envoyer() const override { cout &lt;&lt; "[mail] " &lt;&lt; message &lt;&lt; endl; }
+};
+class Sms : public Notification {
+public:
+    using Notification::Notification;
+    void envoyer() const override { cout &lt;&lt; "[sms] " &lt;&lt; message &lt;&lt; endl; }
+};
+
+int main() {
+    Email e("Sauvegarde terminée");
+    Sms s("Disque plein");
+    vector&lt;const Notification*&gt; file = {&amp;e, &amp;s, &amp;e};
+    for (const Notification* n : file) n-&gt;envoyer();
+}</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : l'héritage</b><p>Une classe abstraite, deux classes filles, une boucle polymorphe.</p><a class="defi-go" href="labo-cpp.html#m=cpp-heritage">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p><code>class Fille : public Mere { … };</code> ; le constructeur de la fille appelle celui de la mère dans sa liste d'initialisation. </p><p> <code>virtual</code> dans la mère, <code>override</code> dans la fille. </p><p> <code>virtual … = 0;</code> : méthode pure, classe abstraite (non instanciable). </p><p> Le polymorphisme exige un pointeur ou une référence vers la classe mère. </p><p> Destructeur <code>virtual</code> dès qu'il y a une méthode virtuelle.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cpp.html">Labo C++</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "Comment déclarer que Chien hérite d'Animal ?",
+  "type": "qcm",
+  "options": [
+   "`class Chien extends Animal`",
+   "`class Chien : public Animal`",
+   "`class Chien(Animal)`",
+   "`class Chien inherits Animal`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel mot-clé, dans la classe mère, autorise la redéfinition polymorphe d'une méthode ?",
+  "type": "qcm",
+  "options": [
+   "`dynamic`",
+   "`abstract`",
+   "`override`",
+   "`virtual`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel mot-clé, dans la classe fille, fait vérifier la redéfinition par le compilateur ?",
+  "type": "qcm",
+  "options": [
+   "`override`",
+   "`virtual`",
+   "`super`",
+   "`final`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel niveau d'accès est visible des classes filles mais pas de l'extérieur ?",
+  "type": "qcm",
+  "options": [
+   "`friend`",
+   "`public`",
+   "`private`",
+   "`protected`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que signifie `= 0` dans `virtual double aire() const = 0;` ?",
+  "type": "qcm",
+  "options": [
+   "La méthode est privée",
+   "La méthode renvoie 0",
+   "La méthode est désactivée",
+   "La méthode est virtuelle pure : les filles doivent la définir"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'une classe abstraite ?",
+  "type": "qcm",
+  "options": [
+   "Une classe privée",
+   "Une classe qu'on ne peut pas instancier, car elle a une méthode virtuelle pure",
+   "Une classe sans attribut",
+   "Une classe sans constructeur"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle relation l'héritage exprime-t-il ?",
+  "type": "qcm",
+  "options": [
+   "« utilise un »",
+   "« a un »",
+   "« est un »",
+   "« contient un »"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Dans le constructeur de Guerrier, où appelle-t-on celui de Personnage ?",
+  "type": "qcm",
+  "options": [
+   "Nulle part, c'est automatique avec les bons arguments",
+   "Dans le corps avec super()",
+   "Dans la liste d'initialisation",
+   "Dans le destructeur"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Comment appeler la version de la classe mère Employe depuis la méthode redéfinie ?",
+  "type": "qcm",
+  "options": [
+   "`super.paie()`",
+   "`base.paie()`",
+   "`this->parent->paie()`",
+   "`Employe::paie()`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que se passe-t-il si `crier` n'est pas virtual et qu'on l'appelle via un `Animal&` qui désigne un Chien ?",
+  "type": "qcm",
+  "options": [
+   "C'est la version de Chien",
+   "C'est la version d'Animal qui est appelée",
+   "Erreur à l'exécution",
+   "Erreur de compilation"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi `vector<Forme>` ne convient-il pas pour stocker des rectangles et des cercles ?",
+  "type": "qcm",
+  "options": [
+   "La copie ne garde que la partie Forme (slicing), et Forme est abstraite",
+   "vector n'accepte que les int",
+   "C'est trop lent",
+   "Il faut un tableau C"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi le destructeur d'une classe mère polymorphe doit-il être virtual ?",
+  "type": "qcm",
+  "options": [
+   "Parce que le compilateur l'exige",
+   "Pour que le destructeur de la fille soit appelé via un pointeur de la mère",
+   "Pour éviter la copie",
+   "Pour aller plus vite"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce que le polymorphisme ?",
+  "type": "qcm",
+  "options": [
+   "Avoir plusieurs constructeurs",
+   "Copier un objet",
+   "Le même appel exécute la méthode de la classe réelle de l'objet",
+   "Avoir des attributs de types différents"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Une classe fille hérite des méthodes publiques de sa mère.",
+  "type": "vf",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Une classe fille a directement accès aux attributs private de sa mère.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Il faut protected, ou passer par les méthodes."
+ },
+ {
+  "niveau": "difficile",
+  "q": "On peut créer un objet d'une classe abstraite avec new.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Une classe abstraite n'est pas instanciable."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel mot-clé place-t-on avant une méthode de la mère pour la rendre redéfinissable ?",
+  "type": "saisie",
+  "answers": [
+   "virtual"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque mot-clé à son rôle.",
+  "type": "associer",
+  "paires": [
+   [
+    "`virtual`",
+    "méthode redéfinissable"
+   ],
+   [
+    "`override`",
+    "redéfinition vérifiée"
+   ],
+   [
+    "`protected`",
+    "visible des classes filles"
+   ],
+   [
+    "`= 0`",
+    "méthode pure"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

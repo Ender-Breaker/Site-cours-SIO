@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>C++ : templates et surcharge d'opérateurs — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="cpp" data-chapter="cpp-templates">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/cpp.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<h2>1. Le problème : le même code pour plusieurs types</h2>
+<p>Écrire <code>maxi</code> pour les <code>int</code>, puis pour les <code>double</code>, puis pour les <code>string</code>, c'est trois fois le même code. Un <b>template</b> est un modèle de fonction dont le type est un <b>paramètre</b>.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+template &lt;typename T&gt;
+T maxi(T a, T b) {
+    return a &gt; b ? a : b;
+}
+
+int main() {
+    cout &lt;&lt; maxi(3, 8) &lt;&lt; endl;                          // T = int, déduit
+    cout &lt;&lt; maxi(2.5, 1.5) &lt;&lt; endl;                      // T = double
+    cout &lt;&lt; maxi(string("abc"), string("abd")) &lt;&lt; endl;  // T = string
+    cout &lt;&lt; maxi&lt;double&gt;(3, 2.5) &lt;&lt; endl;                // T imposé : sinon ambigu (int et double)
+}</code></pre></div>
+<p>Le compilateur fabrique une version de la fonction <b>pour chaque type utilisé</b>. Il n'y a aucun coût à l'exécution.</p>
+<h2>2. Templates et conteneurs</h2>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+using namespace std;
+
+template &lt;typename T&gt;
+void afficher(const vector&lt;T&gt;&amp; v) {
+    for (const T&amp; x : v) cout &lt;&lt; x &lt;&lt; " ";
+    cout &lt;&lt; endl;
+}
+
+template &lt;typename T&gt;
+T somme(const vector&lt;T&gt;&amp; v) {
+    T total = T();                 // valeur par défaut du type : 0, 0.0, ""
+    for (const T&amp; x : v) total += x;
+    return total;
+}
+
+int main() {
+    afficher(vector&lt;int&gt;{1, 2, 3});
+    afficher(vector&lt;string&gt;{"a", "b"});
+    cout &lt;&lt; somme(vector&lt;double&gt;{1.5, 2.5}) &lt;&lt; " " &lt;&lt; somme(vector&lt;string&gt;{"ab", "cd"}) &lt;&lt; endl;
+}</code></pre></div>
+<h2>3. Classes template</h2>
+<p><code>vector&lt;int&gt;</code>, <code>map&lt;string, int&gt;</code>, <code>unique_ptr&lt;Forme&gt;</code> sont des classes template. On peut écrire les siennes :</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+using namespace std;
+
+template &lt;typename T&gt;
+class Pile {
+    vector&lt;T&gt; elements;
+public:
+    void empiler(const T&amp; x) { elements.push_back(x); }
+    T depiler() {
+        T haut = elements.back();
+        elements.pop_back();
+        return haut;
+    }
+    bool vide() const { return elements.empty(); }
+    size_t taille() const { return elements.size(); }
+};
+
+int main() {
+    Pile&lt;int&gt; p;
+    p.empiler(1); p.empiler(2); p.empiler(3);
+    cout &lt;&lt; p.depiler() &lt;&lt; " " &lt;&lt; p.depiler() &lt;&lt; " " &lt;&lt; p.taille() &lt;&lt; endl;
+
+    Pile&lt;string&gt; mots;
+    mots.empiler("monde"); mots.empiler("bonjour");
+    while (!mots.vide()) cout &lt;&lt; mots.depiler() &lt;&lt; " ";
+    cout &lt;&lt; endl;
+}</code></pre></div>
+<div class="box attention"><b>Les messages d'erreur des templates</b><p>Une erreur dans l'utilisation d'un template produit souvent des dizaines de lignes. Remonte toujours à la <b>première</b> erreur : elle dit quel type a été utilisé et quelle opération lui manque.</p></div>
+<h2>4. Surcharger les opérateurs</h2>
+<p>On peut donner un sens à <code>+</code>, <code>==</code>, <code>&lt;</code>, <code>&lt;&lt;</code>… pour ses propres classes. Un opérateur n'est qu'une fonction au nom spécial.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+struct Vec {
+    double x, y;
+
+    Vec operator+(const Vec&amp; o) const { return {x + o.x, y + o.y}; }
+    Vec operator*(double k) const { return {x * k, y * k}; }
+    bool operator==(const Vec&amp; o) const { return x == o.x &amp;&amp; y == o.y; }
+    Vec&amp; operator+=(const Vec&amp; o) { x += o.x; y += o.y; return *this; }
+};
+
+ostream&amp; operator&lt;&lt;(ostream&amp; flux, const Vec&amp; v) {      // pour cout &lt;&lt; v
+    return flux &lt;&lt; "(" &lt;&lt; v.x &lt;&lt; ", " &lt;&lt; v.y &lt;&lt; ")";
+}
+
+int main() {
+    Vec a{1, 2}, b{3, 4};
+    cout &lt;&lt; a + b &lt;&lt; endl;
+    cout &lt;&lt; a * 10 &lt;&lt; endl;
+    cout &lt;&lt; (a == Vec{1, 2}) &lt;&lt; endl;
+    a += b;
+    cout &lt;&lt; a &lt;&lt; endl;
+}</code></pre></div>
+<p><code>operator&lt;&lt;</code> est une fonction <b>hors de la classe</b> : son opérande de gauche est le flux (<code>cout</code>), pas l'objet. Elle renvoie le flux pour permettre d'enchaîner <code>cout &lt;&lt; a &lt;&lt; b</code>.</p>
+<h2>5. Rendre une classe triable</h2>
+<p><code>sort</code>, <code>set</code> et <code>map</code> ont besoin de savoir comparer : il suffit de définir <code>operator&lt;</code>.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+#include &lt;string&gt;
+#include &lt;set&gt;
+using namespace std;
+
+struct Version {
+    int majeur, mineur;
+    bool operator&lt;(const Version&amp; o) const {
+        if (majeur != o.majeur) return majeur &lt; o.majeur;
+        return mineur &lt; o.mineur;
+    }
+};
+ostream&amp; operator&lt;&lt;(ostream&amp; f, const Version&amp; v) { return f &lt;&lt; v.majeur &lt;&lt; "." &lt;&lt; v.mineur; }
+
+int main() {
+    vector&lt;Version&gt; v = {{2, 1}, {1, 9}, {2, 0}, {1, 10}};
+    sort(v.begin(), v.end());                 // utilise operator&lt;
+    for (const Version&amp; x : v) cout &lt;&lt; x &lt;&lt; " ";
+    cout &lt;&lt; endl;
+    set&lt;Version&gt; uniques(v.begin(), v.end());
+    cout &lt;&lt; uniques.size() &lt;&lt; " " &lt;&lt; *uniques.rbegin() &lt;&lt; endl;     // la plus grande
+}</code></pre></div>
+<section class="tuto"><h3><small>Tutoriel</small>Une fraction qui se comporte comme un nombre</h3>
+<div class="etape"><h4>La structure et l'affichage</h4>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+struct Fraction {
+    int num, den;
+};
+ostream&amp; operator&lt;&lt;(ostream&amp; f, const Fraction&amp; q) { return f &lt;&lt; q.num &lt;&lt; "/" &lt;&lt; q.den; }
+
+int main() {
+    Fraction a{1, 2};
+    cout &lt;&lt; a &lt;&lt; endl;
+}</code></pre></div>
+</div>
+<div class="etape"><h4>L'addition</h4>
+<p>a/b + c/d = (ad + cb) / bd.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+struct Fraction {
+    int num, den;
+    Fraction operator+(const Fraction&amp; o) const {
+        return {num * o.den + o.num * den, den * o.den};
+    }
+};
+ostream&amp; operator&lt;&lt;(ostream&amp; f, const Fraction&amp; q) { return f &lt;&lt; q.num &lt;&lt; "/" &lt;&lt; q.den; }
+
+int main() {
+    cout &lt;&lt; Fraction{1, 2} + Fraction{1, 3} &lt;&lt; endl;
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Simplifier avec le PGCD</h4>
+<p>Le constructeur garantit qu'une fraction est toujours simplifiée : c'est un *invariant* de la classe. Ajoute la multiplication.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;numeric&gt;
+using namespace std;
+
+struct Fraction {
+    int num, den;
+    Fraction(int n, int d) : num(n / gcd(n, d)), den(d / gcd(n, d)) {}      // gcd : &lt;numeric&gt;
+    Fraction operator+(const Fraction&amp; o) const {
+        return Fraction(num * o.den + o.num * den, den * o.den);
+    }
+    bool operator==(const Fraction&amp; o) const { return num == o.num &amp;&amp; den == o.den; }
+};
+ostream&amp; operator&lt;&lt;(ostream&amp; f, const Fraction&amp; q) { return f &lt;&lt; q.num &lt;&lt; "/" &lt;&lt; q.den; }
+
+int main() {
+    cout &lt;&lt; Fraction(1, 2) + Fraction(1, 6) &lt;&lt; endl;             // 2/3
+    cout &lt;&lt; (Fraction(2, 4) == Fraction(1, 2)) &lt;&lt; endl;          // 1
+}</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : une fonction template</b><p>Une seule fonction pour tous les types.</p><a class="defi-go" href="labo-cpp.html#m=cpp-template">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : des vecteurs</b><p>Surcharge <code>+</code> et <code>&lt;&lt;</code>.</p><a class="defi-go" href="labo-cpp.html#m=cpp-vecteur">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p><code>template &lt;typename T&gt;</code> avant une fonction ou une classe : T est un type choisi à l'utilisation. </p><p> Le compilateur génère une version par type utilisé. </p><p> <code>T operator+(const T&amp; o) const</code> surcharge <code>+</code> ; <code>operator==</code>, <code>operator&lt;</code> de même. </p><p> <code>ostream&amp; operator&lt;&lt;(ostream&amp; f, const T&amp; x)</code> se définit hors de la classe et renvoie le flux. </p><p> <code>operator&lt;</code> rend une classe utilisable par <code>sort</code>, <code>set</code> et <code>map</code>.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cpp.html">Labo C++</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "À quoi sert un template ?",
+  "type": "qcm",
+  "options": [
+   "À cacher des attributs",
+   "À écrire une fonction ou une classe valable pour plusieurs types",
+   "À accélérer l'exécution",
+   "À créer un fichier modèle"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle ligne précède une fonction template ?",
+  "type": "qcm",
+  "options": [
+   "`template <typename T>`",
+   "`typedef T`",
+   "`<T> function`",
+   "`generic <T>`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Dans `maxi(3, 8)`, comment le compilateur connaît-il T ?",
+  "type": "qcm",
+  "options": [
+   "T vaut int par défaut",
+   "Il le lit dans un fichier",
+   "Il faut toujours l'écrire",
+   "Il le déduit des arguments"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi `maxi(3, 2.5)` ne compile-t-il pas avec `T maxi(T a, T b)` ?",
+  "type": "qcm",
+  "options": [
+   "Il manque un point-virgule",
+   "maxi n'accepte que des entiers",
+   "2.5 n'est pas un nombre valide",
+   "T ne peut pas être à la fois int et double"
+  ],
+  "answer": 3,
+  "explication": "On écrit alors `maxi<double>(3, 2.5)`."
+ },
+ {
+  "niveau": "moyen",
+  "q": "`vector<int>` est…",
+  "type": "qcm",
+  "options": [
+   "une classe template instanciée avec int",
+   "une fonction",
+   "un mot-clé du langage",
+   "un tableau C"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Quand le compilateur génère-t-il le code d'un template ?",
+  "type": "qcm",
+  "options": [
+   "Une seule fois pour tous les types",
+   "À l'exécution",
+   "Jamais",
+   "À la compilation, pour chaque type utilisé"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment s'appelle la fonction qui définit `a + b` pour une classe ?",
+  "type": "qcm",
+  "options": [
+   "`operator+`",
+   "`plus`",
+   "`add`",
+   "`__add__`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi `operator<<` pour cout se définit-il hors de la classe ?",
+  "type": "qcm",
+  "options": [
+   "Parce que son opérande de gauche est le flux, pas l'objet",
+   "Parce que c'est interdit dans une classe",
+   "Pour aller plus vite",
+   "Parce qu'il est privé"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que doit renvoyer `operator<<` ?",
+  "type": "qcm",
+  "options": [
+   "`void`",
+   "Un booléen",
+   "Le flux, pour pouvoir enchaîner les <<",
+   "L'objet affiché"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel opérateur faut-il définir pour utiliser sort sur ses propres objets ?",
+  "type": "qcm",
+  "options": [
+   "`operator<`",
+   "`operator+`",
+   "`operator==`",
+   "`operator[]`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que renvoie en général `operator+=` ?",
+  "type": "qcm",
+  "options": [
+   "Une copie",
+   "Une référence vers l'objet lui-même (`*this`)",
+   "Un booléen",
+   "`void`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que vaut `T()` quand T est int ?",
+  "type": "qcm",
+  "options": [
+   "Une valeur indéterminée",
+   "1",
+   "Une erreur",
+   "0"
+  ],
+  "answer": 3,
+  "explication": "C'est la valeur par défaut du type."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Un template ralentit le programme à l'exécution.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Tout est résolu à la compilation."
+ },
+ {
+  "niveau": "moyen",
+  "q": "On peut surcharger `==` pour comparer deux objets de sa classe.",
+  "type": "vf",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "On peut créer de nouveaux opérateurs, par exemple `**`.",
+  "type": "vf",
+  "answer": false,
+  "explication": "On ne peut surcharger que les opérateurs existants."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Une classe template peut avoir plusieurs paramètres de type, comme `map<K, V>`.",
+  "type": "vf",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel mot-clé introduit un paramètre de type dans un template (avec ou à la place de class) ?",
+  "type": "saisie",
+  "answers": [
+   "typename"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque opérateur à sa signature habituelle.",
+  "type": "associer",
+  "paires": [
+   [
+    "`+`",
+    "renvoie un nouvel objet"
+   ],
+   [
+    "`==`",
+    "renvoie un bool"
+   ],
+   [
+    "`+=`",
+    "renvoie `*this`"
+   ],
+   [
+    "`<<`",
+    "renvoie le flux"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

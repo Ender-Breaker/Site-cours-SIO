@@ -1,0 +1,846 @@
+=== cpp-pointeurs | C++ : pointeurs et mémoire | d
+Les pointeurs sont ce qui distingue vraiment le C++ : ils donnent un accès direct à la **mémoire**. C'est la notion qui fait peur, alors qu'elle se résume à une idée : une variable peut contenir **l'adresse** d'une autre.
+
+## 1. Adresse et pointeur
+
+Chaque variable occupe une case de la mémoire, repérée par une **adresse**. L'opérateur `&` donne cette adresse ; un **pointeur** est une variable qui la stocke.
+
+```run h=iostream main
+int age = 17;
+int* p = &age;             // p contient l'adresse de age : « p pointe sur age »
+cout << age << endl;       // 17
+cout << (p == &age) << endl;   // 1 : même adresse
+cout << *p << endl;        // 17 : *p = la valeur à l'adresse pointée
+*p = 18;                   // modifie age à travers le pointeur
+cout << age << endl;       // 18
+```
+
+| Écriture | Signifie |
+| `int* p` | p est un pointeur vers un `int` |
+| `&x` | l'adresse de x |
+| `*p` | la valeur à l'adresse contenue dans p (*déréférencement*) |
+| `nullptr` | le pointeur qui ne pointe sur rien |
+
+## 2. `nullptr` et les pointeurs dangereux
+
+```run h=iostream main
+int* p = nullptr;            // toujours initialiser un pointeur
+if (p == nullptr) cout << "p ne pointe sur rien" << endl;
+int x = 5;
+p = &x;
+if (p) cout << "p pointe sur " << *p << endl;     // if (p) : vrai si non nul
+```
+
+!attention Déréférencer nullptr | Écrire `*p` quand `p` vaut `nullptr`, ou quand il pointe sur une variable qui n'existe plus, est un **comportement indéfini** : le programme plante (*segmentation fault*) ou, pire, continue avec des données fausses. Teste toujours un pointeur avant de l'utiliser.
+
+## 3. Pointeur ou référence ?
+
+Les deux permettent à une fonction d'agir sur une variable de l'appelant.
+
+```run h=iostream main
+void parReference(int& n) { n = n + 1; }
+void parPointeur(int* n) { if (n) *n = *n + 1; }
+@@
+int x = 10;
+parReference(x);           // rien de spécial à l'appel
+parPointeur(&x);           // on passe l'adresse
+cout << x << endl;
+parPointeur(nullptr);      // un pointeur peut être nul : la fonction doit le prévoir
+```
+
+| | Référence `int&` | Pointeur `int*` |
+| Peut ne désigner rien | non | oui (`nullptr`) |
+| Peut changer de cible | non | oui |
+| Syntaxe d'accès | comme une variable | `*p`, `p->membre` |
+| À utiliser | par défaut | quand « rien » est possible, ou pour la mémoire dynamique |
+
+## 4. Pointeurs et tableaux
+
+Le nom d'un tableau C se comporte comme un pointeur vers son premier élément, et `p + 1` désigne l'élément suivant.
+
+```run h=iostream main
+int t[4] = {10, 20, 30, 40};
+int* p = t;                          // pointe sur t[0]
+cout << *p << " " << *(p + 2) << " " << p[3] << endl;   // p[i] équivaut à *(p + i)
+for (int* q = t; q != t + 4; q++) cout << *q << " ";    // parcours par pointeur
+cout << endl;
+```
+
+C'est exactement le principe des itérateurs `begin()` et `end()` des conteneurs.
+
+## 5. La pile et le tas
+
+| | La pile (*stack*) | Le tas (*heap*) |
+| Contient | les variables locales | ce qu'on réserve avec `new` |
+| Libération | automatique, à la fin du bloc | manuelle, avec `delete` |
+| Taille | petite et fixe | grande |
+| Durée de vie | celle du bloc | jusqu'au `delete` |
+
+```run h=iostream main
+int* p = new int(42);          // réserve un int sur le tas
+cout << *p << endl;
+delete p;                      // libère : obligatoire
+p = nullptr;                   // bonne habitude : ne plus pointer sur la zone libérée
+
+int n = 5;
+int* tab = new int[n];         // tableau de taille connue à l'exécution
+for (int i = 0; i < n; i++) tab[i] = i * i;
+cout << tab[4] << endl;
+delete[] tab;                  // delete[] pour un tableau
+```
+
+Les trois erreurs classiques :
+
+- **fuite de mémoire** : un `new` sans `delete` ; la mémoire reste occupée jusqu'à la fin du programme ;
+- **pointeur pendant** (*dangling*) : utiliser un pointeur après le `delete`, ou renvoyer l'adresse d'une variable locale ;
+- **double libération** : deux `delete` sur la même adresse.
+
+!info En C++ moderne | On n'écrit presque plus `new` et `delete` à la main : `vector` gère sa mémoire tout seul, et les **pointeurs intelligents** (chapitre « Mémoire moderne ») libèrent automatiquement. Il faut pourtant comprendre ce mécanisme : il est sous tout le reste.
+
+## 6. Pointeurs vers des structures : `->`
+
+```run h=iostream,string main
+struct Joueur {
+    string nom;
+    int pv;
+};
+@@
+Joueur j = {"Léa", 10};
+Joueur* p = &j;
+cout << (*p).nom << endl;      // écriture lourde…
+cout << p->nom << endl;        // … remplacée par la flèche
+p->pv -= 3;
+cout << j.pv << endl;
+```
+
+!tuto Comprendre en dessinant la mémoire
+# Deux pointeurs sur la même variable
+Avant d'exécuter, prédis la valeur affichée.
+```run h=iostream main
+int score = 100;
+int* a = &score;
+int* b = a;          // b reçoit la même adresse
+*a += 50;
+*b *= 2;
+cout << score << endl;
+```
+# Changer la cible d'un pointeur
+`p = &y` change **où** pointe p ; `*p = …` change la **valeur** pointée. Ne confonds pas les deux.
+```run h=iostream main
+int x = 1, y = 2;
+int* p = &x;
+*p = 10;             // x vaut 10
+p = &y;              // p pointe maintenant sur y
+*p = 20;             // y vaut 20
+cout << x << " " << y << endl;
+```
+# Une fonction qui « renvoie » par pointeur
+```run h=iostream main
+bool diviser(int a, int b, int* resultat) {
+    if (b == 0 || resultat == nullptr) return false;
+    *resultat = a / b;
+    return true;
+}
+@@
+int r = 0;
+if (diviser(17, 5, &r)) cout << "17 / 5 = " << r << endl;
+if (!diviser(1, 0, &r)) cout << "division impossible" << endl;
+```
+!fin
+
+!defi Défi : agir par pointeur | Modifie une variable à travers son adresse. | cpp-pointeur
+
+!retenir À retenir | `&x` : l'adresse de x. `int* p = &x;` : p pointe sur x. `*p` : la valeur pointée. ¶ `nullptr` : ne pointe sur rien ; toujours tester avant `*p`. ¶ `p->membre` équivaut à `(*p).membre`. ¶ Pile : libération automatique. Tas : `new` puis `delete` (`delete[]` pour un tableau). ¶ Préfère les références, `vector` et les pointeurs intelligents.
+--- exos
+Q¤m¤Que contient un pointeur ?¤Une adresse mémoire;;Une copie de la variable;;Un nom de variable;;Un type¤
+Q¤m¤Que donne `&x` ?¤L'adresse de x;;La valeur de x;;Une copie de x;;Le type de x¤
+Q¤m¤Avec `int* p = &x;`, que désigne `*p` ?¤La valeur de x;;L'adresse de x;;L'adresse de p;;Le type de x¤
+Q¤m¤Quelle valeur désigne un pointeur qui ne pointe sur rien ?¤`nullptr`;;`void`;;`0x0`;;`none`¤
+Q¤d¤Après `int x = 5; int* p = &x; *p = 9;`, que vaut x ?¤9;;5;;Une adresse;;Indéterminé¤
+Q¤d¤Après `int x = 1, y = 2; int* p = &x; p = &y; *p = 7;`, que valent x et y ?¤1 et 7;;7 et 2;;7 et 7;;1 et 2¤p a changé de cible avant l'écriture.
+Q¤m¤Quel opérateur accède à un membre à travers un pointeur ?¤`->`;;`.`;;`::`;;`=>`¤
+Q¤m¤Quel mot-clé réserve de la mémoire sur le tas ?¤`new`;;`malloc_ptr`;;`alloc`;;`create`¤
+Q¤m¤Comment libérer un tableau créé avec `new int[n]` ?¤`delete[] tab;`;;`delete tab;`;;`free tab;`;;`tab.clear();`¤
+Q¤d¤Qu'est-ce qu'une fuite de mémoire ?¤De la mémoire réservée avec new et jamais libérée;;Un pointeur nul;;Un tableau trop petit;;Une variable non initialisée¤
+Q¤d¤Qu'est-ce qu'un pointeur pendant (dangling) ?¤Un pointeur vers une zone déjà libérée ou détruite;;Un pointeur nul;;Un pointeur vers un tableau;;Un pointeur constant¤
+Q¤d¤Pourquoi ne faut-il pas renvoyer l'adresse d'une variable locale ?¤Elle est détruite à la fin de la fonction;;C'est trop lent;;Le compilateur l'interdit toujours;;Elle devient globale¤
+Q¤m¤Où sont rangées les variables locales ?¤Sur la pile;;Sur le tas;;Dans le fichier source;;Dans le processeur¤
+Q¤d¤Avec `int t[3] = {4, 5, 6}; int* p = t;`, que vaut `*(p + 1)` ?¤5;;4;;6;;Une adresse¤p + 1 désigne l'élément suivant.
+V¤m¤Une référence peut valoir nullptr.¤F¤Une référence désigne toujours une variable ; seul un pointeur peut être nul.
+V¤m¤La mémoire de la pile est libérée automatiquement à la fin du bloc.¤V¤
+V¤d¤Appeler delete deux fois sur la même adresse est sans danger.¤F¤C'est une double libération : comportement indéfini.
+S¤m¤Quel mot-clé libère la mémoire réservée par new ?¤delete¤
+A¤m¤Associe chaque écriture à sa signification.¤`int* p`=>déclaration d'un pointeur;;`&x`=>adresse de x;;`*p`=>valeur pointée;;`p->m`=>membre de l'objet pointé¤
+
+=== cpp-classes | C++ : classes et objets | d
+Une **classe** regroupe des données (les **attributs**) et les fonctions qui agissent dessus (les **méthodes**). Un **objet** est un exemplaire de cette classe.
+
+## 1. D'abord `struct` : regrouper des données
+
+```run h=iostream,string,vector main
+struct Produit {
+    string nom;
+    double prix;
+    int stock = 0;                 // valeur par défaut
+};
+@@
+Produit p = {"Souris", 19.9, 4};
+Produit q;                         // nom vide, prix indéterminé, stock 0
+q.nom = "Clavier";
+q.prix = 49;
+vector<Produit> catalogue = {p, q};
+for (const Produit& x : catalogue) {
+    cout << x.nom << " : " << x.prix << " € (" << x.stock << ")" << endl;
+}
+```
+
+## 2. Une classe : données privées, méthodes publiques
+
+```run h=iostream,string main
+class Compte {
+private:                               // inaccessible de l'extérieur
+    string titulaire;
+    double solde;
+
+public:                                // l'interface de la classe
+    Compte(const string& t, double s) : titulaire(t), solde(s) {}   // constructeur
+
+    void deposer(double montant) {
+        if (montant > 0) solde += montant;
+    }
+    bool retirer(double montant) {
+        if (montant > solde) return false;
+        solde -= montant;
+        return true;
+    }
+    double getSolde() const { return solde; }      // const : ne modifie pas l'objet
+};
+@@
+Compte c("Léa", 100);
+c.deposer(50);
+cout << c.retirer(500) << " " << c.retirer(30) << endl;
+cout << c.getSolde() << endl;
+// c.solde = 1000000;   // refusé à la compilation : solde est privé
+```
+
+C'est l'**encapsulation** : l'état de l'objet n'est modifiable que par ses méthodes, qui garantissent qu'il reste cohérent (ici, jamais de solde négatif).
+
+| Mot-clé | Accès |
+| `public` | depuis partout |
+| `private` | depuis la classe uniquement (par défaut dans une `class`) |
+| `protected` | depuis la classe et ses classes filles |
+
+La seule différence entre `struct` et `class` : dans une `struct` tout est public par défaut, dans une `class` tout est privé par défaut.
+
+## 3. Constructeurs
+
+Le **constructeur** porte le nom de la classe et n'a pas de type de retour. Il est appelé automatiquement à la création de l'objet. La **liste d'initialisation** (après les deux-points) donne leur valeur aux attributs.
+
+```run h=iostream,string main
+class Point {
+public:
+    double x, y;
+    Point() : x(0), y(0) {}                          // constructeur par défaut
+    Point(double x, double y) : x(x), y(y) {}        // constructeur à deux paramètres
+};
+@@
+Point a;                 // appelle Point()
+Point b(3, 4);           // appelle Point(double, double)
+Point c{5, 6};           // écriture avec accolades, équivalente
+cout << a.x << " " << b.y << " " << c.x << endl;
+```
+
+## 4. Méthodes `const`, `this`, membres `static`
+
+```run h=iostream,string main
+class Joueur {
+    string nom;
+    int pv;
+    static int nombre;                       // partagé par TOUS les joueurs
+public:
+    Joueur(const string& nom, int pv) : nom(nom), pv(pv) { nombre++; }
+
+    Joueur& blesser(int degats) {
+        this->pv -= degats;                  // this : pointeur vers l'objet courant
+        if (pv < 0) pv = 0;
+        return *this;                        // permet d'enchaîner les appels
+    }
+    bool estVivant() const { return pv > 0; }      // promet de ne rien modifier
+    int getPv() const { return pv; }
+    static int combien() { return nombre; }        // appelée sans objet
+};
+int Joueur::nombre = 0;                      // définition du membre static
+@@
+Joueur a("Léa", 10), b("Sam", 5);
+a.blesser(3).blesser(2);                     // enchaînement grâce à return *this
+b.blesser(99);
+cout << a.getPv() << " " << b.estVivant() << " " << Joueur::combien() << endl;
+```
+
+!attention Marque `const` tout ce qui ne modifie rien | Un objet reçu par `const Joueur&` ne peut appeler **que** des méthodes `const`. Oublier le `const` sur un accesseur provoque des erreurs de compilation plus loin, là où on s'y attend le moins.
+
+## 5. Le destructeur
+
+Le **destructeur** (`~NomDeLaClasse`) est appelé automatiquement quand l'objet est détruit : à la fin de son bloc pour une variable locale. Il sert à libérer ce que l'objet a réservé.
+
+```run h=iostream,string main
+class Fichier {
+    string nom;
+public:
+    Fichier(const string& n) : nom(n) { cout << "ouverture de " << nom << endl; }
+    ~Fichier() { cout << "fermeture de " << nom << endl; }
+};
+@@
+Fichier a("a.txt");
+{
+    Fichier b("b.txt");
+    cout << "fin du bloc" << endl;
+}                                  // b est détruit ici
+cout << "fin de main" << endl;
+```
+
+## 6. `enum class` : une liste de valeurs nommées
+
+```run h=iostream main
+enum class Etat { Menu, Jeu, Pause, Fin };
+@@
+Etat e = Etat::Jeu;
+if (e == Etat::Jeu) cout << "en jeu" << endl;
+switch (e) {
+    case Etat::Menu: cout << "menu" << endl; break;
+    case Etat::Jeu:  cout << "partie en cours" << endl; break;
+    default:         cout << "autre" << endl;
+}
+cout << static_cast<int>(Etat::Pause) << endl;     // 2 : numérotés à partir de 0
+```
+
+!tuto Une classe Chronomètre de A à Z
+# Les attributs et le constructeur
+```run h=iostream main
+class Chrono {
+    int secondes;
+public:
+    Chrono() : secondes(0) {}
+    int total() const { return secondes; }
+};
+@@
+Chrono c;
+cout << c.total() << endl;
+```
+# Des méthodes qui modifient l'état
+```run h=iostream main
+class Chrono {
+    int secondes;
+public:
+    Chrono() : secondes(0) {}
+    void avancer(int s) { if (s > 0) secondes += s; }
+    void remettreAZero() { secondes = 0; }
+    int total() const { return secondes; }
+};
+@@
+Chrono c;
+c.avancer(75);
+c.avancer(-10);        // ignoré : la classe se protège
+cout << c.total() << endl;
+```
+# Une méthode d'affichage
+`const` partout où l'objet n'est pas modifié. Ajoute une méthode `heures()`.
+```run h=iostream,string main
+class Chrono {
+    int secondes;
+public:
+    Chrono() : secondes(0) {}
+    void avancer(int s) { if (s > 0) secondes += s; }
+    int minutes() const { return secondes / 60; }
+    string texte() const {
+        return to_string(minutes()) + " min " + to_string(secondes % 60) + " s";
+    }
+};
+@@
+Chrono c;
+c.avancer(75);
+c.avancer(3600);
+cout << c.texte() << endl;
+```
+!fin
+
+!defi Défi : le compte bancaire | Écris une classe complète avec des attributs privés. | cpp-compte
+!defi Défi : une struct | Regroupe des données et parcours-les. | cpp-struct
+
+!retenir À retenir | `class Nom { private: … public: … };` (ne pas oublier le `;` final). ¶ Attributs privés, méthodes publiques : c'est l'encapsulation. ¶ Constructeur : même nom que la classe, avec une liste d'initialisation `: attribut(valeur)`. ¶ Méthode `const` = ne modifie pas l'objet. ¶ Le destructeur `~Nom()` s'exécute automatiquement à la destruction. ¶ `enum class` pour une liste d'états nommés.
+--- exos
+Q¤f¤Comment appelle-t-on un exemplaire d'une classe ?¤Un objet (une instance);;Une méthode;;Un attribut;;Un module¤
+Q¤m¤Quel est l'accès par défaut des membres d'une `class` ?¤`private`;;`public`;;`protected`;;`static`¤
+Q¤m¤Quel est l'accès par défaut des membres d'une `struct` ?¤`public`;;`private`;;`protected`;;`const`¤
+Q¤m¤Comment s'appelle la méthode exécutée à la création d'un objet ?¤Le constructeur;;Le destructeur;;Le main;;L'initialiseur¤
+Q¤m¤Quel est le type de retour d'un constructeur ?¤Il n'en a pas;;`void`;;Le type de la classe;;`int`¤
+Q¤m¤Que signifie `const` à la fin de `double getSolde() const` ?¤La méthode ne modifie pas l'objet;;La méthode renvoie une constante;;La méthode est privée;;La méthode ne peut pas être appelée¤
+Q¤m¤Qu'est-ce que l'encapsulation ?¤Cacher les données et n'y accéder que par des méthodes;;Mettre une classe dans une autre;;Copier un objet;;Compiler plusieurs fichiers¤
+Q¤d¤Que désigne `this` dans une méthode ?¤Un pointeur vers l'objet sur lequel la méthode est appelée;;La classe elle-même;;Le constructeur;;Une copie de l'objet¤
+Q¤d¤Qu'est-ce qu'un attribut `static` ?¤Un attribut partagé par tous les objets de la classe;;Un attribut constant;;Un attribut privé;;Un attribut sans valeur¤
+Q¤m¤Quand le destructeur d'une variable locale est-il appelé ?¤À la fin du bloc où elle est déclarée;;À la fin du programme uniquement;;Jamais automatiquement;;Quand on appelle delete¤
+Q¤m¤Comment s'écrit le destructeur de la classe Fichier ?¤`~Fichier()`;;`delete Fichier()`;;`!Fichier()`;;`Fichier::end()`¤
+Q¤d¤Dans `Point(double x, double y) : x(x), y(y) {}`, comment s'appelle la partie après les deux-points ?¤La liste d'initialisation;;L'héritage;;Le corps;;Le prototype¤
+Q¤m¤Comment accéder à la valeur Jeu de `enum class Etat` ?¤`Etat::Jeu`;;`Etat.Jeu`;;`Jeu`;;`Etat->Jeu`¤
+Q¤d¤Que se passe-t-il si on appelle une méthode non const sur un `const Compte&` ?¤Une erreur de compilation;;Rien de spécial;;Une erreur à l'exécution;;L'objet est copié¤
+V¤m¤On doit terminer la définition d'une classe par un point-virgule.¤V¤`class A { … };`
+V¤m¤Une classe peut avoir plusieurs constructeurs avec des paramètres différents.¤V¤C'est une surcharge.
+V¤d¤Une méthode static peut utiliser this.¤F¤Elle n'est liée à aucun objet.
+S¤m¤Quel mot-clé rend un membre accessible depuis l'extérieur de la classe ?¤public¤
+A¤m¤Associe chaque notion à sa définition.¤attribut=>donnée d'un objet;;méthode=>fonction d'une classe;;constructeur=>appelé à la création;;destructeur=>appelé à la destruction¤
+
+=== cpp-heritage | C++ : héritage et polymorphisme | d
+## 1. Hériter d'une classe
+
+Une classe **fille** (ou dérivée) reprend les attributs et les méthodes de sa classe **mère** (ou de base), et peut en ajouter.
+
+```run h=iostream,string main
+class Personnage {
+protected:                          // accessible aux classes filles
+    string nom;
+    int pv;
+public:
+    Personnage(const string& nom, int pv) : nom(nom), pv(pv) {}
+    void blesser(int d) { pv -= d; if (pv < 0) pv = 0; }
+    void afficher() const { cout << nom << " : " << pv << " PV" << endl; }
+};
+
+class Guerrier : public Personnage {              // Guerrier EST UN Personnage
+    int force;
+public:
+    Guerrier(const string& nom, int force)
+        : Personnage(nom, 20), force(force) {}    // appelle d'abord le constructeur de la mère
+    void frapper(Personnage& cible) { cible.blesser(force); }
+};
+@@
+Guerrier g("Conan", 7);
+Personnage p("Gobelin", 10);
+g.frapper(p);
+g.afficher();            // méthode héritée
+p.afficher();
+```
+
+L'héritage exprime une relation **« est un »** : un Guerrier est un Personnage. Si la relation est « a un » (une voiture **a un** moteur), on utilise un attribut, pas l'héritage.
+
+## 2. Redéfinir une méthode : `virtual` et `override`
+
+```run h=iostream,string main
+class Animal {
+protected:
+    string nom;
+public:
+    Animal(const string& nom) : nom(nom) {}
+    virtual string crier() const { return "..."; }       // virtual : redéfinissable
+    void presenter() const { cout << nom << " fait " << crier() << endl; }
+    virtual ~Animal() = default;                         // destructeur virtuel : voir plus bas
+};
+
+class Chien : public Animal {
+public:
+    Chien(const string& nom) : Animal(nom) {}
+    string crier() const override { return "Ouaf"; }     // override : vérifié par le compilateur
+};
+
+class Chat : public Animal {
+public:
+    using Animal::Animal;                                // réutilise les constructeurs de la mère
+    string crier() const override { return "Miaou"; }
+};
+@@
+Chien rex("Rex");
+Chat tigrou("Tigrou");
+rex.presenter();
+tigrou.presenter();
+```
+
+`presenter` est écrite une seule fois dans `Animal`, mais appelle le `crier` de la **vraie** classe de l'objet : c'est le **polymorphisme**.
+
+!attention Sans `virtual`, pas de polymorphisme | Si `crier` n'est pas `virtual` dans la classe mère, c'est toujours la version de la mère qui est appelée à travers une référence ou un pointeur de type `Animal`. Et sans `override`, une faute de frappe dans la signature crée silencieusement une **nouvelle** méthode au lieu de redéfinir l'ancienne.
+
+## 3. Le polymorphisme passe par les pointeurs et les références
+
+```run h=iostream,string,vector main
+class Forme {
+public:
+    virtual double aire() const = 0;       // = 0 : méthode virtuelle PURE
+    virtual string nom() const = 0;
+    virtual ~Forme() = default;
+};
+
+class Rectangle : public Forme {
+    double l, h;
+public:
+    Rectangle(double l, double h) : l(l), h(h) {}
+    double aire() const override { return l * h; }
+    string nom() const override { return "rectangle"; }
+};
+
+class Cercle : public Forme {
+    double r;
+public:
+    Cercle(double r) : r(r) {}
+    double aire() const override { return 3.14159 * r * r; }
+    string nom() const override { return "cercle"; }
+};
+
+void decrire(const Forme& f) {             // accepte n'importe quelle Forme
+    cout << f.nom() << " d'aire " << f.aire() << endl;
+}
+@@
+Rectangle r(3, 4);
+Cercle c(1);
+decrire(r);
+decrire(c);
+
+vector<Forme*> formes = {&r, &c};          // une collection de formes différentes
+double total = 0;
+for (const Forme* f : formes) total += f->aire();
+cout << "Aire totale : " << total << endl;
+```
+
+Une classe qui possède au moins une méthode virtuelle pure est **abstraite** : on ne peut pas créer d'objet `Forme`, seulement des objets de ses classes filles. C'est l'équivalent d'une **interface**.
+
+!attention Le découpage (*slicing*) | `vector<Forme>` ne peut pas contenir des rectangles : copier un `Rectangle` dans une variable de type `Forme` ne garde que la partie mère. Pour le polymorphisme, il faut toujours des **pointeurs** ou des **références**.
+
+## 4. Appeler la version de la mère
+
+```run h=iostream,string main
+class Employe {
+protected:
+    string nom;
+    double salaire;
+public:
+    Employe(const string& n, double s) : nom(n), salaire(s) {}
+    virtual double paie() const { return salaire; }
+    virtual ~Employe() = default;
+};
+
+class Commercial : public Employe {
+    double ventes;
+public:
+    Commercial(const string& n, double s, double v) : Employe(n, s), ventes(v) {}
+    double paie() const override {
+        return Employe::paie() + ventes * 0.05;     // la paie de base + une commission
+    }
+};
+@@
+Commercial c("Sam", 2000, 10000);
+const Employe& e = c;
+cout << e.paie() << endl;
+```
+
+## 5. Pourquoi un destructeur virtuel ?
+
+Quand on détruit un objet de classe fille à travers un pointeur de la classe mère, seul un destructeur `virtual` garantit que le destructeur de la fille est appelé. Règle simple : **une classe avec au moins une méthode virtuelle a un destructeur virtuel**.
+
+```run h=iostream main
+class Base {
+public:
+    virtual ~Base() { cout << "destruction de Base" << endl; }
+};
+class Derivee : public Base {
+public:
+    ~Derivee() override { cout << "destruction de Derivee" << endl; }
+};
+@@
+Base* p = new Derivee();
+delete p;              // appelle ~Derivee puis ~Base grâce à virtual
+```
+
+!tuto Un système de notifications
+# La classe abstraite
+Elle fixe ce que **toute** notification sait faire, sans dire comment.
+```run h=iostream,string main
+class Notification {
+protected:
+    string message;
+public:
+    Notification(const string& m) : message(m) {}
+    virtual void envoyer() const = 0;
+    virtual ~Notification() = default;
+};
+@@
+// Notification n("test");    // refusé : classe abstraite
+cout << "Notification est abstraite" << endl;
+```
+# Deux classes concrètes
+```run h=iostream,string main
+class Notification {
+protected:
+    string message;
+public:
+    Notification(const string& m) : message(m) {}
+    virtual void envoyer() const = 0;
+    virtual ~Notification() = default;
+};
+class Email : public Notification {
+    string adresse;
+public:
+    Email(const string& m, const string& a) : Notification(m), adresse(a) {}
+    void envoyer() const override { cout << "Mail à " << adresse << " : " << message << endl; }
+};
+class Sms : public Notification {
+    string numero;
+public:
+    Sms(const string& m, const string& n) : Notification(m), numero(n) {}
+    void envoyer() const override { cout << "SMS au " << numero << " : " << message << endl; }
+};
+@@
+Email e("Serveur en panne", "admin@exemple.fr");
+Sms s("Serveur en panne", "0601020304");
+e.envoyer();
+s.envoyer();
+```
+# Les traiter toutes de la même façon
+Le code qui envoie ne connaît que `Notification`. Ajouter un nouveau type (une notification Slack) ne demande **aucune** modification de cette boucle : essaie.
+```run h=iostream,string,vector main
+class Notification {
+protected:
+    string message;
+public:
+    Notification(const string& m) : message(m) {}
+    virtual void envoyer() const = 0;
+    virtual ~Notification() = default;
+};
+class Email : public Notification {
+public:
+    using Notification::Notification;
+    void envoyer() const override { cout << "[mail] " << message << endl; }
+};
+class Sms : public Notification {
+public:
+    using Notification::Notification;
+    void envoyer() const override { cout << "[sms] " << message << endl; }
+};
+@@
+Email e("Sauvegarde terminée");
+Sms s("Disque plein");
+vector<const Notification*> file = {&e, &s, &e};
+for (const Notification* n : file) n->envoyer();
+```
+!fin
+
+!defi Défi : l'héritage | Une classe abstraite, deux classes filles, une boucle polymorphe. | cpp-heritage
+
+!retenir À retenir | `class Fille : public Mere { … };` ; le constructeur de la fille appelle celui de la mère dans sa liste d'initialisation. ¶ `virtual` dans la mère, `override` dans la fille. ¶ `virtual … = 0;` : méthode pure, classe abstraite (non instanciable). ¶ Le polymorphisme exige un pointeur ou une référence vers la classe mère. ¶ Destructeur `virtual` dès qu'il y a une méthode virtuelle.
+--- exos
+Q¤m¤Comment déclarer que Chien hérite d'Animal ?¤`class Chien : public Animal`;;`class Chien extends Animal`;;`class Chien(Animal)`;;`class Chien inherits Animal`¤
+Q¤m¤Quel mot-clé, dans la classe mère, autorise la redéfinition polymorphe d'une méthode ?¤`virtual`;;`override`;;`abstract`;;`dynamic`¤
+Q¤m¤Quel mot-clé, dans la classe fille, fait vérifier la redéfinition par le compilateur ?¤`override`;;`virtual`;;`final`;;`super`¤
+Q¤m¤Quel niveau d'accès est visible des classes filles mais pas de l'extérieur ?¤`protected`;;`private`;;`public`;;`friend`¤
+Q¤m¤Que signifie `= 0` dans `virtual double aire() const = 0;` ?¤La méthode est virtuelle pure : les filles doivent la définir;;La méthode renvoie 0;;La méthode est désactivée;;La méthode est privée¤
+Q¤m¤Qu'est-ce qu'une classe abstraite ?¤Une classe qu'on ne peut pas instancier, car elle a une méthode virtuelle pure;;Une classe sans attribut;;Une classe privée;;Une classe sans constructeur¤
+Q¤m¤Quelle relation l'héritage exprime-t-il ?¤« est un »;;« a un »;;« utilise un »;;« contient un »¤
+Q¤d¤Dans le constructeur de Guerrier, où appelle-t-on celui de Personnage ?¤Dans la liste d'initialisation;;Dans le corps avec super();;Nulle part, c'est automatique avec les bons arguments;;Dans le destructeur¤
+Q¤d¤Comment appeler la version de la classe mère Employe depuis la méthode redéfinie ?¤`Employe::paie()`;;`super.paie()`;;`base.paie()`;;`this->parent->paie()`¤
+Q¤d¤Que se passe-t-il si `crier` n'est pas virtual et qu'on l'appelle via un `Animal&` qui désigne un Chien ?¤C'est la version d'Animal qui est appelée;;C'est la version de Chien;;Erreur de compilation;;Erreur à l'exécution¤
+Q¤d¤Pourquoi `vector<Forme>` ne convient-il pas pour stocker des rectangles et des cercles ?¤La copie ne garde que la partie Forme (slicing), et Forme est abstraite;;C'est trop lent;;vector n'accepte que les int;;Il faut un tableau C¤
+Q¤d¤Pourquoi le destructeur d'une classe mère polymorphe doit-il être virtual ?¤Pour que le destructeur de la fille soit appelé via un pointeur de la mère;;Pour aller plus vite;;Pour éviter la copie;;Parce que le compilateur l'exige¤
+Q¤m¤Qu'est-ce que le polymorphisme ?¤Le même appel exécute la méthode de la classe réelle de l'objet;;Avoir plusieurs constructeurs;;Avoir des attributs de types différents;;Copier un objet¤
+V¤m¤Une classe fille hérite des méthodes publiques de sa mère.¤V¤
+V¤m¤Une classe fille a directement accès aux attributs private de sa mère.¤F¤Il faut protected, ou passer par les méthodes.
+V¤d¤On peut créer un objet d'une classe abstraite avec new.¤F¤Une classe abstraite n'est pas instanciable.
+S¤m¤Quel mot-clé place-t-on avant une méthode de la mère pour la rendre redéfinissable ?¤virtual¤
+A¤m¤Associe chaque mot-clé à son rôle.¤`virtual`=>méthode redéfinissable;;`override`=>redéfinition vérifiée;;`protected`=>visible des classes filles;;`= 0`=>méthode pure¤
+
+=== cpp-memoire-moderne | C++ : RAII, copie et pointeurs intelligents | d
+Le C++ moderne (depuis C++11) permet de ne **presque jamais** écrire `delete`. Le principe qui rend cela possible s'appelle **RAII**.
+
+## 1. RAII : la ressource vit avec l'objet
+
+*Resource Acquisition Is Initialization* : une ressource (mémoire, fichier, connexion, verrou) est **acquise dans le constructeur** et **libérée dans le destructeur**. Comme le destructeur d'une variable locale est toujours appelé à la fin de son bloc, la ressource est toujours libérée, même si on quitte la fonction au milieu.
+
+```run h=iostream,string main
+class Connexion {
+    string serveur;
+public:
+    Connexion(const string& s) : serveur(s) { cout << "connexion à " << serveur << endl; }
+    ~Connexion() { cout << "déconnexion de " << serveur << endl; }
+    void requete(const string& q) const { cout << "  requête : " << q << endl; }
+};
+
+void travail(bool erreur) {
+    Connexion c("bdd.local");
+    c.requete("SELECT 1");
+    if (erreur) return;                 // sortie anticipée : c est quand même détruit
+    c.requete("SELECT 2");
+}
+@@
+travail(false);
+travail(true);
+```
+
+`vector`, `string`, `ifstream` fonctionnent tous ainsi : c'est pour cela qu'on ne libère jamais leur mémoire à la main.
+
+## 2. `unique_ptr` : un seul propriétaire
+
+`unique_ptr<T>` (bibliothèque `<memory>`) possède un objet créé sur le tas et le détruit automatiquement. Il ne peut pas être copié, seulement **déplacé**.
+
+```run h=iostream,memory,string main
+struct Arme {
+    string nom;
+    Arme(const string& n) : nom(n) { cout << "création de " << nom << endl; }
+    ~Arme() { cout << "destruction de " << nom << endl; }
+};
+@@
+unique_ptr<Arme> a = make_unique<Arme>("épée");     // jamais de new
+cout << a->nom << endl;                              // s'utilise comme un pointeur
+// unique_ptr<Arme> b = a;                           // refusé : copie interdite
+unique_ptr<Arme> b = move(a);                        // transfert de propriété
+cout << (a == nullptr) << " " << b->nom << endl;     // a est vide
+cout << "fin de main" << endl;                       // l'épée est détruite ici, toute seule
+```
+
+C'est aussi la bonne façon de stocker des objets polymorphes :
+
+```run h=iostream,memory,vector,string main
+struct Forme {
+    virtual double aire() const = 0;
+    virtual ~Forme() = default;
+};
+struct Carre : Forme {
+    double c;
+    Carre(double c) : c(c) {}
+    double aire() const override { return c * c; }
+};
+struct Disque : Forme {
+    double r;
+    Disque(double r) : r(r) {}
+    double aire() const override { return 3.14159 * r * r; }
+};
+@@
+vector<unique_ptr<Forme>> formes;
+formes.push_back(make_unique<Carre>(2));
+formes.push_back(make_unique<Disque>(1));
+for (const auto& f : formes) cout << f->aire() << endl;
+// tout est libéré automatiquement à la fin
+```
+
+## 3. `shared_ptr` : plusieurs propriétaires
+
+`shared_ptr<T>` compte ses propriétaires ; l'objet est détruit quand le dernier disparaît.
+
+```run h=iostream,memory,string main
+struct Texture {
+    string fichier;
+    Texture(const string& f) : fichier(f) { cout << "chargement de " << fichier << endl; }
+    ~Texture() { cout << "libération de " << fichier << endl; }
+};
+@@
+shared_ptr<Texture> a = make_shared<Texture>("herbe.png");
+cout << a.use_count() << endl;            // 1 propriétaire
+{
+    shared_ptr<Texture> b = a;            // copie autorisée : 2 propriétaires
+    cout << a.use_count() << endl;
+}                                         // b disparaît : retour à 1
+cout << a.use_count() << endl;
+a.reset();                                // plus aucun propriétaire : libération
+cout << "fin" << endl;
+```
+
+| | `unique_ptr` | `shared_ptr` | Pointeur brut `T*` |
+| Propriétaires | un seul | plusieurs (compteur) | aucun : il **observe** |
+| Copie | interdite (`move`) | autorisée | autorisée |
+| Libération | automatique | automatique, au dernier | jamais |
+| À utiliser | par défaut | ressource réellement partagée | paramètre de fonction, sans propriété |
+
+## 4. La copie d'un objet
+
+Par défaut, copier un objet copie chacun de ses attributs. C'est parfait… sauf si un attribut est un pointeur brut : les deux objets pointent alors sur la même zone, et chacun la libérera (double libération). D'où la **règle de zéro** : utilise `vector`, `string` et les pointeurs intelligents comme attributs, et tu n'auras **aucun** destructeur ni constructeur de copie à écrire.
+
+```run h=iostream,vector,string main
+class Classe {
+    string nom;
+    vector<string> eleves;         // gère sa mémoire tout seul
+public:
+    Classe(const string& n) : nom(n) {}
+    void ajouter(const string& e) { eleves.push_back(e); }
+    size_t effectif() const { return eleves.size(); }
+};
+@@
+Classe a("SIO1");
+a.ajouter("Léa");
+Classe b = a;                      // copie complète et indépendante, sans rien écrire
+b.ajouter("Sam");
+cout << a.effectif() << " " << b.effectif() << endl;
+```
+
+## 5. Déplacer au lieu de copier : `std::move`
+
+Copier un gros vector recopie tous ses éléments. Le **déplacer** transfère simplement son contenu vers le destinataire ; l'objet d'origine reste valide, mais vide.
+
+```run h=iostream,vector,string,utility main
+vector<string> source = {"a", "b", "c"};
+vector<string> copie = source;              // copie : 3 chaînes recopiées
+vector<string> deplace = move(source);      // déplacement : aucune recopie
+cout << copie.size() << " " << deplace.size() << " " << source.size() << endl;
+```
+
+!info La règle de trois, cinq, zéro | Si ta classe gère elle-même une ressource brute et a besoin d'un destructeur, elle a aussi besoin d'un constructeur de copie et d'un opérateur d'affectation (**règle de trois**), plus leurs versions par déplacement (**règle de cinq**). La meilleure solution reste de n'en écrire aucun (**règle de zéro**).
+
+!tuto Un inventaire de jeu sans fuite de mémoire
+# Le problème avec new
+Ce code fuit : l'objet n'est jamais libéré. Le destructeur ne s'affiche pas.
+```run h=iostream,string main
+struct Objet {
+    string nom;
+    Objet(const string& n) : nom(n) {}
+    ~Objet() { cout << "destruction de " << nom << endl; }
+};
+@@
+Objet* o = new Objet("potion");
+cout << o->nom << endl;
+// oubli du delete : fuite
+```
+# La solution : unique_ptr
+Même code, sans `new` ni `delete` : la destruction s'affiche.
+```run h=iostream,string,memory main
+struct Objet {
+    string nom;
+    Objet(const string& n) : nom(n) {}
+    ~Objet() { cout << "destruction de " << nom << endl; }
+};
+@@
+auto o = make_unique<Objet>("potion");
+cout << o->nom << endl;
+```
+# Un sac qui possède ses objets
+Retirer un élément du vector le détruit automatiquement.
+```run h=iostream,string,memory,vector main
+struct Objet {
+    string nom;
+    Objet(const string& n) : nom(n) {}
+    ~Objet() { cout << "destruction de " << nom << endl; }
+};
+@@
+vector<unique_ptr<Objet>> sac;
+sac.push_back(make_unique<Objet>("potion"));
+sac.push_back(make_unique<Objet>("clé"));
+sac.pop_back();                          // la clé est détruite ici
+cout << sac.size() << " objet dans le sac" << endl;
+```
+!fin
+
+!defi Défi : unique_ptr | Remplace new et delete par un pointeur intelligent. | cpp-smart
+
+!retenir À retenir | RAII : acquérir dans le constructeur, libérer dans le destructeur. ¶ `make_unique<T>(…)` crée un `unique_ptr` : un propriétaire, pas de copie, `std::move` pour transférer. ¶ `make_shared<T>(…)` : propriété partagée, libération au dernier. ¶ Règle de zéro : des attributs qui se gèrent seuls (`vector`, `string`, pointeurs intelligents), et rien à écrire.
+--- exos
+Q¤m¤Que signifie RAII en pratique ?¤La ressource est acquise dans le constructeur et libérée dans le destructeur;;Il faut appeler delete à la fin de chaque fonction;;Toute variable doit être initialisée à 0;;Les ressources sont libérées par un ramasse-miettes¤
+Q¤m¤Quelle fonction crée un unique_ptr ?¤`make_unique`;;`new_unique`;;`unique`;;`create_ptr`¤
+Q¤m¤Combien de propriétaires un unique_ptr a-t-il ?¤Un seul;;Autant qu'on veut;;Aucun;;Deux¤
+Q¤m¤Comment transférer la propriété d'un unique_ptr ?¤Avec `std::move`;;Avec `=` simplement;;Avec `copy`;;C'est impossible¤
+Q¤m¤Quand l'objet d'un shared_ptr est-il détruit ?¤Quand son dernier propriétaire disparaît;;À la fin du programme;;Quand on appelle delete;;Dès la première copie¤
+Q¤m¤Quelle méthode donne le nombre de propriétaires d'un shared_ptr ?¤`use_count()`;;`size()`;;`owners()`;;`count()`¤
+Q¤m¤Quelle bibliothèque fournit unique_ptr et shared_ptr ?¤`<memory>`;;`<pointer>`;;`<smart>`;;`<utility>`¤
+Q¤d¤Que vaut un unique_ptr après qu'on l'a déplacé avec move ?¤`nullptr`;;Il pointe toujours sur l'objet;;Une valeur indéterminée;;Une copie de l'objet¤
+Q¤d¤Quel est le danger de copier un objet qui contient un pointeur brut vers une zone qu'il a allouée ?¤Les deux objets libèrent la même zone (double libération);;La copie est trop lente;;Le pointeur devient nul;;Rien¤
+Q¤d¤Que recommande la règle de zéro ?¤N'utiliser que des attributs qui gèrent leur mémoire, pour n'écrire ni destructeur ni copie;;Initialiser tous les attributs à zéro;;Ne jamais utiliser de pointeur;;N'écrire aucune classe¤
+Q¤d¤Après `vector<string> b = move(a);`, que contient a ?¤Un vector valide mais vide;;Les mêmes éléments que b;;Une zone libérée interdite d'accès;;nullptr¤
+Q¤m¤Quel pointeur choisir par défaut pour posséder un objet du tas ?¤`unique_ptr`;;`shared_ptr`;;Un pointeur brut;;`auto_ptr`¤
+Q¤m¤À quoi sert encore un pointeur brut `T*` en C++ moderne ?¤À observer un objet sans le posséder;;À remplacer vector;;À libérer la mémoire;;À rien¤
+V¤m¤Avec un unique_ptr, il faut quand même appeler delete.¤F¤La destruction est automatique.
+V¤m¤Un unique_ptr peut être copié.¤F¤Il ne peut qu'être déplacé.
+V¤m¤vector et string appliquent le principe RAII.¤V¤Ils libèrent leur mémoire dans leur destructeur.
+V¤d¤Le destructeur d'une variable locale est appelé même si on quitte la fonction avec un return anticipé.¤V¤C'est ce qui rend RAII fiable.
+S¤m¤Quelle fonction crée un shared_ptr ?¤make_shared¤
+A¤m¤Associe chaque outil à sa propriété.¤`unique_ptr`=>un seul propriétaire;;`shared_ptr`=>propriété partagée;;`T*`=>observe sans posséder;;`std::move`=>transfère la propriété¤

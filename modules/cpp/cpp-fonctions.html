@@ -11,172 +11,428 @@
 </head>
 <body data-module="cpp" data-chapter="cpp-fonctions">
 
-<!-- ============ COURS ============ -->
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/cpp.txt) -->
 <article id="cours">
 <div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
-<h2>1. Définir une fonction</h2>
-<pre><code>int carre(int x) {          // type de retour, nom, paramètres typés
-    return x * x;
+<h2>1. Déclarer et appeler</h2>
+<p>Une fonction annonce le <b>type de ce qu'elle renvoie</b>, son nom, et le type de chaque paramètre. <code>void</code> signifie « ne renvoie rien ».</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+double aire(double largeur, double hauteur) {
+    return largeur * hauteur;
 }
 
-void afficherLigne(int n) { // void : ne renvoie rien
-    for (int i = 0; i &lt; n; i++) cout &lt;&lt; &#x27;-&#x27;;
+void saluer(string nom) {
+    cout &lt;&lt; "Bonjour " &lt;&lt; nom &lt;&lt; " !" &lt;&lt; endl;
+}
+
+int main() {
+    cout &lt;&lt; aire(3, 4.5) &lt;&lt; endl;
+    saluer("Léa");
+}</code></pre></div>
+<p>Une fonction doit être <b>connue avant d'être utilisée</b>. Soit on la définit au-dessus de <code>main</code>, soit on écrit d'abord son <b>prototype</b> (la première ligne suivie d'un point-virgule) et sa définition plus bas :</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+int carre(int x);              // prototype : promesse que la fonction existe
+
+int main() {
+    cout &lt;&lt; carre(7) &lt;&lt; endl;
+}
+
+int carre(int x) {             // définition
+    return x * x;
+}</code></pre></div>
+<h2>2. Passage par valeur : la fonction reçoit une copie</h2>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+void doubler(int n) {
+    n = n * 2;                 // modifie la COPIE
+}
+
+int main() {
+    int x = 5;
+    doubler(x);
+    cout &lt;&lt; x &lt;&lt; endl;             // 5 : x n'a pas changé
+}</code></pre></div>
+<h2>3. Passage par référence : la fonction agit sur l'original</h2>
+<p>Un <code>&amp;</code> après le type crée une <b>référence</b> : un autre nom pour la même variable.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+void doubler(int&amp; n) {
+    n = n * 2;                 // modifie l'ORIGINAL
+}
+
+void echanger(int&amp; a, int&amp; b) {
+    int temp = a;
+    a = b;
+    b = temp;
+}
+
+int main() {
+    int x = 5, y = 9;
+    doubler(x);
+    echanger(x, y);
+    cout &lt;&lt; x &lt;&lt; " " &lt;&lt; y &lt;&lt; endl;     // 9 10
+}</code></pre></div>
+<h3><code>const &amp;</code> : sans copie et sans modification</h3>
+<p>Copier un gros objet (un long texte, un tableau) coûte cher. On le passe alors par <b>référence constante</b> : pas de copie, et la fonction s'engage à ne pas le modifier.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int compterA(const string&amp; texte) {      // la forme à retenir pour les objets
+    int n = 0;
+    for (char c : texte) {
+        if (c == 'a') n++;
+    }
+    return n;
+}
+
+int main() {
+    cout &lt;&lt; compterA("abracadabra") &lt;&lt; endl;
+}</code></pre></div>
+<table><tr><th>Passage</th><th>Écriture</th><th>Quand</th></tr><tr><td>par valeur</td><td><code>int n</code></td><td>petits types (<code>int</code>, <code>double</code>, <code>char</code>, <code>bool</code>)</td></tr><tr><td>par référence</td><td><code>int&amp; n</code></td><td>la fonction doit <b>modifier</b> la variable</td></tr><tr><td>par référence constante</td><td><code>const string&amp; s</code></td><td>gros objets en lecture seule</td></tr></table>
+<h2>4. Valeurs par défaut et surcharge</h2>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+double prixTTC(double ht, double taux = 0.2) {        // valeur par défaut
+    return ht * (1 + taux);
+}
+
+int maxi(int a, int b) { return a &gt; b ? a : b; }                   // même nom,
+double maxi(double a, double b) { return a &gt; b ? a : b; }          // paramètres différents :
+string maxi(const string&amp; a, const string&amp; b) { return a &gt; b ? a : b; }   // surcharge
+
+int main() {
+    cout &lt;&lt; prixTTC(100) &lt;&lt; " " &lt;&lt; prixTTC(100, 0.055) &lt;&lt; endl;
+    cout &lt;&lt; maxi(3, 8) &lt;&lt; " " &lt;&lt; maxi(2.5, 1.5) &lt;&lt; " " &lt;&lt; maxi(string("abc"), string("abd")) &lt;&lt; endl;
+}</code></pre></div>
+<p>Le compilateur choisit la bonne version d'après les <b>types des arguments</b>. Les paramètres avec valeur par défaut se placent en dernier.</p>
+<h2>5. Récursivité</h2>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+long long factorielle(int n) {
+    if (n &lt;= 1) return 1;                  // cas d'arrêt
+    return n * factorielle(n - 1);         // appel récursif
+}
+
+int main() {
+    cout &lt;&lt; factorielle(5) &lt;&lt; " " &lt;&lt; factorielle(20) &lt;&lt; endl;
+}</code></pre></div>
+<h2>6. Portée des variables</h2>
+<p>Une variable existe de sa déclaration jusqu'à l'accolade fermante de son bloc. Une variable déclarée hors de toute fonction est <b>globale</b> : à éviter, sauf pour des constantes.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+const int MAX = 3;                  // constante globale : acceptable
+
+int compteur() {
+    static int n = 0;               // static : garde sa valeur entre les appels
+    n++;
+    return n;
+}
+
+int main() {
+    for (int i = 0; i &lt; MAX; i++) cout &lt;&lt; compteur() &lt;&lt; " ";
     cout &lt;&lt; endl;
-}</code></pre>
-<p>Une fonction doit être <b>déclarée avant</b> d'être utilisée. Si elle est écrite après <code>main</code>, on place son <b>prototype</b> en haut : <code>int carre(int x);</code></p>
+}</code></pre></div>
+<section class="tuto"><h3><small>Tutoriel</small>Une boîte à outils de statistiques</h3>
+<div class="etape"><h4>Une fonction qui calcule</h4>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+using namespace std;
 
-<h2>2. Passage par valeur ou par référence</h2>
-<pre><code>void plusUnCopie(int n) { n++; }     // reçoit une COPIE
-void plusUn(int&amp; n) { n++; }         // reçoit une RÉFÉRENCE : modifie l&#x27;original
+double moyenne(const vector&lt;double&gt;&amp; notes) {
+    double somme = 0;
+    for (double n : notes) somme += n;
+    return somme / notes.size();
+}
 
-int a = 5;
-plusUnCopie(a);   // a vaut toujours 5
-plusUn(a);        // a vaut 6
+int main() {
+    cout &lt;&lt; moyenne({12, 5, 19, 8}) &lt;&lt; endl;
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Renvoyer deux résultats par référence</h4>
+<p>Une fonction ne renvoie qu'une valeur avec <code>return</code> ; les références permettent d'en « sortir » plusieurs.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+using namespace std;
 
-void afficher(const string&amp; s) {     // référence constante : pas de copie, pas de modification
-    cout &lt;&lt; s &lt;&lt; endl;
-}</code></pre>
-<div class="box retenir"><b>Quand utiliser &amp; ?</b><p>Pour <b>modifier</b> la variable de l'appelant, ou pour <b>éviter de copier</b> un gros objet (string, vector) : dans ce dernier cas, ajoute <code>const</code>.</p></div>
+void minmax(const vector&lt;double&gt;&amp; t, double&amp; mini, double&amp; maxi) {
+    mini = maxi = t[0];
+    for (double v : t) {
+        if (v &lt; mini) mini = v;
+        if (v &gt; maxi) maxi = v;
+    }
+}
 
-<h2>3. Surcharge et valeurs par défaut</h2>
-<pre><code>double aire(double r) { return 3.14159 * r * r; }        // cercle
-double aire(double l, double h) { return l * h; }         // rectangle
-void saluer(string nom = &quot;inconnu&quot;) { cout &lt;&lt; &quot;Salut &quot; &lt;&lt; nom; }</code></pre>
-<p>Plusieurs fonctions peuvent porter le même nom si leurs paramètres diffèrent : c'est la <b>surcharge</b>.</p>
+int main() {
+    double a, b;
+    minmax({12, 5, 19, 8}, a, b);
+    cout &lt;&lt; a &lt;&lt; " " &lt;&lt; b &lt;&lt; endl;
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Composer les fonctions</h4>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+using namespace std;
 
-<h2>4. Pointeurs (aperçu)</h2>
-<pre><code>int a = 5;
-int* p = &amp;a;     // p contient l&#x27;ADRESSE de a
-*p = 8;          // modifie ce qui est pointé : a vaut 8</code></pre>
-<p>Les pointeurs sont puissants mais dangereux (accès à une zone mémoire invalide = plantage). En C++ moderne, on les remplace souvent par des références, <code>vector</code> et des pointeurs intelligents (<code>unique_ptr</code>).</p>
+double moyenne(const vector&lt;double&gt;&amp; t) {
+    double s = 0;
+    for (double v : t) s += v;
+    return s / t.size();
+}
+int auDessus(const vector&lt;double&gt;&amp; t, double seuil) {
+    int n = 0;
+    for (double v : t) if (v &gt; seuil) n++;
+    return n;
+}
 
-<h2>5. Fonctions mathématiques</h2>
-<pre><code>#include &lt;cmath&gt;
-sqrt(16.0)    pow(2, 10)    abs(-3)    round(2.6)    hypot(3, 4)</code></pre><div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cpp.html">labo C++</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+int main() {
+    vector&lt;double&gt; notes = {12, 5, 19, 8, 10};
+    cout &lt;&lt; auDessus(notes, moyenne(notes)) &lt;&lt; " notes au-dessus de la moyenne" &lt;&lt; endl;
+}</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : échanger par référence</b><p>Écris une fonction qui modifie ses arguments.</p><a class="defi-go" href="labo-cpp.html#m=cpp-reference">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : minimum et maximum</b><p>Deux résultats grâce aux références.</p><a class="defi-go" href="labo-cpp.html#m=cpp-minmax">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : la factorielle</b><p>Une fonction récursive.</p><a class="defi-go" href="labo-cpp.html#m=cpp-factorielle">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p><code>type nom(type param) { … return valeur; }</code> ; <code>void</code> si rien n'est renvoyé. </p><p> Par valeur : copie. <code>int&amp;</code> : l'original, modifiable. <code>const string&amp;</code> : l'original, en lecture seule (à utiliser pour les objets). </p><p> Surcharge : même nom, paramètres différents. </p><p> Une fonction doit être déclarée (prototype) avant son utilisation.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cpp.html">Labo C++</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
 </article>
 
 <!-- ============ EXERCICES ============ -->
 <script>
 window.EF_EXERCICES = [
  {
-  "type": "qcm",
   "niveau": "facile",
-  "q": "Que signifie le type de retour void ?",
+  "q": "Quel type de retour indique qu'une fonction ne renvoie rien ?",
+  "type": "qcm",
   "options": [
-   "La fonction renvoie 0",
-   "La fonction ne renvoie rien",
-   "La fonction renvoie du texte",
-   "La fonction est vide"
+   "`empty`",
+   "`none`",
+   "`void`",
+   "`null`"
   ],
-  "answer": 1,
+  "answer": 2,
   "explication": ""
  },
  {
-  "type": "qcm",
   "niveau": "moyen",
-  "q": "Que vaut a après `int a = 5; plusUnCopie(a);` si plusUnCopie(int n) fait n++ ?",
+  "q": "Avec `void f(int n) { n = 0; }`, que vaut x après `int x = 5; f(x);` ?",
+  "type": "qcm",
   "options": [
+   "Indéterminé",
    "5",
-   "6",
-   "Erreur",
+   "Erreur de compilation",
    "0"
+  ],
+  "answer": 1,
+  "explication": "Passage par valeur : f modifie une copie."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Avec `void f(int& n) { n = 0; }`, que vaut x après `int x = 5; f(x);` ?",
+  "type": "qcm",
+  "options": [
+   "Indéterminé",
+   "5",
+   "Erreur de compilation",
+   "0"
+  ],
+  "answer": 3,
+  "explication": "Passage par référence : f modifie l'original."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle est la meilleure façon de passer une longue chaîne en lecture seule ?",
+  "type": "qcm",
+  "options": [
+   "`const string& s`",
+   "`string s`",
+   "`string* s`",
+   "`string& s`"
   ],
   "answer": 0,
-  "explication": "Passage par valeur : une copie."
+  "explication": "Pas de copie, pas de modification."
  },
  {
-  "type": "qcm",
-  "niveau": "moyen",
-  "q": "Que vaut a après `int a = 5; plusUn(a);` si plusUn(int& n) fait n++ ?",
-  "options": [
-   "5",
-   "6",
-   "Erreur",
-   "0"
-  ],
-  "answer": 1,
-  "explication": "Passage par référence."
- },
- {
-  "type": "qcm",
-  "niveau": "moyen",
-  "q": "Pourquoi écrire `const string& s` en paramètre ?",
-  "options": [
-   "Pour modifier s",
-   "Pour éviter une copie sans permettre la modification",
-   "C'est obligatoire",
-   "Pour convertir en string"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "qcm",
   "niveau": "moyen",
   "q": "Qu'est-ce qu'un prototype de fonction ?",
+  "type": "qcm",
   "options": [
+   "Un commentaire",
    "Une version de test",
-   "La déclaration de la fonction (sans son corps) avant son utilisation",
-   "Une fonction vide",
-   "Une classe"
+   "Sa déclaration, sans le corps, suivie d'un point-virgule",
+   "Une fonction sans paramètre"
   ],
-  "answer": 1,
+  "answer": 2,
   "explication": ""
  },
  {
-  "type": "qcm",
   "niveau": "moyen",
-  "q": "Deux fonctions aire(double) et aire(double, double) peuvent coexister grâce à…",
+  "q": "Qu'est-ce que la surcharge de fonctions ?",
+  "type": "qcm",
   "options": [
-   "l'héritage",
-   "la surcharge",
-   "la récursivité",
-   "un pointeur"
+   "Plusieurs fonctions de même nom avec des paramètres différents",
+   "Une fonction globale",
+   "Une fonction trop longue",
+   "Une fonction qui s'appelle elle-même"
   ],
-  "answer": 1,
+  "answer": 0,
   "explication": ""
  },
  {
-  "type": "qcm",
   "niveau": "difficile",
-  "q": "Que contient `int* p = &a;` ?",
-  "options": [
-   "La valeur de a",
-   "L'adresse de a",
-   "Une copie de a",
-   "Rien"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "vf",
-  "niveau": "moyen",
-  "q": "Une fonction doit être déclarée avant d'être appelée.",
-  "answer": true,
-  "explication": ""
- },
- {
-  "type": "saisie",
-  "niveau": "moyen",
-  "q": "Quel en-tête inclure pour sqrt et pow ? (entre chevrons)",
-  "answers": [
-   "<cmath>",
-   "cmath"
-  ],
-  "explication": ""
- },
- {
+  "q": "Deux fonctions surchargées peuvent-elles ne différer que par leur type de retour ?",
   "type": "qcm",
-  "niveau": "moyen",
-  "q": "Que renvoie `hypot(3, 4)` ?",
   "options": [
-   "7",
-   "5",
-   "12",
-   "25"
+   "Non",
+   "Seulement dans une classe",
+   "Oui",
+   "Seulement si elles sont const"
+  ],
+  "answer": 0,
+  "explication": "Le compilateur choisit d'après les arguments."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Avec `double ttc(double ht, double taux = 0.2)`, que vaut `ttc(100)` ?",
+  "type": "qcm",
+  "options": [
+   "Erreur",
+   "20",
+   "100",
+   "120"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Où doivent se placer les paramètres avec valeur par défaut ?",
+  "type": "qcm",
+  "options": [
+   "Dans le prototype uniquement",
+   "En dernier",
+   "En premier",
+   "N'importe où"
   ],
   "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que fait `static int n = 0;` dans une fonction ?",
+  "type": "qcm",
+  "options": [
+   "n est globale",
+   "n vaut 0 à chaque appel",
+   "n est une constante",
+   "n garde sa valeur d'un appel à l'autre"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que manque-t-il à une fonction récursive qui ne s'arrête jamais ?",
+  "type": "qcm",
+  "options": [
+   "Un cas d'arrêt",
+   "Un prototype",
+   "Un `break`",
+   "Une référence"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que signifie le `&` dans `void f(int& n)` ?",
+  "type": "qcm",
+  "options": [
+   "n est une référence : un autre nom pour la variable de l'appelant",
+   "n est facultatif",
+   "n est une adresse",
+   "n est une constante"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Une fonction C++ peut renvoyer plusieurs valeurs avec `return a, b;`.",
+  "type": "vf",
+  "answer": false,
+  "explication": "return ne renvoie qu'une valeur ; on utilise des références, une struct ou un pair."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Une fonction doit être déclarée avant la ligne où elle est appelée.",
+  "type": "vf",
+  "answer": true,
+  "explication": "D'où l'utilité des prototypes."
+ },
+ {
+  "niveau": "difficile",
+  "q": "On peut passer la valeur littérale 5 à une fonction `void f(int& n)`.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Une référence non constante doit désigner une variable."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel mot-clé renvoie une valeur depuis une fonction ?",
+  "type": "saisie",
+  "answers": [
+   "return"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi `factorielle` renvoie-t-elle un `long long` dans le cours ?",
+  "type": "qcm",
+  "options": [
+   "Parce que c'est obligatoire pour la récursivité",
+   "Parce que le résultat dépasse vite la capacité d'un int",
+   "Pour aller plus vite",
+   "Pour éviter les nombres négatifs"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque écriture à son effet.",
+  "type": "associer",
+  "paires": [
+   [
+    "`int n`",
+    "copie de l'argument"
+   ],
+   [
+    "`int& n`",
+    "l'original, modifiable"
+   ],
+   [
+    "`const string& s`",
+    "l'original, non modifiable"
+   ],
+   [
+    "`int n = 0`",
+    "valeur par défaut"
+   ]
+  ],
   "explication": ""
  }
 ];
@@ -184,6 +440,8 @@ window.EF_EXERCICES = [
 <script src="../../data/modules.js"></script>
 <script src="../../assets/app.js"></script>
 <script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
 <script src="../../assets/chapter.js"></script>
 </body>
 </html>

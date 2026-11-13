@@ -42,14 +42,58 @@ def cellules(l):
     return cells
 
 
+def decale(lignes, n):
+    return [(" " * n + l) if l.strip() else "" for l in lignes]
+
+
+def programme(mots, lignes, langue):
+    """Options d'un bloc run pour écrire moins : h=iostream,vector (C++), imp=java.util.* (Java), main (le corps est placé dans main).
+    Avec main, des lignes @@ séparent : [déclarations globales @@] corps de main (C++) ; [classes @@] [membres statiques de Main @@] corps de main (Java)."""
+    opt = {m.split("=")[0]: (m.split("=", 1)[1] if "=" in m else True) for m in mots}
+    parts, cur = [], []
+    for l in lignes:
+        if l.strip() == "@@":
+            parts.append(cur); cur = []
+        else:
+            cur.append(l)
+    parts.append(cur)
+    out = []
+    if langue == "cpp":
+        if "h" in opt:
+            out += ["#include <%s>" % h for h in opt["h"].split(",")] + ["using namespace std;", ""]
+        if "main" in opt:
+            if len(parts) > 1:
+                out += parts[0] + [""]
+            out += ["int main() {"] + decale(parts[-1], 4) + ["}"]
+        else:
+            out += lignes
+    elif langue == "java":
+        if "imp" in opt:
+            out += ["import %s;" % i for i in opt["imp"].split(",")] + [""]
+        if "main" in opt:
+            if len(parts) > 2:
+                out += parts[0] + [""]
+            out += ["public class Main {"]
+            if len(parts) > 1:
+                out += decale(parts[-2], 4) + [""]
+            out += ["    public static void main(String[] args) {"] + decale(parts[-1], 8) + ["    }", "}"]
+        else:
+            out += lignes
+    else:
+        out = lignes
+    return out
+
+
 def bloc_code(info, lignes, langue):
-    code = html.escape("\n".join(lignes), quote=False)
     mots = info.split()
+    if mots and mots[0] == "run":
+        lignes = programme(mots[1:], lignes, langue)
+    code = html.escape("\n".join(lignes), quote=False)
     if mots and mots[0] == "run" and langue:
         att = ""
         for m in mots[1:]:
             if m.startswith("stdin="):
-                att += ' data-stdin="' + html.escape(m[6:].replace("|", "\n")).replace("\n", "&#10;") + '"'
+                att += ' data-stdin="' + html.escape(m[6:].replace("|", "\n").replace("~", " ")).replace("\n", "&#10;") + '"'
             elif m == "stdin":
                 att += ' data-stdin=""'
             elif m == "err":

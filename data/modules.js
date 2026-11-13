@@ -211,20 +211,26 @@ window.EF_MODULES = [
     ]
   },
   {
-    id: "cpp", bonus: true,
+    id: "cpp", bonus: true, evalTextuel: true,
     titre: "C++",
     sousTitre: "Bonus · rapide et compilé",
     icone: "C++",
     option: "BONUS",
     couleur: "cpp",
-    description: "Compilation, types, fonctions, références, vector et string, classes, puis de vrais jeux compilés en WebAssembly.",
-    labos: [{ href: "labo-cpp.html", ico: "C++", titre: "Labo C++", court: "C++", texte: "16 missions avec du vrai C++20 compilé par clang dans le navigateur : console puis jeux en temps réel. Plus un bac à sable." }],
+    description: "Le cours complet : compilation, types, fonctions et références, vector et string, pointeurs, classes, héritage, mémoire moderne, STL, templates, puis de vrais jeux compilés en WebAssembly.",
+    labos: [{ href: "labo-cpp.html", ico: "C++", titre: "Labo C++", court: "C++", texte: "45 missions avec du vrai C++20 compilé par clang dans le navigateur : bases, fonctions, vector, pointeurs, classes, héritage, STL, templates, puis des jeux en temps réel. Plus un bac à sable." }],
     chapitres: [
       { id: "cpp-bases", titre: "C++ : compiler, afficher, lire", niveau: "facile" },
       { id: "cpp-conditions-boucles", titre: "C++ : conditions et boucles", niveau: "facile" },
       { id: "cpp-fonctions", titre: "C++ : fonctions et références", niveau: "moyen" },
       { id: "cpp-vector-string", titre: "C++ : tableaux, vector et string", niveau: "moyen" },
+      { id: "cpp-pointeurs", titre: "C++ : pointeurs et mémoire", niveau: "difficile" },
       { id: "cpp-classes", titre: "C++ : classes et objets", niveau: "difficile" },
+      { id: "cpp-heritage", titre: "C++ : héritage et polymorphisme", niveau: "difficile" },
+      { id: "cpp-memoire-moderne", titre: "C++ : RAII, copie et pointeurs intelligents", niveau: "difficile" },
+      { id: "cpp-stl", titre: "C++ : la STL, conteneurs, algorithmes et lambdas", niveau: "difficile" },
+      { id: "cpp-templates", titre: "C++ : templates et surcharge d'opérateurs", niveau: "difficile" },
+      { id: "cpp-projets", titre: "C++ : exceptions, fichiers et organisation d'un projet", niveau: "moyen" },
       { id: "cpp-jeu", titre: "C++ : créer un jeu dans le navigateur", niveau: "difficile" }
     ]
   },

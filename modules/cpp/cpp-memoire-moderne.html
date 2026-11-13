@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>C++ : RAII, copie et pointeurs intelligents — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="cpp" data-chapter="cpp-memoire-moderne">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/cpp.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>Le C++ moderne (depuis C++11) permet de ne <b>presque jamais</b> écrire <code>delete</code>. Le principe qui rend cela possible s'appelle <b>RAII</b>.</p>
+<h2>1. RAII : la ressource vit avec l'objet</h2>
+<p>*Resource Acquisition Is Initialization* : une ressource (mémoire, fichier, connexion, verrou) est <b>acquise dans le constructeur</b> et <b>libérée dans le destructeur</b>. Comme le destructeur d'une variable locale est toujours appelé à la fin de son bloc, la ressource est toujours libérée, même si on quitte la fonction au milieu.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+class Connexion {
+    string serveur;
+public:
+    Connexion(const string&amp; s) : serveur(s) { cout &lt;&lt; "connexion à " &lt;&lt; serveur &lt;&lt; endl; }
+    ~Connexion() { cout &lt;&lt; "déconnexion de " &lt;&lt; serveur &lt;&lt; endl; }
+    void requete(const string&amp; q) const { cout &lt;&lt; "  requête : " &lt;&lt; q &lt;&lt; endl; }
+};
+
+void travail(bool erreur) {
+    Connexion c("bdd.local");
+    c.requete("SELECT 1");
+    if (erreur) return;                 // sortie anticipée : c est quand même détruit
+    c.requete("SELECT 2");
+}
+
+int main() {
+    travail(false);
+    travail(true);
+}</code></pre></div>
+<p><code>vector</code>, <code>string</code>, <code>ifstream</code> fonctionnent tous ainsi : c'est pour cela qu'on ne libère jamais leur mémoire à la main.</p>
+<h2>2. <code>unique_ptr</code> : un seul propriétaire</h2>
+<p><code>unique_ptr&lt;T&gt;</code> (bibliothèque <code>&lt;memory&gt;</code>) possède un objet créé sur le tas et le détruit automatiquement. Il ne peut pas être copié, seulement <b>déplacé</b>.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;memory&gt;
+#include &lt;string&gt;
+using namespace std;
+
+struct Arme {
+    string nom;
+    Arme(const string&amp; n) : nom(n) { cout &lt;&lt; "création de " &lt;&lt; nom &lt;&lt; endl; }
+    ~Arme() { cout &lt;&lt; "destruction de " &lt;&lt; nom &lt;&lt; endl; }
+};
+
+int main() {
+    unique_ptr&lt;Arme&gt; a = make_unique&lt;Arme&gt;("épée");     // jamais de new
+    cout &lt;&lt; a-&gt;nom &lt;&lt; endl;                              // s'utilise comme un pointeur
+    // unique_ptr&lt;Arme&gt; b = a;                           // refusé : copie interdite
+    unique_ptr&lt;Arme&gt; b = move(a);                        // transfert de propriété
+    cout &lt;&lt; (a == nullptr) &lt;&lt; " " &lt;&lt; b-&gt;nom &lt;&lt; endl;     // a est vide
+    cout &lt;&lt; "fin de main" &lt;&lt; endl;                       // l'épée est détruite ici, toute seule
+}</code></pre></div>
+<p>C'est aussi la bonne façon de stocker des objets polymorphes :</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;memory&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+using namespace std;
+
+struct Forme {
+    virtual double aire() const = 0;
+    virtual ~Forme() = default;
+};
+struct Carre : Forme {
+    double c;
+    Carre(double c) : c(c) {}
+    double aire() const override { return c * c; }
+};
+struct Disque : Forme {
+    double r;
+    Disque(double r) : r(r) {}
+    double aire() const override { return 3.14159 * r * r; }
+};
+
+int main() {
+    vector&lt;unique_ptr&lt;Forme&gt;&gt; formes;
+    formes.push_back(make_unique&lt;Carre&gt;(2));
+    formes.push_back(make_unique&lt;Disque&gt;(1));
+    for (const auto&amp; f : formes) cout &lt;&lt; f-&gt;aire() &lt;&lt; endl;
+    // tout est libéré automatiquement à la fin
+}</code></pre></div>
+<h2>3. <code>shared_ptr</code> : plusieurs propriétaires</h2>
+<p><code>shared_ptr&lt;T&gt;</code> compte ses propriétaires ; l'objet est détruit quand le dernier disparaît.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;memory&gt;
+#include &lt;string&gt;
+using namespace std;
+
+struct Texture {
+    string fichier;
+    Texture(const string&amp; f) : fichier(f) { cout &lt;&lt; "chargement de " &lt;&lt; fichier &lt;&lt; endl; }
+    ~Texture() { cout &lt;&lt; "libération de " &lt;&lt; fichier &lt;&lt; endl; }
+};
+
+int main() {
+    shared_ptr&lt;Texture&gt; a = make_shared&lt;Texture&gt;("herbe.png");
+    cout &lt;&lt; a.use_count() &lt;&lt; endl;            // 1 propriétaire
+    {
+        shared_ptr&lt;Texture&gt; b = a;            // copie autorisée : 2 propriétaires
+        cout &lt;&lt; a.use_count() &lt;&lt; endl;
+    }                                         // b disparaît : retour à 1
+    cout &lt;&lt; a.use_count() &lt;&lt; endl;
+    a.reset();                                // plus aucun propriétaire : libération
+    cout &lt;&lt; "fin" &lt;&lt; endl;
+}</code></pre></div>
+<table><tr><th></th><th><code>unique_ptr</code></th><th><code>shared_ptr</code></th><th>Pointeur brut <code>T*</code></th></tr><tr><td>Propriétaires</td><td>un seul</td><td>plusieurs (compteur)</td><td>aucun : il <b>observe</b></td></tr><tr><td>Copie</td><td>interdite (<code>move</code>)</td><td>autorisée</td><td>autorisée</td></tr><tr><td>Libération</td><td>automatique</td><td>automatique, au dernier</td><td>jamais</td></tr><tr><td>À utiliser</td><td>par défaut</td><td>ressource réellement partagée</td><td>paramètre de fonction, sans propriété</td></tr></table>
+<h2>4. La copie d'un objet</h2>
+<p>Par défaut, copier un objet copie chacun de ses attributs. C'est parfait… sauf si un attribut est un pointeur brut : les deux objets pointent alors sur la même zone, et chacun la libérera (double libération). D'où la <b>règle de zéro</b> : utilise <code>vector</code>, <code>string</code> et les pointeurs intelligents comme attributs, et tu n'auras <b>aucun</b> destructeur ni constructeur de copie à écrire.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+using namespace std;
+
+class Classe {
+    string nom;
+    vector&lt;string&gt; eleves;         // gère sa mémoire tout seul
+public:
+    Classe(const string&amp; n) : nom(n) {}
+    void ajouter(const string&amp; e) { eleves.push_back(e); }
+    size_t effectif() const { return eleves.size(); }
+};
+
+int main() {
+    Classe a("SIO1");
+    a.ajouter("Léa");
+    Classe b = a;                      // copie complète et indépendante, sans rien écrire
+    b.ajouter("Sam");
+    cout &lt;&lt; a.effectif() &lt;&lt; " " &lt;&lt; b.effectif() &lt;&lt; endl;
+}</code></pre></div>
+<h2>5. Déplacer au lieu de copier : <code>std::move</code></h2>
+<p>Copier un gros vector recopie tous ses éléments. Le <b>déplacer</b> transfère simplement son contenu vers le destinataire ; l'objet d'origine reste valide, mais vide.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;utility&gt;
+using namespace std;
+
+int main() {
+    vector&lt;string&gt; source = {"a", "b", "c"};
+    vector&lt;string&gt; copie = source;              // copie : 3 chaînes recopiées
+    vector&lt;string&gt; deplace = move(source);      // déplacement : aucune recopie
+    cout &lt;&lt; copie.size() &lt;&lt; " " &lt;&lt; deplace.size() &lt;&lt; " " &lt;&lt; source.size() &lt;&lt; endl;
+}</code></pre></div>
+<div class="box"><b>La règle de trois, cinq, zéro</b><p>Si ta classe gère elle-même une ressource brute et a besoin d'un destructeur, elle a aussi besoin d'un constructeur de copie et d'un opérateur d'affectation (<b>règle de trois</b>), plus leurs versions par déplacement (<b>règle de cinq</b>). La meilleure solution reste de n'en écrire aucun (<b>règle de zéro</b>).</p></div>
+<section class="tuto"><h3><small>Tutoriel</small>Un inventaire de jeu sans fuite de mémoire</h3>
+<div class="etape"><h4>Le problème avec new</h4>
+<p>Ce code fuit : l'objet n'est jamais libéré. Le destructeur ne s'affiche pas.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+struct Objet {
+    string nom;
+    Objet(const string&amp; n) : nom(n) {}
+    ~Objet() { cout &lt;&lt; "destruction de " &lt;&lt; nom &lt;&lt; endl; }
+};
+
+int main() {
+    Objet* o = new Objet("potion");
+    cout &lt;&lt; o-&gt;nom &lt;&lt; endl;
+    // oubli du delete : fuite
+}</code></pre></div>
+</div>
+<div class="etape"><h4>La solution : unique_ptr</h4>
+<p>Même code, sans <code>new</code> ni <code>delete</code> : la destruction s'affiche.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;memory&gt;
+using namespace std;
+
+struct Objet {
+    string nom;
+    Objet(const string&amp; n) : nom(n) {}
+    ~Objet() { cout &lt;&lt; "destruction de " &lt;&lt; nom &lt;&lt; endl; }
+};
+
+int main() {
+    auto o = make_unique&lt;Objet&gt;("potion");
+    cout &lt;&lt; o-&gt;nom &lt;&lt; endl;
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Un sac qui possède ses objets</h4>
+<p>Retirer un élément du vector le détruit automatiquement.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;memory&gt;
+#include &lt;vector&gt;
+using namespace std;
+
+struct Objet {
+    string nom;
+    Objet(const string&amp; n) : nom(n) {}
+    ~Objet() { cout &lt;&lt; "destruction de " &lt;&lt; nom &lt;&lt; endl; }
+};
+
+int main() {
+    vector&lt;unique_ptr&lt;Objet&gt;&gt; sac;
+    sac.push_back(make_unique&lt;Objet&gt;("potion"));
+    sac.push_back(make_unique&lt;Objet&gt;("clé"));
+    sac.pop_back();                          // la clé est détruite ici
+    cout &lt;&lt; sac.size() &lt;&lt; " objet dans le sac" &lt;&lt; endl;
+}</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : unique_ptr</b><p>Remplace new et delete par un pointeur intelligent.</p><a class="defi-go" href="labo-cpp.html#m=cpp-smart">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p>RAII : acquérir dans le constructeur, libérer dans le destructeur. </p><p> <code>make_unique&lt;T&gt;(…)</code> crée un <code>unique_ptr</code> : un propriétaire, pas de copie, <code>std::move</code> pour transférer. </p><p> <code>make_shared&lt;T&gt;(…)</code> : propriété partagée, libération au dernier. </p><p> Règle de zéro : des attributs qui se gèrent seuls (<code>vector</code>, <code>string</code>, pointeurs intelligents), et rien à écrire.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cpp.html">Labo C++</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "Que signifie RAII en pratique ?",
+  "type": "qcm",
+  "options": [
+   "La ressource est acquise dans le constructeur et libérée dans le destructeur",
+   "Les ressources sont libérées par un ramasse-miettes",
+   "Il faut appeler delete à la fin de chaque fonction",
+   "Toute variable doit être initialisée à 0"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle fonction crée un unique_ptr ?",
+  "type": "qcm",
+  "options": [
+   "`create_ptr`",
+   "`unique`",
+   "`make_unique`",
+   "`new_unique`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Combien de propriétaires un unique_ptr a-t-il ?",
+  "type": "qcm",
+  "options": [
+   "Autant qu'on veut",
+   "Un seul",
+   "Aucun",
+   "Deux"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment transférer la propriété d'un unique_ptr ?",
+  "type": "qcm",
+  "options": [
+   "Avec `std::move`",
+   "Avec `=` simplement",
+   "C'est impossible",
+   "Avec `copy`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quand l'objet d'un shared_ptr est-il détruit ?",
+  "type": "qcm",
+  "options": [
+   "À la fin du programme",
+   "Quand on appelle delete",
+   "Dès la première copie",
+   "Quand son dernier propriétaire disparaît"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle méthode donne le nombre de propriétaires d'un shared_ptr ?",
+  "type": "qcm",
+  "options": [
+   "`size()`",
+   "`use_count()`",
+   "`count()`",
+   "`owners()`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle bibliothèque fournit unique_ptr et shared_ptr ?",
+  "type": "qcm",
+  "options": [
+   "`<smart>`",
+   "`<memory>`",
+   "`<utility>`",
+   "`<pointer>`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que vaut un unique_ptr après qu'on l'a déplacé avec move ?",
+  "type": "qcm",
+  "options": [
+   "Il pointe toujours sur l'objet",
+   "`nullptr`",
+   "Une valeur indéterminée",
+   "Une copie de l'objet"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Quel est le danger de copier un objet qui contient un pointeur brut vers une zone qu'il a allouée ?",
+  "type": "qcm",
+  "options": [
+   "Rien",
+   "Les deux objets libèrent la même zone (double libération)",
+   "Le pointeur devient nul",
+   "La copie est trop lente"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que recommande la règle de zéro ?",
+  "type": "qcm",
+  "options": [
+   "Ne jamais utiliser de pointeur",
+   "N'écrire aucune classe",
+   "Initialiser tous les attributs à zéro",
+   "N'utiliser que des attributs qui gèrent leur mémoire, pour n'écrire ni destructeur ni copie"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Après `vector<string> b = move(a);`, que contient a ?",
+  "type": "qcm",
+  "options": [
+   "Les mêmes éléments que b",
+   "Un vector valide mais vide",
+   "nullptr",
+   "Une zone libérée interdite d'accès"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel pointeur choisir par défaut pour posséder un objet du tas ?",
+  "type": "qcm",
+  "options": [
+   "Un pointeur brut",
+   "`auto_ptr`",
+   "`unique_ptr`",
+   "`shared_ptr`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "À quoi sert encore un pointeur brut `T*` en C++ moderne ?",
+  "type": "qcm",
+  "options": [
+   "À libérer la mémoire",
+   "À rien",
+   "À observer un objet sans le posséder",
+   "À remplacer vector"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Avec un unique_ptr, il faut quand même appeler delete.",
+  "type": "vf",
+  "answer": false,
+  "explication": "La destruction est automatique."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Un unique_ptr peut être copié.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Il ne peut qu'être déplacé."
+ },
+ {
+  "niveau": "moyen",
+  "q": "vector et string appliquent le principe RAII.",
+  "type": "vf",
+  "answer": true,
+  "explication": "Ils libèrent leur mémoire dans leur destructeur."
+ },
+ {
+  "niveau": "difficile",
+  "q": "Le destructeur d'une variable locale est appelé même si on quitte la fonction avec un return anticipé.",
+  "type": "vf",
+  "answer": true,
+  "explication": "C'est ce qui rend RAII fiable."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle fonction crée un shared_ptr ?",
+  "type": "saisie",
+  "answers": [
+   "make_shared"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque outil à sa propriété.",
+  "type": "associer",
+  "paires": [
+   [
+    "`unique_ptr`",
+    "un seul propriétaire"
+   ],
+   [
+    "`shared_ptr`",
+    "propriété partagée"
+   ],
+   [
+    "`T*`",
+    "observe sans posséder"
+   ],
+   [
+    "`std::move`",
+    "transfère la propriété"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

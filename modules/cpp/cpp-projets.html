@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>C++ : exceptions, fichiers et organisation d'un projet — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="cpp" data-chapter="cpp-projets">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/cpp.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>Ce chapitre couvre ce qui transforme un exercice en vrai programme : gérer les erreurs, lire et écrire des fichiers, découper le code en plusieurs fichiers.</p>
+<div class="box"><b>Dans le navigateur</b><p>Le compilateur du site tourne sans disque et sans gestion des exceptions : les exemples d'exceptions et de fichiers de ce chapitre ne sont pas exécutables ici. Ils fonctionnent tels quels sur ton ordinateur avec <code>g++</code>.</p></div>
+<h2>1. Les exceptions</h2>
+<p>Une <b>exception</b> signale une erreur en interrompant le déroulement normal. Elle remonte d'appel en appel jusqu'à un bloc <code>catch</code> capable de la traiter.</p>
+<pre><code>#include &lt;iostream&gt;
+#include &lt;stdexcept&gt;
+using namespace std;
+
+double diviser(double a, double b) {
+    if (b == 0) throw invalid_argument("division par zéro");     // lève l'exception
+    return a / b;
+}
+
+int main() {
+    try {
+        cout &lt;&lt; diviser(10, 2) &lt;&lt; endl;
+        cout &lt;&lt; diviser(1, 0) &lt;&lt; endl;        // lève : la suite du bloc try est sautée
+        cout &lt;&lt; "jamais affiché" &lt;&lt; endl;
+    } catch (const invalid_argument&amp; e) {     // attrape par référence constante
+        cout &lt;&lt; "Erreur : " &lt;&lt; e.what() &lt;&lt; endl;
+    } catch (const exception&amp; e) {            // toute autre exception standard
+        cout &lt;&lt; "Erreur inattendue : " &lt;&lt; e.what() &lt;&lt; endl;
+    }
+    cout &lt;&lt; "le programme continue" &lt;&lt; endl;
+}</code></pre>
+<table><tr><th>Exception standard</th><th>Usage</th></tr><tr><td><code>invalid_argument</code></td><td>argument incorrect</td></tr><tr><td><code>out_of_range</code></td><td>indice hors bornes (<code>v.at(i)</code>, <code>stoi</code>)</td></tr><tr><td><code>runtime_error</code></td><td>erreur détectée à l'exécution</td></tr><tr><td><code>logic_error</code></td><td>erreur de logique du programme</td></tr><tr><td><code>bad_alloc</code></td><td>plus de mémoire (<code>new</code>)</td></tr></table>
+<p>Toutes dérivent de <code>std::exception</code> et ont une méthode <code>what()</code>. On crée la sienne en héritant de l'une d'elles :</p>
+<pre><code>class SoldeInsuffisant : public runtime_error {
+public:
+    SoldeInsuffisant() : runtime_error("solde insuffisant") {}
+};</code></pre>
+<p>Grâce à RAII, les destructeurs des objets locaux sont appelés pendant la remontée de l'exception : rien ne fuit. Sans exceptions, on signale une erreur par une <b>valeur de retour</b>, comme dans cet exemple exécutable :</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;optional&gt;
+#include &lt;string&gt;
+using namespace std;
+
+optional&lt;double&gt; diviser(double a, double b) {        // optional : une valeur, ou rien
+    if (b == 0) return nullopt;
+    return a / b;
+}
+
+int main() {
+    for (double b : {2.0, 0.0}) {
+        optional&lt;double&gt; r = diviser(10, b);
+        if (r) cout &lt;&lt; "Résultat : " &lt;&lt; *r &lt;&lt; endl;
+        else cout &lt;&lt; "Erreur : division par zéro" &lt;&lt; endl;
+    }
+}</code></pre></div>
+<h2>2. Lire et écrire des fichiers</h2>
+<p>La bibliothèque <code>&lt;fstream&gt;</code> fournit <code>ofstream</code> (écriture) et <code>ifstream</code> (lecture). Ils s'utilisent exactement comme <code>cout</code> et <code>cin</code>.</p>
+<pre><code>#include &lt;fstream&gt;
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    ofstream sortie("scores.txt");               // crée ou écrase le fichier
+    if (!sortie) { cerr &lt;&lt; "Impossible d'ouvrir le fichier" &lt;&lt; endl; return 1; }
+    sortie &lt;&lt; "Léa 120" &lt;&lt; endl;
+    sortie &lt;&lt; "Sam 95" &lt;&lt; endl;
+    sortie.close();                              // facultatif : fermé par le destructeur (RAII)
+
+    ifstream entree("scores.txt");
+    string nom;
+    int score;
+    while (entree &gt;&gt; nom &gt;&gt; score) {             // lit tant qu'il y a des données
+        cout &lt;&lt; nom &lt;&lt; " a " &lt;&lt; score &lt;&lt; " points" &lt;&lt; endl;
+    }
+
+    ifstream lignes("scores.txt");
+    string ligne;
+    while (getline(lignes, ligne)) cout &lt;&lt; ligne &lt;&lt; endl;     // ligne par ligne
+
+    ofstream ajout("scores.txt", ios::app);      // ios::app : ajoute à la fin
+    ajout &lt;&lt; "Zoé 150" &lt;&lt; endl;
+}</code></pre>
+<p><code>cerr</code> est la sortie d'erreur ; <code>return 1</code> dans <code>main</code> signale au système que le programme a échoué. Pour découper une ligne, <code>stringstream</code> transforme une chaîne en flux, et celui-ci est exécutable :</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;sstream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    string ligne = "Léa 120 15.5";
+    stringstream flux(ligne);
+    string nom;
+    int score;
+    double note;
+    flux &gt;&gt; nom &gt;&gt; score &gt;&gt; note;
+    cout &lt;&lt; nom &lt;&lt; " | " &lt;&lt; score + 1 &lt;&lt; " | " &lt;&lt; note * 2 &lt;&lt; endl;
+}</code></pre></div>
+<h2>3. Plusieurs fichiers : <code>.h</code> et <code>.cpp</code></h2>
+<p>Un vrai projet sépare la <b>déclaration</b> (ce qui existe : fichier d'en-tête <code>.h</code>) de la <b>définition</b> (le code : fichier <code>.cpp</code>).</p>
+<pre><code>// ---------- compte.h : la déclaration ----------
+#pragma once                       // empêche d'inclure deux fois le même en-tête
+#include &lt;string&gt;
+
+class Compte {
+    std::string titulaire;         // jamais de « using namespace std » dans un .h
+    double solde;
+public:
+    Compte(const std::string&amp; t, double s);
+    void deposer(double montant);
+    double getSolde() const;
+};</code></pre>
+<pre><code>// ---------- compte.cpp : la définition ----------
+#include "compte.h"                // guillemets : fichier du projet
+
+Compte::Compte(const std::string&amp; t, double s) : titulaire(t), solde(s) {}
+void Compte::deposer(double montant) { solde += montant; }      // Compte:: = « de la classe Compte »
+double Compte::getSolde() const { return solde; }</code></pre>
+<pre><code>// ---------- main.cpp ----------
+#include &lt;iostream&gt;
+#include "compte.h"
+
+int main() {
+    Compte c("Léa", 100);
+    c.deposer(50);
+    std::cout &lt;&lt; c.getSolde() &lt;&lt; std::endl;
+}</code></pre>
+<pre><code>g++ -Wall -std=c++20 main.cpp compte.cpp -o banque</code></pre>
+<p>La construction se fait en deux temps : la <b>compilation</b> transforme chaque <code>.cpp</code> en fichier objet <code>.o</code>, puis l'<b>édition de liens</b> (*link*) les assemble. D'où deux familles d'erreurs : <code>error: …</code> (compilation) et <code>undefined reference to …</code> (édition de liens : la fonction est déclarée mais sa définition n'a pas été fournie).</p>
+<h2>4. Les espaces de noms</h2>
+<p>Un <code>namespace</code> regroupe des noms pour éviter les collisions : c'est ce qu'est <code>std</code>.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+namespace geometrie {
+    const double PI = 3.14159;
+    double aireCercle(double r) { return PI * r * r; }
+}
+namespace finance {
+    double aireCercle(double) { return 0; }       // même nom, aucun conflit
+}
+
+int main() {
+    cout &lt;&lt; geometrie::aireCercle(1) &lt;&lt; endl;
+    using geometrie::PI;                              // n'importe qu'un nom
+    cout &lt;&lt; PI &lt;&lt; endl;
+}</code></pre></div>
+<h2>5. Automatiser la construction</h2>
+<p>Dès qu'il y a plusieurs fichiers, on ne tape plus la commande à la main. <b>CMake</b> est l'outil le plus répandu :</p>
+<pre><code># CMakeLists.txt
+cmake_minimum_required(VERSION 3.16)
+project(Banque CXX)
+set(CMAKE_CXX_STANDARD 20)
+add_executable(banque main.cpp compte.cpp)</code></pre>
+<pre><code>cmake -B build          # prépare
+cmake --build build     # compile seulement ce qui a changé
+./build/banque</code></pre>
+<h2>6. Lire les erreurs du compilateur</h2>
+<table><tr><th>Message</th><th>Cause habituelle</th></tr><tr><td><code>expected ';'</code></td><td>point-virgule oublié, souvent à la ligne <b>précédente</b></td></tr><tr><td><code>'x' was not declared in this scope</code></td><td>faute de frappe, <code>#include</code> manquant, variable hors de portée</td></tr><tr><td><code>no matching function for call to</code></td><td>mauvais nombre ou mauvais type d'arguments</td></tr><tr><td><code>invalid conversion</code> / <code>cannot convert</code></td><td>types incompatibles</td></tr><tr><td><code>undefined reference to</code></td><td>définition absente à l'édition de liens (fichier <code>.cpp</code> oublié)</td></tr><tr><td><code>segmentation fault</code> (à l'exécution)</td><td>pointeur nul ou indice hors bornes</td></tr></table>
+<p>Compile toujours avec <code>-Wall -Wextra</code> : les avertissements signalent de vrais bugs (variable non initialisée, <code>=</code> au lieu de <code>==</code>).</p>
+<section class="tuto"><h3><small>Tutoriel</small>Découper un programme en modules</h3>
+<div class="etape"><h4>Tout dans un seul fichier</h4>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+double tva(double ht) { return ht * 0.2; }
+double ttc(double ht) { return ht + tva(ht); }
+
+int main() {
+    cout &lt;&lt; ttc(100) &lt;&lt; endl;
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Ranger dans un espace de noms</h4>
+<p>Dans un projet, ce bloc deviendrait <code>facture.h</code> (les deux déclarations) et <code>facture.cpp</code> (les deux définitions).</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+namespace facture {
+    double tva(double ht);                 // déclarations : le contenu du futur .h
+    double ttc(double ht);
+}
+namespace facture {
+    double tva(double ht) { return ht * 0.2; }      // définitions : le contenu du futur .cpp
+    double ttc(double ht) { return ht + tva(ht); }
+}
+
+int main() {
+    cout &lt;&lt; facture::ttc(100) &lt;&lt; endl;
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Chez toi</h4>
+<p>Crée les trois fichiers <code>facture.h</code>, <code>facture.cpp</code>, <code>main.cpp</code>, puis compile avec <code>g++ main.cpp facture.cpp -o facture</code>. Oublie volontairement <code>facture.cpp</code> dans la commande pour voir l'erreur <code>undefined reference</code>.</p>
+</div>
+</section>
+<div class="box retenir"><b>À retenir</b><p><code>throw</code> lève une exception, <code>try { … } catch (const exception&amp; e) { … }</code> l'attrape ; <code>e.what()</code> donne le message. </p><p> <code>ofstream</code> écrit, <code>ifstream</code> lit, comme <code>cout</code> et <code>cin</code>. </p><p> <code>.h</code> = déclarations (avec <code>#pragma once</code>), <code>.cpp</code> = définitions (<code>Classe::methode</code>). </p><p> Compilation puis édition de liens ; <code>undefined reference</code> = définition manquante. </p><p> <code>namespace</code> évite les conflits de noms.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cpp.html">Labo C++</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "Quel mot-clé lève une exception ?",
+  "type": "qcm",
+  "options": [
+   "`error`",
+   "`throw`",
+   "`raise`",
+   "`except`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel bloc attrape une exception ?",
+  "type": "qcm",
+  "options": [
+   "`except`",
+   "`rescue`",
+   "`catch`",
+   "`finally`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle méthode d'une exception standard donne son message ?",
+  "type": "qcm",
+  "options": [
+   "`what()`",
+   "`toString()`",
+   "`message()`",
+   "`text()`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment attrape-t-on habituellement une exception ?",
+  "type": "qcm",
+  "options": [
+   "Par valeur : `catch (exception e)`",
+   "Avec `catch (e)`",
+   "Par référence constante : `catch (const exception& e)`",
+   "Par pointeur : `catch (exception* e)`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle classe sert à écrire dans un fichier ?",
+  "type": "qcm",
+  "options": [
+   "`cout`",
+   "`fileout`",
+   "`ifstream`",
+   "`ofstream`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle classe sert à lire un fichier ?",
+  "type": "qcm",
+  "options": [
+   "`ifstream`",
+   "`filein`",
+   "`cin`",
+   "`ofstream`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que contient un fichier d'en-tête `.h` ?",
+  "type": "qcm",
+  "options": [
+   "Le code de toutes les fonctions",
+   "Le programme compilé",
+   "Les déclarations (classes, prototypes)",
+   "Les données du programme"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "À quoi sert `#pragma once` ?",
+  "type": "qcm",
+  "options": [
+   "À exécuter le programme une fois",
+   "À désactiver les avertissements",
+   "À compiler une seule fois",
+   "À empêcher qu'un en-tête soit inclus deux fois"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Dans un .cpp, que signifie `Compte::deposer` ?",
+  "type": "qcm",
+  "options": [
+   "Un héritage",
+   "La méthode deposer de la classe Compte",
+   "Un espace de noms",
+   "Un pointeur"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que signale l'erreur `undefined reference to` ?",
+  "type": "qcm",
+  "options": [
+   "Un pointeur nul",
+   "Une faute de syntaxe",
+   "Une fonction déclarée dont la définition manque à l'édition de liens",
+   "Un fichier introuvable"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Quelles sont les deux étapes de la construction d'un programme ?",
+  "type": "qcm",
+  "options": [
+   "Exécution puis compilation",
+   "Interprétation puis exécution",
+   "Compilation puis édition de liens",
+   "Édition de liens puis compilation"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "À quoi sert un namespace ?",
+  "type": "qcm",
+  "options": [
+   "À créer une classe",
+   "À éviter les conflits entre noms identiques",
+   "À cacher des attributs",
+   "À accélérer le code"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi ne met-on pas `using namespace std;` dans un fichier .h ?",
+  "type": "qcm",
+  "options": [
+   "Cela ralentit le programme",
+   "C'est interdit par le compilateur",
+   "Cela l'imposerait à tous les fichiers qui incluent cet en-tête",
+   "std n'existe pas dans les .h"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle différence entre `#include <iostream>` et `#include \"compte.h\"` ?",
+  "type": "qcm",
+  "options": [
+   "Aucune",
+   "Guillemets : plus rapide",
+   "Chevrons : fichiers C seulement",
+   "Chevrons : bibliothèque du système ; guillemets : fichier du projet"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que représente `optional<double>` ?",
+  "type": "qcm",
+  "options": [
+   "Un double facultatif dans une fonction",
+   "Un pointeur vers un double",
+   "Une valeur de type double, ou l'absence de valeur",
+   "Un double arrondi"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Après une exception attrapée par catch, le programme peut continuer.",
+  "type": "vf",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Un ofstream doit obligatoirement être fermé avec close(), sinon le fichier reste ouvert.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Son destructeur le ferme (RAII)."
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pendant la remontée d'une exception, les destructeurs des objets locaux sont appelés.",
+  "type": "vf",
+  "answer": true,
+  "explication": "C'est ce qui évite les fuites."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel flux standard sert à afficher les messages d'erreur ?",
+  "type": "saisie",
+  "answers": [
+   "cerr"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque message à sa cause.",
+  "type": "associer",
+  "paires": [
+   [
+    "`expected ';'`",
+    "point-virgule oublié"
+   ],
+   [
+    "`was not declared`",
+    "nom inconnu ou include manquant"
+   ],
+   [
+    "`undefined reference`",
+    "définition absente"
+   ],
+   [
+    "`segmentation fault`",
+    "accès mémoire invalide"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

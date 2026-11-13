@@ -11,183 +11,416 @@
 </head>
 <body data-module="cpp" data-chapter="cpp-bases">
 
-<!-- ============ COURS ============ -->
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/cpp.txt) -->
 <article id="cours">
 <div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
-<p><b>C++</b> est un langage <b>compilé</b> créé par Bjarne Stroustrup dans les années 1980 comme une extension du C. Il est très rapide et donne un contrôle fin sur la mémoire : on le trouve dans les moteurs de jeux (Unreal Engine), les navigateurs, les logiciels de création, l'embarqué et la finance.</p>
+<p>Le <b>C++</b> est né en 1985 comme une extension du langage C. C'est un langage <b>compilé</b> et <b>typé</b> : rapide, précis, exigeant. Il fait tourner les moteurs de jeu (Unreal Engine), les navigateurs web, les systèmes d'exploitation, les bases de données, les logiciels embarqués. Si tu comprends le C++, tu comprends ce que font réellement les autres langages derrière ton dos.</p>
+<div class="box"><b>Comment suivre ce cours</b><p>Chaque bloc avec un bouton <b>Exécuter</b> est compilé par un vrai compilateur C++20 (clang) dans ton navigateur. La première compilation prend quelques secondes. Modifie le code, provoque des erreurs, lis les messages du compilateur : c'est lui ton meilleur professeur.</p></div>
+<h2>1. Le programme minimal</h2>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+using namespace std;
 
-<h2>1. Compiler, puis exécuter</h2>
-<p>Le code source (<code>main.cpp</code>) n'est pas exécuté directement : un <b>compilateur</b> (g++, clang++, MSVC) le traduit en programme exécutable. Les erreurs de syntaxe ou de type sont détectées <b>avant</b> l'exécution.</p>
-<pre><code>g++ -std=c++20 -Wall main.cpp -o main     # compiler
-./main                                    # exécuter</code></pre>
-<p>Le labo fait tout ça dans ton navigateur : ton code est compilé par <b>clang</b> en WebAssembly puis exécuté.</p>
+int main() {
+    cout &lt;&lt; "Bonjour !" &lt;&lt; endl;
+    return 0;
+}</code></pre></div>
+<table><tr><th>Élément</th><th>Rôle</th></tr><tr><td><code>#include &lt;iostream&gt;</code></td><td>charge la bibliothèque d'entrées-sorties (<code>cout</code>, <code>cin</code>)</td></tr><tr><td><code>using namespace std;</code></td><td>évite d'écrire <code>std::cout</code>, <code>std::string</code>…</td></tr><tr><td><code>int main() { … }</code></td><td>la fonction par laquelle le programme commence</td></tr><tr><td><code>cout &lt;&lt; …</code></td><td>envoie une valeur vers l'écran (*character output*)</td></tr><tr><td><code>endl</code></td><td>retour à la ligne (on peut aussi écrire <code>"\n"</code>)</td></tr><tr><td><code>return 0;</code></td><td>le programme s'est bien terminé</td></tr><tr><td><code>;</code></td><td>termine <b>chaque instruction</b> : l'oubli le plus fréquent</td></tr></table>
+<h2>2. De la source au programme : la compilation</h2>
+<p>Un programme C++ ne s'exécute pas directement. Le <b>compilateur</b> traduit le fichier source <code>.cpp</code> en langage machine :</p>
+<pre><code>g++ main.cpp -o programme     # compile (g++ ou clang++)
+./programme                   # exécute
+g++ -Wall -Wextra -std=c++20 main.cpp -o programme   # avec tous les avertissements</code></pre>
+<p>Conséquence : beaucoup d'erreurs sont détectées <b>avant</b> l'exécution. Une *erreur de compilation* (faute de syntaxe, type incorrect) empêche de produire le programme ; une *erreur d'exécution* survient pendant qu'il tourne.</p>
+<div class="essai" data-langue="cpp" data-erreur="1"><pre><code>#include &lt;iostream&gt;
+using namespace std;
 
-<h2>2. Le programme minimal</h2>
-<pre><code>#include &lt;iostream&gt;     // bibliothèque d&#x27;entrées/sorties
-using namespace std;    // évite d&#x27;écrire std:: partout
-
-int main() {            // point d&#x27;entrée du programme
-    cout &lt;&lt; &quot;Bonjour !&quot; &lt;&lt; endl;
-    return 0;           // 0 = tout s&#x27;est bien passé
-}</code></pre>
-<p>Chaque instruction se termine par un <b>point-virgule</b>. Les blocs sont entre accolades.</p>
-
+int main() {
+    cout &lt;&lt; "Il manque quelque chose" &lt;&lt; endl
+}</code></pre></div>
+<p>Lis toujours la <b>première</b> erreur : elle indique la ligne et ce que le compilateur attendait. Les suivantes en sont souvent des conséquences.</p>
 <h2>3. Variables et types</h2>
-<pre><code>int age = 19;              // entier
-double prix = 9.99;        // nombre à virgule
-char lettre = &#x27;A&#x27;;         // un caractère (apostrophes)
-bool majeur = true;        // vrai / faux
-string nom = &quot;Léa&quot;;        // texte (#include &lt;string&gt;)
-const double TVA = 0.2;    // constante
-auto x = 3.5;              // type déduit : double</code></pre>
-<div class="box attention"><b>Typage statique</b><p>Le type d'une variable est fixé à sa déclaration et ne change plus. <code>int n = 7 / 2;</code> vaut <b>3</b> : entre deux entiers, la division est entière. Écris <code>7.0 / 2</code> pour obtenir 3.5.</p></div>
+<p>En C++, chaque variable a un <b>type</b> fixé à sa création, qui ne changera jamais.</p>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+using namespace std;
 
-<h2>4. Afficher et lire</h2>
-<pre><code>int a, b;
-cout &lt;&lt; &quot;Deux nombres : &quot;;
-cin &gt;&gt; a &gt;&gt; b;                     // lit deux valeurs séparées par des espaces
-cout &lt;&lt; &quot;Somme : &quot; &lt;&lt; a + b &lt;&lt; endl;
-string ligne;
-getline(cin, ligne);               // lit toute une ligne</code></pre>
-<p><code>&lt;&lt;</code> envoie vers la sortie, <code>&gt;&gt;</code> lit depuis l'entrée. <code>endl</code> passe à la ligne (comme <code>"\n"</code>).</p>
-<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cpp.html">labo C++</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+int main() {
+    int age = 17;                // entier
+    double prix = 19.99;         // nombre à virgule
+    char initiale = 'L';         // UN caractère, entre apostrophes
+    bool majeur = false;         // true ou false
+    string prenom = "Léa";       // texte, entre guillemets
+    cout &lt;&lt; prenom &lt;&lt; " a " &lt;&lt; age &lt;&lt; " ans" &lt;&lt; endl;
+    cout &lt;&lt; prix &lt;&lt; " " &lt;&lt; initiale &lt;&lt; " " &lt;&lt; majeur &lt;&lt; endl;   // false s'affiche 0
+    age = age + 1;
+    cout &lt;&lt; age &lt;&lt; endl;
+}</code></pre></div>
+<table><tr><th>Type</th><th>Contenu</th><th>Exemple</th></tr><tr><td><code>int</code></td><td>entier (environ ±2 milliards)</td><td><code>42</code></td></tr><tr><td><code>long long</code></td><td>très grand entier</td><td><code>9000000000LL</code></td></tr><tr><td><code>double</code></td><td>nombre à virgule</td><td><code>3.14</code></td></tr><tr><td><code>char</code></td><td>un caractère</td><td><code>'A'</code></td></tr><tr><td><code>bool</code></td><td>vrai ou faux</td><td><code>true</code></td></tr><tr><td><code>string</code></td><td>texte (bibliothèque <code>&lt;string&gt;</code>)</td><td><code>"Bonjour"</code></td></tr></table>
+<div class="box attention"><b>Une variable non initialisée contient n'importe quoi</b><p><code>int x;</code> sans valeur ne vaut pas 0 : elle contient ce qui traînait en mémoire. Donne toujours une valeur de départ : <code>int x = 0;</code>.</p></div>
+<h3><code>const</code> et <code>auto</code></h3>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    const double TVA = 0.2;      // constante : toute modification est refusée à la compilation
+    auto quantite = 3;           // auto : le compilateur déduit int
+    auto total = quantite * 9.99;   // … et ici double
+    auto nom = string("Sam");
+    cout &lt;&lt; total * (1 + TVA) &lt;&lt; " " &lt;&lt; nom &lt;&lt; endl;
+}</code></pre></div>
+<h2>4. Les opérateurs et leurs pièges</h2>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    cout &lt;&lt; 7 / 2 &lt;&lt; endl;          // 3   : entier / entier = entier !
+    cout &lt;&lt; 7.0 / 2 &lt;&lt; endl;        // 3.5 : dès qu'un des deux est double
+    cout &lt;&lt; 7 % 2 &lt;&lt; endl;          // 1   : reste de la division
+    int a = 7, b = 2;
+    cout &lt;&lt; static_cast&lt;double&gt;(a) / b &lt;&lt; endl;   // 3.5 : conversion explicite
+    int i = 5;
+    i++;            // i = i + 1
+    i += 10;        // i = i + 10
+    i *= 2;
+    cout &lt;&lt; i &lt;&lt; endl;
+    cout &lt;&lt; (5 &gt; 3) &lt;&lt; " " &lt;&lt; (5 == 3) &lt;&lt; " " &lt;&lt; (5 != 3) &lt;&lt; endl;
+}</code></pre></div>
+<div class="box attention"><b>Division entière</b><p><code>7 / 2</code> vaut <code>3</code>, pas <code>3.5</code>. Pour une moyenne, écris <code>somme / 3.0</code> ou convertis avec <code>static_cast&lt;double&gt;(somme)</code>.</p></div>
+<h2>5. Lire au clavier</h2>
+<p><code>cin &gt;&gt; variable</code> lit une valeur et la convertit dans le type de la variable. Les valeurs sont séparées par des espaces ou des retours à la ligne.</p>
+<div class="essai" data-langue="cpp" data-stdin="Léa&#10;17"><pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    string prenom;
+    int age;
+    cin &gt;&gt; prenom &gt;&gt; age;
+    cout &lt;&lt; "Bonjour " &lt;&lt; prenom &lt;&lt; ", dans 10 ans tu auras " &lt;&lt; age + 10 &lt;&lt; " ans." &lt;&lt; endl;
+}</code></pre></div>
+<p><code>cin &gt;&gt;</code> s'arrête au premier espace. Pour lire une <b>ligne entière</b>, on utilise <code>getline</code> :</p>
+<div class="essai" data-langue="cpp" data-stdin="Jean Dupont"><pre><code>#include &lt;iostream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    string nomComplet;
+    getline(cin, nomComplet);
+    cout &lt;&lt; "Bonjour " &lt;&lt; nomComplet &lt;&lt; " (" &lt;&lt; nomComplet.size() &lt;&lt; " caractères)" &lt;&lt; endl;
+}</code></pre></div>
+<h2>6. Mettre en forme les nombres</h2>
+<div class="essai" data-langue="cpp"><pre><code>#include &lt;iostream&gt;
+#include &lt;iomanip&gt;
+using namespace std;
+
+int main() {
+    double prix = 12.5;
+    cout &lt;&lt; prix &lt;&lt; endl;                              // 12.5
+    cout &lt;&lt; fixed &lt;&lt; setprecision(2) &lt;&lt; prix &lt;&lt; endl;  // 12.50 : deux décimales
+    cout &lt;&lt; setw(8) &lt;&lt; 42 &lt;&lt; "|" &lt;&lt; endl;              // sur 8 caractères, aligné à droite
+}</code></pre></div>
+<section class="tuto"><h3><small>Tutoriel</small>Ton premier vrai programme : le ticket de caisse</h3>
+<div class="etape"><h4>Lire le prix et la quantité</h4>
+<div class="essai" data-langue="cpp" data-stdin="4.5&#10;3"><pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    double prix;
+    int quantite;
+    cin &gt;&gt; prix &gt;&gt; quantite;
+    cout &lt;&lt; prix &lt;&lt; " x " &lt;&lt; quantite &lt;&lt; endl;
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Calculer</h4>
+<p><code>double * int</code> donne un <code>double</code> : aucun problème de division entière ici.</p>
+<div class="essai" data-langue="cpp" data-stdin="4.5&#10;3"><pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    double prix;
+    int quantite;
+    cin &gt;&gt; prix &gt;&gt; quantite;
+    double total = prix * quantite;
+    cout &lt;&lt; "Total : " &lt;&lt; total &lt;&lt; endl;
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Ajouter la TVA et mettre en forme</h4>
+<p>Change les entrées et relance. Essaie aussi de modifier <code>TVA</code> après sa déclaration : le compilateur refuse.</p>
+<div class="essai" data-langue="cpp" data-stdin="4.5&#10;3"><pre><code>#include &lt;iostream&gt;
+#include &lt;iomanip&gt;
+using namespace std;
+
+int main() {
+    const double TVA = 0.2;
+    double prix;
+    int quantite;
+    cin &gt;&gt; prix &gt;&gt; quantite;
+    double ht = prix * quantite;
+    cout &lt;&lt; fixed &lt;&lt; setprecision(2);
+    cout &lt;&lt; "HT : " &lt;&lt; ht &lt;&lt; " €" &lt;&lt; endl;
+    cout &lt;&lt; "TVA : " &lt;&lt; ht * TVA &lt;&lt; " €" &lt;&lt; endl;
+    cout &lt;&lt; "TTC : " &lt;&lt; ht * (1 + TVA) &lt;&lt; " €" &lt;&lt; endl;
+}</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : heures, minutes, secondes</b><p>Division entière et modulo.</p><a class="defi-go" href="labo-cpp.html#m=cpp-conv">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : la moyenne</b><p>Attention à la division entière, et affiche deux décimales.</p><a class="defi-go" href="labo-cpp.html#m=cpp-moyenne">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p>Tout programme commence dans <code>int main()</code>. Chaque instruction finit par <code>;</code>. </p><p> <code>cout &lt;&lt; valeur &lt;&lt; endl;</code> affiche, <code>cin &gt;&gt; variable;</code> lit, <code>getline(cin, ligne)</code> lit une ligne entière. </p><p> Types de base : <code>int</code>, <code>double</code>, <code>char</code>, <code>bool</code>, <code>string</code>. </p><p> <code>int / int</code> donne un entier. </p><p> <code>const</code> interdit la modification, <code>auto</code> laisse le compilateur déduire le type.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cpp.html">Labo C++</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
 </article>
 
 <!-- ============ EXERCICES ============ -->
 <script>
 window.EF_EXERCICES = [
  {
-  "type": "qcm",
   "niveau": "facile",
-  "q": "Que fait le compilateur ?",
-  "options": [
-   "Il exécute le code ligne par ligne",
-   "Il traduit le code source en programme exécutable",
-   "Il corrige les fautes",
-   "Il héberge le site"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
+  "q": "Par quelle fonction commence l'exécution d'un programme C++ ?",
   "type": "qcm",
-  "niveau": "facile",
-  "q": "Quelle fonction est le point d'entrée d'un programme C++ ?",
   "options": [
-   "`start()`",
-   "`main()`",
-   "`run()`",
-   "`init()`"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "qcm",
-  "niveau": "facile",
-  "q": "Avec quoi se termine une instruction C++ ?",
-  "options": [
-   "Un point",
-   "Un point-virgule",
-   "Un retour à la ligne",
-   "Rien"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "qcm",
-  "niveau": "moyen",
-  "q": "Que vaut `7 / 2` quand les deux sont des int ?",
-  "options": [
-   "3.5",
-   "3",
-   "4",
-   "Erreur"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "qcm",
-  "niveau": "moyen",
-  "q": "Quel type pour un nombre à virgule ?",
-  "options": [
-   "`int`",
-   "`double`",
-   "`char`",
-   "`bool`"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "qcm",
-  "niveau": "moyen",
-  "q": "Comment afficher la valeur de x ?",
-  "options": [
-   "`print(x);`",
-   "`cout << x;`",
-   "`cin >> x;`",
-   "`echo x;`"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "qcm",
-  "niveau": "moyen",
-  "q": "Comment lire un entier dans n ?",
-  "options": [
-   "`cin >> n;`",
-   "`cout << n;`",
-   "`n = input();`",
-   "`read(n);`"
+   "`main`",
+   "`start`",
+   "`begin`",
+   "`run`"
   ],
   "answer": 0,
   "explication": ""
  },
  {
-  "type": "vf",
-  "niveau": "moyen",
-  "q": "En C++, une variable déclarée int peut ensuite contenir du texte.",
-  "answer": false,
-  "explication": "Typage statique."
- },
- {
+  "niveau": "facile",
+  "q": "Quel caractère termine chaque instruction ?",
   "type": "qcm",
-  "niveau": "moyen",
-  "q": "Quelle ligne permet d'utiliser cout sans écrire std:: ?",
   "options": [
-   "`#include <std>`",
-   "`using namespace std;`",
-   "`import std;`",
-   "`namespace cout;`"
+   "Un retour à la ligne",
+   "`;`",
+   "`:`",
+   "`.`"
   ],
   "answer": 1,
   "explication": ""
  },
  {
-  "type": "saisie",
-  "niveau": "moyen",
-  "q": "Quel fichier d'en-tête inclure pour utiliser cout et cin ? (entre chevrons)",
-  "answers": [
-   "<iostream>",
-   "iostream"
+  "niveau": "facile",
+  "q": "Quel objet affiche du texte à l'écran ?",
+  "type": "qcm",
+  "options": [
+   "`echo`",
+   "`cout`",
+   "`print`",
+   "`cin`"
   ],
+  "answer": 1,
   "explication": ""
  },
  {
+  "niveau": "facile",
+  "q": "Quel objet lit une valeur au clavier ?",
   "type": "qcm",
+  "options": [
+   "`cin`",
+   "`cout`",
+   "`input`",
+   "`scanf`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que vaut `7 / 2` en C++ ?",
+  "type": "qcm",
+  "options": [
+   "1",
+   "3.5",
+   "3",
+   "4"
+  ],
+  "answer": 2,
+  "explication": "Entier divisé par entier donne un entier."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que vaut `7.0 / 2` ?",
+  "type": "qcm",
+  "options": [
+   "3.5",
+   "Une erreur",
+   "3",
+   "4"
+  ],
+  "answer": 0,
+  "explication": "Dès qu'un opérande est un double, le résultat est un double."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que vaut `7 % 2` ?",
+  "type": "qcm",
+  "options": [
+   "3",
+   "0",
+   "3.5",
+   "1"
+  ],
+  "answer": 3,
+  "explication": "Le reste de la division entière."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel type choisir pour un prix comme 19.99 ?",
+  "type": "qcm",
+  "options": [
+   "`int`",
+   "`char`",
+   "`bool`",
+   "`double`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment s'écrit UN caractère ?",
+  "type": "qcm",
+  "options": [
+   "`'A'`",
+   "`(A)`",
+   "`\"A\"`",
+   "`A`"
+  ],
+  "answer": 0,
+  "explication": "Les guillemets doubles créent une chaîne."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel mot-clé rend une variable non modifiable ?",
+  "type": "qcm",
+  "options": [
+   "`static`",
+   "`final`",
+   "`const`",
+   "`fixed`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait `auto x = 3.5;` ?",
+  "type": "qcm",
+  "options": [
+   "x peut changer de type plus tard",
+   "C'est une erreur",
+   "x est une constante",
+   "Le compilateur déduit que x est un double"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle fonction lit une ligne entière, espaces compris ?",
+  "type": "qcm",
+  "options": [
+   "`cin.line(s)`",
+   "`getline(cin, s)`",
+   "`cin >> s`",
+   "`readline(s)`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
   "niveau": "difficile",
-  "q": "Que signifie `return 0;` à la fin de main ?",
+  "q": "Que contient `int x;` (variable locale non initialisée) ?",
+  "type": "qcm",
   "options": [
-   "Le programme recommence",
-   "Le programme s'est terminé sans erreur",
-   "Affiche 0",
-   "Rien"
+   "Une valeur indéterminée",
+   "0",
+   "`null`",
+   "Une erreur de compilation"
   ],
-  "answer": 1,
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Comment obtenir 3.5 avec `int a = 7, b = 2;` ?",
+  "type": "qcm",
+  "options": [
+   "`a / b`",
+   "`double(a / b)`",
+   "`static_cast<double>(a) / b`",
+   "`a // b`"
+  ],
+  "answer": 2,
+  "explication": "Il faut convertir avant la division."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Une variable C++ peut changer de type pendant l'exécution.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Le type est fixé à la déclaration."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Une erreur de compilation empêche la création du programme exécutable.",
+  "type": "vf",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "niveau": "facile",
+  "q": "`i++` ajoute 1 à la variable i.",
+  "type": "vf",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle bibliothèque faut-il inclure pour utiliser cout et cin ?",
+  "type": "saisie",
+  "answers": [
+   "iostream",
+   "<iostream>"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Quel manipulateur, utilisé avec fixed, fixe le nombre de décimales ?",
+  "type": "saisie",
+  "answers": [
+   "setprecision"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque type à une valeur possible.",
+  "type": "associer",
+  "paires": [
+   [
+    "`int`",
+    "42"
+   ],
+   [
+    "`double`",
+    "3.14"
+   ],
+   [
+    "`char`",
+    "'A'"
+   ],
+   [
+    "`bool`",
+    "true"
+   ],
+   [
+    "`string`",
+    "\"Bonjour\""
+   ]
+  ],
   "explication": ""
  }
 ];
@@ -195,6 +428,8 @@ window.EF_EXERCICES = [
 <script src="../../data/modules.js"></script>
 <script src="../../assets/app.js"></script>
 <script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
 <script src="../../assets/chapter.js"></script>
 </body>
 </html>
