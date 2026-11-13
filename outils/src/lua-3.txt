@@ -1,0 +1,753 @@
+=== lua-erreurs-modules | Lua : erreurs, modules et bibliothèques standard | m
+## 1. Provoquer une erreur : `error` et `assert`
+
+```run err
+local function racine(x)
+  if x < 0 then
+    error("nombre négatif interdit : " .. x)
+  end
+  return math.sqrt(x)
+end
+print(racine(16))
+print(racine(-4))        -- le programme s'arrête ici
+print("jamais affiché")
+```
+
+`assert(condition, message)` provoque une erreur si la condition est fausse, sinon renvoie la condition. C'est le raccourci habituel pour vérifier une hypothèse :
+
+```run err
+local age = assert(tonumber("17"), "âge invalide")
+print(age)
+local autre = assert(tonumber("abc"), "âge invalide")
+```
+
+## 2. Attraper une erreur : `pcall`
+
+`pcall(f, arguments…)` (*protected call*) appelle `f` en mode protégé. Il renvoie `true` suivi des résultats, ou `false` suivi du message d'erreur. Le programme **continue** dans les deux cas : c'est le `try / catch` de Lua.
+
+```run
+local function diviser(a, b)
+  if b == 0 then error("division par zéro") end
+  return a / b
+end
+
+local ok, resultat = pcall(diviser, 10, 2)
+print(ok, resultat)
+local ok2, message = pcall(diviser, 10, 0)
+print(ok2, message)
+print("le programme continue")
+
+if not pcall(function() local t = nil; return t.x end) then
+  print("erreur attrapée : on a indexé nil")
+end
+```
+
+L'erreur peut être n'importe quelle valeur, par exemple une table qui décrit le problème. Le second argument de `error` (le niveau `0`) retire le préfixe « fichier:ligne » du message :
+
+```run
+local ok, e = pcall(function() error({ code = 404, texte = "introuvable" }) end)
+print(ok, e.code, e.texte)
+print(pcall(error, "message nu", 0))
+```
+
+## 3. La convention `nil, message`
+
+Pour une erreur **prévisible** (fichier absent, saisie invalide), les fonctions Lua ne lèvent pas d'erreur : elles renvoient `nil` suivi d'un message. L'appelant teste le premier résultat.
+
+```run
+local function lireAge(texte)
+  local n = tonumber(texte)
+  if not n then return nil, "ce n'est pas un nombre" end
+  if n < 0 or n > 130 then return nil, "âge impossible" end
+  return n
+end
+
+for _, saisie in ipairs({ "17", "abc", "250" }) do
+  local age, err = lireAge(saisie)
+  if age then print("âge valide :", age) else print("refusé :", err) end
+end
+```
+
+!info Quelle méthode choisir ? | `nil, message` pour ce qui peut arriver normalement (mauvaise saisie). `error` pour un bug ou une situation qui ne devrait jamais arriver. `pcall` à l'endroit où tu sais quoi faire de l'erreur.
+
+## 4. La bibliothèque `math`
+
+```run
+print(math.floor(3.7), math.ceil(3.2))      -- arrondis bas et haut : 3  4
+print(math.floor(3.5 + 0.5))                -- arrondi au plus proche : 4
+print(math.max(4, 9, 2), math.min(4, 9, 2))
+print(math.abs(-5), math.sqrt(49), math.pi)
+print(math.huge, -math.huge)                -- plus et moins l'infini
+print(math.tointeger(5.0), 7 // 1)          -- flottant → entier
+print(math.random(1, 6))                    -- entier au hasard entre 1 et 6
+print(math.random())                        -- flottant entre 0 et 1
+```
+
+## 5. `os` et `io`
+
+```run
+print(os.time())                       -- secondes depuis le 1er janvier 1970
+print(os.date("%d/%m/%Y %H:%M"))       -- date mise en forme
+local debut = os.clock()               -- temps processeur, pour chronométrer
+local s = 0
+for i = 1, 1000000 do s = s + i end
+print(s, os.clock() - debut >= 0)
+```
+
+Sur un ordinateur, `io` lit et écrit aussi des fichiers. Ce code ne fonctionne pas dans le navigateur (pas de disque), mais c'est celui que tu écriras en vrai :
+
+```
+local f, err = io.open("scores.txt", "w")     -- "r" lire, "w" écrire, "a" ajouter
+if not f then error(err) end
+f:write("Léa 120\n")
+f:close()
+
+for ligne in io.lines("scores.txt") do        -- lit le fichier ligne par ligne
+  print(ligne)
+end
+```
+
+Remarque la convention `nil, message` de `io.open`, et son raccourci : `local f = assert(io.open("scores.txt"))`.
+
+## 6. Les modules
+
+Un module est un fichier qui **renvoie une table** de fonctions. On le charge avec `require`, qui exécute le fichier une seule fois et garde le résultat en mémoire.
+
+```
+-- fichier geometrie.lua
+local M = {}
+
+local function carre(x) return x * x end          -- privé : non exporté
+
+function M.aireCercle(r) return math.pi * carre(r) end
+function M.aireRectangle(l, h) return l * h end
+
+return M
+```
+
+```
+-- fichier main.lua
+local geo = require("geometrie")       -- sans l'extension .lua
+print(geo.aireRectangle(3, 4))
+```
+
+Dans le navigateur il n'y a qu'un seul fichier, mais le principe se teste très bien avec un bloc `do … end` :
+
+```run
+local geo
+do
+  local M = {}
+  local function carre(x) return x * x end
+  function M.aireCercle(r) return math.pi * carre(r) end
+  function M.aireRectangle(l, h) return l * h end
+  geo = M
+end
+print(geo.aireRectangle(3, 4))
+print(string.format("%.2f", geo.aireCercle(1)))
+print(carre)          -- nil : la fonction privée est invisible
+```
+
+!tuto Un programme qui ne plante jamais
+# Le calcul fragile
+Ce programme s'arrête à la première mauvaise saisie.
+```run err stdin=10|0
+local a = io.read("n")
+local b = io.read("n")
+if b == 0 then error("division par zéro") end
+print(a / b)
+```
+# Protéger avec pcall
+```run stdin=10|0
+local function calcul()
+  local a = io.read("n")
+  local b = io.read("n")
+  if b == 0 then error("division par zéro", 0) end
+  return a / b
+end
+local ok, r = pcall(calcul)
+if ok then print("Résultat : " .. r) else print("Erreur : " .. r) end
+```
+# Vérifier aussi la saisie
+`io.read("n")` renvoie `nil` si l'utilisateur ne tape pas un nombre. Essaie avec `abc` en entrée.
+```run stdin=10|abc
+local function calcul()
+  local a = io.read("n")
+  local b = io.read("n")
+  if not a or not b then error("il faut deux nombres", 0) end
+  if b == 0 then error("division par zéro", 0) end
+  return a / b
+end
+local ok, r = pcall(calcul)
+print(ok and ("Résultat : " .. r) or ("Erreur : " .. r))
+```
+!fin
+
+!defi Défi : la division protégée | Attrape l'erreur avec `pcall`. | lua-pcall
+
+!retenir À retenir | `error(msg)` lève une erreur, `assert(cond, msg)` vérifie. ¶ `pcall(f, …)` renvoie `true, résultats` ou `false, erreur` sans arrêter le programme. ¶ Convention pour les erreurs prévisibles : `return nil, "message"`. ¶ `math.floor`, `math.max`, `math.random(a, b)` ; `os.time`, `os.date`. ¶ Un module est un fichier qui renvoie une table ; `require("nom")` le charge.
+--- exos
+Q¤m¤Quelle fonction appelle une autre fonction en mode protégé ?¤`pcall`;;`try`;;`catch`;;`protect`¤
+Q¤m¤Que renvoie `pcall(f)` si f provoque une erreur ?¤`false` puis le message d'erreur;;`nil`;;Le programme s'arrête;;`true` puis le message¤
+Q¤m¤Que renvoie `pcall(f)` si tout va bien ?¤`true` puis les résultats de f;;Seulement les résultats de f;;`false`;;`nil`¤
+Q¤m¤Quelle fonction lève une erreur ?¤`error`;;`throw`;;`raise`;;`fail`¤
+Q¤m¤Que fait `assert(x, "msg")` si x vaut nil ?¤Elle lève une erreur avec le message;;Elle renvoie nil;;Elle affiche le message et continue;;Rien¤
+Q¤m¤Quelle est la convention Lua pour signaler une erreur prévisible ?¤Renvoyer `nil` suivi d'un message;;Renvoyer -1;;Afficher le message avec print;;Lever une exception¤
+Q¤f¤Que vaut `math.floor(3.7)` ?¤3;;4;;3.7;;3.0¤floor arrondit vers le bas.
+Q¤m¤Que renvoie `math.random(1, 6)` ?¤Un entier au hasard entre 1 et 6 inclus;;Un flottant entre 1 et 6;;Un entier entre 1 et 5;;Toujours 1¤
+Q¤m¤Que doit faire la dernière ligne d'un fichier module ?¤Renvoyer la table du module avec return;;Appeler export;;Appeler require;;Rien¤
+Q¤m¤Quelle fonction charge un module ?¤`require`;;`import`;;`include`;;`load`¤
+V¤m¤require exécute le fichier du module à chaque appel.¤F¤Le module est exécuté une fois, puis le résultat est gardé en mémoire.
+V¤m¤Une fonction déclarée local dans un module est invisible depuis l'extérieur.¤V¤Seul ce qui est rangé dans la table renvoyée est exporté.
+V¤d¤Une erreur Lua est forcément une chaîne de caractères.¤F¤error accepte n'importe quelle valeur, par exemple une table.
+Q¤d¤Que renvoie `io.open("absent.txt")` si le fichier n'existe pas ?¤`nil` et un message d'erreur;;Une erreur immédiate;;Un fichier vide;;`false`¤
+S¤m¤Quelle fonction de math arrondit à l'entier supérieur ?¤math.ceil;;ceil¤
+S¤d¤Quelle fonction de os met en forme la date et l'heure ?¤os.date;;date¤
+Q¤d¤À quoi sert le 0 dans `error("message", 0)` ?¤À ne pas ajouter la position (fichier:ligne) au message;;À arrêter le programme avec le code 0;;À ignorer l'erreur;;À relancer le calcul¤
+A¤m¤Associe chaque fonction à son rôle.¤`error`=>lever une erreur;;`pcall`=>attraper une erreur;;`assert`=>vérifier une condition;;`require`=>charger un module¤
+
+=== lua-coroutines | Lua : les coroutines | d
+Une **coroutine** est une fonction qui peut se **mettre en pause** au milieu de son exécution, rendre la main, puis **reprendre exactement là où elle s'était arrêtée**, avec toutes ses variables locales intactes. C'est une spécialité de Lua, très utilisée dans les jeux pour écrire des séquences (« avance, attends 2 secondes, tire, attends… ») comme un simple script.
+
+## 1. Créer, lancer, suspendre
+
+```run
+local co = coroutine.create(function()
+  print("étape 1")
+  coroutine.yield()            -- pause : rend la main
+  print("étape 2")
+  coroutine.yield()
+  print("étape 3")
+end)
+
+print(coroutine.status(co))    -- suspended : créée mais pas encore lancée
+coroutine.resume(co)           -- exécute jusqu'au premier yield
+print("-- retour au programme principal")
+coroutine.resume(co)
+coroutine.resume(co)
+print(coroutine.status(co))    -- dead : terminée
+print(coroutine.resume(co))    -- false   cannot resume dead coroutine
+```
+
+| Fonction | Rôle |
+| `coroutine.create(f)` | crée la coroutine (sans la lancer) |
+| `coroutine.resume(co, …)` | lance ou reprend ; renvoie `true` + les valeurs, ou `false` + l'erreur |
+| `coroutine.yield(…)` | met en pause, depuis l'intérieur |
+| `coroutine.status(co)` | `suspended`, `running`, `dead` |
+| `coroutine.wrap(f)` | crée la coroutine et renvoie une fonction qui la reprend |
+
+## 2. Échanger des valeurs
+
+`yield` peut **envoyer** des valeurs à celui qui a fait `resume`, et `resume` peut en **envoyer** à la coroutine.
+
+```run
+local co = coroutine.create(function(a)
+  print("reçu au départ :", a)
+  local b = coroutine.yield(a * 2)        -- envoie a*2, puis attend
+  print("reçu à la reprise :", b)
+  return "terminé"
+end)
+
+print(coroutine.resume(co, 10))    -- true   20
+print(coroutine.resume(co, 99))    -- true   terminé
+```
+
+## 3. Les générateurs avec `coroutine.wrap`
+
+Un **générateur** produit des valeurs une par une, à la demande. `coroutine.wrap` renvoie directement une fonction : c'est un itérateur tout prêt pour `for … in`.
+
+```run
+local function fibonacci(limite)
+  return coroutine.wrap(function()
+    local a, b = 0, 1
+    while a <= limite do
+      coroutine.yield(a)
+      a, b = b, a + b
+    end
+  end)
+end
+
+for n in fibonacci(100) do io.write(n, " ") end
+print()
+```
+
+La suite pourrait être infinie : le générateur ne calcule que ce qu'on lui demande.
+
+```run
+local function compteur()
+  return coroutine.wrap(function()
+    local n = 0
+    while true do n = n + 1; coroutine.yield(n) end    -- boucle infinie… mais en pause
+  end)
+end
+local suivant = compteur()
+print(suivant(), suivant(), suivant())
+```
+
+## 4. Les coroutines dans un jeu
+
+Sans coroutine, une séquence d'actions oblige à gérer des états et des minuteurs. Avec, on écrit la séquence de haut en bas, et on reprend la coroutine une fois par image.
+
+```run
+local function attendre(images)
+  for _ = 1, images do coroutine.yield() end
+end
+
+local boss = coroutine.wrap(function()
+  while true do
+    print("  le boss avance")
+    attendre(2)
+    print("  le boss tire")
+    attendre(1)
+  end
+end)
+
+for image = 1, 8 do            -- la boucle de jeu : une reprise par image
+  io.write("image ", image, "\n")
+  boss()
+end
+```
+
+!attention Ce n'est pas du parallélisme | Une seule coroutine s'exécute à la fois, et elle ne s'interrompt **que** là où elle appelle `yield`. Il n'y a donc ni course critique ni verrou à gérer, contrairement aux threads du système.
+
+!tuto Un producteur et un consommateur
+# Le producteur génère des commandes
+```run
+local producteur = coroutine.wrap(function()
+  for _, article in ipairs({ "clavier", "souris", "écran" }) do
+    coroutine.yield(article)
+  end
+end)
+print(producteur(), producteur(), producteur(), producteur())
+```
+# Le consommateur les traite une à une
+Quand le producteur est terminé, il renvoie `nil` : la boucle `for` s'arrête toute seule.
+```run
+local function commandes()
+  return coroutine.wrap(function()
+    for _, article in ipairs({ "clavier", "souris", "écran" }) do
+      coroutine.yield(article)
+    end
+  end)
+end
+local n = 0
+for article in commandes() do
+  n = n + 1
+  print("commande " .. n .. " : " .. article)
+end
+```
+# Un filtre entre les deux
+On enchaîne les générateurs comme des tuyaux (pipes) du shell.
+```run
+local function nombres(n)
+  return coroutine.wrap(function() for i = 1, n do coroutine.yield(i) end end)
+end
+local function pairs_seulement(source)
+  return coroutine.wrap(function()
+    for v in source do if v % 2 == 0 then coroutine.yield(v) end end
+  end)
+end
+for v in pairs_seulement(nombres(10)) do io.write(v, " ") end
+print()
+```
+!fin
+
+!defi Défi : un générateur | Produis les termes d'une suite avec une coroutine. | lua-generateur
+
+!retenir À retenir | Une coroutine se met en pause avec `coroutine.yield` et reprend avec `coroutine.resume`. ¶ Ses variables locales sont conservées entre deux reprises. ¶ `coroutine.wrap(f)` renvoie une fonction : idéal pour un générateur dans un `for … in`. ¶ Une seule coroutine s'exécute à la fois : ce n'est pas du parallélisme.
+--- exos
+Q¤m¤Que fait `coroutine.yield()` ?¤Elle met la coroutine en pause et rend la main;;Elle termine la coroutine;;Elle crée une coroutine;;Elle relance la coroutine depuis le début¤
+Q¤m¤Quelle fonction lance ou reprend une coroutine ?¤`coroutine.resume`;;`coroutine.start`;;`coroutine.run`;;`coroutine.next`¤
+Q¤m¤Quel est l'état d'une coroutine qui vient d'être créée avec create ?¤`suspended`;;`running`;;`dead`;;`new`¤create ne la lance pas.
+Q¤m¤Quel est l'état d'une coroutine dont la fonction est terminée ?¤`dead`;;`suspended`;;`finished`;;`nil`¤
+Q¤d¤Que renvoie `coroutine.resume(co)` si la coroutine fait `coroutine.yield(5)` ?¤`true` puis 5;;5;;`true`;;`false` puis 5¤Le premier résultat indique s'il y a eu une erreur.
+Q¤d¤Dans `local b = coroutine.yield(1)`, d'où vient la valeur de b ?¤Des arguments du prochain resume;;De la valeur 1;;D'une variable globale;;Elle vaut toujours nil¤
+Q¤m¤Que renvoie `coroutine.wrap(f)` ?¤Une fonction qui reprend la coroutine à chaque appel;;Un objet coroutine;;Le résultat de f;;Une table¤
+V¤m¤Les variables locales d'une coroutine sont conservées pendant qu'elle est en pause.¤V¤C'est tout l'intérêt : elle reprend exactement où elle en était.
+V¤d¤Deux coroutines peuvent s'exécuter en même temps sur deux cœurs du processeur.¤F¤Une seule s'exécute à la fois ; elles se passent la main volontairement.
+V¤m¤On peut reprendre une coroutine terminée (dead).¤F¤resume renvoie alors false et un message d'erreur.
+Q¤m¤Qu'est-ce qu'un générateur ?¤Une fonction qui produit des valeurs une par une, à la demande;;Une fonction qui crée des tables;;Un nombre aléatoire;;Un constructeur de classe¤
+Q¤d¤Pourquoi un générateur peut-il contenir `while true do` sans bloquer le programme ?¤Parce qu'il se met en pause à chaque yield;;Parce que Lua limite les boucles;;Parce que true devient faux;;Il bloque bel et bien¤
+Q¤m¤Dans un jeu, à quoi servent surtout les coroutines ?¤À écrire des séquences d'actions étalées sur plusieurs images;;À dessiner plus vite;;À charger les images;;À remplacer les tables¤
+S¤m¤Quelle fonction de coroutine donne l'état (suspended, running, dead) ?¤coroutine.status;;status¤
+Q¤d¤Que se passe-t-il quand la fonction d'un générateur wrap se termine et qu'il est utilisé dans un for … in ?¤Il renvoie nil et la boucle s'arrête;;Une erreur est levée;;La boucle recommence;;Le programme se bloque¤
+A¤m¤Associe chaque fonction à son rôle.¤`create`=>créer sans lancer;;`resume`=>lancer ou reprendre;;`yield`=>mettre en pause;;`wrap`=>créer une fonction-générateur¤
+
+=== lua-jeux | Lua : créer un jeu | d
+Tous les moteurs de jeu fonctionnent de la même façon : ils appellent **tes** fonctions à des moments précis. Avec **LÖVE** : `love.load()` au démarrage, puis `love.update(dt)` et `love.draw()` à chaque image. Le labo du site reprend exactement ce principe, avec `setup`, `update` et `draw`.
+
+!info Où tester ? | Les jeux ont besoin d'un écran : ils se lancent dans le [bac à sable du labo](labo-lua.html#libre). Copie les exemples de ce chapitre et modifie-les.
+
+## 1. La boucle de jeu
+
+```
+local x = 0
+
+function setup()            -- appelée une fois au démarrage
+  x = 50
+end
+
+function update(dt)         -- 60 fois par seconde : la logique (déplacer, tester)
+  x = x + 2
+end
+
+function draw()             -- 60 fois par seconde : l'affichage, rien d'autre
+  effacer("black")
+  rect(x, 150, 30, 30, "gold")
+end
+```
+
+`dt` est le temps écoulé depuis l'image précédente, en secondes (environ 0,016). Multiplier une vitesse par `dt` donne un mouvement en **pixels par seconde**, identique quel que soit l'ordinateur : `x = x + 120 * dt`.
+
+## 2. L'API de dessin et d'entrées
+
+| Fonction | Rôle |
+| `effacer(couleur)` | remplit tout l'écran |
+| `rect(x, y, largeur, hauteur, couleur)` | rectangle plein (x, y = coin haut gauche) |
+| `cercle(x, y, rayon, couleur)` | disque (x, y = centre) |
+| `ligne(x1, y1, x2, y2, couleur)` | segment |
+| `texte(message, x, y, taille, couleur)` | texte |
+| `touche("droite")` | vrai **tant que** la touche est enfoncée |
+| `toucheAppuyee("espace")` | vrai **une seule image**, au moment de l'appui |
+| `sourisX()`, `sourisY()`, `clic()` | position de la souris, clic |
+| `hasard(a, b)` | entier au hasard entre a et b |
+| `LARGEUR`, `HAUTEUR` | 480 et 320 |
+
+L'origine (0, 0) est en **haut à gauche** : `y` augmente vers le **bas**. Touches : `gauche`, `droite`, `haut`, `bas`, `espace`, `entree`, les lettres et les chiffres.
+
+## 3. Déplacer un personnage
+
+```
+local joueur = { x = 220, y = 260, l = 40, h = 40, vitesse = 200 }
+
+function update(dt)
+  if touche("gauche") then joueur.x = joueur.x - joueur.vitesse * dt end
+  if touche("droite") then joueur.x = joueur.x + joueur.vitesse * dt end
+  joueur.x = math.max(0, math.min(LARGEUR - joueur.l, joueur.x))   -- reste dans l'écran
+end
+
+function draw()
+  effacer("#16182b")
+  rect(joueur.x, joueur.y, joueur.l, joueur.h, "deepskyblue")
+end
+```
+
+## 4. Gravité et saut
+
+La vitesse verticale `vy` augmente à chaque image (la gravité) ; un saut lui donne une valeur négative (vers le haut).
+
+```
+local y, vy, SOL = 260, 0, 260
+
+function update(dt)
+  if toucheAppuyee("espace") and y >= SOL then vy = -9 end   -- saut seulement au sol
+  vy = vy + 0.5                -- gravité
+  y = y + vy
+  if y > SOL then y, vy = SOL, 0 end
+end
+```
+
+## 5. Collisions
+
+Deux rectangles se touchent s'ils se chevauchent sur les deux axes. Cette fonction (collision **AABB**) sert dans presque tous les jeux 2D :
+
+```run
+local function collision(a, b)
+  return a.x < b.x + b.l and b.x < a.x + a.l
+     and a.y < b.y + b.h and b.y < a.y + a.h
+end
+local joueur = { x = 100, y = 100, l = 40, h = 40 }
+print(collision(joueur, { x = 130, y = 120, l = 20, h = 20 }))   -- true : se chevauchent
+print(collision(joueur, { x = 300, y = 100, l = 20, h = 20 }))   -- false : trop loin
+```
+
+Pour deux cercles : ils se touchent si la distance entre les centres est inférieure à la somme des rayons.
+
+```run
+local function touche_cercles(a, b)
+  local dx, dy = a.x - b.x, a.y - b.y
+  return dx * dx + dy * dy < (a.r + b.r) ^ 2      -- sans racine carrée : plus rapide
+end
+print(touche_cercles({ x = 0, y = 0, r = 10 }, { x = 12, y = 9, r = 6 }))
+```
+
+## 6. Beaucoup d'objets : une table de tables
+
+Ennemis, projectiles, pièces : on les range dans une liste. Pour **supprimer** pendant le parcours, on parcourt **à l'envers**, sinon `table.remove` décale les éléments et on en saute.
+
+```run
+local tirs = { { y = 50 }, { y = -5 }, { y = 120 }, { y = -30 } }
+for i = #tirs, 1, -1 do                    -- à l'envers !
+  tirs[i].y = tirs[i].y - 10
+  if tirs[i].y < 0 then table.remove(tirs, i) end
+end
+print(#tirs .. " tirs encore à l'écran")
+```
+
+## 7. Les états du jeu
+
+Menu, partie, fin de partie : une variable d'état décide quoi mettre à jour et quoi dessiner.
+
+```
+local etat, score = "menu", 0
+
+function update(dt)
+  if etat == "menu" then
+    if toucheAppuyee("espace") then etat, score = "jeu", 0 end
+  elseif etat == "jeu" then
+    score = score + 1
+    if score > 300 then etat = "fin" end
+  elseif etat == "fin" and toucheAppuyee("espace") then
+    etat = "menu"
+  end
+end
+
+function draw()
+  effacer("black")
+  if etat == "menu" then texte("ESPACE pour jouer", 130, 150, 24, "white")
+  elseif etat == "jeu" then texte("Score : " .. score, 16, 16, 24, "white")
+  else texte("Perdu ! Score : " .. score, 130, 150, 24, "tomato") end
+end
+```
+
+!tuto Un jeu complet : esquive les météorites
+# Le vaisseau
+Colle ce code dans le [bac à sable](labo-lua.html#libre) et déplace le vaisseau avec les flèches.
+```
+local vaisseau = { x = 220, y = 280, l = 40, h = 20 }
+
+function update(dt)
+  if touche("gauche") then vaisseau.x = vaisseau.x - 5 end
+  if touche("droite") then vaisseau.x = vaisseau.x + 5 end
+  vaisseau.x = math.max(0, math.min(LARGEUR - vaisseau.l, vaisseau.x))
+end
+
+function draw()
+  effacer("#0d0e1a")
+  rect(vaisseau.x, vaisseau.y, vaisseau.l, vaisseau.h, "deepskyblue")
+end
+```
+# Des météorites qui tombent
+Une liste, un compteur d'images pour en créer régulièrement, un parcours à l'envers pour retirer celles qui sortent. Ajoute ces lignes.
+```
+local meteores, chrono = {}, 0
+
+-- dans update :
+  chrono = chrono + 1
+  if chrono % 30 == 0 then
+    meteores[#meteores + 1] = { x = hasard(0, LARGEUR - 20), y = -20, l = 20, h = 20 }
+  end
+  for i = #meteores, 1, -1 do
+    meteores[i].y = meteores[i].y + 3
+    if meteores[i].y > HAUTEUR then table.remove(meteores, i) end
+  end
+
+-- dans draw :
+  for _, m in ipairs(meteores) do rect(m.x, m.y, m.l, m.h, "orange") end
+```
+# La collision et la fin de partie
+```
+local perdu, score = false, 0
+
+local function collision(a, b)
+  return a.x < b.x + b.l and b.x < a.x + a.l and a.y < b.y + b.h and b.y < a.y + a.h
+end
+
+-- au début de update :
+  if perdu then return end
+  score = score + 1
+-- dans la boucle des météorites :
+    if collision(vaisseau, meteores[i]) then perdu = true end
+-- à la fin de draw :
+  texte("Score : " .. score, 12, 12, 20, "white")
+  if perdu then texte("PERDU", 190, 140, 36, "tomato") end
+```
+# À toi d'améliorer
+Fais accélérer les météorites avec le score, ajoute une touche pour recommencer (`toucheAppuyee("entree")`), des vies, un meilleur score.
+!fin
+
+!defi Défi : la pluie d'étoiles | Gère une liste d'objets qui tombent. | lua-etoiles
+!defi Défi : tirer des projectiles | Crée et supprime des objets en cours de partie. | lua-tir
+!defi Défi : attrape les fruits | Un mini-jeu complet avec score. | lua-fruits
+
+!retenir À retenir | `setup()` une fois, puis `update(dt)` (logique) et `draw()` (affichage) à chaque image. ¶ `y` augmente vers le bas ; l'origine est en haut à gauche. ¶ `touche` = maintenue, `toucheAppuyee` = au moment de l'appui. ¶ Collision de rectangles : chevauchement sur les deux axes. ¶ Supprimer dans une liste : la parcourir à l'envers.
+--- exos
+Q¤f¤Quelle fonction est appelée une seule fois, au démarrage du jeu ?¤`setup`;;`update`;;`draw`;;`start`¤
+Q¤f¤Combien de fois par seconde `update` et `draw` sont-elles appelées ?¤60;;1;;24;;1000¤
+Q¤m¤Que représente le paramètre `dt` de update ?¤Le temps écoulé depuis l'image précédente, en secondes;;Le numéro de l'image;;La date du jour;;La durée totale du jeu¤
+Q¤m¤Où se trouve le point (0, 0) de l'écran ?¤En haut à gauche;;En bas à gauche;;Au centre;;En haut à droite¤
+Q¤m¤Quand y augmente, l'objet…¤descend;;monte;;va à droite;;grossit¤
+Q¤m¤Quelle fonction est vraie tant qu'une touche reste enfoncée ?¤`touche`;;`toucheAppuyee`;;`clic`;;`appui`¤
+Q¤m¤Quelle fonction choisir pour un saut (une seule fois par appui) ?¤`toucheAppuyee`;;`touche`;;`clic`;;`sourisY`¤
+Q¤m¤Pour `cercle(x, y, r, c)`, que désignent x et y ?¤Le centre;;Le coin haut gauche;;Le coin bas droit;;Le point le plus haut¤
+Q¤d¤Pourquoi parcourir une liste à l'envers quand on y supprime des éléments ?¤Parce que table.remove décale les suivants et on en sauterait;;Parce que c'est plus rapide;;Parce que ipairs l'exige;;Parce que # ne marche pas autrement¤
+Q¤d¤Pourquoi multiplier une vitesse par dt ?¤Pour un mouvement identique quelle que soit la vitesse de l'ordinateur;;Pour ralentir le jeu;;Pour arrondir la position;;Pour éviter les collisions¤
+Q¤d¤Deux rectangles sont en collision quand…¤ils se chevauchent sur l'axe x ET sur l'axe y;;ils se chevauchent sur l'axe x OU sur l'axe y;;leurs centres sont identiques;;leurs largeurs sont égales¤
+Q¤d¤Deux cercles se touchent quand la distance entre leurs centres est…¤inférieure à la somme des rayons;;égale à zéro;;supérieure à la somme des rayons;;inférieure au plus petit rayon¤
+V¤m¤La fonction draw doit contenir la logique du jeu (déplacements, score).¤F¤draw ne fait qu'afficher ; la logique va dans update.
+V¤m¤Pour simuler la gravité, on ajoute une petite valeur à la vitesse verticale à chaque image.¤V¤
+Q¤m¤Comment empêcher x de dépasser 0 et 440 ?¤`x = math.max(0, math.min(440, x))`;;`x = x % 440`;;`x = math.abs(x)`;;`x = math.floor(x)`¤
+S¤m¤Quelle constante contient la largeur de l'écran de jeu ?¤LARGEUR¤
+Q¤m¤À quoi sert une variable d'état comme `etat = "menu"` ?¤À décider quoi mettre à jour et afficher selon l'écran en cours;;À sauvegarder la partie;;À compter les images;;À charger les images¤
+A¤m¤Associe chaque fonction à son rôle.¤`effacer`=>remplir l'écran;;`rect`=>dessiner un rectangle;;`hasard`=>tirer un entier au hasard;;`texte`=>écrire à l'écran¤
+
+=== lua-ecosysteme | Lua en vrai : Roblox, LÖVE, Neovim et bonnes pratiques | m
+Tu connais maintenant le langage. Ce chapitre montre où et comment il s'utilise réellement, les différences à connaître selon l'environnement, et les habitudes des développeurs Lua.
+
+## 1. LÖVE (love2d)
+
+LÖVE est un moteur 2D gratuit. Un jeu est un dossier qui contient un fichier `main.lua` ; on le lance avec la commande `love dossier`.
+
+```
+local joueur = { x = 100, y = 100 }
+
+function love.load()                       -- ≈ setup()
+  love.window.setTitle("Mon jeu")
+end
+
+function love.update(dt)                   -- ≈ update(dt)
+  if love.keyboard.isDown("right") then joueur.x = joueur.x + 200 * dt end
+end
+
+function love.draw()                       -- ≈ draw()
+  love.graphics.setColor(1, 0.8, 0)        -- couleurs de 0 à 1
+  love.graphics.rectangle("fill", joueur.x, joueur.y, 40, 40)
+  love.graphics.print("Score : 0", 10, 10)
+end
+
+function love.keypressed(touche)           -- ≈ toucheAppuyee
+  if touche == "escape" then love.event.quit() end
+end
+```
+
+| Dans le labo | Avec LÖVE |
+| `setup()` | `love.load()` |
+| `update(dt)` / `draw()` | `love.update(dt)` / `love.draw()` |
+| `rect(x, y, l, h, c)` | `love.graphics.rectangle("fill", x, y, l, h)` |
+| `cercle(x, y, r, c)` | `love.graphics.circle("fill", x, y, r)` |
+| `touche("droite")` | `love.keyboard.isDown("right")` |
+| `hasard(a, b)` | `love.math.random(a, b)` |
+
+## 2. Roblox et Luau
+
+Roblox Studio utilise **Luau**, un Lua 5.1 enrichi (types optionnels, `+=`, `continue`). Les scripts manipulent des objets du jeu et réagissent à des **événements**.
+
+```
+local Players = game:GetService("Players")          -- un service du moteur
+local piece = script.Parent                         -- l'objet auquel le script est attaché
+
+piece.Touched:Connect(function(autre)               -- événement : quelque chose touche la pièce
+  local joueur = Players:GetPlayerFromCharacter(autre.Parent)
+  if joueur then
+    joueur.leaderstats.Pieces.Value += 1            -- += existe en Luau
+    piece:Destroy()
+  end
+end)
+
+task.wait(2)                                        -- attend 2 secondes (une coroutine !)
+print("2 secondes plus tard")
+```
+
+Ce que tu reconnais : les deux-points des méthodes, une fonction anonyme passée en argument (une closure), et `task.wait` qui met le script en pause grâce aux coroutines.
+
+| Lua 5.4 | Luau (Roblox) |
+| `i = i + 1` | `i += 1` accepté |
+| pas de `continue` | `continue` existe |
+| `//` division entière | `//` existe aussi |
+| `local x <const>` | pas de `<const>` |
+| pas de types | `local n: number = 5` (facultatif) |
+| `goto` | pas de `goto` |
+
+## 3. Les versions de Lua
+
+| Version | Où | Différence marquante |
+| 5.1 | LuaJIT, LÖVE, Neovim, base de Luau | pas d'entiers séparés, `unpack` global, pas de `//` |
+| 5.3 / 5.4 | Lua officiel, ce site | entiers 64 bits, `//`, opérateurs binaires, `<const>` |
+
+En pratique : en 5.1, `10 / 2` affiche `5` et non `5.0`, et `table.unpack` s'appelle `unpack`.
+
+## 4. Configurer avec Lua : Neovim, nginx, Wireshark
+
+Beaucoup de logiciels utilisent Lua comme langage de **configuration et d'extension**, ce qui intéresse aussi l'option SISR. Un fichier de configuration Neovim n'est qu'un script qui remplit des tables :
+
+```
+vim.opt.number = true                    -- numéros de ligne
+vim.opt.tabstop = 2
+vim.keymap.set("n", "<leader>w", ":write<CR>")   -- un raccourci clavier
+```
+
+Avec OpenResty, on écrit en Lua des règles directement dans le serveur web nginx ; Wireshark, HAProxy, Redis et les pare-feu applicatifs acceptent aussi des scripts Lua.
+
+## 5. Opérateurs binaires
+
+Utiles pour les masques (réseau, droits, drapeaux d'un jeu) :
+
+```run
+print(6 & 3, 6 | 3, 6 ~ 3)        -- ET 2, OU 7, OU exclusif 5
+print(1 << 4, 256 >> 2, ~0)       -- décalages : 16, 64 ; NON : -1
+local LECTURE, ECRITURE, EXECUTION = 4, 2, 1
+local droits = LECTURE | EXECUTION
+print(droits, droits & ECRITURE ~= 0, droits & LECTURE ~= 0)
+print(string.format("%d.%d", (192 << 8 | 168) >> 8, (192 << 8 | 168) & 0xFF))
+```
+
+## 6. Les bonnes pratiques
+
+- **`local` partout**, y compris pour les fonctions et les modules (`local M = {}`).
+- Des noms explicites ; `_` pour une valeur qu'on ignore (`for _, v in ipairs(t)`).
+- Mettre en cache dans une locale ce qu'on utilise souvent dans une boucle : `local floor = math.floor`.
+- Construire les longues chaînes avec `table.concat`, jamais avec `..` dans une boucle.
+- Parcourir une liste avec `ipairs` ou `for i = 1, #t` ; un dictionnaire avec `pairs`.
+- Tester l'absence avec `if x == nil` quand `false` est une valeur possible ; sinon `if not x`.
+- Une erreur prévisible renvoie `nil, message` ; un bug lève `error`.
+
+!tuto Du labo à LÖVE : porter un jeu
+# Le jeu dans le labo
+```
+local x = 220
+function update(dt)
+  if touche("gauche") then x = x - 200 * dt end
+  if touche("droite") then x = x + 200 * dt end
+end
+function draw()
+  effacer("black")
+  rect(x, 280, 40, 20, "white")
+end
+```
+# Le même jeu pour LÖVE
+Seuls les noms des fonctions du moteur changent : toute la logique Lua reste identique.
+```
+local x = 220
+function love.update(dt)
+  if love.keyboard.isDown("left") then x = x - 200 * dt end
+  if love.keyboard.isDown("right") then x = x + 200 * dt end
+end
+function love.draw()
+  love.graphics.clear(0, 0, 0)
+  love.graphics.setColor(1, 1, 1)
+  love.graphics.rectangle("fill", x, 280, 40, 20)
+end
+```
+# L'installer chez toi
+Télécharge LÖVE sur love2d.org, enregistre le code dans un dossier sous le nom `main.lua`, puis glisse le dossier sur l'icône de LÖVE (ou tape `love .` dans le dossier).
+!fin
+
+!retenir À retenir | LÖVE : `love.load`, `love.update(dt)`, `love.draw`. ¶ Roblox utilise Luau : même langage, avec `+=`, `continue`, des types facultatifs et une programmation par événements (`:Connect`). ¶ Lua sert aussi à configurer et étendre des logiciels (Neovim, nginx, Wireshark, Redis). ¶ `&`, `|`, `~`, `<<`, `>>` manipulent les bits.
+--- exos
+Q¤f¤Quelle fonction LÖVE est appelée une fois au démarrage ?¤`love.load`;;`love.start`;;`love.init`;;`love.setup`¤
+Q¤f¤Comment s'appelle la variante de Lua utilisée par Roblox ?¤Luau;;LuaJIT;;MoonScript;;RLua¤
+Q¤m¤Quelle écriture est acceptée en Luau mais pas en Lua 5.4 ?¤`i += 1`;;`i = i + 1`;;`local i = 1`;;`i // 2`¤
+Q¤m¤Dans Roblox, que fait `piece.Touched:Connect(f)` ?¤Elle appelle f à chaque fois que l'événement Touched se produit;;Elle appelle f une seule fois immédiatement;;Elle détruit la pièce;;Elle connecte le joueur au serveur¤
+Q¤m¤Quel fichier LÖVE lance-t-il dans le dossier du jeu ?¤`main.lua`;;`index.lua`;;`game.lua`;;`love.lua`¤
+Q¤m¤En LÖVE, comment tester si la flèche droite est enfoncée ?¤`love.keyboard.isDown("right")`;;`touche("droite")`;;`love.key("right")`;;`love.input.right`¤
+Q¤d¤En Lua 5.1 (LÖVE, Neovim), qu'affiche `print(10 / 2)` ?¤5;;5.0;;2;;Une erreur¤Avant la 5.3, il n'y avait qu'un seul type de nombre.
+Q¤d¤Que vaut `6 & 3` ?¤2;;7;;5;;9¤110 ET 011 = 010.
+Q¤d¤Que vaut `6 | 3` ?¤7;;2;;5;;9¤110 OU 011 = 111.
+Q¤d¤Que vaut `1 << 4` ?¤16;;4;;8;;5¤Décaler de 4 bits vers la gauche multiplie par 2⁴.
+Q¤m¤Quel éditeur de texte se configure en Lua ?¤Neovim;;Notepad++;;Word;;Nano¤
+Q¤m¤Quelle est la bonne pratique pour assembler une longue chaîne ?¤`table.concat`;;`..` dans une boucle;;`string.rep`;;`io.write`¤
+V¤m¤Un jeu écrit pour le labo du site se porte vers LÖVE en changeant surtout les noms des fonctions du moteur.¤V¤La logique Lua reste la même.
+V¤m¤Luau possède un mot-clé continue.¤V¤Contrairement à Lua standard.
+V¤d¤En Luau, on peut annoter le type d'une variable : `local n: number = 5`.¤V¤Les types sont facultatifs.
+S¤m¤Quel nom donne-t-on par convention à une variable dont on ignore la valeur dans une boucle for ?¤_¤
+Q¤m¤`task.wait(2)` dans un script Roblox repose sur quel mécanisme de Lua ?¤Les coroutines;;Les métatables;;Les modules;;Les motifs¤Le script est mis en pause puis repris.
+A¤m¤Associe chaque environnement à sa fonction de mise à jour.¤Labo du site=>`update(dt)`;;LÖVE=>`love.update(dt)`;;Roblox=>événements et `:Connect`¤

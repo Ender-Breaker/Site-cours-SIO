@@ -1,0 +1,625 @@
+=== lua-bases | Lua : variables, types et affichage | f
+**Lua** (« lune » en portugais) est un langage très léger, créé au Brésil en 1993 et conçu pour être **intégré** dans d'autres programmes. On le retrouve dans les jeux (Roblox utilise une variante, Luau ; le moteur LÖVE ; les extensions de World of Warcraft), dans l'éditeur Neovim, dans des routeurs et dans le serveur web nginx (OpenResty). Tout le langage tient en une vingtaine de mots-clés : on peut vraiment le connaître en entier, et c'est le but de ce cours.
+
+!info Comment suivre ce cours | Chaque bloc de code avec un bouton **Exécuter** est un vrai programme Lua 5.4 : lance-le, modifie-le, casse-le, relance-le. C'est en changeant le code qu'on apprend. Les **défis** t'envoient dans le labo, où ton programme est vérifié automatiquement.
+
+## 1. Afficher et commenter
+
+`print` affiche ses valeurs puis passe à la ligne. Avec plusieurs valeurs, elles sont séparées par une tabulation.
+
+```run
+print("Bonjour !")
+print("Total :", 42)
+-- un commentaire sur une ligne : Lua l'ignore
+--[[ un commentaire
+     sur plusieurs lignes ]]
+io.write("Sans retour ")
+io.write("à la ligne\n")
+```
+
+Pas de point-virgule obligatoire, pas d'accolades : les blocs se terminent par le mot `end`. Lua distingue les majuscules des minuscules : `Score` et `score` sont deux noms différents.
+
+## 2. Variables : toujours `local`
+
+```run
+local score = 0          -- variable locale : à préférer partout
+score = score + 10
+local a, b = 1, 2        -- affectation multiple
+a, b = b, a              -- échange en une seule ligne
+print(score, a, b)
+print(inconnue)          -- jamais affectée : vaut nil
+```
+
+!attention Le piège numéro 1 de Lua | Sans le mot `local`, une variable est **globale** : elle est visible dans tout le programme et peut écraser une autre variable du même nom. Une faute de frappe dans un nom ne provoque pas d'erreur : elle crée silencieusement une nouvelle variable qui vaut `nil`. Prends l'habitude d'écrire `local` à chaque création.
+
+Depuis Lua 5.4, on peut aussi déclarer une constante : `local TVA <const> = 0.2`. La modifier ensuite est une erreur de compilation.
+
+## 3. Les huit types
+
+| Type | Exemples | À savoir |
+| `nil` | `nil` | l'absence de valeur |
+| `boolean` | `true`, `false` | seuls `false` et `nil` sont « faux » |
+| `number` | `42`, `3.14`, `1e3`, `0xFF` | deux sous-types : entier et flottant |
+| `string` | `"texte"`, `'texte'`, `[[texte long]]` | non modifiable |
+| `table` | `{1, 2, 3}`, `{nom = "Léa"}` | la seule structure de données |
+| `function` | `print`, `function() end` | une valeur comme une autre |
+| `thread` | une coroutine | voir le chapitre Coroutines |
+| `userdata` | donnée du programme hôte | rare en Lua pur |
+
+```run
+print(type(42), type(3.14), type("42"), type(nil), type(print), type({}))
+print(math.type(42), math.type(42.0))   -- integer   float
+print(10 == 10.0)                        -- true : même valeur
+print(0 == false, "" == false)           -- false false
+```
+
+!attention 0 et "" sont vrais | Contrairement à Python, JavaScript ou PHP, en Lua le nombre `0` et la chaîne vide `""` sont considérés comme **vrais** dans une condition. Seuls `false` et `nil` sont faux.
+
+## 4. Opérateurs arithmétiques
+
+```run
+print(7 / 2)       -- 3.5    la division donne toujours un flottant
+print(7 // 2)      -- 3      division entière (arrondie vers le bas)
+print(7 % 2)       -- 1      reste de la division (modulo)
+print(2 ^ 10)      -- 1024.0 puissance (toujours flottante)
+print(-7 // 2, -7 % 3)   -- -4   2  : arrondi vers moins l'infini
+print(10 / 2)      -- 5.0 et non 5
+print(1 + 2 * 3, (1 + 2) * 3)
+```
+
+Pas de `++` ni de `+=` en Lua : on écrit `i = i + 1`.
+
+## 5. Texte : coller, mesurer, convertir
+
+```run
+local prenom = "Léa"
+print("Bonjour " .. prenom .. " !")      -- .. colle deux chaînes
+print(#"Lua")                             -- # donne la longueur : 3
+print("10" + 5)                           -- 15 : la chaîne est convertie en nombre
+print(10 .. 20)                           -- "1020" : les nombres sont convertis en texte
+print(tonumber("42") + 1, tonumber("abc")) -- 43   nil
+print(tostring(42) .. "!")
+print(string.format("%.2f euros", 3.14159))
+```
+
+`tonumber` renvoie `nil` si le texte n'est pas un nombre : c'est la façon de vérifier une saisie. `string.format` met en forme : `%d` entier, `%.2f` deux décimales, `%s` texte, `%5d` sur 5 caractères.
+
+## 6. Lire au clavier
+
+```run stdin=Léa|17
+local nom = io.read()          -- lit une ligne de texte
+local age = io.read("n")       -- lit un nombre
+print("Bonjour " .. nom .. ", dans 10 ans tu auras " .. (age + 10) .. " ans.")
+```
+
+!tuto Ton premier vrai programme : le ticket de caisse
+# Lire le prix et la quantité
+On lit deux nombres. Modifie les entrées sous le code et relance.
+```run stdin=4.5|3
+local prix = io.read("n")
+local quantite = io.read("n")
+print(prix, quantite)
+```
+# Calculer le total
+On range le résultat dans une variable `local` au nom clair.
+```run stdin=4.5|3
+local prix = io.read("n")
+local quantite = io.read("n")
+local total = prix * quantite
+print("Total : " .. total)
+```
+# Ajouter la TVA et mettre en forme
+`string.format` arrondit proprement à deux décimales. Essaie avec d'autres prix.
+```run stdin=4.5|3
+local TVA <const> = 0.2
+local prix = io.read("n")
+local quantite = io.read("n")
+local ht = prix * quantite
+local ttc = ht * (1 + TVA)
+print(string.format("HT : %.2f €", ht))
+print(string.format("TVA : %.2f €", ht * TVA))
+print(string.format("TTC : %.2f €", ttc))
+```
+!fin
+
+!defi Défi : heures, minutes, secondes | Convertis un nombre de secondes en heures, minutes et secondes avec `//` et `%`. | lua-conv
+!defi Défi : la moyenne | Lis trois notes et affiche leur moyenne avec deux décimales. | lua-moyenne
+
+!retenir À retenir | `local` devant chaque nouvelle variable. ¶ `..` colle les chaînes, `#` donne la longueur. ¶ `/` donne un flottant, `//` un entier, `%` le reste, `^` la puissance. ¶ Seuls `false` et `nil` sont faux : `0` et `""` sont vrais. ¶ Une variable inconnue vaut `nil`, sans erreur.
+--- exos
+Q¤f¤Quel mot-clé crée une variable locale ?¤`local`;;`var`;;`let`;;`my`¤
+Q¤f¤Comment colle-t-on deux chaînes en Lua ?¤`..`;;`+`;;`&`;;`.`¤`+` sert uniquement aux nombres.
+Q¤m¤Que vaut `7 // 2` ?¤3;;3.5;;1;;4¤`//` est la division entière.
+Q¤m¤Que vaut `7 / 2` ?¤3.5;;3;;1;;Une erreur¤`/` donne toujours un flottant.
+Q¤f¤Que vaut une variable jamais affectée ?¤`nil`;;0;;`""`;;`undefined`¤
+Q¤m¤Que donne `#"Lua"` ?¤3;;1;;`"Lua"`;;Une erreur¤`#` donne la longueur.
+Q¤f¤Comment écrit-on un commentaire sur une ligne ?¤`-- …`;;`// …`;;`# …`;;`/* … */`¤
+V¤m¤Sans le mot local, une variable Lua est globale.¤V¤C'est le piège le plus courant du langage.
+Q¤m¤Comment échanger a et b en une ligne ?¤`a, b = b, a`;;`swap(a, b)`;;`a = b = a`;;C'est impossible¤L'affectation multiple évalue d'abord toute la partie droite.
+S¤m¤Quelle fonction convertit le texte "12" en nombre ?¤tonumber¤
+V¤m¤Dans une condition, le nombre 0 est considéré comme faux en Lua.¤F¤Seuls false et nil sont faux.
+Q¤m¤Que vaut `10 / 2` ?¤5.0;;5;;2;;`"5"`¤La division `/` produit toujours un flottant.
+Q¤d¤Que renvoie `tonumber("abc")` ?¤`nil`;;0;;Une erreur;;`"abc"`¤Pratique pour vérifier une saisie.
+Q¤m¤Que vaut `2 ^ 3` ?¤8.0;;6;;9;;8¤La puissance donne toujours un flottant.
+Q¤d¤Que vaut `"10" + 5` ?¤15;;`"105"`;;Une erreur;;`nil`¤Avec un opérateur arithmétique, la chaîne est convertie en nombre.
+Q¤d¤Que vaut `10 .. 20` ?¤`"1020"`;;30;;200;;Une erreur¤Avec `..`, les nombres sont convertis en texte.
+S¤m¤Quelle fonction renvoie le nom du type d'une valeur ?¤type¤
+Q¤d¤Que vaut `-7 // 2` ?¤-4;;-3;;-3.5;;3¤La division entière arrondit vers moins l'infini.
+A¤m¤Associe chaque opérateur à son rôle.¤`..`=>concaténation;;`#`=>longueur;;`//`=>division entière;;`%`=>reste de la division;;`^`=>puissance¤
+Q¤f¤Dans quel jeu célèbre retrouve-t-on une variante de Lua pour les créateurs ?¤Roblox;;Minecraft;;Fortnite;;Tetris¤Roblox utilise Luau, dérivé de Lua.
+
+=== lua-conditions-boucles | Lua : conditions et boucles | f
+## 1. La condition `if`
+
+```run stdin=15
+local note = io.read("n")
+if note >= 16 then
+  print("Très bien")
+elseif note >= 10 then
+  print("Admis")
+else
+  print("Recalé")
+end
+```
+
+Trois règles : la condition est suivie de `then`, le bloc se termine par `end`, et `elseif` s'écrit **en un seul mot**. Les conditions sont testées dans l'ordre : dès qu'une est vraie, les suivantes sont ignorées.
+
+## 2. Comparer et combiner
+
+| Opérateur | Sens |
+| `==` | égal |
+| `~=` | différent (et non `!=`) |
+| `<` `<=` `>` `>=` | comparaisons |
+| `and` | et |
+| `or` | ou |
+| `not` | non |
+
+```run
+local age, carte = 17, true
+print(age >= 18 and carte)       -- false
+print(age >= 18 or carte)        -- true
+print(not carte)                 -- false
+print(1 == 1.0, "1" == 1)        -- true  false : pas de conversion avec ==
+print("abc" < "abd")             -- true : ordre alphabétique
+```
+
+### `and` et `or` renvoient une valeur
+
+`and` et `or` ne renvoient pas forcément `true` ou `false` : ils renvoient **l'un de leurs deux opérandes**. `a or b` vaut `a` s'il est vrai, sinon `b`. `a and b` vaut `a` s'il est faux, sinon `b`.
+
+```run
+local pseudo = nil
+print(pseudo or "Invité")              -- valeur par défaut
+local age = 20
+print(age >= 18 and "majeur" or "mineur")   -- le « ternaire » de Lua
+print(nil and 1, false or nil, 0 and "zéro est vrai")
+```
+
+!attention Limite du faux ternaire | `c and a or b` ne marche que si `a` n'est ni `false` ni `nil`. Sinon écris un vrai `if`.
+
+## 3. `while` et `repeat`
+
+`while` teste **avant** chaque tour ; `repeat … until` teste **après** (le bloc s'exécute au moins une fois) et s'arrête quand la condition devient **vraie**.
+
+```run
+local n = 1
+while n < 100 do
+  n = n * 2
+end
+print(n)
+
+local essais = 0
+repeat
+  essais = essais + 1
+until essais * essais > 50
+print(essais)
+```
+
+## 4. `for` numérique
+
+`for i = début, fin, pas` : la fin est **incluse**, le pas vaut 1 par défaut.
+
+```run
+for i = 1, 5 do io.write(i, " ") end
+print()
+for i = 10, 1, -3 do io.write(i, " ") end     -- pas négatif
+print()
+for i = 0, 1, 0.25 do io.write(i, " ") end
+print()
+```
+
+La variable `i` est locale à la boucle et n'existe plus après le `end`. Il existe aussi un `for … in` pour parcourir les tables : voir le chapitre sur les tables.
+
+## 5. `break`, et pas de `continue`
+
+`break` sort de la boucle. Lua n'a pas de `continue` : on inverse la condition, ou on utilise `goto` avec une étiquette.
+
+```run
+for i = 1, 10 do
+  if i % 2 == 0 then goto suite end     -- saute les nombres pairs
+  if i > 7 then break end               -- arrête tout
+  io.write(i, " ")
+  ::suite::
+end
+print()
+```
+
+!tuto Le jeu du « plus ou moins »
+# Une seule comparaison
+Le nombre secret est fixé. On lit un essai et on répond.
+```run stdin=50
+local secret = 42
+local essai = io.read("n")
+if essai < secret then
+  print("Trop petit")
+elseif essai > secret then
+  print("Trop grand")
+else
+  print("Gagné !")
+end
+```
+# Répéter jusqu'à trouver
+On ne sait pas combien d'essais il faudra : c'est le rôle de `repeat … until`. Change les entrées pour gagner plus vite.
+```run stdin=50|30|42
+local secret = 42
+local essai
+repeat
+  essai = io.read("n")
+  if essai < secret then print("Trop petit")
+  elseif essai > secret then print("Trop grand") end
+until essai == secret
+print("Gagné !")
+```
+# Compter les essais
+Un compteur augmente à chaque tour.
+```run stdin=50|30|42
+local secret, essais = 42, 0
+local essai
+repeat
+  essai = io.read("n")
+  essais = essais + 1
+  if essai < secret then print("Trop petit")
+  elseif essai > secret then print("Trop grand") end
+until essai == secret
+print("Gagné ! Essais : " .. essais)
+```
+!fin
+
+!defi Défi : la mention | Affiche la mention qui correspond à une note sur 20. | lua-mention
+!defi Défi : FizzBuzz | Le grand classique des entretiens d'embauche. | lua-fizzbuzz
+!defi Défi : plus ou moins | Refais le jeu du tutoriel sans regarder. | lua-devine
+
+!retenir À retenir | `if … then … elseif … else … end`. ¶ Différent s'écrit `~=`. ¶ `for i = a, b, pas` inclut `b`. ¶ `repeat … until condition` s'exécute au moins une fois. ¶ `x or défaut` donne une valeur par défaut.
+--- exos
+Q¤f¤Comment s'écrit « différent » en Lua ?¤`~=`;;`!=`;;`<>`;;`=/=`¤
+Q¤f¤Par quel mot se termine un bloc `if` ?¤`end`;;`endif`;;`}`;;`fi`¤
+Q¤m¤Combien de fois s'exécute `for i = 1, 5 do … end` ?¤5;;4;;6;;Une infinité¤La borne de fin est incluse.
+Q¤m¤Qu'affiche `for i = 10, 1, -3 do io.write(i, " ") end` ?¤10 7 4 1;;10 7 4;;10 9 8;;Rien¤
+V¤m¤Une boucle repeat … until exécute son bloc au moins une fois.¤V¤La condition est testée après le bloc.
+Q¤m¤Que vaut `nil or "défaut"` ?¤`"défaut"`;;`nil`;;`true`;;`false`¤`or` renvoie son second opérande si le premier est faux.
+Q¤d¤Que vaut `false and 5` ?¤`false`;;5;;`nil`;;`true`¤`and` renvoie son premier opérande s'il est faux.
+Q¤d¤Que vaut `0 and "oui" or "non"` ?¤`"oui"`;;`"non"`;;0;;`false`¤En Lua, 0 est vrai.
+V¤f¤En Lua, on écrit `else if` en deux mots pour enchaîner les conditions.¤F¤On écrit `elseif` en un seul mot (sinon il faut un `end` de plus).
+Q¤m¤Quel mot sort immédiatement d'une boucle ?¤`break`;;`exit`;;`stop`;;`continue`¤
+V¤m¤Lua possède une instruction continue.¤F¤On utilise une condition inversée ou `goto`.
+Q¤m¤Que vaut `"1" == 1` ?¤`false`;;`true`;;`nil`;;Une erreur¤`==` ne convertit jamais : deux types différents ne sont jamais égaux.
+S¤m¤Quel mot-clé suit la condition d'un if ?¤then¤
+S¤m¤Quel mot-clé suit la condition d'un while ?¤do¤
+Q¤d¤`repeat … until c` s'arrête quand…¤c devient vraie;;c devient fausse;;c vaut nil;;le bloc renvoie false¤C'est l'inverse d'un while.
+Q¤d¤Que vaut i après `for i = 1, 3 do end print(i)` (sans autre variable i) ?¤`nil`;;3;;4;;1¤La variable de boucle est locale à la boucle.
+A¤m¤Associe chaque boucle à son usage.¤`for i = 1, n`=>nombre de tours connu;;`while`=>tester avant chaque tour;;`repeat … until`=>au moins un tour;;`break`=>sortir de la boucle¤
+
+=== lua-fonctions | Lua : les fonctions | m
+## 1. Définir et appeler
+
+```run err
+local function aire(largeur, hauteur)
+  return largeur * hauteur
+end
+
+print(aire(3, 4))
+print(aire(3))        -- erreur : hauteur vaut nil
+```
+
+Un paramètre non fourni vaut `nil` (d'où l'erreur ci-dessus quand on multiplie), un argument en trop est ignoré. Une fonction sans `return` renvoie `nil`.
+
+### Valeurs par défaut
+
+Lua n'a pas de syntaxe dédiée : on utilise `or`.
+
+```run
+local function saluer(nom, politesse)
+  politesse = politesse or "Bonjour"
+  print(politesse .. " " .. (nom or "inconnu") .. " !")
+end
+saluer("Léa")
+saluer("Sam", "Salut")
+saluer()
+```
+
+## 2. Plusieurs valeurs de retour
+
+Une fonction Lua peut renvoyer **plusieurs valeurs**. C'est très utilisé : `string.find` renvoie un début et une fin, `pcall` un statut et un résultat.
+
+```run
+local function divise(a, b)
+  return a // b, a % b
+end
+
+local q, r = divise(17, 5)
+print(q, r)
+local seul = divise(17, 5)        -- les valeurs en trop sont perdues
+print(seul)
+print(divise(17, 5), "fin")       -- tronqué à 1 valeur : pas en dernière position
+print("début", divise(17, 5))     -- toutes les valeurs : dernière position
+print((divise(17, 5)))            -- des parenthèses forcent une seule valeur
+```
+
+## 3. Nombre variable d'arguments : `...`
+
+```run
+local function somme(...)
+  local total = 0
+  for _, v in ipairs({...}) do     -- {...} range les arguments dans une table
+    total = total + v
+  end
+  return total
+end
+
+print(somme(1, 2, 3), somme(10, 20, 30, 40), somme())
+print(select("#", "a", "b", "c"))   -- nombre d'arguments : 3
+print(select(2, "a", "b", "c"))     -- à partir du 2e : b   c
+```
+
+## 4. Les fonctions sont des valeurs
+
+Une fonction se range dans une variable, se passe en argument, se renvoie. `function f() end` n'est qu'un raccourci de `f = function() end`.
+
+```run
+local double = function(x) return x * 2 end
+
+local function appliquer(f, valeur)
+  return f(valeur)
+end
+
+print(appliquer(double, 21))
+print(appliquer(function(x) return x * x end, 9))   -- fonction anonyme
+print(appliquer(string.upper, "lua"))
+```
+
+## 5. Récursivité
+
+Une fonction récursive s'appelle elle-même. Il lui faut un **cas d'arrêt**.
+
+```run
+local function factorielle(n)
+  if n <= 1 then return 1 end           -- cas d'arrêt
+  return n * factorielle(n - 1)
+end
+print(factorielle(5), factorielle(20))
+```
+
+!attention `local function` ou `local f = function` ? | Pour une fonction récursive, écris `local function f()`. Avec `local f = function() … f() … end`, le nom `f` n'existe pas encore à l'intérieur de la fonction au moment où elle est créée.
+
+!tuto Une boîte à outils de statistiques
+# Une fonction qui renvoie deux résultats
+```run
+local function minmax(t)
+  local mini, maxi = t[1], t[1]
+  for _, v in ipairs(t) do
+    if v < mini then mini = v end
+    if v > maxi then maxi = v end
+  end
+  return mini, maxi
+end
+print(minmax({12, 5, 19, 8}))
+```
+# Réutiliser une fonction dans une autre
+```run
+local function somme(t)
+  local s = 0
+  for _, v in ipairs(t) do s = s + v end
+  return s
+end
+local function moyenne(t)
+  return somme(t) / #t
+end
+print(moyenne({12, 5, 19, 8}))
+```
+# Passer une fonction en argument
+`compter` reçoit un test sous forme de fonction : la même fonction sert pour tous les critères. Ajoute ton propre test.
+```run
+local function compter(t, test)
+  local n = 0
+  for _, v in ipairs(t) do
+    if test(v) then n = n + 1 end
+  end
+  return n
+end
+local notes = {12, 5, 19, 8, 10}
+print(compter(notes, function(v) return v >= 10 end))
+print(compter(notes, function(v) return v % 2 == 0 end))
+```
+!fin
+
+!defi Défi : minimum et maximum | Écris une fonction qui renvoie deux valeurs. | lua-minmax
+!defi Défi : la factorielle | Une fonction récursive. | lua-factorielle
+!defi Défi : somme(...) | Une fonction au nombre d'arguments variable. | lua-varargs
+
+!retenir À retenir | `local function nom(params) … return … end`. ¶ Paramètre manquant = `nil` ; valeur par défaut avec `or`. ¶ `return a, b` renvoie plusieurs valeurs. ¶ `...` reçoit un nombre variable d'arguments ; `{...}` les range dans une table. ¶ Une fonction est une valeur comme une autre.
+--- exos
+Q¤f¤Quel mot-clé renvoie une valeur depuis une fonction ?¤`return`;;`yield`;;`give`;;`result`¤
+Q¤m¤Que renvoie une fonction sans `return` ?¤`nil`;;0;;`false`;;Une erreur¤
+Q¤m¤Que vaut un paramètre non fourni à l'appel ?¤`nil`;;0;;Une erreur à l'appel;;`""`¤
+Q¤m¤Avec `local function f() return 1, 2 end`, que vaut x après `local x = f()` ?¤1;;2;;Une table {1, 2};;`nil`¤Les valeurs en trop sont abandonnées.
+Q¤d¤Avec la même f, qu'affiche `print(f(), 10)` ?¤1   10;;1   2   10;;2   10;;10¤Un appel qui n'est pas en dernière position est tronqué à une valeur.
+Q¤d¤Et `print(10, f())` ?¤10   1   2;;10   1;;10   2;;10¤En dernière position, toutes les valeurs sont gardées.
+Q¤m¤Comment une fonction reçoit-elle un nombre variable d'arguments ?¤Avec `...`;;Avec `*args`;;Avec `arguments`;;Avec `[]`¤
+S¤m¤Quelle fonction donne le nombre d'arguments avec select("#", ...) ? Écris son nom.¤select¤
+V¤m¤En Lua, on peut passer une fonction en argument d'une autre fonction.¤V¤Les fonctions sont des valeurs de première classe.
+V¤m¤Appeler une fonction avec trop d'arguments provoque une erreur.¤F¤Les arguments en trop sont ignorés.
+Q¤m¤Comment donner la valeur par défaut 1 au paramètre n ?¤`n = n or 1`;;`function f(n = 1)`;;`n ?= 1`;;`default n = 1`¤
+Q¤d¤Pourquoi écrire `local function f()` pour une fonction récursive ?¤Pour que f soit connue à l'intérieur de son propre corps;;Parce que c'est plus rapide;;Parce que function seul est interdit;;Pour la rendre globale¤
+Q¤m¤Qu'est-ce qu'une fonction anonyme ?¤Une fonction sans nom, écrite là où on en a besoin;;Une fonction privée;;Une fonction sans paramètres;;Une fonction sans return¤
+Q¤d¤Que fait `(f())` avec des parenthèses autour de l'appel ?¤Ne garde que la première valeur renvoyée;;Appelle f deux fois;;Renvoie une table;;Rien de particulier¤
+Q¤m¤Que manque-t-il à une fonction récursive qui ne s'arrête jamais ?¤Un cas d'arrêt;;Un `local`;;Un `break`;;Un paramètre¤
+A¤m¤Associe l'écriture à son effet.¤`return a, b`=>deux valeurs de retour;;`...`=>arguments variables;;`n or 0`=>valeur par défaut;;`function(x) … end`=>fonction anonyme¤
+
+=== lua-tables | Lua : les tables | m
+La **table** est l'unique structure de données de Lua. Elle sert à la fois de liste, de dictionnaire, d'objet, de module. Bien maîtriser les tables, c'est maîtriser Lua.
+
+## 1. La table comme liste
+
+```run
+local fruits = {"pomme", "kiwi", "poire"}
+print(fruits[1])              -- pomme : les indices commencent à 1
+print(#fruits)                -- 3 : nombre d'éléments
+fruits[#fruits + 1] = "figue" -- ajoute à la fin
+table.insert(fruits, "noix")  -- pareil
+table.insert(fruits, 1, "ananas")   -- insère au début (décale le reste)
+print(table.remove(fruits))   -- retire et renvoie le dernier : noix
+print(table.remove(fruits, 1))-- retire le premier : ananas
+print(table.concat(fruits, ", "))
+print(fruits[99])             -- nil : pas d'erreur
+```
+
+!attention Les indices commencent à 1 | C'est la différence la plus déroutante quand on vient d'un autre langage. `t[0]` vaut `nil`, et les boucles vont de `1` à `#t`.
+
+## 2. Parcourir : `ipairs` et `pairs`
+
+```run
+local notes = {12, 15, 9}
+for i, v in ipairs(notes) do        -- indice et valeur, dans l'ordre
+  print(i, v)
+end
+for i = #notes, 1, -1 do            -- à l'envers, avec un for numérique
+  io.write(notes[i], " ")
+end
+print()
+```
+
+`ipairs` parcourt 1, 2, 3… et **s'arrête au premier `nil`**. `pairs` parcourt **toutes** les clés, dans un ordre non garanti.
+
+## 3. La table comme dictionnaire
+
+```run
+local joueur = { nom = "Léa", pv = 10 }
+print(joueur.nom, joueur["pv"])     -- deux écritures équivalentes
+joueur.niveau = 3                   -- ajoute une clé
+joueur.pv = nil                     -- supprime une clé
+for cle, valeur in pairs(joueur) do
+  print(cle, valeur)
+end
+local stock = {}
+stock["clé USB"] = 12               -- les crochets acceptent n'importe quelle clé
+stock[42] = "réponse"
+print(stock["clé USB"], stock[42], stock.absent)
+```
+
+`t.nom` est un raccourci de `t["nom"]` : il ne marche que si la clé est un nom simple (lettres, chiffres, `_`).
+
+## 4. Trier
+
+```run
+local t = {5, 2, 8, 1}
+table.sort(t)
+print(table.concat(t, " "))
+table.sort(t, function(a, b) return a > b end)   -- ordre décroissant
+print(table.concat(t, " "))
+
+local eleves = { {nom = "Léa", note = 15}, {nom = "Sam", note = 9}, {nom = "Zoé", note = 18} }
+table.sort(eleves, function(a, b) return a.note > b.note end)
+for rang, e in ipairs(eleves) do print(rang, e.nom, e.note) end
+```
+
+La fonction de comparaison reçoit deux éléments et renvoie `true` si le premier doit passer **avant** le second.
+
+## 5. Les tables sont des références
+
+```run
+local a = {1, 2, 3}
+local b = a            -- b désigne LA MÊME table, pas une copie
+b[1] = 99
+print(a[1])            -- 99
+print(a == b, {1} == {1})   -- true  false : == compare l'identité
+
+local copie = {}
+for i, v in ipairs(a) do copie[i] = v end   -- copie élément par élément
+copie[1] = 0
+print(a[1], copie[1])
+```
+
+Conséquence : une fonction qui reçoit une table peut la **modifier**, et l'appelant voit le changement.
+
+## 6. Tables imbriquées
+
+```run
+local grille = {}
+for l = 1, 3 do
+  grille[l] = {}
+  for c = 1, 3 do grille[l][c] = (l - 1) * 3 + c end
+end
+print(grille[2][3])
+for _, ligne in ipairs(grille) do print(table.concat(ligne, " ")) end
+```
+
+!attention `#` et les trous | `#t` n'est fiable que pour une liste **sans trou**. Si tu écris `t[2] = nil` au milieu d'une liste, `#t` peut donner un résultat inattendu : retire les éléments avec `table.remove`. Pour compter les clés d'un dictionnaire, il faut une boucle `pairs`.
+
+!tuto Un inventaire de magasin
+# Compter avec un dictionnaire
+La clé est le nom de l'article, la valeur sa quantité. `(stock[nom] or 0)` vaut 0 la première fois.
+```run
+local stock = {}
+local function ajouter(nom, qte)
+  stock[nom] = (stock[nom] or 0) + qte
+end
+ajouter("souris", 3)
+ajouter("clavier", 2)
+ajouter("souris", 5)
+print(stock.souris, stock.clavier)
+```
+# Afficher dans l'ordre alphabétique
+`pairs` n'a pas d'ordre garanti : on récupère les clés dans une liste, on la trie, puis on affiche.
+```run
+local stock = { souris = 8, clavier = 2, ecran = 4 }
+local noms = {}
+for nom in pairs(stock) do noms[#noms + 1] = nom end
+table.sort(noms)
+for _, nom in ipairs(noms) do
+  print(nom .. " : " .. stock[nom])
+end
+```
+# Trouver l'article le plus en stock
+```run
+local stock = { souris = 8, clavier = 2, ecran = 4 }
+local meilleur, maxi = nil, -1
+for nom, qte in pairs(stock) do
+  if qte > maxi then meilleur, maxi = nom, qte end
+end
+print(meilleur, maxi)
+```
+!fin
+
+!defi Défi : inverser une liste | Lis des valeurs et affiche-les dans l'ordre inverse. | lua-inverser
+!defi Défi : trier | Trie des nombres avec `table.sort`. | lua-tri
+!defi Défi : l'inventaire | Un dictionnaire, des totaux, un affichage trié. | lua-inventaire
+
+!retenir À retenir | Les indices commencent à **1** ; `#t` donne la taille d'une liste. ¶ `ipairs` pour une liste (dans l'ordre), `pairs` pour un dictionnaire (ordre non garanti). ¶ `t.cle` équivaut à `t["cle"]`. ¶ `table.insert`, `table.remove`, `table.sort`, `table.concat`. ¶ Une variable contient une **référence** vers la table, pas une copie.
+--- exos
+Q¤f¤Quel est l'indice du premier élément d'une liste Lua ?¤1;;0;;-1;;Au choix¤
+Q¤f¤Comment obtenir le nombre d'éléments de la liste t ?¤`#t`;;`t.length`;;`len(t)`;;`t.size()`¤
+Q¤m¤Quelle fonction parcourt une liste dans l'ordre des indices ?¤`ipairs`;;`pairs`;;`each`;;`next`¤
+Q¤m¤Quelle fonction parcourt toutes les clés d'un dictionnaire ?¤`pairs`;;`ipairs`;;`keys`;;`foreach`¤
+Q¤m¤`t.nom` est équivalent à…¤`t["nom"]`;;`t[nom]`;;`t(nom)`;;`t:nom`¤
+Q¤m¤Que vaut `t[5]` si la liste t n'a que 3 éléments ?¤`nil`;;Une erreur;;0;;`""`¤
+Q¤m¤Comment ajouter "x" à la fin de la liste t ?¤`table.insert(t, "x")`;;`t.push("x")`;;`t.append("x")`;;`t += "x"`¤On peut aussi écrire `t[#t + 1] = "x"`.
+Q¤m¤Que fait `table.remove(t)` sans indice ?¤Retire et renvoie le dernier élément;;Vide la table;;Retire le premier élément;;Provoque une erreur¤
+Q¤d¤Après `local a = {1} local b = a b[1] = 5`, que vaut `a[1]` ?¤5;;1;;`nil`;;Une erreur¤a et b désignent la même table.
+Q¤d¤Que vaut `{1, 2} == {1, 2}` ?¤`false`;;`true`;;`nil`;;Une erreur¤Deux tables distinctes ne sont jamais égales, même avec le même contenu.
+Q¤m¤Comment supprimer la clé "pv" de la table j ?¤`j.pv = nil`;;`delete j.pv`;;`j.remove("pv")`;;`unset(j.pv)`¤
+S¤m¤Quelle fonction de la bibliothèque table colle les éléments d'une liste en une chaîne ?¤table.concat;;concat¤
+V¤m¤pairs parcourt les clés dans un ordre garanti.¤F¤L'ordre de pairs n'est pas défini : il faut trier les clés soi-même.
+V¤d¤ipairs s'arrête au premier élément nil rencontré.¤V¤
+Q¤d¤Pour trier t en ordre décroissant, quelle comparaison donner à table.sort ?¤`function(a, b) return a > b end`;;`function(a, b) return a < b end`;;`"desc"`;;`function(a) return -a end`¤La fonction renvoie vrai si a doit passer avant b.
+Q¤d¤Comment compter les clés d'un dictionnaire d ?¤Avec une boucle `pairs` et un compteur;;Avec `#d`;;Avec `d.count`;;Avec `table.size(d)`¤`#` ne compte que la partie liste.
+A¤m¤Associe chaque fonction à son rôle.¤`table.insert`=>ajouter un élément;;`table.remove`=>retirer un élément;;`table.sort`=>trier;;`table.concat`=>coller en une chaîne¤

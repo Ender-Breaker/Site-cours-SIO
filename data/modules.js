@@ -187,20 +187,27 @@ window.EF_MODULES = [
     ]
   },
   {
-    id: "lua", bonus: true,
+    id: "lua", bonus: true, evalTextuel: true,
     titre: "Lua",
     sousTitre: "Bonus · le langage des jeux",
     icone: "Lua",
     option: "BONUS",
     couleur: "lua",
-    description: "Le langage léger de Roblox, LÖVE et des scripts de jeux : variables, tables, fonctions, objets, puis des jeux.",
-    labos: [{ href: "labo-lua.html", ico: "Lua", titre: "Labo Lua", court: "Lua", texte: "16 missions avec du vrai Lua 5.4 : programmes console puis jeux dans le navigateur. Plus un bac à sable." }],
+    description: "Le cours complet du langage de Roblox, LÖVE et des scripts de jeux : bases, tables, chaînes, closures, métatables, objets, coroutines, puis des jeux.",
+    labos: [{ href: "labo-lua.html", ico: "Lua", titre: "Labo Lua", court: "Lua", texte: "44 missions avec du vrai Lua 5.4 : bases, chaînes, tables, closures, métatables, objets, coroutines, puis des jeux dans le navigateur. Plus un bac à sable." }],
     chapitres: [
       { id: "lua-bases", titre: "Lua : variables, types et affichage", niveau: "facile" },
       { id: "lua-conditions-boucles", titre: "Lua : conditions et boucles", niveau: "facile" },
       { id: "lua-fonctions", titre: "Lua : les fonctions", niveau: "moyen" },
       { id: "lua-tables", titre: "Lua : les tables", niveau: "moyen" },
-      { id: "lua-objets-jeux", titre: "Lua : objets et jeux", niveau: "difficile" }
+      { id: "lua-chaines", titre: "Lua : les chaînes de caractères", niveau: "moyen" },
+      { id: "lua-closures", titre: "Lua : portée, closures et fonctions d'ordre supérieur", niveau: "moyen" },
+      { id: "lua-metatables", titre: "Lua : métatables et métaméthodes", niveau: "difficile" },
+      { id: "lua-objets-jeux", titre: "Lua : objets, classes et héritage", niveau: "difficile" },
+      { id: "lua-erreurs-modules", titre: "Lua : erreurs, modules et bibliothèques standard", niveau: "moyen" },
+      { id: "lua-coroutines", titre: "Lua : les coroutines", niveau: "difficile" },
+      { id: "lua-jeux", titre: "Lua : créer un jeu", niveau: "difficile" },
+      { id: "lua-ecosysteme", titre: "Lua en vrai : Roblox, LÖVE, Neovim et bonnes pratiques", niveau: "moyen" }
     ]
   },
   {

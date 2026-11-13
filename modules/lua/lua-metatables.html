@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Lua : métatables et métaméthodes — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="lua" data-chapter="lua-metatables">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/lua.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>Une <b>métatable</b> est une table ordinaire attachée à une autre table pour en <b>modifier le comportement</b> : que faire quand on additionne deux tables, quand on lit une clé absente, quand on l'affiche… Chaque comportement correspond à une clé spéciale qui commence par deux tirets bas : une <b>métaméthode</b>.</p>
+<h2>1. Attacher une métatable</h2>
+<div class="essai" data-langue="lua"><pre><code>local t = {}
+local mt = {}
+setmetatable(t, mt)
+print(getmetatable(t) == mt)      -- true
+local u = setmetatable({}, mt)    -- setmetatable renvoie la table : écriture courante
+print(getmetatable(u) == mt)</code></pre></div>
+<h2>2. <code>__index</code> : la clé absente</h2>
+<p>Quand on lit <code>t.cle</code> et que <code>t</code> n'a pas cette clé, Lua regarde <code>__index</code> dans la métatable. Si c'est une <b>table</b>, il y cherche la clé ; si c'est une <b>fonction</b>, il l'appelle.</p>
+<div class="essai" data-langue="lua"><pre><code>local defauts = { couleur = "bleu", taille = 12 }
+local style = setmetatable({ taille = 20 }, { __index = defauts })
+print(style.taille)        -- 20 : la clé existe dans style
+print(style.couleur)       -- bleu : trouvée dans defauts
+print(style.inconnu)       -- nil : nulle part
+
+local carres = setmetatable({}, { __index = function(table, cle) return cle * cle end })
+print(carres[7], carres[12])</code></pre></div>
+<p>C'est ce mécanisme qui permet les classes et l'héritage : voir le chapitre suivant.</p>
+<h2>3. <code>__newindex</code> : l'écriture d'une nouvelle clé</h2>
+<div class="essai" data-langue="lua" data-erreur="1"><pre><code>local config = setmetatable({}, {
+  __newindex = function(t, cle, valeur)
+    error("clé interdite : " .. cle)
+  end
+})
+config.port = 8080</code></pre></div>
+<p><code>rawget(t, cle)</code> et <code>rawset(t, cle, valeur)</code> lisent et écrivent <b>sans</b> passer par les métaméthodes.</p>
+<h2>4. Redéfinir les opérateurs</h2>
+<table><tr><th>Métaméthode</th><th>Déclenchée par</th></tr><tr><td><code>__add</code> <code>__sub</code> <code>__mul</code> <code>__div</code></td><td><code>+</code> <code>-</code> <code>*</code> <code>/</code></td></tr><tr><td><code>__mod</code> <code>__pow</code> <code>__unm</code> <code>__idiv</code></td><td><code>%</code> <code>^</code> <code>-x</code> <code>//</code></td></tr><tr><td><code>__concat</code></td><td><code>..</code></td></tr><tr><td><code>__len</code></td><td><code>#</code></td></tr><tr><td><code>__eq</code> <code>__lt</code> <code>__le</code></td><td><code>==</code> <code>&lt;</code> <code>&lt;=</code> (et donc <code>~=</code> <code>&gt;</code> <code>&gt;=</code>)</td></tr><tr><td><code>__call</code></td><td><code>t(…)</code> : appeler la table comme une fonction</td></tr><tr><td><code>__tostring</code></td><td><code>tostring(t)</code> et donc <code>print(t)</code></td></tr></table>
+<div class="essai" data-langue="lua"><pre><code>local Vec = {}
+Vec.__index = Vec
+local function vec(x, y) return setmetatable({ x = x, y = y }, Vec) end
+
+Vec.__add = function(a, b) return vec(a.x + b.x, a.y + b.y) end
+Vec.__mul = function(a, k) return vec(a.x * k, a.y * k) end
+Vec.__eq = function(a, b) return a.x == b.x and a.y == b.y end
+Vec.__tostring = function(v) return "(" .. v.x .. ", " .. v.y .. ")" end
+Vec.__len = function(v) return math.sqrt(v.x ^ 2 + v.y ^ 2) end
+
+local a, b = vec(1, 2), vec(3, 4)
+print(a + b)                 -- (4, 6)
+print(a * 10)                -- (10, 20)
+print(a == vec(1, 2))        -- true grâce à __eq
+print(#b)                    -- 5.0 : la norme</code></pre></div>
+<h2>5. <code>__call</code> : une table qu'on appelle</h2>
+<div class="essai" data-langue="lua"><pre><code>local compteur = setmetatable({ n = 0 }, {
+  __call = function(self, pas)
+    self.n = self.n + (pas or 1)
+    return self.n
+  end
+})
+print(compteur(), compteur(), compteur(10))</code></pre></div>
+<section class="tuto"><h3><small>Tutoriel</small>Une table en lecture seule</h3>
+<div class="etape"><h4>Le principe du mandataire (proxy)</h4>
+<p>On donne à l'utilisateur une table <b>vide</b> : toute lecture passe par <code>__index</code>, toute écriture par <code>__newindex</code>.</p>
+<div class="essai" data-langue="lua"><pre><code>local function lectureSeule(donnees)
+  return setmetatable({}, {
+    __index = donnees,
+    __newindex = function() print("Refusé : table en lecture seule") end
+  })
+end
+local jours = lectureSeule({ "lundi", "mardi" })
+print(jours[1])
+jours[1] = "dimanche"
+print(jours[1])</code></pre></div>
+</div>
+<div class="etape"><h4>Compter les accès</h4>
+<p>Le même principe sert à espionner une table : pratique pour déboguer.</p>
+<div class="essai" data-langue="lua"><pre><code>local function espion(donnees)
+  local lectures = 0
+  local proxy = setmetatable({}, {
+    __index = function(_, cle) lectures = lectures + 1; return donnees[cle] end
+  })
+  return proxy, function() return lectures end
+end
+local t, combien = espion({ a = 1, b = 2 })
+local _ = t.a + t.b + t.a
+print(combien() .. " lectures")</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : des vecteurs</b><p>Additionne et affiche des vecteurs avec <code>__add</code> et <code>__tostring</code>.</p><a class="defi-go" href="labo-lua.html#m=lua-vecteur">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : valeurs par défaut</b><p>Une table qui répond 0 pour toute clé absente.</p><a class="defi-go" href="labo-lua.html#m=lua-defaut">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p><code>setmetatable(t, mt)</code> attache la métatable <code>mt</code> à <code>t</code>. </p><p> <code>__index</code> : que répondre pour une clé absente (table ou fonction). </p><p> <code>__newindex</code> : intercepter l'écriture d'une nouvelle clé. </p><p> <code>__add</code>, <code>__eq</code>, <code>__lt</code>, <code>__concat</code>, <code>__len</code>… redéfinissent les opérateurs ; <code>__tostring</code> l'affichage ; <code>__call</code> l'appel.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-lua.html">Labo Lua</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "Quelle fonction attache une métatable à une table ?",
+  "type": "qcm",
+  "options": [
+   "`bind`",
+   "`setmeta`",
+   "`table.meta`",
+   "`setmetatable`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle métaméthode est consultée quand on lit une clé absente ?",
+  "type": "qcm",
+  "options": [
+   "`__missing`",
+   "`__get`",
+   "`__index`",
+   "`__newindex`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle métaméthode redéfinit l'opérateur `+` ?",
+  "type": "qcm",
+  "options": [
+   "`__concat`",
+   "`__plus`",
+   "`__add`",
+   "`__sum`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle métaméthode est utilisée par `print(t)` ?",
+  "type": "qcm",
+  "options": [
+   "`__show`",
+   "`__print`",
+   "`__string`",
+   "`__tostring`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle métaméthode permet d'écrire `t(5)` ?",
+  "type": "qcm",
+  "options": [
+   "`__func`",
+   "`__index`",
+   "`__run`",
+   "`__call`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "`__index` peut être…",
+  "type": "qcm",
+  "options": [
+   "uniquement une table",
+   "uniquement une chaîne",
+   "uniquement une fonction",
+   "une table ou une fonction"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Avec `s = setmetatable({a = 1}, {__index = {a = 9, b = 2}})`, que vaut `s.a` ?",
+  "type": "qcm",
+  "options": [
+   "9",
+   "1",
+   "10",
+   "`nil`"
+  ],
+  "answer": 1,
+  "explication": "__index n'est consulté que si la clé est absente."
+ },
+ {
+  "niveau": "difficile",
+  "q": "Et que vaut `s.b` ?",
+  "type": "qcm",
+  "options": [
+   "1",
+   "`nil`",
+   "9",
+   "2"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Quelle fonction lit une clé sans passer par `__index` ?",
+  "type": "qcm",
+  "options": [
+   "`rawget`",
+   "`get`",
+   "`table.get`",
+   "`noindex`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle métaméthode redéfinit l'opérateur `..` ?",
+  "type": "qcm",
+  "options": [
+   "`__add`",
+   "`__concat`",
+   "`__join`",
+   "`__dotdot`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle métaméthode redéfinit `==` ?",
+  "type": "qcm",
+  "options": [
+   "`__cmp`",
+   "`__equals`",
+   "`__eq`",
+   "`__same`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Une métatable est une table ordinaire.",
+  "type": "vf",
+  "answer": true,
+  "explication": "Elle contient simplement des clés au nom spécial."
+ },
+ {
+  "niveau": "difficile",
+  "q": "__newindex est appelée à chaque écriture, même si la clé existe déjà dans la table.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Seulement quand la clé n'existe pas encore."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Plusieurs tables peuvent partager la même métatable.",
+  "type": "vf",
+  "answer": true,
+  "explication": "C'est le principe des classes."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle fonction renvoie la métatable d'une table ?",
+  "type": "saisie",
+  "answers": [
+   "getmetatable"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi le mandataire (proxy) du cours est-il une table vide ?",
+  "type": "qcm",
+  "options": [
+   "Parce que setmetatable l'exige",
+   "Pour que toutes les lectures et écritures passent par les métaméthodes",
+   "Pour pouvoir utiliser #",
+   "Pour économiser la mémoire"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque métaméthode à son déclencheur.",
+  "type": "associer",
+  "paires": [
+   [
+    "`__add`",
+    "a + b"
+   ],
+   [
+    "`__len`",
+    "#a"
+   ],
+   [
+    "`__lt`",
+    "a < b"
+   ],
+   [
+    "`__call`",
+    "a()"
+   ],
+   [
+    "`__unm`",
+    "-a"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

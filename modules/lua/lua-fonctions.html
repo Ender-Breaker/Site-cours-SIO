@@ -11,177 +11,318 @@
 </head>
 <body data-module="lua" data-chapter="lua-fonctions">
 
-<!-- ============ COURS ============ -->
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/lua.txt) -->
 <article id="cours">
 <div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
 <h2>1. Définir et appeler</h2>
-<pre><code>function carre(x)
-  return x * x
+<div class="essai" data-langue="lua" data-erreur="1"><pre><code>local function aire(largeur, hauteur)
+  return largeur * hauteur
 end
-print(carre(5))              -- 25
 
-local function aire(l, h)    -- fonction locale (à préférer)
-  return l * h
-end</code></pre>
-<p>Un paramètre non fourni vaut <code>nil</code> ; pour une valeur par défaut : <code>nom = nom or "inconnu"</code>.</p>
-
+print(aire(3, 4))
+print(aire(3))        -- erreur : hauteur vaut nil</code></pre></div>
+<p>Un paramètre non fourni vaut <code>nil</code> (d'où l'erreur ci-dessus quand on multiplie), un argument en trop est ignoré. Une fonction sans <code>return</code> renvoie <code>nil</code>.</p>
+<h3>Valeurs par défaut</h3>
+<p>Lua n'a pas de syntaxe dédiée : on utilise <code>or</code>.</p>
+<div class="essai" data-langue="lua"><pre><code>local function saluer(nom, politesse)
+  politesse = politesse or "Bonjour"
+  print(politesse .. " " .. (nom or "inconnu") .. " !")
+end
+saluer("Léa")
+saluer("Sam", "Salut")
+saluer()</code></pre></div>
 <h2>2. Plusieurs valeurs de retour</h2>
-<pre><code>local function divmod(a, b)
+<p>Une fonction Lua peut renvoyer <b>plusieurs valeurs</b>. C'est très utilisé : <code>string.find</code> renvoie un début et une fin, <code>pcall</code> un statut et un résultat.</p>
+<div class="essai" data-langue="lua"><pre><code>local function divise(a, b)
   return a // b, a % b
 end
-local q, r = divmod(17, 5)   -- q = 3, r = 2</code></pre>
 
-<h2>3. Fonctions anonymes et callbacks</h2>
-<pre><code>local double = function(x) return x * 2 end
-
-local function appliquer(t, f)
-  for i, v in ipairs(t) do t[i] = f(v) end
+local q, r = divise(17, 5)
+print(q, r)
+local seul = divise(17, 5)        -- les valeurs en trop sont perdues
+print(seul)
+print(divise(17, 5), "fin")       -- tronqué à 1 valeur : pas en dernière position
+print("début", divise(17, 5))     -- toutes les valeurs : dernière position
+print((divise(17, 5)))            -- des parenthèses forcent une seule valeur</code></pre></div>
+<h2>3. Nombre variable d'arguments : <code>...</code></h2>
+<div class="essai" data-langue="lua"><pre><code>local function somme(...)
+  local total = 0
+  for _, v in ipairs({...}) do     -- {...} range les arguments dans une table
+    total = total + v
+  end
+  return total
 end
-appliquer(notes, function(n) return n + 1 end)
 
-table.sort(noms, function(a, b) return a &gt; b end)   -- tri décroissant</code></pre>
+print(somme(1, 2, 3), somme(10, 20, 30, 40), somme())
+print(select("#", "a", "b", "c"))   -- nombre d'arguments : 3
+print(select(2, "a", "b", "c"))     -- à partir du 2e : b   c</code></pre></div>
+<h2>4. Les fonctions sont des valeurs</h2>
+<p>Une fonction se range dans une variable, se passe en argument, se renvoie. <code>function f() end</code> n'est qu'un raccourci de <code>f = function() end</code>.</p>
+<div class="essai" data-langue="lua"><pre><code>local double = function(x) return x * 2 end
 
-<h2>4. Nombre variable d'arguments</h2>
-<pre><code>local function somme(...)
+local function appliquer(f, valeur)
+  return f(valeur)
+end
+
+print(appliquer(double, 21))
+print(appliquer(function(x) return x * x end, 9))   -- fonction anonyme
+print(appliquer(string.upper, "lua"))</code></pre></div>
+<h2>5. Récursivité</h2>
+<p>Une fonction récursive s'appelle elle-même. Il lui faut un <b>cas d'arrêt</b>.</p>
+<div class="essai" data-langue="lua"><pre><code>local function factorielle(n)
+  if n &lt;= 1 then return 1 end           -- cas d'arrêt
+  return n * factorielle(n - 1)
+end
+print(factorielle(5), factorielle(20))</code></pre></div>
+<div class="box attention"><b><code>local function</code> ou <code>local f = function</code> ?</b><p>Pour une fonction récursive, écris <code>local function f()</code>. Avec <code>local f = function() … f() … end</code>, le nom <code>f</code> n'existe pas encore à l'intérieur de la fonction au moment où elle est créée.</p></div>
+<section class="tuto"><h3><small>Tutoriel</small>Une boîte à outils de statistiques</h3>
+<div class="etape"><h4>Une fonction qui renvoie deux résultats</h4>
+<div class="essai" data-langue="lua"><pre><code>local function minmax(t)
+  local mini, maxi = t[1], t[1]
+  for _, v in ipairs(t) do
+    if v &lt; mini then mini = v end
+    if v &gt; maxi then maxi = v end
+  end
+  return mini, maxi
+end
+print(minmax({12, 5, 19, 8}))</code></pre></div>
+</div>
+<div class="etape"><h4>Réutiliser une fonction dans une autre</h4>
+<div class="essai" data-langue="lua"><pre><code>local function somme(t)
   local s = 0
-  for _, v in ipairs({...}) do s = s + v end
+  for _, v in ipairs(t) do s = s + v end
   return s
 end
-somme(1, 2, 3)   -- 6</code></pre>
-
-<h2>5. Fermetures (closures)</h2>
-<pre><code>local function compteur()
-  local n = 0
-  return function()
-    n = n + 1
-    return n
-  end
+local function moyenne(t)
+  return somme(t) / #t
 end
-local c = compteur()
-c()  c()   -- 1, puis 2 : la fonction se souvient de n</code></pre><div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-lua.html">labo Lua</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+print(moyenne({12, 5, 19, 8}))</code></pre></div>
+</div>
+<div class="etape"><h4>Passer une fonction en argument</h4>
+<p><code>compter</code> reçoit un test sous forme de fonction : la même fonction sert pour tous les critères. Ajoute ton propre test.</p>
+<div class="essai" data-langue="lua"><pre><code>local function compter(t, test)
+  local n = 0
+  for _, v in ipairs(t) do
+    if test(v) then n = n + 1 end
+  end
+  return n
+end
+local notes = {12, 5, 19, 8, 10}
+print(compter(notes, function(v) return v &gt;= 10 end))
+print(compter(notes, function(v) return v % 2 == 0 end))</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : minimum et maximum</b><p>Écris une fonction qui renvoie deux valeurs.</p><a class="defi-go" href="labo-lua.html#m=lua-minmax">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : la factorielle</b><p>Une fonction récursive.</p><a class="defi-go" href="labo-lua.html#m=lua-factorielle">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : somme(...)</b><p>Une fonction au nombre d'arguments variable.</p><a class="defi-go" href="labo-lua.html#m=lua-varargs">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p><code>local function nom(params) … return … end</code>. </p><p> Paramètre manquant = <code>nil</code> ; valeur par défaut avec <code>or</code>. </p><p> <code>return a, b</code> renvoie plusieurs valeurs. </p><p> <code>...</code> reçoit un nombre variable d'arguments ; <code>{...}</code> les range dans une table. </p><p> Une fonction est une valeur comme une autre.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-lua.html">Labo Lua</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
 </article>
 
 <!-- ============ EXERCICES ============ -->
 <script>
 window.EF_EXERCICES = [
  {
-  "type": "qcm",
   "niveau": "facile",
-  "q": "Quel mot termine une fonction Lua ?",
+  "q": "Quel mot-clé renvoie une valeur depuis une fonction ?",
+  "type": "qcm",
   "options": [
-   "`}`",
-   "`end`",
-   "`endfunction`",
-   "`return`"
+   "`yield`",
+   "`give`",
+   "`return`",
+   "`result`"
   ],
-  "answer": 1,
+  "answer": 2,
   "explication": ""
  },
  {
-  "type": "qcm",
   "niveau": "moyen",
-  "q": "Que vaut un paramètre non fourni lors de l'appel ?",
+  "q": "Que renvoie une fonction sans `return` ?",
+  "type": "qcm",
   "options": [
+   "`nil`",
    "0",
-   "nil",
-   "\"\"",
-   "Erreur"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "qcm",
-  "niveau": "moyen",
-  "q": "Comment donner une valeur par défaut à nom ?",
-  "options": [
-   "`nom = nom or \"inconnu\"`",
-   "`nom ?= \"inconnu\"`",
-   "`default nom = \"inconnu\"`",
-   "Impossible"
-  ],
-  "answer": 0,
-  "explication": ""
- },
- {
-  "type": "qcm",
-  "niveau": "moyen",
-  "q": "Une fonction Lua peut-elle renvoyer plusieurs valeurs ?",
-  "options": [
-   "Non",
-   "Oui : return a, b",
-   "Seulement dans une table",
-   "Seulement deux"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "qcm",
-  "niveau": "moyen",
-  "q": "Que reçoivent q et r avec `local q, r = divmod(17, 5)` (quotient, reste) ?",
-  "options": [
-   "3 et 2",
-   "2 et 3",
-   "3.4 et 0",
-   "17 et 5"
-  ],
-  "answer": 0,
-  "explication": ""
- },
- {
-  "type": "qcm",
-  "niveau": "difficile",
-  "q": "Que représente `...` dans les paramètres ?",
-  "options": [
    "Une erreur",
-   "Un nombre variable d'arguments",
-   "Une table vide",
-   "La fin du fichier"
+   "`false`"
   ],
-  "answer": 1,
+  "answer": 0,
   "explication": ""
  },
  {
+  "niveau": "moyen",
+  "q": "Que vaut un paramètre non fourni à l'appel ?",
   "type": "qcm",
+  "options": [
+   "`\"\"`",
+   "0",
+   "Une erreur à l'appel",
+   "`nil`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Avec `local function f() return 1, 2 end`, que vaut x après `local x = f()` ?",
+  "type": "qcm",
+  "options": [
+   "Une table {1, 2}",
+   "`nil`",
+   "2",
+   "1"
+  ],
+  "answer": 3,
+  "explication": "Les valeurs en trop sont abandonnées."
+ },
+ {
   "niveau": "difficile",
-  "q": "Une fonction qui garde l'accès à une variable locale de la fonction qui l'a créée s'appelle…",
-  "options": [
-   "une métaméthode",
-   "une fermeture (closure)",
-   "une coroutine",
-   "un module"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "vf",
-  "niveau": "facile",
-  "q": "En Lua, une fonction peut être rangée dans une variable.",
-  "answer": true,
-  "explication": ""
- },
- {
-  "type": "saisie",
-  "niveau": "moyen",
-  "q": "Quel mot-clé, placé devant function, rend la fonction visible seulement dans le fichier ?",
-  "answers": [
-   "local"
-  ],
-  "explication": ""
- },
- {
+  "q": "Avec la même f, qu'affiche `print(f(), 10)` ?",
   "type": "qcm",
-  "niveau": "moyen",
-  "q": "Quelle fonction de la bibliothèque standard trie une table ?",
   "options": [
-   "`sort(t)`",
-   "`table.sort(t)`",
-   "`t:sort()` obligatoirement",
-   "`table.order(t)`"
+   "1   2   10",
+   "2   10",
+   "10",
+   "1   10"
+  ],
+  "answer": 3,
+  "explication": "Un appel qui n'est pas en dernière position est tronqué à une valeur."
+ },
+ {
+  "niveau": "difficile",
+  "q": "Et `print(10, f())` ?",
+  "type": "qcm",
+  "options": [
+   "10",
+   "10   1   2",
+   "10   1",
+   "10   2"
   ],
   "answer": 1,
+  "explication": "En dernière position, toutes les valeurs sont gardées."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment une fonction reçoit-elle un nombre variable d'arguments ?",
+  "type": "qcm",
+  "options": [
+   "Avec `arguments`",
+   "Avec `[]`",
+   "Avec `*args`",
+   "Avec `...`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle fonction donne le nombre d'arguments avec select(\"#\", ...) ? Écris son nom.",
+  "type": "saisie",
+  "answers": [
+   "select"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "En Lua, on peut passer une fonction en argument d'une autre fonction.",
+  "type": "vf",
+  "answer": true,
+  "explication": "Les fonctions sont des valeurs de première classe."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Appeler une fonction avec trop d'arguments provoque une erreur.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Les arguments en trop sont ignorés."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment donner la valeur par défaut 1 au paramètre n ?",
+  "type": "qcm",
+  "options": [
+   "`n ?= 1`",
+   "`function f(n = 1)`",
+   "`default n = 1`",
+   "`n = n or 1`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi écrire `local function f()` pour une fonction récursive ?",
+  "type": "qcm",
+  "options": [
+   "Pour la rendre globale",
+   "Parce que function seul est interdit",
+   "Pour que f soit connue à l'intérieur de son propre corps",
+   "Parce que c'est plus rapide"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'une fonction anonyme ?",
+  "type": "qcm",
+  "options": [
+   "Une fonction sans nom, écrite là où on en a besoin",
+   "Une fonction sans return",
+   "Une fonction privée",
+   "Une fonction sans paramètres"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que fait `(f())` avec des parenthèses autour de l'appel ?",
+  "type": "qcm",
+  "options": [
+   "Rien de particulier",
+   "Renvoie une table",
+   "Ne garde que la première valeur renvoyée",
+   "Appelle f deux fois"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que manque-t-il à une fonction récursive qui ne s'arrête jamais ?",
+  "type": "qcm",
+  "options": [
+   "Un cas d'arrêt",
+   "Un `break`",
+   "Un `local`",
+   "Un paramètre"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe l'écriture à son effet.",
+  "type": "associer",
+  "paires": [
+   [
+    "`return a, b`",
+    "deux valeurs de retour"
+   ],
+   [
+    "`...`",
+    "arguments variables"
+   ],
+   [
+    "`n or 0`",
+    "valeur par défaut"
+   ],
+   [
+    "`function(x) … end`",
+    "fonction anonyme"
+   ]
+  ],
   "explication": ""
  }
 ];
@@ -189,6 +330,8 @@ window.EF_EXERCICES = [
 <script src="../../data/modules.js"></script>
 <script src="../../assets/app.js"></script>
 <script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
 <script src="../../assets/chapter.js"></script>
 </body>
 </html>

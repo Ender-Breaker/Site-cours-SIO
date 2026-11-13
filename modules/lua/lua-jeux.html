@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Lua : créer un jeu — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="lua" data-chapter="lua-jeux">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/lua.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>Tous les moteurs de jeu fonctionnent de la même façon : ils appellent <b>tes</b> fonctions à des moments précis. Avec <b>LÖVE</b> : <code>love.load()</code> au démarrage, puis <code>love.update(dt)</code> et <code>love.draw()</code> à chaque image. Le labo du site reprend exactement ce principe, avec <code>setup</code>, <code>update</code> et <code>draw</code>.</p>
+<div class="box"><b>Où tester ?</b><p>Les jeux ont besoin d'un écran : ils se lancent dans le <a href="labo-lua.html#libre">bac à sable du labo</a>. Copie les exemples de ce chapitre et modifie-les.</p></div>
+<h2>1. La boucle de jeu</h2>
+<pre><code>local x = 0
+
+function setup()            -- appelée une fois au démarrage
+  x = 50
+end
+
+function update(dt)         -- 60 fois par seconde : la logique (déplacer, tester)
+  x = x + 2
+end
+
+function draw()             -- 60 fois par seconde : l'affichage, rien d'autre
+  effacer("black")
+  rect(x, 150, 30, 30, "gold")
+end</code></pre>
+<p><code>dt</code> est le temps écoulé depuis l'image précédente, en secondes (environ 0,016). Multiplier une vitesse par <code>dt</code> donne un mouvement en <b>pixels par seconde</b>, identique quel que soit l'ordinateur : <code>x = x + 120 * dt</code>.</p>
+<h2>2. L'API de dessin et d'entrées</h2>
+<table><tr><th>Fonction</th><th>Rôle</th></tr><tr><td><code>effacer(couleur)</code></td><td>remplit tout l'écran</td></tr><tr><td><code>rect(x, y, largeur, hauteur, couleur)</code></td><td>rectangle plein (x, y = coin haut gauche)</td></tr><tr><td><code>cercle(x, y, rayon, couleur)</code></td><td>disque (x, y = centre)</td></tr><tr><td><code>ligne(x1, y1, x2, y2, couleur)</code></td><td>segment</td></tr><tr><td><code>texte(message, x, y, taille, couleur)</code></td><td>texte</td></tr><tr><td><code>touche("droite")</code></td><td>vrai <b>tant que</b> la touche est enfoncée</td></tr><tr><td><code>toucheAppuyee("espace")</code></td><td>vrai <b>une seule image</b>, au moment de l'appui</td></tr><tr><td><code>sourisX()</code>, <code>sourisY()</code>, <code>clic()</code></td><td>position de la souris, clic</td></tr><tr><td><code>hasard(a, b)</code></td><td>entier au hasard entre a et b</td></tr><tr><td><code>LARGEUR</code>, <code>HAUTEUR</code></td><td>480 et 320</td></tr></table>
+<p>L'origine (0, 0) est en <b>haut à gauche</b> : <code>y</code> augmente vers le <b>bas</b>. Touches : <code>gauche</code>, <code>droite</code>, <code>haut</code>, <code>bas</code>, <code>espace</code>, <code>entree</code>, les lettres et les chiffres.</p>
+<h2>3. Déplacer un personnage</h2>
+<pre><code>local joueur = { x = 220, y = 260, l = 40, h = 40, vitesse = 200 }
+
+function update(dt)
+  if touche("gauche") then joueur.x = joueur.x - joueur.vitesse * dt end
+  if touche("droite") then joueur.x = joueur.x + joueur.vitesse * dt end
+  joueur.x = math.max(0, math.min(LARGEUR - joueur.l, joueur.x))   -- reste dans l'écran
+end
+
+function draw()
+  effacer("#16182b")
+  rect(joueur.x, joueur.y, joueur.l, joueur.h, "deepskyblue")
+end</code></pre>
+<h2>4. Gravité et saut</h2>
+<p>La vitesse verticale <code>vy</code> augmente à chaque image (la gravité) ; un saut lui donne une valeur négative (vers le haut).</p>
+<pre><code>local y, vy, SOL = 260, 0, 260
+
+function update(dt)
+  if toucheAppuyee("espace") and y &gt;= SOL then vy = -9 end   -- saut seulement au sol
+  vy = vy + 0.5                -- gravité
+  y = y + vy
+  if y &gt; SOL then y, vy = SOL, 0 end
+end</code></pre>
+<h2>5. Collisions</h2>
+<p>Deux rectangles se touchent s'ils se chevauchent sur les deux axes. Cette fonction (collision <b>AABB</b>) sert dans presque tous les jeux 2D :</p>
+<div class="essai" data-langue="lua"><pre><code>local function collision(a, b)
+  return a.x &lt; b.x + b.l and b.x &lt; a.x + a.l
+     and a.y &lt; b.y + b.h and b.y &lt; a.y + a.h
+end
+local joueur = { x = 100, y = 100, l = 40, h = 40 }
+print(collision(joueur, { x = 130, y = 120, l = 20, h = 20 }))   -- true : se chevauchent
+print(collision(joueur, { x = 300, y = 100, l = 20, h = 20 }))   -- false : trop loin</code></pre></div>
+<p>Pour deux cercles : ils se touchent si la distance entre les centres est inférieure à la somme des rayons.</p>
+<div class="essai" data-langue="lua"><pre><code>local function touche_cercles(a, b)
+  local dx, dy = a.x - b.x, a.y - b.y
+  return dx * dx + dy * dy &lt; (a.r + b.r) ^ 2      -- sans racine carrée : plus rapide
+end
+print(touche_cercles({ x = 0, y = 0, r = 10 }, { x = 12, y = 9, r = 6 }))</code></pre></div>
+<h2>6. Beaucoup d'objets : une table de tables</h2>
+<p>Ennemis, projectiles, pièces : on les range dans une liste. Pour <b>supprimer</b> pendant le parcours, on parcourt <b>à l'envers</b>, sinon <code>table.remove</code> décale les éléments et on en saute.</p>
+<div class="essai" data-langue="lua"><pre><code>local tirs = { { y = 50 }, { y = -5 }, { y = 120 }, { y = -30 } }
+for i = #tirs, 1, -1 do                    -- à l'envers !
+  tirs[i].y = tirs[i].y - 10
+  if tirs[i].y &lt; 0 then table.remove(tirs, i) end
+end
+print(#tirs .. " tirs encore à l'écran")</code></pre></div>
+<h2>7. Les états du jeu</h2>
+<p>Menu, partie, fin de partie : une variable d'état décide quoi mettre à jour et quoi dessiner.</p>
+<pre><code>local etat, score = "menu", 0
+
+function update(dt)
+  if etat == "menu" then
+    if toucheAppuyee("espace") then etat, score = "jeu", 0 end
+  elseif etat == "jeu" then
+    score = score + 1
+    if score &gt; 300 then etat = "fin" end
+  elseif etat == "fin" and toucheAppuyee("espace") then
+    etat = "menu"
+  end
+end
+
+function draw()
+  effacer("black")
+  if etat == "menu" then texte("ESPACE pour jouer", 130, 150, 24, "white")
+  elseif etat == "jeu" then texte("Score : " .. score, 16, 16, 24, "white")
+  else texte("Perdu ! Score : " .. score, 130, 150, 24, "tomato") end
+end</code></pre>
+<section class="tuto"><h3><small>Tutoriel</small>Un jeu complet : esquive les météorites</h3>
+<div class="etape"><h4>Le vaisseau</h4>
+<p>Colle ce code dans le <a href="labo-lua.html#libre">bac à sable</a> et déplace le vaisseau avec les flèches.</p>
+<pre><code>local vaisseau = { x = 220, y = 280, l = 40, h = 20 }
+
+function update(dt)
+  if touche("gauche") then vaisseau.x = vaisseau.x - 5 end
+  if touche("droite") then vaisseau.x = vaisseau.x + 5 end
+  vaisseau.x = math.max(0, math.min(LARGEUR - vaisseau.l, vaisseau.x))
+end
+
+function draw()
+  effacer("#0d0e1a")
+  rect(vaisseau.x, vaisseau.y, vaisseau.l, vaisseau.h, "deepskyblue")
+end</code></pre>
+</div>
+<div class="etape"><h4>Des météorites qui tombent</h4>
+<p>Une liste, un compteur d'images pour en créer régulièrement, un parcours à l'envers pour retirer celles qui sortent. Ajoute ces lignes.</p>
+<pre><code>local meteores, chrono = {}, 0
+
+-- dans update :
+  chrono = chrono + 1
+  if chrono % 30 == 0 then
+    meteores[#meteores + 1] = { x = hasard(0, LARGEUR - 20), y = -20, l = 20, h = 20 }
+  end
+  for i = #meteores, 1, -1 do
+    meteores[i].y = meteores[i].y + 3
+    if meteores[i].y &gt; HAUTEUR then table.remove(meteores, i) end
+  end
+
+-- dans draw :
+  for _, m in ipairs(meteores) do rect(m.x, m.y, m.l, m.h, "orange") end</code></pre>
+</div>
+<div class="etape"><h4>La collision et la fin de partie</h4>
+<pre><code>local perdu, score = false, 0
+
+local function collision(a, b)
+  return a.x &lt; b.x + b.l and b.x &lt; a.x + a.l and a.y &lt; b.y + b.h and b.y &lt; a.y + a.h
+end
+
+-- au début de update :
+  if perdu then return end
+  score = score + 1
+-- dans la boucle des météorites :
+    if collision(vaisseau, meteores[i]) then perdu = true end
+-- à la fin de draw :
+  texte("Score : " .. score, 12, 12, 20, "white")
+  if perdu then texte("PERDU", 190, 140, 36, "tomato") end</code></pre>
+</div>
+<div class="etape"><h4>À toi d'améliorer</h4>
+<p>Fais accélérer les météorites avec le score, ajoute une touche pour recommencer (<code>toucheAppuyee("entree")</code>), des vies, un meilleur score.</p>
+</div>
+</section>
+<div class="box defi"><b>Défi : la pluie d'étoiles</b><p>Gère une liste d'objets qui tombent.</p><a class="defi-go" href="labo-lua.html#m=lua-etoiles">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : tirer des projectiles</b><p>Crée et supprime des objets en cours de partie.</p><a class="defi-go" href="labo-lua.html#m=lua-tir">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : attrape les fruits</b><p>Un mini-jeu complet avec score.</p><a class="defi-go" href="labo-lua.html#m=lua-fruits">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p><code>setup()</code> une fois, puis <code>update(dt)</code> (logique) et <code>draw()</code> (affichage) à chaque image. </p><p> <code>y</code> augmente vers le bas ; l'origine est en haut à gauche. </p><p> <code>touche</code> = maintenue, <code>toucheAppuyee</code> = au moment de l'appui. </p><p> Collision de rectangles : chevauchement sur les deux axes. </p><p> Supprimer dans une liste : la parcourir à l'envers.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-lua.html">Labo Lua</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "facile",
+  "q": "Quelle fonction est appelée une seule fois, au démarrage du jeu ?",
+  "type": "qcm",
+  "options": [
+   "`draw`",
+   "`update`",
+   "`setup`",
+   "`start`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "facile",
+  "q": "Combien de fois par seconde `update` et `draw` sont-elles appelées ?",
+  "type": "qcm",
+  "options": [
+   "1000",
+   "24",
+   "1",
+   "60"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que représente le paramètre `dt` de update ?",
+  "type": "qcm",
+  "options": [
+   "La durée totale du jeu",
+   "La date du jour",
+   "Le numéro de l'image",
+   "Le temps écoulé depuis l'image précédente, en secondes"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Où se trouve le point (0, 0) de l'écran ?",
+  "type": "qcm",
+  "options": [
+   "En haut à gauche",
+   "Au centre",
+   "En haut à droite",
+   "En bas à gauche"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quand y augmente, l'objet…",
+  "type": "qcm",
+  "options": [
+   "monte",
+   "va à droite",
+   "descend",
+   "grossit"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle fonction est vraie tant qu'une touche reste enfoncée ?",
+  "type": "qcm",
+  "options": [
+   "`clic`",
+   "`appui`",
+   "`toucheAppuyee`",
+   "`touche`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle fonction choisir pour un saut (une seule fois par appui) ?",
+  "type": "qcm",
+  "options": [
+   "`touche`",
+   "`toucheAppuyee`",
+   "`sourisY`",
+   "`clic`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Pour `cercle(x, y, r, c)`, que désignent x et y ?",
+  "type": "qcm",
+  "options": [
+   "Le centre",
+   "Le point le plus haut",
+   "Le coin haut gauche",
+   "Le coin bas droit"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi parcourir une liste à l'envers quand on y supprime des éléments ?",
+  "type": "qcm",
+  "options": [
+   "Parce que table.remove décale les suivants et on en sauterait",
+   "Parce que ipairs l'exige",
+   "Parce que # ne marche pas autrement",
+   "Parce que c'est plus rapide"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi multiplier une vitesse par dt ?",
+  "type": "qcm",
+  "options": [
+   "Pour un mouvement identique quelle que soit la vitesse de l'ordinateur",
+   "Pour éviter les collisions",
+   "Pour arrondir la position",
+   "Pour ralentir le jeu"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Deux rectangles sont en collision quand…",
+  "type": "qcm",
+  "options": [
+   "leurs centres sont identiques",
+   "leurs largeurs sont égales",
+   "ils se chevauchent sur l'axe x ET sur l'axe y",
+   "ils se chevauchent sur l'axe x OU sur l'axe y"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Deux cercles se touchent quand la distance entre leurs centres est…",
+  "type": "qcm",
+  "options": [
+   "inférieure au plus petit rayon",
+   "supérieure à la somme des rayons",
+   "inférieure à la somme des rayons",
+   "égale à zéro"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "La fonction draw doit contenir la logique du jeu (déplacements, score).",
+  "type": "vf",
+  "answer": false,
+  "explication": "draw ne fait qu'afficher ; la logique va dans update."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Pour simuler la gravité, on ajoute une petite valeur à la vitesse verticale à chaque image.",
+  "type": "vf",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment empêcher x de dépasser 0 et 440 ?",
+  "type": "qcm",
+  "options": [
+   "`x = math.floor(x)`",
+   "`x = x % 440`",
+   "`x = math.abs(x)`",
+   "`x = math.max(0, math.min(440, x))`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle constante contient la largeur de l'écran de jeu ?",
+  "type": "saisie",
+  "answers": [
+   "LARGEUR"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "À quoi sert une variable d'état comme `etat = \"menu\"` ?",
+  "type": "qcm",
+  "options": [
+   "À charger les images",
+   "À compter les images",
+   "À sauvegarder la partie",
+   "À décider quoi mettre à jour et afficher selon l'écran en cours"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque fonction à son rôle.",
+  "type": "associer",
+  "paires": [
+   [
+    "`effacer`",
+    "remplir l'écran"
+   ],
+   [
+    "`rect`",
+    "dessiner un rectangle"
+   ],
+   [
+    "`hasard`",
+    "tirer un entier au hasard"
+   ],
+   [
+    "`texte`",
+    "écrire à l'écran"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

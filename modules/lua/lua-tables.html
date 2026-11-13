@@ -11,169 +11,332 @@
 </head>
 <body data-module="lua" data-chapter="lua-tables">
 
-<!-- ============ COURS ============ -->
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/lua.txt) -->
 <article id="cours">
 <div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
-<p>En Lua, il n'y a qu'une structure de données : la <b>table</b>. Elle sert à la fois de tableau, de dictionnaire, d'objet et de module.</p>
-
-<h2>1. La table comme tableau</h2>
-<pre><code>local fruits = {&quot;pomme&quot;, &quot;kiwi&quot;, &quot;poire&quot;}
-fruits[1]               -- &quot;pomme&quot; : les indices commencent à 1 !
-#fruits                 -- 3
-fruits[#fruits + 1] = &quot;mangue&quot;        -- ajouter à la fin
-table.insert(fruits, &quot;fraise&quot;)        -- idem
-table.insert(fruits, 1, &quot;cerise&quot;)     -- insérer en tête
-table.remove(fruits)                  -- retirer le dernier
-print(table.concat(fruits, &quot;, &quot;))</code></pre>
-<div class="box attention"><b>Indice 1</b><p>Contrairement à la plupart des langages, le premier élément est <code>t[1]</code>. <code>t[0]</code> vaut <code>nil</code> (sauf si on l'a rempli).</p></div>
-
-<h2>2. Parcourir</h2>
-<pre><code>for i, f in ipairs(fruits) do     -- dans l&#x27;ordre, indices 1, 2, 3…
-  print(i, f)
+<p>La <b>table</b> est l'unique structure de données de Lua. Elle sert à la fois de liste, de dictionnaire, d'objet, de module. Bien maîtriser les tables, c'est maîtriser Lua.</p>
+<h2>1. La table comme liste</h2>
+<div class="essai" data-langue="lua"><pre><code>local fruits = {"pomme", "kiwi", "poire"}
+print(fruits[1])              -- pomme : les indices commencent à 1
+print(#fruits)                -- 3 : nombre d'éléments
+fruits[#fruits + 1] = "figue" -- ajoute à la fin
+table.insert(fruits, "noix")  -- pareil
+table.insert(fruits, 1, "ananas")   -- insère au début (décale le reste)
+print(table.remove(fruits))   -- retire et renvoie le dernier : noix
+print(table.remove(fruits, 1))-- retire le premier : ananas
+print(table.concat(fruits, ", "))
+print(fruits[99])             -- nil : pas d'erreur</code></pre></div>
+<div class="box attention"><b>Les indices commencent à 1</b><p>C'est la différence la plus déroutante quand on vient d'un autre langage. <code>t[0]</code> vaut <code>nil</code>, et les boucles vont de <code>1</code> à <code>#t</code>.</p></div>
+<h2>2. Parcourir : <code>ipairs</code> et <code>pairs</code></h2>
+<div class="essai" data-langue="lua"><pre><code>local notes = {12, 15, 9}
+for i, v in ipairs(notes) do        -- indice et valeur, dans l'ordre
+  print(i, v)
 end
-for cle, valeur in pairs(eleve) do  -- toutes les clés, ordre non garanti
-  print(cle, valeur)
-end</code></pre>
-
+for i = #notes, 1, -1 do            -- à l'envers, avec un for numérique
+  io.write(notes[i], " ")
+end
+print()</code></pre></div>
+<p><code>ipairs</code> parcourt 1, 2, 3… et **s'arrête au premier <code>nil</code>**. <code>pairs</code> parcourt <b>toutes</b> les clés, dans un ordre non garanti.</p>
 <h2>3. La table comme dictionnaire</h2>
-<pre><code>local eleve = { nom = &quot;Léa&quot;, age = 19 }
-eleve.nom            -- &quot;Léa&quot;
-eleve[&quot;age&quot;]         -- 19
-eleve.ville = &quot;Rennes&quot;
-eleve.age = nil      -- supprime la clé</code></pre>
+<div class="essai" data-langue="lua"><pre><code>local joueur = { nom = "Léa", pv = 10 }
+print(joueur.nom, joueur["pv"])     -- deux écritures équivalentes
+joueur.niveau = 3                   -- ajoute une clé
+joueur.pv = nil                     -- supprime une clé
+for cle, valeur in pairs(joueur) do
+  print(cle, valeur)
+end
+local stock = {}
+stock["clé USB"] = 12               -- les crochets acceptent n'importe quelle clé
+stock[42] = "réponse"
+print(stock["clé USB"], stock[42], stock.absent)</code></pre></div>
+<p><code>t.nom</code> est un raccourci de <code>t["nom"]</code> : il ne marche que si la clé est un nom simple (lettres, chiffres, <code>_</code>).</p>
+<h2>4. Trier</h2>
+<div class="essai" data-langue="lua"><pre><code>local t = {5, 2, 8, 1}
+table.sort(t)
+print(table.concat(t, " "))
+table.sort(t, function(a, b) return a &gt; b end)   -- ordre décroissant
+print(table.concat(t, " "))
 
-<h2>4. Tables imbriquées</h2>
-<pre><code>local ennemis = {
-  { x = 10, y = 20, pv = 3 },
-  { x = 80, y = 40, pv = 1 },
-}
-for _, e in ipairs(ennemis) do e.y = e.y + 1 end</code></pre>
-<p>Une table est passée par <b>référence</b> : si une fonction la modifie, l'original est modifié.</p>
+local eleves = { {nom = "Léa", note = 15}, {nom = "Sam", note = 9}, {nom = "Zoé", note = 18} }
+table.sort(eleves, function(a, b) return a.note &gt; b.note end)
+for rang, e in ipairs(eleves) do print(rang, e.nom, e.note) end</code></pre></div>
+<p>La fonction de comparaison reçoit deux éléments et renvoie <code>true</code> si le premier doit passer <b>avant</b> le second.</p>
+<h2>5. Les tables sont des références</h2>
+<div class="essai" data-langue="lua"><pre><code>local a = {1, 2, 3}
+local b = a            -- b désigne LA MÊME table, pas une copie
+b[1] = 99
+print(a[1])            -- 99
+print(a == b, {1} == {1})   -- true  false : == compare l'identité
 
-<h2>5. La bibliothèque string</h2>
-<pre><code>local s = &quot;Bonjour&quot;
-s:upper()            -- &quot;BONJOUR&quot;
-s:sub(1, 3)          -- &quot;Bon&quot;
-s:reverse()          -- &quot;ruojnoB&quot;
-s:find(&quot;jour&quot;)       -- 4  7
-string.format(&quot;%.2f €&quot;, 3.5)   -- &quot;3.50 €&quot;</code></pre><div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-lua.html">labo Lua</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+local copie = {}
+for i, v in ipairs(a) do copie[i] = v end   -- copie élément par élément
+copie[1] = 0
+print(a[1], copie[1])</code></pre></div>
+<p>Conséquence : une fonction qui reçoit une table peut la <b>modifier</b>, et l'appelant voit le changement.</p>
+<h2>6. Tables imbriquées</h2>
+<div class="essai" data-langue="lua"><pre><code>local grille = {}
+for l = 1, 3 do
+  grille[l] = {}
+  for c = 1, 3 do grille[l][c] = (l - 1) * 3 + c end
+end
+print(grille[2][3])
+for _, ligne in ipairs(grille) do print(table.concat(ligne, " ")) end</code></pre></div>
+<div class="box attention"><b><code>#</code> et les trous</b><p><code>#t</code> n'est fiable que pour une liste <b>sans trou</b>. Si tu écris <code>t[2] = nil</code> au milieu d'une liste, <code>#t</code> peut donner un résultat inattendu : retire les éléments avec <code>table.remove</code>. Pour compter les clés d'un dictionnaire, il faut une boucle <code>pairs</code>.</p></div>
+<section class="tuto"><h3><small>Tutoriel</small>Un inventaire de magasin</h3>
+<div class="etape"><h4>Compter avec un dictionnaire</h4>
+<p>La clé est le nom de l'article, la valeur sa quantité. <code>(stock[nom] or 0)</code> vaut 0 la première fois.</p>
+<div class="essai" data-langue="lua"><pre><code>local stock = {}
+local function ajouter(nom, qte)
+  stock[nom] = (stock[nom] or 0) + qte
+end
+ajouter("souris", 3)
+ajouter("clavier", 2)
+ajouter("souris", 5)
+print(stock.souris, stock.clavier)</code></pre></div>
+</div>
+<div class="etape"><h4>Afficher dans l'ordre alphabétique</h4>
+<p><code>pairs</code> n'a pas d'ordre garanti : on récupère les clés dans une liste, on la trie, puis on affiche.</p>
+<div class="essai" data-langue="lua"><pre><code>local stock = { souris = 8, clavier = 2, ecran = 4 }
+local noms = {}
+for nom in pairs(stock) do noms[#noms + 1] = nom end
+table.sort(noms)
+for _, nom in ipairs(noms) do
+  print(nom .. " : " .. stock[nom])
+end</code></pre></div>
+</div>
+<div class="etape"><h4>Trouver l'article le plus en stock</h4>
+<div class="essai" data-langue="lua"><pre><code>local stock = { souris = 8, clavier = 2, ecran = 4 }
+local meilleur, maxi = nil, -1
+for nom, qte in pairs(stock) do
+  if qte &gt; maxi then meilleur, maxi = nom, qte end
+end
+print(meilleur, maxi)</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : inverser une liste</b><p>Lis des valeurs et affiche-les dans l'ordre inverse.</p><a class="defi-go" href="labo-lua.html#m=lua-inverser">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : trier</b><p>Trie des nombres avec <code>table.sort</code>.</p><a class="defi-go" href="labo-lua.html#m=lua-tri">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : l'inventaire</b><p>Un dictionnaire, des totaux, un affichage trié.</p><a class="defi-go" href="labo-lua.html#m=lua-inventaire">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p>Les indices commencent à <b>1</b> ; <code>#t</code> donne la taille d'une liste. </p><p> <code>ipairs</code> pour une liste (dans l'ordre), <code>pairs</code> pour un dictionnaire (ordre non garanti). </p><p> <code>t.cle</code> équivaut à <code>t["cle"]</code>. </p><p> <code>table.insert</code>, <code>table.remove</code>, <code>table.sort</code>, <code>table.concat</code>. </p><p> Une variable contient une <b>référence</b> vers la table, pas une copie.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-lua.html">Labo Lua</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
 </article>
 
 <!-- ============ EXERCICES ============ -->
 <script>
 window.EF_EXERCICES = [
  {
-  "type": "qcm",
   "niveau": "facile",
-  "q": "Quel est l'indice du premier élément d'une table utilisée comme tableau ?",
+  "q": "Quel est l'indice du premier élément d'une liste Lua ?",
+  "type": "qcm",
   "options": [
-   "0",
    "1",
-   "-1"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "qcm",
-  "niveau": "facile",
-  "q": "Que donne `#t` pour `t = {\"a\", \"b\", \"c\"}` ?",
-  "options": [
-   "2",
-   "3",
-   "\"c\"",
-   "nil"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "qcm",
-  "niveau": "moyen",
-  "q": "Quelle boucle parcourt un tableau dans l'ordre ?",
-  "options": [
-   "`pairs`",
-   "`ipairs`",
-   "`each`",
-   "`for in`"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "qcm",
-  "niveau": "moyen",
-  "q": "Comment ajouter \"x\" à la fin de t ?",
-  "options": [
-   "`t.push(\"x\")`",
-   "`table.insert(t, \"x\")`",
-   "`t + \"x\"`",
-   "`append(t, \"x\")`"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "qcm",
-  "niveau": "moyen",
-  "q": "Comment supprimer la clé age d'une table e ?",
-  "options": [
-   "`delete e.age`",
-   "`e.age = nil`",
-   "`e:remove(\"age\")`",
-   "`table.remove(e, \"age\")`"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "qcm",
-  "niveau": "moyen",
-  "q": "Que fait `table.concat({\"a\", \"b\"}, \"-\")` ?",
-  "options": [
-   "\"ab\"",
-   "\"a-b\"",
-   "{\"a-b\"}",
-   "Erreur"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "vf",
-  "niveau": "moyen",
-  "q": "pairs() parcourt les clés dans un ordre garanti.",
-  "answer": false,
-  "explication": ""
- },
- {
-  "type": "vf",
-  "niveau": "moyen",
-  "q": "Une table passée à une fonction peut être modifiée par cette fonction.",
-  "answer": true,
-  "explication": "Passage par référence."
- },
- {
-  "type": "qcm",
-  "niveau": "moyen",
-  "q": "Que vaut `(\"Bonjour\"):sub(1, 3)` ?",
-  "options": [
-   "\"Bon\"",
-   "\"onj\"",
-   "\"Bonj\"",
-   "3"
+   "-1",
+   "Au choix",
+   "0"
   ],
   "answer": 0,
   "explication": ""
  },
  {
-  "type": "saisie",
   "niveau": "facile",
-  "q": "Quel est le seul type de structure de données en Lua ?",
+  "q": "Comment obtenir le nombre d'éléments de la liste t ?",
+  "type": "qcm",
+  "options": [
+   "`t.size()`",
+   "`#t`",
+   "`t.length`",
+   "`len(t)`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle fonction parcourt une liste dans l'ordre des indices ?",
+  "type": "qcm",
+  "options": [
+   "`each`",
+   "`next`",
+   "`pairs`",
+   "`ipairs`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle fonction parcourt toutes les clés d'un dictionnaire ?",
+  "type": "qcm",
+  "options": [
+   "`foreach`",
+   "`ipairs`",
+   "`keys`",
+   "`pairs`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "`t.nom` est équivalent à…",
+  "type": "qcm",
+  "options": [
+   "`t[nom]`",
+   "`t:nom`",
+   "`t(nom)`",
+   "`t[\"nom\"]`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que vaut `t[5]` si la liste t n'a que 3 éléments ?",
+  "type": "qcm",
+  "options": [
+   "`nil`",
+   "`\"\"`",
+   "0",
+   "Une erreur"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment ajouter \"x\" à la fin de la liste t ?",
+  "type": "qcm",
+  "options": [
+   "`t += \"x\"`",
+   "`t.append(\"x\")`",
+   "`table.insert(t, \"x\")`",
+   "`t.push(\"x\")`"
+  ],
+  "answer": 2,
+  "explication": "On peut aussi écrire `t[#t + 1] = \"x\"`."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait `table.remove(t)` sans indice ?",
+  "type": "qcm",
+  "options": [
+   "Retire le premier élément",
+   "Provoque une erreur",
+   "Retire et renvoie le dernier élément",
+   "Vide la table"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Après `local a = {1} local b = a b[1] = 5`, que vaut `a[1]` ?",
+  "type": "qcm",
+  "options": [
+   "`nil`",
+   "1",
+   "5",
+   "Une erreur"
+  ],
+  "answer": 2,
+  "explication": "a et b désignent la même table."
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que vaut `{1, 2} == {1, 2}` ?",
+  "type": "qcm",
+  "options": [
+   "`true`",
+   "`false`",
+   "Une erreur",
+   "`nil`"
+  ],
+  "answer": 1,
+  "explication": "Deux tables distinctes ne sont jamais égales, même avec le même contenu."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment supprimer la clé \"pv\" de la table j ?",
+  "type": "qcm",
+  "options": [
+   "`delete j.pv`",
+   "`unset(j.pv)`",
+   "`j.pv = nil`",
+   "`j.remove(\"pv\")`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle fonction de la bibliothèque table colle les éléments d'une liste en une chaîne ?",
+  "type": "saisie",
   "answers": [
-   "table",
-   "la table",
-   "tables"
+   "table.concat",
+   "concat"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "pairs parcourt les clés dans un ordre garanti.",
+  "type": "vf",
+  "answer": false,
+  "explication": "L'ordre de pairs n'est pas défini : il faut trier les clés soi-même."
+ },
+ {
+  "niveau": "difficile",
+  "q": "ipairs s'arrête au premier élément nil rencontré.",
+  "type": "vf",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pour trier t en ordre décroissant, quelle comparaison donner à table.sort ?",
+  "type": "qcm",
+  "options": [
+   "`function(a, b) return a < b end`",
+   "`\"desc\"`",
+   "`function(a, b) return a > b end`",
+   "`function(a) return -a end`"
+  ],
+  "answer": 2,
+  "explication": "La fonction renvoie vrai si a doit passer avant b."
+ },
+ {
+  "niveau": "difficile",
+  "q": "Comment compter les clés d'un dictionnaire d ?",
+  "type": "qcm",
+  "options": [
+   "Avec `d.count`",
+   "Avec `#d`",
+   "Avec une boucle `pairs` et un compteur",
+   "Avec `table.size(d)`"
+  ],
+  "answer": 2,
+  "explication": "`#` ne compte que la partie liste."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque fonction à son rôle.",
+  "type": "associer",
+  "paires": [
+   [
+    "`table.insert`",
+    "ajouter un élément"
+   ],
+   [
+    "`table.remove`",
+    "retirer un élément"
+   ],
+   [
+    "`table.sort`",
+    "trier"
+   ],
+   [
+    "`table.concat`",
+    "coller en une chaîne"
+   ]
   ],
   "explication": ""
  }
@@ -182,6 +345,8 @@ window.EF_EXERCICES = [
 <script src="../../data/modules.js"></script>
 <script src="../../assets/app.js"></script>
 <script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
 <script src="../../assets/chapter.js"></script>
 </body>
 </html>

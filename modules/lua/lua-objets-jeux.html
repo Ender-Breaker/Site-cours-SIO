@@ -4,194 +4,351 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#2b3fe0">
-  <title>Lua : objets et jeux — Étude Facile</title>
+  <title>Lua : objets, classes et héritage — Étude Facile</title>
 <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
 
   <link rel="stylesheet" href="../../assets/style.css">
 </head>
 <body data-module="lua" data-chapter="lua-objets-jeux">
 
-<!-- ============ COURS ============ -->
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/lua.txt) -->
 <article id="cours">
 <div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
-<h2>1. Des objets avec des tables</h2>
-<p>Lua n'a pas de mot-clé <code>class</code>, mais une table peut contenir des données <b>et</b> des fonctions. La syntaxe <code>:</code> passe automatiquement l'objet en premier paramètre, nommé <code>self</code>.</p>
-<pre><code>local joueur = { nom = &quot;Léa&quot;, pv = 10 }
-function joueur:blesser(n)          -- équivaut à joueur.blesser(self, n)
-  self.pv = self.pv - n
+<p>Lua n'a pas de mot-clé <code>class</code>. Mais avec une table, des fonctions et <code>__index</code>, on construit des classes complètes : c'est ainsi que sont écrits tous les jeux en Lua.</p>
+<h2>1. Un objet : des données et des fonctions</h2>
+<div class="essai" data-langue="lua"><pre><code>local joueur = { nom = "Léa", pv = 10 }
+
+function joueur.blesser(self, degats)      -- écriture complète
+  self.pv = self.pv - degats
 end
-joueur:blesser(3)                   -- équivaut à joueur.blesser(joueur, 3)</code></pre>
-
-<h2>2. Une « classe » avec une métatable</h2>
-<pre><code>local Ennemi = {}
-Ennemi.__index = Ennemi              -- les méthodes manquantes sont cherchées dans Ennemi
-
-function Ennemi.nouveau(x, y)
-  local e = { x = x, y = y, pv = 3 }
-  return setmetatable(e, Ennemi)
+function joueur:soigner(n)                 -- le : ajoute self automatiquement
+  self.pv = self.pv + n
 end
 
-function Ennemi:avancer(dy)
-  self.y = self.y + dy
+joueur.blesser(joueur, 3)                  -- appel complet
+joueur:soigner(1)                          -- le : passe joueur automatiquement
+print(joueur.pv)</code></pre></div>
+<p>Le deux-points est un simple raccourci : <code>obj:methode(a)</code> signifie <code>obj.methode(obj, a)</code>, et <code>function obj:methode(a)</code> déclare un premier paramètre caché nommé <code>self</code>.</p>
+<div class="box attention"><b>Point ou deux-points ?</b><p>Appeler <code>joueur.soigner(1)</code> avec un point au lieu de deux-points est l'erreur classique : <code>self</code> reçoit <code>1</code>, et Lua répond <code>attempt to index a number value</code>. Méthode = deux-points.</p></div>
+<h2>2. Une classe</h2>
+<p>La classe est une table qui contient les méthodes. Chaque instance est une petite table de données dont la métatable renvoie vers la classe.</p>
+<div class="essai" data-langue="lua"><pre><code>local Ennemi = {}
+Ennemi.__index = Ennemi               -- méthode absente de l'instance ? cherche dans Ennemi
+
+function Ennemi.new(nom, pv)          -- le constructeur (avec un point)
+  local self = setmetatable({}, Ennemi)
+  self.nom = nom
+  self.pv = pv or 3
+  return self
 end
 
-local e = Ennemi.nouveau(100, 0)
-e:avancer(2)</code></pre>
-<p>Une <b>métatable</b> modifie le comportement d'une table. Avec <code>__index</code>, quand on demande <code>e.avancer</code> et que <code>e</code> ne l'a pas, Lua la cherche dans <code>Ennemi</code> : toutes les instances partagent les mêmes méthodes. D'autres métaméthodes redéfinissent les opérateurs (<code>__add</code>, <code>__eq</code>, <code>__tostring</code>…).</p>
-
-<h2>3. Lua dans les jeux</h2>
-<p>Les moteurs de jeu appellent des fonctions Lua à des moments précis. Avec <b>LÖVE</b> : <code>love.load()</code> au démarrage, <code>love.update(dt)</code> et <code>love.draw()</code> à chaque image. Le labo reprend ce principe :</p>
-<pre><code>local ennemis = {}
-
-function setup()                      -- une fois au début
-  for i = 1, 5 do
-    ennemis[#ennemis + 1] = Ennemi.nouveau(i * 80, 0)
-  end
+function Ennemi:blesser(n)
+  self.pv = math.max(0, self.pv - n)
+end
+function Ennemi:estMort()
+  return self.pv == 0
 end
 
-function update(dt)                   -- 60 fois par seconde
-  for _, e in ipairs(ennemis) do e:avancer(1) end
-  if touche(&quot;gauche&quot;) then joueurX = joueurX - 5 end
+local a, b = Ennemi.new("Gobelin"), Ennemi.new("Dragon", 50)
+a:blesser(5)
+b:blesser(5)
+print(a.nom, a.pv, a:estMort())
+print(b.nom, b.pv, b:estMort())</code></pre></div>
+<p>Les données (<code>nom</code>, <code>pv</code>) sont dans chaque instance ; les méthodes sont écrites <b>une seule fois</b> dans <code>Ennemi</code> et partagées.</p>
+<h2>3. L'héritage</h2>
+<p>Une classe fille est une table dont la métatable renvoie vers la classe mère. Une méthode absente de la fille est cherchée chez la mère.</p>
+<div class="essai" data-langue="lua"><pre><code>local Animal = {}
+Animal.__index = Animal
+function Animal.new(nom)
+  return setmetatable({ nom = nom }, Animal)
 end
+function Animal:crier() return "..." end
+function Animal:presenter() return self.nom .. " fait " .. self:crier() end
 
-function draw()
-  effacer(&quot;black&quot;)
-  for _, e in ipairs(ennemis) do cercle(e.x, e.y, 12, &quot;red&quot;) end
-end</code></pre>
-<div class="box retenir"><b>Supprimer pendant un parcours</b><p>Pour retirer des ennemis touchés, parcours la table <b>à l'envers</b> : <code>for i = #ennemis, 1, -1 do if ennemis[i].pv &lt;= 0 then table.remove(ennemis, i) end end</code>. À l'endroit, on sauterait un élément.</p></div>
+local Chien = setmetatable({}, { __index = Animal })   -- Chien hérite d'Animal
+Chien.__index = Chien
+function Chien.new(nom)
+  local self = Animal.new(nom)        -- construit la partie Animal
+  return setmetatable(self, Chien)    -- puis en fait un Chien
+end
+function Chien:crier() return "Ouaf" end               -- redéfinition
 
-<h2>4. Modules</h2>
-<pre><code>-- fichier vecteur.lua
-local M = {}
-function M.longueur(x, y) return math.sqrt(x * x + y * y) end
-return M
+local Chat = setmetatable({}, { __index = Animal })
+Chat.__index = Chat
+function Chat.new(nom) return setmetatable(Animal.new(nom), Chat) end
+function Chat:crier() return "Miaou" end
 
--- ailleurs
-local vecteur = require(&quot;vecteur&quot;)
-vecteur.longueur(3, 4)   -- 5.0</code></pre><div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-lua.html">labo Lua</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+for _, a in ipairs({ Chien.new("Rex"), Chat.new("Tigrou"), Animal.new("Truc") }) do
+  print(a:presenter())      -- polymorphisme : le bon crier() est choisi tout seul
+end</code></pre></div>
+<p>Pour appeler la version de la classe mère depuis une méthode redéfinie, on l'appelle explicitement avec un point : <code>Animal.presenter(self)</code>.</p>
+<h2>4. <code>__tostring</code> et les autres métaméthodes dans une classe</h2>
+<p>Comme la classe <b>est</b> la métatable des instances, on y range aussi les métaméthodes.</p>
+<div class="essai" data-langue="lua"><pre><code>local Point = {}
+Point.__index = Point
+function Point.new(x, y) return setmetatable({ x = x, y = y }, Point) end
+function Point.__tostring(p) return "Point(" .. p.x .. ", " .. p.y .. ")" end
+function Point.__eq(a, b) return a.x == b.x and a.y == b.y end
+function Point:distance(autre) return math.sqrt((self.x - autre.x) ^ 2 + (self.y - autre.y) ^ 2) end
+
+local p, q = Point.new(0, 0), Point.new(3, 4)
+print(p, q, p == Point.new(0, 0))
+print(p:distance(q))</code></pre></div>
+<h2>5. Attributs privés</h2>
+<p>Tout ce qui est dans la table d'une instance est public. Deux habitudes : préfixer par <code>_</code> ce qui est « privé par convention » (<code>self._cache</code>), ou utiliser une closure (chapitre précédent) quand la protection doit être réelle.</p>
+<section class="tuto"><h3><small>Tutoriel</small>Une classe Compte, pas à pas</h3>
+<div class="etape"><h4>Le constructeur</h4>
+<div class="essai" data-langue="lua"><pre><code>local Compte = {}
+Compte.__index = Compte
+function Compte.new(titulaire, solde)
+  return setmetatable({ titulaire = titulaire, solde = solde or 0 }, Compte)
+end
+local c = Compte.new("Léa", 100)
+print(c.titulaire, c.solde)</code></pre></div>
+</div>
+<div class="etape"><h4>Les méthodes</h4>
+<div class="essai" data-langue="lua"><pre><code>local Compte = {}
+Compte.__index = Compte
+function Compte.new(titulaire, solde)
+  return setmetatable({ titulaire = titulaire, solde = solde or 0 }, Compte)
+end
+function Compte:deposer(m) self.solde = self.solde + m end
+function Compte:retirer(m)
+  if m &gt; self.solde then return false end
+  self.solde = self.solde - m
+  return true
+end
+local c = Compte.new("Léa", 100)
+c:deposer(50)
+print(c:retirer(500), c:retirer(30), c.solde)</code></pre></div>
+</div>
+<div class="etape"><h4>Une classe fille : le compte épargne</h4>
+<p>Il hérite de tout, et ajoute les intérêts.</p>
+<div class="essai" data-langue="lua"><pre><code>local Compte = {}
+Compte.__index = Compte
+function Compte.new(titulaire, solde)
+  return setmetatable({ titulaire = titulaire, solde = solde or 0 }, Compte)
+end
+function Compte:deposer(m) self.solde = self.solde + m end
+
+local Epargne = setmetatable({}, { __index = Compte })
+Epargne.__index = Epargne
+function Epargne.new(titulaire, solde, taux)
+  local self = setmetatable(Compte.new(titulaire, solde), Epargne)
+  self.taux = taux
+  return self
+end
+function Epargne:ajouterInterets() self:deposer(self.solde * self.taux) end
+
+local e = Epargne.new("Sam", 1000, 0.03)
+e:ajouterInterets()
+print(e.solde)</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : le compte bancaire</b><p>Écris la classe complète, vérifiée automatiquement.</p><a class="defi-go" href="labo-lua.html#m=lua-compte">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : l'héritage</b><p>Une classe mère, deux classes filles, une méthode redéfinie.</p><a class="defi-go" href="labo-lua.html#m=lua-heritage">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p><code>obj:m(a)</code> équivaut à <code>obj.m(obj, a)</code> ; <code>function C:m()</code> reçoit <code>self</code>. </p><p> Une classe : <code>local C = {} C.__index = C</code>, un constructeur <code>C.new</code> qui fait <code>setmetatable({}, C)</code>. </p><p> Héritage : <code>local Fille = setmetatable({}, { __index = Mere })</code> puis <code>Fille.__index = Fille</code>. </p><p> Une méthode redéfinie dans la fille remplace celle de la mère.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-lua.html">Labo Lua</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
 </article>
 
 <!-- ============ EXERCICES ============ -->
 <script>
 window.EF_EXERCICES = [
  {
-  "type": "qcm",
   "niveau": "moyen",
-  "q": "Avec `obj:methode(5)`, que reçoit la méthode en premier paramètre ?",
+  "q": "`obj:methode(5)` est équivalent à…",
+  "type": "qcm",
   "options": [
-   "5",
-   "l'objet obj (self)",
-   "nil",
-   "la métatable"
+   "`obj[methode](5)`",
+   "`obj.methode(5)`",
+   "`methode(obj, 5)`",
+   "`obj.methode(obj, 5)`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Dans `function Ennemi:avancer() … end`, comment s'appelle le paramètre caché ?",
+  "type": "qcm",
+  "options": [
+   "`me`",
+   "`self`",
+   "`this`",
+   "`obj`"
   ],
   "answer": 1,
   "explication": ""
  },
  {
-  "type": "qcm",
   "niveau": "moyen",
-  "q": "`obj:f(x)` est équivalent à…",
-  "options": [
-   "`obj.f(x)`",
-   "`obj.f(obj, x)`",
-   "`f(obj)`",
-   "`obj[f](x)`"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
+  "q": "À quoi sert la ligne `Ennemi.__index = Ennemi` ?",
   "type": "qcm",
-  "niveau": "difficile",
-  "q": "À quoi sert `Ennemi.__index = Ennemi` ?",
   "options": [
-   "À compter les ennemis",
-   "À faire chercher les méthodes manquantes dans Ennemi",
-   "À trier",
-   "À copier la table"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "qcm",
-  "niveau": "moyen",
-  "q": "Quelle fonction associe une métatable à une table ?",
-  "options": [
-   "`setmeta`",
-   "`setmetatable`",
-   "`metatable.set`",
-   "`table.meta`"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "qcm",
-  "niveau": "moyen",
-  "q": "Dans LÖVE, quelle fonction est appelée à chaque image pour dessiner ?",
-  "options": [
-   "`love.load`",
-   "`love.draw`",
-   "`love.paint`",
-   "`love.render`"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "qcm",
-  "niveau": "difficile",
-  "q": "Pourquoi parcourir une table à l'envers pour en supprimer des éléments ?",
-  "options": [
-   "C'est plus rapide",
-   "À l'endroit, table.remove décale les éléments et on en saute un",
-   "C'est obligatoire en Lua",
-   "Pour l'ordre d'affichage"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "qcm",
-  "niveau": "moyen",
-  "q": "Quelle métaméthode personnalise l'affichage d'un objet avec print/tostring ?",
-  "options": [
-   "`__index`",
-   "`__tostring`",
-   "`__print`",
-   "`__name`"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "vf",
-  "niveau": "moyen",
-  "q": "Lua possède un mot-clé class.",
-  "answer": false,
-  "explication": ""
- },
- {
-  "type": "saisie",
-  "niveau": "moyen",
-  "q": "Comment s'appelle le paramètre implicite qui désigne l'objet dans une méthode définie avec « : » ?",
-  "answers": [
-   "self"
-  ],
-  "explication": ""
- },
- {
-  "type": "qcm",
-  "niveau": "moyen",
-  "q": "Quelle fonction charge un module Lua ?",
-  "options": [
-   "`import`",
-   "`include`",
-   "`require`",
-   "`load`"
+   "Elle crée une instance",
+   "Elle trie les ennemis",
+   "Les méthodes absentes d'une instance sont cherchées dans Ennemi",
+   "Elle rend la classe privée"
   ],
   "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle fonction relie une instance à sa classe ?",
+  "type": "qcm",
+  "options": [
+   "`inherit`",
+   "`setmetatable`",
+   "`new`",
+   "`class`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Où sont stockées les méthodes d'une classe Lua ?",
+  "type": "qcm",
+  "options": [
+   "Copiées dans chaque instance",
+   "Dans une variable globale",
+   "Une seule fois, dans la table de la classe",
+   "Dans la bibliothèque table"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Comment faire hériter Chien d'Animal ?",
+  "type": "qcm",
+  "options": [
+   "`setmetatable(Chien, { __index = Animal })`",
+   "`Chien extends Animal`",
+   "`Chien = Animal.new()`",
+   "`Chien.parent = Animal`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Depuis une méthode redéfinie, comment appeler la version de la classe mère Animal ?",
+  "type": "qcm",
+  "options": [
+   "`Animal.presenter(self)`",
+   "`parent:presenter()`",
+   "`super.presenter()`",
+   "`self:super()`"
+  ],
+  "answer": 0,
+  "explication": "Lua n'a pas de mot-clé super : on nomme la classe mère."
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que provoque `joueur.soigner(1)` si soigner a été déclarée avec `:` ?",
+  "type": "qcm",
+  "options": [
+   "Rien, c'est équivalent",
+   "Une erreur de syntaxe",
+   "self reçoit 1 : erreur « attempt to index a number value »",
+   "joueur est soigné de 1"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Lua possède un mot-clé class.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Les classes se construisent avec des tables et des métatables."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Tous les champs d'une instance Lua sont publics.",
+  "type": "vf",
+  "answer": true,
+  "explication": "Pour un vrai état privé, on utilise une closure."
+ },
+ {
+  "niveau": "difficile",
+  "q": "Le constructeur `Ennemi.new` se déclare en général avec un point, pas avec deux-points.",
+  "type": "vf",
+  "answer": true,
+  "explication": "Il n'a pas besoin de self : il crée l'instance."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce que le polymorphisme ?",
+  "type": "qcm",
+  "options": [
+   "Avoir plusieurs constructeurs",
+   "Rendre un champ privé",
+   "Le même appel exécute la méthode propre à la classe de chaque objet",
+   "Copier un objet"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle convention signale un champ « privé » ?",
+  "type": "qcm",
+  "options": [
+   "Un nom en majuscules",
+   "Le mot-clé private",
+   "Un nom qui finit par `!`",
+   "Un nom qui commence par `_`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle métaméthode définit ce que print affiche pour un objet ?",
+  "type": "saisie",
+  "answers": [
+   "__tostring"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Dans `Epargne.new`, pourquoi appeler `Compte.new(…)` ?",
+  "type": "qcm",
+  "options": [
+   "Pour copier les méthodes",
+   "Pour créer deux objets",
+   "Pour initialiser les champs hérités avant d'ajouter ceux de la fille",
+   "Parce que c'est obligatoire en Lua"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque notion à sa traduction en Lua.",
+  "type": "associer",
+  "paires": [
+   [
+    "classe",
+    "table contenant les méthodes"
+   ],
+   [
+    "instance",
+    "table dont la métatable est la classe"
+   ],
+   [
+    "héritage",
+    "`__index` vers la classe mère"
+   ],
+   [
+    "constructeur",
+    "fonction `new`"
+   ]
+  ],
   "explication": ""
  }
 ];
@@ -199,6 +356,8 @@ window.EF_EXERCICES = [
 <script src="../../data/modules.js"></script>
 <script src="../../assets/app.js"></script>
 <script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
 <script src="../../assets/chapter.js"></script>
 </body>
 </html>

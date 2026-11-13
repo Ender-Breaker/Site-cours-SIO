@@ -1,0 +1,654 @@
+=== lua-chaines | Lua : les chaînes de caractères | m
+Une chaîne Lua est **non modifiable** : toutes les fonctions renvoient une **nouvelle** chaîne. Les fonctions sont rangées dans la bibliothèque `string`, et on peut les appeler de deux façons : `string.upper(s)` ou `s:upper()`.
+
+## 1. Les fonctions de base
+
+```run
+local s = "Bonjour Lua"
+print(#s, s:len())                 -- longueur
+print(s:upper(), s:lower())
+print(s:sub(1, 7))                 -- du 1er au 7e caractère : Bonjour
+print(s:sub(9))                    -- du 9e à la fin : Lua
+print(s:sub(-3))                   -- les 3 derniers : Lua
+print(s:rep(2, " | "))             -- répète, avec un séparateur
+print(s:reverse())
+print(s:byte(1), string.char(76, 117, 97))   -- code du caractère et l'inverse
+```
+
+Les indices commencent à 1, les indices négatifs partent de la fin, et les deux bornes de `sub` sont incluses.
+
+!attention Les accents comptent double | Lua compte des **octets**, pas des caractères : `#"été"` vaut 5, car `é` occupe 2 octets en UTF-8. Pour compter des caractères, utilise `utf8.len("été")` qui vaut 3. `upper` et `reverse` ne gèrent pas non plus les accents.
+
+## 2. Mettre en forme : `string.format`
+
+```run
+print(string.format("%d article(s)", 3))
+print(string.format("%.2f €", 12.5))
+print(string.format("%5d|%-5d|%05d", 42, 42, 42))   -- largeur, gauche, zéros
+print(string.format("%s a %d ans", "Léa", 17))
+print(string.format("%x %X", 255, 255))               -- hexadécimal
+print(string.format("%3d%%", 50))                     -- %% affiche un %
+print(("%-10s%6.2f"):format("Souris", 19.9))
+```
+
+## 3. Chercher : `find`
+
+```run
+local s = "le chat et le chien"
+print(s:find("chat"))             -- 4   7 : début et fin
+print(s:find("le", 3))            -- cherche à partir du 3e caractère : 12  13
+print(s:find("oiseau"))           -- nil
+if s:find("chien") then print("il y a un chien") end
+print(("v1.2"):find(".", 1, true))  -- 3  3 : true = texte brut, sans motif (sinon . = tout caractère)
+```
+
+## 4. Les motifs (patterns)
+
+Lua n'a pas d'expressions régulières complètes, mais des **motifs** plus simples qui suffisent presque toujours.
+
+| Motif | Signifie |
+| `%a` | une lettre |
+| `%d` | un chiffre |
+| `%s` | un espace (ou tabulation, retour à la ligne) |
+| `%w` | une lettre ou un chiffre |
+| `%p` | un signe de ponctuation |
+| `%A` `%D` `%S` | le contraire (majuscule = « tout sauf ») |
+| `.` | n'importe quel caractère |
+| `[abc]` `[a-z]` `[^0-9]` | un caractère de l'ensemble / hors de l'ensemble |
+| `+` `*` `-` `?` | 1 ou plus / 0 ou plus / 0 ou plus (le moins possible) / 0 ou 1 |
+| `^` `$` | début / fin de la chaîne |
+| `%.` `%%` `%(` | le caractère lui-même (échappé par `%`) |
+| `( )` | une capture : la partie à récupérer |
+
+```run
+print(("Commande n°1284 du 12/03"):match("%d+"))        -- 1284 : première suite de chiffres
+print(("age=42"):match("(%a+)=(%d+)"))                   -- age   42 : deux captures
+print(("  texte  "):match("^%s*(.-)%s*$") .. "|")        -- supprime les espaces autour
+print(("2026-11-13"):match("(%d+)-(%d+)-(%d+)"))
+print(("fichier.tar.gz"):match("%.(%w+)$"))              -- l'extension : gz
+```
+
+## 5. Parcourir et remplacer : `gmatch` et `gsub`
+
+```run
+for mot in ("un deux trois"):gmatch("%a+") do io.write("[", mot, "] ") end
+print()
+for cle, val in ("x=1, y=22, z=333"):gmatch("(%w+)=(%w+)") do print(cle, val) end
+
+print(("bonjour"):gsub("o", "0"))                 -- b0nj0ur   2 : texte et nombre de remplacements
+print(("a b c"):gsub("%s", "_", 1))               -- au plus 1 remplacement
+print(("prix: 10 et 25"):gsub("%d+", function(n) return n * 2 end))   -- une fonction calcule le remplacement
+print(("Bonjour NOM"):gsub("NOM", {NOM = "Léa"}))  -- ou une table
+local _, nb = ("abracadabra"):gsub("a", "")
+print("nombre de a :", nb)
+```
+
+## 6. Chaînes longues et caractères spéciaux
+
+```run
+print("Ligne 1\nLigne 2\tavec tabulation et \"guillemets\"")
+local html = [[
+<p class="x">Texte sur
+plusieurs lignes, sans échappement \n</p>]]
+print(html)
+```
+
+!attention Concaténer dans une boucle | `s = s .. morceau` répété des milliers de fois recopie toute la chaîne à chaque tour. La bonne méthode : ranger les morceaux dans une table, puis `table.concat(t)` à la fin.
+
+!tuto Analyser une ligne de journal (log)
+# Extraire les champs avec des captures
+Une ligne de log a un format fixe : on décrit ce format avec un motif, et chaque paire de parenthèses récupère un champ.
+```run
+local ligne = "2026-11-13 14:02:55 ERREUR disque plein sur /dev/sda1"
+local date, heure, niveau, message = ligne:match("^(%S+) (%S+) (%u+) (.+)$")
+print(date)
+print(heure)
+print(niveau)
+print(message)
+```
+# Compter les mots du message
+```run
+local message = "disque plein sur /dev/sda1"
+local n = 0
+for _ in message:gmatch("%S+") do n = n + 1 end
+print(n .. " mots")
+```
+# Masquer une information sensible
+`gsub` remplace toutes les adresses IP par un texte neutre.
+```run
+local ligne = "connexion refusée depuis 192.168.1.42 puis 10.0.0.7"
+local propre, nb = ligne:gsub("%d+%.%d+%.%d+%.%d+", "[IP masquée]")
+print(propre)
+print(nb .. " adresses masquées")
+```
+!fin
+
+!defi Défi : compter les voyelles | Parcours une chaîne caractère par caractère, ou utilise `gsub`. | lua-voyelles
+!defi Défi : compter les mots | Un motif et `gmatch`. | lua-mots
+!defi Défi : le chiffre de César | Décale chaque lettre de 3 rangs avec `byte` et `char`. | lua-cesar
+
+!retenir À retenir | `s:upper()`, `s:sub(i, j)`, `s:rep(n)`, `#s`. ¶ `string.format("%d %.2f %s", …)` pour mettre en forme. ¶ `find` cherche, `match` extrait, `gmatch` parcourt, `gsub` remplace. ¶ Classes de motifs : `%a` lettre, `%d` chiffre, `%s` espace, `%w` alphanumérique ; `%` échappe. ¶ Une chaîne n'est jamais modifiée : on en obtient une nouvelle.
+--- exos
+Q¤f¤Quelle écriture met la chaîne s en majuscules ?¤`s:upper()`;;`s.toUpperCase()`;;`upper s`;;`s:maj()`¤
+Q¤m¤Que vaut `("Bonjour"):sub(1, 3)` ?¤`"Bon"`;;`"Bo"`;;`"onj"`;;`"Bonj"`¤Indices à partir de 1, bornes incluses.
+Q¤m¤Que vaut `("Bonjour"):sub(-2)` ?¤`"ur"`;;`"Bo"`;;`"r"`;;`"jour"`¤Un indice négatif part de la fin.
+Q¤m¤Que renvoie `("abc"):rep(2)` ?¤`"abcabc"`;;`"aabbcc"`;;`"abc2"`;;`{"abc", "abc"}`¤
+Q¤m¤Quel format affiche un nombre avec deux décimales ?¤`%.2f`;;`%2d`;;`%d.2`;;`%f2`¤
+Q¤m¤Que représente `%d` dans un motif (pattern) ?¤Un chiffre;;Une lettre;;Un espace;;N'importe quel caractère¤
+Q¤m¤Que représente `%a` dans un motif ?¤Une lettre;;Un chiffre;;Tout caractère;;Le caractère a¤
+Q¤d¤Que renvoie `("age=42"):match("%d+")` ?¤`"42"`;;42;;`"age"`;;`nil`¤match renvoie une chaîne ; il faut tonumber pour un nombre.
+Q¤d¤Combien de valeurs renvoie `("bonjour"):gsub("o", "0")` ?¤2 : le texte et le nombre de remplacements;;1 : le texte;;1 : le nombre de remplacements;;Une table¤
+Q¤m¤Quelle fonction parcourt toutes les occurrences d'un motif dans une boucle for ?¤`gmatch`;;`find`;;`match`;;`gsub`¤
+Q¤d¤Que vaut `#"été"` en Lua ?¤5;;3;;6;;4¤# compte des octets ; é en occupe deux en UTF-8.
+Q¤d¤Comment désigner un vrai point dans un motif ?¤`%.`;;`\.`;;`.`;;`[dot]`¤Le caractère d'échappement des motifs est %.
+V¤m¤Les fonctions de chaîne modifient la chaîne d'origine.¤F¤Une chaîne est non modifiable : on obtient une nouvelle chaîne.
+V¤m¤`s:len()` et `string.len(s)` font la même chose.¤V¤
+S¤m¤Quelle fonction de string remplace les occurrences d'un motif ?¤gsub;;string.gsub¤
+S¤d¤Quel motif désigne « une lettre ou un chiffre » ?¤%w¤
+Q¤d¤Que signifie `^` au début d'un motif ?¤Le motif doit commencer au début de la chaîne;;Le contraire du motif;;Une puissance;;Rien¤
+Q¤d¤Quelle est la bonne façon d'assembler 10 000 morceaux de texte ?¤Les ranger dans une table puis `table.concat`;;`s = s .. morceau` dans la boucle;;`string.rep`;;`gsub`¤
+A¤m¤Associe chaque fonction à ce qu'elle renvoie.¤`find`=>positions de début et de fin;;`match`=>le texte capturé;;`gsub`=>le texte modifié et un compteur;;`format`=>un texte mis en forme¤
+
+=== lua-closures | Lua : portée, closures et fonctions d'ordre supérieur | m
+## 1. La portée des variables
+
+Une variable `local` existe **du point où elle est déclarée jusqu'à la fin du bloc** qui la contient (fonction, boucle, `if`, ou `do … end`).
+
+```run
+local x = 1
+do
+  local x = 2          -- une AUTRE variable, qui masque la première
+  print(x)             -- 2
+end
+print(x)               -- 1
+
+if true then
+  local temporaire = 5
+end
+print(temporaire)      -- nil : elle n'existe plus
+```
+
+## 2. Les closures
+
+Une fonction peut utiliser les variables locales du bloc où elle a été **créée**, même après la fin de ce bloc. La fonction et les variables qu'elle a capturées forment une **closure** (fermeture).
+
+```run
+local function creerCompteur()
+  local n = 0                    -- variable capturée
+  return function()
+    n = n + 1
+    return n
+  end
+end
+
+local c1 = creerCompteur()
+local c2 = creerCompteur()
+print(c1(), c1(), c1())          -- 1 2 3
+print(c2())                      -- 1 : chaque compteur a son propre n
+```
+
+La variable `n` est **privée** : aucun code extérieur ne peut la lire ou la modifier, seulement passer par la fonction. C'est la façon la plus simple de protéger un état en Lua.
+
+## 3. Fabriquer des fonctions
+
+```run
+local function multiplicateur(k)
+  return function(x) return x * k end
+end
+local double, triple = multiplicateur(2), multiplicateur(3)
+print(double(10), triple(10))
+
+local function avecPrefixe(prefixe)
+  return function(message) print("[" .. prefixe .. "] " .. message) end
+end
+local info, erreur = avecPrefixe("INFO"), avecPrefixe("ERREUR")
+info("serveur démarré")
+erreur("disque plein")
+```
+
+## 4. Fonctions d'ordre supérieur : map, filter, reduce
+
+Lua ne les fournit pas, mais elles s'écrivent en quelques lignes. Une fonction d'**ordre supérieur** reçoit ou renvoie une fonction.
+
+```run
+local function map(t, f)
+  local r = {}
+  for i, v in ipairs(t) do r[i] = f(v) end
+  return r
+end
+local function filter(t, test)
+  local r = {}
+  for _, v in ipairs(t) do if test(v) then r[#r + 1] = v end end
+  return r
+end
+local function reduce(t, f, depart)
+  local acc = depart
+  for _, v in ipairs(t) do acc = f(acc, v) end
+  return acc
+end
+
+local prix = {12, 5, 30, 8}
+print(table.concat(map(prix, function(p) return p * 1.2 end), " "))
+print(table.concat(filter(prix, function(p) return p >= 10 end), " "))
+print(reduce(prix, function(a, b) return a + b end, 0))
+```
+
+## 5. Écrire son propre itérateur
+
+`for … in` appelle une fonction à chaque tour jusqu'à ce qu'elle renvoie `nil`. Une closure fait un itérateur parfait.
+
+```run
+local function intervalle(debut, fin, pas)
+  local i = debut - pas
+  return function()
+    i = i + pas
+    if i <= fin then return i end      -- sinon renvoie nil : fin de la boucle
+  end
+end
+for n in intervalle(0, 20, 5) do io.write(n, " ") end
+print()
+```
+
+!attention Une closure par tour de boucle | Dans un `for`, la variable de boucle est **recréée à chaque tour**. Chaque fonction créée dans la boucle capture donc sa propre valeur, contrairement à l'ancien `var` de JavaScript.
+
+```run
+local fonctions = {}
+for i = 1, 3 do
+  fonctions[i] = function() return i * 10 end
+end
+print(fonctions[1](), fonctions[2](), fonctions[3]())   -- 10 20 30
+```
+
+!tuto Un compte en banque sans classe
+# Un solde privé
+`solde` est une variable locale de `creerCompte` : seules les deux fonctions renvoyées y ont accès.
+```run
+local function creerCompte(depart)
+  local solde = depart
+  local compte = {}
+  function compte.deposer(montant) solde = solde + montant end
+  function compte.solde() return solde end
+  return compte
+end
+local c = creerCompte(100)
+c.deposer(50)
+print(c.solde())
+print(c.solde_prive)     -- nil : impossible d'y toucher directement
+```
+# Refuser les opérations invalides
+```run
+local function creerCompte(depart)
+  local solde = depart
+  local compte = {}
+  function compte.retirer(montant)
+    if montant > solde then return false, "solde insuffisant" end
+    solde = solde - montant
+    return true
+  end
+  function compte.solde() return solde end
+  return compte
+end
+local c = creerCompte(100)
+print(c.retirer(30), c.solde())
+print(c.retirer(500))
+```
+# Garder un historique
+Une deuxième variable capturée, partagée par toutes les fonctions du compte.
+```run
+local function creerCompte(depart)
+  local solde, historique = depart, {}
+  local compte = {}
+  function compte.deposer(m) solde = solde + m; historique[#historique + 1] = "+" .. m end
+  function compte.retirer(m) solde = solde - m; historique[#historique + 1] = "-" .. m end
+  function compte.releve() return table.concat(historique, " ") .. " = " .. solde end
+  return compte
+end
+local c = creerCompte(100)
+c.deposer(50) c.retirer(20) c.deposer(5)
+print(c.releve())
+```
+!fin
+
+!defi Défi : le compteur | Écris une fabrique de compteurs avec une closure. | lua-compteur
+
+!retenir À retenir | Une variable `local` vit jusqu'à la fin de son bloc. ¶ Une **closure** est une fonction qui garde l'accès aux variables locales de l'endroit où elle a été créée. ¶ Chaque appel de la fabrique crée de nouvelles variables capturées, indépendantes. ¶ Une fonction d'ordre supérieur reçoit ou renvoie une fonction (map, filter, reduce, table.sort).
+--- exos
+Q¤m¤Jusqu'où existe une variable `local` ?¤Jusqu'à la fin du bloc où elle est déclarée;;Jusqu'à la fin du fichier;;Jusqu'à la fin du programme;;Uniquement sur sa ligne¤
+Q¤m¤Qu'est-ce qu'une closure ?¤Une fonction qui garde l'accès aux variables locales de son lieu de création;;Une fonction sans paramètre;;Une table verrouillée;;Une fonction globale¤
+Q¤d¤`local c1, c2 = creerCompteur(), creerCompteur()` : après `c1() c1() c2()`, que renvoie `c1()` ?¤3;;4;;1;;2¤Chaque compteur possède sa propre variable capturée.
+Q¤m¤Quel bloc sert uniquement à limiter la portée de variables ?¤`do … end`;;`begin … end`;;`{ … }`;;`scope … end`¤
+V¤m¤Deux closures créées par deux appels de la même fabrique partagent leurs variables capturées.¤F¤Chaque appel crée de nouvelles variables locales.
+V¤m¤Une variable capturée par une closure est inaccessible directement depuis l'extérieur.¤V¤C'est ce qui permet d'avoir un état privé.
+Q¤m¤Qu'est-ce qu'une fonction d'ordre supérieur ?¤Une fonction qui reçoit ou renvoie une fonction;;Une fonction récursive;;Une fonction globale;;Une fonction avec plus de 3 paramètres¤
+Q¤m¤Que fait la fonction map(t, f) du cours ?¤Elle applique f à chaque élément et renvoie la nouvelle liste;;Elle garde les éléments pour lesquels f est vraie;;Elle additionne les éléments;;Elle trie la liste¤
+Q¤m¤Que fait filter(t, test) ?¤Elle garde les éléments pour lesquels test renvoie vrai;;Elle transforme chaque élément;;Elle compte les éléments;;Elle supprime les doublons¤
+Q¤d¤Que renvoie `reduce({1, 2, 3, 4}, function(a, b) return a * b end, 1)` ?¤24;;10;;1;;4¤reduce combine tous les éléments : 1×1×2×3×4.
+Q¤d¤Quand une boucle `for x in iterateur do` s'arrête-t-elle ?¤Quand la fonction itérateur renvoie nil;;Quand elle renvoie false;;Après 100 tours;;Quand elle renvoie 0¤
+Q¤d¤`local x = 1 do local x = 2 end print(x)` affiche…¤1;;2;;`nil`;;Une erreur¤Le x du bloc do est une autre variable, détruite à la fin du bloc.
+Q¤d¤Dans `for i = 1, 3 do f[i] = function() return i end end`, que renvoie `f[1]()` ?¤1;;3;;4;;`nil`¤La variable de boucle est recréée à chaque tour.
+S¤m¤Quel mot anglais désigne une fonction accompagnée des variables qu'elle a capturées ?¤closure¤
+Q¤m¤Quelle fonction standard de Lua est d'ordre supérieur ?¤`table.sort`;;`table.insert`;;`string.len`;;`tostring`¤Elle accepte une fonction de comparaison.
+A¤m¤Associe chaque fonction à son résultat sur {1, 2, 3, 4}.¤map (x × 2)=>{2, 4, 6, 8};;filter (x pair)=>{2, 4};;reduce (somme)=>10¤
+
+=== lua-metatables | Lua : métatables et métaméthodes | d
+Une **métatable** est une table ordinaire attachée à une autre table pour en **modifier le comportement** : que faire quand on additionne deux tables, quand on lit une clé absente, quand on l'affiche… Chaque comportement correspond à une clé spéciale qui commence par deux tirets bas : une **métaméthode**.
+
+## 1. Attacher une métatable
+
+```run
+local t = {}
+local mt = {}
+setmetatable(t, mt)
+print(getmetatable(t) == mt)      -- true
+local u = setmetatable({}, mt)    -- setmetatable renvoie la table : écriture courante
+print(getmetatable(u) == mt)
+```
+
+## 2. `__index` : la clé absente
+
+Quand on lit `t.cle` et que `t` n'a pas cette clé, Lua regarde `__index` dans la métatable. Si c'est une **table**, il y cherche la clé ; si c'est une **fonction**, il l'appelle.
+
+```run
+local defauts = { couleur = "bleu", taille = 12 }
+local style = setmetatable({ taille = 20 }, { __index = defauts })
+print(style.taille)        -- 20 : la clé existe dans style
+print(style.couleur)       -- bleu : trouvée dans defauts
+print(style.inconnu)       -- nil : nulle part
+
+local carres = setmetatable({}, { __index = function(table, cle) return cle * cle end })
+print(carres[7], carres[12])
+```
+
+C'est ce mécanisme qui permet les classes et l'héritage : voir le chapitre suivant.
+
+## 3. `__newindex` : l'écriture d'une nouvelle clé
+
+```run err
+local config = setmetatable({}, {
+  __newindex = function(t, cle, valeur)
+    error("clé interdite : " .. cle)
+  end
+})
+config.port = 8080
+```
+
+`rawget(t, cle)` et `rawset(t, cle, valeur)` lisent et écrivent **sans** passer par les métaméthodes.
+
+## 4. Redéfinir les opérateurs
+
+| Métaméthode | Déclenchée par |
+| `__add` `__sub` `__mul` `__div` | `+` `-` `*` `/` |
+| `__mod` `__pow` `__unm` `__idiv` | `%` `^` `-x` `//` |
+| `__concat` | `..` |
+| `__len` | `#` |
+| `__eq` `__lt` `__le` | `==` `<` `<=` (et donc `~=` `>` `>=`) |
+| `__call` | `t(…)` : appeler la table comme une fonction |
+| `__tostring` | `tostring(t)` et donc `print(t)` |
+
+```run
+local Vec = {}
+Vec.__index = Vec
+local function vec(x, y) return setmetatable({ x = x, y = y }, Vec) end
+
+Vec.__add = function(a, b) return vec(a.x + b.x, a.y + b.y) end
+Vec.__mul = function(a, k) return vec(a.x * k, a.y * k) end
+Vec.__eq = function(a, b) return a.x == b.x and a.y == b.y end
+Vec.__tostring = function(v) return "(" .. v.x .. ", " .. v.y .. ")" end
+Vec.__len = function(v) return math.sqrt(v.x ^ 2 + v.y ^ 2) end
+
+local a, b = vec(1, 2), vec(3, 4)
+print(a + b)                 -- (4, 6)
+print(a * 10)                -- (10, 20)
+print(a == vec(1, 2))        -- true grâce à __eq
+print(#b)                    -- 5.0 : la norme
+```
+
+## 5. `__call` : une table qu'on appelle
+
+```run
+local compteur = setmetatable({ n = 0 }, {
+  __call = function(self, pas)
+    self.n = self.n + (pas or 1)
+    return self.n
+  end
+})
+print(compteur(), compteur(), compteur(10))
+```
+
+!tuto Une table en lecture seule
+# Le principe du mandataire (proxy)
+On donne à l'utilisateur une table **vide** : toute lecture passe par `__index`, toute écriture par `__newindex`.
+```run
+local function lectureSeule(donnees)
+  return setmetatable({}, {
+    __index = donnees,
+    __newindex = function() print("Refusé : table en lecture seule") end
+  })
+end
+local jours = lectureSeule({ "lundi", "mardi" })
+print(jours[1])
+jours[1] = "dimanche"
+print(jours[1])
+```
+# Compter les accès
+Le même principe sert à espionner une table : pratique pour déboguer.
+```run
+local function espion(donnees)
+  local lectures = 0
+  local proxy = setmetatable({}, {
+    __index = function(_, cle) lectures = lectures + 1; return donnees[cle] end
+  })
+  return proxy, function() return lectures end
+end
+local t, combien = espion({ a = 1, b = 2 })
+local _ = t.a + t.b + t.a
+print(combien() .. " lectures")
+```
+!fin
+
+!defi Défi : des vecteurs | Additionne et affiche des vecteurs avec `__add` et `__tostring`. | lua-vecteur
+!defi Défi : valeurs par défaut | Une table qui répond 0 pour toute clé absente. | lua-defaut
+
+!retenir À retenir | `setmetatable(t, mt)` attache la métatable `mt` à `t`. ¶ `__index` : que répondre pour une clé absente (table ou fonction). ¶ `__newindex` : intercepter l'écriture d'une nouvelle clé. ¶ `__add`, `__eq`, `__lt`, `__concat`, `__len`… redéfinissent les opérateurs ; `__tostring` l'affichage ; `__call` l'appel.
+--- exos
+Q¤m¤Quelle fonction attache une métatable à une table ?¤`setmetatable`;;`setmeta`;;`table.meta`;;`bind`¤
+Q¤m¤Quelle métaméthode est consultée quand on lit une clé absente ?¤`__index`;;`__newindex`;;`__get`;;`__missing`¤
+Q¤m¤Quelle métaméthode redéfinit l'opérateur `+` ?¤`__add`;;`__plus`;;`__sum`;;`__concat`¤
+Q¤m¤Quelle métaméthode est utilisée par `print(t)` ?¤`__tostring`;;`__print`;;`__string`;;`__show`¤
+Q¤m¤Quelle métaméthode permet d'écrire `t(5)` ?¤`__call`;;`__index`;;`__func`;;`__run`¤
+Q¤d¤`__index` peut être…¤une table ou une fonction;;uniquement une table;;uniquement une fonction;;uniquement une chaîne¤
+Q¤d¤Avec `s = setmetatable({a = 1}, {__index = {a = 9, b = 2}})`, que vaut `s.a` ?¤1;;9;;`nil`;;10¤__index n'est consulté que si la clé est absente.
+Q¤d¤Et que vaut `s.b` ?¤2;;`nil`;;1;;9¤
+Q¤d¤Quelle fonction lit une clé sans passer par `__index` ?¤`rawget`;;`get`;;`table.get`;;`noindex`¤
+Q¤m¤Quelle métaméthode redéfinit l'opérateur `..` ?¤`__concat`;;`__add`;;`__join`;;`__dotdot`¤
+Q¤m¤Quelle métaméthode redéfinit `==` ?¤`__eq`;;`__equals`;;`__cmp`;;`__same`¤
+V¤m¤Une métatable est une table ordinaire.¤V¤Elle contient simplement des clés au nom spécial.
+V¤d¤__newindex est appelée à chaque écriture, même si la clé existe déjà dans la table.¤F¤Seulement quand la clé n'existe pas encore.
+V¤m¤Plusieurs tables peuvent partager la même métatable.¤V¤C'est le principe des classes.
+S¤m¤Quelle fonction renvoie la métatable d'une table ?¤getmetatable¤
+Q¤d¤Pourquoi le mandataire (proxy) du cours est-il une table vide ?¤Pour que toutes les lectures et écritures passent par les métaméthodes;;Pour économiser la mémoire;;Parce que setmetatable l'exige;;Pour pouvoir utiliser #¤
+A¤m¤Associe chaque métaméthode à son déclencheur.¤`__add`=>a + b;;`__len`=>#a;;`__lt`=>a < b;;`__call`=>a();;`__unm`=>-a¤
+
+=== lua-objets-jeux | Lua : objets, classes et héritage | d
+Lua n'a pas de mot-clé `class`. Mais avec une table, des fonctions et `__index`, on construit des classes complètes : c'est ainsi que sont écrits tous les jeux en Lua.
+
+## 1. Un objet : des données et des fonctions
+
+```run
+local joueur = { nom = "Léa", pv = 10 }
+
+function joueur.blesser(self, degats)      -- écriture complète
+  self.pv = self.pv - degats
+end
+function joueur:soigner(n)                 -- le : ajoute self automatiquement
+  self.pv = self.pv + n
+end
+
+joueur.blesser(joueur, 3)                  -- appel complet
+joueur:soigner(1)                          -- le : passe joueur automatiquement
+print(joueur.pv)
+```
+
+Le deux-points est un simple raccourci : `obj:methode(a)` signifie `obj.methode(obj, a)`, et `function obj:methode(a)` déclare un premier paramètre caché nommé `self`.
+
+!attention Point ou deux-points ? | Appeler `joueur.soigner(1)` avec un point au lieu de deux-points est l'erreur classique : `self` reçoit `1`, et Lua répond `attempt to index a number value`. Méthode = deux-points.
+
+## 2. Une classe
+
+La classe est une table qui contient les méthodes. Chaque instance est une petite table de données dont la métatable renvoie vers la classe.
+
+```run
+local Ennemi = {}
+Ennemi.__index = Ennemi               -- méthode absente de l'instance ? cherche dans Ennemi
+
+function Ennemi.new(nom, pv)          -- le constructeur (avec un point)
+  local self = setmetatable({}, Ennemi)
+  self.nom = nom
+  self.pv = pv or 3
+  return self
+end
+
+function Ennemi:blesser(n)
+  self.pv = math.max(0, self.pv - n)
+end
+function Ennemi:estMort()
+  return self.pv == 0
+end
+
+local a, b = Ennemi.new("Gobelin"), Ennemi.new("Dragon", 50)
+a:blesser(5)
+b:blesser(5)
+print(a.nom, a.pv, a:estMort())
+print(b.nom, b.pv, b:estMort())
+```
+
+Les données (`nom`, `pv`) sont dans chaque instance ; les méthodes sont écrites **une seule fois** dans `Ennemi` et partagées.
+
+## 3. L'héritage
+
+Une classe fille est une table dont la métatable renvoie vers la classe mère. Une méthode absente de la fille est cherchée chez la mère.
+
+```run
+local Animal = {}
+Animal.__index = Animal
+function Animal.new(nom)
+  return setmetatable({ nom = nom }, Animal)
+end
+function Animal:crier() return "..." end
+function Animal:presenter() return self.nom .. " fait " .. self:crier() end
+
+local Chien = setmetatable({}, { __index = Animal })   -- Chien hérite d'Animal
+Chien.__index = Chien
+function Chien.new(nom)
+  local self = Animal.new(nom)        -- construit la partie Animal
+  return setmetatable(self, Chien)    -- puis en fait un Chien
+end
+function Chien:crier() return "Ouaf" end               -- redéfinition
+
+local Chat = setmetatable({}, { __index = Animal })
+Chat.__index = Chat
+function Chat.new(nom) return setmetatable(Animal.new(nom), Chat) end
+function Chat:crier() return "Miaou" end
+
+for _, a in ipairs({ Chien.new("Rex"), Chat.new("Tigrou"), Animal.new("Truc") }) do
+  print(a:presenter())      -- polymorphisme : le bon crier() est choisi tout seul
+end
+```
+
+Pour appeler la version de la classe mère depuis une méthode redéfinie, on l'appelle explicitement avec un point : `Animal.presenter(self)`.
+
+## 4. `__tostring` et les autres métaméthodes dans une classe
+
+Comme la classe **est** la métatable des instances, on y range aussi les métaméthodes.
+
+```run
+local Point = {}
+Point.__index = Point
+function Point.new(x, y) return setmetatable({ x = x, y = y }, Point) end
+function Point.__tostring(p) return "Point(" .. p.x .. ", " .. p.y .. ")" end
+function Point.__eq(a, b) return a.x == b.x and a.y == b.y end
+function Point:distance(autre) return math.sqrt((self.x - autre.x) ^ 2 + (self.y - autre.y) ^ 2) end
+
+local p, q = Point.new(0, 0), Point.new(3, 4)
+print(p, q, p == Point.new(0, 0))
+print(p:distance(q))
+```
+
+## 5. Attributs privés
+
+Tout ce qui est dans la table d'une instance est public. Deux habitudes : préfixer par `_` ce qui est « privé par convention » (`self._cache`), ou utiliser une closure (chapitre précédent) quand la protection doit être réelle.
+
+!tuto Une classe Compte, pas à pas
+# Le constructeur
+```run
+local Compte = {}
+Compte.__index = Compte
+function Compte.new(titulaire, solde)
+  return setmetatable({ titulaire = titulaire, solde = solde or 0 }, Compte)
+end
+local c = Compte.new("Léa", 100)
+print(c.titulaire, c.solde)
+```
+# Les méthodes
+```run
+local Compte = {}
+Compte.__index = Compte
+function Compte.new(titulaire, solde)
+  return setmetatable({ titulaire = titulaire, solde = solde or 0 }, Compte)
+end
+function Compte:deposer(m) self.solde = self.solde + m end
+function Compte:retirer(m)
+  if m > self.solde then return false end
+  self.solde = self.solde - m
+  return true
+end
+local c = Compte.new("Léa", 100)
+c:deposer(50)
+print(c:retirer(500), c:retirer(30), c.solde)
+```
+# Une classe fille : le compte épargne
+Il hérite de tout, et ajoute les intérêts.
+```run
+local Compte = {}
+Compte.__index = Compte
+function Compte.new(titulaire, solde)
+  return setmetatable({ titulaire = titulaire, solde = solde or 0 }, Compte)
+end
+function Compte:deposer(m) self.solde = self.solde + m end
+
+local Epargne = setmetatable({}, { __index = Compte })
+Epargne.__index = Epargne
+function Epargne.new(titulaire, solde, taux)
+  local self = setmetatable(Compte.new(titulaire, solde), Epargne)
+  self.taux = taux
+  return self
+end
+function Epargne:ajouterInterets() self:deposer(self.solde * self.taux) end
+
+local e = Epargne.new("Sam", 1000, 0.03)
+e:ajouterInterets()
+print(e.solde)
+```
+!fin
+
+!defi Défi : le compte bancaire | Écris la classe complète, vérifiée automatiquement. | lua-compte
+!defi Défi : l'héritage | Une classe mère, deux classes filles, une méthode redéfinie. | lua-heritage
+
+!retenir À retenir | `obj:m(a)` équivaut à `obj.m(obj, a)` ; `function C:m()` reçoit `self`. ¶ Une classe : `local C = {} C.__index = C`, un constructeur `C.new` qui fait `setmetatable({}, C)`. ¶ Héritage : `local Fille = setmetatable({}, { __index = Mere })` puis `Fille.__index = Fille`. ¶ Une méthode redéfinie dans la fille remplace celle de la mère.
+--- exos
+Q¤m¤`obj:methode(5)` est équivalent à…¤`obj.methode(obj, 5)`;;`obj.methode(5)`;;`methode(obj, 5)`;;`obj[methode](5)`¤
+Q¤m¤Dans `function Ennemi:avancer() … end`, comment s'appelle le paramètre caché ?¤`self`;;`this`;;`me`;;`obj`¤
+Q¤m¤À quoi sert la ligne `Ennemi.__index = Ennemi` ?¤Les méthodes absentes d'une instance sont cherchées dans Ennemi;;Elle crée une instance;;Elle rend la classe privée;;Elle trie les ennemis¤
+Q¤m¤Quelle fonction relie une instance à sa classe ?¤`setmetatable`;;`new`;;`class`;;`inherit`¤
+Q¤d¤Où sont stockées les méthodes d'une classe Lua ?¤Une seule fois, dans la table de la classe;;Copiées dans chaque instance;;Dans une variable globale;;Dans la bibliothèque table¤
+Q¤d¤Comment faire hériter Chien d'Animal ?¤`setmetatable(Chien, { __index = Animal })`;;`Chien extends Animal`;;`Chien = Animal.new()`;;`Chien.parent = Animal`¤
+Q¤d¤Depuis une méthode redéfinie, comment appeler la version de la classe mère Animal ?¤`Animal.presenter(self)`;;`super.presenter()`;;`self:super()`;;`parent:presenter()`¤Lua n'a pas de mot-clé super : on nomme la classe mère.
+Q¤d¤Que provoque `joueur.soigner(1)` si soigner a été déclarée avec `:` ?¤self reçoit 1 : erreur « attempt to index a number value »;;Rien, c'est équivalent;;joueur est soigné de 1;;Une erreur de syntaxe¤
+V¤m¤Lua possède un mot-clé class.¤F¤Les classes se construisent avec des tables et des métatables.
+V¤m¤Tous les champs d'une instance Lua sont publics.¤V¤Pour un vrai état privé, on utilise une closure.
+V¤d¤Le constructeur `Ennemi.new` se déclare en général avec un point, pas avec deux-points.¤V¤Il n'a pas besoin de self : il crée l'instance.
+Q¤m¤Qu'est-ce que le polymorphisme ?¤Le même appel exécute la méthode propre à la classe de chaque objet;;Avoir plusieurs constructeurs;;Copier un objet;;Rendre un champ privé¤
+Q¤m¤Quelle convention signale un champ « privé » ?¤Un nom qui commence par `_`;;Un nom en majuscules;;Le mot-clé private;;Un nom qui finit par `!`¤
+S¤m¤Quelle métaméthode définit ce que print affiche pour un objet ?¤__tostring¤
+Q¤d¤Dans `Epargne.new`, pourquoi appeler `Compte.new(…)` ?¤Pour initialiser les champs hérités avant d'ajouter ceux de la fille;;Parce que c'est obligatoire en Lua;;Pour créer deux objets;;Pour copier les méthodes¤
+A¤m¤Associe chaque notion à sa traduction en Lua.¤classe=>table contenant les méthodes;;instance=>table dont la métatable est la classe;;héritage=>`__index` vers la classe mère;;constructeur=>fonction `new`¤

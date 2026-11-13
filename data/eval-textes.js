@@ -268,5 +268,57 @@ window.EF_EVAL_TEXTES = {
         { n: "transparence de l'information", rx: "transparen|information" },
         { n: "libre entrée / libre circulation", rx: "libre|entree|sortie|mobilit|circulation" }],
       corrige: "<p>Un marché est le <b>lieu</b>, réel ou virtuel, où se <b>rencontrent l'offre et la demande</b> d'un bien et où se forme un prix. La concurrence parfaite suppose : <b>atomicité</b> (très nombreux offreurs et demandeurs), <b>homogénéité</b> des produits, <b>transparence</b> de l'information, <b>libre entrée et sortie</b> du marché, et libre circulation des facteurs de production.</p>" }
+  ],
+  /* ---------- cours bonus : généré par outils/gen.py depuis outils/textes.py ---------- */
+  "lua": [
+    { q: "Quelle est la différence entre une variable <code>local</code> et une variable globale en Lua ? Pourquoi faut-il préférer <code>local</code> ?",
+      notions: [
+        { n: "local : visible seulement dans son bloc / sa fonction", rx: "bloc|portee|fonction|fichier|limite|seulement dans|interieur" },
+        { n: "sans local, la variable est globale", rx: "global" },
+        { n: "risque : écraser une autre variable / faute de frappe silencieuse", rx: "ecras|conflit|collision|faute|erreur|bug|modifi|partout" },
+        { n: "une variable inconnue vaut nil", rx: "\\bnil\\b" }],
+      corrige: "<p>Une variable <code>local</code> n'existe que dans le <b>bloc</b> où elle est déclarée. Sans <code>local</code>, la variable est <b>globale</b> : visible et modifiable partout, elle peut écraser une autre variable du même nom, et une faute de frappe crée silencieusement une nouvelle variable qui vaut <code>nil</code>. On écrit donc <code>local</code> à chaque création.</p>" },
+    { q: "Explique ce qu'est une table en Lua et les deux façons de la parcourir.",
+      notions: [
+        { n: "seule structure de données : liste et dictionnaire", rx: "liste|tableau|dictionnaire|cle|structure" },
+        { n: "les indices commencent à 1", rx: "\\b1\\b|un\\b" },
+        { n: "ipairs : liste, dans l'ordre", rx: "ipairs" },
+        { n: "pairs : toutes les clés, ordre non garanti", rx: "\\bpairs" }],
+      corrige: "<p>La table est l'<b>unique structure de données</b> de Lua : elle sert de liste (indices à partir de <b>1</b>) et de dictionnaire (clé → valeur). <code>ipairs(t)</code> parcourt une liste dans l'ordre des indices et s'arrête au premier <code>nil</code> ; <code>pairs(t)</code> parcourt toutes les clés, dans un ordre non garanti.</p>" },
+    { q: "Qu'est-ce qu'une closure ? Donne un exemple d'utilisation.",
+      notions: [
+        { n: "une fonction", rx: "fonction" },
+        { n: "qui garde l'accès aux variables locales de l'endroit où elle a été créée", rx: "captur|garde|conserv|accede|acces|retient|souvien|memoris" },
+        { n: "ces variables sont privées / propres à chaque closure", rx: "prive|propre|independan|protege|chaque" },
+        { n: "un exemple : compteur, fabrique, callback…", rx: "compteur|fabrique|multiplicateur|callback|iterateur|compte" }],
+      corrige: "<p>Une closure est une <b>fonction qui garde l'accès aux variables locales</b> du bloc où elle a été créée, même après la fin de ce bloc. Exemple : <code>creerCompteur()</code> déclare <code>local n = 0</code> et renvoie une fonction qui fait <code>n = n + 1</code>. Chaque compteur a son propre <code>n</code>, <b>privé</b> et inaccessible de l'extérieur.</p>" },
+    { q: "À quoi sert une métatable ? Explique le rôle de <code>__index</code> dans la création d'une classe.",
+      notions: [
+        { n: "modifie le comportement d'une table", rx: "comportement|modifi|personnalis|redefini|operateur" },
+        { n: "__index : consulté quand une clé est absente", rx: "absent|manqu|n'existe pas|pas trouve|introuvable|inexistant" },
+        { n: "les méthodes sont cherchées dans la classe", rx: "methode|classe|fonction" },
+        { n: "setmetatable relie l'instance à la classe", rx: "setmetatable" }],
+      corrige: "<p>Une métatable <b>modifie le comportement</b> d'une table (opérateurs, affichage, accès). Quand on lit une clé <b>absente</b>, Lua consulte <code>__index</code>. Pour une classe : <code>Classe.__index = Classe</code> et chaque instance est créée avec <code>setmetatable({}, Classe)</code> ; une méthode absente de l'instance est alors cherchée dans la classe, où elle n'est écrite qu'une fois.</p>" },
+    { q: "Comment gère-t-on les erreurs en Lua ? Présente <code>error</code>, <code>pcall</code> et la convention <code>nil, message</code>.",
+      notions: [
+        { n: "error lève une erreur", rx: "error.*(leve|provoque|declenche|arret|lance)|(leve|provoque|declenche|lance).*error" },
+        { n: "pcall appelle en mode protégé", rx: "pcall" },
+        { n: "pcall renvoie true/false puis le résultat ou le message", rx: "true|false|vrai|faux|booleen|statut" },
+        { n: "nil, message pour les erreurs prévisibles", rx: "nil" }],
+      corrige: "<p><code>error(msg)</code> <b>lève</b> une erreur et arrête le programme. <code>pcall(f, …)</code> appelle <code>f</code> en mode <b>protégé</b> et renvoie <code>true</code> + les résultats, ou <code>false</code> + l'erreur, sans arrêter le programme. Pour une erreur prévisible (saisie invalide, fichier absent), une fonction renvoie plutôt <code>nil</code> suivi d'un message.</p>" },
+    { q: "Qu'est-ce qu'une coroutine et à quoi sert-elle dans un jeu ?",
+      notions: [
+        { n: "une fonction qui peut se mettre en pause", rx: "pause|suspen|interromp|arret" },
+        { n: "et reprendre là où elle s'était arrêtée", rx: "repren|resume|continu" },
+        { n: "yield / resume", rx: "yield|resume|wrap" },
+        { n: "usage : séquences d'actions, générateurs, attentes", rx: "sequence|generateur|attend|attente|script|animation|image" }],
+      corrige: "<p>Une coroutine est une fonction qui peut se <b>mettre en pause</b> (<code>coroutine.yield</code>) puis <b>reprendre</b> exactement où elle en était (<code>coroutine.resume</code>), avec ses variables intactes. Dans un jeu, elle permet d'écrire une <b>séquence d'actions</b> étalée sur plusieurs images (avancer, attendre, tirer) comme un simple script, ou de créer des générateurs.</p>" },
+    { q: "Quelle est la différence entre <code>objet.methode()</code> et <code>objet:methode()</code> ?",
+      notions: [
+        { n: "le deux-points passe l'objet en premier argument", rx: "premier|automatique|passe|ajoute|implicite" },
+        { n: "ce paramètre s'appelle self", rx: "self" },
+        { n: "obj:m(a) équivaut à obj.m(obj, a)", rx: "equiva|revient|raccourci|pareil|meme chose|identique" },
+        { n: "erreur classique si on se trompe", rx: "erreur|nil|number|bug|piege|oubli" }],
+      corrige: "<p>Le deux-points est un <b>raccourci</b> : <code>obj:m(a)</code> équivaut à <code>obj.m(obj, a)</code>. Il passe <b>automatiquement</b> l'objet en premier argument, que la méthode reçoit sous le nom <code>self</code>. Appeler une méthode avec un point par erreur donne à <code>self</code> une mauvaise valeur : c'est le piège classique.</p>" }
   ]
 };

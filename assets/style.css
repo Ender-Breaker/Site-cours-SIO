@@ -840,3 +840,43 @@ html.compte-ouvert { overflow: hidden; }
 .jeu-pad button:active { background: var(--safran); color: var(--encre); }
 @media (hover: none) and (pointer: coarse) { .jeu-pad { display: flex; } }
 .py-out [hidden], .jeu-zone[hidden] { display: none !important; }
+
+/* ---------- Cours : blocs « Essaie ce code », tutoriels pas à pas, défis ---------- */
+.essai { margin: var(--s3) 0; border: var(--trait); border-radius: var(--r2); overflow: hidden; background: #1b1d33; box-shadow: var(--ombre-1); }
+.essai > pre { margin: 0; border: 0 !important; border-radius: 0 !important; }
+.essai-bar { display: flex; align-items: center; gap: var(--s1); padding: 6px 8px 6px 12px; background: var(--safran); border-bottom: var(--trait); }
+.essai-f { font-family: var(--mono); font-weight: 800; font-size: .82rem; display: flex; align-items: center; gap: 6px; margin-right: auto; min-width: 0; white-space: nowrap; }
+.essai-f small { font-family: var(--texte, inherit); font-weight: 600; opacity: .7; overflow: hidden; text-overflow: ellipsis; }
+.essai-bar .btn { min-height: 36px; padding: 6px 14px; box-shadow: 2px 2px 0 var(--encre); }
+.essai-reset { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border: var(--trait); border-radius: var(--r1); background: var(--surface); }
+.essai-reset:hover { background: var(--safran-clair); }
+.essai-src, .essai-stdin { display: block; width: 100%; margin: 0; padding: 12px 14px; border: 0; outline: 0; resize: vertical; background: transparent; color: #f1ede2; font: .86rem/1.6 var(--mono); tab-size: 2; white-space: pre; overflow: auto; caret-color: var(--safran); }
+.essai-src:focus, .essai-stdin:focus { background: #20233d; }
+.essai-in { display: block; border-top: 1px solid #34375a; }
+.essai-in span { display: block; padding: 6px 14px 0; font-size: .72rem; font-weight: 700; color: #9ea2c3; text-transform: uppercase; letter-spacing: .04em; }
+.essai-out { padding: 10px 14px; border-top: var(--trait); background: #fffdf8; color: var(--encre); font: .86rem/1.55 var(--mono); white-space: pre-wrap; word-break: break-word; max-height: 320px; overflow: auto; }
+.essai-out.attente { color: var(--discret); font-style: italic; }
+.essai-out.ko { background: var(--ko-clair); }
+.essai-out b { color: var(--ko); font-weight: 700; }
+.essai-out i { color: var(--discret); }
+@media (hover: none) and (pointer: coarse) { .essai-src, .essai-stdin { font-size: 16px; } }
+@media (max-width: 560px) { .essai-f small { display: none; } }
+
+.tuto { margin: var(--s4) 0; padding: var(--s3); border: var(--trait); border-radius: var(--r2); background: var(--surface); box-shadow: var(--ombre-2); }
+.tuto > h3 { margin: 0 0 var(--s1); font-family: var(--titre); font-size: 1.35rem; letter-spacing: -.02em; }
+.tuto > h3 small { display: inline-block; margin-right: 10px; padding: 2px 10px; border: var(--trait); border-radius: 999px; background: var(--cobalt); color: var(--sur-cobalt); font-family: var(--texte, inherit); font-size: .72rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; vertical-align: .2em; }
+.tuto .etape { position: relative; margin-top: var(--s3); padding-left: 44px; counter-increment: etape; }
+.tuto { counter-reset: etape; }
+.tuto .etape::before { content: counter(etape); position: absolute; left: 0; top: -2px; width: 30px; height: 30px; display: grid; place-items: center; border: var(--trait); border-radius: 50%; background: var(--safran); font-family: var(--titre); font-weight: 800; }
+.tuto .etape > h4 { margin: 0 0 4px; font-size: 1.05rem; }
+.tuto .etape > :last-child { margin-bottom: 0; }
+@media (max-width: 560px) { .tuto { padding: var(--s2); } .tuto .etape { padding-left: 0; padding-top: 38px; } .tuto .etape::before { top: 0; } }
+
+.box.defi { background: var(--m-clair, var(--safran-clair)); }
+.box.defi { --pictogramme: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528'/%3E%3C/svg%3E"); }
+.box.defi .defi-go { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; padding: 6px 14px; border: var(--trait); border-radius: var(--r1); background: var(--surface); font-weight: 700; font-size: .9rem; box-shadow: 2px 2px 0 var(--encre); text-decoration: none; color: var(--encre); }
+.box.defi .defi-go:hover { background: var(--safran); transform: translate(-1px, -1px); }
+.sommaire { margin: var(--s3) 0; padding: var(--s2) var(--s3); border: var(--trait); border-radius: var(--r1); background: var(--surface-2); }
+.sommaire b { font-family: var(--titre); }
+.sommaire ol { margin: 6px 0 0; padding-left: 1.3em; columns: 2; column-gap: var(--s4); }
+@media (max-width: 560px) { .sommaire ol { columns: 1; } }

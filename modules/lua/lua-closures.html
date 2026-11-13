@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Lua : portée, closures et fonctions d'ordre supérieur — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="lua" data-chapter="lua-closures">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/lua.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<h2>1. La portée des variables</h2>
+<p>Une variable <code>local</code> existe <b>du point où elle est déclarée jusqu'à la fin du bloc</b> qui la contient (fonction, boucle, <code>if</code>, ou <code>do … end</code>).</p>
+<div class="essai" data-langue="lua"><pre><code>local x = 1
+do
+  local x = 2          -- une AUTRE variable, qui masque la première
+  print(x)             -- 2
+end
+print(x)               -- 1
+
+if true then
+  local temporaire = 5
+end
+print(temporaire)      -- nil : elle n'existe plus</code></pre></div>
+<h2>2. Les closures</h2>
+<p>Une fonction peut utiliser les variables locales du bloc où elle a été <b>créée</b>, même après la fin de ce bloc. La fonction et les variables qu'elle a capturées forment une <b>closure</b> (fermeture).</p>
+<div class="essai" data-langue="lua"><pre><code>local function creerCompteur()
+  local n = 0                    -- variable capturée
+  return function()
+    n = n + 1
+    return n
+  end
+end
+
+local c1 = creerCompteur()
+local c2 = creerCompteur()
+print(c1(), c1(), c1())          -- 1 2 3
+print(c2())                      -- 1 : chaque compteur a son propre n</code></pre></div>
+<p>La variable <code>n</code> est <b>privée</b> : aucun code extérieur ne peut la lire ou la modifier, seulement passer par la fonction. C'est la façon la plus simple de protéger un état en Lua.</p>
+<h2>3. Fabriquer des fonctions</h2>
+<div class="essai" data-langue="lua"><pre><code>local function multiplicateur(k)
+  return function(x) return x * k end
+end
+local double, triple = multiplicateur(2), multiplicateur(3)
+print(double(10), triple(10))
+
+local function avecPrefixe(prefixe)
+  return function(message) print("[" .. prefixe .. "] " .. message) end
+end
+local info, erreur = avecPrefixe("INFO"), avecPrefixe("ERREUR")
+info("serveur démarré")
+erreur("disque plein")</code></pre></div>
+<h2>4. Fonctions d'ordre supérieur : map, filter, reduce</h2>
+<p>Lua ne les fournit pas, mais elles s'écrivent en quelques lignes. Une fonction d'<b>ordre supérieur</b> reçoit ou renvoie une fonction.</p>
+<div class="essai" data-langue="lua"><pre><code>local function map(t, f)
+  local r = {}
+  for i, v in ipairs(t) do r[i] = f(v) end
+  return r
+end
+local function filter(t, test)
+  local r = {}
+  for _, v in ipairs(t) do if test(v) then r[#r + 1] = v end end
+  return r
+end
+local function reduce(t, f, depart)
+  local acc = depart
+  for _, v in ipairs(t) do acc = f(acc, v) end
+  return acc
+end
+
+local prix = {12, 5, 30, 8}
+print(table.concat(map(prix, function(p) return p * 1.2 end), " "))
+print(table.concat(filter(prix, function(p) return p &gt;= 10 end), " "))
+print(reduce(prix, function(a, b) return a + b end, 0))</code></pre></div>
+<h2>5. Écrire son propre itérateur</h2>
+<p><code>for … in</code> appelle une fonction à chaque tour jusqu'à ce qu'elle renvoie <code>nil</code>. Une closure fait un itérateur parfait.</p>
+<div class="essai" data-langue="lua"><pre><code>local function intervalle(debut, fin, pas)
+  local i = debut - pas
+  return function()
+    i = i + pas
+    if i &lt;= fin then return i end      -- sinon renvoie nil : fin de la boucle
+  end
+end
+for n in intervalle(0, 20, 5) do io.write(n, " ") end
+print()</code></pre></div>
+<div class="box attention"><b>Une closure par tour de boucle</b><p>Dans un <code>for</code>, la variable de boucle est <b>recréée à chaque tour</b>. Chaque fonction créée dans la boucle capture donc sa propre valeur, contrairement à l'ancien <code>var</code> de JavaScript.</p></div>
+<div class="essai" data-langue="lua"><pre><code>local fonctions = {}
+for i = 1, 3 do
+  fonctions[i] = function() return i * 10 end
+end
+print(fonctions[1](), fonctions[2](), fonctions[3]())   -- 10 20 30</code></pre></div>
+<section class="tuto"><h3><small>Tutoriel</small>Un compte en banque sans classe</h3>
+<div class="etape"><h4>Un solde privé</h4>
+<p><code>solde</code> est une variable locale de <code>creerCompte</code> : seules les deux fonctions renvoyées y ont accès.</p>
+<div class="essai" data-langue="lua"><pre><code>local function creerCompte(depart)
+  local solde = depart
+  local compte = {}
+  function compte.deposer(montant) solde = solde + montant end
+  function compte.solde() return solde end
+  return compte
+end
+local c = creerCompte(100)
+c.deposer(50)
+print(c.solde())
+print(c.solde_prive)     -- nil : impossible d'y toucher directement</code></pre></div>
+</div>
+<div class="etape"><h4>Refuser les opérations invalides</h4>
+<div class="essai" data-langue="lua"><pre><code>local function creerCompte(depart)
+  local solde = depart
+  local compte = {}
+  function compte.retirer(montant)
+    if montant &gt; solde then return false, "solde insuffisant" end
+    solde = solde - montant
+    return true
+  end
+  function compte.solde() return solde end
+  return compte
+end
+local c = creerCompte(100)
+print(c.retirer(30), c.solde())
+print(c.retirer(500))</code></pre></div>
+</div>
+<div class="etape"><h4>Garder un historique</h4>
+<p>Une deuxième variable capturée, partagée par toutes les fonctions du compte.</p>
+<div class="essai" data-langue="lua"><pre><code>local function creerCompte(depart)
+  local solde, historique = depart, {}
+  local compte = {}
+  function compte.deposer(m) solde = solde + m; historique[#historique + 1] = "+" .. m end
+  function compte.retirer(m) solde = solde - m; historique[#historique + 1] = "-" .. m end
+  function compte.releve() return table.concat(historique, " ") .. " = " .. solde end
+  return compte
+end
+local c = creerCompte(100)
+c.deposer(50) c.retirer(20) c.deposer(5)
+print(c.releve())</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : le compteur</b><p>Écris une fabrique de compteurs avec une closure.</p><a class="defi-go" href="labo-lua.html#m=lua-compteur">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p>Une variable <code>local</code> vit jusqu'à la fin de son bloc. </p><p> Une <b>closure</b> est une fonction qui garde l'accès aux variables locales de l'endroit où elle a été créée. </p><p> Chaque appel de la fabrique crée de nouvelles variables capturées, indépendantes. </p><p> Une fonction d'ordre supérieur reçoit ou renvoie une fonction (map, filter, reduce, table.sort).</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-lua.html">Labo Lua</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "Jusqu'où existe une variable `local` ?",
+  "type": "qcm",
+  "options": [
+   "Jusqu'à la fin du bloc où elle est déclarée",
+   "Jusqu'à la fin du programme",
+   "Uniquement sur sa ligne",
+   "Jusqu'à la fin du fichier"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'une closure ?",
+  "type": "qcm",
+  "options": [
+   "Une fonction globale",
+   "Une fonction sans paramètre",
+   "Une fonction qui garde l'accès aux variables locales de son lieu de création",
+   "Une table verrouillée"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "`local c1, c2 = creerCompteur(), creerCompteur()` : après `c1() c1() c2()`, que renvoie `c1()` ?",
+  "type": "qcm",
+  "options": [
+   "2",
+   "1",
+   "4",
+   "3"
+  ],
+  "answer": 3,
+  "explication": "Chaque compteur possède sa propre variable capturée."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel bloc sert uniquement à limiter la portée de variables ?",
+  "type": "qcm",
+  "options": [
+   "`do … end`",
+   "`{ … }`",
+   "`scope … end`",
+   "`begin … end`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Deux closures créées par deux appels de la même fabrique partagent leurs variables capturées.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Chaque appel crée de nouvelles variables locales."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Une variable capturée par une closure est inaccessible directement depuis l'extérieur.",
+  "type": "vf",
+  "answer": true,
+  "explication": "C'est ce qui permet d'avoir un état privé."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'une fonction d'ordre supérieur ?",
+  "type": "qcm",
+  "options": [
+   "Une fonction avec plus de 3 paramètres",
+   "Une fonction récursive",
+   "Une fonction qui reçoit ou renvoie une fonction",
+   "Une fonction globale"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait la fonction map(t, f) du cours ?",
+  "type": "qcm",
+  "options": [
+   "Elle trie la liste",
+   "Elle applique f à chaque élément et renvoie la nouvelle liste",
+   "Elle garde les éléments pour lesquels f est vraie",
+   "Elle additionne les éléments"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait filter(t, test) ?",
+  "type": "qcm",
+  "options": [
+   "Elle supprime les doublons",
+   "Elle garde les éléments pour lesquels test renvoie vrai",
+   "Elle compte les éléments",
+   "Elle transforme chaque élément"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que renvoie `reduce({1, 2, 3, 4}, function(a, b) return a * b end, 1)` ?",
+  "type": "qcm",
+  "options": [
+   "4",
+   "1",
+   "24",
+   "10"
+  ],
+  "answer": 2,
+  "explication": "reduce combine tous les éléments : 1×1×2×3×4."
+ },
+ {
+  "niveau": "difficile",
+  "q": "Quand une boucle `for x in iterateur do` s'arrête-t-elle ?",
+  "type": "qcm",
+  "options": [
+   "Quand elle renvoie 0",
+   "Quand elle renvoie false",
+   "Après 100 tours",
+   "Quand la fonction itérateur renvoie nil"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "`local x = 1 do local x = 2 end print(x)` affiche…",
+  "type": "qcm",
+  "options": [
+   "2",
+   "Une erreur",
+   "`nil`",
+   "1"
+  ],
+  "answer": 3,
+  "explication": "Le x du bloc do est une autre variable, détruite à la fin du bloc."
+ },
+ {
+  "niveau": "difficile",
+  "q": "Dans `for i = 1, 3 do f[i] = function() return i end end`, que renvoie `f[1]()` ?",
+  "type": "qcm",
+  "options": [
+   "4",
+   "3",
+   "1",
+   "`nil`"
+  ],
+  "answer": 2,
+  "explication": "La variable de boucle est recréée à chaque tour."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel mot anglais désigne une fonction accompagnée des variables qu'elle a capturées ?",
+  "type": "saisie",
+  "answers": [
+   "closure"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle fonction standard de Lua est d'ordre supérieur ?",
+  "type": "qcm",
+  "options": [
+   "`string.len`",
+   "`table.insert`",
+   "`table.sort`",
+   "`tostring`"
+  ],
+  "answer": 2,
+  "explication": "Elle accepte une fonction de comparaison."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque fonction à son résultat sur {1, 2, 3, 4}.",
+  "type": "associer",
+  "paires": [
+   [
+    "map (x × 2)",
+    "{2, 4, 6, 8}"
+   ],
+   [
+    "filter (x pair)",
+    "{2, 4}"
+   ],
+   [
+    "reduce (somme)",
+    "10"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

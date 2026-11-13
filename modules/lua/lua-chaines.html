@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Lua : les chaînes de caractères — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="lua" data-chapter="lua-chaines">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/lua.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>Une chaîne Lua est <b>non modifiable</b> : toutes les fonctions renvoient une <b>nouvelle</b> chaîne. Les fonctions sont rangées dans la bibliothèque <code>string</code>, et on peut les appeler de deux façons : <code>string.upper(s)</code> ou <code>s:upper()</code>.</p>
+<h2>1. Les fonctions de base</h2>
+<div class="essai" data-langue="lua"><pre><code>local s = "Bonjour Lua"
+print(#s, s:len())                 -- longueur
+print(s:upper(), s:lower())
+print(s:sub(1, 7))                 -- du 1er au 7e caractère : Bonjour
+print(s:sub(9))                    -- du 9e à la fin : Lua
+print(s:sub(-3))                   -- les 3 derniers : Lua
+print(s:rep(2, " | "))             -- répète, avec un séparateur
+print(s:reverse())
+print(s:byte(1), string.char(76, 117, 97))   -- code du caractère et l'inverse</code></pre></div>
+<p>Les indices commencent à 1, les indices négatifs partent de la fin, et les deux bornes de <code>sub</code> sont incluses.</p>
+<div class="box attention"><b>Les accents comptent double</b><p>Lua compte des <b>octets</b>, pas des caractères : <code>#"été"</code> vaut 5, car <code>é</code> occupe 2 octets en UTF-8. Pour compter des caractères, utilise <code>utf8.len("été")</code> qui vaut 3. <code>upper</code> et <code>reverse</code> ne gèrent pas non plus les accents.</p></div>
+<h2>2. Mettre en forme : <code>string.format</code></h2>
+<div class="essai" data-langue="lua"><pre><code>print(string.format("%d article(s)", 3))
+print(string.format("%.2f €", 12.5))
+print(string.format("%5d|%-5d|%05d", 42, 42, 42))   -- largeur, gauche, zéros
+print(string.format("%s a %d ans", "Léa", 17))
+print(string.format("%x %X", 255, 255))               -- hexadécimal
+print(string.format("%3d%%", 50))                     -- %% affiche un %
+print(("%-10s%6.2f"):format("Souris", 19.9))</code></pre></div>
+<h2>3. Chercher : <code>find</code></h2>
+<div class="essai" data-langue="lua"><pre><code>local s = "le chat et le chien"
+print(s:find("chat"))             -- 4   7 : début et fin
+print(s:find("le", 3))            -- cherche à partir du 3e caractère : 12  13
+print(s:find("oiseau"))           -- nil
+if s:find("chien") then print("il y a un chien") end
+print(("v1.2"):find(".", 1, true))  -- 3  3 : true = texte brut, sans motif (sinon . = tout caractère)</code></pre></div>
+<h2>4. Les motifs (patterns)</h2>
+<p>Lua n'a pas d'expressions régulières complètes, mais des <b>motifs</b> plus simples qui suffisent presque toujours.</p>
+<table><tr><th>Motif</th><th>Signifie</th></tr><tr><td><code>%a</code></td><td>une lettre</td></tr><tr><td><code>%d</code></td><td>un chiffre</td></tr><tr><td><code>%s</code></td><td>un espace (ou tabulation, retour à la ligne)</td></tr><tr><td><code>%w</code></td><td>une lettre ou un chiffre</td></tr><tr><td><code>%p</code></td><td>un signe de ponctuation</td></tr><tr><td><code>%A</code> <code>%D</code> <code>%S</code></td><td>le contraire (majuscule = « tout sauf »)</td></tr><tr><td><code>.</code></td><td>n'importe quel caractère</td></tr><tr><td><code>[abc]</code> <code>[a-z]</code> <code>[^0-9]</code></td><td>un caractère de l'ensemble / hors de l'ensemble</td></tr><tr><td><code>+</code> <code>*</code> <code>-</code> <code>?</code></td><td>1 ou plus / 0 ou plus / 0 ou plus (le moins possible) / 0 ou 1</td></tr><tr><td><code>^</code> <code>$</code></td><td>début / fin de la chaîne</td></tr><tr><td><code>%.</code> <code>%%</code> <code>%(</code></td><td>le caractère lui-même (échappé par <code>%</code>)</td></tr><tr><td><code>( )</code></td><td>une capture : la partie à récupérer</td></tr></table>
+<div class="essai" data-langue="lua"><pre><code>print(("Commande n°1284 du 12/03"):match("%d+"))        -- 1284 : première suite de chiffres
+print(("age=42"):match("(%a+)=(%d+)"))                   -- age   42 : deux captures
+print(("  texte  "):match("^%s*(.-)%s*$") .. "|")        -- supprime les espaces autour
+print(("2026-11-13"):match("(%d+)-(%d+)-(%d+)"))
+print(("fichier.tar.gz"):match("%.(%w+)$"))              -- l'extension : gz</code></pre></div>
+<h2>5. Parcourir et remplacer : <code>gmatch</code> et <code>gsub</code></h2>
+<div class="essai" data-langue="lua"><pre><code>for mot in ("un deux trois"):gmatch("%a+") do io.write("[", mot, "] ") end
+print()
+for cle, val in ("x=1, y=22, z=333"):gmatch("(%w+)=(%w+)") do print(cle, val) end
+
+print(("bonjour"):gsub("o", "0"))                 -- b0nj0ur   2 : texte et nombre de remplacements
+print(("a b c"):gsub("%s", "_", 1))               -- au plus 1 remplacement
+print(("prix: 10 et 25"):gsub("%d+", function(n) return n * 2 end))   -- une fonction calcule le remplacement
+print(("Bonjour NOM"):gsub("NOM", {NOM = "Léa"}))  -- ou une table
+local _, nb = ("abracadabra"):gsub("a", "")
+print("nombre de a :", nb)</code></pre></div>
+<h2>6. Chaînes longues et caractères spéciaux</h2>
+<div class="essai" data-langue="lua"><pre><code>print("Ligne 1\nLigne 2\tavec tabulation et \"guillemets\"")
+local html = [[
+&lt;p class="x"&gt;Texte sur
+plusieurs lignes, sans échappement \n&lt;/p&gt;]]
+print(html)</code></pre></div>
+<div class="box attention"><b>Concaténer dans une boucle</b><p><code>s = s .. morceau</code> répété des milliers de fois recopie toute la chaîne à chaque tour. La bonne méthode : ranger les morceaux dans une table, puis <code>table.concat(t)</code> à la fin.</p></div>
+<section class="tuto"><h3><small>Tutoriel</small>Analyser une ligne de journal (log)</h3>
+<div class="etape"><h4>Extraire les champs avec des captures</h4>
+<p>Une ligne de log a un format fixe : on décrit ce format avec un motif, et chaque paire de parenthèses récupère un champ.</p>
+<div class="essai" data-langue="lua"><pre><code>local ligne = "2026-11-13 14:02:55 ERREUR disque plein sur /dev/sda1"
+local date, heure, niveau, message = ligne:match("^(%S+) (%S+) (%u+) (.+)$")
+print(date)
+print(heure)
+print(niveau)
+print(message)</code></pre></div>
+</div>
+<div class="etape"><h4>Compter les mots du message</h4>
+<div class="essai" data-langue="lua"><pre><code>local message = "disque plein sur /dev/sda1"
+local n = 0
+for _ in message:gmatch("%S+") do n = n + 1 end
+print(n .. " mots")</code></pre></div>
+</div>
+<div class="etape"><h4>Masquer une information sensible</h4>
+<p><code>gsub</code> remplace toutes les adresses IP par un texte neutre.</p>
+<div class="essai" data-langue="lua"><pre><code>local ligne = "connexion refusée depuis 192.168.1.42 puis 10.0.0.7"
+local propre, nb = ligne:gsub("%d+%.%d+%.%d+%.%d+", "[IP masquée]")
+print(propre)
+print(nb .. " adresses masquées")</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : compter les voyelles</b><p>Parcours une chaîne caractère par caractère, ou utilise <code>gsub</code>.</p><a class="defi-go" href="labo-lua.html#m=lua-voyelles">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : compter les mots</b><p>Un motif et <code>gmatch</code>.</p><a class="defi-go" href="labo-lua.html#m=lua-mots">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : le chiffre de César</b><p>Décale chaque lettre de 3 rangs avec <code>byte</code> et <code>char</code>.</p><a class="defi-go" href="labo-lua.html#m=lua-cesar">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p><code>s:upper()</code>, <code>s:sub(i, j)</code>, <code>s:rep(n)</code>, <code>#s</code>. </p><p> <code>string.format("%d %.2f %s", …)</code> pour mettre en forme. </p><p> <code>find</code> cherche, <code>match</code> extrait, <code>gmatch</code> parcourt, <code>gsub</code> remplace. </p><p> Classes de motifs : <code>%a</code> lettre, <code>%d</code> chiffre, <code>%s</code> espace, <code>%w</code> alphanumérique ; <code>%</code> échappe. </p><p> Une chaîne n'est jamais modifiée : on en obtient une nouvelle.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-lua.html">Labo Lua</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "facile",
+  "q": "Quelle écriture met la chaîne s en majuscules ?",
+  "type": "qcm",
+  "options": [
+   "`upper s`",
+   "`s.toUpperCase()`",
+   "`s:maj()`",
+   "`s:upper()`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que vaut `(\"Bonjour\"):sub(1, 3)` ?",
+  "type": "qcm",
+  "options": [
+   "`\"Bo\"`",
+   "`\"onj\"`",
+   "`\"Bonj\"`",
+   "`\"Bon\"`"
+  ],
+  "answer": 3,
+  "explication": "Indices à partir de 1, bornes incluses."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que vaut `(\"Bonjour\"):sub(-2)` ?",
+  "type": "qcm",
+  "options": [
+   "`\"r\"`",
+   "`\"jour\"`",
+   "`\"ur\"`",
+   "`\"Bo\"`"
+  ],
+  "answer": 2,
+  "explication": "Un indice négatif part de la fin."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que renvoie `(\"abc\"):rep(2)` ?",
+  "type": "qcm",
+  "options": [
+   "`\"aabbcc\"`",
+   "`\"abcabc\"`",
+   "`{\"abc\", \"abc\"}`",
+   "`\"abc2\"`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel format affiche un nombre avec deux décimales ?",
+  "type": "qcm",
+  "options": [
+   "`%2d`",
+   "`%f2`",
+   "`%.2f`",
+   "`%d.2`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que représente `%d` dans un motif (pattern) ?",
+  "type": "qcm",
+  "options": [
+   "Un chiffre",
+   "N'importe quel caractère",
+   "Une lettre",
+   "Un espace"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que représente `%a` dans un motif ?",
+  "type": "qcm",
+  "options": [
+   "Le caractère a",
+   "Tout caractère",
+   "Une lettre",
+   "Un chiffre"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que renvoie `(\"age=42\"):match(\"%d+\")` ?",
+  "type": "qcm",
+  "options": [
+   "`nil`",
+   "`\"42\"`",
+   "42",
+   "`\"age\"`"
+  ],
+  "answer": 1,
+  "explication": "match renvoie une chaîne ; il faut tonumber pour un nombre."
+ },
+ {
+  "niveau": "difficile",
+  "q": "Combien de valeurs renvoie `(\"bonjour\"):gsub(\"o\", \"0\")` ?",
+  "type": "qcm",
+  "options": [
+   "2 : le texte et le nombre de remplacements",
+   "Une table",
+   "1 : le texte",
+   "1 : le nombre de remplacements"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle fonction parcourt toutes les occurrences d'un motif dans une boucle for ?",
+  "type": "qcm",
+  "options": [
+   "`gmatch`",
+   "`match`",
+   "`find`",
+   "`gsub`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que vaut `#\"été\"` en Lua ?",
+  "type": "qcm",
+  "options": [
+   "5",
+   "3",
+   "6",
+   "4"
+  ],
+  "answer": 0,
+  "explication": "# compte des octets ; é en occupe deux en UTF-8."
+ },
+ {
+  "niveau": "difficile",
+  "q": "Comment désigner un vrai point dans un motif ?",
+  "type": "qcm",
+  "options": [
+   "`[dot]`",
+   "`.`",
+   "`%.`",
+   "`\\.`"
+  ],
+  "answer": 2,
+  "explication": "Le caractère d'échappement des motifs est %."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Les fonctions de chaîne modifient la chaîne d'origine.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Une chaîne est non modifiable : on obtient une nouvelle chaîne."
+ },
+ {
+  "niveau": "moyen",
+  "q": "`s:len()` et `string.len(s)` font la même chose.",
+  "type": "vf",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle fonction de string remplace les occurrences d'un motif ?",
+  "type": "saisie",
+  "answers": [
+   "gsub",
+   "string.gsub"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Quel motif désigne « une lettre ou un chiffre » ?",
+  "type": "saisie",
+  "answers": [
+   "%w"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que signifie `^` au début d'un motif ?",
+  "type": "qcm",
+  "options": [
+   "Le motif doit commencer au début de la chaîne",
+   "Rien",
+   "Le contraire du motif",
+   "Une puissance"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Quelle est la bonne façon d'assembler 10 000 morceaux de texte ?",
+  "type": "qcm",
+  "options": [
+   "`gsub`",
+   "`string.rep`",
+   "Les ranger dans une table puis `table.concat`",
+   "`s = s .. morceau` dans la boucle"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque fonction à ce qu'elle renvoie.",
+  "type": "associer",
+  "paires": [
+   [
+    "`find`",
+    "positions de début et de fin"
+   ],
+   [
+    "`match`",
+    "le texte capturé"
+   ],
+   [
+    "`gsub`",
+    "le texte modifié et un compteur"
+   ],
+   [
+    "`format`",
+    "un texte mis en forme"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

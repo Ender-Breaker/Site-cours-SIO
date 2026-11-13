@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Lua : les coroutines — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="lua" data-chapter="lua-coroutines">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/lua.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>Une <b>coroutine</b> est une fonction qui peut se <b>mettre en pause</b> au milieu de son exécution, rendre la main, puis <b>reprendre exactement là où elle s'était arrêtée</b>, avec toutes ses variables locales intactes. C'est une spécialité de Lua, très utilisée dans les jeux pour écrire des séquences (« avance, attends 2 secondes, tire, attends… ») comme un simple script.</p>
+<h2>1. Créer, lancer, suspendre</h2>
+<div class="essai" data-langue="lua"><pre><code>local co = coroutine.create(function()
+  print("étape 1")
+  coroutine.yield()            -- pause : rend la main
+  print("étape 2")
+  coroutine.yield()
+  print("étape 3")
+end)
+
+print(coroutine.status(co))    -- suspended : créée mais pas encore lancée
+coroutine.resume(co)           -- exécute jusqu'au premier yield
+print("-- retour au programme principal")
+coroutine.resume(co)
+coroutine.resume(co)
+print(coroutine.status(co))    -- dead : terminée
+print(coroutine.resume(co))    -- false   cannot resume dead coroutine</code></pre></div>
+<table><tr><th>Fonction</th><th>Rôle</th></tr><tr><td><code>coroutine.create(f)</code></td><td>crée la coroutine (sans la lancer)</td></tr><tr><td><code>coroutine.resume(co, …)</code></td><td>lance ou reprend ; renvoie <code>true</code> + les valeurs, ou <code>false</code> + l'erreur</td></tr><tr><td><code>coroutine.yield(…)</code></td><td>met en pause, depuis l'intérieur</td></tr><tr><td><code>coroutine.status(co)</code></td><td><code>suspended</code>, <code>running</code>, <code>dead</code></td></tr><tr><td><code>coroutine.wrap(f)</code></td><td>crée la coroutine et renvoie une fonction qui la reprend</td></tr></table>
+<h2>2. Échanger des valeurs</h2>
+<p><code>yield</code> peut <b>envoyer</b> des valeurs à celui qui a fait <code>resume</code>, et <code>resume</code> peut en <b>envoyer</b> à la coroutine.</p>
+<div class="essai" data-langue="lua"><pre><code>local co = coroutine.create(function(a)
+  print("reçu au départ :", a)
+  local b = coroutine.yield(a * 2)        -- envoie a*2, puis attend
+  print("reçu à la reprise :", b)
+  return "terminé"
+end)
+
+print(coroutine.resume(co, 10))    -- true   20
+print(coroutine.resume(co, 99))    -- true   terminé</code></pre></div>
+<h2>3. Les générateurs avec <code>coroutine.wrap</code></h2>
+<p>Un <b>générateur</b> produit des valeurs une par une, à la demande. <code>coroutine.wrap</code> renvoie directement une fonction : c'est un itérateur tout prêt pour <code>for … in</code>.</p>
+<div class="essai" data-langue="lua"><pre><code>local function fibonacci(limite)
+  return coroutine.wrap(function()
+    local a, b = 0, 1
+    while a &lt;= limite do
+      coroutine.yield(a)
+      a, b = b, a + b
+    end
+  end)
+end
+
+for n in fibonacci(100) do io.write(n, " ") end
+print()</code></pre></div>
+<p>La suite pourrait être infinie : le générateur ne calcule que ce qu'on lui demande.</p>
+<div class="essai" data-langue="lua"><pre><code>local function compteur()
+  return coroutine.wrap(function()
+    local n = 0
+    while true do n = n + 1; coroutine.yield(n) end    -- boucle infinie… mais en pause
+  end)
+end
+local suivant = compteur()
+print(suivant(), suivant(), suivant())</code></pre></div>
+<h2>4. Les coroutines dans un jeu</h2>
+<p>Sans coroutine, une séquence d'actions oblige à gérer des états et des minuteurs. Avec, on écrit la séquence de haut en bas, et on reprend la coroutine une fois par image.</p>
+<div class="essai" data-langue="lua"><pre><code>local function attendre(images)
+  for _ = 1, images do coroutine.yield() end
+end
+
+local boss = coroutine.wrap(function()
+  while true do
+    print("  le boss avance")
+    attendre(2)
+    print("  le boss tire")
+    attendre(1)
+  end
+end)
+
+for image = 1, 8 do            -- la boucle de jeu : une reprise par image
+  io.write("image ", image, "\n")
+  boss()
+end</code></pre></div>
+<div class="box attention"><b>Ce n'est pas du parallélisme</b><p>Une seule coroutine s'exécute à la fois, et elle ne s'interrompt <b>que</b> là où elle appelle <code>yield</code>. Il n'y a donc ni course critique ni verrou à gérer, contrairement aux threads du système.</p></div>
+<section class="tuto"><h3><small>Tutoriel</small>Un producteur et un consommateur</h3>
+<div class="etape"><h4>Le producteur génère des commandes</h4>
+<div class="essai" data-langue="lua"><pre><code>local producteur = coroutine.wrap(function()
+  for _, article in ipairs({ "clavier", "souris", "écran" }) do
+    coroutine.yield(article)
+  end
+end)
+print(producteur(), producteur(), producteur(), producteur())</code></pre></div>
+</div>
+<div class="etape"><h4>Le consommateur les traite une à une</h4>
+<p>Quand le producteur est terminé, il renvoie <code>nil</code> : la boucle <code>for</code> s'arrête toute seule.</p>
+<div class="essai" data-langue="lua"><pre><code>local function commandes()
+  return coroutine.wrap(function()
+    for _, article in ipairs({ "clavier", "souris", "écran" }) do
+      coroutine.yield(article)
+    end
+  end)
+end
+local n = 0
+for article in commandes() do
+  n = n + 1
+  print("commande " .. n .. " : " .. article)
+end</code></pre></div>
+</div>
+<div class="etape"><h4>Un filtre entre les deux</h4>
+<p>On enchaîne les générateurs comme des tuyaux (pipes) du shell.</p>
+<div class="essai" data-langue="lua"><pre><code>local function nombres(n)
+  return coroutine.wrap(function() for i = 1, n do coroutine.yield(i) end end)
+end
+local function pairs_seulement(source)
+  return coroutine.wrap(function()
+    for v in source do if v % 2 == 0 then coroutine.yield(v) end end
+  end)
+end
+for v in pairs_seulement(nombres(10)) do io.write(v, " ") end
+print()</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : un générateur</b><p>Produis les termes d'une suite avec une coroutine.</p><a class="defi-go" href="labo-lua.html#m=lua-generateur">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p>Une coroutine se met en pause avec <code>coroutine.yield</code> et reprend avec <code>coroutine.resume</code>. </p><p> Ses variables locales sont conservées entre deux reprises. </p><p> <code>coroutine.wrap(f)</code> renvoie une fonction : idéal pour un générateur dans un <code>for … in</code>. </p><p> Une seule coroutine s'exécute à la fois : ce n'est pas du parallélisme.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-lua.html">Labo Lua</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "Que fait `coroutine.yield()` ?",
+  "type": "qcm",
+  "options": [
+   "Elle crée une coroutine",
+   "Elle termine la coroutine",
+   "Elle relance la coroutine depuis le début",
+   "Elle met la coroutine en pause et rend la main"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle fonction lance ou reprend une coroutine ?",
+  "type": "qcm",
+  "options": [
+   "`coroutine.run`",
+   "`coroutine.start`",
+   "`coroutine.next`",
+   "`coroutine.resume`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel est l'état d'une coroutine qui vient d'être créée avec create ?",
+  "type": "qcm",
+  "options": [
+   "`running`",
+   "`new`",
+   "`suspended`",
+   "`dead`"
+  ],
+  "answer": 2,
+  "explication": "create ne la lance pas."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel est l'état d'une coroutine dont la fonction est terminée ?",
+  "type": "qcm",
+  "options": [
+   "`dead`",
+   "`finished`",
+   "`suspended`",
+   "`nil`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que renvoie `coroutine.resume(co)` si la coroutine fait `coroutine.yield(5)` ?",
+  "type": "qcm",
+  "options": [
+   "`true` puis 5",
+   "5",
+   "`true`",
+   "`false` puis 5"
+  ],
+  "answer": 0,
+  "explication": "Le premier résultat indique s'il y a eu une erreur."
+ },
+ {
+  "niveau": "difficile",
+  "q": "Dans `local b = coroutine.yield(1)`, d'où vient la valeur de b ?",
+  "type": "qcm",
+  "options": [
+   "D'une variable globale",
+   "Elle vaut toujours nil",
+   "Des arguments du prochain resume",
+   "De la valeur 1"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que renvoie `coroutine.wrap(f)` ?",
+  "type": "qcm",
+  "options": [
+   "Le résultat de f",
+   "Un objet coroutine",
+   "Une fonction qui reprend la coroutine à chaque appel",
+   "Une table"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Les variables locales d'une coroutine sont conservées pendant qu'elle est en pause.",
+  "type": "vf",
+  "answer": true,
+  "explication": "C'est tout l'intérêt : elle reprend exactement où elle en était."
+ },
+ {
+  "niveau": "difficile",
+  "q": "Deux coroutines peuvent s'exécuter en même temps sur deux cœurs du processeur.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Une seule s'exécute à la fois ; elles se passent la main volontairement."
+ },
+ {
+  "niveau": "moyen",
+  "q": "On peut reprendre une coroutine terminée (dead).",
+  "type": "vf",
+  "answer": false,
+  "explication": "resume renvoie alors false et un message d'erreur."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'un générateur ?",
+  "type": "qcm",
+  "options": [
+   "Une fonction qui produit des valeurs une par une, à la demande",
+   "Une fonction qui crée des tables",
+   "Un constructeur de classe",
+   "Un nombre aléatoire"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi un générateur peut-il contenir `while true do` sans bloquer le programme ?",
+  "type": "qcm",
+  "options": [
+   "Il bloque bel et bien",
+   "Parce que Lua limite les boucles",
+   "Parce que true devient faux",
+   "Parce qu'il se met en pause à chaque yield"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Dans un jeu, à quoi servent surtout les coroutines ?",
+  "type": "qcm",
+  "options": [
+   "À charger les images",
+   "À remplacer les tables",
+   "À dessiner plus vite",
+   "À écrire des séquences d'actions étalées sur plusieurs images"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle fonction de coroutine donne l'état (suspended, running, dead) ?",
+  "type": "saisie",
+  "answers": [
+   "coroutine.status",
+   "status"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que se passe-t-il quand la fonction d'un générateur wrap se termine et qu'il est utilisé dans un for … in ?",
+  "type": "qcm",
+  "options": [
+   "Une erreur est levée",
+   "Le programme se bloque",
+   "Il renvoie nil et la boucle s'arrête",
+   "La boucle recommence"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque fonction à son rôle.",
+  "type": "associer",
+  "paires": [
+   [
+    "`create`",
+    "créer sans lancer"
+   ],
+   [
+    "`resume`",
+    "lancer ou reprendre"
+   ],
+   [
+    "`yield`",
+    "mettre en pause"
+   ],
+   [
+    "`wrap`",
+    "créer une fonction-générateur"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

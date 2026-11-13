@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Lua : erreurs, modules et bibliothèques standard — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="lua" data-chapter="lua-erreurs-modules">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/lua.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<h2>1. Provoquer une erreur : <code>error</code> et <code>assert</code></h2>
+<div class="essai" data-langue="lua" data-erreur="1"><pre><code>local function racine(x)
+  if x &lt; 0 then
+    error("nombre négatif interdit : " .. x)
+  end
+  return math.sqrt(x)
+end
+print(racine(16))
+print(racine(-4))        -- le programme s'arrête ici
+print("jamais affiché")</code></pre></div>
+<p><code>assert(condition, message)</code> provoque une erreur si la condition est fausse, sinon renvoie la condition. C'est le raccourci habituel pour vérifier une hypothèse :</p>
+<div class="essai" data-langue="lua" data-erreur="1"><pre><code>local age = assert(tonumber("17"), "âge invalide")
+print(age)
+local autre = assert(tonumber("abc"), "âge invalide")</code></pre></div>
+<h2>2. Attraper une erreur : <code>pcall</code></h2>
+<p><code>pcall(f, arguments…)</code> (*protected call*) appelle <code>f</code> en mode protégé. Il renvoie <code>true</code> suivi des résultats, ou <code>false</code> suivi du message d'erreur. Le programme <b>continue</b> dans les deux cas : c'est le <code>try / catch</code> de Lua.</p>
+<div class="essai" data-langue="lua"><pre><code>local function diviser(a, b)
+  if b == 0 then error("division par zéro") end
+  return a / b
+end
+
+local ok, resultat = pcall(diviser, 10, 2)
+print(ok, resultat)
+local ok2, message = pcall(diviser, 10, 0)
+print(ok2, message)
+print("le programme continue")
+
+if not pcall(function() local t = nil; return t.x end) then
+  print("erreur attrapée : on a indexé nil")
+end</code></pre></div>
+<p>L'erreur peut être n'importe quelle valeur, par exemple une table qui décrit le problème. Le second argument de <code>error</code> (le niveau <code>0</code>) retire le préfixe « fichier:ligne » du message :</p>
+<div class="essai" data-langue="lua"><pre><code>local ok, e = pcall(function() error({ code = 404, texte = "introuvable" }) end)
+print(ok, e.code, e.texte)
+print(pcall(error, "message nu", 0))</code></pre></div>
+<h2>3. La convention <code>nil, message</code></h2>
+<p>Pour une erreur <b>prévisible</b> (fichier absent, saisie invalide), les fonctions Lua ne lèvent pas d'erreur : elles renvoient <code>nil</code> suivi d'un message. L'appelant teste le premier résultat.</p>
+<div class="essai" data-langue="lua"><pre><code>local function lireAge(texte)
+  local n = tonumber(texte)
+  if not n then return nil, "ce n'est pas un nombre" end
+  if n &lt; 0 or n &gt; 130 then return nil, "âge impossible" end
+  return n
+end
+
+for _, saisie in ipairs({ "17", "abc", "250" }) do
+  local age, err = lireAge(saisie)
+  if age then print("âge valide :", age) else print("refusé :", err) end
+end</code></pre></div>
+<div class="box"><b>Quelle méthode choisir ?</b><p><code>nil, message</code> pour ce qui peut arriver normalement (mauvaise saisie). <code>error</code> pour un bug ou une situation qui ne devrait jamais arriver. <code>pcall</code> à l'endroit où tu sais quoi faire de l'erreur.</p></div>
+<h2>4. La bibliothèque <code>math</code></h2>
+<div class="essai" data-langue="lua"><pre><code>print(math.floor(3.7), math.ceil(3.2))      -- arrondis bas et haut : 3  4
+print(math.floor(3.5 + 0.5))                -- arrondi au plus proche : 4
+print(math.max(4, 9, 2), math.min(4, 9, 2))
+print(math.abs(-5), math.sqrt(49), math.pi)
+print(math.huge, -math.huge)                -- plus et moins l'infini
+print(math.tointeger(5.0), 7 // 1)          -- flottant → entier
+print(math.random(1, 6))                    -- entier au hasard entre 1 et 6
+print(math.random())                        -- flottant entre 0 et 1</code></pre></div>
+<h2>5. <code>os</code> et <code>io</code></h2>
+<div class="essai" data-langue="lua"><pre><code>print(os.time())                       -- secondes depuis le 1er janvier 1970
+print(os.date("%d/%m/%Y %H:%M"))       -- date mise en forme
+local debut = os.clock()               -- temps processeur, pour chronométrer
+local s = 0
+for i = 1, 1000000 do s = s + i end
+print(s, os.clock() - debut &gt;= 0)</code></pre></div>
+<p>Sur un ordinateur, <code>io</code> lit et écrit aussi des fichiers. Ce code ne fonctionne pas dans le navigateur (pas de disque), mais c'est celui que tu écriras en vrai :</p>
+<pre><code>local f, err = io.open("scores.txt", "w")     -- "r" lire, "w" écrire, "a" ajouter
+if not f then error(err) end
+f:write("Léa 120\n")
+f:close()
+
+for ligne in io.lines("scores.txt") do        -- lit le fichier ligne par ligne
+  print(ligne)
+end</code></pre>
+<p>Remarque la convention <code>nil, message</code> de <code>io.open</code>, et son raccourci : <code>local f = assert(io.open("scores.txt"))</code>.</p>
+<h2>6. Les modules</h2>
+<p>Un module est un fichier qui <b>renvoie une table</b> de fonctions. On le charge avec <code>require</code>, qui exécute le fichier une seule fois et garde le résultat en mémoire.</p>
+<pre><code>-- fichier geometrie.lua
+local M = {}
+
+local function carre(x) return x * x end          -- privé : non exporté
+
+function M.aireCercle(r) return math.pi * carre(r) end
+function M.aireRectangle(l, h) return l * h end
+
+return M</code></pre>
+<pre><code>-- fichier main.lua
+local geo = require("geometrie")       -- sans l'extension .lua
+print(geo.aireRectangle(3, 4))</code></pre>
+<p>Dans le navigateur il n'y a qu'un seul fichier, mais le principe se teste très bien avec un bloc <code>do … end</code> :</p>
+<div class="essai" data-langue="lua"><pre><code>local geo
+do
+  local M = {}
+  local function carre(x) return x * x end
+  function M.aireCercle(r) return math.pi * carre(r) end
+  function M.aireRectangle(l, h) return l * h end
+  geo = M
+end
+print(geo.aireRectangle(3, 4))
+print(string.format("%.2f", geo.aireCercle(1)))
+print(carre)          -- nil : la fonction privée est invisible</code></pre></div>
+<section class="tuto"><h3><small>Tutoriel</small>Un programme qui ne plante jamais</h3>
+<div class="etape"><h4>Le calcul fragile</h4>
+<p>Ce programme s'arrête à la première mauvaise saisie.</p>
+<div class="essai" data-langue="lua" data-erreur="1" data-stdin="10&#10;0"><pre><code>local a = io.read("n")
+local b = io.read("n")
+if b == 0 then error("division par zéro") end
+print(a / b)</code></pre></div>
+</div>
+<div class="etape"><h4>Protéger avec pcall</h4>
+<div class="essai" data-langue="lua" data-stdin="10&#10;0"><pre><code>local function calcul()
+  local a = io.read("n")
+  local b = io.read("n")
+  if b == 0 then error("division par zéro", 0) end
+  return a / b
+end
+local ok, r = pcall(calcul)
+if ok then print("Résultat : " .. r) else print("Erreur : " .. r) end</code></pre></div>
+</div>
+<div class="etape"><h4>Vérifier aussi la saisie</h4>
+<p><code>io.read("n")</code> renvoie <code>nil</code> si l'utilisateur ne tape pas un nombre. Essaie avec <code>abc</code> en entrée.</p>
+<div class="essai" data-langue="lua" data-stdin="10&#10;abc"><pre><code>local function calcul()
+  local a = io.read("n")
+  local b = io.read("n")
+  if not a or not b then error("il faut deux nombres", 0) end
+  if b == 0 then error("division par zéro", 0) end
+  return a / b
+end
+local ok, r = pcall(calcul)
+print(ok and ("Résultat : " .. r) or ("Erreur : " .. r))</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : la division protégée</b><p>Attrape l'erreur avec <code>pcall</code>.</p><a class="defi-go" href="labo-lua.html#m=lua-pcall">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p><code>error(msg)</code> lève une erreur, <code>assert(cond, msg)</code> vérifie. </p><p> <code>pcall(f, …)</code> renvoie <code>true, résultats</code> ou <code>false, erreur</code> sans arrêter le programme. </p><p> Convention pour les erreurs prévisibles : <code>return nil, "message"</code>. </p><p> <code>math.floor</code>, <code>math.max</code>, <code>math.random(a, b)</code> ; <code>os.time</code>, <code>os.date</code>. </p><p> Un module est un fichier qui renvoie une table ; <code>require("nom")</code> le charge.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-lua.html">Labo Lua</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "Quelle fonction appelle une autre fonction en mode protégé ?",
+  "type": "qcm",
+  "options": [
+   "`catch`",
+   "`pcall`",
+   "`try`",
+   "`protect`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que renvoie `pcall(f)` si f provoque une erreur ?",
+  "type": "qcm",
+  "options": [
+   "Le programme s'arrête",
+   "`nil`",
+   "`false` puis le message d'erreur",
+   "`true` puis le message"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que renvoie `pcall(f)` si tout va bien ?",
+  "type": "qcm",
+  "options": [
+   "`nil`",
+   "`true` puis les résultats de f",
+   "`false`",
+   "Seulement les résultats de f"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle fonction lève une erreur ?",
+  "type": "qcm",
+  "options": [
+   "`throw`",
+   "`error`",
+   "`fail`",
+   "`raise`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait `assert(x, \"msg\")` si x vaut nil ?",
+  "type": "qcm",
+  "options": [
+   "Elle renvoie nil",
+   "Elle affiche le message et continue",
+   "Rien",
+   "Elle lève une erreur avec le message"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle est la convention Lua pour signaler une erreur prévisible ?",
+  "type": "qcm",
+  "options": [
+   "Lever une exception",
+   "Renvoyer -1",
+   "Renvoyer `nil` suivi d'un message",
+   "Afficher le message avec print"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "facile",
+  "q": "Que vaut `math.floor(3.7)` ?",
+  "type": "qcm",
+  "options": [
+   "3.7",
+   "3.0",
+   "4",
+   "3"
+  ],
+  "answer": 3,
+  "explication": "floor arrondit vers le bas."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que renvoie `math.random(1, 6)` ?",
+  "type": "qcm",
+  "options": [
+   "Un entier entre 1 et 5",
+   "Un entier au hasard entre 1 et 6 inclus",
+   "Toujours 1",
+   "Un flottant entre 1 et 6"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que doit faire la dernière ligne d'un fichier module ?",
+  "type": "qcm",
+  "options": [
+   "Renvoyer la table du module avec return",
+   "Appeler require",
+   "Appeler export",
+   "Rien"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle fonction charge un module ?",
+  "type": "qcm",
+  "options": [
+   "`import`",
+   "`include`",
+   "`load`",
+   "`require`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "require exécute le fichier du module à chaque appel.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Le module est exécuté une fois, puis le résultat est gardé en mémoire."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Une fonction déclarée local dans un module est invisible depuis l'extérieur.",
+  "type": "vf",
+  "answer": true,
+  "explication": "Seul ce qui est rangé dans la table renvoyée est exporté."
+ },
+ {
+  "niveau": "difficile",
+  "q": "Une erreur Lua est forcément une chaîne de caractères.",
+  "type": "vf",
+  "answer": false,
+  "explication": "error accepte n'importe quelle valeur, par exemple une table."
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que renvoie `io.open(\"absent.txt\")` si le fichier n'existe pas ?",
+  "type": "qcm",
+  "options": [
+   "`nil` et un message d'erreur",
+   "Un fichier vide",
+   "Une erreur immédiate",
+   "`false`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle fonction de math arrondit à l'entier supérieur ?",
+  "type": "saisie",
+  "answers": [
+   "math.ceil",
+   "ceil"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Quelle fonction de os met en forme la date et l'heure ?",
+  "type": "saisie",
+  "answers": [
+   "os.date",
+   "date"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "À quoi sert le 0 dans `error(\"message\", 0)` ?",
+  "type": "qcm",
+  "options": [
+   "À relancer le calcul",
+   "À ignorer l'erreur",
+   "À ne pas ajouter la position (fichier:ligne) au message",
+   "À arrêter le programme avec le code 0"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque fonction à son rôle.",
+  "type": "associer",
+  "paires": [
+   [
+    "`error`",
+    "lever une erreur"
+   ],
+   [
+    "`pcall`",
+    "attraper une erreur"
+   ],
+   [
+    "`assert`",
+    "vérifier une condition"
+   ],
+   [
+    "`require`",
+    "charger un module"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

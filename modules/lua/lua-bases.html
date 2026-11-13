@@ -11,184 +11,346 @@
 </head>
 <body data-module="lua" data-chapter="lua-bases">
 
-<!-- ============ COURS ============ -->
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/lua.txt) -->
 <article id="cours">
 <div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
-<p><b>Lua</b> (« lune » en portugais) est un langage très léger, créé au Brésil en 1993, conçu pour être <b>intégré</b> dans d'autres programmes. On le retrouve dans les jeux (Roblox utilise une variante, Luau ; le moteur LÖVE ; World of Warcraft pour ses extensions), dans Neovim, dans des routeurs et dans le serveur web nginx (OpenResty).</p>
-
+<p><b>Lua</b> (« lune » en portugais) est un langage très léger, créé au Brésil en 1993 et conçu pour être <b>intégré</b> dans d'autres programmes. On le retrouve dans les jeux (Roblox utilise une variante, Luau ; le moteur LÖVE ; les extensions de World of Warcraft), dans l'éditeur Neovim, dans des routeurs et dans le serveur web nginx (OpenResty). Tout le langage tient en une vingtaine de mots-clés : on peut vraiment le connaître en entier, et c'est le but de ce cours.</p>
+<div class="box"><b>Comment suivre ce cours</b><p>Chaque bloc de code avec un bouton <b>Exécuter</b> est un vrai programme Lua 5.4 : lance-le, modifie-le, casse-le, relance-le. C'est en changeant le code qu'on apprend. Les <b>défis</b> t'envoient dans le labo, où ton programme est vérifié automatiquement.</p></div>
 <h2>1. Afficher et commenter</h2>
-<pre><code>print(&quot;Bonjour !&quot;)
-print(&quot;Total :&quot;, 42)      -- plusieurs valeurs séparées par une tabulation
--- commentaire sur une ligne
---[[ commentaire
-     sur plusieurs lignes ]]</code></pre>
-<p>Pas de point-virgule obligatoire, pas d'accolades : les blocs se terminent par <code>end</code>.</p>
-
-<h2>2. Variables : locales ou globales</h2>
-<pre><code>local score = 0         -- variable locale (à préférer)
+<p><code>print</code> affiche ses valeurs puis passe à la ligne. Avec plusieurs valeurs, elles sont séparées par une tabulation.</p>
+<div class="essai" data-langue="lua"><pre><code>print("Bonjour !")
+print("Total :", 42)
+-- un commentaire sur une ligne : Lua l'ignore
+--[[ un commentaire
+     sur plusieurs lignes ]]
+io.write("Sans retour ")
+io.write("à la ligne\n")</code></pre></div>
+<p>Pas de point-virgule obligatoire, pas d'accolades : les blocs se terminent par le mot <code>end</code>. Lua distingue les majuscules des minuscules : <code>Score</code> et <code>score</code> sont deux noms différents.</p>
+<h2>2. Variables : toujours <code>local</code></h2>
+<div class="essai" data-langue="lua"><pre><code>local score = 0          -- variable locale : à préférer partout
 score = score + 10
-nom = &quot;Léa&quot;             -- sans local : variable GLOBALE
-local a, b = 1, 2       -- affectation multiple
-a, b = b, a             -- échange en une ligne</code></pre>
-<div class="box attention"><b>Toujours local</b><p>Sans le mot <code>local</code>, une variable est globale : elle est visible partout et peut écraser une autre variable du même nom. Une variable jamais affectée vaut <code>nil</code>.</p></div>
-
-<h2>3. Les types</h2>
-<table><tr><th>Type</th><th>Exemples</th></tr>
-<tr><td>nil</td><td><code>nil</code> : absence de valeur</td></tr>
-<tr><td>boolean</td><td><code>true</code>, <code>false</code></td></tr>
-<tr><td>number</td><td><code>42</code> (entier), <code>3.14</code> (flottant)</td></tr>
-<tr><td>string</td><td><code>"texte"</code>, <code>'texte'</code>, <code>[[texte long]]</code></td></tr>
-<tr><td>table</td><td><code>{1, 2, 3}</code>, <code>{nom = "Léa"}</code> : la seule structure de données</td></tr>
-<tr><td>function</td><td>les fonctions sont des valeurs</td></tr></table>
-<p><code>type(x)</code> renvoie le nom du type.</p>
-
-<h2>4. Opérateurs</h2>
-<pre><code>7 / 2      -- 3.5   (division toujours décimale)
-7 // 2     -- 3     (division entière)
-7 % 2      -- 1     (reste)
-2 ^ 10     -- 1024.0 (puissance)
-&quot;Bon&quot; .. &quot;jour&quot;   -- &quot;Bonjour&quot; : concaténation avec ..
-#&quot;Lua&quot;     -- 3 : longueur
-tonumber(&quot;42&quot;), tostring(42)</code></pre>
-
-<h2>5. Lire au clavier</h2>
-<pre><code>local nom = io.read()        -- une ligne (texte)
-local n = io.read(&quot;n&quot;)       -- un nombre
-io.write(&quot;Pas de retour à la ligne&quot;)</code></pre><div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-lua.html">labo Lua</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+local a, b = 1, 2        -- affectation multiple
+a, b = b, a              -- échange en une seule ligne
+print(score, a, b)
+print(inconnue)          -- jamais affectée : vaut nil</code></pre></div>
+<div class="box attention"><b>Le piège numéro 1 de Lua</b><p>Sans le mot <code>local</code>, une variable est <b>globale</b> : elle est visible dans tout le programme et peut écraser une autre variable du même nom. Une faute de frappe dans un nom ne provoque pas d'erreur : elle crée silencieusement une nouvelle variable qui vaut <code>nil</code>. Prends l'habitude d'écrire <code>local</code> à chaque création.</p></div>
+<p>Depuis Lua 5.4, on peut aussi déclarer une constante : <code>local TVA &lt;const&gt; = 0.2</code>. La modifier ensuite est une erreur de compilation.</p>
+<h2>3. Les huit types</h2>
+<table><tr><th>Type</th><th>Exemples</th><th>À savoir</th></tr><tr><td><code>nil</code></td><td><code>nil</code></td><td>l'absence de valeur</td></tr><tr><td><code>boolean</code></td><td><code>true</code>, <code>false</code></td><td>seuls <code>false</code> et <code>nil</code> sont « faux »</td></tr><tr><td><code>number</code></td><td><code>42</code>, <code>3.14</code>, <code>1e3</code>, <code>0xFF</code></td><td>deux sous-types : entier et flottant</td></tr><tr><td><code>string</code></td><td><code>"texte"</code>, <code>'texte'</code>, <code>[[texte long]]</code></td><td>non modifiable</td></tr><tr><td><code>table</code></td><td><code>{1, 2, 3}</code>, <code>{nom = "Léa"}</code></td><td>la seule structure de données</td></tr><tr><td><code>function</code></td><td><code>print</code>, <code>function() end</code></td><td>une valeur comme une autre</td></tr><tr><td><code>thread</code></td><td>une coroutine</td><td>voir le chapitre Coroutines</td></tr><tr><td><code>userdata</code></td><td>donnée du programme hôte</td><td>rare en Lua pur</td></tr></table>
+<div class="essai" data-langue="lua"><pre><code>print(type(42), type(3.14), type("42"), type(nil), type(print), type({}))
+print(math.type(42), math.type(42.0))   -- integer   float
+print(10 == 10.0)                        -- true : même valeur
+print(0 == false, "" == false)           -- false false</code></pre></div>
+<div class="box attention"><b>0 et "" sont vrais</b><p>Contrairement à Python, JavaScript ou PHP, en Lua le nombre <code>0</code> et la chaîne vide <code>""</code> sont considérés comme <b>vrais</b> dans une condition. Seuls <code>false</code> et <code>nil</code> sont faux.</p></div>
+<h2>4. Opérateurs arithmétiques</h2>
+<div class="essai" data-langue="lua"><pre><code>print(7 / 2)       -- 3.5    la division donne toujours un flottant
+print(7 // 2)      -- 3      division entière (arrondie vers le bas)
+print(7 % 2)       -- 1      reste de la division (modulo)
+print(2 ^ 10)      -- 1024.0 puissance (toujours flottante)
+print(-7 // 2, -7 % 3)   -- -4   2  : arrondi vers moins l'infini
+print(10 / 2)      -- 5.0 et non 5
+print(1 + 2 * 3, (1 + 2) * 3)</code></pre></div>
+<p>Pas de <code>++</code> ni de <code>+=</code> en Lua : on écrit <code>i = i + 1</code>.</p>
+<h2>5. Texte : coller, mesurer, convertir</h2>
+<div class="essai" data-langue="lua"><pre><code>local prenom = "Léa"
+print("Bonjour " .. prenom .. " !")      -- .. colle deux chaînes
+print(#"Lua")                             -- # donne la longueur : 3
+print("10" + 5)                           -- 15 : la chaîne est convertie en nombre
+print(10 .. 20)                           -- "1020" : les nombres sont convertis en texte
+print(tonumber("42") + 1, tonumber("abc")) -- 43   nil
+print(tostring(42) .. "!")
+print(string.format("%.2f euros", 3.14159))</code></pre></div>
+<p><code>tonumber</code> renvoie <code>nil</code> si le texte n'est pas un nombre : c'est la façon de vérifier une saisie. <code>string.format</code> met en forme : <code>%d</code> entier, <code>%.2f</code> deux décimales, <code>%s</code> texte, <code>%5d</code> sur 5 caractères.</p>
+<h2>6. Lire au clavier</h2>
+<div class="essai" data-langue="lua" data-stdin="Léa&#10;17"><pre><code>local nom = io.read()          -- lit une ligne de texte
+local age = io.read("n")       -- lit un nombre
+print("Bonjour " .. nom .. ", dans 10 ans tu auras " .. (age + 10) .. " ans.")</code></pre></div>
+<section class="tuto"><h3><small>Tutoriel</small>Ton premier vrai programme : le ticket de caisse</h3>
+<div class="etape"><h4>Lire le prix et la quantité</h4>
+<p>On lit deux nombres. Modifie les entrées sous le code et relance.</p>
+<div class="essai" data-langue="lua" data-stdin="4.5&#10;3"><pre><code>local prix = io.read("n")
+local quantite = io.read("n")
+print(prix, quantite)</code></pre></div>
+</div>
+<div class="etape"><h4>Calculer le total</h4>
+<p>On range le résultat dans une variable <code>local</code> au nom clair.</p>
+<div class="essai" data-langue="lua" data-stdin="4.5&#10;3"><pre><code>local prix = io.read("n")
+local quantite = io.read("n")
+local total = prix * quantite
+print("Total : " .. total)</code></pre></div>
+</div>
+<div class="etape"><h4>Ajouter la TVA et mettre en forme</h4>
+<p><code>string.format</code> arrondit proprement à deux décimales. Essaie avec d'autres prix.</p>
+<div class="essai" data-langue="lua" data-stdin="4.5&#10;3"><pre><code>local TVA &lt;const&gt; = 0.2
+local prix = io.read("n")
+local quantite = io.read("n")
+local ht = prix * quantite
+local ttc = ht * (1 + TVA)
+print(string.format("HT : %.2f €", ht))
+print(string.format("TVA : %.2f €", ht * TVA))
+print(string.format("TTC : %.2f €", ttc))</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : heures, minutes, secondes</b><p>Convertis un nombre de secondes en heures, minutes et secondes avec <code>//</code> et <code>%</code>.</p><a class="defi-go" href="labo-lua.html#m=lua-conv">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : la moyenne</b><p>Lis trois notes et affiche leur moyenne avec deux décimales.</p><a class="defi-go" href="labo-lua.html#m=lua-moyenne">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p><code>local</code> devant chaque nouvelle variable. </p><p> <code>..</code> colle les chaînes, <code>#</code> donne la longueur. </p><p> <code>/</code> donne un flottant, <code>//</code> un entier, <code>%</code> le reste, <code>^</code> la puissance. </p><p> Seuls <code>false</code> et <code>nil</code> sont faux : <code>0</code> et <code>""</code> sont vrais. </p><p> Une variable inconnue vaut <code>nil</code>, sans erreur.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-lua.html">Labo Lua</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
 </article>
 
 <!-- ============ EXERCICES ============ -->
 <script>
 window.EF_EXERCICES = [
  {
-  "type": "qcm",
   "niveau": "facile",
   "q": "Quel mot-clé crée une variable locale ?",
+  "type": "qcm",
   "options": [
-   "`var`",
    "`let`",
    "`local`",
-   "`my`"
+   "`my`",
+   "`var`"
   ],
-  "answer": 2,
+  "answer": 1,
   "explication": ""
  },
  {
-  "type": "qcm",
   "niveau": "facile",
   "q": "Comment colle-t-on deux chaînes en Lua ?",
+  "type": "qcm",
   "options": [
-   "`+`",
-   "`..`",
+   "`.`",
    "`&`",
-   "`.`"
+   "`+`",
+   "`..`"
   ],
-  "answer": 1,
-  "explication": ""
+  "answer": 3,
+  "explication": "`+` sert uniquement aux nombres."
  },
  {
-  "type": "qcm",
   "niveau": "moyen",
   "q": "Que vaut `7 // 2` ?",
+  "type": "qcm",
   "options": [
+   "4",
    "3.5",
-   "3",
    "1",
-   "4"
+   "3"
   ],
-  "answer": 1,
-  "explication": "Division entière."
+  "answer": 3,
+  "explication": "`//` est la division entière."
  },
  {
-  "type": "qcm",
   "niveau": "moyen",
   "q": "Que vaut `7 / 2` ?",
+  "type": "qcm",
   "options": [
-   "3",
-   "3.5",
    "1",
-   "Erreur"
+   "Une erreur",
+   "3",
+   "3.5"
   ],
-  "answer": 1,
-  "explication": ""
+  "answer": 3,
+  "explication": "`/` donne toujours un flottant."
  },
  {
-  "type": "qcm",
   "niveau": "facile",
   "q": "Que vaut une variable jamais affectée ?",
+  "type": "qcm",
   "options": [
+   "`\"\"`",
    "0",
-   "\"\"",
-   "nil",
-   "undefined"
+   "`nil`",
+   "`undefined`"
   ],
   "answer": 2,
   "explication": ""
  },
  {
-  "type": "qcm",
   "niveau": "moyen",
   "q": "Que donne `#\"Lua\"` ?",
+  "type": "qcm",
   "options": [
+   "`\"Lua\"`",
    "1",
    "3",
-   "\"Lua\"",
-   "Erreur"
-  ],
-  "answer": 1,
-  "explication": "# donne la longueur."
- },
- {
-  "type": "qcm",
-  "niveau": "moyen",
-  "q": "Comment écrit-on un commentaire sur une ligne ?",
-  "options": [
-   "`// …`",
-   "`# …`",
-   "`-- …`",
-   "`/* … */`"
+   "Une erreur"
   ],
   "answer": 2,
-  "explication": ""
+  "explication": "`#` donne la longueur."
  },
  {
-  "type": "vf",
-  "niveau": "moyen",
-  "q": "Sans le mot local, une variable Lua est globale.",
-  "answer": true,
-  "explication": ""
- },
- {
+  "niveau": "facile",
+  "q": "Comment écrit-on un commentaire sur une ligne ?",
   "type": "qcm",
-  "niveau": "moyen",
-  "q": "Comment échanger a et b en une ligne ?",
   "options": [
-   "`swap(a, b)`",
-   "`a, b = b, a`",
-   "`a = b = a`",
-   "Impossible"
+   "`/* … */`",
+   "`-- …`",
+   "`# …`",
+   "`// …`"
   ],
   "answer": 1,
   "explication": ""
  },
  {
-  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Sans le mot local, une variable Lua est globale.",
+  "type": "vf",
+  "answer": true,
+  "explication": "C'est le piège le plus courant du langage."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment échanger a et b en une ligne ?",
+  "type": "qcm",
+  "options": [
+   "C'est impossible",
+   "`a, b = b, a`",
+   "`swap(a, b)`",
+   "`a = b = a`"
+  ],
+  "answer": 1,
+  "explication": "L'affectation multiple évalue d'abord toute la partie droite."
+ },
+ {
   "niveau": "moyen",
   "q": "Quelle fonction convertit le texte \"12\" en nombre ?",
+  "type": "saisie",
   "answers": [
    "tonumber"
   ],
   "explication": ""
  },
  {
+  "niveau": "moyen",
+  "q": "Dans une condition, le nombre 0 est considéré comme faux en Lua.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Seuls false et nil sont faux."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que vaut `10 / 2` ?",
   "type": "qcm",
-  "niveau": "difficile",
-  "q": "Dans quel jeu célèbre retrouve-t-on une variante de Lua pour les créateurs ?",
   "options": [
-   "Minecraft",
+   "5",
+   "`\"5\"`",
+   "5.0",
+   "2"
+  ],
+  "answer": 2,
+  "explication": "La division `/` produit toujours un flottant."
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que renvoie `tonumber(\"abc\")` ?",
+  "type": "qcm",
+  "options": [
+   "`\"abc\"`",
+   "0",
+   "`nil`",
+   "Une erreur"
+  ],
+  "answer": 2,
+  "explication": "Pratique pour vérifier une saisie."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que vaut `2 ^ 3` ?",
+  "type": "qcm",
+  "options": [
+   "8",
+   "8.0",
+   "6",
+   "9"
+  ],
+  "answer": 1,
+  "explication": "La puissance donne toujours un flottant."
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que vaut `\"10\" + 5` ?",
+  "type": "qcm",
+  "options": [
+   "15",
+   "`nil`",
+   "Une erreur",
+   "`\"105\"`"
+  ],
+  "answer": 0,
+  "explication": "Avec un opérateur arithmétique, la chaîne est convertie en nombre."
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que vaut `10 .. 20` ?",
+  "type": "qcm",
+  "options": [
+   "Une erreur",
+   "`\"1020\"`",
+   "200",
+   "30"
+  ],
+  "answer": 1,
+  "explication": "Avec `..`, les nombres sont convertis en texte."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle fonction renvoie le nom du type d'une valeur ?",
+  "type": "saisie",
+  "answers": [
+   "type"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que vaut `-7 // 2` ?",
+  "type": "qcm",
+  "options": [
+   "-3.5",
+   "-3",
+   "3",
+   "-4"
+  ],
+  "answer": 3,
+  "explication": "La division entière arrondit vers moins l'infini."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque opérateur à son rôle.",
+  "type": "associer",
+  "paires": [
+   [
+    "`..`",
+    "concaténation"
+   ],
+   [
+    "`#`",
+    "longueur"
+   ],
+   [
+    "`//`",
+    "division entière"
+   ],
+   [
+    "`%`",
+    "reste de la division"
+   ],
+   [
+    "`^`",
+    "puissance"
+   ]
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "facile",
+  "q": "Dans quel jeu célèbre retrouve-t-on une variante de Lua pour les créateurs ?",
+  "type": "qcm",
+  "options": [
+   "Tetris",
    "Roblox",
    "Fortnite",
-   "Tetris"
+   "Minecraft"
   ],
   "answer": 1,
   "explication": "Roblox utilise Luau, dérivé de Lua."
@@ -198,6 +360,8 @@ window.EF_EXERCICES = [
 <script src="../../data/modules.js"></script>
 <script src="../../assets/app.js"></script>
 <script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
 <script src="../../assets/chapter.js"></script>
 </body>
 </html>

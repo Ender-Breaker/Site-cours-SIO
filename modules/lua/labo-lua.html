@@ -14,7 +14,7 @@ window.EF_CODE = {
  "langue": "lua",
  "key": "ef-labo-lua",
  "titre": "Labo Lua",
- "sousTitre": "Du vrai Lua 5.4 (le langage de Roblox et de LÖVE) : programmes console puis jeux dans le navigateur.",
+ "sousTitre": "Du vrai Lua 5.4 (le langage de Roblox et de LÖVE) : des bases aux métatables et aux coroutines, puis des jeux dans le navigateur.",
  "ico": "Lua",
  "couleur": "lua",
  "fichier": "main.lua",
@@ -124,6 +124,118 @@ window.EF_CODE = {
      "stdin": [
       "100"
      ]
+    },
+    {
+     "id": "lua-conv",
+     "titre": "Heures, minutes, secondes",
+     "texte": "<p>Lis un nombre de secondes et affiche-le sous la forme <b>H h M min S s<\/b>. La division entière donne les heures, le reste donne ce qu'il reste à convertir.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>print(7 // 2, 7 % 2)   -- 3   1<\/code><\/pre>",
+     "depart": "local s = io.read(\"n\")\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>3725<\/code> → <code>1 h 2 min 5 s<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3725"
+          ],
+          "out": "^1 h 2 min 5 s[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>59<\/code> → <code>0 h 0 min 59 s<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "59"
+          ],
+          "out": "^0 h 0 min 59 s[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>86399<\/code> → <code>23 h 59 min 59 s<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "86399"
+          ],
+          "out": "^23 h 59 min 59 s[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>s // 3600<\/code> donne les heures ; <code>(s % 3600) // 60<\/code> les minutes ; <code>s % 60<\/code> les secondes.",
+     "solution": "local s = io.read(\"n\")\nlocal h = s // 3600\nlocal m = (s % 3600) // 60\nprint(h .. \" h \" .. m .. \" min \" .. (s % 60) .. \" s\")\n",
+     "stdin": [
+      "3725"
+     ]
+    },
+    {
+     "id": "lua-moyenne",
+     "titre": "La moyenne de trois notes",
+     "texte": "<p>Lis trois notes (une par ligne) et affiche <b>Moyenne : X<\/b> avec exactement <b>deux décimales<\/b>.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>print(string.format(\"%.2f\", 3.14159))   -- 3.14<\/code><\/pre>",
+     "depart": "local a = io.read(\"n\")\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>12, 15, 9<\/code> → <code>Moyenne : 12.00<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "12",
+           "15",
+           "9"
+          ],
+          "out": "^Moyenne : 12\\.00[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>10, 11, 11<\/code> → <code>Moyenne : 10.67<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "10",
+           "11",
+           "11"
+          ],
+          "out": "^Moyenne : 10\\.67[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>20, 20, 19<\/code> → <code>Moyenne : 19.67<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "20",
+           "20",
+           "19"
+          ],
+          "out": "^Moyenne : 19\\.67[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>string.format(\"Moyenne : %.2f\", valeur)<\/code> arrondit à deux décimales.",
+     "solution": "local a = io.read(\"n\")\nlocal b = io.read(\"n\")\nlocal c = io.read(\"n\")\nprint(string.format(\"Moyenne : %.2f\", (a + b + c) / 3))\n",
+     "stdin": [
+      "12",
+      "15",
+      "9"
+     ]
     }
    ]
   },
@@ -176,6 +288,84 @@ window.EF_CODE = {
      "solution": "local n = io.read(\"n\")\nif n % 2 == 0 then\n  print(\"pair\")\nelse\n  print(\"impair\")\nend\n",
      "stdin": [
       "4"
+     ]
+    },
+    {
+     "id": "lua-mention",
+     "titre": "La mention",
+     "texte": "<p>Lis une note sur 20 et affiche la mention : <b>Insuffisant<\/b> (moins de 10), <b>Passable<\/b> (de 10 à moins de 12), <b>Assez bien<\/b> (de 12 à moins de 14), <b>Bien<\/b> (de 14 à moins de 16), <b>Très bien<\/b> (16 et plus).<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>if x &lt; 10 then\n  …\nelseif x &lt; 20 then\n  …\nelse\n  …\nend<\/code><\/pre>",
+     "depart": "local note = io.read(\"n\")\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>8<\/code> → <code>Insuffisant<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "8"
+          ],
+          "out": "^Insuffisant[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>10<\/code> → <code>Passable<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "10"
+          ],
+          "out": "^Passable[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>13<\/code> → <code>Assez bien<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "13"
+          ],
+          "out": "^Assez bien[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>15.5<\/code> → <code>Bien<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "15.5"
+          ],
+          "out": "^Bien[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>18<\/code> → <code>Très bien<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "18"
+          ],
+          "out": "^Très bien[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Enchaîne les <code>elseif<\/code> du plus petit seuil au plus grand : chaque test n'a alors qu'une borne à vérifier.",
+     "solution": "local note = io.read(\"n\")\nif note < 10 then print(\"Insuffisant\")\nelseif note < 12 then print(\"Passable\")\nelseif note < 14 then print(\"Assez bien\")\nelseif note < 16 then print(\"Bien\")\nelse print(\"Très bien\") end\n",
+     "stdin": [
+      "8"
      ]
     },
     {
@@ -278,11 +468,223 @@ window.EF_CODE = {
       "5",
       "0"
      ]
+    },
+    {
+     "id": "lua-fizzbuzz",
+     "titre": "FizzBuzz",
+     "texte": "<p>Lis un entier n et affiche les nombres de 1 à n, un par ligne. Mais : pour un multiple de 3 affiche <b>Fizz<\/b>, pour un multiple de 5 affiche <b>Buzz<\/b>, et pour un multiple des deux affiche <b>FizzBuzz<\/b>. C'est l'exercice le plus célèbre des entretiens d'embauche.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>if i % 3 == 0 then … end   -- i est un multiple de 3<\/code><\/pre>",
+     "depart": "local n = io.read(\"n\")\n",
+     "objectifs": [
+      {
+       "txt": "Avec 15 : de <code>1<\/code> à <code>FizzBuzz<\/code>, 15 lignes",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "15"
+          ],
+          "out": "^1[ \\t]*\\n2[ \\t]*\\nFizz[ \\t]*\\n4[ \\t]*\\nBuzz[ \\t]*\\nFizz[ \\t]*\\n7[ \\t]*\\n8[ \\t]*\\nFizz[ \\t]*\\nBuzz[ \\t]*\\n11[ \\t]*\\nFizz[ \\t]*\\n13[ \\t]*\\n14[ \\t]*\\nFizzBuzz[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Avec 5 : on s'arrête à <code>Buzz<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "5"
+          ],
+          "out": "^1[ \\t]*\\n2[ \\t]*\\nFizz[ \\t]*\\n4[ \\t]*\\nBuzz[ \\t]*$",
+          "notout": "^7\\s*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Teste d'abord le cas « multiple de 3 et de 5 » (donc de 15), sinon il ne sera jamais atteint.",
+     "solution": "local n = io.read(\"n\")\nfor i = 1, n do\n  if i % 15 == 0 then print(\"FizzBuzz\")\n  elseif i % 3 == 0 then print(\"Fizz\")\n  elseif i % 5 == 0 then print(\"Buzz\")\n  else print(i) end\nend\n",
+     "stdin": [
+      "15"
+     ]
+    },
+    {
+     "id": "lua-rebours",
+     "titre": "Compte à rebours",
+     "texte": "<p>Lis un entier n et affiche le compte à rebours de n à 1, un nombre par ligne, puis <b>Décollage !<\/b><\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>for i = 10, 1, -1 do … end   -- pas de -1<\/code><\/pre>",
+     "depart": "local n = io.read(\"n\")\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>3<\/code> → <code>3 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3"
+          ],
+          "out": "^3[ \\t]*\\n2[ \\t]*\\n1[ \\t]*\\nDécollage ![ \\t]*$",
+          "notout": "^[4-9]"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>1<\/code> → <code>1 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1"
+          ],
+          "out": "^1[ \\t]*\\nDécollage ![ \\t]*$",
+          "notout": "^[2-9]"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>10<\/code> → <code>10 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "10"
+          ],
+          "out": "^10[ \\t]*\\n9[ \\t]*\\n8[ \\t]*\\n7[ \\t]*\\n6[ \\t]*\\n5[ \\t]*\\n4[ \\t]*\\n3[ \\t]*\\n2[ \\t]*\\n1[ \\t]*\\nDécollage ![ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Le troisième nombre du <code>for<\/code> est le pas : <code>for i = n, 1, -1 do<\/code>.",
+     "solution": "local n = io.read(\"n\")\nfor i = n, 1, -1 do\n  print(i)\nend\nprint(\"Décollage !\")\n",
+     "stdin": [
+      "3"
+     ]
+    },
+    {
+     "id": "lua-devine",
+     "titre": "Plus ou moins",
+     "texte": "<p>Le nombre secret est <b>42<\/b>. Lis des essais (un par ligne) jusqu'à ce que le joueur trouve. Pour chaque essai raté, affiche <b>Trop petit<\/b> ou <b>Trop grand<\/b>. Quand il trouve, affiche <b>Gagné ! Essais : N<\/b> où N est le nombre total d'essais.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>repeat\n  …\nuntil condition   -- s'arrête quand la condition est vraie<\/code><\/pre>",
+     "depart": "local secret = 42\nlocal essais = 0\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>50, 30, 42<\/code> → <code>Trop grand …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "50",
+           "30",
+           "42"
+          ],
+          "out": "^Trop grand[ \\t]*\\nTrop petit[ \\t]*\\nGagné ! Essais : 3[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>42<\/code> → <code>Gagné ! Essais : 1<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "42"
+          ],
+          "out": "^Gagné ! Essais : 1[ \\t]*$",
+          "notout": "Trop"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>1, 2, 3, 41, 43, 42<\/code> → <code>Gagné ! Essais : 6<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1",
+           "2",
+           "3",
+           "41",
+           "43",
+           "42"
+          ],
+          "out": "^Gagné ! Essais : 6[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>repeat … until essai == secret<\/code> ; déclare <code>local essai<\/code> avant la boucle pour qu'il soit visible dans la condition.",
+     "solution": "local secret = 42\nlocal essais = 0\nlocal essai\nrepeat\n  essai = io.read(\"n\")\n  essais = essais + 1\n  if essai < secret then print(\"Trop petit\")\n  elseif essai > secret then print(\"Trop grand\") end\nuntil essai == secret\nprint(\"Gagné ! Essais : \" .. essais)\n",
+     "stdin": [
+      "50",
+      "30",
+      "42"
+     ]
+    },
+    {
+     "id": "lua-pgcd",
+     "titre": "Le PGCD par l'algorithme d'Euclide",
+     "texte": "<p>Lis deux entiers a et b et affiche <b>PGCD : X<\/b>. Algorithme d'Euclide : tant que b n'est pas nul, on remplace (a, b) par (b, reste de a divisé par b). À la fin, le PGCD est a.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>a, b = b, a % b   -- les deux affectations en même temps<\/code><\/pre>",
+     "depart": "local a = io.read(\"n\")\nlocal b = io.read(\"n\")\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>48, 18<\/code> → <code>PGCD : 6<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "48",
+           "18"
+          ],
+          "out": "^PGCD : 6[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>17, 5<\/code> → <code>PGCD : 1<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "17",
+           "5"
+          ],
+          "out": "^PGCD : 1[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>100, 75<\/code> → <code>PGCD : 25<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "100",
+           "75"
+          ],
+          "out": "^PGCD : 25[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>while b ~= 0 do a, b = b, a % b end<\/code>",
+     "solution": "local a = io.read(\"n\")\nlocal b = io.read(\"n\")\nwhile b ~= 0 do\n  a, b = b, a % b\nend\nprint(\"PGCD : \" .. a)\n",
+     "stdin": [
+      "48",
+      "18"
+     ]
     }
    ]
   },
   {
-   "titre": "Fonctions, tableaux, objets",
+   "titre": "Fonctions",
    "missions": [
     {
      "id": "lua-premier",
@@ -356,6 +758,289 @@ window.EF_CODE = {
      ]
     },
     {
+     "id": "lua-minmax",
+     "titre": "Minimum et maximum",
+     "texte": "<p>Lis un entier n, puis n nombres (un par ligne). Affiche <b>Min : X<\/b> puis <b>Max : Y<\/b> sur deux lignes. Écris une fonction qui reçoit la liste et calcule les deux valeurs.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>local function f()\n  return 1, 2        -- deux valeurs de retour\nend\nlocal a, b = f()<\/code><\/pre>",
+     "depart": "local function minmax(t)\n  -- renvoie deux valeurs\nend\n\nlocal n = io.read(\"n\")\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>4, 12, 5, 19, 8<\/code> → <code>Min : 5 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "4",
+           "12",
+           "5",
+           "19",
+           "8"
+          ],
+          "out": "^Min : 5[ \\t]*\\nMax : 19[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>3, -2, -7, -1<\/code> → <code>Min : -7 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "-2",
+           "-7",
+           "-1"
+          ],
+          "out": "^Min : -7[ \\t]*\\nMax : -1[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>1, 6<\/code> → <code>Min : 6 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1",
+           "6"
+          ],
+          "out": "^Min : 6[ \\t]*\\nMax : 6[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Une fonction renvoie les deux valeurs d'un coup",
+       "r": [
+        {
+         "code": "return\\s+[\\w.\\[\\]]+\\s*,\\s*[\\w.\\[\\]]+"
+        }
+       ]
+      }
+     ],
+     "indice": "Une fonction Lua peut renvoyer deux valeurs : <code>return mini, maxi<\/code>, puis <code>local a, b = minmax(t)<\/code>.",
+     "solution": "local function minmax(t)\n  local mini, maxi = t[1], t[1]\n  for _, v in ipairs(t) do\n    if v < mini then mini = v end\n    if v > maxi then maxi = v end\n  end\n  return mini, maxi\nend\n\nlocal n = io.read(\"n\")\nlocal t = {}\nfor i = 1, n do t[i] = io.read(\"n\") end\nlocal mini, maxi = minmax(t)\nprint(\"Min : \" .. mini)\nprint(\"Max : \" .. maxi)\n",
+     "stdin": [
+      "4",
+      "12",
+      "5",
+      "19",
+      "8"
+     ]
+    },
+    {
+     "id": "lua-factorielle",
+     "titre": "La factorielle, en récursif",
+     "texte": "<p>Lis un entier n et affiche <b>n! = résultat<\/b>. La factorielle de n est n × (n − 1) × … × 1, et 0! vaut 1. Écris une fonction <b>récursive<\/b> : elle s'appelle elle-même avec n − 1.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>local function compte(n)\n  if n == 0 then return end     -- cas d'arrêt\n  compte(n - 1)                 -- appel récursif\nend<\/code><\/pre>",
+     "depart": "local function factorielle(n)\n  -- à compléter\nend\n\nlocal n = io.read(\"n\")\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>5<\/code> → <code>5! = 120<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "5"
+          ],
+          "out": "^5! = 120[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>0<\/code> → <code>0! = 1<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "0"
+          ],
+          "out": "^0! = 1[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>10<\/code> → <code>10! = 3628800<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "10"
+          ],
+          "out": "^10! = 3628800[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "La fonction s'appelle elle-même",
+       "r": [
+        {
+         "code": "function\\s+(\\w+)\\s*\\([\\s\\S]*\\b\\1\\s*\\([\\s\\S]*\\b\\1\\s*\\("
+        }
+       ]
+      }
+     ],
+     "indice": "Cas d'arrêt : <code>if n &lt;= 1 then return 1 end<\/code>. Sinon <code>return n * factorielle(n - 1)<\/code>.",
+     "solution": "local function factorielle(n)\n  if n <= 1 then return 1 end\n  return n * factorielle(n - 1)\nend\n\nlocal n = io.read(\"n\")\nprint(n .. \"! = \" .. factorielle(n))\n",
+     "stdin": [
+      "5"
+     ]
+    },
+    {
+     "id": "lua-fibo",
+     "titre": "La suite de Fibonacci",
+     "texte": "<p>Lis un entier n (au moins 1) et affiche les n premiers termes de la suite de Fibonacci, séparés par un espace. La suite commence par 0 et 1, puis chaque terme est la somme des deux précédents.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>a, b = b, a + b              -- avance d'un terme\nprint(table.concat(t, \" \"))  -- colle une liste avec des espaces<\/code><\/pre>",
+     "depart": "local n = io.read(\"n\")\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>8<\/code> → <code>0 1 1 2 3 5 8 13<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "8"
+          ],
+          "out": "^0 1 1 2 3 5 8 13[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>1<\/code> → <code>0<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1"
+          ],
+          "out": "^0[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>12<\/code> → <code>0 1 1 2 3 5 8 13 21 34 55 89<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "12"
+          ],
+          "out": "^0 1 1 2 3 5 8 13 21 34 55 89[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Range les termes dans une table puis affiche <code>table.concat(t, \" \")<\/code>.",
+     "solution": "local n = io.read(\"n\")\nlocal a, b = 0, 1\nlocal t = {}\nfor i = 1, n do\n  t[i] = a\n  a, b = b, a + b\nend\nprint(table.concat(t, \" \"))\n",
+     "stdin": [
+      "8"
+     ]
+    },
+    {
+     "id": "lua-varargs",
+     "titre": "Une fonction à arguments variables",
+     "texte": "<p>Complète la fonction <b>somme(...)<\/b> : elle additionne <b>tous<\/b> ses arguments, quel que soit leur nombre, et renvoie 0 si elle n'en reçoit aucun. Les trois appels déjà écrits servent de test.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>local function compte(...)\n  local t = {...}        -- les arguments dans une table\n  return #t\nend<\/code><\/pre>",
+     "depart": "local function somme(...)\n  -- à compléter\nend\n\nprint(somme(1, 2, 3))\nprint(somme(10, 20, 30, 40))\nprint(somme())\n",
+     "objectifs": [
+      {
+       "txt": "Le programme affiche <code>6<\/code>, <code>100<\/code> puis <code>0<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [],
+          "out": "^6[ \\t]*\\n100[ \\t]*\\n0[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "La fonction utilise <code>...<\/code>",
+       "r": [
+        {
+         "code": "function\\s+somme\\s*\\(\\s*\\.\\.\\.\\s*\\)[\\s\\S]*\\.\\.\\."
+        }
+       ]
+      }
+     ],
+     "indice": "<code>for _, v in ipairs({...}) do total = total + v end<\/code>",
+     "solution": "local function somme(...)\n  local total = 0\n  for _, v in ipairs({...}) do\n    total = total + v\n  end\n  return total\nend\n\nprint(somme(1, 2, 3))\nprint(somme(10, 20, 30, 40))\nprint(somme())\n"
+    },
+    {
+     "id": "lua-binaire",
+     "titre": "Du décimal au binaire",
+     "texte": "<p>Lis un entier positif et affiche son écriture en <b>binaire<\/b>. Méthode des divisions successives : on divise par 2 tant que le nombre n'est pas nul, et les restes lus du dernier au premier donnent le résultat. N'utilise pas de fonction de conversion toute faite.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>local reste = n % 2    -- le dernier chiffre binaire\nn = n // 2             -- on passe au suivant<\/code><\/pre>",
+     "depart": "local n = io.read(\"n\")\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>10<\/code> → <code>1010<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "10"
+          ],
+          "out": "^1010[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>255<\/code> → <code>11111111<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "255"
+          ],
+          "out": "^11111111[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>1<\/code> → <code>1<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1"
+          ],
+          "out": "^1[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>0<\/code> → <code>0<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "0"
+          ],
+          "out": "^0[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Ajoute chaque reste <b>devant<\/b> le texte déjà construit : <code>bits = (n % 2) .. bits<\/code>. Pense au cas n = 0.",
+     "solution": "local n = io.read(\"n\")\nlocal bits = \"\"\nif n == 0 then bits = \"0\" end\nwhile n > 0 do\n  bits = (n % 2) .. bits\n  n = n // 2\nend\nprint(bits)\n",
+     "stdin": [
+      "10"
+     ]
+    }
+   ]
+  },
+  {
+   "titre": "Tables",
+   "missions": [
+    {
      "id": "lua-tableau",
      "titre": "Un tableau",
      "texte": "<p>Lis un entier n, puis n nombres que tu ranges dans un tableau. Affiche ensuite <b>max = …<\/b> puis <b>moyenne = …<\/b>.<\/p><p><b>Exemple<\/b><\/p><pre><code>local t = {}\nt[#t + 1] = 4\nfor i, x in ipairs(t) do … end<\/code><\/pre>",
@@ -414,6 +1099,271 @@ window.EF_CODE = {
      ]
     },
     {
+     "id": "lua-inverser",
+     "titre": "Inverser une liste",
+     "texte": "<p>Lis un entier n, puis n mots (un par ligne). Range-les dans une liste, puis affiche-les <b>dans l'ordre inverse<\/b>, séparés par un espace.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>for i = #t, 1, -1 do … end   -- de la fin vers le début<\/code><\/pre>",
+     "depart": "local n = io.read(\"n\")\nlocal t = {}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>3, a, b, c<\/code> → <code>c b a<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "a",
+           "b",
+           "c"
+          ],
+          "out": "^c b a[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>4, 10, 20, 30, 40<\/code> → <code>40 30 20 10<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "4",
+           "10",
+           "20",
+           "30",
+           "40"
+          ],
+          "out": "^40 30 20 10[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>1, seul<\/code> → <code>seul<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1",
+           "seul"
+          ],
+          "out": "^seul[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Parcours la liste de <code>n<\/code> à <code>1<\/code> avec un pas de <code>-1<\/code>, et colle le résultat avec <code>table.concat(r, \" \")<\/code>.",
+     "solution": "local n = io.read(\"n\")\nlocal t = {}\nfor i = 1, n do t[i] = io.read() end\nlocal r = {}\nfor i = n, 1, -1 do r[#r + 1] = t[i] end\nprint(table.concat(r, \" \"))\n",
+     "stdin": [
+      "3",
+      "a",
+      "b",
+      "c"
+     ]
+    },
+    {
+     "id": "lua-tri",
+     "titre": "Trier des nombres",
+     "texte": "<p>Lis un entier n, puis n entiers (un par ligne). Affiche-les triés dans l'ordre <b>croissant<\/b>, séparés par un espace. Utilise la fonction de tri du langage. Attention : ce sont des nombres, 9 doit passer avant 10.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>table.sort(t)   -- trie la liste sur place<\/code><\/pre>",
+     "depart": "local n = io.read(\"n\")\nlocal t = {}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>5, 5, 2, 8, 1, 9<\/code> → <code>1 2 5 8 9<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "5",
+           "5",
+           "2",
+           "8",
+           "1",
+           "9"
+          ],
+          "out": "^1 2 5 8 9[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>3, 10, 9, 100<\/code> → <code>9 10 100<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "10",
+           "9",
+           "100"
+          ],
+          "out": "^9 10 100[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>4, -1, 3, -5, 0<\/code> → <code>-5 -1 0 3<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "4",
+           "-1",
+           "3",
+           "-5",
+           "0"
+          ],
+          "out": "^-5 -1 0 3[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Lis les valeurs avec <code>io.read(\"n\")<\/code> pour avoir des <b>nombres<\/b> : des chaînes seraient triées par ordre alphabétique.",
+     "solution": "local n = io.read(\"n\")\nlocal t = {}\nfor i = 1, n do t[i] = io.read(\"n\") end\ntable.sort(t)\nprint(table.concat(t, \" \"))\n",
+     "stdin": [
+      "5",
+      "5",
+      "2",
+      "8",
+      "1",
+      "9"
+     ]
+    },
+    {
+     "id": "lua-inventaire",
+     "titre": "L'inventaire",
+     "texte": "<p>Lis un entier n, puis n articles : pour chacun, son <b>nom<\/b> sur une ligne et sa <b>quantité<\/b> sur la ligne suivante. Un même nom peut revenir plusieurs fois : additionne ses quantités dans un dictionnaire. Affiche ensuite une ligne <b>nom : total<\/b> par article, dans l'ordre <b>alphabétique<\/b>.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>stock[nom] = (stock[nom] or 0) + qte   -- 0 la première fois<\/code><\/pre>",
+     "depart": "local n = io.read(\"n\")\nlocal stock = {}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>3, souris, 3, clavier, 2, souris, 5<\/code> → <code>clavier : 2 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "souris",
+           "3",
+           "clavier",
+           "2",
+           "souris",
+           "5"
+          ],
+          "out": "^clavier : 2[ \\t]*\\nsouris : 8[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>4, ecran, 1, cable, 10, ecran, 1, adaptateur, 4<\/code> → <code>adaptateur : 4 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "4",
+           "ecran",
+           "1",
+           "cable",
+           "10",
+           "ecran",
+           "1",
+           "adaptateur",
+           "4"
+          ],
+          "out": "^adaptateur : 4[ \\t]*\\ncable : 10[ \\t]*\\necran : 2[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>pairs<\/code> n'a pas d'ordre : range les clés dans une liste, trie-la avec <code>table.sort<\/code>, puis affiche.",
+     "solution": "local n = io.read(\"n\")\nlocal stock = {}\nfor i = 1, n do\n  local nom = io.read()\n  local qte = io.read(\"n\")\n  stock[nom] = (stock[nom] or 0) + qte\nend\nlocal noms = {}\nfor nom in pairs(stock) do noms[#noms + 1] = nom end\ntable.sort(noms)\nfor _, nom in ipairs(noms) do\n  print(nom .. \" : \" .. stock[nom])\nend\n",
+     "stdin": [
+      "3",
+      "souris",
+      "3",
+      "clavier",
+      "2",
+      "souris",
+      "5"
+     ]
+    },
+    {
+     "id": "lua-doublons",
+     "titre": "Supprimer les doublons",
+     "texte": "<p>Lis un entier n, puis n mots (un par ligne). Affiche chaque mot <b>une seule fois<\/b>, dans l'ordre de sa première apparition, séparés par un espace.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>local vus = {}\nvus[\"lua\"] = true          -- on note qu'on l'a vu\nif not vus[\"java\"] then … end<\/code><\/pre>",
+     "depart": "local n = io.read(\"n\")\nlocal vus = {}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>5, a, b, a, c, b<\/code> → <code>a b c<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "5",
+           "a",
+           "b",
+           "a",
+           "c",
+           "b"
+          ],
+          "out": "^a b c[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>3, x, x, x<\/code> → <code>x<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "x",
+           "x",
+           "x"
+          ],
+          "out": "^x[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>4, lua, java, cpp, java<\/code> → <code>lua java cpp<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "4",
+           "lua",
+           "java",
+           "cpp",
+           "java"
+          ],
+          "out": "^lua java cpp[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Un dictionnaire <code>vus[mot] = true<\/code> sert d'ensemble : la recherche y est immédiate.",
+     "solution": "local n = io.read(\"n\")\nlocal vus, res = {}, {}\nfor i = 1, n do\n  local mot = io.read()\n  if not vus[mot] then\n    vus[mot] = true\n    res[#res + 1] = mot\n  end\nend\nprint(table.concat(res, \" \"))\n",
+     "stdin": [
+      "5",
+      "a",
+      "b",
+      "a",
+      "c",
+      "b"
+     ]
+    }
+   ]
+  },
+  {
+   "titre": "Chaînes de caractères",
+   "missions": [
+    {
      "id": "lua-palindrome",
      "titre": "Les chaînes de caractères",
      "texte": "<p>Lis un mot, affiche-le <b>à l'envers<\/b> sur une ligne, puis <b>palindrome<\/b> s'il se lit pareil dans les deux sens, sinon <b>pas un palindrome<\/b>.<\/p><p><b>Exemple<\/b><\/p><pre><code>local s = &quot;abc&quot;\nprint(s:reverse(), #s)<\/code><\/pre>",
@@ -453,6 +1403,269 @@ window.EF_CODE = {
      ]
     },
     {
+     "id": "lua-voyelles",
+     "titre": "Compter les voyelles",
+     "texte": "<p>Lis un mot écrit en minuscules sans accent et affiche <b>Voyelles : N<\/b>. Les voyelles sont a, e, i, o, u et y.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>local _, nb = (\"banane\"):gsub(\"a\", \"\")   -- nb = 3 remplacements<\/code><\/pre>",
+     "depart": "local mot = io.read()\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>bonjour<\/code> → <code>Voyelles : 3<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "bonjour"
+          ],
+          "out": "^Voyelles : 3[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>rythme<\/code> → <code>Voyelles : 2<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "rythme"
+          ],
+          "out": "^Voyelles : 2[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>brrr<\/code> → <code>Voyelles : 0<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "brrr"
+          ],
+          "out": "^Voyelles : 0[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>gsub<\/code> renvoie deux valeurs : le texte et le <b>nombre<\/b> de remplacements. Le motif <code>[aeiouy]<\/code> désigne une voyelle.",
+     "solution": "local mot = io.read()\nlocal _, n = mot:gsub(\"[aeiouy]\", \"\")\nprint(\"Voyelles : \" .. n)\n",
+     "stdin": [
+      "bonjour"
+     ]
+    },
+    {
+     "id": "lua-mots",
+     "titre": "Compter les mots",
+     "texte": "<p>Lis une phrase et affiche <b>Mots : N<\/b>. Les mots sont séparés par un ou <b>plusieurs<\/b> espaces.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>for mot in (\"a b\"):gmatch(\"%S+\") do print(mot) end<\/code><\/pre>",
+     "depart": "local phrase = io.read()\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>le chat dort<\/code> → <code>Mots : 3<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "le chat dort"
+          ],
+          "out": "^Mots : 3[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>bonjour<\/code> → <code>Mots : 1<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "bonjour"
+          ],
+          "out": "^Mots : 1[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>un  deux   trois quatre<\/code> → <code>Mots : 4<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "un  deux   trois quatre"
+          ],
+          "out": "^Mots : 4[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>%S+<\/code> : une suite de caractères qui ne sont pas des espaces. <code>gmatch<\/code> les parcourt un par un.",
+     "solution": "local phrase = io.read()\nlocal n = 0\nfor _ in phrase:gmatch(\"%S+\") do n = n + 1 end\nprint(\"Mots : \" .. n)\n",
+     "stdin": [
+      "le chat dort"
+     ]
+    },
+    {
+     "id": "lua-cesar",
+     "titre": "Le chiffre de César",
+     "texte": "<p>Lis un texte en minuscules sans accent et affiche-le <b>chiffré<\/b> : chaque lettre est décalée de 3 rangs dans l'alphabet (a devient d, b devient e…), et après z on revient à a (x devient a). Les espaces ne changent pas.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>print((\"a\"):byte())        -- 97 : le code de la lettre a\nprint(string.char(100))    -- d<\/code><\/pre>",
+     "depart": "local texte = io.read()\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>abc<\/code> → <code>def<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "abc"
+          ],
+          "out": "^def[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>xyz<\/code> → <code>abc<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "xyz"
+          ],
+          "out": "^abc[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>bonjour le monde<\/code> → <code>erqmrxu oh prqgh<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "bonjour le monde"
+          ],
+          "out": "^erqmrxu oh prqgh[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Code de la lettre − 97 donne son rang de 0 à 25 ; ajoute 3, prends le reste modulo 26, rajoute 97. <code>%l<\/code> désigne une minuscule.",
+     "solution": "local texte = io.read()\nlocal res = texte:gsub(\"%l\", function(c)\n  return string.char((c:byte() - 97 + 3) % 26 + 97)\nend)\nprint(res)\n",
+     "stdin": [
+      "abc"
+     ]
+    },
+    {
+     "id": "lua-parentheses",
+     "titre": "Parenthèses équilibrées",
+     "texte": "<p>Lis une expression et affiche <b>équilibré<\/b> si ses parenthèses sont correctement ouvertes et fermées, sinon <b>non équilibré<\/b>. Parcours le texte avec un compteur : +1 pour une ouvrante, −1 pour une fermante. Le compteur ne doit jamais devenir négatif et doit finir à 0.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>for c in (\"abc\"):gmatch(\".\") do print(c) end   -- caractère par caractère<\/code><\/pre>",
+     "depart": "local expr = io.read()\nlocal niveau = 0\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>(()())<\/code> → <code>équilibré<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "(()())"
+          ],
+          "out": "^équilibré[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>(()<\/code> → <code>non équilibré<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "(()"
+          ],
+          "out": "^non équilibré[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>)(<\/code> → <code>non équilibré<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           ")("
+          ],
+          "out": "^non équilibré[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>((a+b)*c)<\/code> → <code>équilibré<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "((a+b)*c)"
+          ],
+          "out": "^équilibré[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Deux conditions : le compteur ne passe jamais sous 0, et il vaut 0 à la fin.",
+     "solution": "local expr = io.read()\nlocal niveau, ok = 0, true\nfor c in expr:gmatch(\".\") do\n  if c == \"(\" then niveau = niveau + 1\n  elseif c == \")\" then\n    niveau = niveau - 1\n    if niveau < 0 then ok = false end\n  end\nend\nif ok and niveau == 0 then print(\"équilibré\") else print(\"non équilibré\") end\n",
+     "stdin": [
+      "(()())"
+     ]
+    }
+   ]
+  },
+  {
+   "titre": "Closures, métatables et objets",
+   "missions": [
+    {
+     "id": "lua-compteur",
+     "titre": "Une closure : la fabrique de compteurs",
+     "texte": "<p>Complète <b>creerCompteur()<\/b> : elle renvoie une <b>fonction<\/b>. Chaque appel de cette fonction renvoie le nombre suivant (1, puis 2, puis 3…). Chaque compteur créé a son propre total, indépendant des autres.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>local function fabrique()\n  local secret = 0            -- capturée par la fonction renvoyée\n  return function() secret = secret + 1 end\nend<\/code><\/pre>",
+     "depart": "local function creerCompteur()\n  -- à compléter\nend\n\nlocal a = creerCompteur()\nlocal b = creerCompteur()\nprint(a())\nprint(a())\nprint(a())\nprint(b())\n",
+     "objectifs": [
+      {
+       "txt": "Le programme affiche <code>1<\/code>, <code>2<\/code>, <code>3<\/code> puis <code>1<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [],
+          "out": "^1[ \\t]*\\n2[ \\t]*\\n3[ \\t]*\\n1[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "<code>creerCompteur<\/code> renvoie une fonction",
+       "r": [
+        {
+         "code": "return\\s+function\\s*\\("
+        }
+       ]
+      },
+      {
+       "txt": "Pas de variable globale pour compter",
+       "r": [
+        {
+         "nocode": "^\\s*(?!local\\b)\\w+\\s*=\\s*0\\s*$"
+        }
+       ]
+      }
+     ],
+     "indice": "Une variable <code>local n = 0<\/code> dans la fabrique, puis <code>return function() n = n + 1 return n end<\/code>.",
+     "solution": "local function creerCompteur()\n  local n = 0\n  return function()\n    n = n + 1\n    return n\n  end\nend\n\nlocal a = creerCompteur()\nlocal b = creerCompteur()\nprint(a())\nprint(a())\nprint(a())\nprint(b())\n"
+    },
+    {
      "id": "lua-compte",
      "titre": "Un objet : le compte bancaire",
      "texte": "<p>Crée un type <b>Compte<\/b> qui garde un solde, avec deux opérations : <b>deposer(montant)<\/b> et <b>retirer(montant)<\/b>. Si le solde ne suffit pas, <b>retirer<\/b> affiche <code>Solde insuffisant<\/code> et ne change rien. Le programme principal est déjà écrit en bas.<\/p><p><b>Exemple<\/b><\/p><pre><code>Chien = {}\nChien.__index = Chien\nfunction Chien.nouveau(nom) return setmetatable({nom = nom}, Chien) end\nfunction Chien:aboyer() print(self.nom .. &quot; : Ouaf&quot;) end<\/code><\/pre>",
@@ -488,6 +1701,218 @@ window.EF_CODE = {
      ],
      "indice": "Une méthode déclarée avec <code>:<\/code> reçoit l'objet dans <code>self<\/code>.",
      "solution": "Compte = {}\nCompte.__index = Compte\n\nfunction Compte.nouveau(solde)\n  return setmetatable({ solde = solde }, Compte)\nend\n\nfunction Compte:deposer(m)\n  self.solde = self.solde + m\nend\n\nfunction Compte:retirer(m)\n  if m > self.solde then\n    print(\"Solde insuffisant\")\n    return\n  end\n  self.solde = self.solde - m\nend\n\nlocal c = Compte.nouveau(100)\nc:deposer(50)\nc:retirer(30)\nc:retirer(500)\nprint(\"Solde : \" .. c.solde)\n"
+    },
+    {
+     "id": "lua-vecteur",
+     "titre": "Des vecteurs avec une métatable",
+     "texte": "<p>Complète la métatable <b>Vec<\/b> pour que deux vecteurs s'additionnent avec <code>+<\/code> (métaméthode <code>__add<\/code>) et s'affichent sous la forme <b>(x, y)<\/b> (métaméthode <code>__tostring<\/code>).<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>local MT = {}\nMT.__add = function(a, b) return … end\nMT.__tostring = function(v) return \"…\" end<\/code><\/pre>",
+     "depart": "local Vec = {}\nVec.__index = Vec\nlocal function vec(x, y)\n  return setmetatable({ x = x, y = y }, Vec)\nend\n\n-- à compléter : Vec.__add et Vec.__tostring\n\nlocal a, b = vec(1, 2), vec(3, 4)\nprint(a + b)\nprint(a + b + vec(10, 10))\n",
+     "objectifs": [
+      {
+       "txt": "Le programme affiche <code>(4, 6) …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [],
+          "out": "^\\(4, 6\\)[ \\t]*\\n\\(14, 16\\)[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "<code>__add<\/code> et <code>__tostring<\/code> sont définies",
+       "r": [
+        {
+         "code": "__add[\\s\\S]*__tostring|__tostring[\\s\\S]*__add"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>__add<\/code> doit renvoyer un <b>nouveau<\/b> vecteur créé avec <code>vec(…)<\/code>, pour qu'il ait lui aussi la métatable.",
+     "solution": "local Vec = {}\nVec.__index = Vec\nlocal function vec(x, y)\n  return setmetatable({ x = x, y = y }, Vec)\nend\n\nVec.__add = function(a, b) return vec(a.x + b.x, a.y + b.y) end\nVec.__tostring = function(v) return \"(\" .. v.x .. \", \" .. v.y .. \")\" end\n\nlocal a, b = vec(1, 2), vec(3, 4)\nprint(a + b)\nprint(a + b + vec(10, 10))\n"
+    },
+    {
+     "id": "lua-defaut",
+     "titre": "Une valeur par défaut avec __index",
+     "texte": "<p>La table <b>stock<\/b> doit répondre <b>0<\/b> pour tout article absent, au lieu de <code>nil<\/code>. Attache-lui une métatable dont <code>__index<\/code> est une fonction qui renvoie 0. Le reste du programme est déjà écrit.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>setmetatable(t, { __index = function(table, cle) return \"?\" end })<\/code><\/pre>",
+     "depart": "local stock = { souris = 3 }\n-- à compléter : la métatable\n\nprint(stock.souris)\nprint(stock.clavier)\nprint(stock.souris + stock.ecran)\n",
+     "objectifs": [
+      {
+       "txt": "Le programme affiche <code>3 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [],
+          "out": "^3[ \\t]*\\n0[ \\t]*\\n3[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Utilise <code>setmetatable<\/code> et <code>__index<\/code>",
+       "r": [
+        {
+         "code": "setmetatable[\\s\\S]*__index"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>setmetatable(stock, { __index = function() return 0 end })<\/code>",
+     "solution": "local stock = { souris = 3 }\nsetmetatable(stock, { __index = function() return 0 end })\n\nprint(stock.souris)\nprint(stock.clavier)\nprint(stock.souris + stock.ecran)\n"
+    },
+    {
+     "id": "lua-heritage",
+     "titre": "L'héritage",
+     "texte": "<p>La classe <b>Animal<\/b> est écrite. Crée deux classes filles : <b>Chien<\/b>, dont <code>crier()<\/code> renvoie <code>\"Ouaf\"<\/code>, et <b>Chat<\/b>, dont <code>crier()<\/code> renvoie <code>\"Miaou\"<\/code>. Elles héritent de <code>presenter()<\/code> sans la réécrire. Chaque classe fille a son constructeur <code>new(nom)<\/code>.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>local Fille = setmetatable({}, { __index = Mere })   -- hérite de Mere\nFille.__index = Fille\nfunction Fille.new(nom)\n  return setmetatable(Mere.new(nom), Fille)\nend<\/code><\/pre>",
+     "depart": "local Animal = {}\nAnimal.__index = Animal\nfunction Animal.new(nom) return setmetatable({ nom = nom }, Animal) end\nfunction Animal:crier() return \"...\" end\nfunction Animal:presenter() return self.nom .. \" fait \" .. self:crier() end\n\n-- à compléter : les classes Chien et Chat\n\nprint(Chien.new(\"Rex\"):presenter())\nprint(Chat.new(\"Tigrou\"):presenter())\nprint(Animal.new(\"Truc\"):presenter())\n",
+     "objectifs": [
+      {
+       "txt": "Le programme affiche <code>Rex fait Ouaf …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [],
+          "out": "^Rex fait Ouaf[ \\t]*\\nTigrou fait Miaou[ \\t]*\\nTruc fait \\.\\.\\.[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "<code>presenter<\/code> n'est pas réécrite dans les classes filles",
+       "r": [
+        {
+         "nocode": "function\\s+(Chien|Chat)[:.]presenter"
+        }
+       ]
+      },
+      {
+       "txt": "Les classes filles héritent avec <code>__index = Animal<\/code>",
+       "r": [
+        {
+         "code": "__index\\s*=\\s*Animal\\s*\\}"
+        }
+       ]
+      }
+     ],
+     "indice": "Pour chaque fille : <code>setmetatable({}, { __index = Animal })<\/code>, puis <code>Fille.__index = Fille<\/code>, un <code>new<\/code> et sa propre méthode <code>crier<\/code>.",
+     "solution": "local Animal = {}\nAnimal.__index = Animal\nfunction Animal.new(nom) return setmetatable({ nom = nom }, Animal) end\nfunction Animal:crier() return \"...\" end\nfunction Animal:presenter() return self.nom .. \" fait \" .. self:crier() end\n\nlocal Chien = setmetatable({}, { __index = Animal })\nChien.__index = Chien\nfunction Chien.new(nom) return setmetatable(Animal.new(nom), Chien) end\nfunction Chien:crier() return \"Ouaf\" end\n\nlocal Chat = setmetatable({}, { __index = Animal })\nChat.__index = Chat\nfunction Chat.new(nom) return setmetatable(Animal.new(nom), Chat) end\nfunction Chat:crier() return \"Miaou\" end\n\nprint(Chien.new(\"Rex\"):presenter())\nprint(Chat.new(\"Tigrou\"):presenter())\nprint(Animal.new(\"Truc\"):presenter())\n"
+    }
+   ]
+  },
+  {
+   "titre": "Erreurs et coroutines",
+   "missions": [
+    {
+     "id": "lua-pcall",
+     "titre": "Attraper une erreur avec pcall",
+     "texte": "<p>La fonction <b>diviser(a, b)<\/b> lève une erreur quand b vaut 0. Lis a et b, appelle-la <b>en mode protégé<\/b> avec <code>pcall<\/code>, puis affiche <b>Résultat : X<\/b> si tout va bien, ou <b>Erreur : division par zéro<\/b> sinon. Le programme ne doit jamais planter.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>local ok, valeur = pcall(f, 1, 2)   -- ok = true ou false<\/code><\/pre>",
+     "depart": "local function diviser(a, b)\n  if b == 0 then error(\"division par zéro\", 0) end\n  return a // b\nend\n\nlocal a = io.read(\"n\")\nlocal b = io.read(\"n\")\nprint(\"Résultat : \" .. diviser(a, b))\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>10, 2<\/code> → <code>Résultat : 5<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "10",
+           "2"
+          ],
+          "out": "^Résultat : 5[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>7, 0<\/code> → <code>Erreur : division par zéro<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "7",
+           "0"
+          ],
+          "out": "^Erreur : division par zéro[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>9, 4<\/code> → <code>Résultat : 2<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "9",
+           "4"
+          ],
+          "out": "^Résultat : 2[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Utilise <code>pcall<\/code>",
+       "r": [
+        {
+         "code": "\\bpcall\\s*\\("
+        }
+       ]
+      }
+     ],
+     "indice": "<code>local ok, r = pcall(diviser, a, b)<\/code> : si <code>ok<\/code> est faux, <code>r<\/code> contient le message d'erreur.",
+     "solution": "local function diviser(a, b)\n  if b == 0 then error(\"division par zéro\", 0) end\n  return a // b\nend\n\nlocal a = io.read(\"n\")\nlocal b = io.read(\"n\")\nlocal ok, r = pcall(diviser, a, b)\nif ok then\n  print(\"Résultat : \" .. r)\nelse\n  print(\"Erreur : \" .. r)\nend\n",
+     "stdin": [
+      "10",
+      "2"
+     ]
+    },
+    {
+     "id": "lua-generateur",
+     "titre": "Un générateur avec une coroutine",
+     "texte": "<p>Complète <b>carres(n)<\/b> : elle renvoie un générateur (avec <code>coroutine.wrap<\/code>) qui produit les carrés 1, 4, 9… jusqu'à n². La boucle <code>for<\/code> déjà écrite les affiche.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>local function lettres()\n  return coroutine.wrap(function()\n    coroutine.yield(\"a\")\n    coroutine.yield(\"b\")\n  end)\nend<\/code><\/pre>",
+     "depart": "local function carres(n)\n  -- à compléter\nend\n\nlocal n = io.read(\"n\")\nfor c in carres(n) do\n  print(c)\nend\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>5<\/code> → <code>1 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "5"
+          ],
+          "out": "^1[ \\t]*\\n4[ \\t]*\\n9[ \\t]*\\n16[ \\t]*\\n25[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>2<\/code> → <code>1 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "2"
+          ],
+          "out": "^1[ \\t]*\\n4[ \\t]*$",
+          "notout": "^9"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Utilise <code>coroutine.wrap<\/code> et <code>coroutine.yield<\/code>",
+       "r": [
+        {
+         "code": "coroutine\\.wrap[\\s\\S]*coroutine\\.yield"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>return coroutine.wrap(function() for i = 1, n do coroutine.yield(i * i) end end)<\/code>",
+     "solution": "local function carres(n)\n  return coroutine.wrap(function()\n    for i = 1, n do\n      coroutine.yield(i * i)\n    end\n  end)\nend\n\nlocal n = io.read(\"n\")\nfor c in carres(n) do\n  print(c)\nend\n",
+     "stdin": [
+      "5"
+     ]
     }
    ]
   },
@@ -706,12 +2131,7 @@ window.EF_CODE = {
      ],
      "indice": "« ou » s'écrit <code>or<\/code> en Lua.",
      "solution": "local x, y = 100, 80\nlocal vx, vy = 4, 3\n\nfunction update(dt)\n  x = x + vx\n  y = y + vy\n  if x < 12 or x > LARGEUR - 12 then vx = -vx end\n  if y < 12 or y > HAUTEUR - 12 then vy = -vy end\nend\n\nfunction draw()\n  effacer(\"black\")\n  cercle(x, y, 12, \"red\")\nend\n"
-    }
-   ]
-  },
-  {
-   "titre": "Mini-jeux",
-   "missions": [
+    },
     {
      "id": "lua-clics",
      "titre": "Compter les clics",
@@ -838,7 +2258,12 @@ window.EF_CODE = {
      ],
      "indice": "<code>if clic() then score = score + 1 end<\/code>",
      "solution": "local score = 0\n\nfunction update(dt)\n  if clic() then score = score + 1 end\nend\n\nfunction draw()\n  effacer(\"black\")\n  texte(\"Score : \" .. score, 16, 16, 28, \"white\")\n  cercle(sourisX(), sourisY(), 10, \"yellow\")\nend\n"
-    },
+    }
+   ]
+  },
+  {
+   "titre": "Mini-jeux",
+   "missions": [
     {
      "id": "lua-saut",
      "titre": "Sauter avec la gravité",
@@ -1062,6 +2487,197 @@ window.EF_CODE = {
      ],
      "indice": "Collision : <code>fy &gt;= 280 and fx &gt;= px and fx &lt;= px + 80<\/code>.",
      "solution": "local px = 200\nlocal fx, fy = hasard(20, 460), 0\nlocal score = 0\n\nlocal function nouveauFruit()\n  fx = hasard(20, 460)\n  fy = 0\nend\n\nfunction update(dt)\n  if touche(\"droite\") then px = px + 6 end\n  if touche(\"gauche\") then px = px - 6 end\n  px = math.max(0, math.min(LARGEUR - 80, px))\n  fy = fy + 4\n  if fy >= 280 and fy <= 300 and fx >= px and fx <= px + 80 then\n    score = score + 1\n    nouveauFruit()\n  elseif fy > HAUTEUR then\n    nouveauFruit()\n  end\nend\n\nfunction draw()\n  effacer(\"black\")\n  rect(px, 290, 80, 12, \"white\")\n  cercle(fx, fy, 10, \"red\")\n  texte(\"Score : \" .. score, 16, 16, 24, \"white\")\nend\n"
+    },
+    {
+     "id": "lua-etoiles",
+     "titre": "La pluie d'étoiles",
+     "texte": "<p>Fais tomber <b>5 étoiles<\/b>. Ce sont des cercles <b>blancs<\/b> (<code>\"white\"<\/code>) de rayon 3, rangés dans une <b>liste<\/b>. Leurs x valent 60, 150, 240, 330 et 420 ; leurs y de départ valent 0, 40, 80, 120 et 160. À chaque image, chaque étoile descend de <b>2 pixels<\/b> ; dès que son y dépasse 320, elle repart à y = 0. Le fond est noir.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>local liste = {}\nliste[1] = { x = 60, y = 0 }             -- un objet = une table\nfor _, e in ipairs(liste) do e.y = e.y + 2 end<\/code><\/pre>",
+     "depart": "local etoiles = {}\n\nfunction setup()\n  -- crée les 5 étoiles\nend\n\nfunction update(dt)\nend\n\nfunction draw()\n  effacer(\"black\")\nend\n",
+     "objectifs": [
+      {
+       "txt": "5 cercles blancs à chaque image",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 30
+           }
+          ],
+          "test": "const c = F.map(q => T(q, 'cercle').filter(v => v[4] === 'white').sort((a, b) => a[1] - b[1]));\nreturn c.every(f => f.length === 5) && [60, 150, 240, 330, 420].every((x, i) => c[0][i][1] === x);"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Chaque étoile descend de 2 pixels par image",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 30
+           }
+          ],
+          "test": "const c = F.map(q => T(q, 'cercle').filter(v => v[4] === 'white').sort((a, b) => a[1] - b[1]));\nreturn c[0].every((v, i) => c[10][i][2] - v[2] === 20 && c[1][i][2] - v[2] === 2);"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Les étoiles partent de hauteurs différentes",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 3
+           }
+          ],
+          "test": "const c = F.map(q => T(q, 'cercle').filter(v => v[4] === 'white').sort((a, b) => a[1] - b[1]));\nreturn new Set(c[0].map(v => v[2])).size === 5;"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Arrivées en bas, elles repartent du haut et ne sortent jamais",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 200
+           }
+          ],
+          "test": "const c = F.map(q => T(q, 'cercle').filter(v => v[4] === 'white').sort((a, b) => a[1] - b[1]));\nreturn c.every(f => f.every(v => v[2] >= 0 && v[2] <= 322)) && [0, 1, 2, 3, 4].every(i => c.some((f, k) => k && f[i][2] < c[k - 1][i][2]));"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Crée les étoiles dans <code>setup<\/code> avec une boucle : <code>{ x = 60 + (i - 1) * 90, y = (i - 1) * 40 }<\/code>. Déplace-les dans <code>update<\/code>, dessine-les dans <code>draw<\/code>.",
+     "solution": "local etoiles = {}\n\nfunction setup()\n  for i = 1, 5 do\n    etoiles[i] = { x = 60 + (i - 1) * 90, y = (i - 1) * 40 }\n  end\nend\n\nfunction update(dt)\n  for _, e in ipairs(etoiles) do\n    e.y = e.y + 2\n    if e.y > 320 then e.y = 0 end\n  end\nend\n\nfunction draw()\n  effacer(\"black\")\n  for _, e in ipairs(etoiles) do\n    cercle(e.x, e.y, 3, \"white\")\n  end\nend\n"
+    },
+    {
+     "id": "lua-tir",
+     "titre": "Tirer des projectiles",
+     "texte": "<p>Un vaisseau (rectangle <b>bleu<\/b> <code>\"blue\"<\/code> de 40 × 20, en y = 290) part de x = 220 et se déplace de 5 pixels par image avec les flèches gauche et droite. À chaque <b>appui<\/b> sur espace, il crée un tir : un rectangle <b>jaune<\/b> (<code>\"yellow\"<\/code>) de 4 × 10 placé en (x du vaisseau + 18, 280). Chaque tir monte de <b>8 pixels<\/b> par image et il est <b>retiré de la liste<\/b> quand son y devient négatif. Le fond est noir.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>for i = #tirs, 1, -1 do                  -- à l'envers pour pouvoir supprimer\n  if tirs[i].y &lt; 0 then table.remove(tirs, i) end\nend<\/code><\/pre>",
+     "depart": "local x = 220\nlocal tirs = {}\n\nfunction update(dt)\nend\n\nfunction draw()\n  effacer(\"black\")\n  rect(x, 290, 40, 20, \"blue\")\nend\n",
+     "objectifs": [
+      {
+       "txt": "Le vaisseau bleu se déplace avec les flèches",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1
+           },
+           {
+            "n": 10,
+            "k": [
+             "droite"
+            ]
+           }
+          ],
+          "test": "const x = P('rect', 'blue').map(v => v && v[1]);\nreturn x[0] === 220 && x[10] === 270;"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Aucun tir tant qu'on n'appuie pas sur espace",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 5
+           }
+          ],
+          "test": "const t = F.map(q => T(q, 'rect').filter(v => v[5] === 'yellow'));\nreturn t.every(f => f.length === 0);"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Un appui sur espace crée un seul tir, qui monte de 8 pixels par image",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 2
+           },
+           {
+            "n": 1,
+            "p": [
+             "espace"
+            ]
+           },
+           {
+            "n": 6
+           }
+          ],
+          "test": "const t = F.map(q => T(q, 'rect').filter(v => v[5] === 'yellow'));\nreturn t[1].length === 0 && t[4].length === 1 && t[8].length === 1 && t[4][0][2] - t[5][0][2] === 8 && t[4][0][1] === 238;"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Deux appuis : deux tirs à l'écran",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1,
+            "p": [
+             "espace"
+            ]
+           },
+           {
+            "n": 5
+           },
+           {
+            "n": 1,
+            "p": [
+             "espace"
+            ]
+           },
+           {
+            "n": 3
+           }
+          ],
+          "test": "const t = F.map(q => T(q, 'rect').filter(v => v[5] === 'yellow'));\nreturn t[t.length - 1].length === 2;"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Un tir sorti de l'écran est retiré de la liste",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1,
+            "p": [
+             "espace"
+            ]
+           },
+           {
+            "n": 60
+           }
+          ],
+          "test": "const t = F.map(q => T(q, 'rect').filter(v => v[5] === 'yellow'));\nreturn t[2].length === 1 && t[t.length - 1].length === 0 && t.every(f => f.every(v => v[2] >= -10));"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>toucheAppuyee(\"espace\")<\/code> n'est vrai qu'une image par appui. Parcours la liste <b>à l'envers<\/b> pour supprimer avec <code>table.remove<\/code>.",
+     "solution": "local x = 220\nlocal tirs = {}\n\nfunction update(dt)\n  if touche(\"gauche\") then x = x - 5 end\n  if touche(\"droite\") then x = x + 5 end\n  if toucheAppuyee(\"espace\") then\n    tirs[#tirs + 1] = { x = x + 18, y = 280 }\n  end\n  for i = #tirs, 1, -1 do\n    tirs[i].y = tirs[i].y - 8\n    if tirs[i].y < 0 then table.remove(tirs, i) end\n  end\nend\n\nfunction draw()\n  effacer(\"black\")\n  rect(x, 290, 40, 20, \"blue\")\n  for _, t in ipairs(tirs) do\n    rect(t.x, t.y, 4, 10, \"yellow\")\n  end\nend\n"
     }
    ]
   }

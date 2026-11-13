@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Lua en vrai : Roblox, LÖVE, Neovim et bonnes pratiques — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="lua" data-chapter="lua-ecosysteme">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/lua.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>Tu connais maintenant le langage. Ce chapitre montre où et comment il s'utilise réellement, les différences à connaître selon l'environnement, et les habitudes des développeurs Lua.</p>
+<h2>1. LÖVE (love2d)</h2>
+<p>LÖVE est un moteur 2D gratuit. Un jeu est un dossier qui contient un fichier <code>main.lua</code> ; on le lance avec la commande <code>love dossier</code>.</p>
+<pre><code>local joueur = { x = 100, y = 100 }
+
+function love.load()                       -- ≈ setup()
+  love.window.setTitle("Mon jeu")
+end
+
+function love.update(dt)                   -- ≈ update(dt)
+  if love.keyboard.isDown("right") then joueur.x = joueur.x + 200 * dt end
+end
+
+function love.draw()                       -- ≈ draw()
+  love.graphics.setColor(1, 0.8, 0)        -- couleurs de 0 à 1
+  love.graphics.rectangle("fill", joueur.x, joueur.y, 40, 40)
+  love.graphics.print("Score : 0", 10, 10)
+end
+
+function love.keypressed(touche)           -- ≈ toucheAppuyee
+  if touche == "escape" then love.event.quit() end
+end</code></pre>
+<table><tr><th>Dans le labo</th><th>Avec LÖVE</th></tr><tr><td><code>setup()</code></td><td><code>love.load()</code></td></tr><tr><td><code>update(dt)</code> / <code>draw()</code></td><td><code>love.update(dt)</code> / <code>love.draw()</code></td></tr><tr><td><code>rect(x, y, l, h, c)</code></td><td><code>love.graphics.rectangle("fill", x, y, l, h)</code></td></tr><tr><td><code>cercle(x, y, r, c)</code></td><td><code>love.graphics.circle("fill", x, y, r)</code></td></tr><tr><td><code>touche("droite")</code></td><td><code>love.keyboard.isDown("right")</code></td></tr><tr><td><code>hasard(a, b)</code></td><td><code>love.math.random(a, b)</code></td></tr></table>
+<h2>2. Roblox et Luau</h2>
+<p>Roblox Studio utilise <b>Luau</b>, un Lua 5.1 enrichi (types optionnels, <code>+=</code>, <code>continue</code>). Les scripts manipulent des objets du jeu et réagissent à des <b>événements</b>.</p>
+<pre><code>local Players = game:GetService("Players")          -- un service du moteur
+local piece = script.Parent                         -- l'objet auquel le script est attaché
+
+piece.Touched:Connect(function(autre)               -- événement : quelque chose touche la pièce
+  local joueur = Players:GetPlayerFromCharacter(autre.Parent)
+  if joueur then
+    joueur.leaderstats.Pieces.Value += 1            -- += existe en Luau
+    piece:Destroy()
+  end
+end)
+
+task.wait(2)                                        -- attend 2 secondes (une coroutine !)
+print("2 secondes plus tard")</code></pre>
+<p>Ce que tu reconnais : les deux-points des méthodes, une fonction anonyme passée en argument (une closure), et <code>task.wait</code> qui met le script en pause grâce aux coroutines.</p>
+<table><tr><th>Lua 5.4</th><th>Luau (Roblox)</th></tr><tr><td><code>i = i + 1</code></td><td><code>i += 1</code> accepté</td></tr><tr><td>pas de <code>continue</code></td><td><code>continue</code> existe</td></tr><tr><td><code>//</code> division entière</td><td><code>//</code> existe aussi</td></tr><tr><td><code>local x &lt;const&gt;</code></td><td>pas de <code>&lt;const&gt;</code></td></tr><tr><td>pas de types</td><td><code>local n: number = 5</code> (facultatif)</td></tr><tr><td><code>goto</code></td><td>pas de <code>goto</code></td></tr></table>
+<h2>3. Les versions de Lua</h2>
+<table><tr><th>Version</th><th>Où</th><th>Différence marquante</th></tr><tr><td>5.1</td><td>LuaJIT, LÖVE, Neovim, base de Luau</td><td>pas d'entiers séparés, <code>unpack</code> global, pas de <code>//</code></td></tr><tr><td>5.3 / 5.4</td><td>Lua officiel, ce site</td><td>entiers 64 bits, <code>//</code>, opérateurs binaires, <code>&lt;const&gt;</code></td></tr></table>
+<p>En pratique : en 5.1, <code>10 / 2</code> affiche <code>5</code> et non <code>5.0</code>, et <code>table.unpack</code> s'appelle <code>unpack</code>.</p>
+<h2>4. Configurer avec Lua : Neovim, nginx, Wireshark</h2>
+<p>Beaucoup de logiciels utilisent Lua comme langage de <b>configuration et d'extension</b>, ce qui intéresse aussi l'option SISR. Un fichier de configuration Neovim n'est qu'un script qui remplit des tables :</p>
+<pre><code>vim.opt.number = true                    -- numéros de ligne
+vim.opt.tabstop = 2
+vim.keymap.set("n", "&lt;leader&gt;w", ":write&lt;CR&gt;")   -- un raccourci clavier</code></pre>
+<p>Avec OpenResty, on écrit en Lua des règles directement dans le serveur web nginx ; Wireshark, HAProxy, Redis et les pare-feu applicatifs acceptent aussi des scripts Lua.</p>
+<h2>5. Opérateurs binaires</h2>
+<p>Utiles pour les masques (réseau, droits, drapeaux d'un jeu) :</p>
+<div class="essai" data-langue="lua"><pre><code>print(6 &amp; 3, 6 | 3, 6 ~ 3)        -- ET 2, OU 7, OU exclusif 5
+print(1 &lt;&lt; 4, 256 &gt;&gt; 2, ~0)       -- décalages : 16, 64 ; NON : -1
+local LECTURE, ECRITURE, EXECUTION = 4, 2, 1
+local droits = LECTURE | EXECUTION
+print(droits, droits &amp; ECRITURE ~= 0, droits &amp; LECTURE ~= 0)
+print(string.format("%d.%d", (192 &lt;&lt; 8 | 168) &gt;&gt; 8, (192 &lt;&lt; 8 | 168) &amp; 0xFF))</code></pre></div>
+<h2>6. Les bonnes pratiques</h2>
+<ul><li>**<code>local</code> partout**, y compris pour les fonctions et les modules (<code>local M = {}</code>).</li><li>Des noms explicites ; <code>_</code> pour une valeur qu'on ignore (<code>for _, v in ipairs(t)</code>).</li><li>Mettre en cache dans une locale ce qu'on utilise souvent dans une boucle : <code>local floor = math.floor</code>.</li><li>Construire les longues chaînes avec <code>table.concat</code>, jamais avec <code>..</code> dans une boucle.</li><li>Parcourir une liste avec <code>ipairs</code> ou <code>for i = 1, #t</code> ; un dictionnaire avec <code>pairs</code>.</li><li>Tester l'absence avec <code>if x == nil</code> quand <code>false</code> est une valeur possible ; sinon <code>if not x</code>.</li><li>Une erreur prévisible renvoie <code>nil, message</code> ; un bug lève <code>error</code>.</li></ul>
+<section class="tuto"><h3><small>Tutoriel</small>Du labo à LÖVE : porter un jeu</h3>
+<div class="etape"><h4>Le jeu dans le labo</h4>
+<pre><code>local x = 220
+function update(dt)
+  if touche("gauche") then x = x - 200 * dt end
+  if touche("droite") then x = x + 200 * dt end
+end
+function draw()
+  effacer("black")
+  rect(x, 280, 40, 20, "white")
+end</code></pre>
+</div>
+<div class="etape"><h4>Le même jeu pour LÖVE</h4>
+<p>Seuls les noms des fonctions du moteur changent : toute la logique Lua reste identique.</p>
+<pre><code>local x = 220
+function love.update(dt)
+  if love.keyboard.isDown("left") then x = x - 200 * dt end
+  if love.keyboard.isDown("right") then x = x + 200 * dt end
+end
+function love.draw()
+  love.graphics.clear(0, 0, 0)
+  love.graphics.setColor(1, 1, 1)
+  love.graphics.rectangle("fill", x, 280, 40, 20)
+end</code></pre>
+</div>
+<div class="etape"><h4>L'installer chez toi</h4>
+<p>Télécharge LÖVE sur love2d.org, enregistre le code dans un dossier sous le nom <code>main.lua</code>, puis glisse le dossier sur l'icône de LÖVE (ou tape <code>love .</code> dans le dossier).</p>
+</div>
+</section>
+<div class="box retenir"><b>À retenir</b><p>LÖVE : <code>love.load</code>, <code>love.update(dt)</code>, <code>love.draw</code>. </p><p> Roblox utilise Luau : même langage, avec <code>+=</code>, <code>continue</code>, des types facultatifs et une programmation par événements (<code>:Connect</code>). </p><p> Lua sert aussi à configurer et étendre des logiciels (Neovim, nginx, Wireshark, Redis). </p><p> <code>&amp;</code>, <code>|</code>, <code>~</code>, <code>&lt;&lt;</code>, <code>&gt;&gt;</code> manipulent les bits.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-lua.html">Labo Lua</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "facile",
+  "q": "Quelle fonction LÖVE est appelée une fois au démarrage ?",
+  "type": "qcm",
+  "options": [
+   "`love.load`",
+   "`love.start`",
+   "`love.setup`",
+   "`love.init`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "facile",
+  "q": "Comment s'appelle la variante de Lua utilisée par Roblox ?",
+  "type": "qcm",
+  "options": [
+   "RLua",
+   "LuaJIT",
+   "Luau",
+   "MoonScript"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle écriture est acceptée en Luau mais pas en Lua 5.4 ?",
+  "type": "qcm",
+  "options": [
+   "`i // 2`",
+   "`local i = 1`",
+   "`i = i + 1`",
+   "`i += 1`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Dans Roblox, que fait `piece.Touched:Connect(f)` ?",
+  "type": "qcm",
+  "options": [
+   "Elle détruit la pièce",
+   "Elle appelle f une seule fois immédiatement",
+   "Elle appelle f à chaque fois que l'événement Touched se produit",
+   "Elle connecte le joueur au serveur"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel fichier LÖVE lance-t-il dans le dossier du jeu ?",
+  "type": "qcm",
+  "options": [
+   "`index.lua`",
+   "`main.lua`",
+   "`game.lua`",
+   "`love.lua`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "En LÖVE, comment tester si la flèche droite est enfoncée ?",
+  "type": "qcm",
+  "options": [
+   "`touche(\"droite\")`",
+   "`love.key(\"right\")`",
+   "`love.input.right`",
+   "`love.keyboard.isDown(\"right\")`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "En Lua 5.1 (LÖVE, Neovim), qu'affiche `print(10 / 2)` ?",
+  "type": "qcm",
+  "options": [
+   "5.0",
+   "Une erreur",
+   "5",
+   "2"
+  ],
+  "answer": 2,
+  "explication": "Avant la 5.3, il n'y avait qu'un seul type de nombre."
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que vaut `6 & 3` ?",
+  "type": "qcm",
+  "options": [
+   "2",
+   "7",
+   "9",
+   "5"
+  ],
+  "answer": 0,
+  "explication": "110 ET 011 = 010."
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que vaut `6 | 3` ?",
+  "type": "qcm",
+  "options": [
+   "7",
+   "2",
+   "5",
+   "9"
+  ],
+  "answer": 0,
+  "explication": "110 OU 011 = 111."
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que vaut `1 << 4` ?",
+  "type": "qcm",
+  "options": [
+   "16",
+   "5",
+   "8",
+   "4"
+  ],
+  "answer": 0,
+  "explication": "Décaler de 4 bits vers la gauche multiplie par 2⁴."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel éditeur de texte se configure en Lua ?",
+  "type": "qcm",
+  "options": [
+   "Nano",
+   "Notepad++",
+   "Neovim",
+   "Word"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle est la bonne pratique pour assembler une longue chaîne ?",
+  "type": "qcm",
+  "options": [
+   "`..` dans une boucle",
+   "`string.rep`",
+   "`io.write`",
+   "`table.concat`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Un jeu écrit pour le labo du site se porte vers LÖVE en changeant surtout les noms des fonctions du moteur.",
+  "type": "vf",
+  "answer": true,
+  "explication": "La logique Lua reste la même."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Luau possède un mot-clé continue.",
+  "type": "vf",
+  "answer": true,
+  "explication": "Contrairement à Lua standard."
+ },
+ {
+  "niveau": "difficile",
+  "q": "En Luau, on peut annoter le type d'une variable : `local n: number = 5`.",
+  "type": "vf",
+  "answer": true,
+  "explication": "Les types sont facultatifs."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel nom donne-t-on par convention à une variable dont on ignore la valeur dans une boucle for ?",
+  "type": "saisie",
+  "answers": [
+   "_"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "`task.wait(2)` dans un script Roblox repose sur quel mécanisme de Lua ?",
+  "type": "qcm",
+  "options": [
+   "Les coroutines",
+   "Les modules",
+   "Les métatables",
+   "Les motifs"
+  ],
+  "answer": 0,
+  "explication": "Le script est mis en pause puis repris."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque environnement à sa fonction de mise à jour.",
+  "type": "associer",
+  "paires": [
+   [
+    "Labo du site",
+    "`update(dt)`"
+   ],
+   [
+    "LÖVE",
+    "`love.update(dt)`"
+   ],
+   [
+    "Roblox",
+    "événements et `:Connect`"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>
