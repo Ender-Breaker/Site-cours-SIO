@@ -14,7 +14,7 @@ window.EF_CODE = {
  "langue": "java",
  "key": "ef-labo-java",
  "titre": "Labo Java",
- "sousTitre": "Du vrai Java (javac + TeaVM) dans ton navigateur : programmes console, objets, puis jeux avec la classe Jeu.",
+ "sousTitre": "Du vrai Java (javac + TeaVM) dans le navigateur : des bases aux objets, à l'héritage, aux collections, aux exceptions et aux streams, puis des jeux.",
  "ico": "J",
  "couleur": "java",
  "fichier": "Main.java",
@@ -124,6 +124,118 @@ window.EF_CODE = {
      "stdin": [
       "100"
      ]
+    },
+    {
+     "id": "java-conv",
+     "titre": "Heures, minutes, secondes",
+     "texte": "<p>Lis un nombre de secondes et affiche-le sous la forme <b>H h M min S s<\/b>. La division entière donne les heures, le reste donne ce qu'il reste à convertir.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>System.out.println(7 / 2 + \" \" + 7 % 2);   // 3 1<\/code><\/pre>",
+     "depart": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int s = sc.nextInt();\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>3725<\/code> → <code>1 h 2 min 5 s<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3725"
+          ],
+          "out": "^1 h 2 min 5 s[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>59<\/code> → <code>0 h 0 min 59 s<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "59"
+          ],
+          "out": "^0 h 0 min 59 s[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>86399<\/code> → <code>23 h 59 min 59 s<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "86399"
+          ],
+          "out": "^23 h 59 min 59 s[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>s / 3600<\/code> donne les heures (division entière) ; <code>(s % 3600) / 60<\/code> les minutes ; <code>s % 60<\/code> les secondes. Mets les calculs entre parenthèses dans la concaténation.",
+     "solution": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int s = sc.nextInt();\n        int h = s / 3600;\n        int m = (s % 3600) / 60;\n        System.out.println(h + \" h \" + m + \" min \" + (s % 60) + \" s\");\n    }\n}\n",
+     "stdin": [
+      "3725"
+     ]
+    },
+    {
+     "id": "java-moyenne",
+     "titre": "La moyenne de trois notes",
+     "texte": "<p>Lis trois notes (une par ligne) et affiche <b>Moyenne : X<\/b> avec exactement <b>deux décimales<\/b>.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>System.out.printf(\"%.2f%n\", 3.14159);   // 3.14<\/code><\/pre>",
+     "depart": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        double a = sc.nextDouble();\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>12, 15, 9<\/code> → <code>Moyenne : 12.00<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "12",
+           "15",
+           "9"
+          ],
+          "out": "^Moyenne : 12\\.00[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>10, 11, 11<\/code> → <code>Moyenne : 10.67<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "10",
+           "11",
+           "11"
+          ],
+          "out": "^Moyenne : 10\\.67[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>20, 20, 19<\/code> → <code>Moyenne : 19.67<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "20",
+           "20",
+           "19"
+          ],
+          "out": "^Moyenne : 19\\.67[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>System.out.printf(\"Moyenne : %.2f%n\", valeur);<\/code> Lis les notes avec <code>nextDouble()<\/code>.",
+     "solution": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        double a = sc.nextDouble();\n        double b = sc.nextDouble();\n        double c = sc.nextDouble();\n        System.out.printf(\"Moyenne : %.2f%n\", (a + b + c) / 3);\n    }\n}\n",
+     "stdin": [
+      "12",
+      "15",
+      "9"
+     ]
     }
    ]
   },
@@ -176,6 +288,84 @@ window.EF_CODE = {
      "solution": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        if (n % 2 == 0) {\n            System.out.println(\"pair\");\n        } else {\n            System.out.println(\"impair\");\n        }\n    }\n}\n",
      "stdin": [
       "4"
+     ]
+    },
+    {
+     "id": "java-mention",
+     "titre": "La mention",
+     "texte": "<p>Lis une note sur 20 et affiche la mention : <b>Insuffisant<\/b> (moins de 10), <b>Passable<\/b> (de 10 à moins de 12), <b>Assez bien<\/b> (de 12 à moins de 14), <b>Bien<\/b> (de 14 à moins de 16), <b>Très bien<\/b> (16 et plus).<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>if (x &lt; 10) { … }\nelse if (x &lt; 20) { … }\nelse { … }<\/code><\/pre>",
+     "depart": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        double note = sc.nextDouble();\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>8<\/code> → <code>Insuffisant<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "8"
+          ],
+          "out": "^Insuffisant[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>10<\/code> → <code>Passable<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "10"
+          ],
+          "out": "^Passable[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>13<\/code> → <code>Assez bien<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "13"
+          ],
+          "out": "^Assez bien[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>15.5<\/code> → <code>Bien<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "15.5"
+          ],
+          "out": "^Bien[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>18<\/code> → <code>Très bien<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "18"
+          ],
+          "out": "^Très bien[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Enchaîne les <code>else if<\/code> du plus petit seuil au plus grand.",
+     "solution": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        double note = sc.nextDouble();\n        if (note < 10) System.out.println(\"Insuffisant\");\n        else if (note < 12) System.out.println(\"Passable\");\n        else if (note < 14) System.out.println(\"Assez bien\");\n        else if (note < 16) System.out.println(\"Bien\");\n        else System.out.println(\"Très bien\");\n    }\n}\n",
+     "stdin": [
+      "8"
      ]
     },
     {
@@ -278,11 +468,223 @@ window.EF_CODE = {
       "5",
       "0"
      ]
+    },
+    {
+     "id": "java-fizzbuzz",
+     "titre": "FizzBuzz",
+     "texte": "<p>Lis un entier n et affiche les nombres de 1 à n, un par ligne. Mais : pour un multiple de 3 affiche <b>Fizz<\/b>, pour un multiple de 5 affiche <b>Buzz<\/b>, et pour un multiple des deux affiche <b>FizzBuzz<\/b>. C'est l'exercice le plus célèbre des entretiens d'embauche.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>if (i % 3 == 0) { … }   // i est un multiple de 3<\/code><\/pre>",
+     "depart": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Avec 15 : de <code>1<\/code> à <code>FizzBuzz<\/code>, 15 lignes",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "15"
+          ],
+          "out": "^1[ \\t]*\\n2[ \\t]*\\nFizz[ \\t]*\\n4[ \\t]*\\nBuzz[ \\t]*\\nFizz[ \\t]*\\n7[ \\t]*\\n8[ \\t]*\\nFizz[ \\t]*\\nBuzz[ \\t]*\\n11[ \\t]*\\nFizz[ \\t]*\\n13[ \\t]*\\n14[ \\t]*\\nFizzBuzz[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Avec 5 : on s'arrête à <code>Buzz<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "5"
+          ],
+          "out": "^1[ \\t]*\\n2[ \\t]*\\nFizz[ \\t]*\\n4[ \\t]*\\nBuzz[ \\t]*$",
+          "notout": "^7\\s*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Teste d'abord le cas « multiple de 15 », sinon il ne sera jamais atteint.",
+     "solution": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        for (int i = 1; i <= n; i++) {\n            if (i % 15 == 0) System.out.println(\"FizzBuzz\");\n            else if (i % 3 == 0) System.out.println(\"Fizz\");\n            else if (i % 5 == 0) System.out.println(\"Buzz\");\n            else System.out.println(i);\n        }\n    }\n}\n",
+     "stdin": [
+      "15"
+     ]
+    },
+    {
+     "id": "java-rebours",
+     "titre": "Compte à rebours",
+     "texte": "<p>Lis un entier n et affiche le compte à rebours de n à 1, un nombre par ligne, puis <b>Décollage !<\/b><\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>for (int i = 10; i &gt;= 1; i--) { … }<\/code><\/pre>",
+     "depart": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>3<\/code> → <code>3 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3"
+          ],
+          "out": "^3[ \\t]*\\n2[ \\t]*\\n1[ \\t]*\\nDécollage ![ \\t]*$",
+          "notout": "^[4-9]"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>1<\/code> → <code>1 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1"
+          ],
+          "out": "^1[ \\t]*\\nDécollage ![ \\t]*$",
+          "notout": "^[2-9]"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>10<\/code> → <code>10 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "10"
+          ],
+          "out": "^10[ \\t]*\\n9[ \\t]*\\n8[ \\t]*\\n7[ \\t]*\\n6[ \\t]*\\n5[ \\t]*\\n4[ \\t]*\\n3[ \\t]*\\n2[ \\t]*\\n1[ \\t]*\\nDécollage ![ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>for (int i = n; i &gt;= 1; i--)<\/code>",
+     "solution": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        for (int i = n; i >= 1; i--) {\n            System.out.println(i);\n        }\n        System.out.println(\"Décollage !\");\n    }\n}\n",
+     "stdin": [
+      "3"
+     ]
+    },
+    {
+     "id": "java-devine",
+     "titre": "Plus ou moins",
+     "texte": "<p>Le nombre secret est <b>42<\/b>. Lis des essais (un par ligne) jusqu'à ce que le joueur trouve. Pour chaque essai raté, affiche <b>Trop petit<\/b> ou <b>Trop grand<\/b>. Quand il trouve, affiche <b>Gagné ! Essais : N<\/b> où N est le nombre total d'essais.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>do {\n    …\n} while (condition);   // au moins un tour<\/code><\/pre>",
+     "depart": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        final int SECRET = 42;\n        int essais = 0;\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>50, 30, 42<\/code> → <code>Trop grand …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "50",
+           "30",
+           "42"
+          ],
+          "out": "^Trop grand[ \\t]*\\nTrop petit[ \\t]*\\nGagné ! Essais : 3[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>42<\/code> → <code>Gagné ! Essais : 1<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "42"
+          ],
+          "out": "^Gagné ! Essais : 1[ \\t]*$",
+          "notout": "Trop"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>1, 2, 3, 41, 43, 42<\/code> → <code>Gagné ! Essais : 6<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1",
+           "2",
+           "3",
+           "41",
+           "43",
+           "42"
+          ],
+          "out": "^Gagné ! Essais : 6[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Une boucle <code>do { … } while (essai != SECRET);<\/code> : il y a toujours au moins un essai.",
+     "solution": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        final int SECRET = 42;\n        int essai, essais = 0;\n        do {\n            essai = sc.nextInt();\n            essais++;\n            if (essai < SECRET) System.out.println(\"Trop petit\");\n            else if (essai > SECRET) System.out.println(\"Trop grand\");\n        } while (essai != SECRET);\n        System.out.println(\"Gagné ! Essais : \" + essais);\n    }\n}\n",
+     "stdin": [
+      "50",
+      "30",
+      "42"
+     ]
+    },
+    {
+     "id": "java-pgcd",
+     "titre": "Le PGCD par l'algorithme d'Euclide",
+     "texte": "<p>Lis deux entiers a et b et affiche <b>PGCD : X<\/b>. Algorithme d'Euclide : tant que b n'est pas nul, on remplace (a, b) par (b, reste de a divisé par b). À la fin, le PGCD est a.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>int reste = a % b;   // garde le reste avant de modifier a<\/code><\/pre>",
+     "depart": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt();\n        int b = sc.nextInt();\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>48, 18<\/code> → <code>PGCD : 6<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "48",
+           "18"
+          ],
+          "out": "^PGCD : 6[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>17, 5<\/code> → <code>PGCD : 1<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "17",
+           "5"
+          ],
+          "out": "^PGCD : 1[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>100, 75<\/code> → <code>PGCD : 25<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "100",
+           "75"
+          ],
+          "out": "^PGCD : 25[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Dans la boucle : calcule le reste, puis <code>a = b; b = reste;<\/code>.",
+     "solution": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt();\n        int b = sc.nextInt();\n        while (b != 0) {\n            int reste = a % b;\n            a = b;\n            b = reste;\n        }\n        System.out.println(\"PGCD : \" + a);\n    }\n}\n",
+     "stdin": [
+      "48",
+      "18"
+     ]
     }
    ]
   },
   {
-   "titre": "Fonctions, tableaux, objets",
+   "titre": "Méthodes et tableaux",
    "missions": [
     {
      "id": "java-premier",
@@ -356,6 +758,263 @@ window.EF_CODE = {
      ]
     },
     {
+     "id": "java-minmax",
+     "titre": "Minimum et maximum",
+     "texte": "<p>Lis un entier n, puis n nombres (un par ligne). Affiche <b>Min : X<\/b> puis <b>Max : Y<\/b> sur deux lignes. Écris une fonction qui reçoit la liste et calcule les deux valeurs.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>static int[] deux() {\n    return new int[]{1, 2};   // deux résultats dans un tableau\n}<\/code><\/pre>",
+     "depart": "import java.util.Scanner;\n\npublic class Main {\n    // écris ici une méthode qui calcule le minimum et le maximum\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>4, 12, 5, 19, 8<\/code> → <code>Min : 5 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "4",
+           "12",
+           "5",
+           "19",
+           "8"
+          ],
+          "out": "^Min : 5[ \\t]*\\nMax : 19[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>3, -2, -7, -1<\/code> → <code>Min : -7 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "-2",
+           "-7",
+           "-1"
+          ],
+          "out": "^Min : -7[ \\t]*\\nMax : -1[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>1, 6<\/code> → <code>Min : 6 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1",
+           "6"
+          ],
+          "out": "^Min : 6[ \\t]*\\nMax : 6[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Une méthode reçoit le tableau et calcule les deux valeurs",
+       "r": [
+        {
+         "code": "static\\s+[\\w\\[\\]<>]+\\s+\\w+\\s*\\(\\s*(int\\[\\]|List<Integer>)\\s+\\w+\\s*\\)"
+        }
+       ]
+      }
+     ],
+     "indice": "Une méthode ne renvoie qu'une valeur : renvoie un tableau <code>new int[]{mini, maxi}<\/code>.",
+     "solution": "import java.util.Scanner;\n\npublic class Main {\n    static int[] minMax(int[] t) {\n        int mini = t[0], maxi = t[0];\n        for (int v : t) {\n            if (v < mini) mini = v;\n            if (v > maxi) maxi = v;\n        }\n        return new int[]{mini, maxi};\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        int[] t = new int[n];\n        for (int i = 0; i < n; i++) t[i] = sc.nextInt();\n        int[] r = minMax(t);\n        System.out.println(\"Min : \" + r[0]);\n        System.out.println(\"Max : \" + r[1]);\n    }\n}\n",
+     "stdin": [
+      "4",
+      "12",
+      "5",
+      "19",
+      "8"
+     ]
+    },
+    {
+     "id": "java-factorielle",
+     "titre": "La factorielle, en récursif",
+     "texte": "<p>Lis un entier n et affiche <b>n! = résultat<\/b>. La factorielle de n est n × (n − 1) × … × 1, et 0! vaut 1. Écris une fonction <b>récursive<\/b> : elle s'appelle elle-même avec n − 1.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>static int compte(int n) {\n    if (n == 0) return 0;        // cas d'arrêt\n    return 1 + compte(n - 1);    // appel récursif\n}<\/code><\/pre>",
+     "depart": "import java.util.Scanner;\n\npublic class Main {\n    static long factorielle(int n) {\n        // à compléter\n        return 0;\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>5<\/code> → <code>5! = 120<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "5"
+          ],
+          "out": "^5! = 120[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>0<\/code> → <code>0! = 1<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "0"
+          ],
+          "out": "^0! = 1[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>10<\/code> → <code>10! = 3628800<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "10"
+          ],
+          "out": "^10! = 3628800[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "La méthode s'appelle elle-même",
+       "r": [
+        {
+         "code": "\\b(\\w+)\\s*\\(\\s*(?:int|long)\\s+\\w+\\s*\\)\\s*\\{[\\s\\S]*\\b\\1\\s*\\([\\s\\S]*\\b\\1\\s*\\("
+        }
+       ]
+      }
+     ],
+     "indice": "Cas d'arrêt : <code>if (n &lt;= 1) return 1;<\/code>. Sinon <code>return n * factorielle(n - 1);<\/code>.",
+     "solution": "import java.util.Scanner;\n\npublic class Main {\n    static long factorielle(int n) {\n        if (n <= 1) return 1;\n        return n * factorielle(n - 1);\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        System.out.println(n + \"! = \" + factorielle(n));\n    }\n}\n",
+     "stdin": [
+      "5"
+     ]
+    },
+    {
+     "id": "java-fibo",
+     "titre": "La suite de Fibonacci",
+     "texte": "<p>Lis un entier n (au moins 1) et affiche les n premiers termes de la suite de Fibonacci, séparés par un espace. La suite commence par 0 et 1, puis chaque terme est la somme des deux précédents.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>long suivant = a + b;\na = b;\nb = suivant;<\/code><\/pre>",
+     "depart": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>8<\/code> → <code>0 1 1 2 3 5 8 13<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "8"
+          ],
+          "out": "^0 1 1 2 3 5 8 13[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>1<\/code> → <code>0<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1"
+          ],
+          "out": "^0[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>12<\/code> → <code>0 1 1 2 3 5 8 13 21 34 55 89<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "12"
+          ],
+          "out": "^0 1 1 2 3 5 8 13 21 34 55 89[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Deux variables <code>a<\/code> et <code>b<\/code> ; à chaque tour ajoute <code>a<\/code> au texte, puis avance : <code>suivant = a + b; a = b; b = suivant;<\/code>.",
+     "solution": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        long a = 0, b = 1;\n        StringBuilder sb = new StringBuilder();\n        for (int i = 0; i < n; i++) {\n            if (i > 0) sb.append(\" \");\n            sb.append(a);\n            long suivant = a + b;\n            a = b;\n            b = suivant;\n        }\n        System.out.println(sb);\n    }\n}\n",
+     "stdin": [
+      "8"
+     ]
+    },
+    {
+     "id": "java-binaire",
+     "titre": "Du décimal au binaire",
+     "texte": "<p>Lis un entier positif et affiche son écriture en <b>binaire<\/b>. Méthode des divisions successives : on divise par 2 tant que le nombre n'est pas nul, et les restes lus du dernier au premier donnent le résultat. N'utilise pas de fonction de conversion toute faite.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>String s = 1 + \"0\";   // \"10\" : le nombre est collé devant le texte<\/code><\/pre>",
+     "depart": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>10<\/code> → <code>1010<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "10"
+          ],
+          "out": "^1010[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>255<\/code> → <code>11111111<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "255"
+          ],
+          "out": "^11111111[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>1<\/code> → <code>1<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1"
+          ],
+          "out": "^1[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>0<\/code> → <code>0<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "0"
+          ],
+          "out": "^0[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Sans <code>toBinaryString<\/code>",
+       "r": [
+        {
+         "nocode": "toBinaryString|toString\\s*\\([^)]*,\\s*2\\s*\\)"
+        }
+       ]
+      }
+     ],
+     "indice": "Ajoute chaque reste <b>devant<\/b> : <code>bits = (n % 2) + bits;<\/code>. Pense au cas n = 0.",
+     "solution": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        String bits = \"\";\n        if (n == 0) bits = \"0\";\n        while (n > 0) {\n            bits = (n % 2) + bits;\n            n /= 2;\n        }\n        System.out.println(bits);\n    }\n}\n",
+     "stdin": [
+      "10"
+     ]
+    },
+    {
      "id": "java-tableau",
      "titre": "Un tableau",
      "texte": "<p>Lis un entier n, puis n nombres que tu ranges dans un tableau. Affiche ensuite <b>max = …<\/b> puis <b>moyenne = …<\/b>.<\/p><p><b>Exemple<\/b><\/p><pre><code>int[] t = new int[n];\nfor (int x : t) { … }<\/code><\/pre>",
@@ -414,6 +1073,80 @@ window.EF_CODE = {
      ]
     },
     {
+     "id": "java-tri",
+     "titre": "Trier des nombres",
+     "texte": "<p>Lis un entier n, puis n entiers (un par ligne). Affiche-les triés dans l'ordre <b>croissant<\/b>, séparés par un espace. Utilise la fonction de tri du langage. Attention : ce sont des nombres, 9 doit passer avant 10.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>Arrays.sort(t);   // trie le tableau sur place<\/code><\/pre>",
+     "depart": "import java.util.Scanner;\nimport java.util.Arrays;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        int[] t = new int[n];\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>5, 5, 2, 8, 1, 9<\/code> → <code>1 2 5 8 9<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "5",
+           "5",
+           "2",
+           "8",
+           "1",
+           "9"
+          ],
+          "out": "^1 2 5 8 9[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>3, 10, 9, 100<\/code> → <code>9 10 100<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "10",
+           "9",
+           "100"
+          ],
+          "out": "^9 10 100[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>4, -1, 3, -5, 0<\/code> → <code>-5 -1 0 3<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "4",
+           "-1",
+           "3",
+           "-5",
+           "0"
+          ],
+          "out": "^-5 -1 0 3[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>Arrays.sort(t);<\/code> puis une boucle pour afficher avec des espaces.",
+     "solution": "import java.util.Scanner;\nimport java.util.Arrays;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        int[] t = new int[n];\n        for (int i = 0; i < n; i++) t[i] = sc.nextInt();\n        Arrays.sort(t);\n        StringBuilder sb = new StringBuilder();\n        for (int i = 0; i < n; i++) {\n            if (i > 0) sb.append(\" \");\n            sb.append(t[i]);\n        }\n        System.out.println(sb);\n    }\n}\n",
+     "stdin": [
+      "5",
+      "5",
+      "2",
+      "8",
+      "1",
+      "9"
+     ]
+    }
+   ]
+  },
+  {
+   "titre": "Chaînes de caractères",
+   "missions": [
+    {
      "id": "java-palindrome",
      "titre": "Les chaînes de caractères",
      "texte": "<p>Lis un mot, affiche-le <b>à l'envers<\/b> sur une ligne, puis <b>palindrome<\/b> s'il se lit pareil dans les deux sens, sinon <b>pas un palindrome<\/b>.<\/p><p><b>Exemple<\/b><\/p><pre><code>new StringBuilder(s).reverse().toString()\ns1.equals(s2)<\/code><\/pre>",
@@ -453,6 +1186,232 @@ window.EF_CODE = {
      ]
     },
     {
+     "id": "java-voyelles",
+     "titre": "Compter les voyelles",
+     "texte": "<p>Lis un mot écrit en minuscules sans accent et affiche <b>Voyelles : N<\/b>. Les voyelles sont a, e, i, o, u et y.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>for (char c : mot.toCharArray()) { … }     // chaque caractère\nif (\"abc\".indexOf(c) &gt;= 0) { … }           // c est-il dans \"abc\" ?<\/code><\/pre>",
+     "depart": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String mot = sc.next();\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>bonjour<\/code> → <code>Voyelles : 3<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "bonjour"
+          ],
+          "out": "^Voyelles : 3[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>rythme<\/code> → <code>Voyelles : 2<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "rythme"
+          ],
+          "out": "^Voyelles : 2[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>brrr<\/code> → <code>Voyelles : 0<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "brrr"
+          ],
+          "out": "^Voyelles : 0[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Parcours <code>mot.toCharArray()<\/code> et teste <code>\"aeiouy\".indexOf(c) &gt;= 0<\/code>.",
+     "solution": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String mot = sc.next();\n        int n = 0;\n        for (char c : mot.toCharArray()) {\n            if (\"aeiouy\".indexOf(c) >= 0) n++;\n        }\n        System.out.println(\"Voyelles : \" + n);\n    }\n}\n",
+     "stdin": [
+      "bonjour"
+     ]
+    },
+    {
+     "id": "java-mots",
+     "titre": "Compter les mots",
+     "texte": "<p>Lis une phrase et affiche <b>Mots : N<\/b>. Les mots sont séparés par un ou <b>plusieurs<\/b> espaces.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>String[] t = \"a  b\".split(\"\\\\s+\");   // découpe sur un ou plusieurs espaces<\/code><\/pre>",
+     "depart": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String phrase = sc.nextLine();\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>le chat dort<\/code> → <code>Mots : 3<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "le chat dort"
+          ],
+          "out": "^Mots : 3[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>bonjour<\/code> → <code>Mots : 1<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "bonjour"
+          ],
+          "out": "^Mots : 1[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>un  deux   trois quatre<\/code> → <code>Mots : 4<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "un  deux   trois quatre"
+          ],
+          "out": "^Mots : 4[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>phrase.trim().split(\"\\\\s+\")<\/code> renvoie le tableau des mots ; sa longueur est la réponse.",
+     "solution": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String phrase = sc.nextLine();\n        String[] mots = phrase.trim().split(\"\\\\s+\");\n        System.out.println(\"Mots : \" + mots.length);\n    }\n}\n",
+     "stdin": [
+      "le chat dort"
+     ]
+    },
+    {
+     "id": "java-cesar",
+     "titre": "Le chiffre de César",
+     "texte": "<p>Lis un texte en minuscules sans accent et affiche-le <b>chiffré<\/b> : chaque lettre est décalée de 3 rangs dans l'alphabet (a devient d, b devient e…), et après z on revient à a (x devient a). Les espaces ne changent pas.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>char c = (char) ('a' + 2);   // 'c' : un char est un nombre\nint rang = 'e' - 'a';        // 4<\/code><\/pre>",
+     "depart": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String texte = sc.nextLine();\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>abc<\/code> → <code>def<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "abc"
+          ],
+          "out": "^def[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>xyz<\/code> → <code>abc<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "xyz"
+          ],
+          "out": "^abc[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>bonjour le monde<\/code> → <code>erqmrxu oh prqgh<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "bonjour le monde"
+          ],
+          "out": "^erqmrxu oh prqgh[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>c - 'a'<\/code> donne le rang de 0 à 25 ; ajoute 3, prends le reste modulo 26, rajoute <code>'a'<\/code> et reconvertis avec <code>(char)<\/code>.",
+     "solution": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String texte = sc.nextLine();\n        StringBuilder sb = new StringBuilder();\n        for (char c : texte.toCharArray()) {\n            if (c >= 'a' && c <= 'z') c = (char) ('a' + (c - 'a' + 3) % 26);\n            sb.append(c);\n        }\n        System.out.println(sb);\n    }\n}\n",
+     "stdin": [
+      "abc"
+     ]
+    },
+    {
+     "id": "java-parentheses",
+     "titre": "Parenthèses équilibrées",
+     "texte": "<p>Lis une expression et affiche <b>équilibré<\/b> si ses parenthèses sont correctement ouvertes et fermées, sinon <b>non équilibré<\/b>. Parcours le texte avec un compteur : +1 pour une ouvrante, −1 pour une fermante. Le compteur ne doit jamais devenir négatif et doit finir à 0.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>if (c == '(') niveau++;<\/code><\/pre>",
+     "depart": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String expr = sc.nextLine();\n        int niveau = 0;\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>(()())<\/code> → <code>équilibré<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "(()())"
+          ],
+          "out": "^équilibré[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>(()<\/code> → <code>non équilibré<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "(()"
+          ],
+          "out": "^non équilibré[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>)(<\/code> → <code>non équilibré<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           ")("
+          ],
+          "out": "^non équilibré[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>((a+b)*c)<\/code> → <code>équilibré<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "((a+b)*c)"
+          ],
+          "out": "^équilibré[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Deux conditions : le compteur ne passe jamais sous 0, et il vaut 0 à la fin.",
+     "solution": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String expr = sc.nextLine();\n        int niveau = 0;\n        boolean ok = true;\n        for (char c : expr.toCharArray()) {\n            if (c == '(') niveau++;\n            else if (c == ')') {\n                niveau--;\n                if (niveau < 0) ok = false;\n            }\n        }\n        System.out.println(ok && niveau == 0 ? \"équilibré\" : \"non équilibré\");\n    }\n}\n",
+     "stdin": [
+      "(()())"
+     ]
+    }
+   ]
+  },
+  {
+   "titre": "Objets, héritage et interfaces",
+   "missions": [
+    {
      "id": "java-compte",
      "titre": "Un objet : le compte bancaire",
      "texte": "<p>Crée un type <b>Compte<\/b> qui garde un solde, avec deux opérations : <b>deposer(montant)<\/b> et <b>retirer(montant)<\/b>. Si le solde ne suffit pas, <b>retirer<\/b> affiche <code>Solde insuffisant<\/code> et ne change rien. Le programme principal est déjà écrit en bas.<\/p><p><b>Exemple<\/b><\/p><pre><code>class Chien {\n    private String nom;\n    Chien(String nom) { this.nom = nom; }\n    void aboyer() { System.out.println(nom + &quot; : Ouaf&quot;); }\n}<\/code><\/pre>",
@@ -488,6 +1447,599 @@ window.EF_CODE = {
      ],
      "indice": "Un seul <code>public class<\/code> par fichier (Main) : écris <code>class Compte<\/code> au-dessus.",
      "solution": "class Compte {\n    private int solde;\n\n    Compte(int solde) {\n        this.solde = solde;\n    }\n\n    void deposer(int m) {\n        solde += m;\n    }\n\n    void retirer(int m) {\n        if (m > solde) {\n            System.out.println(\"Solde insuffisant\");\n            return;\n        }\n        solde -= m;\n    }\n\n    int getSolde() {\n        return solde;\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        Compte c = new Compte(100);\n        c.deposer(50);\n        c.retirer(30);\n        c.retirer(500);\n        System.out.println(\"Solde : \" + c.getSolde());\n    }\n}\n"
+    },
+    {
+     "id": "java-tostring",
+     "titre": "toString et equals",
+     "texte": "<p>Complète la classe <b>Point<\/b> : <code>toString()<\/code> doit renvoyer <b>(x, y)<\/b>, et <code>equals<\/code> doit considérer que deux points de mêmes coordonnées sont égaux. Le <code>main<\/code> est déjà écrit.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>@Override\npublic String toString() { return \"…\"; }\n\n@Override\npublic boolean equals(Object o) {\n    if (!(o instanceof Point)) return false;\n    Point p = (Point) o;\n    return …;\n}<\/code><\/pre>",
+     "depart": "class Point {\n    private final int x, y;\n    Point(int x, int y) { this.x = x; this.y = y; }\n\n    // à compléter : toString et equals\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        Point a = new Point(3, 4), b = new Point(3, 4), c = new Point(0, 1);\n        System.out.println(a);\n        System.out.println(a.equals(b));\n        System.out.println(a.equals(c));\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Le programme affiche <code>(3, 4) …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [],
+          "out": "^\\(3, 4\\)[ \\t]*\\ntrue[ \\t]*\\nfalse[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Les méthodes sont redéfinies avec <code>@Override<\/code>",
+       "r": [
+        {
+         "code": "@Override[\\s\\S]*toString[\\s\\S]*@Override|@Override[\\s\\S]*equals[\\s\\S]*@Override"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>equals<\/code> reçoit un <code>Object<\/code> : teste <code>instanceof Point<\/code>, convertis avec <code>(Point) o<\/code>, puis compare x et y.",
+     "solution": "class Point {\n    private final int x, y;\n    Point(int x, int y) { this.x = x; this.y = y; }\n\n    @Override\n    public String toString() { return \"(\" + x + \", \" + y + \")\"; }\n\n    @Override\n    public boolean equals(Object o) {\n        if (!(o instanceof Point)) return false;\n        Point p = (Point) o;\n        return x == p.x && y == p.y;\n    }\n\n    @Override\n    public int hashCode() { return 31 * x + y; }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        Point a = new Point(3, 4), b = new Point(3, 4), c = new Point(0, 1);\n        System.out.println(a);\n        System.out.println(a.equals(b));\n        System.out.println(a.equals(c));\n    }\n}\n"
+    },
+    {
+     "id": "java-heritage",
+     "titre": "Héritage et classe abstraite",
+     "texte": "<p>La classe abstraite <b>Animal<\/b> est écrite. Crée deux classes filles : <b>Chien<\/b>, dont <code>crier()<\/code> renvoie <code>\"Ouaf\"<\/code>, et <b>Chat<\/b>, dont <code>crier()<\/code> renvoie <code>\"Miaou\"<\/code>. Le <code>main<\/code> déjà écrit les range dans une <code>List&lt;Animal&gt;<\/code>.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>class Fille extends Mere {\n    Fille(String nom) { super(nom); }           // appelle le constructeur de la mère\n    @Override String methode() { return \"…\"; }\n}<\/code><\/pre>",
+     "depart": "import java.util.List;\n\nabstract class Animal {\n    protected final String nom;\n    Animal(String nom) { this.nom = nom; }\n    abstract String crier();\n    String presenter() { return nom + \" fait \" + crier(); }\n}\n\n// à compléter : les classes Chien et Chat\n\npublic class Main {\n    public static void main(String[] args) {\n        List<Animal> animaux = List.of(new Chien(\"Rex\"), new Chat(\"Tigrou\"));\n        for (Animal a : animaux) System.out.println(a.presenter());\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Le programme affiche <code>Rex fait Ouaf …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [],
+          "out": "^Rex fait Ouaf[ \\t]*\\nTigrou fait Miaou[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Les deux classes héritent d'<code>Animal<\/code>",
+       "r": [
+        {
+         "code": "class\\s+Chien\\s+extends\\s+Animal[\\s\\S]*class\\s+Chat\\s+extends\\s+Animal|class\\s+Chat\\s+extends\\s+Animal[\\s\\S]*class\\s+Chien\\s+extends\\s+Animal"
+        }
+       ]
+      },
+      {
+       "txt": "Le constructeur de la mère est appelé avec <code>super<\/code>",
+       "r": [
+        {
+         "code": "super\\s*\\(\\s*\\w+\\s*\\)"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>class Chien extends Animal { Chien(String nom) { super(nom); } @Override String crier() { return \"Ouaf\"; } }<\/code>",
+     "solution": "import java.util.List;\n\nabstract class Animal {\n    protected final String nom;\n    Animal(String nom) { this.nom = nom; }\n    abstract String crier();\n    String presenter() { return nom + \" fait \" + crier(); }\n}\n\nclass Chien extends Animal {\n    Chien(String nom) { super(nom); }\n    @Override String crier() { return \"Ouaf\"; }\n}\n\nclass Chat extends Animal {\n    Chat(String nom) { super(nom); }\n    @Override String crier() { return \"Miaou\"; }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        List<Animal> animaux = List.of(new Chien(\"Rex\"), new Chat(\"Tigrou\"));\n        for (Animal a : animaux) System.out.println(a.presenter());\n    }\n}\n"
+    },
+    {
+     "id": "java-interface",
+     "titre": "Une interface",
+     "texte": "<p>L'interface <b>Forme<\/b> déclare la méthode <code>aire()<\/code>. Écris deux classes qui l'implémentent : <b>Rectangle<\/b> (largeur, hauteur) et <b>Carre<\/b> (côté). Le <code>main<\/code> déjà écrit affiche leurs aires.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>interface Parlant { String parler(); }\n\nclass Robot implements Parlant {\n    @Override public String parler() { return \"bip\"; }   // public obligatoire\n}<\/code><\/pre>",
+     "depart": "import java.util.List;\n\ninterface Forme {\n    double aire();\n}\n\n// à compléter : les classes Rectangle et Carre\n\npublic class Main {\n    public static void main(String[] args) {\n        List<Forme> formes = List.of(new Rectangle(3, 4), new Carre(5));\n        for (Forme f : formes) System.out.println(f.aire());\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Le programme affiche <code>12.0 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [],
+          "out": "^12\\.0[ \\t]*\\n25\\.0[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Les deux classes utilisent <code>implements Forme<\/code>",
+       "r": [
+        {
+         "code": "class\\s+\\w+\\s+implements\\s+Forme[\\s\\S]*class\\s+\\w+\\s+implements\\s+Forme"
+        }
+       ]
+      }
+     ],
+     "indice": "Une méthode qui implémente une interface doit être <code>public<\/code> : <code>@Override public double aire() { … }<\/code>.",
+     "solution": "import java.util.List;\n\ninterface Forme {\n    double aire();\n}\n\nclass Rectangle implements Forme {\n    private final double l, h;\n    Rectangle(double l, double h) { this.l = l; this.h = h; }\n    @Override public double aire() { return l * h; }\n}\n\nclass Carre implements Forme {\n    private final double c;\n    Carre(double c) { this.c = c; }\n    @Override public double aire() { return c * c; }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        List<Forme> formes = List.of(new Rectangle(3, 4), new Carre(5));\n        for (Forme f : formes) System.out.println(f.aire());\n    }\n}\n"
+    },
+    {
+     "id": "java-enum",
+     "titre": "Un enum et un switch",
+     "texte": "<p>Définis un enum <b>Feu<\/b> avec les valeurs ROUGE, ORANGE et VERT. Le programme lit le nom d'une couleur (en majuscules), le convertit en valeur de l'enum avec <code>valueOf<\/code>, puis affiche l'action : <b>Stop<\/b> pour ROUGE, <b>Ralentir<\/b> pour ORANGE, <b>Passer<\/b> pour VERT.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>enum Jour { LUNDI, MARDI }\nJour j = Jour.valueOf(\"MARDI\");\nString s = switch (j) {\n    case LUNDI -&gt; \"début\";\n    case MARDI -&gt; \"suite\";\n};<\/code><\/pre>",
+     "depart": "import java.util.Scanner;\n\n// définis ici l'enum Feu\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String couleur = sc.next();\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>ROUGE<\/code> → <code>Stop<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "ROUGE"
+          ],
+          "out": "^Stop[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>ORANGE<\/code> → <code>Ralentir<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "ORANGE"
+          ],
+          "out": "^Ralentir[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>VERT<\/code> → <code>Passer<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "VERT"
+          ],
+          "out": "^Passer[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Un <code>enum Feu<\/code> est défini et utilisé",
+       "r": [
+        {
+         "code": "enum\\s+Feu\\s*\\{[\\s\\S]*Feu\\.valueOf|Feu\\.valueOf[\\s\\S]*enum\\s+Feu\\s*\\{"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>Feu feu = Feu.valueOf(sc.next());<\/code> puis un <code>switch (feu)<\/code>.",
+     "solution": "import java.util.Scanner;\n\nenum Feu { ROUGE, ORANGE, VERT }\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        Feu feu = Feu.valueOf(sc.next());\n        String action = switch (feu) {\n            case ROUGE -> \"Stop\";\n            case ORANGE -> \"Ralentir\";\n            case VERT -> \"Passer\";\n        };\n        System.out.println(action);\n    }\n}\n",
+     "stdin": [
+      "ROUGE"
+     ]
+    },
+    {
+     "id": "java-record",
+     "titre": "Un record",
+     "texte": "<p>Définis un record <b>Produit<\/b> (nom, prix, quantité : des entiers pour le prix et la quantité) avec une méthode <code>montant()<\/code> qui renvoie prix × quantité. Lis un entier n, puis n produits : nom, prix et quantité, chacun sur sa ligne. Affiche pour chaque produit <b>nom : montant<\/b>, puis <b>Total : X<\/b>.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>record Point(int x, int y) {\n    int somme() { return x + y; }\n}\nPoint p = new Point(3, 4);\nSystem.out.println(p.x() + \" \" + p.somme());<\/code><\/pre>",
+     "depart": "import java.util.Scanner;\nimport java.util.ArrayList;\nimport java.util.List;\n\n// définis ici le record Produit\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>2, souris, 20, 3, clavier, 50, 1<\/code> → <code>souris : 60 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "2",
+           "souris",
+           "20",
+           "3",
+           "clavier",
+           "50",
+           "1"
+          ],
+          "out": "^souris : 60[ \\t]*\\nclavier : 50[ \\t]*\\nTotal : 110[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>1, ecran, 150, 2<\/code> → <code>ecran : 300 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1",
+           "ecran",
+           "150",
+           "2"
+          ],
+          "out": "^ecran : 300[ \\t]*\\nTotal : 300[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Un <code>record Produit<\/code> est défini",
+       "r": [
+        {
+         "code": "record\\s+Produit\\s*\\("
+        }
+       ]
+      }
+     ],
+     "indice": "<code>record Produit(String nom, int prix, int quantite) { int montant() { return prix * quantite; } }<\/code> ; les accesseurs s'écrivent <code>p.nom()<\/code>.",
+     "solution": "import java.util.Scanner;\nimport java.util.ArrayList;\nimport java.util.List;\n\nrecord Produit(String nom, int prix, int quantite) {\n    int montant() { return prix * quantite; }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        List<Produit> produits = new ArrayList<>();\n        for (int i = 0; i < n; i++) {\n            produits.add(new Produit(sc.next(), sc.nextInt(), sc.nextInt()));\n        }\n        int total = 0;\n        for (Produit p : produits) {\n            System.out.println(p.nom() + \" : \" + p.montant());\n            total += p.montant();\n        }\n        System.out.println(\"Total : \" + total);\n    }\n}\n",
+     "stdin": [
+      "2",
+      "souris",
+      "20",
+      "3",
+      "clavier",
+      "50",
+      "1"
+     ]
+    }
+   ]
+  },
+  {
+   "titre": "Collections, exceptions et streams",
+   "missions": [
+    {
+     "id": "java-inverser",
+     "titre": "Inverser une liste",
+     "texte": "<p>Lis un entier n, puis n mots (un par ligne). Range-les dans une liste, puis affiche-les <b>dans l'ordre inverse<\/b>, séparés par un espace.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>for (int i = liste.size() - 1; i &gt;= 0; i--) { … liste.get(i) … }<\/code><\/pre>",
+     "depart": "import java.util.Scanner;\nimport java.util.ArrayList;\nimport java.util.List;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        List<String> mots = new ArrayList<>();\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>3, a, b, c<\/code> → <code>c b a<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "a",
+           "b",
+           "c"
+          ],
+          "out": "^c b a[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>4, 10, 20, 30, 40<\/code> → <code>40 30 20 10<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "4",
+           "10",
+           "20",
+           "30",
+           "40"
+          ],
+          "out": "^40 30 20 10[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>1, seul<\/code> → <code>seul<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1",
+           "seul"
+          ],
+          "out": "^seul[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Parcours les indices de <code>n - 1<\/code> à <code>0<\/code> et lis avec <code>mots.get(i)<\/code>.",
+     "solution": "import java.util.Scanner;\nimport java.util.ArrayList;\nimport java.util.List;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        List<String> mots = new ArrayList<>();\n        for (int i = 0; i < n; i++) mots.add(sc.next());\n        StringBuilder sb = new StringBuilder();\n        for (int i = n - 1; i >= 0; i--) {\n            sb.append(mots.get(i));\n            if (i > 0) sb.append(\" \");\n        }\n        System.out.println(sb);\n    }\n}\n",
+     "stdin": [
+      "3",
+      "a",
+      "b",
+      "c"
+     ]
+    },
+    {
+     "id": "java-inventaire",
+     "titre": "L'inventaire",
+     "texte": "<p>Lis un entier n, puis n articles : pour chacun, son <b>nom<\/b> sur une ligne et sa <b>quantité<\/b> sur la ligne suivante. Un même nom peut revenir plusieurs fois : additionne ses quantités dans un dictionnaire. Affiche ensuite une ligne <b>nom : total<\/b> par article, dans l'ordre <b>alphabétique<\/b>.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>stock.put(nom, stock.getOrDefault(nom, 0) + qte);   // 0 la première fois\nfor (Map.Entry&lt;String, Integer&gt; e : stock.entrySet()) { … e.getKey() … e.getValue() … }<\/code><\/pre>",
+     "depart": "import java.util.Scanner;\nimport java.util.Map;\nimport java.util.TreeMap;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        Map<String, Integer> stock = new TreeMap<>();\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>3, souris, 3, clavier, 2, souris, 5<\/code> → <code>clavier : 2 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "souris",
+           "3",
+           "clavier",
+           "2",
+           "souris",
+           "5"
+          ],
+          "out": "^clavier : 2[ \\t]*\\nsouris : 8[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>4, ecran, 1, cable, 10, ecran, 1, adaptateur, 4<\/code> → <code>adaptateur : 4 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "4",
+           "ecran",
+           "1",
+           "cable",
+           "10",
+           "ecran",
+           "1",
+           "adaptateur",
+           "4"
+          ],
+          "out": "^adaptateur : 4[ \\t]*\\ncable : 10[ \\t]*\\necran : 2[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Une <code>TreeMap<\/code> garde ses clés triées : il suffit de parcourir <code>entrySet()<\/code>.",
+     "solution": "import java.util.Scanner;\nimport java.util.Map;\nimport java.util.TreeMap;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        Map<String, Integer> stock = new TreeMap<>();\n        for (int i = 0; i < n; i++) {\n            String nom = sc.next();\n            int qte = sc.nextInt();\n            stock.put(nom, stock.getOrDefault(nom, 0) + qte);\n        }\n        for (Map.Entry<String, Integer> e : stock.entrySet()) {\n            System.out.println(e.getKey() + \" : \" + e.getValue());\n        }\n    }\n}\n",
+     "stdin": [
+      "3",
+      "souris",
+      "3",
+      "clavier",
+      "2",
+      "souris",
+      "5"
+     ]
+    },
+    {
+     "id": "java-doublons",
+     "titre": "Supprimer les doublons",
+     "texte": "<p>Lis un entier n, puis n mots (un par ligne). Affiche chaque mot <b>une seule fois<\/b>, dans l'ordre de sa première apparition, séparés par un espace.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>if (vus.add(mot)) { … }             // add renvoie false si le mot était déjà là\nString.join(\" \", liste)             // colle une liste avec des espaces<\/code><\/pre>",
+     "depart": "import java.util.Scanner;\nimport java.util.Set;\nimport java.util.HashSet;\nimport java.util.List;\nimport java.util.ArrayList;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        Set<String> vus = new HashSet<>();\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>5, a, b, a, c, b<\/code> → <code>a b c<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "5",
+           "a",
+           "b",
+           "a",
+           "c",
+           "b"
+          ],
+          "out": "^a b c[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>3, x, x, x<\/code> → <code>x<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "x",
+           "x",
+           "x"
+          ],
+          "out": "^x[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>4, lua, java, cpp, java<\/code> → <code>lua java cpp<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "4",
+           "lua",
+           "java",
+           "cpp",
+           "java"
+          ],
+          "out": "^lua java cpp[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>vus.add(mot)<\/code> renvoie <code>true<\/code> seulement la première fois. <code>String.join(\" \", res)<\/code> assemble le résultat.",
+     "solution": "import java.util.Scanner;\nimport java.util.Set;\nimport java.util.HashSet;\nimport java.util.List;\nimport java.util.ArrayList;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        Set<String> vus = new HashSet<>();\n        List<String> res = new ArrayList<>();\n        for (int i = 0; i < n; i++) {\n            String mot = sc.next();\n            if (vus.add(mot)) res.add(mot);\n        }\n        System.out.println(String.join(\" \", res));\n    }\n}\n",
+     "stdin": [
+      "5",
+      "a",
+      "b",
+      "a",
+      "c",
+      "b"
+     ]
+    },
+    {
+     "id": "java-exception",
+     "titre": "Attraper une exception",
+     "texte": "<p>Lis une ligne. Si c'est un entier, affiche <b>Double : X<\/b> (le double du nombre). Sinon, le programme ne doit pas planter : attrape l'exception et affiche <b>Erreur : saisie invalide<\/b>.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>try {\n    int n = Integer.parseInt(texte);\n} catch (NumberFormatException e) {\n    …\n}<\/code><\/pre>",
+     "depart": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String saisie = sc.nextLine();\n        int n = Integer.parseInt(saisie);\n        System.out.println(\"Double : \" + n * 2);\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>21<\/code> → <code>Double : 42<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "21"
+          ],
+          "out": "^Double : 42[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>abc<\/code> → <code>Erreur : saisie invalide<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "abc"
+          ],
+          "out": "^Erreur : saisie invalide[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>12.5<\/code> → <code>Erreur : saisie invalide<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "12.5"
+          ],
+          "out": "^Erreur : saisie invalide[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "L'exception <code>NumberFormatException<\/code> est attrapée",
+       "r": [
+        {
+         "code": "catch\\s*\\(\\s*(final\\s+)?(NumberFormatException|IllegalArgumentException|RuntimeException|Exception)\\b"
+        }
+       ]
+      }
+     ],
+     "indice": "Entoure la conversion <b>et<\/b> l'affichage du résultat d'un <code>try<\/code>, puis <code>catch (NumberFormatException e)<\/code>.",
+     "solution": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String saisie = sc.nextLine();\n        try {\n            int n = Integer.parseInt(saisie);\n            System.out.println(\"Double : \" + n * 2);\n        } catch (NumberFormatException e) {\n            System.out.println(\"Erreur : saisie invalide\");\n        }\n    }\n}\n",
+     "stdin": [
+      "21"
+     ]
+    },
+    {
+     "id": "java-throw",
+     "titre": "Créer et lever sa propre exception",
+     "texte": "<p>Crée la classe <b>AgeInvalideException<\/b>, qui hérite de <code>Exception<\/code>. Complète la méthode <b>verifier(age)<\/b> : elle lève cette exception avec le message <b>âge impossible : X<\/b> quand l'âge est négatif ou supérieur à 130. Le <code>main<\/code> déjà écrit attrape l'exception.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>class StockVideException extends Exception {\n    StockVideException(String message) { super(message); }\n}\n\nstatic void retirer(int n) throws StockVideException {\n    if (n &gt; 0) throw new StockVideException(\"stock vide\");\n}<\/code><\/pre>",
+     "depart": "import java.util.Scanner;\n\n// à compléter : la classe AgeInvalideException\n\npublic class Main {\n    static void verifier(int age) throws AgeInvalideException {\n        // à compléter\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int age = sc.nextInt();\n        try {\n            verifier(age);\n            System.out.println(\"Âge valide : \" + age);\n        } catch (AgeInvalideException e) {\n            System.out.println(e.getMessage());\n        }\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>17<\/code> → <code>Âge valide : 17<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "17"
+          ],
+          "out": "^Âge valide : 17[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>250<\/code> → <code>âge impossible : 250<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "250"
+          ],
+          "out": "^âge impossible : 250[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>-3<\/code> → <code>âge impossible : -3<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "-3"
+          ],
+          "out": "^âge impossible : -3[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "La classe hérite de <code>Exception<\/code> et l'exception est levée avec <code>throw new<\/code>",
+       "r": [
+        {
+         "code": "class\\s+AgeInvalideException\\s+extends\\s+Exception[\\s\\S]*throw\\s+new\\s+AgeInvalideException"
+        }
+       ]
+      }
+     ],
+     "indice": "Le constructeur transmet le message à la classe mère : <code>super(message);<\/code>.",
+     "solution": "import java.util.Scanner;\n\nclass AgeInvalideException extends Exception {\n    AgeInvalideException(String message) { super(message); }\n}\n\npublic class Main {\n    static void verifier(int age) throws AgeInvalideException {\n        if (age < 0 || age > 130) throw new AgeInvalideException(\"âge impossible : \" + age);\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int age = sc.nextInt();\n        try {\n            verifier(age);\n            System.out.println(\"Âge valide : \" + age);\n        } catch (AgeInvalideException e) {\n            System.out.println(e.getMessage());\n        }\n    }\n}\n",
+     "stdin": [
+      "17"
+     ]
+    },
+    {
+     "id": "java-stream",
+     "titre": "Filtrer et compter avec un stream",
+     "texte": "<p>Le programme lit n notes dans une liste. Avec un <b>stream<\/b>, affiche <b>Admis : X<\/b> (le nombre de notes supérieures ou égales à 10), puis sur la ligne suivante les notes admises triées par ordre croissant, séparées par un espace.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>long pairs = liste.stream().filter(x -&gt; x % 2 == 0).count();\nString texte = liste.stream().sorted().map(String::valueOf).collect(Collectors.joining(\" \"));<\/code><\/pre>",
+     "depart": "import java.util.*;\nimport java.util.stream.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        List<Integer> notes = new ArrayList<>();\n        for (int i = 0; i < n; i++) notes.add(sc.nextInt());\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>5, 12, 5, 19, 8, 10<\/code> → <code>Admis : 3 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "5",
+           "12",
+           "5",
+           "19",
+           "8",
+           "10"
+          ],
+          "out": "^Admis : 3[ \\t]*\\n10 12 19[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>3, 9, 20, 4<\/code> → <code>Admis : 1 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "9",
+           "20",
+           "4"
+          ],
+          "out": "^Admis : 1[ \\t]*\\n20[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Utilise <code>stream()<\/code> et <code>filter<\/code>",
+       "r": [
+        {
+         "code": "\\.stream\\s*\\(\\s*\\)[\\s\\S]*\\.filter\\s*\\("
+        }
+       ]
+      }
+     ],
+     "indice": "<code>notes.stream().filter(x -&gt; x &gt;= 10).count()<\/code> ; pour l'affichage : <code>.sorted().map(String::valueOf).collect(Collectors.joining(\" \"))<\/code>.",
+     "solution": "import java.util.*;\nimport java.util.stream.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        List<Integer> notes = new ArrayList<>();\n        for (int i = 0; i < n; i++) notes.add(sc.nextInt());\n        System.out.println(\"Admis : \" + notes.stream().filter(x -> x >= 10).count());\n        System.out.println(notes.stream().filter(x -> x >= 10).sorted().map(String::valueOf).collect(Collectors.joining(\" \")));\n    }\n}\n",
+     "stdin": [
+      "5",
+      "12",
+      "5",
+      "19",
+      "8",
+      "10"
+     ]
     }
    ]
   },
@@ -706,12 +2258,7 @@ window.EF_CODE = {
      ],
      "indice": "<code>vx = -vx;<\/code> quand la balle touche un bord.",
      "solution": "public class Main extends Jeu {\n    double x = 100, y = 80;\n    double vx = 4, vy = 3;\n\n    public void update(double dt) {\n        x += vx;\n        y += vy;\n        if (x < 12 || x > LARGEUR - 12) vx = -vx;\n        if (y < 12 || y > HAUTEUR - 12) vy = -vy;\n    }\n\n    public void draw() {\n        effacer(\"black\");\n        cercle(x, y, 12, \"red\");\n    }\n\n    public static void main(String[] args) {\n        lancer(new Main());\n    }\n}\n"
-    }
-   ]
-  },
-  {
-   "titre": "Mini-jeux",
-   "missions": [
+    },
     {
      "id": "java-clics",
      "titre": "Compter les clics",
@@ -838,7 +2385,12 @@ window.EF_CODE = {
      ],
      "indice": "<code>if (clic()) score++;<\/code>",
      "solution": "public class Main extends Jeu {\n    int score = 0;\n\n    public void update(double dt) {\n        if (clic()) score++;\n    }\n\n    public void draw() {\n        effacer(\"black\");\n        texte(\"Score : \" + score, 16, 16, 28, \"white\");\n        cercle(sourisX(), sourisY(), 10, \"yellow\");\n    }\n\n    public static void main(String[] args) {\n        lancer(new Main());\n    }\n}\n"
-    },
+    }
+   ]
+  },
+  {
+   "titre": "Mini-jeux",
+   "missions": [
     {
      "id": "java-saut",
      "titre": "Sauter avec la gravité",
@@ -1062,6 +2614,197 @@ window.EF_CODE = {
      ],
      "indice": "Écris une méthode <code>nouveauFruit()<\/code> appelée dans <code>setup()<\/code> et après chaque chute.",
      "solution": "public class Main extends Jeu {\n    double px = 200;\n    double fx = 240, fy = 0;\n    int score = 0;\n\n    void nouveauFruit() {\n        fx = hasard(20, 460);\n        fy = 0;\n    }\n\n    public void setup() {\n        nouveauFruit();\n    }\n\n    public void update(double dt) {\n        if (touche(\"droite\")) px += 6;\n        if (touche(\"gauche\")) px -= 6;\n        px = Math.max(0, Math.min(LARGEUR - 80, px));\n        fy += 4;\n        if (fy >= 280 && fy <= 300 && fx >= px && fx <= px + 80) {\n            score++;\n            nouveauFruit();\n        } else if (fy > HAUTEUR) {\n            nouveauFruit();\n        }\n    }\n\n    public void draw() {\n        effacer(\"black\");\n        rect(px, 290, 80, 12, \"white\");\n        cercle(fx, fy, 10, \"red\");\n        texte(\"Score : \" + score, 16, 16, 24, \"white\");\n    }\n\n    public static void main(String[] args) {\n        lancer(new Main());\n    }\n}\n"
+    },
+    {
+     "id": "java-etoiles",
+     "titre": "La pluie d'étoiles",
+     "texte": "<p>Fais tomber <b>5 étoiles<\/b>. Ce sont des cercles <b>blancs<\/b> (<code>\"white\"<\/code>) de rayon 3, rangés dans une <b>liste<\/b>. Leurs x valent 60, 150, 240, 330 et 420 ; leurs y de départ valent 0, 40, 80, 120 et 160. À chaque image, chaque étoile descend de <b>2 pixels<\/b> ; dès que son y dépasse 320, elle repart à y = 0. Le fond est noir.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>etoiles.add(new double[]{60, 0});          // ajoute une étoile {x, y}\nfor (double[] e : etoiles) e[1] += 2;      // modifie son y<\/code><\/pre>",
+     "depart": "import java.util.ArrayList;\nimport java.util.List;\n\npublic class Main extends Jeu {\n    List<double[]> etoiles = new ArrayList<>();     // chaque étoile : {x, y}\n\n    public void setup() {\n        // crée les 5 étoiles\n    }\n\n    public void update(double dt) {\n    }\n\n    public void draw() {\n        effacer(\"black\");\n    }\n\n    public static void main(String[] args) {\n        lancer(new Main());\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "5 cercles blancs à chaque image",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 30
+           }
+          ],
+          "test": "const c = F.map(q => T(q, 'cercle').filter(v => v[4] === 'white').sort((a, b) => a[1] - b[1]));\nreturn c.every(f => f.length === 5) && [60, 150, 240, 330, 420].every((x, i) => c[0][i][1] === x);"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Chaque étoile descend de 2 pixels par image",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 30
+           }
+          ],
+          "test": "const c = F.map(q => T(q, 'cercle').filter(v => v[4] === 'white').sort((a, b) => a[1] - b[1]));\nreturn c[0].every((v, i) => c[10][i][2] - v[2] === 20 && c[1][i][2] - v[2] === 2);"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Les étoiles partent de hauteurs différentes",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 3
+           }
+          ],
+          "test": "const c = F.map(q => T(q, 'cercle').filter(v => v[4] === 'white').sort((a, b) => a[1] - b[1]));\nreturn new Set(c[0].map(v => v[2])).size === 5;"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Arrivées en bas, elles repartent du haut et ne sortent jamais",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 200
+           }
+          ],
+          "test": "const c = F.map(q => T(q, 'cercle').filter(v => v[4] === 'white').sort((a, b) => a[1] - b[1]));\nreturn c.every(f => f.every(v => v[2] >= 0 && v[2] <= 322)) && [0, 1, 2, 3, 4].every(i => c.some((f, k) => k && f[i][2] < c[k - 1][i][2]));"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Crée les étoiles dans <code>setup<\/code> : <code>etoiles.add(new double[]{60 + i * 90, i * 40});<\/code>. <code>e[0]<\/code> est le x, <code>e[1]<\/code> le y.",
+     "solution": "import java.util.ArrayList;\nimport java.util.List;\n\npublic class Main extends Jeu {\n    List<double[]> etoiles = new ArrayList<>();     // chaque étoile : {x, y}\n\n    public void setup() {\n        for (int i = 0; i < 5; i++) {\n            etoiles.add(new double[]{60 + i * 90, i * 40});\n        }\n    }\n\n    public void update(double dt) {\n        for (double[] e : etoiles) {\n            e[1] += 2;\n            if (e[1] > 320) e[1] = 0;\n        }\n    }\n\n    public void draw() {\n        effacer(\"black\");\n        for (double[] e : etoiles) {\n            cercle(e[0], e[1], 3, \"white\");\n        }\n    }\n\n    public static void main(String[] args) {\n        lancer(new Main());\n    }\n}\n"
+    },
+    {
+     "id": "java-tir",
+     "titre": "Tirer des projectiles",
+     "texte": "<p>Un vaisseau (rectangle <b>bleu<\/b> <code>\"blue\"<\/code> de 40 × 20, en y = 290) part de x = 220 et se déplace de 5 pixels par image avec les flèches gauche et droite. À chaque <b>appui<\/b> sur espace, il crée un tir : un rectangle <b>jaune<\/b> (<code>\"yellow\"<\/code>) de 4 × 10 placé en (x du vaisseau + 18, 280). Chaque tir monte de <b>8 pixels<\/b> par image et il est <b>retiré de la liste<\/b> quand son y devient négatif. Le fond est noir.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>tirs.removeIf(t -&gt; t[1] &lt; 0);   // retire les tirs sortis de l'écran<\/code><\/pre>",
+     "depart": "import java.util.ArrayList;\nimport java.util.List;\n\npublic class Main extends Jeu {\n    double x = 220;\n    List<double[]> tirs = new ArrayList<>();        // chaque tir : {x, y}\n\n    public void update(double dt) {\n    }\n\n    public void draw() {\n        effacer(\"black\");\n        rect(x, 290, 40, 20, \"blue\");\n    }\n\n    public static void main(String[] args) {\n        lancer(new Main());\n    }\n}\n",
+     "objectifs": [
+      {
+       "txt": "Le vaisseau bleu se déplace avec les flèches",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1
+           },
+           {
+            "n": 10,
+            "k": [
+             "droite"
+            ]
+           }
+          ],
+          "test": "const x = P('rect', 'blue').map(v => v && v[1]);\nreturn x[0] === 220 && x[10] === 270;"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Aucun tir tant qu'on n'appuie pas sur espace",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 5
+           }
+          ],
+          "test": "const t = F.map(q => T(q, 'rect').filter(v => v[5] === 'yellow'));\nreturn t.every(f => f.length === 0);"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Un appui sur espace crée un seul tir, qui monte de 8 pixels par image",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 2
+           },
+           {
+            "n": 1,
+            "p": [
+             "espace"
+            ]
+           },
+           {
+            "n": 6
+           }
+          ],
+          "test": "const t = F.map(q => T(q, 'rect').filter(v => v[5] === 'yellow'));\nreturn t[1].length === 0 && t[4].length === 1 && t[8].length === 1 && t[4][0][2] - t[5][0][2] === 8 && t[4][0][1] === 238;"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Deux appuis : deux tirs à l'écran",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1,
+            "p": [
+             "espace"
+            ]
+           },
+           {
+            "n": 5
+           },
+           {
+            "n": 1,
+            "p": [
+             "espace"
+            ]
+           },
+           {
+            "n": 3
+           }
+          ],
+          "test": "const t = F.map(q => T(q, 'rect').filter(v => v[5] === 'yellow'));\nreturn t[t.length - 1].length === 2;"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Un tir sorti de l'écran est retiré de la liste",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1,
+            "p": [
+             "espace"
+            ]
+           },
+           {
+            "n": 60
+           }
+          ],
+          "test": "const t = F.map(q => T(q, 'rect').filter(v => v[5] === 'yellow'));\nreturn t[2].length === 1 && t[t.length - 1].length === 0 && t.every(f => f.every(v => v[2] >= -10));"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>toucheAppuyee(\"espace\")<\/code> n'est vrai qu'une image par appui. <code>removeIf<\/code> retire les tirs dont le y est négatif.",
+     "solution": "import java.util.ArrayList;\nimport java.util.List;\n\npublic class Main extends Jeu {\n    double x = 220;\n    List<double[]> tirs = new ArrayList<>();        // chaque tir : {x, y}\n\n    public void update(double dt) {\n        if (touche(\"gauche\")) x -= 5;\n        if (touche(\"droite\")) x += 5;\n        if (toucheAppuyee(\"espace\")) tirs.add(new double[]{x + 18, 280});\n        for (double[] t : tirs) t[1] -= 8;\n        tirs.removeIf(t -> t[1] < 0);\n    }\n\n    public void draw() {\n        effacer(\"black\");\n        rect(x, 290, 40, 20, \"blue\");\n        for (double[] t : tirs) {\n            rect(t[0], t[1], 4, 10, \"yellow\");\n        }\n    }\n\n    public static void main(String[] args) {\n        lancer(new Main());\n    }\n}\n"
     }
    ]
   }

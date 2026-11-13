@@ -11,173 +11,410 @@
 </head>
 <body data-module="java" data-chapter="java-conditions-boucles">
 
-<!-- ============ COURS ============ -->
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/java.txt) -->
 <article id="cours">
 <div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
-<h2>1. Conditions</h2>
-<pre><code>if (note &gt;= 16) {
-    System.out.println(&quot;Très bien&quot;);
-} else if (note &gt;= 10) {
-    System.out.println(&quot;Admis&quot;);
-} else {
-    System.out.println(&quot;Recalé&quot;);
-}
-String statut = age &gt;= 18 ? &quot;majeur&quot; : &quot;mineur&quot;;</code></pre>
-<p>Opérateurs : <code>== != &lt; &gt; &lt;= &gt;=</code>, <code>&amp;&amp;</code>, <code>||</code>, <code>!</code>. La condition doit être un <code>boolean</code> : <code>if (n)</code> ne compile pas.</p>
+<h2>1. <code>if</code>, <code>else if</code>, <code>else</code></h2>
+<div class="essai" data-langue="java" data-stdin="15"><pre><code>import java.util.Scanner;
 
-<h2>2. switch</h2>
-<pre><code>switch (jour) {                     // fonctionne aussi avec des String
-    case &quot;samedi&quot;, &quot;dimanche&quot; -&gt; System.out.println(&quot;Week-end&quot;);
-    default -&gt; System.out.println(&quot;Semaine&quot;);
-}
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        double note = sc.nextDouble();
+        if (note &gt;= 16) {
+            System.out.println("Très bien");
+        } else if (note &gt;= 10) {
+            System.out.println("Admis");
+        } else {
+            System.out.println("Recalé");
+        }
+    }
+}</code></pre></div>
+<p>La condition est entre parenthèses et doit être un <b>boolean</b> : contrairement au C ou au JavaScript, <code>if (x)</code> avec un entier ne compile pas.</p>
+<h2>2. Comparer et combiner</h2>
+<table><tr><th>Opérateur</th><th>Sens</th></tr><tr><td><code>==</code> <code>!=</code></td><td>égal, différent (pour les types primitifs)</td></tr><tr><td><code>&lt;</code> <code>&lt;=</code> <code>&gt;</code> <code>&gt;=</code></td><td>comparaisons</td></tr><tr><td><code>&amp;&amp;</code></td><td>et</td></tr><tr><td><code>||</code></td><td>ou</td></tr><tr><td><code>!</code></td><td>non</td></tr></table>
+<div class="essai" data-langue="java"><pre><code>public class Main {
+    public static void main(String[] args) {
+        int age = 17;
+        boolean carte = true;
+        System.out.println(age &gt;= 18 &amp;&amp; carte);     // false
+        System.out.println(age &gt;= 18 || carte);     // true
+        System.out.println(!carte);                 // false
+        String a = "java", b = "ja" + String.valueOf("va");
+        System.out.println(a.equals(b));            // true : compare le CONTENU
+    }
+}</code></pre></div>
+<div class="box attention"><b>Comparer des String : <code>equals</code>, jamais <code>==</code></b><p><code>==</code> entre deux objets teste s'il s'agit du <b>même objet en mémoire</b>, pas s'ils ont le même contenu. Pour du texte, écris toujours <code>a.equals(b)</code>. C'est le bug numéro 1 des débutants en Java.</p></div>
+<h2>3. Le ternaire et <code>switch</code></h2>
+<div class="essai" data-langue="java" data-stdin="3"><pre><code>import java.util.Scanner;
 
-String type = switch (note / 5) {   // switch-expression (Java 14+)
-    case 4 -&gt; &quot;excellent&quot;;
-    case 2, 3 -&gt; &quot;moyen&quot;;
-    default -&gt; &quot;faible&quot;;
-};</code></pre>
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int jour = sc.nextInt();
+        String type = (jour &gt;= 6) ? "week-end" : "semaine";     // condition ? si vrai : si faux
+        System.out.println(type);
 
-<h2>3. Boucles</h2>
-<pre><code>for (int i = 1; i &lt;= 10; i++) {
-    System.out.print(i + &quot; &quot;);
-}
+        switch (jour) {                       // forme classique : un break par cas
+            case 1: System.out.println("lundi"); break;
+            case 2: System.out.println("mardi"); break;
+            case 6:
+            case 7: System.out.println("repos"); break;
+            default: System.out.println("autre jour");
+        }
 
-int n = 100;
-while (n &gt; 1) n /= 2;
+        String nom = switch (jour) {          // forme moderne (Java 14+) : pas de break, renvoie une valeur
+            case 1 -&gt; "lundi";
+            case 2 -&gt; "mardi";
+            case 3 -&gt; "mercredi";
+            case 6, 7 -&gt; "repos";
+            default -&gt; "autre jour";
+        };
+        System.out.println(nom);
+    }
+}</code></pre></div>
+<p><code>switch</code> fonctionne avec les entiers, les <code>char</code>, les <code>String</code> et les <code>enum</code>.</p>
+<h2>4. <code>while</code> et <code>do … while</code></h2>
+<div class="essai" data-langue="java"><pre><code>public class Main {
+    public static void main(String[] args) {
+        int n = 1;
+        while (n &lt; 100) {        // teste AVANT chaque tour
+            n *= 2;
+        }
+        System.out.println(n);
 
-do {
-    x = sc.nextInt();
-} while (x &lt; 0);
+        int essais = 0;
+        do {                     // teste APRÈS : au moins un tour
+            essais++;
+        } while (essais * essais &lt;= 50);
+        System.out.println(essais);
+    }
+}</code></pre></div>
+<h2>5. <code>for</code> et <code>for-each</code></h2>
+<div class="essai" data-langue="java"><pre><code>public class Main {
+    public static void main(String[] args) {
+        for (int i = 1; i &lt;= 5; i++) {
+            System.out.print(i + " ");
+        }
+        System.out.println();
+        for (int i = 10; i &gt; 0; i -= 3) System.out.print(i + " ");
+        System.out.println();
 
-int[] notes = {12, 15, 9};
-for (int note : notes) {            // boucle « pour chaque »
-    System.out.println(note);
-}</code></pre>
-<p><code>break</code> sort de la boucle, <code>continue</code> passe au tour suivant.</p>
-<div class="box retenir"><b>Bonnes habitudes</b><p>Toujours des accolades, même pour une seule instruction ; une indentation de 4 espaces ; des noms de variables en camelCase (<code>nombreDeVies</code>).</p></div>
-<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-java.html">labo Java</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+        int[] notes = {12, 15, 9};
+        for (int note : notes) {             // for-each : « pour chaque note dans notes »
+            System.out.print(note + " ");
+        }
+        System.out.println();
+        for (char c : "Java".toCharArray()) System.out.print(c + "-");
+        System.out.println();
+    }
+}</code></pre></div>
+<h2>6. <code>break</code> et <code>continue</code></h2>
+<div class="essai" data-langue="java"><pre><code>public class Main {
+    public static void main(String[] args) {
+        for (int i = 1; i &lt;= 10; i++) {
+            if (i % 2 == 0) continue;    // passe au tour suivant
+            if (i &gt; 7) break;            // sort de la boucle
+            System.out.print(i + " ");
+        }
+        System.out.println();
+    }
+}</code></pre></div>
+<section class="tuto"><h3><small>Tutoriel</small>Le jeu du « plus ou moins »</h3>
+<div class="etape"><h4>Une seule comparaison</h4>
+<div class="essai" data-langue="java" data-stdin="50"><pre><code>import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        final int SECRET = 42;
+        Scanner sc = new Scanner(System.in);
+        int essai = sc.nextInt();
+        if (essai &lt; SECRET) System.out.println("Trop petit");
+        else if (essai &gt; SECRET) System.out.println("Trop grand");
+        else System.out.println("Gagné !");
+    }
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Répéter jusqu'à trouver</h4>
+<div class="essai" data-langue="java" data-stdin="50&#10;30&#10;42"><pre><code>import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        final int SECRET = 42;
+        Scanner sc = new Scanner(System.in);
+        int essai;
+        do {
+            essai = sc.nextInt();
+            if (essai &lt; SECRET) System.out.println("Trop petit");
+            else if (essai &gt; SECRET) System.out.println("Trop grand");
+        } while (essai != SECRET);
+        System.out.println("Gagné !");
+    }
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Compter les essais</h4>
+<div class="essai" data-langue="java" data-stdin="50&#10;30&#10;42"><pre><code>import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        final int SECRET = 42;
+        Scanner sc = new Scanner(System.in);
+        int essai, essais = 0;
+        do {
+            essai = sc.nextInt();
+            essais++;
+            if (essai &lt; SECRET) System.out.println("Trop petit");
+            else if (essai &gt; SECRET) System.out.println("Trop grand");
+        } while (essai != SECRET);
+        System.out.println("Gagné ! Essais : " + essais);
+    }
+}</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : la mention</b><p>Une cascade de <code>else if</code>.</p><a class="defi-go" href="labo-java.html#m=java-mention">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : FizzBuzz</b><p>Le grand classique des entretiens d'embauche.</p><a class="defi-go" href="labo-java.html#m=java-fizzbuzz">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : le PGCD</b><p>L'algorithme d'Euclide avec un <code>while</code>.</p><a class="defi-go" href="labo-java.html#m=java-pgcd">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p><code>if (condition) { … } else if (…) { … } else { … }</code> ; la condition est un boolean. </p><p> <code>&amp;&amp;</code> et, <code>||</code> ou, <code>!</code> non. </p><p> Les <code>String</code> se comparent avec <code>equals</code>. </p><p> <code>while</code> teste avant, <code>do … while</code> après ; <code>for (int i = 0; i &lt; n; i++)</code> ; <code>for (Type x : collection)</code>. </p><p> <code>switch</code> moderne : <code>case 1 -&gt; …</code> sans <code>break</code>.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-java.html">Labo Java</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
 </article>
 
 <!-- ============ EXERCICES ============ -->
 <script>
 window.EF_EXERCICES = [
  {
-  "type": "qcm",
   "niveau": "facile",
-  "q": "Quel opérateur signifie « et » ?",
+  "q": "Comment s'écrit « et » logique en Java ?",
+  "type": "qcm",
   "options": [
    "`and`",
-   "`&&`",
-   "`&`",
-   "`+`"
+   "`&and`",
+   "`+`",
+   "`&&`"
   ],
-  "answer": 1,
+  "answer": 3,
   "explication": ""
  },
  {
+  "niveau": "facile",
+  "q": "Comment s'écrit « différent » ?",
   "type": "qcm",
-  "niveau": "moyen",
-  "q": "`if (n)` avec n de type int…",
   "options": [
-   "teste si n vaut 0",
-   "ne compile pas : il faut un boolean",
-   "est toujours vrai",
-   "est toujours faux"
+   "`<>`",
+   "`not =`",
+   "`~=`",
+   "`!=`"
   ],
-  "answer": 1,
+  "answer": 3,
   "explication": ""
  },
  {
-  "type": "qcm",
   "niveau": "moyen",
-  "q": "Un switch Java peut-il porter sur une String ?",
-  "options": [
-   "Non",
-   "Oui",
-   "Seulement en Java 1",
-   "Seulement avec des majuscules"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
+  "q": "Comment comparer le contenu de deux String a et b ?",
   "type": "qcm",
-  "niveau": "moyen",
-  "q": "Que fait `System.out.print` par rapport à println ?",
   "options": [
-   "Rien de différent",
-   "Ne passe pas à la ligne",
-   "Affiche en couleur",
-   "Imprime sur papier"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "qcm",
-  "niveau": "moyen",
-  "q": "Quelle boucle parcourt chaque élément d'un tableau ?",
-  "options": [
-   "`for (int x : t)`",
-   "`foreach (t as x)`",
-   "`for x in t`",
-   "`loop t`"
+   "`a.equals(b)`",
+   "`a.same(b)`",
+   "`a = b`",
+   "`a == b`"
   ],
   "answer": 0,
   "explication": ""
  },
  {
+  "niveau": "difficile",
+  "q": "Que teste `a == b` entre deux objets String ?",
   "type": "qcm",
-  "niveau": "moyen",
-  "q": "Combien de tours fait `for (int i = 10; i > 0; i -= 3)` ?",
   "options": [
-   "3",
-   "4",
-   "10",
-   "Infini"
+   "S'il s'agit du même objet en mémoire",
+   "S'ils ont la même longueur",
+   "Rien, c'est une erreur",
+   "S'ils ont le même contenu"
   ],
-  "answer": 1,
-  "explication": "10, 7, 4, 1."
+  "answer": 0,
+  "explication": ""
  },
  {
-  "type": "qcm",
   "niveau": "moyen",
-  "q": "Quelle boucle s'exécute au moins une fois ?",
+  "q": "Combien de tours fait `for (int i = 0; i < 5; i++)` ?",
+  "type": "qcm",
   "options": [
-   "`for`",
-   "`while`",
-   "`do … while`"
+   "6",
+   "Une infinité",
+   "5",
+   "4"
   ],
   "answer": 2,
   "explication": ""
  },
  {
-  "type": "vf",
   "niveau": "moyen",
-  "q": "La convention de nommage des variables Java est le camelCase.",
+  "q": "Quelle boucle exécute son bloc au moins une fois ?",
+  "type": "qcm",
+  "options": [
+   "`for-each`",
+   "`do … while`",
+   "`for`",
+   "`while`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que signifie `for (int note : notes)` ?",
+  "type": "qcm",
+  "options": [
+   "Tant que note est dans notes",
+   "Pour note de 0 à notes",
+   "Pour chaque élément note du tableau notes",
+   "Si note appartient à notes"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait `continue` ?",
+  "type": "qcm",
+  "options": [
+   "Recommence au début",
+   "Sort de la boucle",
+   "Passe directement au tour suivant",
+   "Arrête le programme"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "`if (x)` avec `int x = 1;` en Java…",
+  "type": "qcm",
+  "options": [
+   "lève une exception",
+   "est faux",
+   "ne compile pas : il faut un boolean",
+   "est vrai"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que vaut `(age >= 18) ? \"majeur\" : \"mineur\"` si age vaut 15 ?",
+  "type": "qcm",
+  "options": [
+   "`\"mineur\"`",
+   "15",
+   "`\"majeur\"`",
+   "`false`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Dans un switch classique, que se passe-t-il sans `break` ?",
+  "type": "qcm",
+  "options": [
+   "L'exécution continue dans le cas suivant",
+   "Le switch s'arrête",
+   "Une erreur de compilation",
+   "Rien"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Quel avantage a la forme `case 1 -> …` du switch ?",
+  "type": "qcm",
+  "options": [
+   "Elle accepte les double",
+   "Pas de break à écrire, et le switch peut renvoyer une valeur",
+   "Aucun",
+   "Elle est plus rapide"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Sur quels types `switch` peut-il porter ?",
+  "type": "qcm",
+  "options": [
+   "Entiers, char, String et enum",
+   "Uniquement les int",
+   "Uniquement les String",
+   "Tous les types"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'affiche `for (int i = 10; i > 0; i -= 3) System.out.print(i + \" \");` ?",
+  "type": "qcm",
+  "options": [
+   "Rien",
+   "10 7 4 1",
+   "10 9 8",
+   "10 7 4"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "facile",
+  "q": "La condition d'un if s'écrit entre parenthèses.",
+  "type": "vf",
   "answer": true,
   "explication": ""
  },
  {
-  "type": "saisie",
   "niveau": "moyen",
-  "q": "Quel mot-clé sort immédiatement d'une boucle ?",
+  "q": "Une boucle while dont la condition est fausse dès le départ s'exécute une fois.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Elle ne s'exécute pas."
+ },
+ {
+  "niveau": "moyen",
+  "q": "La variable i de `for (int i = 0; …)` existe encore après la boucle.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Elle est locale à la boucle."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel mot-clé désigne le cas par défaut d'un switch ?",
+  "type": "saisie",
   "answers": [
-   "break"
+   "default"
   ],
   "explication": ""
  },
  {
-  "type": "qcm",
-  "niveau": "difficile",
-  "q": "Quelle écriture est un switch-expression valide ?",
-  "options": [
-   "`String t = switch (n) { case 1 -> \"un\"; default -> \"autre\"; };`",
-   "`switch n: 1 => \"un\"`",
-   "`match (n) { 1 -> \"un\" }`",
-   "Aucune"
+  "niveau": "moyen",
+  "q": "Associe chaque boucle à son usage.",
+  "type": "associer",
+  "paires": [
+   [
+    "`for`",
+    "nombre de tours connu"
+   ],
+   [
+    "`while`",
+    "tester avant chaque tour"
+   ],
+   [
+    "`do … while`",
+    "au moins un tour"
+   ],
+   [
+    "`for-each`",
+    "parcourir une collection"
+   ]
   ],
-  "answer": 0,
   "explication": ""
  }
 ];
@@ -185,6 +422,8 @@ window.EF_EXERCICES = [
 <script src="../../data/modules.js"></script>
 <script src="../../assets/app.js"></script>
 <script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
 <script src="../../assets/chapter.js"></script>
 </body>
 </html>

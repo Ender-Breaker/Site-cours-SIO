@@ -4,189 +4,436 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#2b3fe0">
-  <title>Java : méthodes, tableaux et ArrayList — Étude Facile</title>
+  <title>Java : méthodes et tableaux — Étude Facile</title>
 <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
 
   <link rel="stylesheet" href="../../assets/style.css">
 </head>
 <body data-module="java" data-chapter="java-methodes-tableaux">
 
-<!-- ============ COURS ============ -->
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/java.txt) -->
 <article id="cours">
 <div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
-<h2>1. Les méthodes</h2>
-<pre><code>public class Main {
-    static int carre(int x) {            // type de retour, nom, paramètres typés
-        return x * x;
+<h2>1. Écrire une méthode</h2>
+<p>En Java, une fonction s'appelle une <b>méthode</b> et appartient toujours à une classe. Pour l'instant, nos méthodes sont <code>static</code> : on les appelle directement, sans créer d'objet.</p>
+<div class="essai" data-langue="java"><pre><code>public class Main {
+    static double aire(double largeur, double hauteur) {
+        return largeur * hauteur;
     }
-    static void afficherLigne(int n) {   // void : ne renvoie rien
-        System.out.println(&quot;-&quot;.repeat(n));
+
+    static void saluer(String nom) {            // void : ne renvoie rien
+        System.out.println("Bonjour " + nom + " !");
     }
+
+    static boolean estPair(int n) {
+        return n % 2 == 0;
+    }
+
     public static void main(String[] args) {
-        System.out.println(carre(5));
-        afficherLigne(10);
+        System.out.println(aire(3, 4.5));
+        saluer("Léa");
+        System.out.println(estPair(7) + " " + estPair(8));
     }
-}</code></pre>
-<p>Les méthodes appelées depuis <code>main</code> sans objet doivent être <code>static</code>. Plusieurs méthodes peuvent avoir le même nom avec des paramètres différents (<b>surcharge</b>).</p>
-<p>Java passe toujours les paramètres <b>par valeur</b> : pour un <code>int</code>, une copie ; pour un objet ou un tableau, une copie de la <b>référence</b>, donc la méthode peut modifier son contenu.</p>
+}</code></pre></div>
+<p>La signature annonce le <b>type de retour</b>, le nom, puis le type de chaque paramètre. L'ordre des méthodes dans la classe n'a pas d'importance.</p>
+<h2>2. Surcharge</h2>
+<p>Plusieurs méthodes peuvent porter le même nom si leurs <b>paramètres</b> diffèrent.</p>
+<div class="essai" data-langue="java"><pre><code>public class Main {
+    static int maxi(int a, int b) { return a &gt; b ? a : b; }
+    static double maxi(double a, double b) { return a &gt; b ? a : b; }
+    static int maxi(int a, int b, int c) { return maxi(maxi(a, b), c); }
 
-<h2>2. Les tableaux</h2>
-<pre><code>int[] notes = new int[5];          // 5 cases à 0, taille FIXE
-int[] t = {12, 15, 9};
-t[0]          // 12
-t.length      // 3 (attribut, sans parenthèses)
-int[][] grille = new int[3][3];    // deux dimensions
-java.util.Arrays.sort(t);
-System.out.println(java.util.Arrays.toString(t));   // [9, 12, 15]</code></pre>
-<p>Accéder à <code>t[3]</code> déclenche une <code>ArrayIndexOutOfBoundsException</code>.</p>
+    public static void main(String[] args) {
+        System.out.println(maxi(3, 8) + " " + maxi(2.5, 1.5) + " " + maxi(4, 9, 2));
+    }
+}</code></pre></div>
+<h2>3. Passage des arguments</h2>
+<p>Java passe <b>toujours par valeur</b>. Pour un type primitif, la méthode reçoit une copie du nombre. Pour un objet ou un tableau, elle reçoit une copie de la <b>référence</b> : elle peut donc modifier le contenu de l'objet, mais pas remplacer l'objet de l'appelant.</p>
+<div class="essai" data-langue="java"><pre><code>public class Main {
+    static void doubler(int n) { n = n * 2; }              // modifie une copie : sans effet
+    static void doublerTout(int[] t) {                     // modifie le tableau d'origine
+        for (int i = 0; i &lt; t.length; i++) t[i] *= 2;
+    }
 
-<h2>3. ArrayList : la liste qui grandit</h2>
-<pre><code>import java.util.ArrayList;
+    public static void main(String[] args) {
+        int x = 5;
+        doubler(x);
+        System.out.println(x);                 // 5
+        int[] notes = {1, 2, 3};
+        doublerTout(notes);
+        System.out.println(notes[0] + " " + notes[1] + " " + notes[2]);    // 2 4 6
+    }
+}</code></pre></div>
+<h2>4. Récursivité</h2>
+<div class="essai" data-langue="java"><pre><code>public class Main {
+    static long factorielle(int n) {
+        if (n &lt;= 1) return 1;                  // cas d'arrêt
+        return n * factorielle(n - 1);         // appel récursif
+    }
 
-ArrayList&lt;String&gt; noms = new ArrayList&lt;&gt;();
-noms.add(&quot;Léa&quot;);
-noms.add(&quot;Tom&quot;);
-noms.get(0)          // &quot;Léa&quot;
-noms.size()          // 2
-noms.remove(&quot;Tom&quot;);
-noms.contains(&quot;Léa&quot;) // true
-for (String n : noms) System.out.println(n);
+    public static void main(String[] args) {
+        System.out.println(factorielle(5) + " " + factorielle(20));
+    }
+}</code></pre></div>
+<h2>5. Les tableaux</h2>
+<p>Un tableau contient un nombre <b>fixe</b> d'éléments du même type. Les indices vont de <code>0</code> à <code>length - 1</code>.</p>
+<div class="essai" data-langue="java"><pre><code>import java.util.Arrays;
 
-ArrayList&lt;Integer&gt; nombres = new ArrayList&lt;&gt;();   // Integer, pas int</code></pre>
-<div class="box retenir"><b>Tableau ou ArrayList ?</b><p>Tableau : taille connue et fixe, types primitifs, rapide. ArrayList : taille variable, méthodes pratiques, mais seulement des objets (<code>Integer</code>, <code>Double</code>… les « enveloppes » des types primitifs).</p></div>
+public class Main {
+    public static void main(String[] args) {
+        int[] notes = {12, 15, 9};              // tableau initialisé
+        double[] prix = new double[4];          // 4 cases, toutes à 0.0
+        String[] noms = new String[2];          // 2 cases, toutes à null
+        notes[1] = 16;
+        prix[0] = 9.99;
+        System.out.println(notes[0] + " " + notes.length);     // length SANS parenthèses
+        System.out.println(Arrays.toString(notes));            // affichage lisible
+        System.out.println(Arrays.toString(prix) + " " + noms[0]);
 
-<h2>4. Les String</h2>
-<pre><code>String s = &quot;Bonjour&quot;;
-s.length()            s.charAt(0)          s.toUpperCase()
-s.substring(0, 3)     s.indexOf(&quot;jour&quot;)    s.contains(&quot;jour&quot;)
-s.split(&quot; &quot;)          String.join(&quot;, &quot;, liste)
-new StringBuilder(s).reverse().toString()</code></pre>
-<p>Une String est <b>immuable</b> : ses méthodes renvoient une nouvelle chaîne. Pour construire un long texte dans une boucle, utilise <code>StringBuilder</code>.</p>
-<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-java.html">labo Java</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+        int somme = 0;
+        for (int n : notes) somme += n;                        // parcours for-each
+        System.out.println("Moyenne : " + (double) somme / notes.length);
+        for (int i = notes.length - 1; i &gt;= 0; i--) System.out.print(notes[i] + " ");   // à l'envers
+        System.out.println();
+    }
+}</code></pre></div>
+<div class="box attention"><b>Sortir des bornes</b><p><code>notes[3]</code> sur un tableau de 3 éléments lève l'exception <code>ArrayIndexOutOfBoundsException</code> et arrête le programme. Le dernier indice valide est toujours <code>length - 1</code>.</p></div>
+<h3>La boîte à outils <code>Arrays</code></h3>
+<div class="essai" data-langue="java"><pre><code>import java.util.Arrays;
+
+public class Main {
+    public static void main(String[] args) {
+        int[] t = {5, 2, 8, 1};
+        Arrays.sort(t);                                      // trie sur place
+        System.out.println(Arrays.toString(t));
+        int[] copie = Arrays.copyOf(t, t.length);            // vraie copie
+        copie[0] = 99;
+        System.out.println(t[0] + " " + copie[0]);
+        int[] meme = t;                                      // PAS une copie : même tableau
+        meme[0] = -1;
+        System.out.println(t[0]);
+        System.out.println(Arrays.equals(t, copie));
+        Arrays.fill(copie, 7);
+        System.out.println(Arrays.toString(copie));
+    }
+}</code></pre></div>
+<h2>6. Tableaux à deux dimensions</h2>
+<div class="essai" data-langue="java"><pre><code>import java.util.Arrays;
+
+public class Main {
+    public static void main(String[] args) {
+        int[][] grille = new int[3][4];            // 3 lignes, 4 colonnes, remplies de 0
+        grille[1][2] = 7;
+        for (int[] ligne : grille) {
+            System.out.println(Arrays.toString(ligne));
+        }
+        int[][] triangle = {{1}, {1, 1}, {1, 2, 1}};       // lignes de longueurs différentes
+        System.out.println(triangle[2][1] + " " + triangle.length + " " + triangle[2].length);
+    }
+}</code></pre></div>
+<div class="box"><b>Et quand la taille n'est pas connue ?</b><p>Un tableau ne peut pas grandir. Pour une liste dont la taille change, on utilise <code>ArrayList</code> : voir le chapitre sur les collections.</p></div>
+<section class="tuto"><h3><small>Tutoriel</small>Une boîte à outils de statistiques</h3>
+<div class="etape"><h4>Une méthode par calcul</h4>
+<div class="essai" data-langue="java"><pre><code>public class Main {
+    static double moyenne(double[] t) {
+        double somme = 0;
+        for (double v : t) somme += v;
+        return somme / t.length;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(moyenne(new double[]{12, 5, 19, 8}));
+    }
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Renvoyer deux résultats dans un tableau</h4>
+<p>Une méthode ne renvoie qu'une valeur ; cette valeur peut être un tableau.</p>
+<div class="essai" data-langue="java"><pre><code>import java.util.Arrays;
+
+public class Main {
+    static double[] minMax(double[] t) {
+        double mini = t[0], maxi = t[0];
+        for (double v : t) {
+            if (v &lt; mini) mini = v;
+            if (v &gt; maxi) maxi = v;
+        }
+        return new double[]{mini, maxi};
+    }
+
+    public static void main(String[] args) {
+        double[] r = minMax(new double[]{12, 5, 19, 8});
+        System.out.println(r[0] + " " + r[1]);
+    }
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Composer les méthodes</h4>
+<div class="essai" data-langue="java"><pre><code>public class Main {
+    static double moyenne(double[] t) {
+        double s = 0;
+        for (double v : t) s += v;
+        return s / t.length;
+    }
+    static int auDessus(double[] t, double seuil) {
+        int n = 0;
+        for (double v : t) if (v &gt; seuil) n++;
+        return n;
+    }
+
+    public static void main(String[] args) {
+        double[] notes = {12, 5, 19, 8, 10};
+        System.out.println(auDessus(notes, moyenne(notes)) + " notes au-dessus de la moyenne");
+    }
+}</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : minimum et maximum</b><p>Une méthode qui calcule deux résultats.</p><a class="defi-go" href="labo-java.html#m=java-minmax">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : la factorielle</b><p>Une méthode récursive.</p><a class="defi-go" href="labo-java.html#m=java-factorielle">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : trier</b><p><code>Arrays.sort</code>.</p><a class="defi-go" href="labo-java.html#m=java-tri">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p><code>static typeRetour nom(type param) { … return valeur; }</code> ; <code>void</code> si rien n'est renvoyé. </p><p> Surcharge : même nom, paramètres différents. </p><p> Les primitifs sont copiés ; pour un tableau ou un objet, la méthode reçoit la référence et peut en modifier le contenu. </p><p> Tableau : taille fixe, <code>t.length</code>, indices de 0 à <code>length - 1</code>. </p><p> <code>Arrays.sort</code>, <code>Arrays.toString</code>, <code>Arrays.copyOf</code>.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-java.html">Labo Java</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
 </article>
 
 <!-- ============ EXERCICES ============ -->
 <script>
 window.EF_EXERCICES = [
  {
-  "type": "qcm",
   "niveau": "facile",
-  "q": "Que signifie void devant une méthode ?",
+  "q": "Quel type de retour indique qu'une méthode ne renvoie rien ?",
+  "type": "qcm",
   "options": [
-   "Elle renvoie 0",
-   "Elle ne renvoie rien",
-   "Elle est privée",
-   "Elle est vide"
+   "`null`",
+   "`empty`",
+   "`void`",
+   "`none`"
   ],
-  "answer": 1,
+  "answer": 2,
   "explication": ""
  },
  {
+  "niveau": "facile",
+  "q": "Quel est l'indice du premier élément d'un tableau ?",
   "type": "qcm",
+  "options": [
+   "Au choix",
+   "-1",
+   "0",
+   "1"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
   "niveau": "moyen",
-  "q": "Pourquoi les méthodes appelées depuis main sont-elles static ?",
-  "options": [
-   "C'est plus rapide",
-   "main est static : elle n'a pas d'objet pour appeler une méthode d'instance",
-   "Pour les cacher",
-   "C'est facultatif"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
+  "q": "Comment obtenir le nombre d'éléments du tableau t ?",
   "type": "qcm",
-  "niveau": "facile",
-  "q": "Comment obtenir la taille d'un tableau t ?",
   "options": [
-   "`t.size()`",
+   "`len(t)`",
    "`t.length`",
-   "`t.length()`",
-   "`len(t)`"
+   "`t.size()`",
+   "`t.length()`"
   ],
   "answer": 1,
-  "explication": ""
+  "explication": "Pour un tableau : sans parenthèses."
  },
  {
-  "type": "qcm",
-  "niveau": "facile",
-  "q": "Comment obtenir la taille d'une ArrayList l ?",
-  "options": [
-   "`l.size()`",
-   "`l.length`",
-   "`l.count`",
-   "`len(l)`"
-  ],
-  "answer": 0,
-  "explication": ""
- },
- {
-  "type": "qcm",
   "niveau": "moyen",
-  "q": "Que se passe-t-il avec t[3] si t a 3 éléments ?",
+  "q": "Que contient `new int[3]` juste après sa création ?",
+  "type": "qcm",
   "options": [
-   "Renvoie 0",
-   "ArrayIndexOutOfBoundsException",
-   "Ajoute une case",
+   "Trois 0",
+   "Trois valeurs indéterminées",
+   "Trois null",
    "Rien"
   ],
-  "answer": 1,
+  "answer": 0,
   "explication": ""
  },
  {
-  "type": "qcm",
   "niveau": "moyen",
-  "q": "Quel type mettre dans une ArrayList d'entiers ?",
+  "q": "Que contient `new String[2]` juste après sa création ?",
+  "type": "qcm",
   "options": [
-   "`ArrayList<int>`",
-   "`ArrayList<Integer>`",
-   "`ArrayList<number>`",
-   "`ArrayList[int]`"
+   "Une erreur",
+   "Deux chaînes vides",
+   "Deux espaces",
+   "Deux null"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que se passe-t-il avec `t[3]` si t a 3 éléments ?",
+  "type": "qcm",
+  "options": [
+   "Le tableau s'agrandit",
+   "Une exception ArrayIndexOutOfBoundsException",
+   "Renvoie null",
+   "Renvoie 0"
   ],
   "answer": 1,
   "explication": ""
  },
  {
-  "type": "qcm",
   "niveau": "moyen",
-  "q": "Que donne `\"Bonjour\".substring(0, 3)` ?",
+  "q": "Avec `static void f(int n) { n = 0; }`, que vaut x après `int x = 5; f(x);` ?",
+  "type": "qcm",
   "options": [
-   "\"Bon\"",
-   "\"onj\"",
-   "\"Bonj\"",
-   "3"
+   "5",
+   "0",
+   "Erreur",
+   "Indéterminé"
+  ],
+  "answer": 0,
+  "explication": "Un primitif est copié."
+ },
+ {
+  "niveau": "difficile",
+  "q": "Avec `static void f(int[] t) { t[0] = 0; }`, que vaut `a[0]` après `int[] a = {5}; f(a);` ?",
+  "type": "qcm",
+  "options": [
+   "5",
+   "0",
+   "Erreur",
+   "Indéterminé"
+  ],
+  "answer": 1,
+  "explication": "La méthode reçoit la référence vers le même tableau."
+ },
+ {
+  "niveau": "difficile",
+  "q": "Après `int[] b = a; b[0] = 9;`, que vaut `a[0]` ?",
+  "type": "qcm",
+  "options": [
+   "0",
+   "Erreur",
+   "Sa valeur d'avant",
+   "9"
+  ],
+  "answer": 3,
+  "explication": "b et a désignent le même tableau."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle méthode trie un tableau ?",
+  "type": "qcm",
+  "options": [
+   "`t.sort()`",
+   "`sort(t)`",
+   "`Array.order(t)`",
+   "`Arrays.sort(t)`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle méthode donne un affichage lisible d'un tableau ?",
+  "type": "qcm",
+  "options": [
+   "`String(t)`",
+   "`t.toString()`",
+   "`Arrays.toString(t)`",
+   "`print(t)`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce que la surcharge ?",
+  "type": "qcm",
+  "options": [
+   "Plusieurs méthodes de même nom avec des paramètres différents",
+   "Une méthode privée",
+   "Une méthode récursive",
+   "Une méthode trop longue"
   ],
   "answer": 0,
   "explication": ""
  },
  {
-  "type": "vf",
   "niveau": "moyen",
-  "q": "Une String Java peut être modifiée sur place (elle est mutable).",
-  "answer": false,
-  "explication": ""
- },
- {
-  "type": "saisie",
-  "niveau": "moyen",
-  "q": "Quelle méthode ajoute un élément à une ArrayList ?",
-  "answers": [
-   "add",
-   "add()"
-  ],
-  "explication": ""
- },
- {
+  "q": "Comment déclarer une grille de 3 lignes et 4 colonnes d'entiers ?",
   "type": "qcm",
-  "niveau": "difficile",
-  "q": "Une méthode reçoit un tableau et modifie t[0]. Le tableau de l'appelant est-il modifié ?",
   "options": [
-   "Non, Java copie le tableau",
-   "Oui, la référence est copiée mais pointe sur le même tableau",
-   "Erreur de compilation",
-   "Seulement si la méthode est static"
+   "`int g[3,4];`",
+   "`int[3][4] g;`",
+   "`int[][] g = new int[3][4];`",
+   "`grid<int> g(3, 4);`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que manque-t-il à une méthode récursive qui ne s'arrête jamais ?",
+  "type": "qcm",
+  "options": [
+   "Un tableau",
+   "Un cas d'arrêt",
+   "Un `break`",
+   "Un `static`"
   ],
   "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "La taille d'un tableau Java peut changer après sa création.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Elle est fixe ; pour une taille variable, on utilise ArrayList."
+ },
+ {
+  "niveau": "moyen",
+  "q": "L'ordre dans lequel les méthodes sont écrites dans une classe n'a pas d'importance.",
+  "type": "vf",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Deux méthodes surchargées peuvent ne différer que par leur type de retour.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Elles doivent différer par leurs paramètres."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel mot-clé renvoie une valeur depuis une méthode ?",
+  "type": "saisie",
+  "answers": [
+   "return"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque méthode de Arrays à son rôle.",
+  "type": "associer",
+  "paires": [
+   [
+    "`sort`",
+    "trier"
+   ],
+   [
+    "`toString`",
+    "afficher"
+   ],
+   [
+    "`copyOf`",
+    "copier"
+   ],
+   [
+    "`fill`",
+    "remplir"
+   ],
+   [
+    "`equals`",
+    "comparer le contenu"
+   ]
+  ],
   "explication": ""
  }
 ];
@@ -194,6 +441,8 @@ window.EF_EXERCICES = [
 <script src="../../data/modules.js"></script>
 <script src="../../assets/app.js"></script>
 <script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
 <script src="../../assets/chapter.js"></script>
 </body>
 </html>

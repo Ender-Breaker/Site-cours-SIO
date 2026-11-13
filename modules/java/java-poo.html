@@ -11,186 +11,479 @@
 </head>
 <body data-module="java" data-chapter="java-poo">
 
-<!-- ============ COURS ============ -->
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/java.txt) -->
 <article id="cours">
 <div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
-<p>Java est un langage <b>orienté objet</b> : un programme est un ensemble d'objets qui collaborent. C'est aussi le langage de référence pour apprendre les concepts objet au BTS (modélisation UML, design patterns).</p>
+<p>Java est un langage <b>orienté objet</b> : un programme est un ensemble d'<b>objets</b> qui collaborent. Une <b>classe</b> est le plan de fabrication ; un <b>objet</b> (ou *instance*) est un exemplaire construit à partir de ce plan.</p>
+<h2>1. Une première classe</h2>
+<div class="essai" data-langue="java"><pre><code>class Joueur {
+    String nom;                 // attributs : les données de chaque objet
+    int pv;
 
-<h2>1. Classe, attributs, constructeur, méthodes</h2>
-<pre><code>class Compte {
-    private String titulaire;          // attributs privés
+    void blesser(int degats) {  // méthode : agit sur l'objet
+        pv = pv - degats;
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Joueur a = new Joueur();        // new crée un objet
+        a.nom = "Léa";
+        a.pv = 10;
+        Joueur b = new Joueur();
+        b.nom = "Sam";
+        b.pv = 5;
+        a.blesser(3);
+        System.out.println(a.nom + " : " + a.pv + ", " + b.nom + " : " + b.pv);
+    }
+}</code></pre></div>
+<p>Chaque objet a <b>ses propres</b> valeurs d'attributs. Remarque que <code>blesser</code> n'est pas <code>static</code> : elle s'applique à <b>un</b> objet.</p>
+<h2>2. Le constructeur et <code>this</code></h2>
+<p>Le <b>constructeur</b> porte le nom de la classe, n'a pas de type de retour, et s'exécute au moment du <code>new</code>. <code>this</code> désigne l'objet en cours.</p>
+<div class="essai" data-langue="java"><pre><code>class Joueur {
+    String nom;
+    int pv;
+
+    Joueur(String nom, int pv) {     // constructeur
+        this.nom = nom;              // this.nom = l'attribut ; nom = le paramètre
+        this.pv = pv;
+    }
+    Joueur(String nom) {             // surcharge : un second constructeur
+        this(nom, 10);               // appelle le premier
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Joueur a = new Joueur("Léa", 20);
+        Joueur b = new Joueur("Sam");
+        System.out.println(a.nom + " " + a.pv + ", " + b.nom + " " + b.pv);
+    }
+}</code></pre></div>
+<h2>3. L'encapsulation : <code>private</code>, accesseurs</h2>
+<p>On interdit l'accès direct aux attributs (<code>private</code>) et on n'expose que des méthodes qui gardent l'objet dans un état cohérent.</p>
+<div class="essai" data-langue="java"><pre><code>class Compte {
+    private String titulaire;
     private double solde;
 
-    public Compte(String titulaire, double solde) {   // constructeur
-        this.titulaire = titulaire;    // this = l&#x27;objet en cours de création
+    public Compte(String titulaire, double solde) {
+        this.titulaire = titulaire;
         this.solde = solde;
     }
 
-    public void deposer(double m) { if (m &gt; 0) solde += m; }
-    public double getSolde() { return solde; }        // accesseur
+    public void deposer(double montant) {
+        if (montant &gt; 0) solde += montant;
+    }
+    public boolean retirer(double montant) {
+        if (montant &gt; solde) return false;
+        solde -= montant;
+        return true;
+    }
+    public double getSolde() { return solde; }               // accesseur (getter)
+    public String getTitulaire() { return titulaire; }
+    public void setTitulaire(String t) {                      // mutateur (setter), avec contrôle
+        if (t != null &amp;&amp; !t.isBlank()) titulaire = t;
+    }
 }
 
-Compte c = new Compte(&quot;Léa&quot;, 100);     // new crée un objet (une instance)
-c.deposer(50);</code></pre>
+public class Main {
+    public static void main(String[] args) {
+        Compte c = new Compte("Léa", 100);
+        c.deposer(50);
+        System.out.println(c.retirer(500) + " " + c.retirer(30) + " " + c.getSolde());
+        // c.solde = 1000000;     // refusé à la compilation : solde est private
+    }
+}</code></pre></div>
+<table><tr><th>Modificateur</th><th>Visible depuis</th></tr><tr><td><code>private</code></td><td>la classe uniquement</td></tr><tr><td>(rien)</td><td>les classes du même paquetage</td></tr><tr><td><code>protected</code></td><td>le paquetage et les classes filles</td></tr><tr><td><code>public</code></td><td>partout</td></tr></table>
+<h2>4. <code>toString</code> et <code>equals</code></h2>
+<p><code>println(objet)</code> appelle sa méthode <code>toString()</code>. Par défaut elle affiche quelque chose comme <code>Point@1b6d3586</code> : on la <b>redéfinit</b>. De même, <code>equals</code> par défaut ne compare que les références.</p>
+<div class="essai" data-langue="java"><pre><code>class Point {
+    private final int x, y;          // final : fixés par le constructeur, jamais modifiés
 
-<h2>2. Encapsulation et visibilité</h2>
-<table><tr><th>Mot-clé</th><th>Accessible depuis</th></tr>
-<tr><td><code>private</code></td><td>la classe seulement</td></tr>
-<tr><td>(rien)</td><td>les classes du même paquetage</td></tr>
-<tr><td><code>protected</code></td><td>le paquetage et les classes filles</td></tr>
-<tr><td><code>public</code></td><td>partout</td></tr></table>
-<p>On met les attributs en <code>private</code> et on expose des méthodes : l'objet contrôle lui-même la validité de son état.</p>
+    Point(int x, int y) { this.x = x; this.y = y; }
 
-<h2>3. Héritage</h2>
-<pre><code>class Personnage {
-    protected int pv = 100;
-    public void attaquer() { System.out.println(&quot;Coup de poing&quot;); }
-}
-
-class Mage extends Personnage {           // Mage EST UN Personnage
     @Override
-    public void attaquer() { System.out.println(&quot;Boule de feu&quot;); }
+    public String toString() { return "(" + x + ", " + y + ")"; }
+
+    @Override
+    public boolean equals(Object autre) {
+        if (!(autre instanceof Point)) return false;
+        Point p = (Point) autre;
+        return x == p.x &amp;&amp; y == p.y;
+    }
+    @Override
+    public int hashCode() { return 31 * x + y; }     // toujours redéfini avec equals
 }
 
-Personnage p = new Mage();
-p.attaquer();          // « Boule de feu » : polymorphisme</code></pre>
-<p>Toutes les classes héritent de <code>Object</code>, qui fournit <code>toString()</code>, <code>equals()</code>, <code>hashCode()</code>. Java n'autorise qu'<b>un seul</b> parent par classe.</p>
+public class Main {
+    public static void main(String[] args) {
+        Point a = new Point(3, 4), b = new Point(3, 4);
+        System.out.println(a);                    // appelle toString
+        System.out.println(a == b);               // false : deux objets distincts
+        System.out.println(a.equals(b));          // true  : même contenu
+    }
+}</code></pre></div>
+<h2>5. <code>static</code> : ce qui appartient à la classe</h2>
+<p>Un membre <code>static</code> est <b>partagé</b> par tous les objets et s'utilise avec le nom de la classe.</p>
+<div class="essai" data-langue="java"><pre><code>class Ticket {
+    private static int prochain = 1;          // un seul compteur pour toute la classe
+    public static final int MAX = 999;        // constante de classe
+    private final int numero;
 
-<h2>4. Classes abstraites et interfaces</h2>
-<pre><code>abstract class Forme {                    // ne peut pas être instanciée
-    abstract double aire();               // à définir dans les classes filles
-}
-class Cercle extends Forme {
-    double r;
-    Cercle(double r) { this.r = r; }
-    double aire() { return Math.PI * r * r; }
+    Ticket() { numero = prochain++; }
+    int getNumero() { return numero; }
+    static int dejaEmis() { return prochain - 1; }      // méthode de classe : pas de this
 }
 
-interface Affichable {                    // un contrat
-    void afficher();
+public class Main {
+    public static void main(String[] args) {
+        Ticket a = new Ticket(), b = new Ticket(), c = new Ticket();
+        System.out.println(a.getNumero() + " " + c.getNumero() + " " + Ticket.dejaEmis() + " " + Ticket.MAX);
+    }
+}</code></pre></div>
+<p>C'est pour cela que <code>main</code> est <code>static</code> : elle est appelée avant qu'un seul objet n'existe. <code>Math.sqrt</code>, <code>Integer.parseInt</code> sont aussi des méthodes de classe.</p>
+<h2>6. Les références et <code>null</code></h2>
+<p>Une variable d'objet contient une <b>référence</b> vers l'objet, pas l'objet lui-même.</p>
+<div class="essai" data-langue="java"><pre><code>class Boite {
+    int valeur;
+    Boite(int v) { valeur = v; }
 }
-class Produit implements Affichable {
-    public void afficher() { System.out.println(&quot;Produit&quot;); }
-}</code></pre>
-<div class="box retenir"><b>Le labo de jeux utilise tout ça</b><p>Ta classe <code>Main extends Jeu</code> hérite d'une classe abstraite <code>Jeu</code> qui fournit les méthodes de dessin, et tu <b>redéfinis</b> <code>update</code> et <code>draw</code>.</p></div>
 
-<h2>5. static et la mémoire</h2>
-<p>Un attribut <code>static</code> est partagé par tous les objets de la classe (un compteur d'instances, une constante). La mémoire des objets est libérée automatiquement par le <b>ramasse-miettes</b> (garbage collector) quand plus rien ne les référence.</p>
-<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-java.html">labo Java</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+public class Main {
+    public static void main(String[] args) {
+        Boite a = new Boite(1);
+        Boite b = a;                 // b désigne LE MÊME objet
+        b.valeur = 99;
+        System.out.println(a.valeur);          // 99
+        Boite c = null;              // ne désigne aucun objet
+        if (c == null) System.out.println("c est vide");
+        // c.valeur = 5;             // NullPointerException : l'erreur la plus fréquente en Java
+    }
+}</code></pre></div>
+<p>La mémoire des objets devenus inaccessibles est récupérée automatiquement par le <b>ramasse-miettes</b> (*garbage collector*) : pas de <code>delete</code> en Java.</p>
+<h2>7. Des objets qui contiennent des objets</h2>
+<div class="essai" data-langue="java"><pre><code>import java.util.ArrayList;
+
+class Eleve {
+    private final String nom;
+    private final double note;
+    Eleve(String nom, double note) { this.nom = nom; this.note = note; }
+    String getNom() { return nom; }
+    double getNote() { return note; }
+}
+
+class Classe {
+    private final ArrayList&lt;Eleve&gt; eleves = new ArrayList&lt;&gt;();
+    void ajouter(Eleve e) { eleves.add(e); }
+    double moyenne() {
+        double somme = 0;
+        for (Eleve e : eleves) somme += e.getNote();
+        return eleves.isEmpty() ? 0 : somme / eleves.size();
+    }
+    Eleve meilleur() {
+        Eleve m = eleves.get(0);
+        for (Eleve e : eleves) if (e.getNote() &gt; m.getNote()) m = e;
+        return m;
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Classe sio = new Classe();
+        sio.ajouter(new Eleve("Léa", 15));
+        sio.ajouter(new Eleve("Sam", 9));
+        sio.ajouter(new Eleve("Zoé", 18));
+        System.out.println(sio.moyenne() + " " + sio.meilleur().getNom());
+    }
+}</code></pre></div>
+<p>Une Classe <b>a des</b> élèves : c'est la <b>composition</b>, à ne pas confondre avec l'héritage (« est un »).</p>
+<section class="tuto"><h3><small>Tutoriel</small>Une classe Chronomètre de A à Z</h3>
+<div class="etape"><h4>Les attributs et le constructeur</h4>
+<div class="essai" data-langue="java"><pre><code>class Chrono {
+    private int secondes;
+    Chrono() { secondes = 0; }
+    int total() { return secondes; }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Chrono c = new Chrono();
+        System.out.println(c.total());
+    }
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Des méthodes qui protègent l'état</h4>
+<div class="essai" data-langue="java"><pre><code>class Chrono {
+    private int secondes;
+    void avancer(int s) { if (s &gt; 0) secondes += s; }
+    void remettreAZero() { secondes = 0; }
+    int total() { return secondes; }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Chrono c = new Chrono();
+        c.avancer(75);
+        c.avancer(-10);          // ignoré : la classe se protège
+        System.out.println(c.total());
+    }
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Un affichage avec toString</h4>
+<p>Ajoute une méthode <code>heures()</code>.</p>
+<div class="essai" data-langue="java"><pre><code>class Chrono {
+    private int secondes;
+    void avancer(int s) { if (s &gt; 0) secondes += s; }
+    int minutes() { return secondes / 60; }
+    @Override
+    public String toString() { return minutes() + " min " + secondes % 60 + " s"; }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Chrono c = new Chrono();
+        c.avancer(75);
+        c.avancer(3600);
+        System.out.println(c);
+    }
+}</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : le compte bancaire</b><p>Une classe complète avec des attributs privés.</p><a class="defi-go" href="labo-java.html#m=java-compte">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : toString et equals</b><p>Donne un affichage et une égalité à tes objets.</p><a class="defi-go" href="labo-java.html#m=java-tostring">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p><code>class Nom { attributs ; constructeur ; méthodes }</code> ; <code>new Nom(…)</code> crée un objet. </p><p> <code>this</code> désigne l'objet courant. </p><p> Attributs <code>private</code>, accès par des méthodes <code>public</code> : c'est l'encapsulation. </p><p> Redéfinir <code>toString()</code> pour l'affichage, <code>equals()</code> (et <code>hashCode()</code>) pour l'égalité. </p><p> <code>static</code> = appartient à la classe, partagé par tous les objets. </p><p> Une variable d'objet est une référence ; elle peut valoir <code>null</code>.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-java.html">Labo Java</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
 </article>
 
 <!-- ============ EXERCICES ============ -->
 <script>
 window.EF_EXERCICES = [
  {
-  "type": "qcm",
   "niveau": "facile",
-  "q": "Quel mot-clé crée un nouvel objet ?",
+  "q": "Quel mot-clé crée un objet ?",
+  "type": "qcm",
   "options": [
+   "`object`",
    "`create`",
    "`new`",
-   "`make`",
-   "`object`"
+   "`make`"
   ],
-  "answer": 1,
+  "answer": 2,
   "explication": ""
  },
  {
+  "niveau": "facile",
+  "q": "Comment appelle-t-on un exemplaire d'une classe ?",
   "type": "qcm",
+  "options": [
+   "Une méthode",
+   "Un attribut",
+   "Un objet (une instance)",
+   "Un paquetage"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
   "niveau": "moyen",
-  "q": "Dans un constructeur, que désigne this ?",
-  "options": [
-   "La classe parente",
-   "L'objet en cours de création",
-   "La méthode main",
-   "Une variable globale"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
+  "q": "Comment s'appelle la méthode exécutée lors du `new` ?",
   "type": "qcm",
-  "niveau": "moyen",
-  "q": "Quelle visibilité pour un attribut, en respectant l'encapsulation ?",
   "options": [
-   "public",
-   "private",
-   "static",
-   "final"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "qcm",
-  "niveau": "moyen",
-  "q": "Quel mot-clé indique qu'une classe hérite d'une autre ?",
-  "options": [
-   "`implements`",
-   "`extends`",
-   "`inherits`",
-   "`:`"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "qcm",
-  "niveau": "moyen",
-  "q": "Quel mot-clé indique qu'une classe respecte une interface ?",
-  "options": [
-   "`extends`",
-   "`implements`",
-   "`uses`",
-   "`with`"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "qcm",
-  "niveau": "difficile",
-  "q": "`Personnage p = new Mage(); p.attaquer();` appelle la version…",
-  "options": [
-   "de Personnage",
-   "de Mage (polymorphisme)",
-   "aucune : erreur",
-   "des deux"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "qcm",
-  "niveau": "moyen",
-  "q": "Une classe abstraite…",
-  "options": [
-   "ne peut pas être instanciée directement",
-   "ne peut pas avoir de méthodes",
-   "est toujours finale",
-   "n'a pas de constructeur"
+   "Le constructeur",
+   "Le destructeur",
+   "Le main",
+   "L'initialiseur statique"
   ],
   "answer": 0,
   "explication": ""
  },
  {
-  "type": "vf",
   "niveau": "moyen",
-  "q": "Une classe Java peut hériter de plusieurs classes à la fois.",
-  "answer": false,
-  "explication": "Un seul parent ; mais plusieurs interfaces."
- },
- {
-  "type": "vf",
-  "niveau": "moyen",
-  "q": "La mémoire des objets Java est libérée automatiquement par le ramasse-miettes.",
-  "answer": true,
+  "q": "Quel est le type de retour d'un constructeur ?",
+  "type": "qcm",
+  "options": [
+   "Il n'en a pas",
+   "`Object`",
+   "`void`",
+   "Le type de la classe"
+  ],
+  "answer": 0,
   "explication": ""
  },
  {
-  "type": "saisie",
   "niveau": "moyen",
-  "q": "Quelle annotation signale qu'une méthode redéfinit celle du parent ?",
+  "q": "Que désigne `this` ?",
+  "type": "qcm",
+  "options": [
+   "Le paramètre",
+   "L'objet sur lequel la méthode est appelée",
+   "La classe",
+   "L'objet précédent"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel modificateur rend un attribut inaccessible hors de la classe ?",
+  "type": "qcm",
+  "options": [
+   "`private`",
+   "`static`",
+   "`public`",
+   "`final`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce que l'encapsulation ?",
+  "type": "qcm",
+  "options": [
+   "Copier un objet",
+   "Hériter d'une classe",
+   "Mettre une classe dans une autre",
+   "Cacher les attributs et n'y accéder que par des méthodes"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle méthode faut-il redéfinir pour que `println(objet)` affiche un texte lisible ?",
+  "type": "qcm",
+  "options": [
+   "`display()`",
+   "`show()`",
+   "`toString()`",
+   "`print()`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Avec `Point a = new Point(1, 2), b = new Point(1, 2);` et equals non redéfinie, que vaut `a.equals(b)` ?",
+  "type": "qcm",
+  "options": [
+   "`null`",
+   "`true`",
+   "`false`",
+   "Une erreur"
+  ],
+  "answer": 2,
+  "explication": "Par défaut, equals compare les références."
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que signifie `static` devant un attribut ?",
+  "type": "qcm",
+  "options": [
+   "Il est privé",
+   "Il est partagé par tous les objets de la classe",
+   "Il est constant",
+   "Il est obligatoire"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi une méthode static ne peut-elle pas utiliser `this` ?",
+  "type": "qcm",
+  "options": [
+   "Elle n'est liée à aucun objet",
+   "Elle le peut",
+   "this est privé",
+   "C'est un oubli du langage"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Après `Boite a = new Boite(1); Boite b = a; b.valeur = 9;`, que vaut `a.valeur` ?",
+  "type": "qcm",
+  "options": [
+   "0",
+   "9",
+   "1",
+   "Une erreur"
+  ],
+  "answer": 1,
+  "explication": "a et b référencent le même objet."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que se passe-t-il si on appelle une méthode sur une variable qui vaut null ?",
+  "type": "qcm",
+  "options": [
+   "Une erreur de compilation",
+   "Une NullPointerException",
+   "Rien",
+   "La méthode renvoie null"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qui libère la mémoire des objets inutilisés en Java ?",
+  "type": "qcm",
+  "options": [
+   "Le ramasse-miettes (garbage collector)",
+   "Le programmeur avec delete",
+   "Personne",
+   "Le compilateur"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait `this(nom, 10);` dans un constructeur ?",
+  "type": "qcm",
+  "options": [
+   "Appelle la classe mère",
+   "Crée un second objet",
+   "Affecte deux attributs",
+   "Appelle un autre constructeur de la même classe"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que signifie `final` devant un attribut ?",
+  "type": "qcm",
+  "options": [
+   "Il est public",
+   "Il est facultatif",
+   "Il est partagé",
+   "Il reçoit sa valeur une fois (au plus tard dans le constructeur) et ne change plus"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Une classe peut avoir plusieurs constructeurs.",
+  "type": "vf",
+  "answer": true,
+  "explication": "C'est une surcharge."
+ },
+ {
+  "niveau": "moyen",
+  "q": "En Java, il faut libérer les objets avec delete.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Le ramasse-miettes s'en charge."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle annotation place-t-on au-dessus d'une méthode redéfinie comme toString ?",
+  "type": "saisie",
   "answers": [
    "@Override",
    "Override"
@@ -198,16 +491,27 @@ window.EF_EXERCICES = [
   "explication": ""
  },
  {
-  "type": "qcm",
   "niveau": "moyen",
-  "q": "De quelle classe héritent toutes les classes Java ?",
-  "options": [
-   "`Main`",
-   "`Object`",
-   "`Class`",
-   "`Base`"
+  "q": "Associe chaque notion à sa définition.",
+  "type": "associer",
+  "paires": [
+   [
+    "attribut",
+    "donnée d'un objet"
+   ],
+   [
+    "méthode",
+    "action d'un objet"
+   ],
+   [
+    "constructeur",
+    "initialise l'objet"
+   ],
+   [
+    "getter",
+    "méthode qui lit un attribut privé"
+   ]
   ],
-  "answer": 1,
   "explication": ""
  }
 ];
@@ -215,6 +519,8 @@ window.EF_EXERCICES = [
 <script src="../../data/modules.js"></script>
 <script src="../../assets/app.js"></script>
 <script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
 <script src="../../assets/chapter.js"></script>
 </body>
 </html>

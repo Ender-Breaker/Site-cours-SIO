@@ -71,10 +71,12 @@ def programme(mots, lignes, langue):
         if "imp" in opt:
             out += ["import %s;" % i for i in opt["imp"].split(",")] + [""]
         if "main" in opt:
+            if "cls" in opt and len(parts) == 2:  # cls : [classes @@ corps de main], sans membres statiques
+                parts = [parts[0], None, parts[1]]
             if len(parts) > 2:
                 out += parts[0] + [""]
             out += ["public class Main {"]
-            if len(parts) > 1:
+            if len(parts) > 1 and parts[-2] is not None:
                 out += decale(parts[-2], 4) + [""]
             out += ["    public static void main(String[] args) {"] + decale(parts[-1], 8) + ["    }", "}"]
         else:

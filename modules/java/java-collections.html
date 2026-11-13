@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Java : les collections et les génériques — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="java" data-chapter="java-collections">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/java.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>Les <b>collections</b> (paquetage <code>java.util</code>) sont les structures de données prêtes à l'emploi de Java. Trois suffisent pour presque tout : la <b>liste</b>, le <b>dictionnaire</b>, l'<b>ensemble</b>.</p>
+<h2>1. <code>ArrayList</code> : la liste qui grandit</h2>
+<div class="essai" data-langue="java"><pre><code>import java.util.ArrayList;
+import java.util.List;
+
+public class Main {
+    public static void main(String[] args) {
+        List&lt;String&gt; fruits = new ArrayList&lt;&gt;();        // &lt;String&gt; : le type des éléments
+        fruits.add("pomme");
+        fruits.add("kiwi");
+        fruits.add(0, "ananas");                        // insère à l'indice 0
+        System.out.println(fruits + " " + fruits.size());
+        System.out.println(fruits.get(1));              // lecture par indice
+        fruits.set(1, "poire");                         // remplacement
+        fruits.remove("kiwi");                          // suppression par valeur
+        fruits.remove(0);                               // suppression par indice
+        System.out.println(fruits + " " + fruits.contains("poire") + " " + fruits.indexOf("poire") + " " + fruits.isEmpty());
+
+        for (String f : fruits) System.out.println(f.toUpperCase());
+    }
+}</code></pre></div>
+<p><code>List</code> est l'<b>interface</b>, <code>ArrayList</code> la classe concrète. On déclare la variable avec l'interface : le reste du code ne dépend pas de l'implémentation choisie.</p>
+<h2>2. Les génériques et les types enveloppes</h2>
+<p>Le type entre chevrons est un <b>paramètre de type</b>. Il doit être une classe : pour les types primitifs, on utilise leur <b>enveloppe</b> (<code>Integer</code>, <code>Double</code>, <code>Boolean</code>, <code>Character</code>). La conversion est automatique (*autoboxing*).</p>
+<div class="essai" data-langue="java"><pre><code>import java.util.ArrayList;
+import java.util.List;
+import java.util.Collections;
+
+public class Main {
+    public static void main(String[] args) {
+        List&lt;Integer&gt; notes = new ArrayList&lt;&gt;(List.of(12, 5, 19, 8));     // List.of : liste non modifiable
+        notes.add(10);                               // int → Integer automatiquement
+        int somme = 0;
+        for (int n : notes) somme += n;              // Integer → int automatiquement
+        System.out.println(somme + " " + Collections.max(notes) + " " + Collections.min(notes));
+        Collections.sort(notes);
+        System.out.println(notes);
+        Collections.reverse(notes);
+        System.out.println(notes);
+        // List&lt;int&gt; x;        // refusé : pas de type primitif entre chevrons
+    }
+}</code></pre></div>
+<p>Grâce aux génériques, le compilateur refuse <code>notes.add("texte")</code> : les erreurs de type sont détectées avant l'exécution.</p>
+<h2>3. <code>HashMap</code> : le dictionnaire</h2>
+<div class="essai" data-langue="java"><pre><code>import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
+
+public class Main {
+    public static void main(String[] args) {
+        Map&lt;String, Integer&gt; stock = new HashMap&lt;&gt;();
+        stock.put("souris", 3);
+        stock.put("clavier", 2);
+        stock.put("souris", 8);                                   // même clé : la valeur est remplacée
+        System.out.println(stock.get("souris") + " " + stock.get("webcam"));       // 8 null
+        System.out.println(stock.getOrDefault("webcam", 0) + " " + stock.containsKey("clavier") + " " + stock.size());
+
+        stock.put("ecran", stock.getOrDefault("ecran", 0) + 1);   // compter
+        stock.merge("ecran", 1, Integer::sum);                    // la même chose, en plus court
+
+        for (Map.Entry&lt;String, Integer&gt; e : stock.entrySet()) {   // parcourir clés et valeurs
+            System.out.println(e.getKey() + " : " + e.getValue());
+        }
+        System.out.println(new TreeMap&lt;&gt;(stock));                 // TreeMap : clés triées
+        stock.remove("clavier");
+        System.out.println(stock.keySet() + " " + stock.values());
+    }
+}</code></pre></div>
+<div class="box attention"><b>L'ordre d'une <code>HashMap</code></b><p>Une <code>HashMap</code> ne garantit <b>aucun</b> ordre de parcours. Pour des clés triées, utilise <code>TreeMap</code> ; pour garder l'ordre d'insertion, <code>LinkedHashMap</code>.</p></div>
+<h2>4. <code>HashSet</code> : l'ensemble sans doublon</h2>
+<div class="essai" data-langue="java"><pre><code>import java.util.HashSet;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.List;
+
+public class Main {
+    public static void main(String[] args) {
+        Set&lt;String&gt; vus = new HashSet&lt;&gt;();
+        System.out.println(vus.add("lua") + " " + vus.add("java") + " " + vus.add("lua"));    // add renvoie false si déjà présent
+        System.out.println(vus.size() + " " + vus.contains("java"));
+        Set&lt;Integer&gt; uniques = new TreeSet&lt;&gt;(List.of(5, 2, 5, 8, 2));      // TreeSet : trié
+        System.out.println(uniques);
+    }
+}</code></pre></div>
+<table><tr><th>Besoin</th><th>Interface</th><th>Classe habituelle</th></tr><tr><td>suite ordonnée, accès par indice</td><td><code>List</code></td><td><code>ArrayList</code></td></tr><tr><td>clé → valeur</td><td><code>Map</code></td><td><code>HashMap</code> (ou <code>TreeMap</code> triée)</td></tr><tr><td>valeurs uniques</td><td><code>Set</code></td><td><code>HashSet</code> (ou <code>TreeSet</code> trié)</td></tr><tr><td>pile, file</td><td><code>Deque</code></td><td><code>ArrayDeque</code></td></tr></table>
+<h2>5. Trier des objets : <code>Comparator</code></h2>
+<div class="essai" data-langue="java"><pre><code>import java.util.ArrayList;
+import java.util.List;
+import java.util.Comparator;
+
+class Eleve {
+    final String nom;
+    final double note;
+    Eleve(String nom, double note) { this.nom = nom; this.note = note; }
+    @Override public String toString() { return nom + " " + note; }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        List&lt;Eleve&gt; classe = new ArrayList&lt;&gt;();
+        classe.add(new Eleve("Léa", 15));
+        classe.add(new Eleve("Sam", 9));
+        classe.add(new Eleve("Zoé", 18));
+
+        classe.sort(Comparator.comparing(e -&gt; e.nom));                   // par nom
+        System.out.println(classe);
+        classe.sort((a, b) -&gt; Double.compare(b.note, a.note));           // par note décroissante
+        System.out.println(classe);
+    }
+}</code></pre></div>
+<p>Un <code>Comparator</code> renvoie un nombre négatif, nul ou positif selon que le premier élément passe avant, est égal, ou passe après le second.</p>
+<h2>6. Supprimer pendant un parcours</h2>
+<p>Modifier une liste dans un <code>for-each</code> lève une <code>ConcurrentModificationException</code>. La bonne méthode : <code>removeIf</code>.</p>
+<div class="essai" data-langue="java"><pre><code>import java.util.ArrayList;
+import java.util.List;
+
+public class Main {
+    public static void main(String[] args) {
+        List&lt;Integer&gt; tirs = new ArrayList&lt;&gt;(List.of(50, -5, 120, -30));
+        tirs.removeIf(y -&gt; y &lt; 0);                  // supprime selon une condition
+        System.out.println(tirs);
+    }
+}</code></pre></div>
+<h2>7. Écrire sa propre classe générique</h2>
+<div class="essai" data-langue="java"><pre><code>import java.util.ArrayList;
+import java.util.List;
+
+class Pile&lt;T&gt; {                              // T : un type choisi à l'utilisation
+    private final List&lt;T&gt; elements = new ArrayList&lt;&gt;();
+    void empiler(T x) { elements.add(x); }
+    T depiler() { return elements.remove(elements.size() - 1); }
+    boolean estVide() { return elements.isEmpty(); }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Pile&lt;Integer&gt; p = new Pile&lt;&gt;();
+        p.empiler(1); p.empiler(2); p.empiler(3);
+        System.out.println(p.depiler() + " " + p.depiler());
+        Pile&lt;String&gt; mots = new Pile&lt;&gt;();
+        mots.empiler("monde"); mots.empiler("bonjour");
+        while (!mots.estVide()) System.out.print(mots.depiler() + " ");
+        System.out.println();
+    }
+}</code></pre></div>
+<section class="tuto"><h3><small>Tutoriel</small>Compter les mots d'un texte</h3>
+<div class="etape"><h4>Découper le texte</h4>
+<div class="essai" data-langue="java" data-stdin="le chat et le chien et le lapin"><pre><code>import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        List&lt;String&gt; mots = new ArrayList&lt;&gt;();
+        while (sc.hasNext()) mots.add(sc.next());
+        System.out.println(mots.size() + " mots");
+    }
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Compter avec une Map</h4>
+<p><code>TreeMap</code> affiche les mots dans l'ordre alphabétique.</p>
+<div class="essai" data-langue="java" data-stdin="le chat et le chien et le lapin"><pre><code>import java.util.Scanner;
+import java.util.Map;
+import java.util.TreeMap;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        Map&lt;String, Integer&gt; compte = new TreeMap&lt;&gt;();
+        while (sc.hasNext()) compte.merge(sc.next(), 1, Integer::sum);
+        for (Map.Entry&lt;String, Integer&gt; e : compte.entrySet()) {
+            System.out.println(e.getKey() + " : " + e.getValue());
+        }
+    }
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Classer par fréquence</h4>
+<p>On copie les entrées dans une liste, qu'on trie par valeur décroissante.</p>
+<div class="essai" data-langue="java" data-stdin="le chat et le chien et le lapin"><pre><code>import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        Map&lt;String, Integer&gt; compte = new TreeMap&lt;&gt;();
+        while (sc.hasNext()) compte.merge(sc.next(), 1, Integer::sum);
+        List&lt;Map.Entry&lt;String, Integer&gt;&gt; liste = new ArrayList&lt;&gt;(compte.entrySet());
+        liste.sort((a, b) -&gt; b.getValue() - a.getValue());
+        for (Map.Entry&lt;String, Integer&gt; e : liste) {
+            System.out.println(e.getValue() + " x " + e.getKey());
+        }
+    }
+}</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : inverser une liste</b><p>Une <code>ArrayList</code> parcourue à l'envers.</p><a class="defi-go" href="labo-java.html#m=java-inverser">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : l'inventaire</b><p>Une <code>Map</code> fait presque tout le travail.</p><a class="defi-go" href="labo-java.html#m=java-inventaire">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : supprimer les doublons</b><p>Un <code>Set</code> pour savoir ce qu'on a déjà vu.</p><a class="defi-go" href="labo-java.html#m=java-doublons">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p><code>List&lt;T&gt;</code> / <code>ArrayList</code> : <code>add</code>, <code>get(i)</code>, <code>set</code>, <code>remove</code>, <code>size()</code>, <code>contains</code>. </p><p> <code>Map&lt;K, V&gt;</code> / <code>HashMap</code> : <code>put</code>, <code>get</code>, <code>getOrDefault</code>, <code>containsKey</code>, <code>entrySet()</code>. </p><p> <code>Set&lt;T&gt;</code> / <code>HashSet</code> : pas de doublon. </p><p> Entre chevrons : des classes (<code>Integer</code>, pas <code>int</code>). </p><p> <code>Collections.sort(liste)</code> ou <code>liste.sort(comparateur)</code> ; <code>removeIf</code> pour supprimer selon une condition.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-java.html">Labo Java</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "facile",
+  "q": "Quelle méthode ajoute un élément à une ArrayList ?",
+  "type": "qcm",
+  "options": [
+   "`append`",
+   "`insert`",
+   "`push`",
+   "`add`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "facile",
+  "q": "Quelle méthode donne le nombre d'éléments d'une liste ?",
+  "type": "qcm",
+  "options": [
+   "`length`",
+   "`length()`",
+   "`size()`",
+   "`count()`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment lire l'élément d'indice 2 d'une liste ?",
+  "type": "qcm",
+  "options": [
+   "`liste[2]`",
+   "`liste.get(2)`",
+   "`liste(2)`",
+   "`liste.at(2)`"
+  ],
+  "answer": 1,
+  "explication": "Les crochets sont réservés aux tableaux."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Pourquoi écrit-on `List<Integer>` et non `List<int>` ?",
+  "type": "qcm",
+  "options": [
+   "C'est une convention de style",
+   "Le paramètre de type doit être une classe",
+   "int est trop petit",
+   "List<int> est plus lent"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle collection associe une valeur à une clé ?",
+  "type": "qcm",
+  "options": [
+   "`HashMap`",
+   "`ArrayList`",
+   "`ArrayDeque`",
+   "`HashSet`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que renvoie `map.get(\"x\")` si la clé \"x\" est absente ?",
+  "type": "qcm",
+  "options": [
+   "0",
+   "Une exception",
+   "Une chaîne vide",
+   "`null`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle méthode renvoie une valeur de remplacement si la clé est absente ?",
+  "type": "qcm",
+  "options": [
+   "`getOr`",
+   "`getOrDefault`",
+   "`find`",
+   "`getSafe`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait `map.put(\"a\", 5)` si la clé \"a\" existe déjà ?",
+  "type": "qcm",
+  "options": [
+   "Rien",
+   "Une erreur est levée",
+   "Une deuxième entrée est créée",
+   "La valeur est remplacée"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle collection refuse les doublons ?",
+  "type": "qcm",
+  "options": [
+   "`LinkedList`",
+   "`HashSet`",
+   "`ArrayList`",
+   "`ArrayDeque`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que renvoie `set.add(x)` si x est déjà présent ?",
+  "type": "qcm",
+  "options": [
+   "Une exception",
+   "`true`",
+   "`null`",
+   "`false`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Quelle Map garde ses clés triées ?",
+  "type": "qcm",
+  "options": [
+   "`HashMap`",
+   "`LinkedHashMap`",
+   "`TreeMap`",
+   "`SortedList`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que se passe-t-il si on retire un élément d'une liste pendant un for-each sur cette liste ?",
+  "type": "qcm",
+  "options": [
+   "Une ConcurrentModificationException",
+   "Rien",
+   "L'élément suivant est sauté sans erreur",
+   "La boucle recommence"
+  ],
+  "answer": 0,
+  "explication": "On utilise `removeIf`."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment parcourir à la fois les clés et les valeurs d'une Map ?",
+  "type": "qcm",
+  "options": [
+   "Avec `get()`",
+   "Avec `size()`",
+   "Avec `keys()`",
+   "Avec `entrySet()`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que crée `List.of(1, 2, 3)` ?",
+  "type": "qcm",
+  "options": [
+   "Une liste non modifiable",
+   "Un Set",
+   "Une ArrayList modifiable",
+   "Un tableau"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi déclarer `List<String> l = new ArrayList<>();` avec le type List ?",
+  "type": "qcm",
+  "options": [
+   "C'est obligatoire",
+   "Parce que ArrayList n'est pas un type",
+   "Pour ne pas dépendre de l'implémentation choisie",
+   "Pour aller plus vite"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que doit renvoyer un Comparator si le premier élément doit passer avant le second ?",
+  "type": "qcm",
+  "options": [
+   "0",
+   "Un nombre négatif",
+   "`true`",
+   "Un nombre positif"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Une ArrayList a une taille fixe.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Elle grandit et rétrécit selon les besoins."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Une HashMap garantit l'ordre de parcours de ses clés.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Aucun ordre n'est garanti."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle classe enveloppe correspond au type primitif int ?",
+  "type": "saisie",
+  "answers": [
+   "Integer"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque besoin à la collection adaptée.",
+  "type": "associer",
+  "paires": [
+   [
+    "suite ordonnée",
+    "`ArrayList`"
+   ],
+   [
+    "clé → valeur",
+    "`HashMap`"
+   ],
+   [
+    "valeurs uniques",
+    "`HashSet`"
+   ],
+   [
+    "clés triées",
+    "`TreeMap`"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

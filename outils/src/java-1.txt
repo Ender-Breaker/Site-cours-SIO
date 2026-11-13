@@ -1,0 +1,697 @@
+=== java-bases | Java : la classe Main, types et Scanner | f
+**Java** (1995) est l'un des langages les plus utilisés au monde : applications d'entreprise, serveurs web, applications **Android**, logiciels bancaires, Minecraft. Sa devise : *écrire une fois, exécuter partout*. Il est **typé**, **orienté objet** de bout en bout, et sa syntaxe ressemble beaucoup à celle du C# que l'on rencontre aussi en BTS SIO : apprendre l'un, c'est presque connaître l'autre.
+
+!info Comment suivre ce cours | Chaque bloc avec un bouton **Exécuter** est compilé par le vrai compilateur `javac` dans ton navigateur. Modifie le code, provoque des erreurs, lis les messages : c'est la meilleure façon d'apprendre.
+
+## 1. Le programme minimal
+
+```run
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Bonjour !");
+    }
+}
+```
+
+| Élément | Rôle |
+| `public class Main { … }` | tout le code Java vit dans une **classe** ; le fichier s'appelle `Main.java` |
+| `public static void main(String[] args)` | la méthode par laquelle le programme commence |
+| `System.out.println(…)` | affiche puis passe à la ligne (`print` : sans retour à la ligne) |
+| `;` | termine chaque instruction |
+| `{ }` | délimitent les blocs |
+
+## 2. Compiler et exécuter : la JVM
+
+```
+javac Main.java     # compile : produit Main.class (du bytecode)
+java Main           # la machine virtuelle Java (JVM) exécute le bytecode
+```
+
+Le compilateur ne produit pas un programme pour un processeur précis, mais du **bytecode** exécuté par la **JVM**. Le même fichier `.class` tourne sur Windows, Linux, macOS : il suffit d'avoir une JVM. Le **JDK** contient le compilateur et les outils ; le **JRE** seulement de quoi exécuter.
+
+```run err main
+System.out.println("Il manque quelque chose")
+```
+
+## 3. Variables et types primitifs
+
+Chaque variable a un **type** fixé à sa déclaration.
+
+```run main
+int age = 17;                 // entier
+double prix = 19.99;          // nombre à virgule
+char initiale = 'L';          // UN caractère, entre apostrophes
+boolean majeur = false;       // true ou false
+String prenom = "Léa";        // texte, entre guillemets (String est une classe : majuscule)
+long population = 8_000_000_000L;   // très grand entier (suffixe L)
+System.out.println(prenom + " a " + age + " ans");     // + colle les textes
+System.out.println(prix + " " + initiale + " " + majeur + " " + population);
+age = age + 1;
+System.out.println(age);
+```
+
+| Type | Contenu | Exemple |
+| `int` | entier (environ ±2 milliards) | `42` |
+| `long` | très grand entier | `9000000000L` |
+| `double` | nombre à virgule | `3.14` |
+| `boolean` | vrai ou faux | `true` |
+| `char` | un caractère | `'A'` |
+| `String` | texte (un objet, pas un type primitif) | `"Bonjour"` |
+
+### `final` et `var`
+
+```run main
+final double TVA = 0.2;       // constante : ne peut plus être modifiée
+var quantite = 3;             // var : le compilateur déduit int (Java 10+)
+var total = quantite * 9.99;  // … et ici double
+System.out.println(total * (1 + TVA));
+```
+
+## 4. Les opérateurs et leurs pièges
+
+```run main
+System.out.println(7 / 2);            // 3   : entier / entier = entier !
+System.out.println(7 / 2.0);          // 3.5 : dès qu'un des deux est double
+System.out.println(7 % 2);            // 1   : reste de la division
+int a = 7, b = 2;
+System.out.println((double) a / b);   // 3.5 : conversion explicite (cast)
+System.out.println((int) 3.99);       // 3   : le cast vers int TRONQUE
+int i = 5;
+i++;            // i = i + 1
+i += 10;        // i = i + 10
+System.out.println(i);
+System.out.println("Total : " + 2 + 3);      // Total : 23  (concaténation de gauche à droite)
+System.out.println("Total : " + (2 + 3));    // Total : 5
+System.out.println(Math.pow(2, 10) + " " + Math.sqrt(49) + " " + Math.round(2.5) + " " + Math.max(3, 8));
+```
+
+!attention Division entière et concaténation | `7 / 2` vaut `3`. Et dès qu'un `String` apparaît dans une addition, tout ce qui suit est **collé** comme du texte : mets les calculs entre parenthèses.
+
+## 5. Lire au clavier : `Scanner`
+
+```run stdin=Léa|17 imp=java.util.Scanner main
+Scanner sc = new Scanner(System.in);
+String prenom = sc.nextLine();        // une ligne de texte
+int age = sc.nextInt();               // un entier
+System.out.println("Bonjour " + prenom + ", dans 10 ans tu auras " + (age + 10) + " ans.");
+```
+
+| Méthode | Lit |
+| `nextInt()` | un entier |
+| `nextDouble()` | un nombre à virgule |
+| `next()` | un mot (jusqu'au prochain espace) |
+| `nextLine()` | toute la ligne |
+| `hasNext()` | vrai s'il reste quelque chose à lire |
+
+!attention Le piège de `nextInt` suivi de `nextLine` | `nextInt()` laisse le retour à la ligne dans le tampon : le `nextLine()` suivant renvoie alors une chaîne **vide**. Ajoute un `sc.nextLine();` « pour rien » après le `nextInt()`.
+
+## 6. Mettre en forme : `printf` et `String.format`
+
+```run main
+double prix = 12.5;
+System.out.printf("%.2f €%n", prix);                  // 12.50 €   (%n = retour à la ligne)
+System.out.printf("%s a %d ans%n", "Léa", 17);        // %s texte, %d entier
+System.out.printf("|%5d|%-5d|%05d|%n", 42, 42, 42);   // largeur, gauche, zéros
+String texte = String.format("%.1f %%", 45.678);      // même chose, mais renvoie un String
+System.out.println(texte);
+```
+
+!tuto Ton premier vrai programme : le ticket de caisse
+# Lire le prix et la quantité
+```run stdin=4.5|3 imp=java.util.Scanner main
+Scanner sc = new Scanner(System.in);
+double prix = sc.nextDouble();
+int quantite = sc.nextInt();
+System.out.println(prix + " x " + quantite);
+```
+# Calculer
+```run stdin=4.5|3 imp=java.util.Scanner main
+Scanner sc = new Scanner(System.in);
+double prix = sc.nextDouble();
+int quantite = sc.nextInt();
+double total = prix * quantite;
+System.out.println("Total : " + total);
+```
+# Ajouter la TVA et mettre en forme
+Essaie de modifier `TVA` après sa déclaration : le compilateur refuse.
+```run stdin=4.5|3 imp=java.util.Scanner main
+final double TVA = 0.2;
+Scanner sc = new Scanner(System.in);
+double prix = sc.nextDouble();
+int quantite = sc.nextInt();
+double ht = prix * quantite;
+System.out.printf("HT : %.2f €%n", ht);
+System.out.printf("TVA : %.2f €%n", ht * TVA);
+System.out.printf("TTC : %.2f €%n", ht * (1 + TVA));
+```
+!fin
+
+!defi Défi : heures, minutes, secondes | Division entière et modulo. | java-conv
+!defi Défi : la moyenne | Attention à la division entière, et affiche deux décimales. | java-moyenne
+
+!retenir À retenir | Tout le code est dans une classe ; le programme démarre dans `public static void main(String[] args)`. ¶ `System.out.println(…)` affiche ; `Scanner` lit (`nextInt`, `nextDouble`, `nextLine`). ¶ Types primitifs : `int`, `long`, `double`, `boolean`, `char` ; `String` est une classe. ¶ `int / int` donne un entier ; `(double) a / b` pour un résultat décimal. ¶ `final` = constante, `var` = type déduit.
+--- exos
+Q¤f¤Dans quelle méthode démarre un programme Java ?¤`main`;;`start`;;`run`;;`init`¤
+Q¤f¤Quelle instruction affiche un texte suivi d'un retour à la ligne ?¤`System.out.println(…)`;;`print(…)`;;`console.log(…)`;;`echo …`¤
+Q¤m¤Que vaut `7 / 2` en Java ?¤3;;3.5;;4;;1¤Entier divisé par entier donne un entier.
+Q¤m¤Que vaut `(double) 7 / 2` ?¤3.5;;3;;3.0;;Une erreur¤Le cast s'applique à 7 avant la division.
+Q¤m¤Que vaut `(int) 3.99` ?¤3;;4;;3.99;;Une erreur¤Le cast vers int tronque.
+Q¤m¤Qu'affiche `System.out.println("Total : " + 2 + 3);` ?¤Total : 23;;Total : 5;;Total : 2 + 3;;Une erreur¤La concaténation se fait de gauche à droite.
+Q¤m¤Quel type choisir pour vrai / faux ?¤`boolean`;;`bool`;;`bit`;;`int`¤
+Q¤m¤Quel mot-clé rend une variable non modifiable ?¤`final`;;`const`;;`static`;;`fixed`¤
+Q¤m¤Quelle classe sert à lire au clavier ?¤`Scanner`;;`Reader`;;`Input`;;`Keyboard`¤
+Q¤m¤Quelle méthode de Scanner lit une ligne entière ?¤`nextLine()`;;`next()`;;`readLine()`;;`nextString()`¤
+Q¤m¤Qu'est-ce que le bytecode ?¤Le code intermédiaire produit par javac et exécuté par la JVM;;Le code source;;Le code machine du processeur;;Un format d'image¤
+Q¤m¤Quel programme exécute le bytecode ?¤La JVM;;javac;;Le navigateur;;Le système d'exploitation directement¤
+Q¤m¤Quelle commande compile `Main.java` ?¤`javac Main.java`;;`java Main.java -c`;;`compile Main`;;`jvm Main.java`¤
+Q¤d¤Pourquoi `sc.nextLine()` renvoie-t-il parfois une chaîne vide juste après `sc.nextInt()` ?¤nextInt laisse le retour à la ligne dans le tampon;;Le Scanner est fermé;;nextLine ne lit que des nombres;;C'est un bug de Java¤
+Q¤d¤Quel format affiche un nombre avec deux décimales dans printf ?¤`%.2f`;;`%2d`;;`%d.2`;;`%s2`¤
+V¤m¤String est un type primitif en Java.¤F¤C'est une classe (d'où la majuscule).
+V¤m¤Avec `var x = 3;`, la variable x peut ensuite recevoir un texte.¤F¤var déduit le type une fois pour toutes : x est un int.
+V¤f¤Un caractère seul s'écrit entre apostrophes : 'A'.¤V¤
+S¤m¤Quel suffixe ajoute-t-on à un littéral pour en faire un long (ex. 9000000000_) ?¤L¤
+A¤m¤Associe chaque type à une valeur possible.¤`int`=>42;;`double`=>3.14;;`char`=>'A';;`boolean`=>true;;`String`=>"Bonjour"¤
+
+=== java-conditions-boucles | Java : conditions et boucles | f
+## 1. `if`, `else if`, `else`
+
+```run stdin=15 imp=java.util.Scanner main
+Scanner sc = new Scanner(System.in);
+double note = sc.nextDouble();
+if (note >= 16) {
+    System.out.println("Très bien");
+} else if (note >= 10) {
+    System.out.println("Admis");
+} else {
+    System.out.println("Recalé");
+}
+```
+
+La condition est entre parenthèses et doit être un **boolean** : contrairement au C ou au JavaScript, `if (x)` avec un entier ne compile pas.
+
+## 2. Comparer et combiner
+
+| Opérateur | Sens |
+| `==` `!=` | égal, différent (pour les types primitifs) |
+| `<` `<=` `>` `>=` | comparaisons |
+| `&&` | et |
+| `||` | ou |
+| `!` | non |
+
+```run main
+int age = 17;
+boolean carte = true;
+System.out.println(age >= 18 && carte);     // false
+System.out.println(age >= 18 || carte);     // true
+System.out.println(!carte);                 // false
+String a = "java", b = "ja" + String.valueOf("va");
+System.out.println(a.equals(b));            // true : compare le CONTENU
+```
+
+!attention Comparer des String : `equals`, jamais `==` | `==` entre deux objets teste s'il s'agit du **même objet en mémoire**, pas s'ils ont le même contenu. Pour du texte, écris toujours `a.equals(b)`. C'est le bug numéro 1 des débutants en Java.
+
+## 3. Le ternaire et `switch`
+
+```run stdin=3 imp=java.util.Scanner main
+Scanner sc = new Scanner(System.in);
+int jour = sc.nextInt();
+String type = (jour >= 6) ? "week-end" : "semaine";     // condition ? si vrai : si faux
+System.out.println(type);
+
+switch (jour) {                       // forme classique : un break par cas
+    case 1: System.out.println("lundi"); break;
+    case 2: System.out.println("mardi"); break;
+    case 6:
+    case 7: System.out.println("repos"); break;
+    default: System.out.println("autre jour");
+}
+
+String nom = switch (jour) {          // forme moderne (Java 14+) : pas de break, renvoie une valeur
+    case 1 -> "lundi";
+    case 2 -> "mardi";
+    case 3 -> "mercredi";
+    case 6, 7 -> "repos";
+    default -> "autre jour";
+};
+System.out.println(nom);
+```
+
+`switch` fonctionne avec les entiers, les `char`, les `String` et les `enum`.
+
+## 4. `while` et `do … while`
+
+```run main
+int n = 1;
+while (n < 100) {        // teste AVANT chaque tour
+    n *= 2;
+}
+System.out.println(n);
+
+int essais = 0;
+do {                     // teste APRÈS : au moins un tour
+    essais++;
+} while (essais * essais <= 50);
+System.out.println(essais);
+```
+
+## 5. `for` et `for-each`
+
+```run main
+for (int i = 1; i <= 5; i++) {
+    System.out.print(i + " ");
+}
+System.out.println();
+for (int i = 10; i > 0; i -= 3) System.out.print(i + " ");
+System.out.println();
+
+int[] notes = {12, 15, 9};
+for (int note : notes) {             // for-each : « pour chaque note dans notes »
+    System.out.print(note + " ");
+}
+System.out.println();
+for (char c : "Java".toCharArray()) System.out.print(c + "-");
+System.out.println();
+```
+
+## 6. `break` et `continue`
+
+```run main
+for (int i = 1; i <= 10; i++) {
+    if (i % 2 == 0) continue;    // passe au tour suivant
+    if (i > 7) break;            // sort de la boucle
+    System.out.print(i + " ");
+}
+System.out.println();
+```
+
+!tuto Le jeu du « plus ou moins »
+# Une seule comparaison
+```run stdin=50 imp=java.util.Scanner main
+final int SECRET = 42;
+Scanner sc = new Scanner(System.in);
+int essai = sc.nextInt();
+if (essai < SECRET) System.out.println("Trop petit");
+else if (essai > SECRET) System.out.println("Trop grand");
+else System.out.println("Gagné !");
+```
+# Répéter jusqu'à trouver
+```run stdin=50|30|42 imp=java.util.Scanner main
+final int SECRET = 42;
+Scanner sc = new Scanner(System.in);
+int essai;
+do {
+    essai = sc.nextInt();
+    if (essai < SECRET) System.out.println("Trop petit");
+    else if (essai > SECRET) System.out.println("Trop grand");
+} while (essai != SECRET);
+System.out.println("Gagné !");
+```
+# Compter les essais
+```run stdin=50|30|42 imp=java.util.Scanner main
+final int SECRET = 42;
+Scanner sc = new Scanner(System.in);
+int essai, essais = 0;
+do {
+    essai = sc.nextInt();
+    essais++;
+    if (essai < SECRET) System.out.println("Trop petit");
+    else if (essai > SECRET) System.out.println("Trop grand");
+} while (essai != SECRET);
+System.out.println("Gagné ! Essais : " + essais);
+```
+!fin
+
+!defi Défi : la mention | Une cascade de `else if`. | java-mention
+!defi Défi : FizzBuzz | Le grand classique des entretiens d'embauche. | java-fizzbuzz
+!defi Défi : le PGCD | L'algorithme d'Euclide avec un `while`. | java-pgcd
+
+!retenir À retenir | `if (condition) { … } else if (…) { … } else { … }` ; la condition est un boolean. ¶ `&&` et, `||` ou, `!` non. ¶ Les `String` se comparent avec `equals`. ¶ `while` teste avant, `do … while` après ; `for (int i = 0; i < n; i++)` ; `for (Type x : collection)`. ¶ `switch` moderne : `case 1 -> …` sans `break`.
+--- exos
+Q¤f¤Comment s'écrit « et » logique en Java ?¤`&&`;;`and`;;`&and`;;`+`¤
+Q¤f¤Comment s'écrit « différent » ?¤`!=`;;`<>`;;`~=`;;`not =`¤
+Q¤m¤Comment comparer le contenu de deux String a et b ?¤`a.equals(b)`;;`a == b`;;`a = b`;;`a.same(b)`¤
+Q¤d¤Que teste `a == b` entre deux objets String ?¤S'il s'agit du même objet en mémoire;;S'ils ont le même contenu;;S'ils ont la même longueur;;Rien, c'est une erreur¤
+Q¤m¤Combien de tours fait `for (int i = 0; i < 5; i++)` ?¤5;;4;;6;;Une infinité¤
+Q¤m¤Quelle boucle exécute son bloc au moins une fois ?¤`do … while`;;`while`;;`for`;;`for-each`¤
+Q¤m¤Que signifie `for (int note : notes)` ?¤Pour chaque élément note du tableau notes;;Tant que note est dans notes;;Si note appartient à notes;;Pour note de 0 à notes¤
+Q¤m¤Que fait `continue` ?¤Passe directement au tour suivant;;Sort de la boucle;;Arrête le programme;;Recommence au début¤
+Q¤d¤`if (x)` avec `int x = 1;` en Java…¤ne compile pas : il faut un boolean;;est vrai;;est faux;;lève une exception¤
+Q¤m¤Que vaut `(age >= 18) ? "majeur" : "mineur"` si age vaut 15 ?¤`"mineur"`;;`"majeur"`;;`false`;;15¤
+Q¤d¤Dans un switch classique, que se passe-t-il sans `break` ?¤L'exécution continue dans le cas suivant;;Une erreur de compilation;;Le switch s'arrête;;Rien¤
+Q¤d¤Quel avantage a la forme `case 1 -> …` du switch ?¤Pas de break à écrire, et le switch peut renvoyer une valeur;;Elle est plus rapide;;Elle accepte les double;;Aucun¤
+Q¤m¤Sur quels types `switch` peut-il porter ?¤Entiers, char, String et enum;;Tous les types;;Uniquement les int;;Uniquement les String¤
+Q¤m¤Qu'affiche `for (int i = 10; i > 0; i -= 3) System.out.print(i + " ");` ?¤10 7 4 1;;10 7 4;;10 9 8;;Rien¤
+V¤f¤La condition d'un if s'écrit entre parenthèses.¤V¤
+V¤m¤Une boucle while dont la condition est fausse dès le départ s'exécute une fois.¤F¤Elle ne s'exécute pas.
+V¤m¤La variable i de `for (int i = 0; …)` existe encore après la boucle.¤F¤Elle est locale à la boucle.
+S¤m¤Quel mot-clé désigne le cas par défaut d'un switch ?¤default¤
+A¤m¤Associe chaque boucle à son usage.¤`for`=>nombre de tours connu;;`while`=>tester avant chaque tour;;`do … while`=>au moins un tour;;`for-each`=>parcourir une collection¤
+
+=== java-methodes-tableaux | Java : méthodes et tableaux | m
+## 1. Écrire une méthode
+
+En Java, une fonction s'appelle une **méthode** et appartient toujours à une classe. Pour l'instant, nos méthodes sont `static` : on les appelle directement, sans créer d'objet.
+
+```run main
+static double aire(double largeur, double hauteur) {
+    return largeur * hauteur;
+}
+
+static void saluer(String nom) {            // void : ne renvoie rien
+    System.out.println("Bonjour " + nom + " !");
+}
+
+static boolean estPair(int n) {
+    return n % 2 == 0;
+}
+@@
+System.out.println(aire(3, 4.5));
+saluer("Léa");
+System.out.println(estPair(7) + " " + estPair(8));
+```
+
+La signature annonce le **type de retour**, le nom, puis le type de chaque paramètre. L'ordre des méthodes dans la classe n'a pas d'importance.
+
+## 2. Surcharge
+
+Plusieurs méthodes peuvent porter le même nom si leurs **paramètres** diffèrent.
+
+```run main
+static int maxi(int a, int b) { return a > b ? a : b; }
+static double maxi(double a, double b) { return a > b ? a : b; }
+static int maxi(int a, int b, int c) { return maxi(maxi(a, b), c); }
+@@
+System.out.println(maxi(3, 8) + " " + maxi(2.5, 1.5) + " " + maxi(4, 9, 2));
+```
+
+## 3. Passage des arguments
+
+Java passe **toujours par valeur**. Pour un type primitif, la méthode reçoit une copie du nombre. Pour un objet ou un tableau, elle reçoit une copie de la **référence** : elle peut donc modifier le contenu de l'objet, mais pas remplacer l'objet de l'appelant.
+
+```run main
+static void doubler(int n) { n = n * 2; }              // modifie une copie : sans effet
+static void doublerTout(int[] t) {                     // modifie le tableau d'origine
+    for (int i = 0; i < t.length; i++) t[i] *= 2;
+}
+@@
+int x = 5;
+doubler(x);
+System.out.println(x);                 // 5
+int[] notes = {1, 2, 3};
+doublerTout(notes);
+System.out.println(notes[0] + " " + notes[1] + " " + notes[2]);    // 2 4 6
+```
+
+## 4. Récursivité
+
+```run main
+static long factorielle(int n) {
+    if (n <= 1) return 1;                  // cas d'arrêt
+    return n * factorielle(n - 1);         // appel récursif
+}
+@@
+System.out.println(factorielle(5) + " " + factorielle(20));
+```
+
+## 5. Les tableaux
+
+Un tableau contient un nombre **fixe** d'éléments du même type. Les indices vont de `0` à `length - 1`.
+
+```run imp=java.util.Arrays main
+int[] notes = {12, 15, 9};              // tableau initialisé
+double[] prix = new double[4];          // 4 cases, toutes à 0.0
+String[] noms = new String[2];          // 2 cases, toutes à null
+notes[1] = 16;
+prix[0] = 9.99;
+System.out.println(notes[0] + " " + notes.length);     // length SANS parenthèses
+System.out.println(Arrays.toString(notes));            // affichage lisible
+System.out.println(Arrays.toString(prix) + " " + noms[0]);
+
+int somme = 0;
+for (int n : notes) somme += n;                        // parcours for-each
+System.out.println("Moyenne : " + (double) somme / notes.length);
+for (int i = notes.length - 1; i >= 0; i--) System.out.print(notes[i] + " ");   // à l'envers
+System.out.println();
+```
+
+!attention Sortir des bornes | `notes[3]` sur un tableau de 3 éléments lève l'exception `ArrayIndexOutOfBoundsException` et arrête le programme. Le dernier indice valide est toujours `length - 1`.
+
+### La boîte à outils `Arrays`
+
+```run imp=java.util.Arrays main
+int[] t = {5, 2, 8, 1};
+Arrays.sort(t);                                      // trie sur place
+System.out.println(Arrays.toString(t));
+int[] copie = Arrays.copyOf(t, t.length);            // vraie copie
+copie[0] = 99;
+System.out.println(t[0] + " " + copie[0]);
+int[] meme = t;                                      // PAS une copie : même tableau
+meme[0] = -1;
+System.out.println(t[0]);
+System.out.println(Arrays.equals(t, copie));
+Arrays.fill(copie, 7);
+System.out.println(Arrays.toString(copie));
+```
+
+## 6. Tableaux à deux dimensions
+
+```run imp=java.util.Arrays main
+int[][] grille = new int[3][4];            // 3 lignes, 4 colonnes, remplies de 0
+grille[1][2] = 7;
+for (int[] ligne : grille) {
+    System.out.println(Arrays.toString(ligne));
+}
+int[][] triangle = {{1}, {1, 1}, {1, 2, 1}};       // lignes de longueurs différentes
+System.out.println(triangle[2][1] + " " + triangle.length + " " + triangle[2].length);
+```
+
+!info Et quand la taille n'est pas connue ? | Un tableau ne peut pas grandir. Pour une liste dont la taille change, on utilise `ArrayList` : voir le chapitre sur les collections.
+
+!tuto Une boîte à outils de statistiques
+# Une méthode par calcul
+```run main
+static double moyenne(double[] t) {
+    double somme = 0;
+    for (double v : t) somme += v;
+    return somme / t.length;
+}
+@@
+System.out.println(moyenne(new double[]{12, 5, 19, 8}));
+```
+# Renvoyer deux résultats dans un tableau
+Une méthode ne renvoie qu'une valeur ; cette valeur peut être un tableau.
+```run imp=java.util.Arrays main
+static double[] minMax(double[] t) {
+    double mini = t[0], maxi = t[0];
+    for (double v : t) {
+        if (v < mini) mini = v;
+        if (v > maxi) maxi = v;
+    }
+    return new double[]{mini, maxi};
+}
+@@
+double[] r = minMax(new double[]{12, 5, 19, 8});
+System.out.println(r[0] + " " + r[1]);
+```
+# Composer les méthodes
+```run main
+static double moyenne(double[] t) {
+    double s = 0;
+    for (double v : t) s += v;
+    return s / t.length;
+}
+static int auDessus(double[] t, double seuil) {
+    int n = 0;
+    for (double v : t) if (v > seuil) n++;
+    return n;
+}
+@@
+double[] notes = {12, 5, 19, 8, 10};
+System.out.println(auDessus(notes, moyenne(notes)) + " notes au-dessus de la moyenne");
+```
+!fin
+
+!defi Défi : minimum et maximum | Une méthode qui calcule deux résultats. | java-minmax
+!defi Défi : la factorielle | Une méthode récursive. | java-factorielle
+!defi Défi : trier | `Arrays.sort`. | java-tri
+
+!retenir À retenir | `static typeRetour nom(type param) { … return valeur; }` ; `void` si rien n'est renvoyé. ¶ Surcharge : même nom, paramètres différents. ¶ Les primitifs sont copiés ; pour un tableau ou un objet, la méthode reçoit la référence et peut en modifier le contenu. ¶ Tableau : taille fixe, `t.length`, indices de 0 à `length - 1`. ¶ `Arrays.sort`, `Arrays.toString`, `Arrays.copyOf`.
+--- exos
+Q¤f¤Quel type de retour indique qu'une méthode ne renvoie rien ?¤`void`;;`null`;;`none`;;`empty`¤
+Q¤f¤Quel est l'indice du premier élément d'un tableau ?¤0;;1;;-1;;Au choix¤
+Q¤m¤Comment obtenir le nombre d'éléments du tableau t ?¤`t.length`;;`t.length()`;;`t.size()`;;`len(t)`¤Pour un tableau : sans parenthèses.
+Q¤m¤Que contient `new int[3]` juste après sa création ?¤Trois 0;;Trois valeurs indéterminées;;Trois null;;Rien¤
+Q¤m¤Que contient `new String[2]` juste après sa création ?¤Deux null;;Deux chaînes vides;;Deux espaces;;Une erreur¤
+Q¤d¤Que se passe-t-il avec `t[3]` si t a 3 éléments ?¤Une exception ArrayIndexOutOfBoundsException;;Renvoie 0;;Renvoie null;;Le tableau s'agrandit¤
+Q¤m¤Avec `static void f(int n) { n = 0; }`, que vaut x après `int x = 5; f(x);` ?¤5;;0;;Indéterminé;;Erreur¤Un primitif est copié.
+Q¤d¤Avec `static void f(int[] t) { t[0] = 0; }`, que vaut `a[0]` après `int[] a = {5}; f(a);` ?¤0;;5;;Indéterminé;;Erreur¤La méthode reçoit la référence vers le même tableau.
+Q¤d¤Après `int[] b = a; b[0] = 9;`, que vaut `a[0]` ?¤9;;Sa valeur d'avant;;0;;Erreur¤b et a désignent le même tableau.
+Q¤m¤Quelle méthode trie un tableau ?¤`Arrays.sort(t)`;;`t.sort()`;;`sort(t)`;;`Array.order(t)`¤
+Q¤m¤Quelle méthode donne un affichage lisible d'un tableau ?¤`Arrays.toString(t)`;;`t.toString()`;;`print(t)`;;`String(t)`¤
+Q¤m¤Qu'est-ce que la surcharge ?¤Plusieurs méthodes de même nom avec des paramètres différents;;Une méthode trop longue;;Une méthode récursive;;Une méthode privée¤
+Q¤m¤Comment déclarer une grille de 3 lignes et 4 colonnes d'entiers ?¤`int[][] g = new int[3][4];`;;`int[3][4] g;`;;`int g[3,4];`;;`grid<int> g(3, 4);`¤
+Q¤m¤Que manque-t-il à une méthode récursive qui ne s'arrête jamais ?¤Un cas d'arrêt;;Un `break`;;Un `static`;;Un tableau¤
+V¤m¤La taille d'un tableau Java peut changer après sa création.¤F¤Elle est fixe ; pour une taille variable, on utilise ArrayList.
+V¤m¤L'ordre dans lequel les méthodes sont écrites dans une classe n'a pas d'importance.¤V¤
+V¤d¤Deux méthodes surchargées peuvent ne différer que par leur type de retour.¤F¤Elles doivent différer par leurs paramètres.
+S¤m¤Quel mot-clé renvoie une valeur depuis une méthode ?¤return¤
+A¤m¤Associe chaque méthode de Arrays à son rôle.¤`sort`=>trier;;`toString`=>afficher;;`copyOf`=>copier;;`fill`=>remplir;;`equals`=>comparer le contenu¤
+
+=== java-chaines | Java : les chaînes de caractères | m
+## 1. `String` : un objet non modifiable
+
+Un `String` est **immuable** : aucune méthode ne le modifie, toutes renvoient un **nouveau** `String`.
+
+```run main
+String s = "Bonjour Java";
+System.out.println(s.length());                 // 12 (avec des parenthèses, contrairement aux tableaux)
+System.out.println(s.charAt(0) + " " + s.charAt(s.length() - 1));
+System.out.println(s.toUpperCase() + " " + s.toLowerCase());
+System.out.println(s.substring(0, 7));          // de l'indice 0 inclus à 7 exclu : Bonjour
+System.out.println(s.substring(8));             // de 8 à la fin : Java
+System.out.println(s.indexOf("Java") + " " + s.indexOf("Python"));   // 8  -1
+System.out.println(s.contains("jour") + " " + s.startsWith("Bon") + " " + s.endsWith("va"));
+System.out.println(s.replace("Java", "le monde"));
+System.out.println(s);                          // inchangé !
+s = s.toUpperCase();                            // il faut réaffecter
+System.out.println(s);
+```
+
+## 2. Comparer
+
+```run main
+String a = "java";
+String b = new String("java");
+System.out.println(a == b);                     // false : deux objets différents
+System.out.println(a.equals(b));                // true  : même contenu
+System.out.println("Java".equalsIgnoreCase("JAVA"));
+System.out.println("abc".compareTo("abd"));     // négatif : "abc" est avant "abd"
+System.out.println("".isEmpty() + " " + "   ".isBlank());
+```
+
+!attention `equals`, toujours | `==` compare les références. Il « marche » parfois par hasard (Java réutilise certains littéraux), ce qui rend le bug sournois. Pour éviter une erreur quand la variable peut être `null`, place la constante à gauche : `"oui".equals(reponse)`.
+
+## 3. Découper, assembler, nettoyer
+
+```run imp=java.util.Arrays main
+String csv = "Léa;17;SIO";
+String[] champs = csv.split(";");
+System.out.println(champs.length + " " + champs[0] + " " + Arrays.toString(champs));
+System.out.println(String.join(" | ", champs));
+System.out.println("  texte  ".trim() + "|" + "  texte  ".strip() + "|");
+System.out.println("ab".repeat(3));
+String[] mots = "un  deux   trois".trim().split("\\s+");     // \\s+ : un ou plusieurs espaces
+System.out.println(mots.length);
+```
+
+## 4. Convertir
+
+```run main
+int n = Integer.parseInt("42") + 1;             // String → int
+double d = Double.parseDouble("3.5") * 2;       // String → double
+String s = String.valueOf(n);                   // nombre → String
+String t = "" + d;                              // raccourci courant
+System.out.println(n + " " + d + " " + s.length() + " " + t);
+System.out.println(Integer.toBinaryString(10) + " " + Integer.toHexString(255) + " " + Integer.parseInt("1010", 2));
+```
+
+`Integer.parseInt("abc")` lève une `NumberFormatException` : on apprendra à l'attraper dans le chapitre sur les exceptions.
+
+## 5. Les caractères
+
+Un `char` est un petit entier : le code du caractère. On peut calculer avec.
+
+```run main
+char c = 'a';
+System.out.println((int) c + " " + (char) (c + 1) + " " + (char) 65);
+System.out.println(Character.isDigit('7') + " " + Character.isLetter('7') + " " + Character.toUpperCase('b'));
+String mot = "Bonjour";
+int voyelles = 0;
+for (char x : mot.toCharArray()) {
+    if ("aeiouy".indexOf(x) >= 0) voyelles++;
+}
+System.out.println(voyelles);
+```
+
+## 6. `StringBuilder` : construire un texte efficacement
+
+Comme un `String` n'est pas modifiable, `s = s + morceau` dans une boucle recrée tout le texte à chaque tour. `StringBuilder` est une chaîne **modifiable**, faite pour cela.
+
+```run main
+StringBuilder sb = new StringBuilder();
+for (int i = 1; i <= 5; i++) {
+    sb.append(i).append(" ");           // append renvoie le StringBuilder : on enchaîne
+}
+System.out.println(sb.toString().trim());
+sb.insert(0, "Nombres : ");
+sb.setLength(sb.length() - 1);          // retire le dernier caractère
+System.out.println(sb);
+System.out.println(new StringBuilder("Java").reverse());
+```
+
+## 7. Blocs de texte
+
+```run main
+String html = """
+    <ul>
+      <li>Java</li>
+    </ul>""";
+System.out.println(html);
+System.out.println("Ligne 1\nLigne 2\tavec tabulation et \"guillemets\"");
+```
+
+!tuto Analyser une ligne de journal (log)
+# Découper les champs
+```run main
+String ligne = "2026-11-13 14:02:55 ERREUR disque plein sur /dev/sda1";
+String[] p = ligne.split(" ", 4);        // au plus 4 morceaux : le message reste entier
+System.out.println(p[0]);
+System.out.println(p[1]);
+System.out.println(p[2]);
+System.out.println(p[3]);
+```
+# Tester le niveau et compter les mots
+```run main
+String ligne = "2026-11-13 14:02:55 ERREUR disque plein sur /dev/sda1";
+String[] p = ligne.split(" ", 4);
+if (p[2].equals("ERREUR")) {
+    System.out.println("Alerte : " + p[3].toUpperCase());
+}
+System.out.println(p[3].split("\\s+").length + " mots");
+```
+# Masquer une information sensible
+`replaceAll` accepte une **expression régulière** : ici, quatre groupes de chiffres séparés par des points.
+```run main
+String ligne = "connexion refusée depuis 192.168.1.42 puis 10.0.0.7";
+String propre = ligne.replaceAll("\\d+\\.\\d+\\.\\d+\\.\\d+", "[IP masquée]");
+System.out.println(propre);
+System.out.println("192.168.1.42".matches("\\d+\\.\\d+\\.\\d+\\.\\d+"));
+```
+!fin
+
+!defi Défi : compter les voyelles | Parcours un `String` caractère par caractère. | java-voyelles
+!defi Défi : compter les mots | `split` et une expression régulière. | java-mots
+!defi Défi : le chiffre de César | Calcule sur des `char` et assemble avec un `StringBuilder`. | java-cesar
+
+!retenir À retenir | Un `String` est immuable : chaque méthode renvoie un nouveau texte. ¶ `length()`, `charAt(i)`, `substring(début, fin exclue)`, `indexOf`, `contains`, `replace`, `split`, `trim`. ¶ Comparer avec `equals`, jamais `==`. ¶ `Integer.parseInt` / `String.valueOf` pour convertir. ¶ `StringBuilder` (`append`, `toString`) pour construire un texte dans une boucle.
+--- exos
+Q¤f¤Quelle méthode donne la longueur d'un String ?¤`length()`;;`length`;;`size()`;;`count()`¤Avec des parenthèses, contrairement aux tableaux.
+Q¤m¤Que renvoie `"Bonjour".substring(0, 3)` ?¤`"Bon"`;;`"Bonj"`;;`"onj"`;;`"Bo"`¤L'indice de fin est exclu.
+Q¤m¤Que renvoie `"Bonjour".charAt(1)` ?¤`'o'`;;`'B'`;;`'n'`;;`"Bo"`¤
+Q¤m¤Que renvoie `"Bonjour".indexOf("x")` ?¤-1;;0;;`null`;;Une exception¤
+Q¤m¤Après `String s = "java"; s.toUpperCase();`, que vaut s ?¤`"java"`;;`"JAVA"`;;`null`;;Une erreur¤Un String est immuable : il faut réaffecter.
+Q¤m¤Comment tester l'égalité de deux String ?¤`a.equals(b)`;;`a == b`;;`a.compare(b)`;;`a = b`¤
+Q¤m¤Que renvoie `"a;b;c".split(";")` ?¤Un tableau de 3 String;;Une liste de 3 char;;Le texte "abc";;3¤
+Q¤m¤Quelle méthode convertit "42" en entier ?¤`Integer.parseInt("42")`;;`"42".toInt()`;;`(int) "42"`;;`Int.parse("42")`¤
+Q¤m¤Quelle méthode convertit un nombre en String ?¤`String.valueOf(n)`;;`n.toString()`;;`(String) n`;;`str(n)`¤
+Q¤d¤Pourquoi utiliser StringBuilder dans une boucle ?¤Parce que concaténer des String recrée tout le texte à chaque tour;;Parce que + est interdit dans une boucle;;Pour économiser des variables;;Pour trier le texte¤
+Q¤m¤Quelle méthode de StringBuilder ajoute du texte à la fin ?¤`append`;;`add`;;`push`;;`concat`¤
+Q¤d¤Que vaut `(char) ('a' + 2)` ?¤`'c'`;;99;;`"a2"`;;Une erreur¤
+Q¤d¤Pourquoi écrire `"oui".equals(reponse)` plutôt que `reponse.equals("oui")` ?¤Cela ne plante pas si reponse vaut null;;C'est plus rapide;;C'est obligatoire;;Pour ignorer la casse¤
+Q¤d¤Que fait `"un  deux".split("\\s+")` ?¤Découpe sur un ou plusieurs espaces;;Découpe sur le caractère s;;Découpe sur le signe +;;Supprime les espaces¤
+Q¤m¤Que renvoie `"abc".compareTo("abd")` ?¤Un nombre négatif;;Un nombre positif;;0;;`false`¤"abc" vient avant "abd".
+V¤m¤Un String Java peut être modifié caractère par caractère.¤F¤Il est immuable ; on utilise StringBuilder.
+V¤m¤`"  a  ".trim()` renvoie "a".¤V¤
+V¤m¤`Integer.parseInt("abc")` renvoie 0.¤F¤Il lève une NumberFormatException.
+S¤m¤Quelle méthode transforme un String en tableau de char ?¤toCharArray;;toCharArray()¤
+A¤m¤Associe chaque méthode à son résultat sur "Java".¤`length()`=>4;;`charAt(0)`=>'J';;`toUpperCase()`=>"JAVA";;`indexOf("v")`=>2;;`substring(2)`=>"va"¤

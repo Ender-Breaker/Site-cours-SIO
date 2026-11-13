@@ -371,5 +371,63 @@ window.EF_EVAL_TEXTES = {
         { n: "le compilateur génère une version par type", rx: "compilateur|compilation|genere|instanci" },
         { n: "un exemple : maxi, vector, map, Pile…", rx: "vector|map|max|pile|somme|unique_ptr|echang" }],
       corrige: "<p>Un template permet d'écrire une fonction ou une classe <b>valable pour plusieurs types</b> : le type est un <b>paramètre</b> (<code>template &lt;typename T&gt;</code>). Le <b>compilateur</b> génère une version pour chaque type utilisé. Exemples : <code>T maxi(T a, T b)</code>, ou les conteneurs <code>vector&lt;int&gt;</code> et <code>map&lt;string, int&gt;</code>.</p>" }
+  ],
+  "java": [
+    { q: "Explique le rôle de la JVM et du bytecode. Pourquoi dit-on que Java est portable ?",
+      notions: [
+        { n: "javac compile le code source en bytecode (.class)", rx: "bytecode|\\.class|compil" },
+        { n: "la JVM (machine virtuelle) exécute le bytecode", rx: "jvm|machine virtuelle" },
+        { n: "le même programme tourne sur plusieurs systèmes", rx: "windows|linux|mac|systeme|plateforme|partout|n'importe quel|portable" },
+        { n: "il suffit qu'une JVM soit installée", rx: "install|suffit|chaque systeme|dispose|fournie|existe" }],
+      corrige: "<p><code>javac</code> <b>compile</b> le code source en <b>bytecode</b> (fichiers <code>.class</code>), un code intermédiaire indépendant du processeur. La <b>JVM</b> (machine virtuelle Java) exécute ce bytecode. Comme il existe une JVM pour chaque <b>système</b> (Windows, Linux, macOS, Android), le même programme tourne partout sans être recompilé.</p>" },
+    { q: "Pourquoi compare-t-on deux <code>String</code> avec <code>equals</code> et non avec <code>==</code> ?",
+      notions: [
+        { n: "== compare les références (le même objet en mémoire)", rx: "reference|adresse|meme objet|memoire|identite" },
+        { n: "equals compare le contenu", rx: "contenu|caractere|texte|valeur" },
+        { n: "deux String de même contenu peuvent être deux objets différents", rx: "deux objets|different|distinct|new string|pas le meme" },
+        { n: "String est un objet, pas un type primitif", rx: "objet|classe|primitif" }],
+      corrige: "<p><code>String</code> est une <b>classe</b> : une variable contient une <b>référence</b> vers l'objet. <code>==</code> teste si les deux variables désignent le <b>même objet</b> en mémoire ; <code>equals</code> compare le <b>contenu</b>. Deux chaînes identiques peuvent être deux objets distincts : <code>==</code> renvoie alors <code>false</code>.</p>" },
+    { q: "Qu'est-ce que l'encapsulation en Java ? Illustre avec <code>private</code> et les accesseurs.",
+      notions: [
+        { n: "les attributs sont private : inaccessibles de l'extérieur", rx: "private|prive|cach|inaccessible|proteg" },
+        { n: "on y accède par des méthodes publiques (getters / setters)", rx: "getter|setter|accesseur|mutateur|methode|public" },
+        { n: "les méthodes contrôlent / valident les modifications", rx: "control|valid|verifi|coheren|interdi|refus|garanti" },
+        { n: "le constructeur initialise l'objet", rx: "constructeur|initialis|new" }],
+      corrige: "<p>L'encapsulation consiste à déclarer les attributs <code>private</code> et à n'y donner accès que par des <b>méthodes publiques</b> (accesseurs <code>getX</code>, mutateurs <code>setX</code>, méthodes métier). Ces méthodes <b>contrôlent</b> les modifications et garantissent un état cohérent (un solde jamais négatif). Le <b>constructeur</b> fixe l'état initial.</p>" },
+    { q: "Quelle différence y a-t-il entre une classe abstraite et une interface ? Quand utiliser l'une ou l'autre ?",
+      notions: [
+        { n: "une classe abstraite ne peut pas être instanciée et peut contenir du code et des attributs", rx: "instanci|attribut|code|constructeur|partag" },
+        { n: "une interface est un contrat : des méthodes à fournir", rx: "contrat|engage|signature|doit (fournir|definir|implementer)|capacite" },
+        { n: "une seule classe mère (extends), plusieurs interfaces (implements)", rx: "plusieurs|une seule|multiple|extends|implements" },
+        { n: "classe abstraite pour des classes proches, interface pour une capacité commune", rx: "proche|famille|commun|capacite|sans lien|est un" }],
+      corrige: "<p>Une <b>classe abstraite</b> ne peut pas être instanciée ; elle peut contenir des attributs, un constructeur et du code partagé par ses filles. Une <b>interface</b> est un <b>contrat</b> : la liste des méthodes qu'une classe s'engage à fournir. Une classe n'hérite que d'<b>une seule</b> classe (<code>extends</code>) mais peut implémenter <b>plusieurs</b> interfaces (<code>implements</code>).</p>" },
+    { q: "Explique le polymorphisme en Java avec un exemple.",
+      notions: [
+        { n: "héritage ou interface : plusieurs classes partagent un même type", rx: "herit|extends|interface|implements|classe mere|type commun" },
+        { n: "une méthode est redéfinie (@Override)", rx: "redefini|override|sa propre|chaque classe" },
+        { n: "la méthode appelée dépend de la classe réelle de l'objet", rx: "reel|execution|dynami|veritable|vrai type|objet lui" },
+        { n: "un exemple : Animal/Chien, Forme/Cercle…", rx: "animal|chien|chat|forme|cercle|rectangle|employe|notification|liste" }],
+      corrige: "<p>Plusieurs classes qui <b>héritent</b> d'une même classe (ou implémentent une même interface) peuvent <b>redéfinir</b> une méthode. Quand on appelle cette méthode sur une variable du type commun, c'est la version de la <b>classe réelle</b> de l'objet qui s'exécute. Exemple : dans une <code>List&lt;Animal&gt;</code>, <code>a.crier()</code> renvoie « Ouaf » pour un Chien et « Miaou » pour un Chat.</p>" },
+    { q: "Présente les trois grandes collections de Java (liste, dictionnaire, ensemble) et leur usage.",
+      notions: [
+        { n: "ArrayList / List : suite ordonnée, accès par indice", rx: "arraylist|\\blist|liste" },
+        { n: "HashMap / Map : association clé → valeur", rx: "hashmap|\\bmap|cle|dictionnaire" },
+        { n: "HashSet / Set : pas de doublon", rx: "hashset|\\bset|doublon|unique|ensemble" },
+        { n: "les génériques fixent le type des éléments", rx: "generique|<|type des elements|integer|string" }],
+      corrige: "<p><code>ArrayList</code> (interface <code>List</code>) : une <b>suite ordonnée</b> qui grandit, avec accès par indice. <code>HashMap</code> (interface <code>Map</code>) : un <b>dictionnaire</b> clé → valeur. <code>HashSet</code> (interface <code>Set</code>) : un <b>ensemble sans doublon</b>. Les <b>génériques</b> (<code>List&lt;String&gt;</code>) fixent le type des éléments et font vérifier les erreurs par le compilateur.</p>" },
+    { q: "Comment fonctionnent les exceptions en Java ? Explique <code>try</code>, <code>catch</code>, <code>finally</code> et <code>throw</code>.",
+      notions: [
+        { n: "try contient le code à risque", rx: "try" },
+        { n: "catch traite l'exception", rx: "catch|attrap|trait|interce" },
+        { n: "finally s'exécute dans tous les cas", rx: "finally|tous les cas|toujours" },
+        { n: "throw lève une exception", rx: "throw|leve|lance|declenche" }],
+      corrige: "<p>Le bloc <code>try</code> contient le code qui risque d'échouer. Si une exception est levée, le reste du bloc est sauté et le <code>catch</code> correspondant la <b>traite</b>. <code>finally</code> s'exécute <b>dans tous les cas</b> (libérer une ressource). <code>throw new …Exception(\"message\")</code> <b>lève</b> une exception ; une exception vérifiée doit être déclarée avec <code>throws</code>.</p>" },
+    { q: "Pourquoi faut-il utiliser une requête préparée (<code>PreparedStatement</code>) pour accéder à une base de données ?",
+      notions: [
+        { n: "contre l'injection SQL", rx: "injection" },
+        { n: "la saisie est transmise comme une donnée, pas comme du code SQL", rx: "donnee|parametre|\\?|pas (interprete|execute)|separ" },
+        { n: "concaténer une saisie dans la requête est dangereux", rx: "concaten|coll|\\+|apostrophe|guillemet|saisie" },
+        { n: "un attaquant pourrait lire ou détruire des données", rx: "lire|vol|supprim|detrui|drop|contourn|acced|pirat|attaqu" }],
+      corrige: "<p>Construire une requête en <b>concaténant</b> une saisie de l'utilisateur permet l'<b>injection SQL</b> : la saisie est interprétée comme du code SQL, et un attaquant peut lire ou détruire les données. Avec un <code>PreparedStatement</code>, la requête contient des <code>?</code> et la saisie est transmise séparément, comme une <b>donnée</b> qui ne sera jamais exécutée.</p>" }
   ]
 };

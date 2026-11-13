@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Java en vrai : fichiers, base de données, Maven et tests — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="java" data-chapter="java-projets">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/java.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>Ce chapitre montre les outils d'un vrai projet Java, ceux que tu rencontreras en stage et dans les épreuves pratiques de l'option SLAM.</p>
+<div class="box"><b>Dans le navigateur</b><p>Fichiers, base de données, Maven et JUnit ont besoin d'un vrai poste de développement : ces exemples ne sont pas exécutables ici. Installe un JDK et un éditeur (IntelliJ IDEA Community, Eclipse ou VS Code) pour les essayer.</p></div>
+<h2>1. Lire et écrire des fichiers</h2>
+<pre><code>import java.nio.file.*;
+import java.io.IOException;
+import java.util.List;
+
+public class Main {
+    public static void main(String[] args) {
+        Path fichier = Path.of("notes.txt");
+        try {
+            Files.writeString(fichier, "Léa;15\nSam;9\n");                    // écrit (écrase)
+            Files.writeString(fichier, "Zoé;18\n", StandardOpenOption.APPEND); // ajoute à la fin
+
+            List&lt;String&gt; lignes = Files.readAllLines(fichier);                // lit tout
+            for (String ligne : lignes) {
+                String[] champs = ligne.split(";");
+                System.out.println(champs[0] + " a " + Double.parseDouble(champs[1]));
+            }
+            System.out.println(Files.exists(fichier) + " " + Files.size(fichier));
+        } catch (IOException e) {                    // exception vérifiée : obligatoire
+            System.out.println("Erreur de fichier : " + e.getMessage());
+        }
+    }
+}</code></pre>
+<p>Pour un très gros fichier, on lit ligne par ligne sans tout charger en mémoire :</p>
+<pre><code>try (BufferedReader lecteur = Files.newBufferedReader(Path.of("gros.log"))) {
+    String ligne;
+    while ((ligne = lecteur.readLine()) != null) {
+        if (ligne.contains("ERREUR")) System.out.println(ligne);
+    }
+}</code></pre>
+<h2>2. Accéder à une base de données : JDBC</h2>
+<p><b>JDBC</b> est l'API standard pour dialoguer avec une base SQL (MySQL, MariaDB, PostgreSQL, SQLite). Le schéma est toujours le même : <b>connexion → requête préparée → résultat</b>.</p>
+<pre><code>import java.sql.*;
+
+public class Main {
+    public static void main(String[] args) {
+        String url = "jdbc:mysql://localhost:3306/parc";
+        String sql = "SELECT nom, prix FROM materiel WHERE prix &gt; ? ORDER BY prix";
+
+        try (Connection cnx = DriverManager.getConnection(url, "utilisateur", "motdepasse");
+             PreparedStatement requete = cnx.prepareStatement(sql)) {
+
+            requete.setDouble(1, 100);                       // remplace le 1er ?
+            try (ResultSet res = requete.executeQuery()) {
+                while (res.next()) {                         // une ligne à la fois
+                    System.out.println(res.getString("nom") + " : " + res.getDouble("prix"));
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Erreur SQL : " + e.getMessage());
+        }
+    }
+}</code></pre>
+<p>Pour modifier les données : <code>executeUpdate()</code>, qui renvoie le nombre de lignes touchées.</p>
+<pre><code>String sql = "INSERT INTO materiel (nom, prix) VALUES (?, ?)";
+try (PreparedStatement requete = cnx.prepareStatement(sql)) {
+    requete.setString(1, "Écran 27 pouces");
+    requete.setDouble(2, 189.90);
+    int lignes = requete.executeUpdate();
+}</code></pre>
+<div class="box attention"><b>Injection SQL : toujours une requête préparée</b><p>Ne construis <b>jamais</b> une requête en collant une saisie de l'utilisateur : <code>"… WHERE nom = '" + saisie + "'"</code>. Si quelqu'un tape <code>' OR '1'='1</code>, la condition devient toujours vraie et il lit toute la table ; il peut aussi détruire des données. Avec <code>PreparedStatement</code> et les <code>?</code>, la saisie est transmise comme une <b>donnée</b>, jamais comme du code SQL. C'est une exigence du bloc 3 (cybersécurité).</p></div>
+<p>En pratique on range ce code dans une classe <b>DAO</b> (*Data Access Object*) : <code>MaterielDao.trouverTous()</code>, <code>MaterielDao.ajouter(m)</code>. Le reste de l'application ne voit jamais de SQL.</p>
+<h2>3. Maven : construire et gérer les dépendances</h2>
+<p>Un projet réel utilise des bibliothèques (le pilote MySQL, JUnit…). <b>Maven</b> les télécharge, compile, lance les tests et fabrique le fichier <code>.jar</code>. Tout est décrit dans <code>pom.xml</code> :</p>
+<pre><code>&lt;project&gt;
+  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+  &lt;groupId&gt;fr.monlycee&lt;/groupId&gt;
+  &lt;artifactId&gt;parc&lt;/artifactId&gt;
+  &lt;version&gt;1.0&lt;/version&gt;
+
+  &lt;properties&gt;
+    &lt;maven.compiler.release&gt;21&lt;/maven.compiler.release&gt;
+  &lt;/properties&gt;
+
+  &lt;dependencies&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;com.mysql&lt;/groupId&gt;
+      &lt;artifactId&gt;mysql-connector-j&lt;/artifactId&gt;
+      &lt;version&gt;9.1.0&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.junit.jupiter&lt;/groupId&gt;
+      &lt;artifactId&gt;junit-jupiter&lt;/artifactId&gt;
+      &lt;version&gt;5.11.0&lt;/version&gt;
+      &lt;scope&gt;test&lt;/scope&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+&lt;/project&gt;</code></pre>
+<table><tr><th>Dossier / commande</th><th>Rôle</th></tr><tr><td><code>src/main/java</code></td><td>le code de l'application</td></tr><tr><td><code>src/test/java</code></td><td>les tests</td></tr><tr><td><code>src/main/resources</code></td><td>fichiers de configuration</td></tr><tr><td><code>target/</code></td><td>ce que Maven produit (à ne pas versionner)</td></tr><tr><td><code>mvn compile</code></td><td>compile</td></tr><tr><td><code>mvn test</code></td><td>lance les tests</td></tr><tr><td><code>mvn package</code></td><td>fabrique le <code>.jar</code> dans <code>target/</code></td></tr></table>
+<p><b>Gradle</b> est l'alternative à Maven, utilisée notamment par les projets Android.</p>
+<h2>4. Les tests unitaires avec JUnit</h2>
+<p>Un <b>test unitaire</b> vérifie automatiquement qu'une méthode renvoie le bon résultat. On l'écrit une fois, on le relance à chaque modification : si un changement casse quelque chose, on le sait tout de suite.</p>
+<pre><code>import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class CompteTest {
+
+    @Test
+    void deposerAugmenteLeSolde() {
+        Compte c = new Compte("Léa", 100);
+        c.deposer(50);
+        assertEquals(150, c.getSolde());
+    }
+
+    @Test
+    void retirerPlusQueLeSoldeEstRefuse() {
+        Compte c = new Compte("Léa", 100);
+        assertFalse(c.retirer(500));
+        assertEquals(100, c.getSolde());             // le solde n'a pas bougé
+    }
+
+    @Test
+    void soldeInitialNegatifLeveUneException() {
+        assertThrows(IllegalArgumentException.class, () -&gt; new Compte("Léa", -1));
+    }
+}</code></pre>
+<p>Un bon test suit trois temps : <b>préparer</b> les données, <b>agir</b>, <b>vérifier</b>. Les objectifs vérifiés automatiquement dans les labos de ce site sont exactement des tests de ce genre.</p>
+<h2>5. Et après ?</h2>
+<table><tr><th>Domaine</th><th>Technologie Java</th></tr><tr><td>Applications web et API REST</td><td>Spring Boot</td></tr><tr><td>Applications Android</td><td>Android SDK (Java ou Kotlin)</td></tr><tr><td>Interfaces de bureau</td><td>JavaFX, Swing</td></tr><tr><td>Accès aux données sans SQL manuel</td><td>JPA / Hibernate</td></tr><tr><td>Langage voisin, même JVM</td><td>Kotlin</td></tr></table>
+<p>Et si ton lycée enseigne le <b>C#</b> : classes, interfaces, exceptions, collections, lambdas (LINQ ressemble aux streams) s'y écrivent presque de la même façon. Ce que tu as appris ici se transpose directement.</p>
+<section class="tuto"><h3><small>Tutoriel</small>Architecture d'une petite application de gestion</h3>
+<div class="etape"><h4>Le modèle : un record</h4>
+<pre><code>public record Materiel(int id, String nom, double prix) {}</code></pre>
+</div>
+<div class="etape"><h4>L'accès aux données : un DAO</h4>
+<p>Tout le SQL est ici, et nulle part ailleurs.</p>
+<pre><code>public class MaterielDao {
+    private final Connection cnx;
+    public MaterielDao(Connection cnx) { this.cnx = cnx; }
+
+    public List&lt;Materiel&gt; trouverTous() throws SQLException {
+        List&lt;Materiel&gt; liste = new ArrayList&lt;&gt;();
+        try (PreparedStatement r = cnx.prepareStatement("SELECT id, nom, prix FROM materiel");
+             ResultSet res = r.executeQuery()) {
+            while (res.next()) {
+                liste.add(new Materiel(res.getInt("id"), res.getString("nom"), res.getDouble("prix")));
+            }
+        }
+        return liste;
+    }
+}</code></pre>
+</div>
+<div class="etape"><h4>La logique : un service testable</h4>
+<p>Il ne connaît ni le SQL ni l'affichage : on peut le tester avec une simple liste.</p>
+<pre><code>public class InventaireService {
+    public double valeurTotale(List&lt;Materiel&gt; liste) {
+        return liste.stream().mapToDouble(Materiel::prix).sum();
+    }
+    public List&lt;Materiel&gt; plusChersQue(List&lt;Materiel&gt; liste, double seuil) {
+        return liste.stream().filter(m -&gt; m.prix() &gt; seuil).toList();
+    }
+}</code></pre>
+</div>
+<div class="etape"><h4>Le programme principal relie le tout</h4>
+<pre><code>try (Connection cnx = DriverManager.getConnection(url, utilisateur, motDePasse)) {
+    List&lt;Materiel&gt; tout = new MaterielDao(cnx).trouverTous();
+    InventaireService service = new InventaireService();
+    System.out.printf("Valeur du parc : %.2f €%n", service.valeurTotale(tout));
+}</code></pre>
+<p>Cette séparation <b>modèle / accès aux données / logique / présentation</b> est le principe des architectures en couches et du MVC que tu verras en SLAM.</p>
+</div>
+</section>
+<div class="box retenir"><b>À retenir</b><p><code>Files.readAllLines</code> / <code>Files.writeString</code> pour les fichiers ; <code>IOException</code> à traiter. </p><p> JDBC : <code>Connection</code> → <code>PreparedStatement</code> (avec des <code>?</code>) → <code>ResultSet</code>. </p><p> Requêtes préparées obligatoires contre l'injection SQL. </p><p> Maven : <code>pom.xml</code>, <code>mvn test</code>, <code>mvn package</code>. </p><p> JUnit : <code>@Test</code>, <code>assertEquals</code>, <code>assertThrows</code>. </p><p> Séparer modèle, DAO, logique et présentation.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-java.html">Labo Java</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "Quelle classe permet de lire toutes les lignes d'un fichier en une instruction ?",
+  "type": "qcm",
+  "options": [
+   "`Scanner`",
+   "`System`",
+   "`Reader`",
+   "`Files`"
+  ],
+  "answer": 3,
+  "explication": "`Files.readAllLines(chemin)`."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle exception faut-il traiter quand on manipule un fichier ?",
+  "type": "qcm",
+  "options": [
+   "`NumberFormatException`",
+   "`IOException`",
+   "`FileError`",
+   "`ArithmeticException`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que signifie JDBC ?",
+  "type": "qcm",
+  "options": [
+   "Un format de fichier",
+   "L'API Java standard d'accès aux bases de données",
+   "Un outil de test",
+   "Un moteur de base de données"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel objet représente la liaison avec la base de données ?",
+  "type": "qcm",
+  "options": [
+   "`ResultSet`",
+   "`Driver`",
+   "`Connection`",
+   "`Statement`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel objet contient les lignes renvoyées par un SELECT ?",
+  "type": "qcm",
+  "options": [
+   "`List`",
+   "`ResultSet`",
+   "`PreparedStatement`",
+   "`Connection`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle méthode exécute un INSERT, UPDATE ou DELETE ?",
+  "type": "qcm",
+  "options": [
+   "`commit()`",
+   "`executeQuery()`",
+   "`executeUpdate()`",
+   "`run()`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que représente le `?` dans une requête préparée ?",
+  "type": "qcm",
+  "options": [
+   "Une erreur de syntaxe",
+   "Un paramètre remplacé ensuite par une valeur",
+   "Un caractère joker de SQL",
+   "Un champ facultatif"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi une requête préparée protège-t-elle de l'injection SQL ?",
+  "type": "qcm",
+  "options": [
+   "Elle limite la longueur de la saisie",
+   "Elle interdit les apostrophes",
+   "Elle chiffre la requête",
+   "La saisie est transmise comme donnée, jamais interprétée comme du SQL"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Quel est le danger de `\"… WHERE nom = '\" + saisie + \"'\"` ?",
+  "type": "qcm",
+  "options": [
+   "Aucun",
+   "Une erreur de compilation",
+   "Une requête trop lente",
+   "L'injection SQL"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'un DAO ?",
+  "type": "qcm",
+  "options": [
+   "Un fichier de configuration",
+   "Un type de base de données",
+   "Une classe qui regroupe l'accès aux données",
+   "Un test"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel fichier décrit un projet Maven ?",
+  "type": "qcm",
+  "options": [
+   "`pom.xml`",
+   "`package.xml`",
+   "`build.json`",
+   "`maven.cfg`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande Maven lance les tests ?",
+  "type": "qcm",
+  "options": [
+   "`mvn test`",
+   "`mvn run`",
+   "`maven --test`",
+   "`mvn check-all`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Dans quel dossier Maven range-t-on le code de l'application ?",
+  "type": "qcm",
+  "options": [
+   "`target`",
+   "`src/main/java`",
+   "`src/test/java`",
+   "`bin`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle annotation marque une méthode de test JUnit ?",
+  "type": "qcm",
+  "options": [
+   "`@Test`",
+   "`@Check`",
+   "`@Run`",
+   "`@Unit`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que vérifie `assertEquals(150, c.getSolde())` ?",
+  "type": "qcm",
+  "options": [
+   "Que c n'est pas null",
+   "Que le solde est différent de 150",
+   "Que le solde vaut 150",
+   "Que la méthode existe"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que vérifie `assertThrows(IllegalArgumentException.class, () -> …)` ?",
+  "type": "qcm",
+  "options": [
+   "Que le test est ignoré",
+   "Que la classe existe",
+   "Que le code ne lève aucune exception",
+   "Que le code lève bien cette exception"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quels sont les trois temps d'un test unitaire ?",
+  "type": "qcm",
+  "options": [
+   "Ouvrir, tester, fermer",
+   "Lire, écrire, fermer",
+   "Préparer, agir, vérifier",
+   "Compiler, exécuter, corriger"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Un test unitaire se relance automatiquement à chaque modification du code pour détecter les régressions.",
+  "type": "vf",
+  "answer": true,
+  "explication": "C'est tout son intérêt."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Le dossier target/ de Maven doit être versionné avec Git.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Il contient ce qui est généré : on l'ignore."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque outil à son rôle.",
+  "type": "associer",
+  "paires": [
+   [
+    "JDBC",
+    "accès aux bases de données"
+   ],
+   [
+    "Maven",
+    "construction et dépendances"
+   ],
+   [
+    "JUnit",
+    "tests unitaires"
+   ],
+   [
+    "Javadoc",
+    "documentation"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

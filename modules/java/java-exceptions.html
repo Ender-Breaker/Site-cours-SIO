@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Java : les exceptions — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="java" data-chapter="java-exceptions">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/java.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>Une <b>exception</b> est un objet qui signale une erreur survenue pendant l'exécution. Si personne ne l'attrape, le programme s'arrête en affichant la pile d'appels (*stack trace*). Savoir la lire et la gérer distingue un exercice d'un programme fiable.</p>
+<h2>1. Attraper : <code>try</code> / <code>catch</code></h2>
+<div class="essai" data-langue="java"><pre><code>public class Main {
+    public static void main(String[] args) {
+        String[] saisies = {"42", "abc", "7"};
+        for (String s : saisies) {
+            try {
+                int n = Integer.parseInt(s);            // peut lever NumberFormatException
+                System.out.println(n + " x 2 = " + n * 2);
+            } catch (NumberFormatException e) {
+                System.out.println("« " + s + " » n'est pas un nombre");
+            }
+        }
+        System.out.println("le programme continue");
+    }
+}</code></pre></div>
+<p>Dès qu'une exception est levée dans le <code>try</code>, le reste du bloc est <b>sauté</b> et l'exécution reprend dans le <code>catch</code> correspondant.</p>
+<h2>2. Plusieurs <code>catch</code>, et <code>finally</code></h2>
+<div class="essai" data-langue="java"><pre><code>public class Main {
+    static int diviser(String a, String b) {
+        return Integer.parseInt(a) / Integer.parseInt(b);
+    }
+
+    public static void main(String[] args) {
+        String[][] essais = {{"10", "2"}, {"10", "0"}, {"dix", "2"}};
+        for (String[] e : essais) {
+            try {
+                System.out.println(diviser(e[0], e[1]));
+            } catch (ArithmeticException ex) {
+                System.out.println("Calcul impossible : " + ex.getMessage());
+            } catch (NumberFormatException ex) {
+                System.out.println("Saisie invalide : " + ex.getMessage());
+            } finally {
+                System.out.println("  (essai terminé)");        // exécuté dans TOUS les cas
+            }
+        }
+    }
+}</code></pre></div>
+<p><code>finally</code> sert à libérer une ressource (fermer un fichier, une connexion) qu'il y ait eu une erreur ou non. On peut regrouper deux types : <code>catch (ArithmeticException | NumberFormatException ex)</code>.</p>
+<h2>3. Les exceptions courantes</h2>
+<table><tr><th>Exception</th><th>Cause</th></tr><tr><td><code>NullPointerException</code></td><td>appel d'une méthode sur <code>null</code></td></tr><tr><td><code>ArrayIndexOutOfBoundsException</code></td><td>indice de tableau invalide</td></tr><tr><td><code>IndexOutOfBoundsException</code></td><td>indice de liste invalide</td></tr><tr><td><code>NumberFormatException</code></td><td>texte non convertible en nombre</td></tr><tr><td><code>ArithmeticException</code></td><td>division entière par zéro</td></tr><tr><td><code>ClassCastException</code></td><td>conversion de type impossible</td></tr><tr><td><code>IllegalArgumentException</code></td><td>argument refusé par une méthode</td></tr><tr><td><code>IOException</code></td><td>problème de fichier ou de réseau</td></tr></table>
+<div class="box"><b>Dans le navigateur</b><p>Sur ce site, le Java est traduit en WebAssembly : quelques erreurs très bas niveau (méthode appelée sur <code>null</code>, indice de tableau invalide) arrêtent directement le programme au lieu de lever une exception attrapable. Avec une vraie JVM, toutes s'attrapent.</p></div>
+<h2>4. Lever une exception : <code>throw</code></h2>
+<div class="essai" data-langue="java"><pre><code>class Compte {
+    private double solde;
+    Compte(double solde) {
+        if (solde &lt; 0) throw new IllegalArgumentException("solde initial négatif");
+        this.solde = solde;
+    }
+    void retirer(double montant) {
+        if (montant &lt;= 0) throw new IllegalArgumentException("montant invalide : " + montant);
+        if (montant &gt; solde) throw new IllegalStateException("solde insuffisant");
+        solde -= montant;
+    }
+    double getSolde() { return solde; }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Compte c = new Compte(100);
+        try {
+            c.retirer(30);
+            c.retirer(500);                  // lève : la ligne suivante est sautée
+            c.retirer(10);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            System.out.println("Refusé : " + e.getMessage());
+        }
+        System.out.println(c.getSolde());
+    }
+}</code></pre></div>
+<p>Une méthode qui ne peut pas faire son travail ne doit ni renvoyer une valeur bidon ni afficher un message : elle <b>lève une exception</b>, et c'est l'appelant qui décide quoi faire.</p>
+<h2>5. Créer sa propre exception</h2>
+<div class="essai" data-langue="java"><pre><code>class SoldeInsuffisantException extends Exception {          // une exception « vérifiée »
+    private final double manque;
+    SoldeInsuffisantException(double manque) {
+        super("il manque " + manque + " €");
+        this.manque = manque;
+    }
+    double getManque() { return manque; }
+}
+
+class Compte {
+    private double solde = 100;
+    void retirer(double montant) throws SoldeInsuffisantException {      // throws : annonce le risque
+        if (montant &gt; solde) throw new SoldeInsuffisantException(montant - solde);
+        solde -= montant;
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Compte c = new Compte();
+        try {
+            c.retirer(250);
+        } catch (SoldeInsuffisantException e) {
+            System.out.println(e.getMessage() + " (" + e.getManque() + ")");
+        }
+    }
+}</code></pre></div>
+<h2>6. Exceptions vérifiées et non vérifiées</h2>
+<table><tr><th></th><th>Vérifiées (*checked*)</th><th>Non vérifiées (*unchecked*)</th></tr><tr><td>Héritent de</td><td><code>Exception</code></td><td><code>RuntimeException</code></td></tr><tr><td>Le compilateur impose</td><td><code>try/catch</code> ou <code>throws</code></td><td>rien</td></tr><tr><td>Représentent</td><td>un problème extérieur prévisible (fichier absent, réseau)</td><td>un bug du programme (indice, null, argument)</td></tr><tr><td>Exemples</td><td><code>IOException</code>, <code>SQLException</code></td><td><code>NullPointerException</code>, <code>IllegalArgumentException</code></td></tr></table>
+<p>Une exception non attrapée <b>remonte</b> d'appel en appel. Une méthode qui laisse passer une exception vérifiée doit le déclarer avec <code>throws</code> :</p>
+<div class="essai" data-langue="java"><pre><code>public class Main {
+    static int lireAge(String texte) {                    // NumberFormatException est non vérifiée : pas de throws
+        int age = Integer.parseInt(texte.trim());
+        if (age &lt; 0 || age &gt; 130) throw new IllegalArgumentException("âge impossible : " + age);
+        return age;
+    }
+
+    public static void main(String[] args) {
+        for (String s : new String[]{" 17 ", "abc", "250"}) {
+            try {
+                System.out.println("âge valide : " + lireAge(s));
+            } catch (NumberFormatException e) {                // plus spécifique d'abord
+                System.out.println("pas un nombre : " + s);
+            } catch (IllegalArgumentException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+}</code></pre></div>
+<div class="box attention"><b>L'ordre des <code>catch</code></b><p><code>NumberFormatException</code> hérite d'<code>IllegalArgumentException</code> : le <code>catch</code> le plus <b>spécifique</b> doit être écrit en premier, sinon il est inatteignable et le compilateur refuse.</p></div>
+<h2>7. <code>try</code>-with-resources</h2>
+<p>Pour les ressources à fermer (fichiers, connexions à une base de données), cette forme appelle <code>close()</code> automatiquement, même en cas d'erreur :</p>
+<pre><code>try (BufferedReader lecteur = new BufferedReader(new FileReader("notes.txt"))) {
+    String ligne;
+    while ((ligne = lecteur.readLine()) != null) {
+        System.out.println(ligne);
+    }
+} catch (IOException e) {
+    System.out.println("Lecture impossible : " + e.getMessage());
+}</code></pre>
+<div class="box attention"><b>Ne jamais avaler une exception</b><p>Un <code>catch (Exception e) { }</code> vide fait disparaître l'erreur : le programme continue avec des données fausses et le bug devient introuvable. Au minimum, affiche ou journalise le message, et n'attrape que les exceptions que tu sais traiter.</p></div>
+<section class="tuto"><h3><small>Tutoriel</small>Une saisie qui ne plante jamais</h3>
+<div class="etape"><h4>Le programme fragile</h4>
+<div class="essai" data-langue="java" data-erreur="1" data-stdin="abc"><pre><code>import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int age = Integer.parseInt(sc.nextLine());
+        System.out.println("Dans 10 ans : " + (age + 10));
+    }
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Attraper l'erreur</h4>
+<div class="essai" data-langue="java" data-stdin="abc"><pre><code>import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        try {
+            int age = Integer.parseInt(sc.nextLine());
+            System.out.println("Dans 10 ans : " + (age + 10));
+        } catch (NumberFormatException e) {
+            System.out.println("Il faut saisir un nombre entier.");
+        }
+    }
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Redemander tant que c'est faux</h4>
+<p>La boucle ne s'arrête qu'après une saisie correcte. Change les entrées.</p>
+<div class="essai" data-langue="java" data-stdin="abc&#10;12.5&#10;17"><pre><code>import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int age = -1;
+        while (age &lt; 0) {
+            String saisie = sc.nextLine();
+            try {
+                age = Integer.parseInt(saisie);
+            } catch (NumberFormatException e) {
+                System.out.println("« " + saisie + " » refusé, recommence.");
+            }
+        }
+        System.out.println("Dans 10 ans : " + (age + 10));
+    }
+}</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : la saisie protégée</b><p>Attrape l'exception de conversion.</p><a class="defi-go" href="labo-java.html#m=java-exception">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : ta propre exception</b><p>Lève et attrape une exception que tu as créée.</p><a class="defi-go" href="labo-java.html#m=java-throw">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p><code>try { … } catch (TypeException e) { … } finally { … }</code>. </p><p> <code>throw new …Exception("message")</code> lève ; <code>e.getMessage()</code> lit le message. </p><p> Exceptions vérifiées (<code>Exception</code>) : <code>try/catch</code> ou <code>throws</code> obligatoire. Non vérifiées (<code>RuntimeException</code>) : libres. </p><p> Le <code>catch</code> le plus spécifique en premier. </p><p> <code>try (ressource) { … }</code> ferme automatiquement.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-java.html">Labo Java</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "Quel bloc contient le code qui risque de lever une exception ?",
+  "type": "qcm",
+  "options": [
+   "`catch`",
+   "`finally`",
+   "`try`",
+   "`throw`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel bloc traite l'exception ?",
+  "type": "qcm",
+  "options": [
+   "`catch`",
+   "`throws`",
+   "`try`",
+   "`finally`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quand le bloc `finally` s'exécute-t-il ?",
+  "type": "qcm",
+  "options": [
+   "Jamais automatiquement",
+   "Seulement s'il y a une erreur",
+   "Dans tous les cas, erreur ou non",
+   "Seulement s'il n'y a pas d'erreur"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel mot-clé lève une exception ?",
+  "type": "qcm",
+  "options": [
+   "`raise`",
+   "`throw`",
+   "`throws`",
+   "`error`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "À quoi sert `throws` dans la signature d'une méthode ?",
+  "type": "qcm",
+  "options": [
+   "À annoncer que la méthode peut laisser passer cette exception",
+   "À lever l'exception",
+   "À l'ignorer",
+   "À attraper l'exception"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle exception lève `Integer.parseInt(\"abc\")` ?",
+  "type": "qcm",
+  "options": [
+   "`ArithmeticException`",
+   "`IOException`",
+   "`NumberFormatException`",
+   "`NullPointerException`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle exception lève `5 / 0` avec des entiers ?",
+  "type": "qcm",
+  "options": [
+   "`NumberFormatException`",
+   "`ArithmeticException`",
+   "Aucune : le résultat est infini",
+   "`MathException`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle exception obtient-on en appelant une méthode sur null ?",
+  "type": "qcm",
+  "options": [
+   "`IllegalStateException`",
+   "`NullException`",
+   "`NullPointerException`",
+   "`ClassCastException`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle méthode donne le message d'une exception ?",
+  "type": "qcm",
+  "options": [
+   "`what()`",
+   "`text()`",
+   "`toMessage()`",
+   "`getMessage()`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "De quelle classe hérite une exception non vérifiée ?",
+  "type": "qcm",
+  "options": [
+   "`Error`",
+   "`RuntimeException`",
+   "`Object` directement",
+   "`Exception` directement"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Qu'impose le compilateur pour une exception vérifiée ?",
+  "type": "qcm",
+  "options": [
+   "De l'afficher",
+   "De l'attraper ou de la déclarer avec throws",
+   "De l'ignorer",
+   "Rien"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Dans quel ordre écrire plusieurs catch ?",
+  "type": "qcm",
+  "options": [
+   "Du plus spécifique au plus général",
+   "Peu importe",
+   "Par ordre alphabétique",
+   "Du plus général au plus spécifique"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que fait un `try (ressource) { … }` ?",
+  "type": "qcm",
+  "options": [
+   "Il essaie deux fois",
+   "Il ferme automatiquement la ressource à la fin",
+   "Il crée un thread",
+   "Il ignore les erreurs"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi un `catch (Exception e) { }` vide est-il dangereux ?",
+  "type": "qcm",
+  "options": [
+   "Il relance l'exception",
+   "Il ralentit le programme",
+   "Il ne compile pas",
+   "L'erreur disparaît et le programme continue avec un état faux"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que se passe-t-il si une exception n'est attrapée nulle part ?",
+  "type": "qcm",
+  "options": [
+   "Le programme redémarre",
+   "Le programme s'arrête en affichant la pile d'appels",
+   "Elle est écrite dans un fichier",
+   "Elle est ignorée"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait le reste du bloc try après la ligne qui a levé l'exception ?",
+  "type": "qcm",
+  "options": [
+   "Il s'exécute quand même",
+   "Il s'exécute deux fois",
+   "Il est sauté",
+   "Il s'exécute après le catch"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "On peut créer sa propre classe d'exception en héritant de Exception.",
+  "type": "vf",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "IOException est une exception vérifiée.",
+  "type": "vf",
+  "answer": true,
+  "explication": "Le compilateur oblige à la traiter."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel mot-clé crée l'objet exception dans `throw ___ IllegalArgumentException(\"…\")` ?",
+  "type": "saisie",
+  "answers": [
+   "new"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque exception à sa cause.",
+  "type": "associer",
+  "paires": [
+   [
+    "`NumberFormatException`",
+    "texte non numérique"
+   ],
+   [
+    "`ArithmeticException`",
+    "division par zéro"
+   ],
+   [
+    "`NullPointerException`",
+    "méthode appelée sur null"
+   ],
+   [
+    "`IOException`",
+    "problème de fichier"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

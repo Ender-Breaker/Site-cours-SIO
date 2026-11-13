@@ -235,19 +235,26 @@ window.EF_MODULES = [
     ]
   },
   {
-    id: "java", bonus: true,
+    id: "java", bonus: true, evalTextuel: true,
     titre: "Java",
     sousTitre: "Bonus · objets et Android",
     icone: "J",
     option: "BONUS",
     couleur: "java",
-    description: "Classes, types, Scanner, méthodes, tableaux et ArrayList, programmation objet, puis des jeux avec la classe Jeu.",
-    labos: [{ href: "labo-java.html", ico: "J", titre: "Labo Java", court: "Java", texte: "16 missions avec du vrai Java (javac + TeaVM) dans le navigateur : console, objets, puis jeux. Plus un bac à sable." }],
+    description: "Le cours complet : types, méthodes, tableaux, chaînes, programmation objet, héritage et interfaces, collections, exceptions, lambdas et streams, puis des jeux avec la classe Jeu.",
+    labos: [{ href: "labo-java.html", ico: "J", titre: "Labo Java", court: "Java", texte: "45 missions avec du vrai Java (javac + TeaVM) dans le navigateur : bases, méthodes, chaînes, objets, héritage, collections, exceptions, streams, puis des jeux. Plus un bac à sable." }],
     chapitres: [
       { id: "java-bases", titre: "Java : la classe Main, types et Scanner", niveau: "facile" },
       { id: "java-conditions-boucles", titre: "Java : conditions et boucles", niveau: "facile" },
-      { id: "java-methodes-tableaux", titre: "Java : méthodes, tableaux et ArrayList", niveau: "moyen" },
+      { id: "java-methodes-tableaux", titre: "Java : méthodes et tableaux", niveau: "moyen" },
+      { id: "java-chaines", titre: "Java : les chaînes de caractères", niveau: "moyen" },
       { id: "java-poo", titre: "Java : programmation orientée objet", niveau: "difficile" },
+      { id: "java-heritage", titre: "Java : héritage, classes abstraites et interfaces", niveau: "difficile" },
+      { id: "java-collections", titre: "Java : les collections et les génériques", niveau: "moyen" },
+      { id: "java-exceptions", titre: "Java : les exceptions", niveau: "moyen" },
+      { id: "java-lambdas-streams", titre: "Java : lambdas et streams", niveau: "difficile" },
+      { id: "java-enum-records", titre: "Java : enum, records, paquetages et bonnes pratiques", niveau: "moyen" },
+      { id: "java-projets", titre: "Java en vrai : fichiers, base de données, Maven et tests", niveau: "moyen" },
       { id: "java-jeu", titre: "Java : créer un jeu dans le navigateur", niveau: "difficile" }
     ]
   }

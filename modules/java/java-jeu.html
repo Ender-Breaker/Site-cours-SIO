@@ -11,203 +11,419 @@
 </head>
 <body data-module="java" data-chapter="java-jeu">
 
-<!-- ============ COURS ============ -->
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/java.txt) -->
 <article id="cours">
 <div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
-<p>Java a servi à écrire Minecraft et de nombreux jeux Android. Sur ordinateur, on utilise des bibliothèques comme <b>libGDX</b> ou <b>LWJGL</b> ; dans le labo, ton code Java est compilé dans le navigateur (javac, puis TeaVM qui le traduit en WebAssembly) et dessine dans un canvas.</p>
-
-<h2>1. La structure d'un jeu</h2>
+<p>Java est le langage de Minecraft et de milliers de jeux Android (libGDX, jMonkeyEngine). Le principe est le même que dans tous les moteurs : tu écris une classe, et le moteur appelle ses méthodes à chaque image.</p>
+<div class="box"><b>Où tester ?</b><p>Les jeux ont besoin d'un écran : ils se lancent dans le <a href="labo-java.html#libre">bac à sable du labo</a>. Copie les exemples de ce chapitre et modifie-les.</p></div>
+<h2>1. La boucle de jeu</h2>
+<p>Ta classe <b>hérite</b> de <code>Jeu</code> et <b>redéfinit</b> trois méthodes. C'est l'héritage et le polymorphisme en action : le moteur ne connaît que <code>Jeu</code>, et appelle pourtant <b>tes</b> méthodes.</p>
 <pre><code>public class Main extends Jeu {
-    double x = 200;                       // l&#x27;état du jeu : des attributs
+    double x = 200;                          // l'état du jeu : des attributs
 
-    public void setup() {                 // une fois au démarrage
+    public void setup() {                    // une fois, au démarrage
+        x = 50;
     }
 
-    public void update(double dt) {       // 60 fois par seconde : logique
-        if (touche(&quot;droite&quot;)) x += 5;
+    public void update(double dt) {          // 60 fois par seconde : la logique
+        if (touche("droite")) x += 200 * dt; // 200 pixels par seconde
     }
 
-    public void draw() {                  // 60 fois par seconde : dessin
-        effacer(&quot;black&quot;);
-        rect(x, 140, 40, 40, &quot;blue&quot;);
+    public void draw() {                     // 60 fois par seconde : l'affichage
+        effacer("black");
+        rect(x, 140, 40, 40, "gold");
     }
 
     public static void main(String[] args) {
-        lancer(new Main());               // démarre la boucle de jeu
+        lancer(new Main());                  // démarre le moteur
     }
 }</code></pre>
-<p>La classe abstraite <code>Jeu</code> (fournie par le labo) contient la boucle et les méthodes de dessin. Tu en hérites et tu <b>redéfinis</b> <code>setup</code>, <code>update</code> et <code>draw</code> : c'est le patron de conception <i>méthode modèle</i>.</p>
-<table><tr><th>Méthode de Jeu</th><th>Rôle</th></tr>
-<tr><td><code>effacer(c)</code>, <code>rect(…)</code>, <code>cercle(…)</code>, <code>ligne(…)</code>, <code>texte(t, x, y, taille, c)</code></td><td>dessin sur un écran de 480 × 320</td></tr>
-<tr><td><code>touche("gauche")</code>, <code>toucheAppuyee("espace")</code></td><td>clavier</td></tr>
-<tr><td><code>sourisX()</code>, <code>sourisY()</code>, <code>clic()</code></td><td>souris</td></tr>
-<tr><td><code>hasard(a, b)</code>, <code>LARGEUR</code>, <code>HAUTEUR</code></td><td>outils</td></tr>
-<tr><td><code>afficher(texte)</code></td><td>écrire dans la console pendant le jeu</td></tr></table>
-
-<h2>2. Des objets pour les entités</h2>
+<table><tr><th>Méthode</th><th>Rôle</th></tr><tr><td><code>effacer(c)</code></td><td>remplit l'écran (480 × 320)</td></tr><tr><td><code>rect(x, y, l, h, c)</code></td><td>rectangle plein (coin haut gauche)</td></tr><tr><td><code>cercle(x, y, r, c)</code></td><td>disque (centre)</td></tr><tr><td><code>ligne(x1, y1, x2, y2, c)</code></td><td>segment</td></tr><tr><td><code>texte(t, x, y, taille, c)</code></td><td>texte</td></tr><tr><td><code>touche("gauche")</code></td><td>vrai tant que la touche est enfoncée</td></tr><tr><td><code>toucheAppuyee("espace")</code></td><td>vrai une seule image, à l'appui</td></tr><tr><td><code>sourisX()</code>, <code>sourisY()</code>, <code>clic()</code></td><td>souris</td></tr><tr><td><code>hasard(a, b)</code></td><td>entier au hasard entre a et b</td></tr><tr><td><code>LARGEUR</code>, <code>HAUTEUR</code></td><td>480 et 320</td></tr></table>
+<p>L'origine est en <b>haut à gauche</b> et <code>y</code> augmente vers le <b>bas</b>.</p>
+<h2>2. Des entités : une classe par type d'objet</h2>
 <pre><code>import java.util.ArrayList;
+import java.util.List;
 
-class Ennemi {
-    double x, y, vitesse;
-    Ennemi(double x, double vitesse) { this.x = x; this.y = 0; this.vitesse = vitesse; }
-    void avancer() { y += vitesse; }
-    boolean sorti() { return y &gt; Jeu.HAUTEUR; }
+class Balle {
+    double x, y, vx, vy;
+    Balle(double x, double y, double vx, double vy) { this.x = x; this.y = y; this.vx = vx; this.vy = vy; }
+
+    void avancer() {
+        x += vx; y += vy;
+        if (x &lt; 10 || x &gt; Jeu.LARGEUR - 10) vx = -vx;
+        if (y &lt; 10 || y &gt; Jeu.HAUTEUR - 10) vy = -vy;
+    }
 }
 
 public class Main extends Jeu {
-    ArrayList&lt;Ennemi&gt; ennemis = new ArrayList&lt;&gt;();
+    List&lt;Balle&gt; balles = new ArrayList&lt;&gt;();
+
+    public void setup() {
+        for (int i = 0; i &lt; 5; i++) balles.add(new Balle(hasard(20, 460), hasard(20, 300), 3, 2));
+    }
+    public void update(double dt) {
+        for (Balle b : balles) b.avancer();
+    }
+    public void draw() {
+        effacer("#16182b");
+        for (Balle b : balles) cercle(b.x, b.y, 10, "gold");
+    }
+    public static void main(String[] args) { lancer(new Main()); }
+}</code></pre>
+<h2>3. Gravité et saut</h2>
+<pre><code>double y = 260, vy = 0;
+final double SOL = 260;
+
+public void update(double dt) {
+    if (toucheAppuyee("espace") &amp;&amp; y &gt;= SOL) vy = -9;     // saut seulement au sol
+    vy += 0.5;                                            // gravité
+    y += vy;
+    if (y &gt; SOL) { y = SOL; vy = 0; }
+}</code></pre>
+<h2>4. Collisions</h2>
+<p>Le test de chevauchement de deux rectangles, exécutable ici car il n'a pas besoin d'écran :</p>
+<div class="essai" data-langue="java"><pre><code>record Boite(double x, double y, double l, double h) {
+    boolean touche(Boite o) {
+        return x &lt; o.x + o.l &amp;&amp; o.x &lt; x + l &amp;&amp; y &lt; o.y + o.h &amp;&amp; o.y &lt; y + h;
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Boite joueur = new Boite(100, 100, 40, 40);
+        System.out.println(joueur.touche(new Boite(130, 120, 20, 20)));     // true : se chevauchent
+        System.out.println(joueur.touche(new Boite(300, 100, 20, 20)));     // false : trop loin
+    }
+}</code></pre></div>
+<h2>5. Créer et supprimer des objets</h2>
+<div class="essai" data-langue="java"><pre><code>import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        List&lt;double[]&gt; tirs = new ArrayList&lt;&gt;(List.of(new double[]{10, 50}, new double[]{20, -5}, new double[]{30, 120}));
+        for (double[] t : tirs) t[1] -= 10;            // chaque tir monte
+        tirs.removeIf(t -&gt; t[1] &lt; 0);                  // retire ceux qui sont sortis
+        System.out.println(tirs.size() + " tirs encore à l'écran");
+    }
+}</code></pre></div>
+<h2>6. Les états du jeu avec un <code>enum</code></h2>
+<pre><code>enum Etat { MENU, JEU, FIN }
+
+public class Main extends Jeu {
+    Etat etat = Etat.MENU;
     int score = 0;
 
     public void update(double dt) {
-        if (hasard(1, 30) == 1) ennemis.add(new Ennemi(hasard(20, 460), hasard(2, 5)));
-        for (Ennemi e : ennemis) e.avancer();
-        ennemis.removeIf(Ennemi::sorti);           // retire ceux qui sont sortis
+        switch (etat) {
+            case MENU -&gt; { if (toucheAppuyee("espace")) { etat = Etat.JEU; score = 0; } }
+            case JEU  -&gt; { score++; if (score &gt; 300) etat = Etat.FIN; }
+            case FIN  -&gt; { if (toucheAppuyee("espace")) etat = Etat.MENU; }
+        }
     }
 
     public void draw() {
-        effacer(&quot;black&quot;);
-        for (Ennemi e : ennemis) cercle(e.x, e.y, 10, &quot;red&quot;);
-        texte(&quot;Score : &quot; + score, 10, 10, 20, &quot;white&quot;);
+        effacer("black");
+        switch (etat) {
+            case MENU -&gt; texte("ESPACE pour jouer", 130, 150, 24, "white");
+            case JEU  -&gt; texte("Score : " + score, 16, 16, 24, "white");
+            case FIN  -&gt; texte("Perdu ! Score : " + score, 130, 150, 24, "tomato");
+        }
+    }
+    public static void main(String[] args) { lancer(new Main()); }
+}</code></pre>
+<section class="tuto"><h3><small>Tutoriel</small>Un jeu complet : esquive les météorites</h3>
+<div class="etape"><h4>Le vaisseau</h4>
+<p>Colle ce code dans le <a href="labo-java.html#libre">bac à sable</a>.</p>
+<pre><code>import java.util.ArrayList;
+import java.util.List;
+
+public class Main extends Jeu {
+    double vx = 220;                              // position du vaisseau
+
+    public void update(double dt) {
+        if (touche("gauche")) vx -= 5;
+        if (touche("droite")) vx += 5;
+        vx = Math.max(0, Math.min(LARGEUR - 40, vx));      // reste dans l'écran
+    }
+
+    public void draw() {
+        effacer("#0d0e1a");
+        rect(vx, 280, 40, 20, "deepskyblue");
     }
 
     public static void main(String[] args) { lancer(new Main()); }
 }</code></pre>
-<div class="box attention"><b>Supprimer en parcourant</b><p>Retirer un élément d'une <code>ArrayList</code> pendant un <code>for (Ennemi e : ennemis)</code> provoque une <code>ConcurrentModificationException</code>. Utilise <code>removeIf</code> ou un <code>Iterator</code>.</p></div>
+</div>
+<div class="etape"><h4>Des météorites qui tombent</h4>
+<p>Chaque météorite est un petit tableau <code>{x, y}</code>. Ajoute ces lignes.</p>
+<pre><code>List&lt;double[]&gt; meteores = new ArrayList&lt;&gt;();
+int chrono = 0;
 
-<h2>3. Collisions et états</h2>
-<pre><code>boolean collision(double ax, double ay, double aw, double ah,
-                  double bx, double by, double bw, double bh) {
-    return ax &lt; bx + bw &amp;&amp; ax + aw &gt; bx &amp;&amp; ay &lt; by + bh &amp;&amp; ay + ah &gt; by;
-}
+// dans update :
+    chrono++;
+    if (chrono % 30 == 0) meteores.add(new double[]{hasard(0, LARGEUR - 20), -20});
+    for (double[] m : meteores) m[1] += 3;
+    meteores.removeIf(m -&gt; m[1] &gt; HAUTEUR);
 
-enum Etat { MENU, JEU, PERDU }
-Etat etat = Etat.MENU;</code></pre>
-<p>Une <b>énumération</b> représente proprement les états du jeu ; <code>update</code> et <code>draw</code> font un <code>switch (etat)</code>.</p>
-<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-java.html">labo Java</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+// dans draw :
+    for (double[] m : meteores) rect(m[0], m[1], 20, 20, "orange");</code></pre>
+</div>
+<div class="etape"><h4>La collision et la fin de partie</h4>
+<pre><code>boolean perdu = false;
+int score = 0;
+
+// au début de update :
+    if (perdu) return;
+    score++;
+// après le déplacement des météorites :
+    for (double[] m : meteores) {
+        if (vx &lt; m[0] + 20 &amp;&amp; m[0] &lt; vx + 40 &amp;&amp; 280 &lt; m[1] + 20 &amp;&amp; m[1] &lt; 300) perdu = true;
+    }
+// à la fin de draw :
+    texte("Score : " + score, 12, 12, 20, "white");
+    if (perdu) texte("PERDU", 190, 140, 36, "tomato");</code></pre>
+</div>
+<div class="etape"><h4>À toi d'améliorer</h4>
+<p>Remplace les tableaux par une vraie classe <code>Meteore</code> avec ses méthodes <code>avancer()</code> et <code>dessiner(Jeu jeu)</code>, fais accélérer la chute avec le score, ajoute une touche pour recommencer et des vies.</p>
+</div>
+</section>
+<div class="box defi"><b>Défi : la pluie d'étoiles</b><p>Une liste d'objets mise à jour à chaque image.</p><a class="defi-go" href="labo-java.html#m=java-etoiles">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : tirer des projectiles</b><p>Créer et supprimer des objets en cours de partie.</p><a class="defi-go" href="labo-java.html#m=java-tir">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : attrape les fruits</b><p>Un mini-jeu complet avec score.</p><a class="defi-go" href="labo-java.html#m=java-fruits">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p><code>public class Main extends Jeu</code>, avec <code>setup()</code>, <code>update(double dt)</code>, <code>draw()</code>, et <code>lancer(new Main());</code> dans <code>main</code>. </p><p> L'état du jeu vit dans les attributs. </p><p> Une classe (ou un record) par type d'entité, rangées dans une <code>List</code>. </p><p> <code>removeIf</code> pour retirer des objets. </p><p> Un <code>enum</code> pour les états (menu, jeu, fin).</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-java.html">Labo Java</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
 </article>
 
 <!-- ============ EXERCICES ============ -->
 <script>
 window.EF_EXERCICES = [
  {
-  "type": "qcm",
   "niveau": "facile",
-  "q": "Quelle classe ta classe Main doit-elle étendre dans le labo ?",
+  "q": "De quelle classe ta classe Main doit-elle hériter pour faire un jeu dans le labo ?",
+  "type": "qcm",
   "options": [
-   "`Game`",
    "`Jeu`",
+   "`Applet`",
    "`Canvas`",
-   "`Thread`"
+   "`Game`"
   ],
-  "answer": 1,
+  "answer": 0,
   "explication": ""
  },
  {
+  "niveau": "facile",
+  "q": "Quelle méthode est appelée une seule fois au démarrage ?",
   "type": "qcm",
-  "niveau": "moyen",
-  "q": "Que fait `lancer(new Main());` ?",
   "options": [
-   "Compile le jeu",
-   "Crée l'objet jeu et démarre la boucle (setup puis update/draw)",
-   "Affiche Main",
-   "Rien"
+   "`update`",
+   "`draw`",
+   "`setup`",
+   "`start`"
   ],
-  "answer": 1,
+  "answer": 2,
   "explication": ""
  },
  {
-  "type": "qcm",
   "niveau": "moyen",
-  "q": "Comment appelle-t-on le fait de réécrire update() dans Main ?",
+  "q": "Quelle instruction démarre le moteur depuis main ?",
+  "type": "qcm",
   "options": [
-   "Surcharge",
-   "Redéfinition (override)",
-   "Encapsulation",
-   "Instanciation"
+   "`new Main().run();`",
+   "`play();`",
+   "`Jeu.start();`",
+   "`lancer(new Main());`"
   ],
-  "answer": 1,
+  "answer": 3,
   "explication": ""
  },
  {
-  "type": "qcm",
   "niveau": "moyen",
-  "q": "Où stocker la position du joueur pour qu'elle survive d'une image à l'autre ?",
+  "q": "Que représente `dt` dans `update(double dt)` ?",
+  "type": "qcm",
   "options": [
-   "Dans une variable locale de draw()",
-   "Dans un attribut de la classe",
-   "Dans main()",
-   "Dans un String"
+   "La date",
+   "La durée totale",
+   "Le temps écoulé depuis l'image précédente, en secondes",
+   "Le numéro de l'image"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel principe objet permet au moteur d'appeler tes méthodes update et draw ?",
+  "type": "qcm",
+  "options": [
+   "Les génériques",
+   "L'encapsulation",
+   "La surcharge",
+   "Le polymorphisme (redéfinition)"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Où se trouve le point (0, 0) ?",
+  "type": "qcm",
+  "options": [
+   "En haut à gauche",
+   "En bas à gauche",
+   "Au centre",
+   "En bas à droite"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle méthode utiliser pour un saut déclenché une seule fois par appui ?",
+  "type": "qcm",
+  "options": [
+   "`touche`",
+   "`toucheAppuyee`",
+   "`hasard`",
+   "`clic`"
   ],
   "answer": 1,
   "explication": ""
  },
  {
+  "niveau": "moyen",
+  "q": "Où range-t-on l'état du jeu (positions, score) ?",
   "type": "qcm",
+  "options": [
+   "Dans le fichier",
+   "Dans des variables locales de draw",
+   "Dans les attributs de la classe",
+   "Dans main"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
   "niveau": "difficile",
-  "q": "Que provoque `ennemis.remove(e)` dans un `for (Ennemi e : ennemis)` ?",
-  "options": [
-   "Rien",
-   "ConcurrentModificationException",
-   "Une boucle infinie",
-   "Une erreur de compilation"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
+  "q": "Quelle méthode retire d'une liste tous les éléments vérifiant une condition ?",
   "type": "qcm",
-  "niveau": "moyen",
-  "q": "Quelle méthode retire d'une ArrayList tous les éléments qui vérifient une condition ?",
   "options": [
-   "`removeAll`",
+   "`deleteAll`",
    "`removeIf`",
-   "`filter`",
-   "`deleteWhere`"
+   "`clear`",
+   "`filter`"
   ],
   "answer": 1,
   "explication": ""
  },
  {
+  "niveau": "difficile",
+  "q": "Pourquoi ne pas appeler `liste.remove(x)` dans un for-each sur cette liste ?",
   "type": "qcm",
-  "niveau": "moyen",
-  "q": "À quoi sert une enum Etat { MENU, JEU, PERDU } ?",
   "options": [
-   "À compter les points",
-   "À représenter les états du jeu de façon sûre",
-   "À dessiner",
-   "À lire le clavier"
+   "C'est trop lent",
+   "Cela lève une ConcurrentModificationException",
+   "remove n'existe pas",
+   "Cela vide la liste"
   ],
   "answer": 1,
   "explication": ""
  },
  {
-  "type": "vf",
+  "niveau": "difficile",
+  "q": "Deux rectangles sont en collision quand…",
+  "type": "qcm",
+  "options": [
+   "ils ont la même taille",
+   "leurs coins coïncident",
+   "ils se chevauchent sur l'axe x ET sur l'axe y",
+   "ils se chevauchent sur un seul axe"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
   "niveau": "moyen",
-  "q": "Minecraft (édition Java) est écrit en Java.",
+  "q": "Quel outil convient pour représenter les états menu / jeu / fin ?",
+  "type": "qcm",
+  "options": [
+   "Un double",
+   "Un tableau",
+   "Un `enum`",
+   "Une interface"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment empêcher x de sortir de l'intervalle 0 à 440 ?",
+  "type": "qcm",
+  "options": [
+   "`x = Math.max(0, Math.min(440, x));`",
+   "`x = x % 440;`",
+   "`x = Math.round(x);`",
+   "`x = Math.abs(x);`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi multiplier une vitesse par dt ?",
+  "type": "qcm",
+  "options": [
+   "Pour un mouvement identique quelle que soit la vitesse de la machine",
+   "Pour arrondir la position",
+   "Pour éviter les collisions",
+   "Pour ralentir le jeu"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "La méthode draw doit contenir la logique du jeu.",
+  "type": "vf",
+  "answer": false,
+  "explication": "draw affiche ; la logique va dans update."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quand y augmente, l'objet descend à l'écran.",
+  "type": "vf",
   "answer": true,
   "explication": ""
  },
  {
-  "type": "saisie",
   "niveau": "moyen",
-  "q": "Quelle méthode de Jeu écrit un message dans la console pendant le jeu ?",
+  "q": "Quelle constante contient la largeur de l'écran de jeu ?",
+  "type": "saisie",
   "answers": [
-   "afficher",
-   "afficher()"
+   "LARGEUR"
   ],
   "explication": ""
  },
  {
-  "type": "qcm",
   "niveau": "moyen",
-  "q": "Quelle bibliothèque Java est utilisée pour des jeux sur ordinateur et Android ?",
-  "options": [
-   "React",
-   "libGDX",
-   "Django",
-   "jQuery"
+  "q": "Associe chaque méthode à son rôle.",
+  "type": "associer",
+  "paires": [
+   [
+    "`effacer`",
+    "remplir l'écran"
+   ],
+   [
+    "`cercle`",
+    "dessiner un disque"
+   ],
+   [
+    "`hasard`",
+    "entier aléatoire"
+   ],
+   [
+    "`texte`",
+    "écrire à l'écran"
+   ]
   ],
-  "answer": 1,
   "explication": ""
  }
 ];
@@ -215,6 +431,8 @@ window.EF_EXERCICES = [
 <script src="../../data/modules.js"></script>
 <script src="../../assets/app.js"></script>
 <script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
 <script src="../../assets/chapter.js"></script>
 </body>
 </html>

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Java : les chaînes de caractères — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="java" data-chapter="java-chaines">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/java.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<h2>1. <code>String</code> : un objet non modifiable</h2>
+<p>Un <code>String</code> est <b>immuable</b> : aucune méthode ne le modifie, toutes renvoient un <b>nouveau</b> <code>String</code>.</p>
+<div class="essai" data-langue="java"><pre><code>public class Main {
+    public static void main(String[] args) {
+        String s = "Bonjour Java";
+        System.out.println(s.length());                 // 12 (avec des parenthèses, contrairement aux tableaux)
+        System.out.println(s.charAt(0) + " " + s.charAt(s.length() - 1));
+        System.out.println(s.toUpperCase() + " " + s.toLowerCase());
+        System.out.println(s.substring(0, 7));          // de l'indice 0 inclus à 7 exclu : Bonjour
+        System.out.println(s.substring(8));             // de 8 à la fin : Java
+        System.out.println(s.indexOf("Java") + " " + s.indexOf("Python"));   // 8  -1
+        System.out.println(s.contains("jour") + " " + s.startsWith("Bon") + " " + s.endsWith("va"));
+        System.out.println(s.replace("Java", "le monde"));
+        System.out.println(s);                          // inchangé !
+        s = s.toUpperCase();                            // il faut réaffecter
+        System.out.println(s);
+    }
+}</code></pre></div>
+<h2>2. Comparer</h2>
+<div class="essai" data-langue="java"><pre><code>public class Main {
+    public static void main(String[] args) {
+        String a = "java";
+        String b = new String("java");
+        System.out.println(a == b);                     // false : deux objets différents
+        System.out.println(a.equals(b));                // true  : même contenu
+        System.out.println("Java".equalsIgnoreCase("JAVA"));
+        System.out.println("abc".compareTo("abd"));     // négatif : "abc" est avant "abd"
+        System.out.println("".isEmpty() + " " + "   ".isBlank());
+    }
+}</code></pre></div>
+<div class="box attention"><b><code>equals</code>, toujours</b><p><code>==</code> compare les références. Il « marche » parfois par hasard (Java réutilise certains littéraux), ce qui rend le bug sournois. Pour éviter une erreur quand la variable peut être <code>null</code>, place la constante à gauche : <code>"oui".equals(reponse)</code>.</p></div>
+<h2>3. Découper, assembler, nettoyer</h2>
+<div class="essai" data-langue="java"><pre><code>import java.util.Arrays;
+
+public class Main {
+    public static void main(String[] args) {
+        String csv = "Léa;17;SIO";
+        String[] champs = csv.split(";");
+        System.out.println(champs.length + " " + champs[0] + " " + Arrays.toString(champs));
+        System.out.println(String.join(" | ", champs));
+        System.out.println("  texte  ".trim() + "|" + "  texte  ".strip() + "|");
+        System.out.println("ab".repeat(3));
+        String[] mots = "un  deux   trois".trim().split("\\s+");     // \\s+ : un ou plusieurs espaces
+        System.out.println(mots.length);
+    }
+}</code></pre></div>
+<h2>4. Convertir</h2>
+<div class="essai" data-langue="java"><pre><code>public class Main {
+    public static void main(String[] args) {
+        int n = Integer.parseInt("42") + 1;             // String → int
+        double d = Double.parseDouble("3.5") * 2;       // String → double
+        String s = String.valueOf(n);                   // nombre → String
+        String t = "" + d;                              // raccourci courant
+        System.out.println(n + " " + d + " " + s.length() + " " + t);
+        System.out.println(Integer.toBinaryString(10) + " " + Integer.toHexString(255) + " " + Integer.parseInt("1010", 2));
+    }
+}</code></pre></div>
+<p><code>Integer.parseInt("abc")</code> lève une <code>NumberFormatException</code> : on apprendra à l'attraper dans le chapitre sur les exceptions.</p>
+<h2>5. Les caractères</h2>
+<p>Un <code>char</code> est un petit entier : le code du caractère. On peut calculer avec.</p>
+<div class="essai" data-langue="java"><pre><code>public class Main {
+    public static void main(String[] args) {
+        char c = 'a';
+        System.out.println((int) c + " " + (char) (c + 1) + " " + (char) 65);
+        System.out.println(Character.isDigit('7') + " " + Character.isLetter('7') + " " + Character.toUpperCase('b'));
+        String mot = "Bonjour";
+        int voyelles = 0;
+        for (char x : mot.toCharArray()) {
+            if ("aeiouy".indexOf(x) &gt;= 0) voyelles++;
+        }
+        System.out.println(voyelles);
+    }
+}</code></pre></div>
+<h2>6. <code>StringBuilder</code> : construire un texte efficacement</h2>
+<p>Comme un <code>String</code> n'est pas modifiable, <code>s = s + morceau</code> dans une boucle recrée tout le texte à chaque tour. <code>StringBuilder</code> est une chaîne <b>modifiable</b>, faite pour cela.</p>
+<div class="essai" data-langue="java"><pre><code>public class Main {
+    public static void main(String[] args) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 1; i &lt;= 5; i++) {
+            sb.append(i).append(" ");           // append renvoie le StringBuilder : on enchaîne
+        }
+        System.out.println(sb.toString().trim());
+        sb.insert(0, "Nombres : ");
+        sb.setLength(sb.length() - 1);          // retire le dernier caractère
+        System.out.println(sb);
+        System.out.println(new StringBuilder("Java").reverse());
+    }
+}</code></pre></div>
+<h2>7. Blocs de texte</h2>
+<div class="essai" data-langue="java"><pre><code>public class Main {
+    public static void main(String[] args) {
+        String html = """
+            &lt;ul&gt;
+              &lt;li&gt;Java&lt;/li&gt;
+            &lt;/ul&gt;""";
+        System.out.println(html);
+        System.out.println("Ligne 1\nLigne 2\tavec tabulation et \"guillemets\"");
+    }
+}</code></pre></div>
+<section class="tuto"><h3><small>Tutoriel</small>Analyser une ligne de journal (log)</h3>
+<div class="etape"><h4>Découper les champs</h4>
+<div class="essai" data-langue="java"><pre><code>public class Main {
+    public static void main(String[] args) {
+        String ligne = "2026-11-13 14:02:55 ERREUR disque plein sur /dev/sda1";
+        String[] p = ligne.split(" ", 4);        // au plus 4 morceaux : le message reste entier
+        System.out.println(p[0]);
+        System.out.println(p[1]);
+        System.out.println(p[2]);
+        System.out.println(p[3]);
+    }
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Tester le niveau et compter les mots</h4>
+<div class="essai" data-langue="java"><pre><code>public class Main {
+    public static void main(String[] args) {
+        String ligne = "2026-11-13 14:02:55 ERREUR disque plein sur /dev/sda1";
+        String[] p = ligne.split(" ", 4);
+        if (p[2].equals("ERREUR")) {
+            System.out.println("Alerte : " + p[3].toUpperCase());
+        }
+        System.out.println(p[3].split("\\s+").length + " mots");
+    }
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Masquer une information sensible</h4>
+<p><code>replaceAll</code> accepte une <b>expression régulière</b> : ici, quatre groupes de chiffres séparés par des points.</p>
+<div class="essai" data-langue="java"><pre><code>public class Main {
+    public static void main(String[] args) {
+        String ligne = "connexion refusée depuis 192.168.1.42 puis 10.0.0.7";
+        String propre = ligne.replaceAll("\\d+\\.\\d+\\.\\d+\\.\\d+", "[IP masquée]");
+        System.out.println(propre);
+        System.out.println("192.168.1.42".matches("\\d+\\.\\d+\\.\\d+\\.\\d+"));
+    }
+}</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : compter les voyelles</b><p>Parcours un <code>String</code> caractère par caractère.</p><a class="defi-go" href="labo-java.html#m=java-voyelles">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : compter les mots</b><p><code>split</code> et une expression régulière.</p><a class="defi-go" href="labo-java.html#m=java-mots">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : le chiffre de César</b><p>Calcule sur des <code>char</code> et assemble avec un <code>StringBuilder</code>.</p><a class="defi-go" href="labo-java.html#m=java-cesar">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p>Un <code>String</code> est immuable : chaque méthode renvoie un nouveau texte. </p><p> <code>length()</code>, <code>charAt(i)</code>, <code>substring(début, fin exclue)</code>, <code>indexOf</code>, <code>contains</code>, <code>replace</code>, <code>split</code>, <code>trim</code>. </p><p> Comparer avec <code>equals</code>, jamais <code>==</code>. </p><p> <code>Integer.parseInt</code> / <code>String.valueOf</code> pour convertir. </p><p> <code>StringBuilder</code> (<code>append</code>, <code>toString</code>) pour construire un texte dans une boucle.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-java.html">Labo Java</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "facile",
+  "q": "Quelle méthode donne la longueur d'un String ?",
+  "type": "qcm",
+  "options": [
+   "`length`",
+   "`length()`",
+   "`size()`",
+   "`count()`"
+  ],
+  "answer": 1,
+  "explication": "Avec des parenthèses, contrairement aux tableaux."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que renvoie `\"Bonjour\".substring(0, 3)` ?",
+  "type": "qcm",
+  "options": [
+   "`\"onj\"`",
+   "`\"Bo\"`",
+   "`\"Bon\"`",
+   "`\"Bonj\"`"
+  ],
+  "answer": 2,
+  "explication": "L'indice de fin est exclu."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que renvoie `\"Bonjour\".charAt(1)` ?",
+  "type": "qcm",
+  "options": [
+   "`'o'`",
+   "`'n'`",
+   "`'B'`",
+   "`\"Bo\"`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que renvoie `\"Bonjour\".indexOf(\"x\")` ?",
+  "type": "qcm",
+  "options": [
+   "0",
+   "`null`",
+   "Une exception",
+   "-1"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Après `String s = \"java\"; s.toUpperCase();`, que vaut s ?",
+  "type": "qcm",
+  "options": [
+   "`null`",
+   "`\"java\"`",
+   "`\"JAVA\"`",
+   "Une erreur"
+  ],
+  "answer": 1,
+  "explication": "Un String est immuable : il faut réaffecter."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment tester l'égalité de deux String ?",
+  "type": "qcm",
+  "options": [
+   "`a.equals(b)`",
+   "`a.compare(b)`",
+   "`a = b`",
+   "`a == b`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que renvoie `\"a;b;c\".split(\";\")` ?",
+  "type": "qcm",
+  "options": [
+   "Une liste de 3 char",
+   "Le texte \"abc\"",
+   "Un tableau de 3 String",
+   "3"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle méthode convertit \"42\" en entier ?",
+  "type": "qcm",
+  "options": [
+   "`\"42\".toInt()`",
+   "`Int.parse(\"42\")`",
+   "`Integer.parseInt(\"42\")`",
+   "`(int) \"42\"`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle méthode convertit un nombre en String ?",
+  "type": "qcm",
+  "options": [
+   "`str(n)`",
+   "`n.toString()`",
+   "`(String) n`",
+   "`String.valueOf(n)`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi utiliser StringBuilder dans une boucle ?",
+  "type": "qcm",
+  "options": [
+   "Pour trier le texte",
+   "Pour économiser des variables",
+   "Parce que + est interdit dans une boucle",
+   "Parce que concaténer des String recrée tout le texte à chaque tour"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle méthode de StringBuilder ajoute du texte à la fin ?",
+  "type": "qcm",
+  "options": [
+   "`add`",
+   "`concat`",
+   "`push`",
+   "`append`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que vaut `(char) ('a' + 2)` ?",
+  "type": "qcm",
+  "options": [
+   "`'c'`",
+   "99",
+   "`\"a2\"`",
+   "Une erreur"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi écrire `\"oui\".equals(reponse)` plutôt que `reponse.equals(\"oui\")` ?",
+  "type": "qcm",
+  "options": [
+   "C'est obligatoire",
+   "Cela ne plante pas si reponse vaut null",
+   "Pour ignorer la casse",
+   "C'est plus rapide"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que fait `\"un  deux\".split(\"\\\\s+\")` ?",
+  "type": "qcm",
+  "options": [
+   "Découpe sur un ou plusieurs espaces",
+   "Découpe sur le signe +",
+   "Supprime les espaces",
+   "Découpe sur le caractère s"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que renvoie `\"abc\".compareTo(\"abd\")` ?",
+  "type": "qcm",
+  "options": [
+   "`false`",
+   "Un nombre positif",
+   "0",
+   "Un nombre négatif"
+  ],
+  "answer": 3,
+  "explication": "\"abc\" vient avant \"abd\"."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Un String Java peut être modifié caractère par caractère.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Il est immuable ; on utilise StringBuilder."
+ },
+ {
+  "niveau": "moyen",
+  "q": "`\"  a  \".trim()` renvoie \"a\".",
+  "type": "vf",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "`Integer.parseInt(\"abc\")` renvoie 0.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Il lève une NumberFormatException."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle méthode transforme un String en tableau de char ?",
+  "type": "saisie",
+  "answers": [
+   "toCharArray",
+   "toCharArray()"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque méthode à son résultat sur \"Java\".",
+  "type": "associer",
+  "paires": [
+   [
+    "`length()`",
+    "4"
+   ],
+   [
+    "`charAt(0)`",
+    "'J'"
+   ],
+   [
+    "`toUpperCase()`",
+    "\"JAVA\""
+   ],
+   [
+    "`indexOf(\"v\")`",
+    "2"
+   ],
+   [
+    "`substring(2)`",
+    "\"va\""
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

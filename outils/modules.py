@@ -24,13 +24,9 @@ MODULES = {
                   sousTitre="Du vrai C++20 compilé par clang dans le navigateur : des bases aux classes, à l'héritage, à la STL et aux templates, puis des jeux en temps réel.",
                   texte="{n} missions avec du vrai C++20 compilé par clang dans le navigateur : bases, fonctions, vector, pointeurs, classes, héritage, STL, templates, puis des jeux en temps réel. Plus un bac à sable.")),
     "java": dict(
-        titre="Java", sousTitre="Bonus · objets et Android", icone="J", couleur="java",
-        description="Classes, types, Scanner, méthodes, tableaux et ArrayList, programmation objet, puis des jeux avec la classe Jeu.",
+        titre="Java", sousTitre="Bonus · objets et Android", icone="J", couleur="java", textuel=True,
+        description="Le cours complet : types, méthodes, tableaux, chaînes, programmation objet, héritage et interfaces, collections, exceptions, lambdas et streams, puis des jeux avec la classe Jeu.",
         labo=dict(href="labo-java.html", titre="Labo Java", court="Java",
-                  texte="16 missions avec du vrai Java (javac + TeaVM) dans le navigateur : console, objets, puis jeux. Plus un bac à sable."),
-        fixes=[("java-bases", "Java : la classe Main, types et Scanner", "facile"),
-               ("java-conditions-boucles", "Java : conditions et boucles", "facile"),
-               ("java-methodes-tableaux", "Java : méthodes, tableaux et ArrayList", "moyen"),
-               ("java-poo", "Java : programmation orientée objet", "difficile"),
-               ("java-jeu", "Java : créer un jeu dans le navigateur", "difficile")]),
+                  sousTitre="Du vrai Java (javac + TeaVM) dans le navigateur : des bases aux objets, à l'héritage, aux collections, aux exceptions et aux streams, puis des jeux.",
+                  texte="{n} missions avec du vrai Java (javac + TeaVM) dans le navigateur : bases, méthodes, chaînes, objets, héritage, collections, exceptions, streams, puis des jeux. Plus un bac à sable.")),
 }

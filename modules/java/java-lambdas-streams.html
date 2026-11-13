@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Java : lambdas et streams — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="java" data-chapter="java-lambdas-streams">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/java.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>Depuis Java 8, on peut passer du <b>comportement</b> en argument (une lambda) et traiter les collections de façon <b>déclarative</b> (les streams) : on décrit *quoi* obtenir plutôt que *comment* boucler.</p>
+<h2>1. Une lambda : une fonction écrite sur place</h2>
+<div class="essai" data-langue="java"><pre><code>import java.util.function.*;
+
+public class Main {
+    public static void main(String[] args) {
+        Function&lt;Integer, Integer&gt; carre = x -&gt; x * x;               // un paramètre, un résultat
+        BiFunction&lt;Integer, Integer, Integer&gt; somme = (a, b) -&gt; a + b;
+        Predicate&lt;String&gt; estVide = s -&gt; s.isEmpty();                // renvoie un boolean
+        Supplier&lt;String&gt; salut = () -&gt; "Bonjour";                    // aucun paramètre
+        Consumer&lt;String&gt; afficher = s -&gt; System.out.println("&gt; " + s);    // ne renvoie rien
+
+        System.out.println(carre.apply(7) + " " + somme.apply(3, 4) + " " + estVide.test("") + " " + salut.get());
+        afficher.accept("une lambda est un objet");
+
+        Function&lt;Integer, Integer&gt; plusLong = x -&gt; {                 // corps sur plusieurs lignes
+            int double_ = x * 2;
+            return double_ + 1;
+        };
+        System.out.println(plusLong.apply(5));
+    }
+}</code></pre></div>
+<table><tr><th>Interface fonctionnelle</th><th>Forme</th><th>Méthode</th></tr><tr><td><code>Function&lt;T, R&gt;</code></td><td>T → R</td><td><code>apply</code></td></tr><tr><td><code>Predicate&lt;T&gt;</code></td><td>T → boolean</td><td><code>test</code></td></tr><tr><td><code>Consumer&lt;T&gt;</code></td><td>T → rien</td><td><code>accept</code></td></tr><tr><td><code>Supplier&lt;T&gt;</code></td><td>rien → T</td><td><code>get</code></td></tr><tr><td><code>Comparator&lt;T&gt;</code></td><td>(T, T) → int</td><td><code>compare</code></td></tr><tr><td><code>Runnable</code></td><td>rien → rien</td><td><code>run</code></td></tr></table>
+<p>Une lambda est une façon courte d'écrire un objet qui implémente une <b>interface à une seule méthode abstraite</b>.</p>
+<h2>2. Les références de méthodes</h2>
+<p>Quand la lambda ne fait qu'appeler une méthode existante, on peut la nommer directement avec <code>::</code>.</p>
+<div class="essai" data-langue="java"><pre><code>import java.util.*;
+import java.util.function.*;
+
+public class Main {
+    public static void main(String[] args) {
+        Function&lt;String, Integer&gt; longueur = String::length;         // s -&gt; s.length()
+        Function&lt;String, String&gt; maj = String::toUpperCase;          // s -&gt; s.toUpperCase()
+        Function&lt;String, Integer&gt; convertir = Integer::parseInt;     // s -&gt; Integer.parseInt(s)
+        System.out.println(longueur.apply("Java") + " " + maj.apply("java") + " " + (convertir.apply("41") + 1));
+        List&lt;String&gt; mots = new ArrayList&lt;&gt;(List.of("poire", "kiwi", "banane"));
+        mots.forEach(System.out::println);                           // x -&gt; System.out.println(x)
+    }
+}</code></pre></div>
+<h2>3. Les streams : une chaîne de traitements</h2>
+<p>Un <b>stream</b> est un flux d'éléments qui traverse une suite d'opérations. On part d'une collection (<code>.stream()</code>), on enchaîne des opérations <b>intermédiaires</b>, et on termine par une opération <b>terminale</b> qui produit le résultat.</p>
+<div class="essai" data-langue="java"><pre><code>import java.util.*;
+import java.util.stream.*;
+
+public class Main {
+    public static void main(String[] args) {
+        List&lt;Integer&gt; notes = List.of(12, 5, 19, 8, 10, 15);
+
+        List&lt;Integer&gt; admis = notes.stream()
+            .filter(n -&gt; n &gt;= 10)                // garde ceux qui passent le test
+            .sorted()                            // trie
+            .collect(Collectors.toList());       // rassemble dans une liste
+        System.out.println(admis);
+
+        List&lt;String&gt; textes = notes.stream()
+            .map(n -&gt; n + "/20")                 // transforme chaque élément
+            .collect(Collectors.toList());
+        System.out.println(textes);
+
+        System.out.println(notes.stream().filter(n -&gt; n &gt;= 10).count());            // combien
+        System.out.println(notes.stream().mapToInt(Integer::intValue).sum());       // somme
+        System.out.println(notes.stream().mapToInt(Integer::intValue).average().getAsDouble());
+        System.out.println(notes.stream().mapToInt(Integer::intValue).max().getAsInt());
+        System.out.println(notes.stream().anyMatch(n -&gt; n &lt; 6) + " " + notes.stream().allMatch(n -&gt; n &gt; 0));
+    }
+}</code></pre></div>
+<table><tr><th>Intermédiaires (renvoient un stream)</th><th>Terminales (produisent un résultat)</th></tr><tr><td><code>filter(test)</code></td><td><code>collect(Collectors.toList())</code>, <code>toList()</code></td></tr><tr><td><code>map(fonction)</code></td><td><code>count()</code>, <code>sum()</code>, <code>average()</code>, <code>max()</code>, <code>min()</code></td></tr><tr><td><code>sorted()</code>, <code>sorted(comparateur)</code></td><td><code>forEach(action)</code></td></tr><tr><td><code>distinct()</code>, <code>limit(n)</code>, <code>skip(n)</code></td><td><code>anyMatch</code>, <code>allMatch</code>, <code>noneMatch</code></td></tr><tr><td><code>mapToInt(…)</code></td><td><code>reduce(départ, opération)</code>, <code>findFirst()</code></td></tr></table>
+<p>Le stream <b>ne modifie pas</b> la collection d'origine, et rien n'est calculé tant qu'il n'y a pas d'opération terminale.</p>
+<h2>4. Des streams sur des objets</h2>
+<div class="essai" data-langue="java"><pre><code>import java.util.*;
+import java.util.stream.*;
+
+class Eleve {
+    final String nom, option;
+    final double note;
+    Eleve(String nom, String option, double note) { this.nom = nom; this.option = option; this.note = note; }
+    String getNom() { return nom; }
+    String getOption() { return option; }
+    double getNote() { return note; }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        List&lt;Eleve&gt; classe = List.of(new Eleve("Léa", "SLAM", 15), new Eleve("Sam", "SISR", 9),
+                                     new Eleve("Zoé", "SLAM", 18), new Eleve("Tom", "SISR", 12));
+
+        String admisSlam = classe.stream()
+            .filter(e -&gt; e.getOption().equals("SLAM"))
+            .filter(e -&gt; e.getNote() &gt;= 10)
+            .sorted(Comparator.comparing(Eleve::getNote).reversed())
+            .map(Eleve::getNom)
+            .collect(Collectors.joining(", "));
+        System.out.println(admisSlam);
+
+        System.out.println(classe.stream().mapToDouble(Eleve::getNote).average().orElse(0));
+        Map&lt;String, Long&gt; parOption = classe.stream()
+            .collect(Collectors.groupingBy(Eleve::getOption, TreeMap::new, Collectors.counting()));
+        System.out.println(parOption);
+    }
+}</code></pre></div>
+<p>Compare avec la version « boucles » : trois <code>if</code>, un tri, une concaténation. Le stream se lit comme une phrase.</p>
+<h2>5. <code>reduce</code> et <code>IntStream</code></h2>
+<div class="essai" data-langue="java"><pre><code>import java.util.*;
+import java.util.stream.*;
+
+public class Main {
+    public static void main(String[] args) {
+        List&lt;Integer&gt; v = List.of(1, 2, 3, 4);
+        System.out.println(v.stream().reduce(0, Integer::sum));           // 10 : combine tous les éléments
+        System.out.println(v.stream().reduce(1, (a, b) -&gt; a * b));        // 24
+        System.out.println(IntStream.rangeClosed(1, 5).sum());            // 1 + 2 + 3 + 4 + 5
+        IntStream.range(0, 3).forEach(i -&gt; System.out.print(i + " "));    // remplace for (int i = 0; i &lt; 3; i++)
+        System.out.println();
+        System.out.println(Stream.of("b", "a", "b", "c").distinct().sorted().collect(Collectors.toList()));
+    }
+}</code></pre></div>
+<h2>6. <code>Optional</code> : une valeur, ou rien</h2>
+<p>Certaines opérations peuvent ne rien trouver (<code>findFirst</code>, <code>max</code> sur une liste vide). Plutôt que de renvoyer <code>null</code>, elles renvoient un <code>Optional</code>, qui oblige à prévoir le cas « rien ».</p>
+<div class="essai" data-langue="java"><pre><code>import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        List&lt;String&gt; mots = List.of("poire", "kiwi", "banane");
+        Optional&lt;String&gt; long6 = mots.stream().filter(m -&gt; m.length() &gt;= 6).findFirst();
+        Optional&lt;String&gt; long9 = mots.stream().filter(m -&gt; m.length() &gt;= 9).findFirst();
+        System.out.println(long6.isPresent() + " " + long6.get());
+        System.out.println(long9.isPresent() + " " + long9.orElse("aucun"));
+        long6.ifPresent(m -&gt; System.out.println("trouvé : " + m));
+        System.out.println(long9.map(String::toUpperCase).orElse("?"));
+    }
+}</code></pre></div>
+<div class="box attention"><b>Lisibilité avant tout</b><p>Un stream de dix opérations avec des lambdas sur plusieurs lignes est plus difficile à lire et à déboguer qu'une boucle. Utilise-les pour filtrer, transformer, agréger ; garde une boucle classique quand la logique est complexe.</p></div>
+<section class="tuto"><h3><small>Tutoriel</small>Du <code>for</code> au stream</h3>
+<div class="etape"><h4>La version avec des boucles</h4>
+<p>Total des commandes de plus de 50 €.</p>
+<div class="essai" data-langue="java"><pre><code>import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        List&lt;Double&gt; commandes = List.of(20.0, 75.5, 120.0, 49.9, 60.0);
+        double total = 0;
+        for (double c : commandes) {
+            if (c &gt; 50) total += c;
+        }
+        System.out.println(total);
+    }
+}</code></pre></div>
+</div>
+<div class="etape"><h4>La même chose avec un stream</h4>
+<div class="essai" data-langue="java"><pre><code>import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        List&lt;Double&gt; commandes = List.of(20.0, 75.5, 120.0, 49.9, 60.0);
+        double total = commandes.stream()
+            .filter(c -&gt; c &gt; 50)
+            .mapToDouble(Double::doubleValue)
+            .sum();
+        System.out.println(total);
+    }
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Ajouter une étape sans tout réécrire</h4>
+<p>Appliquer 10 % de remise avant de filtrer : une ligne de plus. Change l'ordre de <code>map</code> et <code>filter</code> et observe.</p>
+<div class="essai" data-langue="java"><pre><code>import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        List&lt;Double&gt; commandes = List.of(20.0, 75.5, 120.0, 49.9, 60.0);
+        double total = commandes.stream()
+            .map(c -&gt; c * 0.9)
+            .filter(c -&gt; c &gt; 50)
+            .mapToDouble(Double::doubleValue)
+            .sum();
+        System.out.printf("%.2f%n", total);
+    }
+}</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : filtrer et compter</b><p>Un stream à la place d'une boucle.</p><a class="defi-go" href="labo-java.html#m=java-stream">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p>Lambda : <code>(paramètres) -&gt; expression</code> ; elle implémente une interface à une seule méthode. </p><p> <code>Classe::methode</code> est une référence de méthode. </p><p> Stream : <code>collection.stream()</code> → <code>filter</code> / <code>map</code> / <code>sorted</code> → <code>collect</code>, <code>count</code>, <code>sum</code>… </p><p> Un stream ne modifie pas sa source. </p><p> <code>Optional</code> représente une valeur peut-être absente : <code>orElse</code>, <code>ifPresent</code>.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-java.html">Labo Java</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'une lambda ?",
+  "type": "qcm",
+  "options": [
+   "Un type primitif",
+   "Une fonction anonyme écrite sur place",
+   "Une boucle",
+   "Une classe abstraite"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment s'écrit une lambda qui double son argument ?",
+  "type": "qcm",
+  "options": [
+   "`x => x * 2`",
+   "`function(x) { x * 2 }`",
+   "`x -> x * 2`",
+   "`lambda x: x * 2`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle interface représente une fonction T → boolean ?",
+  "type": "qcm",
+  "options": [
+   "`Predicate<T>`",
+   "`Consumer<T>`",
+   "`Function<T>`",
+   "`Supplier<T>`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle interface représente une action qui ne renvoie rien ?",
+  "type": "qcm",
+  "options": [
+   "`Predicate<T>`",
+   "`Supplier<T>`",
+   "`Consumer<T>`",
+   "`Function<T, R>`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "`String::length` est équivalent à…",
+  "type": "qcm",
+  "options": [
+   "`length(String)`",
+   "`String.length()`",
+   "`s -> s.length()`",
+   "`s -> String.length`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle opération de stream garde les éléments qui vérifient une condition ?",
+  "type": "qcm",
+  "options": [
+   "`filter`",
+   "`map`",
+   "`collect`",
+   "`sorted`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle opération transforme chaque élément ?",
+  "type": "qcm",
+  "options": [
+   "`limit`",
+   "`filter`",
+   "`map`",
+   "`reduce`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Laquelle est une opération terminale ?",
+  "type": "qcm",
+  "options": [
+   "`collect`",
+   "`sorted`",
+   "`filter`",
+   "`map`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que se passe-t-il s'il n'y a pas d'opération terminale ?",
+  "type": "qcm",
+  "options": [
+   "Le stream boucle sans fin",
+   "La collection est vidée",
+   "Une exception est levée",
+   "Rien n'est calculé"
+  ],
+  "answer": 3,
+  "explication": "Les streams sont évalués paresseusement."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Un stream modifie-t-il la collection d'origine ?",
+  "type": "qcm",
+  "options": [
+   "Seulement avec filter",
+   "Oui, toujours",
+   "Non",
+   "Seulement avec map"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que renvoie `List.of(1, 2, 3).stream().filter(n -> n > 1).count()` ?",
+  "type": "qcm",
+  "options": [
+   "2",
+   "1",
+   "3",
+   "Une liste"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que renvoie `List.of(1, 2, 3, 4).stream().reduce(0, Integer::sum)` ?",
+  "type": "qcm",
+  "options": [
+   "4",
+   "10",
+   "24",
+   "0"
+  ],
+  "answer": 1,
+  "explication": "reduce combine tous les éléments."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel collecteur assemble des String avec un séparateur ?",
+  "type": "qcm",
+  "options": [
+   "`Collectors.concat()`",
+   "`Collectors.split()`",
+   "`Collectors.joining(\", \")`",
+   "`Collectors.toList()`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que représente un `Optional<String>` ?",
+  "type": "qcm",
+  "options": [
+   "Une liste de String",
+   "Un String qui peut être absent",
+   "Un String constant",
+   "Un String facultatif dans une méthode"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle méthode d'Optional fournit une valeur de remplacement ?",
+  "type": "qcm",
+  "options": [
+   "`isPresent`",
+   "`ifNull`",
+   "`orElse`",
+   "`get`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Combien de méthodes abstraites une interface fonctionnelle possède-t-elle ?",
+  "type": "qcm",
+  "options": [
+   "Deux",
+   "Autant qu'on veut",
+   "Aucune",
+   "Une seule"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Une lambda peut contenir plusieurs instructions entre accolades.",
+  "type": "vf",
+  "answer": true,
+  "explication": "Il faut alors un return explicite."
+ },
+ {
+  "niveau": "moyen",
+  "q": "`sorted()` est une opération terminale.",
+  "type": "vf",
+  "answer": false,
+  "explication": "C'est une opération intermédiaire : elle renvoie un stream."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle méthode transforme une collection en stream ?",
+  "type": "saisie",
+  "answers": [
+   "stream",
+   "stream()"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque opération à son rôle.",
+  "type": "associer",
+  "paires": [
+   [
+    "`filter`",
+    "garder selon un test"
+   ],
+   [
+    "`map`",
+    "transformer"
+   ],
+   [
+    "`sorted`",
+    "trier"
+   ],
+   [
+    "`collect`",
+    "rassembler le résultat"
+   ],
+   [
+    "`count`",
+    "compter"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

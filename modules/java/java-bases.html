@@ -11,187 +11,400 @@
 </head>
 <body data-module="java" data-chapter="java-bases">
 
-<!-- ============ COURS ============ -->
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/java.txt) -->
 <article id="cours">
 <div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
-<p><b>Java</b> (1995) est un langage orienté objet très utilisé en entreprise (applications de gestion, serveurs avec Spring), pour Android et pour Minecraft (édition Java). Son principe : « écrire une fois, exécuter partout ». Le code est compilé en <b>bytecode</b> que la machine virtuelle Java (<b>JVM</b>) exécute sur n'importe quel système.</p>
-
+<p><b>Java</b> (1995) est l'un des langages les plus utilisés au monde : applications d'entreprise, serveurs web, applications <b>Android</b>, logiciels bancaires, Minecraft. Sa devise : *écrire une fois, exécuter partout*. Il est <b>typé</b>, <b>orienté objet</b> de bout en bout, et sa syntaxe ressemble beaucoup à celle du C# que l'on rencontre aussi en BTS SIO : apprendre l'un, c'est presque connaître l'autre.</p>
+<div class="box"><b>Comment suivre ce cours</b><p>Chaque bloc avec un bouton <b>Exécuter</b> est compilé par le vrai compilateur <code>javac</code> dans ton navigateur. Modifie le code, provoque des erreurs, lis les messages : c'est la meilleure façon d'apprendre.</p></div>
 <h2>1. Le programme minimal</h2>
-<pre><code>public class Main {
+<div class="essai" data-langue="java"><pre><code>public class Main {
     public static void main(String[] args) {
-        System.out.println(&quot;Bonjour !&quot;);
+        System.out.println("Bonjour !");
     }
-}</code></pre>
-<ul>
-<li>Tout le code est dans une <b>classe</b> ; le fichier porte son nom (<code>Main.java</code>).</li>
-<li><code>main</code> est le point d'entrée. <code>static</code> : elle appartient à la classe, pas à un objet.</li>
-<li><code>System.out.println</code> affiche et passe à la ligne ; <code>print</code> n'y passe pas.</li>
-</ul>
-<pre><code>javac Main.java     # compile en Main.class (bytecode)
-java Main           # exécute sur la JVM</code></pre>
-<p>Le labo compile ton code avec un vrai <b>javac</b> directement dans le navigateur.</p>
+}</code></pre></div>
+<table><tr><th>Élément</th><th>Rôle</th></tr><tr><td><code>public class Main { … }</code></td><td>tout le code Java vit dans une <b>classe</b> ; le fichier s'appelle <code>Main.java</code></td></tr><tr><td><code>public static void main(String[] args)</code></td><td>la méthode par laquelle le programme commence</td></tr><tr><td><code>System.out.println(…)</code></td><td>affiche puis passe à la ligne (<code>print</code> : sans retour à la ligne)</td></tr><tr><td><code>;</code></td><td>termine chaque instruction</td></tr><tr><td><code>{ }</code></td><td>délimitent les blocs</td></tr></table>
+<h2>2. Compiler et exécuter : la JVM</h2>
+<pre><code>javac Main.java     # compile : produit Main.class (du bytecode)
+java Main           # la machine virtuelle Java (JVM) exécute le bytecode</code></pre>
+<p>Le compilateur ne produit pas un programme pour un processeur précis, mais du <b>bytecode</b> exécuté par la <b>JVM</b>. Le même fichier <code>.class</code> tourne sur Windows, Linux, macOS : il suffit d'avoir une JVM. Le <b>JDK</b> contient le compilateur et les outils ; le <b>JRE</b> seulement de quoi exécuter.</p>
+<div class="essai" data-langue="java" data-erreur="1"><pre><code>public class Main {
+    public static void main(String[] args) {
+        System.out.println("Il manque quelque chose")
+    }
+}</code></pre></div>
+<h2>3. Variables et types primitifs</h2>
+<p>Chaque variable a un <b>type</b> fixé à sa déclaration.</p>
+<div class="essai" data-langue="java"><pre><code>public class Main {
+    public static void main(String[] args) {
+        int age = 17;                 // entier
+        double prix = 19.99;          // nombre à virgule
+        char initiale = 'L';          // UN caractère, entre apostrophes
+        boolean majeur = false;       // true ou false
+        String prenom = "Léa";        // texte, entre guillemets (String est une classe : majuscule)
+        long population = 8_000_000_000L;   // très grand entier (suffixe L)
+        System.out.println(prenom + " a " + age + " ans");     // + colle les textes
+        System.out.println(prix + " " + initiale + " " + majeur + " " + population);
+        age = age + 1;
+        System.out.println(age);
+    }
+}</code></pre></div>
+<table><tr><th>Type</th><th>Contenu</th><th>Exemple</th></tr><tr><td><code>int</code></td><td>entier (environ ±2 milliards)</td><td><code>42</code></td></tr><tr><td><code>long</code></td><td>très grand entier</td><td><code>9000000000L</code></td></tr><tr><td><code>double</code></td><td>nombre à virgule</td><td><code>3.14</code></td></tr><tr><td><code>boolean</code></td><td>vrai ou faux</td><td><code>true</code></td></tr><tr><td><code>char</code></td><td>un caractère</td><td><code>'A'</code></td></tr><tr><td><code>String</code></td><td>texte (un objet, pas un type primitif)</td><td><code>"Bonjour"</code></td></tr></table>
+<h3><code>final</code> et <code>var</code></h3>
+<div class="essai" data-langue="java"><pre><code>public class Main {
+    public static void main(String[] args) {
+        final double TVA = 0.2;       // constante : ne peut plus être modifiée
+        var quantite = 3;             // var : le compilateur déduit int (Java 10+)
+        var total = quantite * 9.99;  // … et ici double
+        System.out.println(total * (1 + TVA));
+    }
+}</code></pre></div>
+<h2>4. Les opérateurs et leurs pièges</h2>
+<div class="essai" data-langue="java"><pre><code>public class Main {
+    public static void main(String[] args) {
+        System.out.println(7 / 2);            // 3   : entier / entier = entier !
+        System.out.println(7 / 2.0);          // 3.5 : dès qu'un des deux est double
+        System.out.println(7 % 2);            // 1   : reste de la division
+        int a = 7, b = 2;
+        System.out.println((double) a / b);   // 3.5 : conversion explicite (cast)
+        System.out.println((int) 3.99);       // 3   : le cast vers int TRONQUE
+        int i = 5;
+        i++;            // i = i + 1
+        i += 10;        // i = i + 10
+        System.out.println(i);
+        System.out.println("Total : " + 2 + 3);      // Total : 23  (concaténation de gauche à droite)
+        System.out.println("Total : " + (2 + 3));    // Total : 5
+        System.out.println(Math.pow(2, 10) + " " + Math.sqrt(49) + " " + Math.round(2.5) + " " + Math.max(3, 8));
+    }
+}</code></pre></div>
+<div class="box attention"><b>Division entière et concaténation</b><p><code>7 / 2</code> vaut <code>3</code>. Et dès qu'un <code>String</code> apparaît dans une addition, tout ce qui suit est <b>collé</b> comme du texte : mets les calculs entre parenthèses.</p></div>
+<h2>5. Lire au clavier : <code>Scanner</code></h2>
+<div class="essai" data-langue="java" data-stdin="Léa&#10;17"><pre><code>import java.util.Scanner;
 
-<h2>2. Types primitifs et String</h2>
-<pre><code>int age = 19;
-double prix = 9.99;
-boolean majeur = true;
-char lettre = &#x27;A&#x27;;
-long grand = 3_000_000_000L;
-String nom = &quot;Léa&quot;;            // String est une classe (majuscule !)
-final double TVA = 0.2;        // constante
-var total = 12.5;              // type déduit (Java 10+)</code></pre>
-<div class="box attention"><b>Division entière et comparaison de textes</b><p><code>7 / 2</code> vaut 3 entre deux <code>int</code>. Et deux String se comparent avec <code>a.equals(b)</code>, jamais avec <code>==</code> (qui compare les références).</p></div>
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String prenom = sc.nextLine();        // une ligne de texte
+        int age = sc.nextInt();               // un entier
+        System.out.println("Bonjour " + prenom + ", dans 10 ans tu auras " + (age + 10) + " ans.");
+    }
+}</code></pre></div>
+<table><tr><th>Méthode</th><th>Lit</th></tr><tr><td><code>nextInt()</code></td><td>un entier</td></tr><tr><td><code>nextDouble()</code></td><td>un nombre à virgule</td></tr><tr><td><code>next()</code></td><td>un mot (jusqu'au prochain espace)</td></tr><tr><td><code>nextLine()</code></td><td>toute la ligne</td></tr><tr><td><code>hasNext()</code></td><td>vrai s'il reste quelque chose à lire</td></tr></table>
+<div class="box attention"><b>Le piège de <code>nextInt</code> suivi de <code>nextLine</code></b><p><code>nextInt()</code> laisse le retour à la ligne dans le tampon : le <code>nextLine()</code> suivant renvoie alors une chaîne <b>vide</b>. Ajoute un <code>sc.nextLine();</code> « pour rien » après le <code>nextInt()</code>.</p></div>
+<h2>6. Mettre en forme : <code>printf</code> et <code>String.format</code></h2>
+<div class="essai" data-langue="java"><pre><code>public class Main {
+    public static void main(String[] args) {
+        double prix = 12.5;
+        System.out.printf("%.2f €%n", prix);                  // 12.50 €   (%n = retour à la ligne)
+        System.out.printf("%s a %d ans%n", "Léa", 17);        // %s texte, %d entier
+        System.out.printf("|%5d|%-5d|%05d|%n", 42, 42, 42);   // largeur, gauche, zéros
+        String texte = String.format("%.1f %%", 45.678);      // même chose, mais renvoie un String
+        System.out.println(texte);
+    }
+}</code></pre></div>
+<section class="tuto"><h3><small>Tutoriel</small>Ton premier vrai programme : le ticket de caisse</h3>
+<div class="etape"><h4>Lire le prix et la quantité</h4>
+<div class="essai" data-langue="java" data-stdin="4.5&#10;3"><pre><code>import java.util.Scanner;
 
-<h2>3. Lire au clavier avec Scanner</h2>
-<pre><code>import java.util.Scanner;
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        double prix = sc.nextDouble();
+        int quantite = sc.nextInt();
+        System.out.println(prix + " x " + quantite);
+    }
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Calculer</h4>
+<div class="essai" data-langue="java" data-stdin="4.5&#10;3"><pre><code>import java.util.Scanner;
 
-Scanner sc = new Scanner(System.in);
-int n = sc.nextInt();          // un entier
-double d = sc.nextDouble();    // un décimal
-String mot = sc.next();        // un mot
-String ligne = sc.nextLine();  // une ligne</code></pre>
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        double prix = sc.nextDouble();
+        int quantite = sc.nextInt();
+        double total = prix * quantite;
+        System.out.println("Total : " + total);
+    }
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Ajouter la TVA et mettre en forme</h4>
+<p>Essaie de modifier <code>TVA</code> après sa déclaration : le compilateur refuse.</p>
+<div class="essai" data-langue="java" data-stdin="4.5&#10;3"><pre><code>import java.util.Scanner;
 
-<h2>4. Conversions</h2>
-<pre><code>int n = Integer.parseInt(&quot;42&quot;);
-double d = Double.parseDouble(&quot;3.5&quot;);
-String s = String.valueOf(42);   // ou &quot;&quot; + 42
-int arrondi = (int) 3.9;         // cast : 3 (troncature)</code></pre><div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-java.html">labo Java</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+public class Main {
+    public static void main(String[] args) {
+        final double TVA = 0.2;
+        Scanner sc = new Scanner(System.in);
+        double prix = sc.nextDouble();
+        int quantite = sc.nextInt();
+        double ht = prix * quantite;
+        System.out.printf("HT : %.2f €%n", ht);
+        System.out.printf("TVA : %.2f €%n", ht * TVA);
+        System.out.printf("TTC : %.2f €%n", ht * (1 + TVA));
+    }
+}</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : heures, minutes, secondes</b><p>Division entière et modulo.</p><a class="defi-go" href="labo-java.html#m=java-conv">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : la moyenne</b><p>Attention à la division entière, et affiche deux décimales.</p><a class="defi-go" href="labo-java.html#m=java-moyenne">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p>Tout le code est dans une classe ; le programme démarre dans <code>public static void main(String[] args)</code>. </p><p> <code>System.out.println(…)</code> affiche ; <code>Scanner</code> lit (<code>nextInt</code>, <code>nextDouble</code>, <code>nextLine</code>). </p><p> Types primitifs : <code>int</code>, <code>long</code>, <code>double</code>, <code>boolean</code>, <code>char</code> ; <code>String</code> est une classe. </p><p> <code>int / int</code> donne un entier ; <code>(double) a / b</code> pour un résultat décimal. </p><p> <code>final</code> = constante, <code>var</code> = type déduit.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-java.html">Labo Java</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
 </article>
 
 <!-- ============ EXERCICES ============ -->
 <script>
 window.EF_EXERCICES = [
  {
-  "type": "qcm",
   "niveau": "facile",
-  "q": "Quelle méthode est le point d'entrée d'un programme Java ?",
+  "q": "Dans quelle méthode démarre un programme Java ?",
+  "type": "qcm",
   "options": [
-   "`start()`",
-   "`main()`",
-   "`run()`",
-   "`init()`"
+   "`start`",
+   "`init`",
+   "`run`",
+   "`main`"
   ],
-  "answer": 1,
+  "answer": 3,
   "explication": ""
  },
  {
-  "type": "qcm",
   "niveau": "facile",
-  "q": "Comment afficher une ligne ?",
+  "q": "Quelle instruction affiche un texte suivi d'un retour à la ligne ?",
+  "type": "qcm",
   "options": [
-   "`print(\"x\")`",
-   "`System.out.println(\"x\");`",
-   "`console.log(\"x\");`",
-   "`cout << \"x\";`"
+   "`console.log(…)`",
+   "`System.out.println(…)`",
+   "`echo …`",
+   "`print(…)`"
   ],
   "answer": 1,
   "explication": ""
  },
  {
-  "type": "qcm",
   "niveau": "moyen",
-  "q": "Qu'exécute la JVM ?",
-  "options": [
-   "Le code source .java",
-   "Le bytecode (.class)",
-   "Du HTML",
-   "Du code machine uniquement"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
+  "q": "Que vaut `7 / 2` en Java ?",
   "type": "qcm",
-  "niveau": "moyen",
-  "q": "Comment comparer le contenu de deux String a et b ?",
   "options": [
-   "`a == b`",
-   "`a.equals(b)`",
-   "`a === b`",
-   "`compare(a, b)`"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "qcm",
-  "niveau": "moyen",
-  "q": "Que vaut `7 / 2` entre deux int ?",
-  "options": [
-   "3.5",
    "3",
    "4",
-   "Erreur"
+   "1",
+   "3.5"
+  ],
+  "answer": 0,
+  "explication": "Entier divisé par entier donne un entier."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que vaut `(double) 7 / 2` ?",
+  "type": "qcm",
+  "options": [
+   "Une erreur",
+   "3.0",
+   "3",
+   "3.5"
+  ],
+  "answer": 3,
+  "explication": "Le cast s'applique à 7 avant la division."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que vaut `(int) 3.99` ?",
+  "type": "qcm",
+  "options": [
+   "3.99",
+   "3",
+   "Une erreur",
+   "4"
   ],
   "answer": 1,
+  "explication": "Le cast vers int tronque."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'affiche `System.out.println(\"Total : \" + 2 + 3);` ?",
+  "type": "qcm",
+  "options": [
+   "Total : 2 + 3",
+   "Total : 23",
+   "Total : 5",
+   "Une erreur"
+  ],
+  "answer": 1,
+  "explication": "La concaténation se fait de gauche à droite."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel type choisir pour vrai / faux ?",
+  "type": "qcm",
+  "options": [
+   "`int`",
+   "`bool`",
+   "`bit`",
+   "`boolean`"
+  ],
+  "answer": 3,
   "explication": ""
  },
  {
+  "niveau": "moyen",
+  "q": "Quel mot-clé rend une variable non modifiable ?",
   "type": "qcm",
+  "options": [
+   "`static`",
+   "`const`",
+   "`final`",
+   "`fixed`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
   "niveau": "moyen",
   "q": "Quelle classe sert à lire au clavier ?",
+  "type": "qcm",
   "options": [
+   "`Input`",
    "`Reader`",
    "`Scanner`",
-   "`Input`",
-   "`Console` uniquement"
+   "`Keyboard`"
   ],
-  "answer": 1,
+  "answer": 2,
   "explication": ""
  },
  {
-  "type": "qcm",
   "niveau": "moyen",
-  "q": "Comment convertir \"42\" en int ?",
+  "q": "Quelle méthode de Scanner lit une ligne entière ?",
+  "type": "qcm",
   "options": [
-   "`(int) \"42\"`",
-   "`Integer.parseInt(\"42\")`",
-   "`int(\"42\")`",
-   "`\"42\".toInt()`"
+   "`nextString()`",
+   "`nextLine()`",
+   "`readLine()`",
+   "`next()`"
   ],
   "answer": 1,
   "explication": ""
  },
  {
+  "niveau": "moyen",
+  "q": "Qu'est-ce que le bytecode ?",
+  "type": "qcm",
+  "options": [
+   "Un format d'image",
+   "Le code machine du processeur",
+   "Le code intermédiaire produit par javac et exécuté par la JVM",
+   "Le code source"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel programme exécute le bytecode ?",
+  "type": "qcm",
+  "options": [
+   "Le système d'exploitation directement",
+   "Le navigateur",
+   "javac",
+   "La JVM"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande compile `Main.java` ?",
+  "type": "qcm",
+  "options": [
+   "`compile Main`",
+   "`javac Main.java`",
+   "`java Main.java -c`",
+   "`jvm Main.java`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi `sc.nextLine()` renvoie-t-il parfois une chaîne vide juste après `sc.nextInt()` ?",
+  "type": "qcm",
+  "options": [
+   "Le Scanner est fermé",
+   "nextInt laisse le retour à la ligne dans le tampon",
+   "nextLine ne lit que des nombres",
+   "C'est un bug de Java"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Quel format affiche un nombre avec deux décimales dans printf ?",
+  "type": "qcm",
+  "options": [
+   "`%s2`",
+   "`%d.2`",
+   "`%2d`",
+   "`%.2f`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "String est un type primitif en Java.",
   "type": "vf",
+  "answer": false,
+  "explication": "C'est une classe (d'où la majuscule)."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Avec `var x = 3;`, la variable x peut ensuite recevoir un texte.",
+  "type": "vf",
+  "answer": false,
+  "explication": "var déduit le type une fois pour toutes : x est un int."
+ },
+ {
   "niveau": "facile",
-  "q": "String s'écrit avec une majuscule car c'est une classe.",
+  "q": "Un caractère seul s'écrit entre apostrophes : 'A'.",
+  "type": "vf",
   "answer": true,
   "explication": ""
  },
  {
-  "type": "saisie",
   "niveau": "moyen",
-  "q": "Quel mot-clé rend une variable constante en Java ?",
+  "q": "Quel suffixe ajoute-t-on à un littéral pour en faire un long (ex. 9000000000_) ?",
+  "type": "saisie",
   "answers": [
-   "final"
+   "L"
   ],
   "explication": ""
  },
  {
-  "type": "qcm",
-  "niveau": "difficile",
-  "q": "Que vaut `(int) 3.9` ?",
-  "options": [
-   "4",
-   "3",
-   "3.9",
-   "Erreur"
-  ],
-  "answer": 1,
-  "explication": "Le cast tronque."
- },
- {
-  "type": "qcm",
   "niveau": "moyen",
-  "q": "Comment s'appelle le fichier qui contient public class Main ?",
-  "options": [
-   "main.java",
-   "Main.java",
-   "Main.class",
-   "Programme.java"
+  "q": "Associe chaque type à une valeur possible.",
+  "type": "associer",
+  "paires": [
+   [
+    "`int`",
+    "42"
+   ],
+   [
+    "`double`",
+    "3.14"
+   ],
+   [
+    "`char`",
+    "'A'"
+   ],
+   [
+    "`boolean`",
+    "true"
+   ],
+   [
+    "`String`",
+    "\"Bonjour\""
+   ]
   ],
-  "answer": 1,
   "explication": ""
  }
 ];
@@ -199,6 +412,8 @@ window.EF_EXERCICES = [
 <script src="../../data/modules.js"></script>
 <script src="../../assets/app.js"></script>
 <script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
 <script src="../../assets/chapter.js"></script>
 </body>
 </html>

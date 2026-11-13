@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Java : enum, records, paquetages et bonnes pratiques — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="java" data-chapter="java-enum-records">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/java.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<h2>1. <code>enum</code> : un nombre fini de valeurs</h2>
+<p>Un <code>enum</code> définit un type dont les seules valeurs possibles sont listées. Fini les <code>int</code> ou <code>String</code> « magiques ».</p>
+<div class="essai" data-langue="java"><pre><code>enum Statut { EN_ATTENTE, EN_COURS, RESOLU, FERME }
+
+public class Main {
+    public static void main(String[] args) {
+        Statut s = Statut.EN_COURS;
+        System.out.println(s + " " + s.ordinal() + " " + s.name().length());
+        if (s == Statut.EN_COURS) System.out.println("ticket en cours");      // == est sûr pour un enum
+        for (Statut x : Statut.values()) System.out.print(x + " ");           // toutes les valeurs
+        System.out.println();
+        Statut lu = Statut.valueOf("RESOLU");                                 // depuis un texte
+        String message = switch (lu) {
+            case EN_ATTENTE -&gt; "pas encore pris en charge";
+            case EN_COURS -&gt; "un technicien travaille dessus";
+            case RESOLU, FERME -&gt; "terminé";
+        };
+        System.out.println(message);
+    }
+}</code></pre></div>
+<h3>Un enum est une classe</h3>
+<p>Il peut avoir des attributs, un constructeur et des méthodes.</p>
+<div class="essai" data-langue="java"><pre><code>enum Priorite {
+    BASSE("sous 5 jours", 1), NORMALE("sous 48 h", 2), URGENTE("sous 4 h", 3);
+
+    private final String delai;
+    private final int niveau;
+    Priorite(String delai, int niveau) { this.delai = delai; this.niveau = niveau; }
+    String getDelai() { return delai; }
+    boolean plusUrgentQue(Priorite autre) { return niveau &gt; autre.niveau; }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Priorite p = Priorite.URGENTE;
+        System.out.println(p + " : " + p.getDelai());
+        System.out.println(p.plusUrgentQue(Priorite.NORMALE));
+    }
+}</code></pre></div>
+<h2>2. <code>record</code> : une classe de données en une ligne</h2>
+<p>Un <code>record</code> (Java 16+) génère automatiquement le constructeur, les accesseurs, <code>toString</code>, <code>equals</code> et <code>hashCode</code>. Ses champs sont <b>immuables</b>.</p>
+<div class="essai" data-langue="java"><pre><code>import java.util.*;
+
+record Point(int x, int y) {
+    double distance(Point autre) {                  // on peut ajouter des méthodes
+        return Math.sqrt(Math.pow(x - autre.x, 2) + Math.pow(y - autre.y, 2));
+    }
+}
+record Produit(String nom, double prix) {
+    Produit {                                       // constructeur compact : validation
+        if (prix &lt; 0) throw new IllegalArgumentException("prix négatif");
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Point a = new Point(0, 0), b = new Point(3, 4);
+        System.out.println(b + " " + b.x() + " " + a.distance(b));          // accesseur : x(), pas getX()
+        System.out.println(b.equals(new Point(3, 4)));                      // true : comparaison par contenu
+        List&lt;Produit&gt; panier = List.of(new Produit("Souris", 19.9), new Produit("Clavier", 49));
+        System.out.println(panier);
+    }
+}</code></pre></div>
+<p>Écrire la même classe <code>Point</code> à la main demande une trentaine de lignes. Les records sont parfaits pour les objets qui ne font que <b>transporter des données</b> (résultat d'une requête, ligne d'un fichier, réponse d'une API).</p>
+<h2>3. L'immuabilité</h2>
+<p>Un objet <b>immuable</b> ne change plus après sa création (<code>String</code>, les records, <code>List.of</code>). Avantages : pas de modification surprise à distance, partage sans danger. Pour « modifier », on crée un nouvel objet.</p>
+<div class="essai" data-langue="java"><pre><code>record Compte(String titulaire, double solde) {
+    Compte deposer(double m) { return new Compte(titulaire, solde + m); }    // renvoie un NOUVEAU compte
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Compte c1 = new Compte("Léa", 100);
+        Compte c2 = c1.deposer(50);
+        System.out.println(c1 + " " + c2);
+    }
+}</code></pre></div>
+<h2>4. <code>static</code>, <code>final</code> et les constantes</h2>
+<div class="essai" data-langue="java"><pre><code>public class Main {
+    static final double TVA = 0.2;                 // constante de classe : MAJUSCULES
+    static final int MAX_ESSAIS = 3;
+    static int compteur = 0;                       // variable de classe (à utiliser avec prudence)
+
+    static double ttc(double ht) { compteur++; return ht * (1 + TVA); }
+
+    public static void main(String[] args) {
+        System.out.println(ttc(100) + " " + ttc(50) + " " + compteur + " " + MAX_ESSAIS);
+        final int[] t = {1, 2, 3};
+        t[0] = 99;                                     // final protège la VARIABLE, pas le contenu
+        System.out.println(t[0]);
+    }
+}</code></pre></div>
+<h2>5. Les paquetages et <code>import</code></h2>
+<p>Un <b>paquetage</b> (*package*) est un dossier de classes. Il évite les conflits de noms et organise le projet.</p>
+<pre><code>// fichier src/fr/monlycee/banque/Compte.java
+package fr.monlycee.banque;                 // 1re ligne : le paquetage (= le chemin du dossier)
+
+import java.util.ArrayList;                 // une classe précise
+import java.util.*;                         // toutes les classes du paquetage java.util
+
+public class Compte { … }                   // public : utilisable depuis un autre paquetage</code></pre>
+<table><tr><th>Paquetage</th><th>Contenu</th></tr><tr><td><code>java.lang</code></td><td><code>String</code>, <code>Math</code>, <code>Integer</code>, <code>System</code>… importé automatiquement</td></tr><tr><td><code>java.util</code></td><td>collections, <code>Scanner</code>, <code>Random</code>, <code>Optional</code></td></tr><tr><td><code>java.util.stream</code></td><td>les streams</td></tr><tr><td><code>java.io</code>, <code>java.nio.file</code></td><td>fichiers</td></tr><tr><td><code>java.time</code></td><td>dates et heures (<code>LocalDate</code>, <code>Duration</code>)</td></tr><tr><td><code>java.sql</code></td><td>accès aux bases de données (JDBC)</td></tr></table>
+<p>Règle : <b>une classe publique par fichier</b>, et le fichier porte le nom de la classe.</p>
+<h2>6. Les conventions de nommage</h2>
+<table><tr><th>Élément</th><th>Convention</th><th>Exemple</th></tr><tr><td>Classe, interface, enum, record</td><td>PascalCase</td><td><code>CompteBancaire</code></td></tr><tr><td>Méthode, variable, attribut</td><td>camelCase</td><td><code>calculerTotal</code>, <code>prixTtc</code></td></tr><tr><td>Constante</td><td>MAJUSCULES_AVEC_TIRETS_BAS</td><td><code>MAX_ESSAIS</code></td></tr><tr><td>Paquetage</td><td>minuscules</td><td><code>fr.monlycee.banque</code></td></tr><tr><td>Accesseurs</td><td><code>getX</code>, <code>setX</code>, <code>isX</code> pour un boolean</td><td><code>getSolde</code>, <code>isVide</code></td></tr></table>
+<p>Ces conventions sont respectées par tous les développeurs Java : les suivre rend ton code lisible par n'importe qui.</p>
+<h2>7. Documenter : la Javadoc</h2>
+<pre><code>/**
+ * Calcule le prix toutes taxes comprises.
+ *
+ * @param ht le prix hors taxes, positif
+ * @return le prix TTC
+ * @throws IllegalArgumentException si ht est négatif
+ */
+public static double ttc(double ht) { … }</code></pre>
+<p>Le commentaire <code>/** … */</code> placé avant une classe ou une méthode est lu par l'outil <code>javadoc</code> (qui génère un site de documentation) et affiché par l'éditeur au survol.</p>
+<section class="tuto"><h3><small>Tutoriel</small>Modéliser un ticket d'assistance</h3>
+<div class="etape"><h4>Les valeurs possibles : des enum</h4>
+<div class="essai" data-langue="java"><pre><code>enum Statut { OUVERT, EN_COURS, RESOLU }
+enum Priorite { BASSE, NORMALE, URGENTE }
+
+public class Main {
+    public static void main(String[] args) {
+        System.out.println(Statut.OUVERT + " " + Priorite.valueOf("URGENTE"));
+    }
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Les données : un record</h4>
+<div class="essai" data-langue="java"><pre><code>enum Statut { OUVERT, EN_COURS, RESOLU }
+enum Priorite { BASSE, NORMALE, URGENTE }
+record Ticket(int numero, String titre, Priorite priorite, Statut statut) {}
+
+public class Main {
+    public static void main(String[] args) {
+        Ticket t = new Ticket(1, "Imprimante hors ligne", Priorite.NORMALE, Statut.OUVERT);
+        System.out.println(t);
+        System.out.println(t.titre() + " : " + t.statut());
+    }
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Faire évoluer sans modifier</h4>
+<p>Un ticket est immuable : passer à l'étape suivante renvoie un nouveau ticket. Puis un stream liste les urgents.</p>
+<div class="essai" data-langue="java"><pre><code>import java.util.*;
+
+enum Statut { OUVERT, EN_COURS, RESOLU }
+enum Priorite { BASSE, NORMALE, URGENTE }
+record Ticket(int numero, String titre, Priorite priorite, Statut statut) {
+    Ticket avecStatut(Statut s) { return new Ticket(numero, titre, priorite, s); }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        List&lt;Ticket&gt; tickets = List.of(
+            new Ticket(1, "Imprimante hors ligne", Priorite.NORMALE, Statut.OUVERT),
+            new Ticket(2, "Serveur de fichiers en panne", Priorite.URGENTE, Statut.OUVERT),
+            new Ticket(3, "Mot de passe oublié", Priorite.BASSE, Statut.RESOLU));
+        Ticket pris = tickets.get(1).avecStatut(Statut.EN_COURS);
+        System.out.println(pris);
+        tickets.stream()
+            .filter(t -&gt; t.priorite() == Priorite.URGENTE &amp;&amp; t.statut() != Statut.RESOLU)
+            .forEach(t -&gt; System.out.println("URGENT : " + t.titre()));
+    }
+}</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : un enum</b><p>Des valeurs nommées et un <code>switch</code>.</p><a class="defi-go" href="labo-java.html#m=java-enum">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : un record</b><p>Une classe de données en une ligne.</p><a class="defi-go" href="labo-java.html#m=java-record">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p><code>enum</code> : un type à valeurs fixes (<code>values()</code>, <code>valueOf</code>, <code>ordinal()</code>), comparable avec <code>==</code>, utilisable dans un <code>switch</code>. </p><p> <code>record Nom(type champ, …)</code> : constructeur, accesseurs <code>champ()</code>, <code>toString</code>, <code>equals</code> générés ; immuable. </p><p> <code>static final</code> pour une constante. </p><p> <code>package</code> en première ligne, <code>import</code> ensuite ; une classe publique par fichier. </p><p> PascalCase pour les classes, camelCase pour le reste, MAJUSCULES pour les constantes.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-java.html">Labo Java</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "À quoi sert un enum ?",
+  "type": "qcm",
+  "options": [
+   "À hériter de plusieurs classes",
+   "À définir un type dont les valeurs possibles sont fixées",
+   "À compter",
+   "À créer une liste modifiable"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment obtenir toutes les valeurs de l'enum Statut ?",
+  "type": "qcm",
+  "options": [
+   "`Statut.list`",
+   "`Statut.values()`",
+   "`Statut.all()`",
+   "`new Statut()`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que renvoie `Statut.valueOf(\"RESOLU\")` ?",
+  "type": "qcm",
+  "options": [
+   "Le nombre 2",
+   "La valeur Statut.RESOLU",
+   "Le texte \"RESOLU\"",
+   "`true`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que renvoie `ordinal()` sur la première valeur d'un enum ?",
+  "type": "qcm",
+  "options": [
+   "-1",
+   "0",
+   "1",
+   "Son nom"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment comparer deux valeurs d'un enum ?",
+  "type": "qcm",
+  "options": [
+   "Uniquement avec equals",
+   "C'est impossible",
+   "Avec `==`",
+   "Avec compareText"
+  ],
+  "answer": 2,
+  "explication": "Chaque valeur n'existe qu'en un seul exemplaire."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que génère automatiquement un record ?",
+  "type": "qcm",
+  "options": [
+   "Constructeur, accesseurs, toString, equals et hashCode",
+   "Des setters",
+   "Seulement le constructeur",
+   "Une interface"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Pour `record Point(int x, int y)`, comment lire x ?",
+  "type": "qcm",
+  "options": [
+   "`p.x()`",
+   "`p[x]`",
+   "`p.getX()`",
+   "`p->x`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Peut-on modifier un champ d'un record après sa création ?",
+  "type": "qcm",
+  "options": [
+   "Oui, directement",
+   "Oui, avec un setter généré",
+   "Seulement les champs numériques",
+   "Non, il est immuable"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Avec `record Point(int x, int y)`, que vaut `new Point(1, 2).equals(new Point(1, 2))` ?",
+  "type": "qcm",
+  "options": [
+   "`null`",
+   "`false`",
+   "Une erreur",
+   "`true`"
+  ],
+  "answer": 3,
+  "explication": "equals compare le contenu."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment déclare-t-on une constante de classe ?",
+  "type": "qcm",
+  "options": [
+   "`define`",
+   "`const`",
+   "`static final`",
+   "`final static const`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Avec `final int[] t = {1, 2};`, peut-on écrire `t[0] = 9;` ?",
+  "type": "qcm",
+  "options": [
+   "Seulement dans un constructeur",
+   "Non, jamais",
+   "Erreur à l'exécution",
+   "Oui : final protège la variable, pas le contenu du tableau"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle est la première instruction d'un fichier Java rangé dans un paquetage ?",
+  "type": "qcm",
+  "options": [
+   "`using …;`",
+   "`package …;`",
+   "`public class …`",
+   "`import …;`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel paquetage est importé automatiquement ?",
+  "type": "qcm",
+  "options": [
+   "`java.io`",
+   "`java.lang`",
+   "`java.util`",
+   "Aucun"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle convention de nommage pour une classe ?",
+  "type": "qcm",
+  "options": [
+   "PascalCase : `CompteBancaire`",
+   "camelCase : `compteBancaire`",
+   "MAJUSCULES",
+   "snake_case : `compte_bancaire`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle convention pour une méthode ?",
+  "type": "qcm",
+  "options": [
+   "snake_case",
+   "camelCase : `calculerTotal`",
+   "PascalCase : `CalculerTotal`",
+   "MAJUSCULES"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment s'appelle par convention l'accesseur d'un attribut boolean `vide` ?",
+  "type": "qcm",
+  "options": [
+   "`hasVide()`",
+   "`isVide()`",
+   "`getVide()`",
+   "`vide?`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Un enum peut avoir des attributs et des méthodes.",
+  "type": "vf",
+  "answer": true,
+  "explication": "C'est une classe à part entière."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Un fichier Java peut contenir plusieurs classes publiques.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Une seule, et le fichier porte son nom."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Par quels caractères commence un commentaire Javadoc ?",
+  "type": "saisie",
+  "answers": [
+   "/**"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque paquetage à son contenu.",
+  "type": "associer",
+  "paires": [
+   [
+    "`java.util`",
+    "collections et Scanner"
+   ],
+   [
+    "`java.lang`",
+    "String et Math"
+   ],
+   [
+    "`java.sql`",
+    "bases de données"
+   ],
+   [
+    "`java.time`",
+    "dates et heures"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

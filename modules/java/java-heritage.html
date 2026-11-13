@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Java : héritage, classes abstraites et interfaces — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="java" data-chapter="java-heritage">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/java.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<h2>1. Hériter avec <code>extends</code></h2>
+<p>Une classe <b>fille</b> reprend les attributs et les méthodes de sa classe <b>mère</b> et peut en ajouter ou en redéfinir. En Java, une classe n'a qu'<b>une seule</b> classe mère.</p>
+<div class="essai" data-langue="java"><pre><code>class Personnage {
+    protected String nom;            // protected : visible des classes filles
+    protected int pv;
+
+    Personnage(String nom, int pv) { this.nom = nom; this.pv = pv; }
+    void blesser(int d) { pv = Math.max(0, pv - d); }
+    @Override
+    public String toString() { return nom + " : " + pv + " PV"; }
+}
+
+class Guerrier extends Personnage {          // Guerrier EST UN Personnage
+    private final int force;
+
+    Guerrier(String nom, int force) {
+        super(nom, 20);                      // appelle le constructeur de la mère (1re ligne)
+        this.force = force;
+    }
+    void frapper(Personnage cible) { cible.blesser(force); }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Guerrier g = new Guerrier("Conan", 7);
+        Personnage p = new Personnage("Gobelin", 10);
+        g.frapper(p);
+        System.out.println(g);          // toString hérité
+        System.out.println(p);
+    }
+}</code></pre></div>
+<h2>2. Redéfinir une méthode : <code>@Override</code> et <code>super</code></h2>
+<div class="essai" data-langue="java"><pre><code>class Employe {
+    protected String nom;
+    protected double salaire;
+    Employe(String nom, double salaire) { this.nom = nom; this.salaire = salaire; }
+    double paie() { return salaire; }
+    String fiche() { return nom + " : " + paie() + " €"; }
+}
+
+class Commercial extends Employe {
+    private final double ventes;
+    Commercial(String nom, double salaire, double ventes) {
+        super(nom, salaire);
+        this.ventes = ventes;
+    }
+    @Override
+    double paie() { return super.paie() + ventes * 0.05; }     // la paie de base + une commission
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Employe e = new Employe("Léa", 2000);
+        Employe c = new Commercial("Sam", 2000, 10000);       // un Commercial rangé dans une variable Employe
+        System.out.println(e.fiche());
+        System.out.println(c.fiche());                        // fiche() appelle le paie() du Commercial
+    }
+}</code></pre></div>
+<p><code>@Override</code> demande au compilateur de vérifier qu'on redéfinit bien une méthode existante : une faute de frappe dans le nom devient une erreur de compilation au lieu d'un bug silencieux.</p>
+<h2>3. Le polymorphisme</h2>
+<p>Une variable de type <code>Employe</code> peut désigner n'importe quel objet d'une classe fille. La méthode exécutée est celle de la <b>classe réelle</b> de l'objet, décidée à l'exécution. En Java, c'est le comportement par défaut (pas de mot-clé <code>virtual</code>).</p>
+<div class="essai" data-langue="java"><pre><code>import java.util.List;
+
+class Animal {
+    protected final String nom;
+    Animal(String nom) { this.nom = nom; }
+    String crier() { return "..."; }
+    String presenter() { return nom + " fait " + crier(); }
+}
+class Chien extends Animal {
+    Chien(String nom) { super(nom); }
+    @Override String crier() { return "Ouaf"; }
+}
+class Chat extends Animal {
+    Chat(String nom) { super(nom); }
+    @Override String crier() { return "Miaou"; }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        List&lt;Animal&gt; animaux = List.of(new Chien("Rex"), new Chat("Tigrou"), new Animal("Truc"));
+        for (Animal a : animaux) {
+            System.out.println(a.presenter());
+        }
+        Animal x = animaux.get(0);
+        if (x instanceof Chien c) System.out.println(c.nom + " est un chien");     // test du type réel
+    }
+}</code></pre></div>
+<h2>4. Les classes abstraites</h2>
+<p>Une classe <code>abstract</code> ne peut pas être instanciée. Elle peut déclarer des <b>méthodes abstraites</b> (sans corps) que chaque classe fille <b>doit</b> définir.</p>
+<div class="essai" data-langue="java"><pre><code>import java.util.List;
+
+abstract class Forme {
+    abstract double aire();                              // pas de corps
+    abstract String nom();
+    String description() { return nom() + " d'aire " + aire(); }     // méthode normale, commune
+}
+class Rectangle extends Forme {
+    private final double l, h;
+    Rectangle(double l, double h) { this.l = l; this.h = h; }
+    @Override double aire() { return l * h; }
+    @Override String nom() { return "rectangle"; }
+}
+class Cercle extends Forme {
+    private final double r;
+    Cercle(double r) { this.r = r; }
+    @Override double aire() { return Math.PI * r * r; }
+    @Override String nom() { return "cercle"; }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        List&lt;Forme&gt; formes = List.of(new Rectangle(3, 4), new Cercle(1));
+        double total = 0;
+        for (Forme f : formes) {
+            System.out.println(f.description());
+            total += f.aire();
+        }
+        System.out.printf("Aire totale : %.2f%n", total);
+        // Forme f = new Forme();     // refusé : classe abstraite
+    }
+}</code></pre></div>
+<h2>5. Les interfaces</h2>
+<p>Une <b>interface</b> est un contrat : une liste de méthodes qu'une classe s'engage à fournir. Une classe n'hérite que d'une classe, mais peut <b>implémenter plusieurs interfaces</b>.</p>
+<div class="essai" data-langue="java"><pre><code>import java.util.List;
+
+interface Affichable {
+    String afficher();
+}
+interface Exportable {
+    String versCsv();
+    default String entete() { return "nom;valeur"; }      // méthode par défaut (Java 8+)
+}
+
+class Produit implements Affichable, Exportable {
+    private final String nom;
+    private final double prix;
+    Produit(String nom, double prix) { this.nom = nom; this.prix = prix; }
+    @Override public String afficher() { return nom + " (" + prix + " €)"; }
+    @Override public String versCsv() { return nom + ";" + prix; }
+}
+class Client implements Exportable {
+    private final String nom;
+    Client(String nom) { this.nom = nom; }
+    @Override public String versCsv() { return nom + ";client"; }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Produit p = new Produit("Souris", 19.9);
+        System.out.println(p.afficher());
+        List&lt;Exportable&gt; aExporter = List.of(p, new Client("Léa"));      // des classes sans lien entre elles
+        System.out.println(aExporter.get(0).entete());
+        for (Exportable e : aExporter) System.out.println(e.versCsv());
+    }
+}</code></pre></div>
+<table><tr><th></th><th>Classe abstraite</th><th>Interface</th></tr><tr><td>Attributs d'instance</td><td>oui</td><td>non (seulement des constantes)</td></tr><tr><td>Constructeur</td><td>oui</td><td>non</td></tr><tr><td>Combien par classe</td><td>une seule (<code>extends</code>)</td><td>plusieurs (<code>implements</code>)</td></tr><tr><td>Sert à</td><td>partager du <b>code</b> entre classes proches</td><td>définir une <b>capacité</b> commune</td></tr></table>
+<p>Les interfaces sont partout dans Java : <code>List</code> est une interface, <code>ArrayList</code> une classe qui l'implémente ; <code>Comparable</code>, <code>Runnable</code>, <code>Iterable</code> aussi.</p>
+<h2>6. <code>final</code> et la classe <code>Object</code></h2>
+<p>Une méthode <code>final</code> ne peut pas être redéfinie ; une classe <code>final</code> ne peut pas avoir de fille (c'est le cas de <code>String</code>). Enfin, toute classe hérite implicitement de <code>Object</code>, d'où viennent <code>toString</code>, <code>equals</code> et <code>hashCode</code>.</p>
+<div class="box attention"><b>Héritage ou composition ?</b><p>N'utilise l'héritage que pour une vraie relation « est un ». Si tu veux seulement réutiliser du code (« a un »), mets un attribut : une Voiture <b>a un</b> Moteur, elle n'hérite pas de Moteur.</p></div>
+<section class="tuto"><h3><small>Tutoriel</small>Un système de notifications</h3>
+<div class="etape"><h4>L'interface</h4>
+<p>Elle dit ce que toute notification sait faire, sans dire comment.</p>
+<div class="essai" data-langue="java"><pre><code>interface Notification {
+    void envoyer(String message);
+}
+
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Notification est un contrat : aucune instance possible");
+    }
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Deux implémentations</h4>
+<div class="essai" data-langue="java"><pre><code>interface Notification {
+    void envoyer(String message);
+}
+class Email implements Notification {
+    private final String adresse;
+    Email(String adresse) { this.adresse = adresse; }
+    @Override public void envoyer(String message) { System.out.println("Mail à " + adresse + " : " + message); }
+}
+class Sms implements Notification {
+    private final String numero;
+    Sms(String numero) { this.numero = numero; }
+    @Override public void envoyer(String message) { System.out.println("SMS au " + numero + " : " + message); }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        new Email("admin@exemple.fr").envoyer("Serveur en panne");
+        new Sms("0601020304").envoyer("Serveur en panne");
+    }
+}</code></pre></div>
+</div>
+<div class="etape"><h4>Les traiter toutes de la même façon</h4>
+<p>La classe <code>Alerte</code> ne connaît que l'interface. Ajoute un canal <code>Slack</code> : la classe <code>Alerte</code> ne change pas d'une ligne.</p>
+<div class="essai" data-langue="java"><pre><code>import java.util.ArrayList;
+import java.util.List;
+
+interface Notification {
+    void envoyer(String message);
+}
+class Email implements Notification {
+    @Override public void envoyer(String message) { System.out.println("[mail] " + message); }
+}
+class Sms implements Notification {
+    @Override public void envoyer(String message) { System.out.println("[sms] " + message); }
+}
+class Alerte {
+    private final List&lt;Notification&gt; canaux = new ArrayList&lt;&gt;();
+    void abonner(Notification n) { canaux.add(n); }
+    void declencher(String message) {
+        for (Notification n : canaux) n.envoyer(message);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Alerte a = new Alerte();
+        a.abonner(new Email());
+        a.abonner(new Sms());
+        a.declencher("Disque plein");
+    }
+}</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : l'héritage</b><p>Une classe abstraite et deux classes filles.</p><a class="defi-go" href="labo-java.html#m=java-heritage">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : une interface</b><p>Deux classes sans lien qui respectent le même contrat.</p><a class="defi-go" href="labo-java.html#m=java-interface">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p><code>class Fille extends Mere</code> ; <code>super(…)</code> appelle le constructeur de la mère, <code>super.methode()</code> sa version d'une méthode. </p><p> <code>@Override</code> fait vérifier la redéfinition. </p><p> Polymorphisme : la méthode exécutée dépend de la classe réelle de l'objet. </p><p> <code>abstract</code> : classe non instanciable, méthodes à définir dans les filles. </p><p> <code>interface</code> : un contrat ; une classe peut en <code>implements</code> plusieurs.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-java.html">Labo Java</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "Quel mot-clé fait hériter une classe d'une autre ?",
+  "type": "qcm",
+  "options": [
+   "`implements`",
+   "`:`",
+   "`extends`",
+   "`inherits`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel mot-clé indique qu'une classe respecte une interface ?",
+  "type": "qcm",
+  "options": [
+   "`with`",
+   "`implements`",
+   "`extends`",
+   "`uses`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "De combien de classes une classe Java peut-elle hériter directement ?",
+  "type": "qcm",
+  "options": [
+   "Aucune",
+   "Deux",
+   "Autant qu'on veut",
+   "Une seule"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Combien d'interfaces une classe peut-elle implémenter ?",
+  "type": "qcm",
+  "options": [
+   "Une seule",
+   "Plusieurs",
+   "Deux au maximum",
+   "Aucune"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait `super(nom, 20);` dans un constructeur ?",
+  "type": "qcm",
+  "options": [
+   "Appelle le constructeur de la classe mère",
+   "Rend l'objet prioritaire",
+   "Appelle un autre constructeur de la même classe",
+   "Crée un objet de la classe mère"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait `super.paie()` ?",
+  "type": "qcm",
+  "options": [
+   "Appelle la méthode de la classe fille",
+   "Calcule une paie supérieure",
+   "Appelle la version de la classe mère de la méthode",
+   "Provoque une erreur"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "À quoi sert `@Override` ?",
+  "type": "qcm",
+  "options": [
+   "À rendre la méthode publique",
+   "À interdire la redéfinition",
+   "À faire vérifier par le compilateur qu'on redéfinit bien une méthode",
+   "À accélérer la méthode"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'une classe abstraite ?",
+  "type": "qcm",
+  "options": [
+   "Une classe privée",
+   "Une classe qu'on ne peut pas instancier",
+   "Une classe sans méthode",
+   "Une classe sans attribut"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que doit faire une classe (non abstraite) qui hérite d'une méthode abstraite ?",
+  "type": "qcm",
+  "options": [
+   "La rendre static",
+   "La supprimer",
+   "La définir",
+   "L'ignorer"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "`Employe c = new Commercial(…); c.paie();` appelle quelle version de paie ?",
+  "type": "qcm",
+  "options": [
+   "Celle d'Employe",
+   "Les deux",
+   "Erreur de compilation",
+   "Celle de Commercial"
+  ],
+  "answer": 3,
+  "explication": "La classe réelle de l'objet décide."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce que le polymorphisme ?",
+  "type": "qcm",
+  "options": [
+   "Avoir plusieurs constructeurs",
+   "Copier un objet",
+   "Le même appel exécute la méthode de la classe réelle de l'objet",
+   "Avoir plusieurs attributs"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel modificateur rend un membre visible des classes filles ?",
+  "type": "qcm",
+  "options": [
+   "`private`",
+   "`static`",
+   "`final`",
+   "`protected`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Quelle différence majeure entre classe abstraite et interface ?",
+  "type": "qcm",
+  "options": [
+   "Une classe abstraite n'a pas de méthodes",
+   "Aucune",
+   "Une interface peut être instanciée",
+   "Une classe hérite d'une seule classe abstraite mais peut implémenter plusieurs interfaces"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que permet le mot-clé `default` dans une interface ?",
+  "type": "qcm",
+  "options": [
+   "De rendre l'interface abstraite",
+   "De créer un constructeur",
+   "De fournir une implémentation par défaut d'une méthode",
+   "De rendre la méthode privée"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que teste `x instanceof Chien` ?",
+  "type": "qcm",
+  "options": [
+   "Si la classe Chien existe",
+   "Si x est une interface",
+   "Si x est null",
+   "Si l'objet désigné par x est un Chien (ou une classe fille)"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que signifie `final` devant une classe ?",
+  "type": "qcm",
+  "options": [
+   "Tous ses attributs sont constants",
+   "On ne peut pas l'instancier",
+   "On ne peut pas en hériter",
+   "Elle est abstraite"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Toute classe Java hérite de Object.",
+  "type": "vf",
+  "answer": true,
+  "explication": "D'où toString, equals et hashCode."
+ },
+ {
+  "niveau": "moyen",
+  "q": "En Java, il faut le mot-clé virtual pour qu'une méthode soit redéfinissable.",
+  "type": "vf",
+  "answer": false,
+  "explication": "C'est le comportement par défaut."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel mot-clé déclare une classe qu'on ne peut pas instancier ?",
+  "type": "saisie",
+  "answers": [
+   "abstract"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque mot-clé à son rôle.",
+  "type": "associer",
+  "paires": [
+   [
+    "`extends`",
+    "hériter d'une classe"
+   ],
+   [
+    "`implements`",
+    "respecter une interface"
+   ],
+   [
+    "`super`",
+    "accéder à la classe mère"
+   ],
+   [
+    "`abstract`",
+    "à définir dans les filles"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

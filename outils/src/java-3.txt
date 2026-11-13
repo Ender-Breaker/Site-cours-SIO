@@ -1,0 +1,880 @@
+=== java-lambdas-streams | Java : lambdas et streams | d
+Depuis Java 8, on peut passer du **comportement** en argument (une lambda) et traiter les collections de façon **déclarative** (les streams) : on décrit *quoi* obtenir plutôt que *comment* boucler.
+
+## 1. Une lambda : une fonction écrite sur place
+
+```run imp=java.util.function.* main
+Function<Integer, Integer> carre = x -> x * x;               // un paramètre, un résultat
+BiFunction<Integer, Integer, Integer> somme = (a, b) -> a + b;
+Predicate<String> estVide = s -> s.isEmpty();                // renvoie un boolean
+Supplier<String> salut = () -> "Bonjour";                    // aucun paramètre
+Consumer<String> afficher = s -> System.out.println("> " + s);    // ne renvoie rien
+
+System.out.println(carre.apply(7) + " " + somme.apply(3, 4) + " " + estVide.test("") + " " + salut.get());
+afficher.accept("une lambda est un objet");
+
+Function<Integer, Integer> plusLong = x -> {                 // corps sur plusieurs lignes
+    int double_ = x * 2;
+    return double_ + 1;
+};
+System.out.println(plusLong.apply(5));
+```
+
+| Interface fonctionnelle | Forme | Méthode |
+| `Function<T, R>` | T → R | `apply` |
+| `Predicate<T>` | T → boolean | `test` |
+| `Consumer<T>` | T → rien | `accept` |
+| `Supplier<T>` | rien → T | `get` |
+| `Comparator<T>` | (T, T) → int | `compare` |
+| `Runnable` | rien → rien | `run` |
+
+Une lambda est une façon courte d'écrire un objet qui implémente une **interface à une seule méthode abstraite**.
+
+## 2. Les références de méthodes
+
+Quand la lambda ne fait qu'appeler une méthode existante, on peut la nommer directement avec `::`.
+
+```run imp=java.util.*,java.util.function.* main
+Function<String, Integer> longueur = String::length;         // s -> s.length()
+Function<String, String> maj = String::toUpperCase;          // s -> s.toUpperCase()
+Function<String, Integer> convertir = Integer::parseInt;     // s -> Integer.parseInt(s)
+System.out.println(longueur.apply("Java") + " " + maj.apply("java") + " " + (convertir.apply("41") + 1));
+List<String> mots = new ArrayList<>(List.of("poire", "kiwi", "banane"));
+mots.forEach(System.out::println);                           // x -> System.out.println(x)
+```
+
+## 3. Les streams : une chaîne de traitements
+
+Un **stream** est un flux d'éléments qui traverse une suite d'opérations. On part d'une collection (`.stream()`), on enchaîne des opérations **intermédiaires**, et on termine par une opération **terminale** qui produit le résultat.
+
+```run imp=java.util.*,java.util.stream.* main
+List<Integer> notes = List.of(12, 5, 19, 8, 10, 15);
+
+List<Integer> admis = notes.stream()
+    .filter(n -> n >= 10)                // garde ceux qui passent le test
+    .sorted()                            // trie
+    .collect(Collectors.toList());       // rassemble dans une liste
+System.out.println(admis);
+
+List<String> textes = notes.stream()
+    .map(n -> n + "/20")                 // transforme chaque élément
+    .collect(Collectors.toList());
+System.out.println(textes);
+
+System.out.println(notes.stream().filter(n -> n >= 10).count());            // combien
+System.out.println(notes.stream().mapToInt(Integer::intValue).sum());       // somme
+System.out.println(notes.stream().mapToInt(Integer::intValue).average().getAsDouble());
+System.out.println(notes.stream().mapToInt(Integer::intValue).max().getAsInt());
+System.out.println(notes.stream().anyMatch(n -> n < 6) + " " + notes.stream().allMatch(n -> n > 0));
+```
+
+| Intermédiaires (renvoient un stream) | Terminales (produisent un résultat) |
+| `filter(test)` | `collect(Collectors.toList())`, `toList()` |
+| `map(fonction)` | `count()`, `sum()`, `average()`, `max()`, `min()` |
+| `sorted()`, `sorted(comparateur)` | `forEach(action)` |
+| `distinct()`, `limit(n)`, `skip(n)` | `anyMatch`, `allMatch`, `noneMatch` |
+| `mapToInt(…)` | `reduce(départ, opération)`, `findFirst()` |
+
+Le stream **ne modifie pas** la collection d'origine, et rien n'est calculé tant qu'il n'y a pas d'opération terminale.
+
+## 4. Des streams sur des objets
+
+```run imp=java.util.*,java.util.stream.* cls main
+class Eleve {
+    final String nom, option;
+    final double note;
+    Eleve(String nom, String option, double note) { this.nom = nom; this.option = option; this.note = note; }
+    String getNom() { return nom; }
+    String getOption() { return option; }
+    double getNote() { return note; }
+}
+@@
+List<Eleve> classe = List.of(new Eleve("Léa", "SLAM", 15), new Eleve("Sam", "SISR", 9),
+                             new Eleve("Zoé", "SLAM", 18), new Eleve("Tom", "SISR", 12));
+
+String admisSlam = classe.stream()
+    .filter(e -> e.getOption().equals("SLAM"))
+    .filter(e -> e.getNote() >= 10)
+    .sorted(Comparator.comparing(Eleve::getNote).reversed())
+    .map(Eleve::getNom)
+    .collect(Collectors.joining(", "));
+System.out.println(admisSlam);
+
+System.out.println(classe.stream().mapToDouble(Eleve::getNote).average().orElse(0));
+Map<String, Long> parOption = classe.stream()
+    .collect(Collectors.groupingBy(Eleve::getOption, TreeMap::new, Collectors.counting()));
+System.out.println(parOption);
+```
+
+Compare avec la version « boucles » : trois `if`, un tri, une concaténation. Le stream se lit comme une phrase.
+
+## 5. `reduce` et `IntStream`
+
+```run imp=java.util.*,java.util.stream.* main
+List<Integer> v = List.of(1, 2, 3, 4);
+System.out.println(v.stream().reduce(0, Integer::sum));           // 10 : combine tous les éléments
+System.out.println(v.stream().reduce(1, (a, b) -> a * b));        // 24
+System.out.println(IntStream.rangeClosed(1, 5).sum());            // 1 + 2 + 3 + 4 + 5
+IntStream.range(0, 3).forEach(i -> System.out.print(i + " "));    // remplace for (int i = 0; i < 3; i++)
+System.out.println();
+System.out.println(Stream.of("b", "a", "b", "c").distinct().sorted().collect(Collectors.toList()));
+```
+
+## 6. `Optional` : une valeur, ou rien
+
+Certaines opérations peuvent ne rien trouver (`findFirst`, `max` sur une liste vide). Plutôt que de renvoyer `null`, elles renvoient un `Optional`, qui oblige à prévoir le cas « rien ».
+
+```run imp=java.util.* main
+List<String> mots = List.of("poire", "kiwi", "banane");
+Optional<String> long6 = mots.stream().filter(m -> m.length() >= 6).findFirst();
+Optional<String> long9 = mots.stream().filter(m -> m.length() >= 9).findFirst();
+System.out.println(long6.isPresent() + " " + long6.get());
+System.out.println(long9.isPresent() + " " + long9.orElse("aucun"));
+long6.ifPresent(m -> System.out.println("trouvé : " + m));
+System.out.println(long9.map(String::toUpperCase).orElse("?"));
+```
+
+!attention Lisibilité avant tout | Un stream de dix opérations avec des lambdas sur plusieurs lignes est plus difficile à lire et à déboguer qu'une boucle. Utilise-les pour filtrer, transformer, agréger ; garde une boucle classique quand la logique est complexe.
+
+!tuto Du `for` au stream
+# La version avec des boucles
+Total des commandes de plus de 50 €.
+```run imp=java.util.* main
+List<Double> commandes = List.of(20.0, 75.5, 120.0, 49.9, 60.0);
+double total = 0;
+for (double c : commandes) {
+    if (c > 50) total += c;
+}
+System.out.println(total);
+```
+# La même chose avec un stream
+```run imp=java.util.* main
+List<Double> commandes = List.of(20.0, 75.5, 120.0, 49.9, 60.0);
+double total = commandes.stream()
+    .filter(c -> c > 50)
+    .mapToDouble(Double::doubleValue)
+    .sum();
+System.out.println(total);
+```
+# Ajouter une étape sans tout réécrire
+Appliquer 10 % de remise avant de filtrer : une ligne de plus. Change l'ordre de `map` et `filter` et observe.
+```run imp=java.util.* main
+List<Double> commandes = List.of(20.0, 75.5, 120.0, 49.9, 60.0);
+double total = commandes.stream()
+    .map(c -> c * 0.9)
+    .filter(c -> c > 50)
+    .mapToDouble(Double::doubleValue)
+    .sum();
+System.out.printf("%.2f%n", total);
+```
+!fin
+
+!defi Défi : filtrer et compter | Un stream à la place d'une boucle. | java-stream
+
+!retenir À retenir | Lambda : `(paramètres) -> expression` ; elle implémente une interface à une seule méthode. ¶ `Classe::methode` est une référence de méthode. ¶ Stream : `collection.stream()` → `filter` / `map` / `sorted` → `collect`, `count`, `sum`… ¶ Un stream ne modifie pas sa source. ¶ `Optional` représente une valeur peut-être absente : `orElse`, `ifPresent`.
+--- exos
+Q¤m¤Qu'est-ce qu'une lambda ?¤Une fonction anonyme écrite sur place;;Une classe abstraite;;Un type primitif;;Une boucle¤
+Q¤m¤Comment s'écrit une lambda qui double son argument ?¤`x -> x * 2`;;`x => x * 2`;;`lambda x: x * 2`;;`function(x) { x * 2 }`¤
+Q¤m¤Quelle interface représente une fonction T → boolean ?¤`Predicate<T>`;;`Function<T>`;;`Supplier<T>`;;`Consumer<T>`¤
+Q¤m¤Quelle interface représente une action qui ne renvoie rien ?¤`Consumer<T>`;;`Supplier<T>`;;`Predicate<T>`;;`Function<T, R>`¤
+Q¤m¤`String::length` est équivalent à…¤`s -> s.length()`;;`s -> String.length`;;`length(String)`;;`String.length()`¤
+Q¤m¤Quelle opération de stream garde les éléments qui vérifient une condition ?¤`filter`;;`map`;;`collect`;;`sorted`¤
+Q¤m¤Quelle opération transforme chaque élément ?¤`map`;;`filter`;;`reduce`;;`limit`¤
+Q¤m¤Laquelle est une opération terminale ?¤`collect`;;`filter`;;`map`;;`sorted`¤
+Q¤d¤Que se passe-t-il s'il n'y a pas d'opération terminale ?¤Rien n'est calculé;;Une exception est levée;;Le stream boucle sans fin;;La collection est vidée¤Les streams sont évalués paresseusement.
+Q¤m¤Un stream modifie-t-il la collection d'origine ?¤Non;;Oui, toujours;;Seulement avec map;;Seulement avec filter¤
+Q¤m¤Que renvoie `List.of(1, 2, 3).stream().filter(n -> n > 1).count()` ?¤2;;3;;1;;Une liste¤
+Q¤d¤Que renvoie `List.of(1, 2, 3, 4).stream().reduce(0, Integer::sum)` ?¤10;;24;;4;;0¤reduce combine tous les éléments.
+Q¤m¤Quel collecteur assemble des String avec un séparateur ?¤`Collectors.joining(", ")`;;`Collectors.toList()`;;`Collectors.concat()`;;`Collectors.split()`¤
+Q¤m¤Que représente un `Optional<String>` ?¤Un String qui peut être absent;;Un String facultatif dans une méthode;;Une liste de String;;Un String constant¤
+Q¤m¤Quelle méthode d'Optional fournit une valeur de remplacement ?¤`orElse`;;`get`;;`isPresent`;;`ifNull`¤
+Q¤d¤Combien de méthodes abstraites une interface fonctionnelle possède-t-elle ?¤Une seule;;Aucune;;Deux;;Autant qu'on veut¤
+V¤m¤Une lambda peut contenir plusieurs instructions entre accolades.¤V¤Il faut alors un return explicite.
+V¤m¤`sorted()` est une opération terminale.¤F¤C'est une opération intermédiaire : elle renvoie un stream.
+S¤m¤Quelle méthode transforme une collection en stream ?¤stream;;stream()¤
+A¤m¤Associe chaque opération à son rôle.¤`filter`=>garder selon un test;;`map`=>transformer;;`sorted`=>trier;;`collect`=>rassembler le résultat;;`count`=>compter¤
+
+=== java-enum-records | Java : enum, records, paquetages et bonnes pratiques | m
+## 1. `enum` : un nombre fini de valeurs
+
+Un `enum` définit un type dont les seules valeurs possibles sont listées. Fini les `int` ou `String` « magiques ».
+
+```run cls main
+enum Statut { EN_ATTENTE, EN_COURS, RESOLU, FERME }
+@@
+Statut s = Statut.EN_COURS;
+System.out.println(s + " " + s.ordinal() + " " + s.name().length());
+if (s == Statut.EN_COURS) System.out.println("ticket en cours");      // == est sûr pour un enum
+for (Statut x : Statut.values()) System.out.print(x + " ");           // toutes les valeurs
+System.out.println();
+Statut lu = Statut.valueOf("RESOLU");                                 // depuis un texte
+String message = switch (lu) {
+    case EN_ATTENTE -> "pas encore pris en charge";
+    case EN_COURS -> "un technicien travaille dessus";
+    case RESOLU, FERME -> "terminé";
+};
+System.out.println(message);
+```
+
+### Un enum est une classe
+
+Il peut avoir des attributs, un constructeur et des méthodes.
+
+```run cls main
+enum Priorite {
+    BASSE("sous 5 jours", 1), NORMALE("sous 48 h", 2), URGENTE("sous 4 h", 3);
+
+    private final String delai;
+    private final int niveau;
+    Priorite(String delai, int niveau) { this.delai = delai; this.niveau = niveau; }
+    String getDelai() { return delai; }
+    boolean plusUrgentQue(Priorite autre) { return niveau > autre.niveau; }
+}
+@@
+Priorite p = Priorite.URGENTE;
+System.out.println(p + " : " + p.getDelai());
+System.out.println(p.plusUrgentQue(Priorite.NORMALE));
+```
+
+## 2. `record` : une classe de données en une ligne
+
+Un `record` (Java 16+) génère automatiquement le constructeur, les accesseurs, `toString`, `equals` et `hashCode`. Ses champs sont **immuables**.
+
+```run imp=java.util.* cls main
+record Point(int x, int y) {
+    double distance(Point autre) {                  // on peut ajouter des méthodes
+        return Math.sqrt(Math.pow(x - autre.x, 2) + Math.pow(y - autre.y, 2));
+    }
+}
+record Produit(String nom, double prix) {
+    Produit {                                       // constructeur compact : validation
+        if (prix < 0) throw new IllegalArgumentException("prix négatif");
+    }
+}
+@@
+Point a = new Point(0, 0), b = new Point(3, 4);
+System.out.println(b + " " + b.x() + " " + a.distance(b));          // accesseur : x(), pas getX()
+System.out.println(b.equals(new Point(3, 4)));                      // true : comparaison par contenu
+List<Produit> panier = List.of(new Produit("Souris", 19.9), new Produit("Clavier", 49));
+System.out.println(panier);
+```
+
+Écrire la même classe `Point` à la main demande une trentaine de lignes. Les records sont parfaits pour les objets qui ne font que **transporter des données** (résultat d'une requête, ligne d'un fichier, réponse d'une API).
+
+## 3. L'immuabilité
+
+Un objet **immuable** ne change plus après sa création (`String`, les records, `List.of`). Avantages : pas de modification surprise à distance, partage sans danger. Pour « modifier », on crée un nouvel objet.
+
+```run cls main
+record Compte(String titulaire, double solde) {
+    Compte deposer(double m) { return new Compte(titulaire, solde + m); }    // renvoie un NOUVEAU compte
+}
+@@
+Compte c1 = new Compte("Léa", 100);
+Compte c2 = c1.deposer(50);
+System.out.println(c1 + " " + c2);
+```
+
+## 4. `static`, `final` et les constantes
+
+```run main
+static final double TVA = 0.2;                 // constante de classe : MAJUSCULES
+static final int MAX_ESSAIS = 3;
+static int compteur = 0;                       // variable de classe (à utiliser avec prudence)
+
+static double ttc(double ht) { compteur++; return ht * (1 + TVA); }
+@@
+System.out.println(ttc(100) + " " + ttc(50) + " " + compteur + " " + MAX_ESSAIS);
+final int[] t = {1, 2, 3};
+t[0] = 99;                                     // final protège la VARIABLE, pas le contenu
+System.out.println(t[0]);
+```
+
+## 5. Les paquetages et `import`
+
+Un **paquetage** (*package*) est un dossier de classes. Il évite les conflits de noms et organise le projet.
+
+```
+// fichier src/fr/monlycee/banque/Compte.java
+package fr.monlycee.banque;                 // 1re ligne : le paquetage (= le chemin du dossier)
+
+import java.util.ArrayList;                 // une classe précise
+import java.util.*;                         // toutes les classes du paquetage java.util
+
+public class Compte { … }                   // public : utilisable depuis un autre paquetage
+```
+
+| Paquetage | Contenu |
+| `java.lang` | `String`, `Math`, `Integer`, `System`… importé automatiquement |
+| `java.util` | collections, `Scanner`, `Random`, `Optional` |
+| `java.util.stream` | les streams |
+| `java.io`, `java.nio.file` | fichiers |
+| `java.time` | dates et heures (`LocalDate`, `Duration`) |
+| `java.sql` | accès aux bases de données (JDBC) |
+
+Règle : **une classe publique par fichier**, et le fichier porte le nom de la classe.
+
+## 6. Les conventions de nommage
+
+| Élément | Convention | Exemple |
+| Classe, interface, enum, record | PascalCase | `CompteBancaire` |
+| Méthode, variable, attribut | camelCase | `calculerTotal`, `prixTtc` |
+| Constante | MAJUSCULES_AVEC_TIRETS_BAS | `MAX_ESSAIS` |
+| Paquetage | minuscules | `fr.monlycee.banque` |
+| Accesseurs | `getX`, `setX`, `isX` pour un boolean | `getSolde`, `isVide` |
+
+Ces conventions sont respectées par tous les développeurs Java : les suivre rend ton code lisible par n'importe qui.
+
+## 7. Documenter : la Javadoc
+
+```
+/**
+ * Calcule le prix toutes taxes comprises.
+ *
+ * @param ht le prix hors taxes, positif
+ * @return le prix TTC
+ * @throws IllegalArgumentException si ht est négatif
+ */
+public static double ttc(double ht) { … }
+```
+
+Le commentaire `/** … */` placé avant une classe ou une méthode est lu par l'outil `javadoc` (qui génère un site de documentation) et affiché par l'éditeur au survol.
+
+!tuto Modéliser un ticket d'assistance
+# Les valeurs possibles : des enum
+```run cls main
+enum Statut { OUVERT, EN_COURS, RESOLU }
+enum Priorite { BASSE, NORMALE, URGENTE }
+@@
+System.out.println(Statut.OUVERT + " " + Priorite.valueOf("URGENTE"));
+```
+# Les données : un record
+```run cls main
+enum Statut { OUVERT, EN_COURS, RESOLU }
+enum Priorite { BASSE, NORMALE, URGENTE }
+record Ticket(int numero, String titre, Priorite priorite, Statut statut) {}
+@@
+Ticket t = new Ticket(1, "Imprimante hors ligne", Priorite.NORMALE, Statut.OUVERT);
+System.out.println(t);
+System.out.println(t.titre() + " : " + t.statut());
+```
+# Faire évoluer sans modifier
+Un ticket est immuable : passer à l'étape suivante renvoie un nouveau ticket. Puis un stream liste les urgents.
+```run imp=java.util.* cls main
+enum Statut { OUVERT, EN_COURS, RESOLU }
+enum Priorite { BASSE, NORMALE, URGENTE }
+record Ticket(int numero, String titre, Priorite priorite, Statut statut) {
+    Ticket avecStatut(Statut s) { return new Ticket(numero, titre, priorite, s); }
+}
+@@
+List<Ticket> tickets = List.of(
+    new Ticket(1, "Imprimante hors ligne", Priorite.NORMALE, Statut.OUVERT),
+    new Ticket(2, "Serveur de fichiers en panne", Priorite.URGENTE, Statut.OUVERT),
+    new Ticket(3, "Mot de passe oublié", Priorite.BASSE, Statut.RESOLU));
+Ticket pris = tickets.get(1).avecStatut(Statut.EN_COURS);
+System.out.println(pris);
+tickets.stream()
+    .filter(t -> t.priorite() == Priorite.URGENTE && t.statut() != Statut.RESOLU)
+    .forEach(t -> System.out.println("URGENT : " + t.titre()));
+```
+!fin
+
+!defi Défi : un enum | Des valeurs nommées et un `switch`. | java-enum
+!defi Défi : un record | Une classe de données en une ligne. | java-record
+
+!retenir À retenir | `enum` : un type à valeurs fixes (`values()`, `valueOf`, `ordinal()`), comparable avec `==`, utilisable dans un `switch`. ¶ `record Nom(type champ, …)` : constructeur, accesseurs `champ()`, `toString`, `equals` générés ; immuable. ¶ `static final` pour une constante. ¶ `package` en première ligne, `import` ensuite ; une classe publique par fichier. ¶ PascalCase pour les classes, camelCase pour le reste, MAJUSCULES pour les constantes.
+--- exos
+Q¤m¤À quoi sert un enum ?¤À définir un type dont les valeurs possibles sont fixées;;À créer une liste modifiable;;À compter;;À hériter de plusieurs classes¤
+Q¤m¤Comment obtenir toutes les valeurs de l'enum Statut ?¤`Statut.values()`;;`Statut.all()`;;`Statut.list`;;`new Statut()`¤
+Q¤m¤Que renvoie `Statut.valueOf("RESOLU")` ?¤La valeur Statut.RESOLU;;Le texte "RESOLU";;Le nombre 2;;`true`¤
+Q¤m¤Que renvoie `ordinal()` sur la première valeur d'un enum ?¤0;;1;;Son nom;;-1¤
+Q¤m¤Comment comparer deux valeurs d'un enum ?¤Avec `==`;;Uniquement avec equals;;Avec compareText;;C'est impossible¤Chaque valeur n'existe qu'en un seul exemplaire.
+Q¤m¤Que génère automatiquement un record ?¤Constructeur, accesseurs, toString, equals et hashCode;;Seulement le constructeur;;Des setters;;Une interface¤
+Q¤m¤Pour `record Point(int x, int y)`, comment lire x ?¤`p.x()`;;`p.getX()`;;`p[x]`;;`p->x`¤
+Q¤m¤Peut-on modifier un champ d'un record après sa création ?¤Non, il est immuable;;Oui, avec un setter généré;;Oui, directement;;Seulement les champs numériques¤
+Q¤d¤Avec `record Point(int x, int y)`, que vaut `new Point(1, 2).equals(new Point(1, 2))` ?¤`true`;;`false`;;Une erreur;;`null`¤equals compare le contenu.
+Q¤m¤Comment déclare-t-on une constante de classe ?¤`static final`;;`const`;;`final static const`;;`define`¤
+Q¤d¤Avec `final int[] t = {1, 2};`, peut-on écrire `t[0] = 9;` ?¤Oui : final protège la variable, pas le contenu du tableau;;Non, jamais;;Seulement dans un constructeur;;Erreur à l'exécution¤
+Q¤m¤Quelle est la première instruction d'un fichier Java rangé dans un paquetage ?¤`package …;`;;`import …;`;;`public class …`;;`using …;`¤
+Q¤m¤Quel paquetage est importé automatiquement ?¤`java.lang`;;`java.util`;;`java.io`;;Aucun¤
+Q¤m¤Quelle convention de nommage pour une classe ?¤PascalCase : `CompteBancaire`;;camelCase : `compteBancaire`;;snake_case : `compte_bancaire`;;MAJUSCULES¤
+Q¤m¤Quelle convention pour une méthode ?¤camelCase : `calculerTotal`;;PascalCase : `CalculerTotal`;;MAJUSCULES;;snake_case¤
+Q¤m¤Comment s'appelle par convention l'accesseur d'un attribut boolean `vide` ?¤`isVide()`;;`getVide()`;;`vide?`;;`hasVide()`¤
+V¤m¤Un enum peut avoir des attributs et des méthodes.¤V¤C'est une classe à part entière.
+V¤m¤Un fichier Java peut contenir plusieurs classes publiques.¤F¤Une seule, et le fichier porte son nom.
+S¤m¤Par quels caractères commence un commentaire Javadoc ?¤/**¤
+A¤m¤Associe chaque paquetage à son contenu.¤`java.util`=>collections et Scanner;;`java.lang`=>String et Math;;`java.sql`=>bases de données;;`java.time`=>dates et heures¤
+
+=== java-projets | Java en vrai : fichiers, base de données, Maven et tests | m
+Ce chapitre montre les outils d'un vrai projet Java, ceux que tu rencontreras en stage et dans les épreuves pratiques de l'option SLAM.
+
+!info Dans le navigateur | Fichiers, base de données, Maven et JUnit ont besoin d'un vrai poste de développement : ces exemples ne sont pas exécutables ici. Installe un JDK et un éditeur (IntelliJ IDEA Community, Eclipse ou VS Code) pour les essayer.
+
+## 1. Lire et écrire des fichiers
+
+```
+import java.nio.file.*;
+import java.io.IOException;
+import java.util.List;
+
+public class Main {
+    public static void main(String[] args) {
+        Path fichier = Path.of("notes.txt");
+        try {
+            Files.writeString(fichier, "Léa;15\nSam;9\n");                    // écrit (écrase)
+            Files.writeString(fichier, "Zoé;18\n", StandardOpenOption.APPEND); // ajoute à la fin
+
+            List<String> lignes = Files.readAllLines(fichier);                // lit tout
+            for (String ligne : lignes) {
+                String[] champs = ligne.split(";");
+                System.out.println(champs[0] + " a " + Double.parseDouble(champs[1]));
+            }
+            System.out.println(Files.exists(fichier) + " " + Files.size(fichier));
+        } catch (IOException e) {                    // exception vérifiée : obligatoire
+            System.out.println("Erreur de fichier : " + e.getMessage());
+        }
+    }
+}
+```
+
+Pour un très gros fichier, on lit ligne par ligne sans tout charger en mémoire :
+
+```
+try (BufferedReader lecteur = Files.newBufferedReader(Path.of("gros.log"))) {
+    String ligne;
+    while ((ligne = lecteur.readLine()) != null) {
+        if (ligne.contains("ERREUR")) System.out.println(ligne);
+    }
+}
+```
+
+## 2. Accéder à une base de données : JDBC
+
+**JDBC** est l'API standard pour dialoguer avec une base SQL (MySQL, MariaDB, PostgreSQL, SQLite). Le schéma est toujours le même : **connexion → requête préparée → résultat**.
+
+```
+import java.sql.*;
+
+public class Main {
+    public static void main(String[] args) {
+        String url = "jdbc:mysql://localhost:3306/parc";
+        String sql = "SELECT nom, prix FROM materiel WHERE prix > ? ORDER BY prix";
+
+        try (Connection cnx = DriverManager.getConnection(url, "utilisateur", "motdepasse");
+             PreparedStatement requete = cnx.prepareStatement(sql)) {
+
+            requete.setDouble(1, 100);                       // remplace le 1er ?
+            try (ResultSet res = requete.executeQuery()) {
+                while (res.next()) {                         // une ligne à la fois
+                    System.out.println(res.getString("nom") + " : " + res.getDouble("prix"));
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Erreur SQL : " + e.getMessage());
+        }
+    }
+}
+```
+
+Pour modifier les données : `executeUpdate()`, qui renvoie le nombre de lignes touchées.
+
+```
+String sql = "INSERT INTO materiel (nom, prix) VALUES (?, ?)";
+try (PreparedStatement requete = cnx.prepareStatement(sql)) {
+    requete.setString(1, "Écran 27 pouces");
+    requete.setDouble(2, 189.90);
+    int lignes = requete.executeUpdate();
+}
+```
+
+!attention Injection SQL : toujours une requête préparée | Ne construis **jamais** une requête en collant une saisie de l'utilisateur : `"… WHERE nom = '" + saisie + "'"`. Si quelqu'un tape `' OR '1'='1`, la condition devient toujours vraie et il lit toute la table ; il peut aussi détruire des données. Avec `PreparedStatement` et les `?`, la saisie est transmise comme une **donnée**, jamais comme du code SQL. C'est une exigence du bloc 3 (cybersécurité).
+
+En pratique on range ce code dans une classe **DAO** (*Data Access Object*) : `MaterielDao.trouverTous()`, `MaterielDao.ajouter(m)`. Le reste de l'application ne voit jamais de SQL.
+
+## 3. Maven : construire et gérer les dépendances
+
+Un projet réel utilise des bibliothèques (le pilote MySQL, JUnit…). **Maven** les télécharge, compile, lance les tests et fabrique le fichier `.jar`. Tout est décrit dans `pom.xml` :
+
+```
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>fr.monlycee</groupId>
+  <artifactId>parc</artifactId>
+  <version>1.0</version>
+
+  <properties>
+    <maven.compiler.release>21</maven.compiler.release>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.mysql</groupId>
+      <artifactId>mysql-connector-j</artifactId>
+      <version>9.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>5.11.0</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>
+```
+
+| Dossier / commande | Rôle |
+| `src/main/java` | le code de l'application |
+| `src/test/java` | les tests |
+| `src/main/resources` | fichiers de configuration |
+| `target/` | ce que Maven produit (à ne pas versionner) |
+| `mvn compile` | compile |
+| `mvn test` | lance les tests |
+| `mvn package` | fabrique le `.jar` dans `target/` |
+
+**Gradle** est l'alternative à Maven, utilisée notamment par les projets Android.
+
+## 4. Les tests unitaires avec JUnit
+
+Un **test unitaire** vérifie automatiquement qu'une méthode renvoie le bon résultat. On l'écrit une fois, on le relance à chaque modification : si un changement casse quelque chose, on le sait tout de suite.
+
+```
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class CompteTest {
+
+    @Test
+    void deposerAugmenteLeSolde() {
+        Compte c = new Compte("Léa", 100);
+        c.deposer(50);
+        assertEquals(150, c.getSolde());
+    }
+
+    @Test
+    void retirerPlusQueLeSoldeEstRefuse() {
+        Compte c = new Compte("Léa", 100);
+        assertFalse(c.retirer(500));
+        assertEquals(100, c.getSolde());             // le solde n'a pas bougé
+    }
+
+    @Test
+    void soldeInitialNegatifLeveUneException() {
+        assertThrows(IllegalArgumentException.class, () -> new Compte("Léa", -1));
+    }
+}
+```
+
+Un bon test suit trois temps : **préparer** les données, **agir**, **vérifier**. Les objectifs vérifiés automatiquement dans les labos de ce site sont exactement des tests de ce genre.
+
+## 5. Et après ?
+
+| Domaine | Technologie Java |
+| Applications web et API REST | Spring Boot |
+| Applications Android | Android SDK (Java ou Kotlin) |
+| Interfaces de bureau | JavaFX, Swing |
+| Accès aux données sans SQL manuel | JPA / Hibernate |
+| Langage voisin, même JVM | Kotlin |
+
+Et si ton lycée enseigne le **C#** : classes, interfaces, exceptions, collections, lambdas (LINQ ressemble aux streams) s'y écrivent presque de la même façon. Ce que tu as appris ici se transpose directement.
+
+!tuto Architecture d'une petite application de gestion
+# Le modèle : un record
+```
+public record Materiel(int id, String nom, double prix) {}
+```
+# L'accès aux données : un DAO
+Tout le SQL est ici, et nulle part ailleurs.
+```
+public class MaterielDao {
+    private final Connection cnx;
+    public MaterielDao(Connection cnx) { this.cnx = cnx; }
+
+    public List<Materiel> trouverTous() throws SQLException {
+        List<Materiel> liste = new ArrayList<>();
+        try (PreparedStatement r = cnx.prepareStatement("SELECT id, nom, prix FROM materiel");
+             ResultSet res = r.executeQuery()) {
+            while (res.next()) {
+                liste.add(new Materiel(res.getInt("id"), res.getString("nom"), res.getDouble("prix")));
+            }
+        }
+        return liste;
+    }
+}
+```
+# La logique : un service testable
+Il ne connaît ni le SQL ni l'affichage : on peut le tester avec une simple liste.
+```
+public class InventaireService {
+    public double valeurTotale(List<Materiel> liste) {
+        return liste.stream().mapToDouble(Materiel::prix).sum();
+    }
+    public List<Materiel> plusChersQue(List<Materiel> liste, double seuil) {
+        return liste.stream().filter(m -> m.prix() > seuil).toList();
+    }
+}
+```
+# Le programme principal relie le tout
+```
+try (Connection cnx = DriverManager.getConnection(url, utilisateur, motDePasse)) {
+    List<Materiel> tout = new MaterielDao(cnx).trouverTous();
+    InventaireService service = new InventaireService();
+    System.out.printf("Valeur du parc : %.2f €%n", service.valeurTotale(tout));
+}
+```
+Cette séparation **modèle / accès aux données / logique / présentation** est le principe des architectures en couches et du MVC que tu verras en SLAM.
+!fin
+
+!retenir À retenir | `Files.readAllLines` / `Files.writeString` pour les fichiers ; `IOException` à traiter. ¶ JDBC : `Connection` → `PreparedStatement` (avec des `?`) → `ResultSet`. ¶ Requêtes préparées obligatoires contre l'injection SQL. ¶ Maven : `pom.xml`, `mvn test`, `mvn package`. ¶ JUnit : `@Test`, `assertEquals`, `assertThrows`. ¶ Séparer modèle, DAO, logique et présentation.
+--- exos
+Q¤m¤Quelle classe permet de lire toutes les lignes d'un fichier en une instruction ?¤`Files`;;`Scanner`;;`System`;;`Reader`¤`Files.readAllLines(chemin)`.
+Q¤m¤Quelle exception faut-il traiter quand on manipule un fichier ?¤`IOException`;;`FileError`;;`NumberFormatException`;;`ArithmeticException`¤
+Q¤m¤Que signifie JDBC ?¤L'API Java standard d'accès aux bases de données;;Un moteur de base de données;;Un outil de test;;Un format de fichier¤
+Q¤m¤Quel objet représente la liaison avec la base de données ?¤`Connection`;;`ResultSet`;;`Statement`;;`Driver`¤
+Q¤m¤Quel objet contient les lignes renvoyées par un SELECT ?¤`ResultSet`;;`Connection`;;`PreparedStatement`;;`List`¤
+Q¤m¤Quelle méthode exécute un INSERT, UPDATE ou DELETE ?¤`executeUpdate()`;;`executeQuery()`;;`run()`;;`commit()`¤
+Q¤m¤Que représente le `?` dans une requête préparée ?¤Un paramètre remplacé ensuite par une valeur;;Un caractère joker de SQL;;Une erreur de syntaxe;;Un champ facultatif¤
+Q¤d¤Pourquoi une requête préparée protège-t-elle de l'injection SQL ?¤La saisie est transmise comme donnée, jamais interprétée comme du SQL;;Elle chiffre la requête;;Elle interdit les apostrophes;;Elle limite la longueur de la saisie¤
+Q¤d¤Quel est le danger de `"… WHERE nom = '" + saisie + "'"` ?¤L'injection SQL;;Une requête trop lente;;Une erreur de compilation;;Aucun¤
+Q¤m¤Qu'est-ce qu'un DAO ?¤Une classe qui regroupe l'accès aux données;;Un type de base de données;;Un fichier de configuration;;Un test¤
+Q¤m¤Quel fichier décrit un projet Maven ?¤`pom.xml`;;`build.json`;;`maven.cfg`;;`package.xml`¤
+Q¤m¤Quelle commande Maven lance les tests ?¤`mvn test`;;`mvn run`;;`mvn check-all`;;`maven --test`¤
+Q¤m¤Dans quel dossier Maven range-t-on le code de l'application ?¤`src/main/java`;;`src/test/java`;;`target`;;`bin`¤
+Q¤m¤Quelle annotation marque une méthode de test JUnit ?¤`@Test`;;`@Check`;;`@Unit`;;`@Run`¤
+Q¤m¤Que vérifie `assertEquals(150, c.getSolde())` ?¤Que le solde vaut 150;;Que le solde est différent de 150;;Que c n'est pas null;;Que la méthode existe¤
+Q¤d¤Que vérifie `assertThrows(IllegalArgumentException.class, () -> …)` ?¤Que le code lève bien cette exception;;Que le code ne lève aucune exception;;Que la classe existe;;Que le test est ignoré¤
+Q¤m¤Quels sont les trois temps d'un test unitaire ?¤Préparer, agir, vérifier;;Compiler, exécuter, corriger;;Lire, écrire, fermer;;Ouvrir, tester, fermer¤
+V¤m¤Un test unitaire se relance automatiquement à chaque modification du code pour détecter les régressions.¤V¤C'est tout son intérêt.
+V¤m¤Le dossier target/ de Maven doit être versionné avec Git.¤F¤Il contient ce qui est généré : on l'ignore.
+A¤m¤Associe chaque outil à son rôle.¤JDBC=>accès aux bases de données;;Maven=>construction et dépendances;;JUnit=>tests unitaires;;Javadoc=>documentation¤
+
+=== java-jeu | Java : créer un jeu dans le navigateur | d
+Java est le langage de Minecraft et de milliers de jeux Android (libGDX, jMonkeyEngine). Le principe est le même que dans tous les moteurs : tu écris une classe, et le moteur appelle ses méthodes à chaque image.
+
+!info Où tester ? | Les jeux ont besoin d'un écran : ils se lancent dans le [bac à sable du labo](labo-java.html#libre). Copie les exemples de ce chapitre et modifie-les.
+
+## 1. La boucle de jeu
+
+Ta classe **hérite** de `Jeu` et **redéfinit** trois méthodes. C'est l'héritage et le polymorphisme en action : le moteur ne connaît que `Jeu`, et appelle pourtant **tes** méthodes.
+
+```
+public class Main extends Jeu {
+    double x = 200;                          // l'état du jeu : des attributs
+
+    public void setup() {                    // une fois, au démarrage
+        x = 50;
+    }
+
+    public void update(double dt) {          // 60 fois par seconde : la logique
+        if (touche("droite")) x += 200 * dt; // 200 pixels par seconde
+    }
+
+    public void draw() {                     // 60 fois par seconde : l'affichage
+        effacer("black");
+        rect(x, 140, 40, 40, "gold");
+    }
+
+    public static void main(String[] args) {
+        lancer(new Main());                  // démarre le moteur
+    }
+}
+```
+
+| Méthode | Rôle |
+| `effacer(c)` | remplit l'écran (480 × 320) |
+| `rect(x, y, l, h, c)` | rectangle plein (coin haut gauche) |
+| `cercle(x, y, r, c)` | disque (centre) |
+| `ligne(x1, y1, x2, y2, c)` | segment |
+| `texte(t, x, y, taille, c)` | texte |
+| `touche("gauche")` | vrai tant que la touche est enfoncée |
+| `toucheAppuyee("espace")` | vrai une seule image, à l'appui |
+| `sourisX()`, `sourisY()`, `clic()` | souris |
+| `hasard(a, b)` | entier au hasard entre a et b |
+| `LARGEUR`, `HAUTEUR` | 480 et 320 |
+
+L'origine est en **haut à gauche** et `y` augmente vers le **bas**.
+
+## 2. Des entités : une classe par type d'objet
+
+```
+import java.util.ArrayList;
+import java.util.List;
+
+class Balle {
+    double x, y, vx, vy;
+    Balle(double x, double y, double vx, double vy) { this.x = x; this.y = y; this.vx = vx; this.vy = vy; }
+
+    void avancer() {
+        x += vx; y += vy;
+        if (x < 10 || x > Jeu.LARGEUR - 10) vx = -vx;
+        if (y < 10 || y > Jeu.HAUTEUR - 10) vy = -vy;
+    }
+}
+
+public class Main extends Jeu {
+    List<Balle> balles = new ArrayList<>();
+
+    public void setup() {
+        for (int i = 0; i < 5; i++) balles.add(new Balle(hasard(20, 460), hasard(20, 300), 3, 2));
+    }
+    public void update(double dt) {
+        for (Balle b : balles) b.avancer();
+    }
+    public void draw() {
+        effacer("#16182b");
+        for (Balle b : balles) cercle(b.x, b.y, 10, "gold");
+    }
+    public static void main(String[] args) { lancer(new Main()); }
+}
+```
+
+## 3. Gravité et saut
+
+```
+double y = 260, vy = 0;
+final double SOL = 260;
+
+public void update(double dt) {
+    if (toucheAppuyee("espace") && y >= SOL) vy = -9;     // saut seulement au sol
+    vy += 0.5;                                            // gravité
+    y += vy;
+    if (y > SOL) { y = SOL; vy = 0; }
+}
+```
+
+## 4. Collisions
+
+Le test de chevauchement de deux rectangles, exécutable ici car il n'a pas besoin d'écran :
+
+```run cls main
+record Boite(double x, double y, double l, double h) {
+    boolean touche(Boite o) {
+        return x < o.x + o.l && o.x < x + l && y < o.y + o.h && o.y < y + h;
+    }
+}
+@@
+Boite joueur = new Boite(100, 100, 40, 40);
+System.out.println(joueur.touche(new Boite(130, 120, 20, 20)));     // true : se chevauchent
+System.out.println(joueur.touche(new Boite(300, 100, 20, 20)));     // false : trop loin
+```
+
+## 5. Créer et supprimer des objets
+
+```run imp=java.util.* main
+List<double[]> tirs = new ArrayList<>(List.of(new double[]{10, 50}, new double[]{20, -5}, new double[]{30, 120}));
+for (double[] t : tirs) t[1] -= 10;            // chaque tir monte
+tirs.removeIf(t -> t[1] < 0);                  // retire ceux qui sont sortis
+System.out.println(tirs.size() + " tirs encore à l'écran");
+```
+
+## 6. Les états du jeu avec un `enum`
+
+```
+enum Etat { MENU, JEU, FIN }
+
+public class Main extends Jeu {
+    Etat etat = Etat.MENU;
+    int score = 0;
+
+    public void update(double dt) {
+        switch (etat) {
+            case MENU -> { if (toucheAppuyee("espace")) { etat = Etat.JEU; score = 0; } }
+            case JEU  -> { score++; if (score > 300) etat = Etat.FIN; }
+            case FIN  -> { if (toucheAppuyee("espace")) etat = Etat.MENU; }
+        }
+    }
+
+    public void draw() {
+        effacer("black");
+        switch (etat) {
+            case MENU -> texte("ESPACE pour jouer", 130, 150, 24, "white");
+            case JEU  -> texte("Score : " + score, 16, 16, 24, "white");
+            case FIN  -> texte("Perdu ! Score : " + score, 130, 150, 24, "tomato");
+        }
+    }
+    public static void main(String[] args) { lancer(new Main()); }
+}
+```
+
+!tuto Un jeu complet : esquive les météorites
+# Le vaisseau
+Colle ce code dans le [bac à sable](labo-java.html#libre).
+```
+import java.util.ArrayList;
+import java.util.List;
+
+public class Main extends Jeu {
+    double vx = 220;                              // position du vaisseau
+
+    public void update(double dt) {
+        if (touche("gauche")) vx -= 5;
+        if (touche("droite")) vx += 5;
+        vx = Math.max(0, Math.min(LARGEUR - 40, vx));      // reste dans l'écran
+    }
+
+    public void draw() {
+        effacer("#0d0e1a");
+        rect(vx, 280, 40, 20, "deepskyblue");
+    }
+
+    public static void main(String[] args) { lancer(new Main()); }
+}
+```
+# Des météorites qui tombent
+Chaque météorite est un petit tableau `{x, y}`. Ajoute ces lignes.
+```
+List<double[]> meteores = new ArrayList<>();
+int chrono = 0;
+
+// dans update :
+    chrono++;
+    if (chrono % 30 == 0) meteores.add(new double[]{hasard(0, LARGEUR - 20), -20});
+    for (double[] m : meteores) m[1] += 3;
+    meteores.removeIf(m -> m[1] > HAUTEUR);
+
+// dans draw :
+    for (double[] m : meteores) rect(m[0], m[1], 20, 20, "orange");
+```
+# La collision et la fin de partie
+```
+boolean perdu = false;
+int score = 0;
+
+// au début de update :
+    if (perdu) return;
+    score++;
+// après le déplacement des météorites :
+    for (double[] m : meteores) {
+        if (vx < m[0] + 20 && m[0] < vx + 40 && 280 < m[1] + 20 && m[1] < 300) perdu = true;
+    }
+// à la fin de draw :
+    texte("Score : " + score, 12, 12, 20, "white");
+    if (perdu) texte("PERDU", 190, 140, 36, "tomato");
+```
+# À toi d'améliorer
+Remplace les tableaux par une vraie classe `Meteore` avec ses méthodes `avancer()` et `dessiner(Jeu jeu)`, fais accélérer la chute avec le score, ajoute une touche pour recommencer et des vies.
+!fin
+
+!defi Défi : la pluie d'étoiles | Une liste d'objets mise à jour à chaque image. | java-etoiles
+!defi Défi : tirer des projectiles | Créer et supprimer des objets en cours de partie. | java-tir
+!defi Défi : attrape les fruits | Un mini-jeu complet avec score. | java-fruits
+
+!retenir À retenir | `public class Main extends Jeu`, avec `setup()`, `update(double dt)`, `draw()`, et `lancer(new Main());` dans `main`. ¶ L'état du jeu vit dans les attributs. ¶ Une classe (ou un record) par type d'entité, rangées dans une `List`. ¶ `removeIf` pour retirer des objets. ¶ Un `enum` pour les états (menu, jeu, fin).
+--- exos
+Q¤f¤De quelle classe ta classe Main doit-elle hériter pour faire un jeu dans le labo ?¤`Jeu`;;`Game`;;`Canvas`;;`Applet`¤
+Q¤f¤Quelle méthode est appelée une seule fois au démarrage ?¤`setup`;;`update`;;`draw`;;`start`¤
+Q¤m¤Quelle instruction démarre le moteur depuis main ?¤`lancer(new Main());`;;`new Main().run();`;;`Jeu.start();`;;`play();`¤
+Q¤m¤Que représente `dt` dans `update(double dt)` ?¤Le temps écoulé depuis l'image précédente, en secondes;;Le numéro de l'image;;La durée totale;;La date¤
+Q¤m¤Quel principe objet permet au moteur d'appeler tes méthodes update et draw ?¤Le polymorphisme (redéfinition);;La surcharge;;L'encapsulation;;Les génériques¤
+Q¤m¤Où se trouve le point (0, 0) ?¤En haut à gauche;;En bas à gauche;;Au centre;;En bas à droite¤
+Q¤m¤Quelle méthode utiliser pour un saut déclenché une seule fois par appui ?¤`toucheAppuyee`;;`touche`;;`clic`;;`hasard`¤
+Q¤m¤Où range-t-on l'état du jeu (positions, score) ?¤Dans les attributs de la classe;;Dans des variables locales de draw;;Dans le fichier;;Dans main¤
+Q¤d¤Quelle méthode retire d'une liste tous les éléments vérifiant une condition ?¤`removeIf`;;`deleteAll`;;`filter`;;`clear`¤
+Q¤d¤Pourquoi ne pas appeler `liste.remove(x)` dans un for-each sur cette liste ?¤Cela lève une ConcurrentModificationException;;C'est trop lent;;remove n'existe pas;;Cela vide la liste¤
+Q¤d¤Deux rectangles sont en collision quand…¤ils se chevauchent sur l'axe x ET sur l'axe y;;ils se chevauchent sur un seul axe;;ils ont la même taille;;leurs coins coïncident¤
+Q¤m¤Quel outil convient pour représenter les états menu / jeu / fin ?¤Un `enum`;;Un double;;Un tableau;;Une interface¤
+Q¤m¤Comment empêcher x de sortir de l'intervalle 0 à 440 ?¤`x = Math.max(0, Math.min(440, x));`;;`x = x % 440;`;;`x = Math.abs(x);`;;`x = Math.round(x);`¤
+Q¤d¤Pourquoi multiplier une vitesse par dt ?¤Pour un mouvement identique quelle que soit la vitesse de la machine;;Pour ralentir le jeu;;Pour éviter les collisions;;Pour arrondir la position¤
+V¤m¤La méthode draw doit contenir la logique du jeu.¤F¤draw affiche ; la logique va dans update.
+V¤m¤Quand y augmente, l'objet descend à l'écran.¤V¤
+S¤m¤Quelle constante contient la largeur de l'écran de jeu ?¤LARGEUR¤
+A¤m¤Associe chaque méthode à son rôle.¤`effacer`=>remplir l'écran;;`cercle`=>dessiner un disque;;`hasard`=>entier aléatoire;;`texte`=>écrire à l'écran¤

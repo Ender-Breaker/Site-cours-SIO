@@ -1,0 +1,931 @@
+=== java-poo | Java : programmation orientée objet | d
+Java est un langage **orienté objet** : un programme est un ensemble d'**objets** qui collaborent. Une **classe** est le plan de fabrication ; un **objet** (ou *instance*) est un exemplaire construit à partir de ce plan.
+
+## 1. Une première classe
+
+```run cls main
+class Joueur {
+    String nom;                 // attributs : les données de chaque objet
+    int pv;
+
+    void blesser(int degats) {  // méthode : agit sur l'objet
+        pv = pv - degats;
+    }
+}
+@@
+Joueur a = new Joueur();        // new crée un objet
+a.nom = "Léa";
+a.pv = 10;
+Joueur b = new Joueur();
+b.nom = "Sam";
+b.pv = 5;
+a.blesser(3);
+System.out.println(a.nom + " : " + a.pv + ", " + b.nom + " : " + b.pv);
+```
+
+Chaque objet a **ses propres** valeurs d'attributs. Remarque que `blesser` n'est pas `static` : elle s'applique à **un** objet.
+
+## 2. Le constructeur et `this`
+
+Le **constructeur** porte le nom de la classe, n'a pas de type de retour, et s'exécute au moment du `new`. `this` désigne l'objet en cours.
+
+```run cls main
+class Joueur {
+    String nom;
+    int pv;
+
+    Joueur(String nom, int pv) {     // constructeur
+        this.nom = nom;              // this.nom = l'attribut ; nom = le paramètre
+        this.pv = pv;
+    }
+    Joueur(String nom) {             // surcharge : un second constructeur
+        this(nom, 10);               // appelle le premier
+    }
+}
+@@
+Joueur a = new Joueur("Léa", 20);
+Joueur b = new Joueur("Sam");
+System.out.println(a.nom + " " + a.pv + ", " + b.nom + " " + b.pv);
+```
+
+## 3. L'encapsulation : `private`, accesseurs
+
+On interdit l'accès direct aux attributs (`private`) et on n'expose que des méthodes qui gardent l'objet dans un état cohérent.
+
+```run cls main
+class Compte {
+    private String titulaire;
+    private double solde;
+
+    public Compte(String titulaire, double solde) {
+        this.titulaire = titulaire;
+        this.solde = solde;
+    }
+
+    public void deposer(double montant) {
+        if (montant > 0) solde += montant;
+    }
+    public boolean retirer(double montant) {
+        if (montant > solde) return false;
+        solde -= montant;
+        return true;
+    }
+    public double getSolde() { return solde; }               // accesseur (getter)
+    public String getTitulaire() { return titulaire; }
+    public void setTitulaire(String t) {                      // mutateur (setter), avec contrôle
+        if (t != null && !t.isBlank()) titulaire = t;
+    }
+}
+@@
+Compte c = new Compte("Léa", 100);
+c.deposer(50);
+System.out.println(c.retirer(500) + " " + c.retirer(30) + " " + c.getSolde());
+// c.solde = 1000000;     // refusé à la compilation : solde est private
+```
+
+| Modificateur | Visible depuis |
+| `private` | la classe uniquement |
+| (rien) | les classes du même paquetage |
+| `protected` | le paquetage et les classes filles |
+| `public` | partout |
+
+## 4. `toString` et `equals`
+
+`println(objet)` appelle sa méthode `toString()`. Par défaut elle affiche quelque chose comme `Point@1b6d3586` : on la **redéfinit**. De même, `equals` par défaut ne compare que les références.
+
+```run cls main
+class Point {
+    private final int x, y;          // final : fixés par le constructeur, jamais modifiés
+
+    Point(int x, int y) { this.x = x; this.y = y; }
+
+    @Override
+    public String toString() { return "(" + x + ", " + y + ")"; }
+
+    @Override
+    public boolean equals(Object autre) {
+        if (!(autre instanceof Point)) return false;
+        Point p = (Point) autre;
+        return x == p.x && y == p.y;
+    }
+    @Override
+    public int hashCode() { return 31 * x + y; }     // toujours redéfini avec equals
+}
+@@
+Point a = new Point(3, 4), b = new Point(3, 4);
+System.out.println(a);                    // appelle toString
+System.out.println(a == b);               // false : deux objets distincts
+System.out.println(a.equals(b));          // true  : même contenu
+```
+
+## 5. `static` : ce qui appartient à la classe
+
+Un membre `static` est **partagé** par tous les objets et s'utilise avec le nom de la classe.
+
+```run cls main
+class Ticket {
+    private static int prochain = 1;          // un seul compteur pour toute la classe
+    public static final int MAX = 999;        // constante de classe
+    private final int numero;
+
+    Ticket() { numero = prochain++; }
+    int getNumero() { return numero; }
+    static int dejaEmis() { return prochain - 1; }      // méthode de classe : pas de this
+}
+@@
+Ticket a = new Ticket(), b = new Ticket(), c = new Ticket();
+System.out.println(a.getNumero() + " " + c.getNumero() + " " + Ticket.dejaEmis() + " " + Ticket.MAX);
+```
+
+C'est pour cela que `main` est `static` : elle est appelée avant qu'un seul objet n'existe. `Math.sqrt`, `Integer.parseInt` sont aussi des méthodes de classe.
+
+## 6. Les références et `null`
+
+Une variable d'objet contient une **référence** vers l'objet, pas l'objet lui-même.
+
+```run cls main
+class Boite {
+    int valeur;
+    Boite(int v) { valeur = v; }
+}
+@@
+Boite a = new Boite(1);
+Boite b = a;                 // b désigne LE MÊME objet
+b.valeur = 99;
+System.out.println(a.valeur);          // 99
+Boite c = null;              // ne désigne aucun objet
+if (c == null) System.out.println("c est vide");
+// c.valeur = 5;             // NullPointerException : l'erreur la plus fréquente en Java
+```
+
+La mémoire des objets devenus inaccessibles est récupérée automatiquement par le **ramasse-miettes** (*garbage collector*) : pas de `delete` en Java.
+
+## 7. Des objets qui contiennent des objets
+
+```run imp=java.util.ArrayList cls main
+class Eleve {
+    private final String nom;
+    private final double note;
+    Eleve(String nom, double note) { this.nom = nom; this.note = note; }
+    String getNom() { return nom; }
+    double getNote() { return note; }
+}
+
+class Classe {
+    private final ArrayList<Eleve> eleves = new ArrayList<>();
+    void ajouter(Eleve e) { eleves.add(e); }
+    double moyenne() {
+        double somme = 0;
+        for (Eleve e : eleves) somme += e.getNote();
+        return eleves.isEmpty() ? 0 : somme / eleves.size();
+    }
+    Eleve meilleur() {
+        Eleve m = eleves.get(0);
+        for (Eleve e : eleves) if (e.getNote() > m.getNote()) m = e;
+        return m;
+    }
+}
+@@
+Classe sio = new Classe();
+sio.ajouter(new Eleve("Léa", 15));
+sio.ajouter(new Eleve("Sam", 9));
+sio.ajouter(new Eleve("Zoé", 18));
+System.out.println(sio.moyenne() + " " + sio.meilleur().getNom());
+```
+
+Une Classe **a des** élèves : c'est la **composition**, à ne pas confondre avec l'héritage (« est un »).
+
+!tuto Une classe Chronomètre de A à Z
+# Les attributs et le constructeur
+```run cls main
+class Chrono {
+    private int secondes;
+    Chrono() { secondes = 0; }
+    int total() { return secondes; }
+}
+@@
+Chrono c = new Chrono();
+System.out.println(c.total());
+```
+# Des méthodes qui protègent l'état
+```run cls main
+class Chrono {
+    private int secondes;
+    void avancer(int s) { if (s > 0) secondes += s; }
+    void remettreAZero() { secondes = 0; }
+    int total() { return secondes; }
+}
+@@
+Chrono c = new Chrono();
+c.avancer(75);
+c.avancer(-10);          // ignoré : la classe se protège
+System.out.println(c.total());
+```
+# Un affichage avec toString
+Ajoute une méthode `heures()`.
+```run cls main
+class Chrono {
+    private int secondes;
+    void avancer(int s) { if (s > 0) secondes += s; }
+    int minutes() { return secondes / 60; }
+    @Override
+    public String toString() { return minutes() + " min " + secondes % 60 + " s"; }
+}
+@@
+Chrono c = new Chrono();
+c.avancer(75);
+c.avancer(3600);
+System.out.println(c);
+```
+!fin
+
+!defi Défi : le compte bancaire | Une classe complète avec des attributs privés. | java-compte
+!defi Défi : toString et equals | Donne un affichage et une égalité à tes objets. | java-tostring
+
+!retenir À retenir | `class Nom { attributs ; constructeur ; méthodes }` ; `new Nom(…)` crée un objet. ¶ `this` désigne l'objet courant. ¶ Attributs `private`, accès par des méthodes `public` : c'est l'encapsulation. ¶ Redéfinir `toString()` pour l'affichage, `equals()` (et `hashCode()`) pour l'égalité. ¶ `static` = appartient à la classe, partagé par tous les objets. ¶ Une variable d'objet est une référence ; elle peut valoir `null`.
+--- exos
+Q¤f¤Quel mot-clé crée un objet ?¤`new`;;`create`;;`make`;;`object`¤
+Q¤f¤Comment appelle-t-on un exemplaire d'une classe ?¤Un objet (une instance);;Une méthode;;Un attribut;;Un paquetage¤
+Q¤m¤Comment s'appelle la méthode exécutée lors du `new` ?¤Le constructeur;;Le main;;L'initialiseur statique;;Le destructeur¤
+Q¤m¤Quel est le type de retour d'un constructeur ?¤Il n'en a pas;;`void`;;Le type de la classe;;`Object`¤
+Q¤m¤Que désigne `this` ?¤L'objet sur lequel la méthode est appelée;;La classe;;Le paramètre;;L'objet précédent¤
+Q¤m¤Quel modificateur rend un attribut inaccessible hors de la classe ?¤`private`;;`public`;;`static`;;`final`¤
+Q¤m¤Qu'est-ce que l'encapsulation ?¤Cacher les attributs et n'y accéder que par des méthodes;;Mettre une classe dans une autre;;Copier un objet;;Hériter d'une classe¤
+Q¤m¤Quelle méthode faut-il redéfinir pour que `println(objet)` affiche un texte lisible ?¤`toString()`;;`print()`;;`display()`;;`show()`¤
+Q¤d¤Avec `Point a = new Point(1, 2), b = new Point(1, 2);` et equals non redéfinie, que vaut `a.equals(b)` ?¤`false`;;`true`;;Une erreur;;`null`¤Par défaut, equals compare les références.
+Q¤d¤Que signifie `static` devant un attribut ?¤Il est partagé par tous les objets de la classe;;Il est constant;;Il est privé;;Il est obligatoire¤
+Q¤d¤Pourquoi une méthode static ne peut-elle pas utiliser `this` ?¤Elle n'est liée à aucun objet;;C'est un oubli du langage;;this est privé;;Elle le peut¤
+Q¤d¤Après `Boite a = new Boite(1); Boite b = a; b.valeur = 9;`, que vaut `a.valeur` ?¤9;;1;;0;;Une erreur¤a et b référencent le même objet.
+Q¤m¤Que se passe-t-il si on appelle une méthode sur une variable qui vaut null ?¤Une NullPointerException;;Rien;;La méthode renvoie null;;Une erreur de compilation¤
+Q¤m¤Qui libère la mémoire des objets inutilisés en Java ?¤Le ramasse-miettes (garbage collector);;Le programmeur avec delete;;Le compilateur;;Personne¤
+Q¤m¤Que fait `this(nom, 10);` dans un constructeur ?¤Appelle un autre constructeur de la même classe;;Crée un second objet;;Appelle la classe mère;;Affecte deux attributs¤
+Q¤m¤Que signifie `final` devant un attribut ?¤Il reçoit sa valeur une fois (au plus tard dans le constructeur) et ne change plus;;Il est partagé;;Il est public;;Il est facultatif¤
+V¤m¤Une classe peut avoir plusieurs constructeurs.¤V¤C'est une surcharge.
+V¤m¤En Java, il faut libérer les objets avec delete.¤F¤Le ramasse-miettes s'en charge.
+S¤m¤Quelle annotation place-t-on au-dessus d'une méthode redéfinie comme toString ?¤@Override;;Override¤
+A¤m¤Associe chaque notion à sa définition.¤attribut=>donnée d'un objet;;méthode=>action d'un objet;;constructeur=>initialise l'objet;;getter=>méthode qui lit un attribut privé¤
+
+=== java-heritage | Java : héritage, classes abstraites et interfaces | d
+## 1. Hériter avec `extends`
+
+Une classe **fille** reprend les attributs et les méthodes de sa classe **mère** et peut en ajouter ou en redéfinir. En Java, une classe n'a qu'**une seule** classe mère.
+
+```run cls main
+class Personnage {
+    protected String nom;            // protected : visible des classes filles
+    protected int pv;
+
+    Personnage(String nom, int pv) { this.nom = nom; this.pv = pv; }
+    void blesser(int d) { pv = Math.max(0, pv - d); }
+    @Override
+    public String toString() { return nom + " : " + pv + " PV"; }
+}
+
+class Guerrier extends Personnage {          // Guerrier EST UN Personnage
+    private final int force;
+
+    Guerrier(String nom, int force) {
+        super(nom, 20);                      // appelle le constructeur de la mère (1re ligne)
+        this.force = force;
+    }
+    void frapper(Personnage cible) { cible.blesser(force); }
+}
+@@
+Guerrier g = new Guerrier("Conan", 7);
+Personnage p = new Personnage("Gobelin", 10);
+g.frapper(p);
+System.out.println(g);          // toString hérité
+System.out.println(p);
+```
+
+## 2. Redéfinir une méthode : `@Override` et `super`
+
+```run cls main
+class Employe {
+    protected String nom;
+    protected double salaire;
+    Employe(String nom, double salaire) { this.nom = nom; this.salaire = salaire; }
+    double paie() { return salaire; }
+    String fiche() { return nom + " : " + paie() + " €"; }
+}
+
+class Commercial extends Employe {
+    private final double ventes;
+    Commercial(String nom, double salaire, double ventes) {
+        super(nom, salaire);
+        this.ventes = ventes;
+    }
+    @Override
+    double paie() { return super.paie() + ventes * 0.05; }     // la paie de base + une commission
+}
+@@
+Employe e = new Employe("Léa", 2000);
+Employe c = new Commercial("Sam", 2000, 10000);       // un Commercial rangé dans une variable Employe
+System.out.println(e.fiche());
+System.out.println(c.fiche());                        // fiche() appelle le paie() du Commercial
+```
+
+`@Override` demande au compilateur de vérifier qu'on redéfinit bien une méthode existante : une faute de frappe dans le nom devient une erreur de compilation au lieu d'un bug silencieux.
+
+## 3. Le polymorphisme
+
+Une variable de type `Employe` peut désigner n'importe quel objet d'une classe fille. La méthode exécutée est celle de la **classe réelle** de l'objet, décidée à l'exécution. En Java, c'est le comportement par défaut (pas de mot-clé `virtual`).
+
+```run imp=java.util.List cls main
+class Animal {
+    protected final String nom;
+    Animal(String nom) { this.nom = nom; }
+    String crier() { return "..."; }
+    String presenter() { return nom + " fait " + crier(); }
+}
+class Chien extends Animal {
+    Chien(String nom) { super(nom); }
+    @Override String crier() { return "Ouaf"; }
+}
+class Chat extends Animal {
+    Chat(String nom) { super(nom); }
+    @Override String crier() { return "Miaou"; }
+}
+@@
+List<Animal> animaux = List.of(new Chien("Rex"), new Chat("Tigrou"), new Animal("Truc"));
+for (Animal a : animaux) {
+    System.out.println(a.presenter());
+}
+Animal x = animaux.get(0);
+if (x instanceof Chien c) System.out.println(c.nom + " est un chien");     // test du type réel
+```
+
+## 4. Les classes abstraites
+
+Une classe `abstract` ne peut pas être instanciée. Elle peut déclarer des **méthodes abstraites** (sans corps) que chaque classe fille **doit** définir.
+
+```run imp=java.util.List cls main
+abstract class Forme {
+    abstract double aire();                              // pas de corps
+    abstract String nom();
+    String description() { return nom() + " d'aire " + aire(); }     // méthode normale, commune
+}
+class Rectangle extends Forme {
+    private final double l, h;
+    Rectangle(double l, double h) { this.l = l; this.h = h; }
+    @Override double aire() { return l * h; }
+    @Override String nom() { return "rectangle"; }
+}
+class Cercle extends Forme {
+    private final double r;
+    Cercle(double r) { this.r = r; }
+    @Override double aire() { return Math.PI * r * r; }
+    @Override String nom() { return "cercle"; }
+}
+@@
+List<Forme> formes = List.of(new Rectangle(3, 4), new Cercle(1));
+double total = 0;
+for (Forme f : formes) {
+    System.out.println(f.description());
+    total += f.aire();
+}
+System.out.printf("Aire totale : %.2f%n", total);
+// Forme f = new Forme();     // refusé : classe abstraite
+```
+
+## 5. Les interfaces
+
+Une **interface** est un contrat : une liste de méthodes qu'une classe s'engage à fournir. Une classe n'hérite que d'une classe, mais peut **implémenter plusieurs interfaces**.
+
+```run imp=java.util.List cls main
+interface Affichable {
+    String afficher();
+}
+interface Exportable {
+    String versCsv();
+    default String entete() { return "nom;valeur"; }      // méthode par défaut (Java 8+)
+}
+
+class Produit implements Affichable, Exportable {
+    private final String nom;
+    private final double prix;
+    Produit(String nom, double prix) { this.nom = nom; this.prix = prix; }
+    @Override public String afficher() { return nom + " (" + prix + " €)"; }
+    @Override public String versCsv() { return nom + ";" + prix; }
+}
+class Client implements Exportable {
+    private final String nom;
+    Client(String nom) { this.nom = nom; }
+    @Override public String versCsv() { return nom + ";client"; }
+}
+@@
+Produit p = new Produit("Souris", 19.9);
+System.out.println(p.afficher());
+List<Exportable> aExporter = List.of(p, new Client("Léa"));      // des classes sans lien entre elles
+System.out.println(aExporter.get(0).entete());
+for (Exportable e : aExporter) System.out.println(e.versCsv());
+```
+
+| | Classe abstraite | Interface |
+| Attributs d'instance | oui | non (seulement des constantes) |
+| Constructeur | oui | non |
+| Combien par classe | une seule (`extends`) | plusieurs (`implements`) |
+| Sert à | partager du **code** entre classes proches | définir une **capacité** commune |
+
+Les interfaces sont partout dans Java : `List` est une interface, `ArrayList` une classe qui l'implémente ; `Comparable`, `Runnable`, `Iterable` aussi.
+
+## 6. `final` et la classe `Object`
+
+Une méthode `final` ne peut pas être redéfinie ; une classe `final` ne peut pas avoir de fille (c'est le cas de `String`). Enfin, toute classe hérite implicitement de `Object`, d'où viennent `toString`, `equals` et `hashCode`.
+
+!attention Héritage ou composition ? | N'utilise l'héritage que pour une vraie relation « est un ». Si tu veux seulement réutiliser du code (« a un »), mets un attribut : une Voiture **a un** Moteur, elle n'hérite pas de Moteur.
+
+!tuto Un système de notifications
+# L'interface
+Elle dit ce que toute notification sait faire, sans dire comment.
+```run cls main
+interface Notification {
+    void envoyer(String message);
+}
+@@
+System.out.println("Notification est un contrat : aucune instance possible");
+```
+# Deux implémentations
+```run cls main
+interface Notification {
+    void envoyer(String message);
+}
+class Email implements Notification {
+    private final String adresse;
+    Email(String adresse) { this.adresse = adresse; }
+    @Override public void envoyer(String message) { System.out.println("Mail à " + adresse + " : " + message); }
+}
+class Sms implements Notification {
+    private final String numero;
+    Sms(String numero) { this.numero = numero; }
+    @Override public void envoyer(String message) { System.out.println("SMS au " + numero + " : " + message); }
+}
+@@
+new Email("admin@exemple.fr").envoyer("Serveur en panne");
+new Sms("0601020304").envoyer("Serveur en panne");
+```
+# Les traiter toutes de la même façon
+La classe `Alerte` ne connaît que l'interface. Ajoute un canal `Slack` : la classe `Alerte` ne change pas d'une ligne.
+```run imp=java.util.ArrayList,java.util.List cls main
+interface Notification {
+    void envoyer(String message);
+}
+class Email implements Notification {
+    @Override public void envoyer(String message) { System.out.println("[mail] " + message); }
+}
+class Sms implements Notification {
+    @Override public void envoyer(String message) { System.out.println("[sms] " + message); }
+}
+class Alerte {
+    private final List<Notification> canaux = new ArrayList<>();
+    void abonner(Notification n) { canaux.add(n); }
+    void declencher(String message) {
+        for (Notification n : canaux) n.envoyer(message);
+    }
+}
+@@
+Alerte a = new Alerte();
+a.abonner(new Email());
+a.abonner(new Sms());
+a.declencher("Disque plein");
+```
+!fin
+
+!defi Défi : l'héritage | Une classe abstraite et deux classes filles. | java-heritage
+!defi Défi : une interface | Deux classes sans lien qui respectent le même contrat. | java-interface
+
+!retenir À retenir | `class Fille extends Mere` ; `super(…)` appelle le constructeur de la mère, `super.methode()` sa version d'une méthode. ¶ `@Override` fait vérifier la redéfinition. ¶ Polymorphisme : la méthode exécutée dépend de la classe réelle de l'objet. ¶ `abstract` : classe non instanciable, méthodes à définir dans les filles. ¶ `interface` : un contrat ; une classe peut en `implements` plusieurs.
+--- exos
+Q¤m¤Quel mot-clé fait hériter une classe d'une autre ?¤`extends`;;`inherits`;;`implements`;;`:`¤
+Q¤m¤Quel mot-clé indique qu'une classe respecte une interface ?¤`implements`;;`extends`;;`uses`;;`with`¤
+Q¤m¤De combien de classes une classe Java peut-elle hériter directement ?¤Une seule;;Deux;;Autant qu'on veut;;Aucune¤
+Q¤m¤Combien d'interfaces une classe peut-elle implémenter ?¤Plusieurs;;Une seule;;Aucune;;Deux au maximum¤
+Q¤m¤Que fait `super(nom, 20);` dans un constructeur ?¤Appelle le constructeur de la classe mère;;Crée un objet de la classe mère;;Appelle un autre constructeur de la même classe;;Rend l'objet prioritaire¤
+Q¤m¤Que fait `super.paie()` ?¤Appelle la version de la classe mère de la méthode;;Appelle la méthode de la classe fille;;Calcule une paie supérieure;;Provoque une erreur¤
+Q¤m¤À quoi sert `@Override` ?¤À faire vérifier par le compilateur qu'on redéfinit bien une méthode;;À rendre la méthode publique;;À accélérer la méthode;;À interdire la redéfinition¤
+Q¤m¤Qu'est-ce qu'une classe abstraite ?¤Une classe qu'on ne peut pas instancier;;Une classe sans méthode;;Une classe privée;;Une classe sans attribut¤
+Q¤m¤Que doit faire une classe (non abstraite) qui hérite d'une méthode abstraite ?¤La définir;;L'ignorer;;La supprimer;;La rendre static¤
+Q¤d¤`Employe c = new Commercial(…); c.paie();` appelle quelle version de paie ?¤Celle de Commercial;;Celle d'Employe;;Les deux;;Erreur de compilation¤La classe réelle de l'objet décide.
+Q¤m¤Qu'est-ce que le polymorphisme ?¤Le même appel exécute la méthode de la classe réelle de l'objet;;Avoir plusieurs constructeurs;;Avoir plusieurs attributs;;Copier un objet¤
+Q¤m¤Quel modificateur rend un membre visible des classes filles ?¤`protected`;;`private`;;`static`;;`final`¤
+Q¤d¤Quelle différence majeure entre classe abstraite et interface ?¤Une classe hérite d'une seule classe abstraite mais peut implémenter plusieurs interfaces;;Une interface peut être instanciée;;Une classe abstraite n'a pas de méthodes;;Aucune¤
+Q¤d¤Que permet le mot-clé `default` dans une interface ?¤De fournir une implémentation par défaut d'une méthode;;De rendre la méthode privée;;De créer un constructeur;;De rendre l'interface abstraite¤
+Q¤m¤Que teste `x instanceof Chien` ?¤Si l'objet désigné par x est un Chien (ou une classe fille);;Si x est null;;Si la classe Chien existe;;Si x est une interface¤
+Q¤d¤Que signifie `final` devant une classe ?¤On ne peut pas en hériter;;On ne peut pas l'instancier;;Tous ses attributs sont constants;;Elle est abstraite¤
+V¤m¤Toute classe Java hérite de Object.¤V¤D'où toString, equals et hashCode.
+V¤m¤En Java, il faut le mot-clé virtual pour qu'une méthode soit redéfinissable.¤F¤C'est le comportement par défaut.
+S¤m¤Quel mot-clé déclare une classe qu'on ne peut pas instancier ?¤abstract¤
+A¤m¤Associe chaque mot-clé à son rôle.¤`extends`=>hériter d'une classe;;`implements`=>respecter une interface;;`super`=>accéder à la classe mère;;`abstract`=>à définir dans les filles¤
+
+=== java-collections | Java : les collections et les génériques | m
+Les **collections** (paquetage `java.util`) sont les structures de données prêtes à l'emploi de Java. Trois suffisent pour presque tout : la **liste**, le **dictionnaire**, l'**ensemble**.
+
+## 1. `ArrayList` : la liste qui grandit
+
+```run imp=java.util.ArrayList,java.util.List main
+List<String> fruits = new ArrayList<>();        // <String> : le type des éléments
+fruits.add("pomme");
+fruits.add("kiwi");
+fruits.add(0, "ananas");                        // insère à l'indice 0
+System.out.println(fruits + " " + fruits.size());
+System.out.println(fruits.get(1));              // lecture par indice
+fruits.set(1, "poire");                         // remplacement
+fruits.remove("kiwi");                          // suppression par valeur
+fruits.remove(0);                               // suppression par indice
+System.out.println(fruits + " " + fruits.contains("poire") + " " + fruits.indexOf("poire") + " " + fruits.isEmpty());
+
+for (String f : fruits) System.out.println(f.toUpperCase());
+```
+
+`List` est l'**interface**, `ArrayList` la classe concrète. On déclare la variable avec l'interface : le reste du code ne dépend pas de l'implémentation choisie.
+
+## 2. Les génériques et les types enveloppes
+
+Le type entre chevrons est un **paramètre de type**. Il doit être une classe : pour les types primitifs, on utilise leur **enveloppe** (`Integer`, `Double`, `Boolean`, `Character`). La conversion est automatique (*autoboxing*).
+
+```run imp=java.util.ArrayList,java.util.List,java.util.Collections main
+List<Integer> notes = new ArrayList<>(List.of(12, 5, 19, 8));     // List.of : liste non modifiable
+notes.add(10);                               // int → Integer automatiquement
+int somme = 0;
+for (int n : notes) somme += n;              // Integer → int automatiquement
+System.out.println(somme + " " + Collections.max(notes) + " " + Collections.min(notes));
+Collections.sort(notes);
+System.out.println(notes);
+Collections.reverse(notes);
+System.out.println(notes);
+// List<int> x;        // refusé : pas de type primitif entre chevrons
+```
+
+Grâce aux génériques, le compilateur refuse `notes.add("texte")` : les erreurs de type sont détectées avant l'exécution.
+
+## 3. `HashMap` : le dictionnaire
+
+```run imp=java.util.HashMap,java.util.Map,java.util.TreeMap main
+Map<String, Integer> stock = new HashMap<>();
+stock.put("souris", 3);
+stock.put("clavier", 2);
+stock.put("souris", 8);                                   // même clé : la valeur est remplacée
+System.out.println(stock.get("souris") + " " + stock.get("webcam"));       // 8 null
+System.out.println(stock.getOrDefault("webcam", 0) + " " + stock.containsKey("clavier") + " " + stock.size());
+
+stock.put("ecran", stock.getOrDefault("ecran", 0) + 1);   // compter
+stock.merge("ecran", 1, Integer::sum);                    // la même chose, en plus court
+
+for (Map.Entry<String, Integer> e : stock.entrySet()) {   // parcourir clés et valeurs
+    System.out.println(e.getKey() + " : " + e.getValue());
+}
+System.out.println(new TreeMap<>(stock));                 // TreeMap : clés triées
+stock.remove("clavier");
+System.out.println(stock.keySet() + " " + stock.values());
+```
+
+!attention L'ordre d'une `HashMap` | Une `HashMap` ne garantit **aucun** ordre de parcours. Pour des clés triées, utilise `TreeMap` ; pour garder l'ordre d'insertion, `LinkedHashMap`.
+
+## 4. `HashSet` : l'ensemble sans doublon
+
+```run imp=java.util.HashSet,java.util.Set,java.util.TreeSet,java.util.List main
+Set<String> vus = new HashSet<>();
+System.out.println(vus.add("lua") + " " + vus.add("java") + " " + vus.add("lua"));    // add renvoie false si déjà présent
+System.out.println(vus.size() + " " + vus.contains("java"));
+Set<Integer> uniques = new TreeSet<>(List.of(5, 2, 5, 8, 2));      // TreeSet : trié
+System.out.println(uniques);
+```
+
+| Besoin | Interface | Classe habituelle |
+| suite ordonnée, accès par indice | `List` | `ArrayList` |
+| clé → valeur | `Map` | `HashMap` (ou `TreeMap` triée) |
+| valeurs uniques | `Set` | `HashSet` (ou `TreeSet` trié) |
+| pile, file | `Deque` | `ArrayDeque` |
+
+## 5. Trier des objets : `Comparator`
+
+```run imp=java.util.ArrayList,java.util.List,java.util.Comparator cls main
+class Eleve {
+    final String nom;
+    final double note;
+    Eleve(String nom, double note) { this.nom = nom; this.note = note; }
+    @Override public String toString() { return nom + " " + note; }
+}
+@@
+List<Eleve> classe = new ArrayList<>();
+classe.add(new Eleve("Léa", 15));
+classe.add(new Eleve("Sam", 9));
+classe.add(new Eleve("Zoé", 18));
+
+classe.sort(Comparator.comparing(e -> e.nom));                   // par nom
+System.out.println(classe);
+classe.sort((a, b) -> Double.compare(b.note, a.note));           // par note décroissante
+System.out.println(classe);
+```
+
+Un `Comparator` renvoie un nombre négatif, nul ou positif selon que le premier élément passe avant, est égal, ou passe après le second.
+
+## 6. Supprimer pendant un parcours
+
+Modifier une liste dans un `for-each` lève une `ConcurrentModificationException`. La bonne méthode : `removeIf`.
+
+```run imp=java.util.ArrayList,java.util.List main
+List<Integer> tirs = new ArrayList<>(List.of(50, -5, 120, -30));
+tirs.removeIf(y -> y < 0);                  // supprime selon une condition
+System.out.println(tirs);
+```
+
+## 7. Écrire sa propre classe générique
+
+```run imp=java.util.ArrayList,java.util.List cls main
+class Pile<T> {                              // T : un type choisi à l'utilisation
+    private final List<T> elements = new ArrayList<>();
+    void empiler(T x) { elements.add(x); }
+    T depiler() { return elements.remove(elements.size() - 1); }
+    boolean estVide() { return elements.isEmpty(); }
+}
+@@
+Pile<Integer> p = new Pile<>();
+p.empiler(1); p.empiler(2); p.empiler(3);
+System.out.println(p.depiler() + " " + p.depiler());
+Pile<String> mots = new Pile<>();
+mots.empiler("monde"); mots.empiler("bonjour");
+while (!mots.estVide()) System.out.print(mots.depiler() + " ");
+System.out.println();
+```
+
+!tuto Compter les mots d'un texte
+# Découper le texte
+```run imp=java.util.Scanner,java.util.ArrayList,java.util.List stdin=le~chat~et~le~chien~et~le~lapin main
+Scanner sc = new Scanner(System.in);
+List<String> mots = new ArrayList<>();
+while (sc.hasNext()) mots.add(sc.next());
+System.out.println(mots.size() + " mots");
+```
+# Compter avec une Map
+`TreeMap` affiche les mots dans l'ordre alphabétique.
+```run imp=java.util.Scanner,java.util.Map,java.util.TreeMap stdin=le~chat~et~le~chien~et~le~lapin main
+Scanner sc = new Scanner(System.in);
+Map<String, Integer> compte = new TreeMap<>();
+while (sc.hasNext()) compte.merge(sc.next(), 1, Integer::sum);
+for (Map.Entry<String, Integer> e : compte.entrySet()) {
+    System.out.println(e.getKey() + " : " + e.getValue());
+}
+```
+# Classer par fréquence
+On copie les entrées dans une liste, qu'on trie par valeur décroissante.
+```run imp=java.util.* stdin=le~chat~et~le~chien~et~le~lapin main
+Scanner sc = new Scanner(System.in);
+Map<String, Integer> compte = new TreeMap<>();
+while (sc.hasNext()) compte.merge(sc.next(), 1, Integer::sum);
+List<Map.Entry<String, Integer>> liste = new ArrayList<>(compte.entrySet());
+liste.sort((a, b) -> b.getValue() - a.getValue());
+for (Map.Entry<String, Integer> e : liste) {
+    System.out.println(e.getValue() + " x " + e.getKey());
+}
+```
+!fin
+
+!defi Défi : inverser une liste | Une `ArrayList` parcourue à l'envers. | java-inverser
+!defi Défi : l'inventaire | Une `Map` fait presque tout le travail. | java-inventaire
+!defi Défi : supprimer les doublons | Un `Set` pour savoir ce qu'on a déjà vu. | java-doublons
+
+!retenir À retenir | `List<T>` / `ArrayList` : `add`, `get(i)`, `set`, `remove`, `size()`, `contains`. ¶ `Map<K, V>` / `HashMap` : `put`, `get`, `getOrDefault`, `containsKey`, `entrySet()`. ¶ `Set<T>` / `HashSet` : pas de doublon. ¶ Entre chevrons : des classes (`Integer`, pas `int`). ¶ `Collections.sort(liste)` ou `liste.sort(comparateur)` ; `removeIf` pour supprimer selon une condition.
+--- exos
+Q¤f¤Quelle méthode ajoute un élément à une ArrayList ?¤`add`;;`push`;;`append`;;`insert`¤
+Q¤f¤Quelle méthode donne le nombre d'éléments d'une liste ?¤`size()`;;`length`;;`length()`;;`count()`¤
+Q¤m¤Comment lire l'élément d'indice 2 d'une liste ?¤`liste.get(2)`;;`liste[2]`;;`liste.at(2)`;;`liste(2)`¤Les crochets sont réservés aux tableaux.
+Q¤m¤Pourquoi écrit-on `List<Integer>` et non `List<int>` ?¤Le paramètre de type doit être une classe;;int est trop petit;;C'est une convention de style;;List<int> est plus lent¤
+Q¤m¤Quelle collection associe une valeur à une clé ?¤`HashMap`;;`ArrayList`;;`HashSet`;;`ArrayDeque`¤
+Q¤m¤Que renvoie `map.get("x")` si la clé "x" est absente ?¤`null`;;0;;Une exception;;Une chaîne vide¤
+Q¤m¤Quelle méthode renvoie une valeur de remplacement si la clé est absente ?¤`getOrDefault`;;`getOr`;;`find`;;`getSafe`¤
+Q¤m¤Que fait `map.put("a", 5)` si la clé "a" existe déjà ?¤La valeur est remplacée;;Une erreur est levée;;Rien;;Une deuxième entrée est créée¤
+Q¤m¤Quelle collection refuse les doublons ?¤`HashSet`;;`ArrayList`;;`LinkedList`;;`ArrayDeque`¤
+Q¤d¤Que renvoie `set.add(x)` si x est déjà présent ?¤`false`;;`true`;;`null`;;Une exception¤
+Q¤d¤Quelle Map garde ses clés triées ?¤`TreeMap`;;`HashMap`;;`LinkedHashMap`;;`SortedList`¤
+Q¤d¤Que se passe-t-il si on retire un élément d'une liste pendant un for-each sur cette liste ?¤Une ConcurrentModificationException;;Rien;;L'élément suivant est sauté sans erreur;;La boucle recommence¤On utilise `removeIf`.
+Q¤m¤Comment parcourir à la fois les clés et les valeurs d'une Map ?¤Avec `entrySet()`;;Avec `get()`;;Avec `size()`;;Avec `keys()`¤
+Q¤m¤Que crée `List.of(1, 2, 3)` ?¤Une liste non modifiable;;Un tableau;;Une ArrayList modifiable;;Un Set¤
+Q¤d¤Pourquoi déclarer `List<String> l = new ArrayList<>();` avec le type List ?¤Pour ne pas dépendre de l'implémentation choisie;;Parce que ArrayList n'est pas un type;;Pour aller plus vite;;C'est obligatoire¤
+Q¤d¤Que doit renvoyer un Comparator si le premier élément doit passer avant le second ?¤Un nombre négatif;;Un nombre positif;;`true`;;0¤
+V¤m¤Une ArrayList a une taille fixe.¤F¤Elle grandit et rétrécit selon les besoins.
+V¤m¤Une HashMap garantit l'ordre de parcours de ses clés.¤F¤Aucun ordre n'est garanti.
+S¤m¤Quelle classe enveloppe correspond au type primitif int ?¤Integer¤
+A¤m¤Associe chaque besoin à la collection adaptée.¤suite ordonnée=>`ArrayList`;;clé → valeur=>`HashMap`;;valeurs uniques=>`HashSet`;;clés triées=>`TreeMap`¤
+
+=== java-exceptions | Java : les exceptions | m
+Une **exception** est un objet qui signale une erreur survenue pendant l'exécution. Si personne ne l'attrape, le programme s'arrête en affichant la pile d'appels (*stack trace*). Savoir la lire et la gérer distingue un exercice d'un programme fiable.
+
+## 1. Attraper : `try` / `catch`
+
+```run main
+String[] saisies = {"42", "abc", "7"};
+for (String s : saisies) {
+    try {
+        int n = Integer.parseInt(s);            // peut lever NumberFormatException
+        System.out.println(n + " x 2 = " + n * 2);
+    } catch (NumberFormatException e) {
+        System.out.println("« " + s + " » n'est pas un nombre");
+    }
+}
+System.out.println("le programme continue");
+```
+
+Dès qu'une exception est levée dans le `try`, le reste du bloc est **sauté** et l'exécution reprend dans le `catch` correspondant.
+
+## 2. Plusieurs `catch`, et `finally`
+
+```run main
+static int diviser(String a, String b) {
+    return Integer.parseInt(a) / Integer.parseInt(b);
+}
+@@
+String[][] essais = {{"10", "2"}, {"10", "0"}, {"dix", "2"}};
+for (String[] e : essais) {
+    try {
+        System.out.println(diviser(e[0], e[1]));
+    } catch (ArithmeticException ex) {
+        System.out.println("Calcul impossible : " + ex.getMessage());
+    } catch (NumberFormatException ex) {
+        System.out.println("Saisie invalide : " + ex.getMessage());
+    } finally {
+        System.out.println("  (essai terminé)");        // exécuté dans TOUS les cas
+    }
+}
+```
+
+`finally` sert à libérer une ressource (fermer un fichier, une connexion) qu'il y ait eu une erreur ou non. On peut regrouper deux types : `catch (ArithmeticException | NumberFormatException ex)`.
+
+## 3. Les exceptions courantes
+
+| Exception | Cause |
+| `NullPointerException` | appel d'une méthode sur `null` |
+| `ArrayIndexOutOfBoundsException` | indice de tableau invalide |
+| `IndexOutOfBoundsException` | indice de liste invalide |
+| `NumberFormatException` | texte non convertible en nombre |
+| `ArithmeticException` | division entière par zéro |
+| `ClassCastException` | conversion de type impossible |
+| `IllegalArgumentException` | argument refusé par une méthode |
+| `IOException` | problème de fichier ou de réseau |
+
+!info Dans le navigateur | Sur ce site, le Java est traduit en WebAssembly : quelques erreurs très bas niveau (méthode appelée sur `null`, indice de tableau invalide) arrêtent directement le programme au lieu de lever une exception attrapable. Avec une vraie JVM, toutes s'attrapent.
+
+## 4. Lever une exception : `throw`
+
+```run cls main
+class Compte {
+    private double solde;
+    Compte(double solde) {
+        if (solde < 0) throw new IllegalArgumentException("solde initial négatif");
+        this.solde = solde;
+    }
+    void retirer(double montant) {
+        if (montant <= 0) throw new IllegalArgumentException("montant invalide : " + montant);
+        if (montant > solde) throw new IllegalStateException("solde insuffisant");
+        solde -= montant;
+    }
+    double getSolde() { return solde; }
+}
+@@
+Compte c = new Compte(100);
+try {
+    c.retirer(30);
+    c.retirer(500);                  // lève : la ligne suivante est sautée
+    c.retirer(10);
+} catch (IllegalStateException | IllegalArgumentException e) {
+    System.out.println("Refusé : " + e.getMessage());
+}
+System.out.println(c.getSolde());
+```
+
+Une méthode qui ne peut pas faire son travail ne doit ni renvoyer une valeur bidon ni afficher un message : elle **lève une exception**, et c'est l'appelant qui décide quoi faire.
+
+## 5. Créer sa propre exception
+
+```run cls main
+class SoldeInsuffisantException extends Exception {          // une exception « vérifiée »
+    private final double manque;
+    SoldeInsuffisantException(double manque) {
+        super("il manque " + manque + " €");
+        this.manque = manque;
+    }
+    double getManque() { return manque; }
+}
+
+class Compte {
+    private double solde = 100;
+    void retirer(double montant) throws SoldeInsuffisantException {      // throws : annonce le risque
+        if (montant > solde) throw new SoldeInsuffisantException(montant - solde);
+        solde -= montant;
+    }
+}
+@@
+Compte c = new Compte();
+try {
+    c.retirer(250);
+} catch (SoldeInsuffisantException e) {
+    System.out.println(e.getMessage() + " (" + e.getManque() + ")");
+}
+```
+
+## 6. Exceptions vérifiées et non vérifiées
+
+| | Vérifiées (*checked*) | Non vérifiées (*unchecked*) |
+| Héritent de | `Exception` | `RuntimeException` |
+| Le compilateur impose | `try/catch` ou `throws` | rien |
+| Représentent | un problème extérieur prévisible (fichier absent, réseau) | un bug du programme (indice, null, argument) |
+| Exemples | `IOException`, `SQLException` | `NullPointerException`, `IllegalArgumentException` |
+
+Une exception non attrapée **remonte** d'appel en appel. Une méthode qui laisse passer une exception vérifiée doit le déclarer avec `throws` :
+
+```run main
+static int lireAge(String texte) {                    // NumberFormatException est non vérifiée : pas de throws
+    int age = Integer.parseInt(texte.trim());
+    if (age < 0 || age > 130) throw new IllegalArgumentException("âge impossible : " + age);
+    return age;
+}
+@@
+for (String s : new String[]{" 17 ", "abc", "250"}) {
+    try {
+        System.out.println("âge valide : " + lireAge(s));
+    } catch (NumberFormatException e) {                // plus spécifique d'abord
+        System.out.println("pas un nombre : " + s);
+    } catch (IllegalArgumentException e) {
+        System.out.println(e.getMessage());
+    }
+}
+```
+
+!attention L'ordre des `catch` | `NumberFormatException` hérite d'`IllegalArgumentException` : le `catch` le plus **spécifique** doit être écrit en premier, sinon il est inatteignable et le compilateur refuse.
+
+## 7. `try`-with-resources
+
+Pour les ressources à fermer (fichiers, connexions à une base de données), cette forme appelle `close()` automatiquement, même en cas d'erreur :
+
+```
+try (BufferedReader lecteur = new BufferedReader(new FileReader("notes.txt"))) {
+    String ligne;
+    while ((ligne = lecteur.readLine()) != null) {
+        System.out.println(ligne);
+    }
+} catch (IOException e) {
+    System.out.println("Lecture impossible : " + e.getMessage());
+}
+```
+
+!attention Ne jamais avaler une exception | Un `catch (Exception e) { }` vide fait disparaître l'erreur : le programme continue avec des données fausses et le bug devient introuvable. Au minimum, affiche ou journalise le message, et n'attrape que les exceptions que tu sais traiter.
+
+!tuto Une saisie qui ne plante jamais
+# Le programme fragile
+```run err stdin=abc imp=java.util.Scanner main
+Scanner sc = new Scanner(System.in);
+int age = Integer.parseInt(sc.nextLine());
+System.out.println("Dans 10 ans : " + (age + 10));
+```
+# Attraper l'erreur
+```run stdin=abc imp=java.util.Scanner main
+Scanner sc = new Scanner(System.in);
+try {
+    int age = Integer.parseInt(sc.nextLine());
+    System.out.println("Dans 10 ans : " + (age + 10));
+} catch (NumberFormatException e) {
+    System.out.println("Il faut saisir un nombre entier.");
+}
+```
+# Redemander tant que c'est faux
+La boucle ne s'arrête qu'après une saisie correcte. Change les entrées.
+```run stdin=abc|12.5|17 imp=java.util.Scanner main
+Scanner sc = new Scanner(System.in);
+int age = -1;
+while (age < 0) {
+    String saisie = sc.nextLine();
+    try {
+        age = Integer.parseInt(saisie);
+    } catch (NumberFormatException e) {
+        System.out.println("« " + saisie + " » refusé, recommence.");
+    }
+}
+System.out.println("Dans 10 ans : " + (age + 10));
+```
+!fin
+
+!defi Défi : la saisie protégée | Attrape l'exception de conversion. | java-exception
+!defi Défi : ta propre exception | Lève et attrape une exception que tu as créée. | java-throw
+
+!retenir À retenir | `try { … } catch (TypeException e) { … } finally { … }`. ¶ `throw new …Exception("message")` lève ; `e.getMessage()` lit le message. ¶ Exceptions vérifiées (`Exception`) : `try/catch` ou `throws` obligatoire. Non vérifiées (`RuntimeException`) : libres. ¶ Le `catch` le plus spécifique en premier. ¶ `try (ressource) { … }` ferme automatiquement.
+--- exos
+Q¤m¤Quel bloc contient le code qui risque de lever une exception ?¤`try`;;`catch`;;`finally`;;`throw`¤
+Q¤m¤Quel bloc traite l'exception ?¤`catch`;;`try`;;`finally`;;`throws`¤
+Q¤m¤Quand le bloc `finally` s'exécute-t-il ?¤Dans tous les cas, erreur ou non;;Seulement s'il y a une erreur;;Seulement s'il n'y a pas d'erreur;;Jamais automatiquement¤
+Q¤m¤Quel mot-clé lève une exception ?¤`throw`;;`throws`;;`raise`;;`error`¤
+Q¤m¤À quoi sert `throws` dans la signature d'une méthode ?¤À annoncer que la méthode peut laisser passer cette exception;;À lever l'exception;;À attraper l'exception;;À l'ignorer¤
+Q¤m¤Quelle exception lève `Integer.parseInt("abc")` ?¤`NumberFormatException`;;`ArithmeticException`;;`NullPointerException`;;`IOException`¤
+Q¤m¤Quelle exception lève `5 / 0` avec des entiers ?¤`ArithmeticException`;;`NumberFormatException`;;`MathException`;;Aucune : le résultat est infini¤
+Q¤m¤Quelle exception obtient-on en appelant une méthode sur null ?¤`NullPointerException`;;`NullException`;;`IllegalStateException`;;`ClassCastException`¤
+Q¤m¤Quelle méthode donne le message d'une exception ?¤`getMessage()`;;`what()`;;`text()`;;`toMessage()`¤
+Q¤d¤De quelle classe hérite une exception non vérifiée ?¤`RuntimeException`;;`Exception` directement;;`Error`;;`Object` directement¤
+Q¤d¤Qu'impose le compilateur pour une exception vérifiée ?¤De l'attraper ou de la déclarer avec throws;;Rien;;De l'ignorer;;De l'afficher¤
+Q¤d¤Dans quel ordre écrire plusieurs catch ?¤Du plus spécifique au plus général;;Du plus général au plus spécifique;;Par ordre alphabétique;;Peu importe¤
+Q¤d¤Que fait un `try (ressource) { … }` ?¤Il ferme automatiquement la ressource à la fin;;Il essaie deux fois;;Il ignore les erreurs;;Il crée un thread¤
+Q¤d¤Pourquoi un `catch (Exception e) { }` vide est-il dangereux ?¤L'erreur disparaît et le programme continue avec un état faux;;Il ralentit le programme;;Il ne compile pas;;Il relance l'exception¤
+Q¤m¤Que se passe-t-il si une exception n'est attrapée nulle part ?¤Le programme s'arrête en affichant la pile d'appels;;Elle est ignorée;;Le programme redémarre;;Elle est écrite dans un fichier¤
+Q¤m¤Que fait le reste du bloc try après la ligne qui a levé l'exception ?¤Il est sauté;;Il s'exécute quand même;;Il s'exécute deux fois;;Il s'exécute après le catch¤
+V¤m¤On peut créer sa propre classe d'exception en héritant de Exception.¤V¤
+V¤m¤IOException est une exception vérifiée.¤V¤Le compilateur oblige à la traiter.
+S¤m¤Quel mot-clé crée l'objet exception dans `throw ___ IllegalArgumentException("…")` ?¤new¤
+A¤m¤Associe chaque exception à sa cause.¤`NumberFormatException`=>texte non numérique;;`ArithmeticException`=>division par zéro;;`NullPointerException`=>méthode appelée sur null;;`IOException`=>problème de fichier¤
