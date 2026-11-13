@@ -66,43 +66,30 @@ Le site est utilisable sur téléphone : barre du haut compacte, pastilles et le
 
 ## Cours bonus (hors programme)
 
-Page `bonus.html` (lien « Bonus » dans la barre du haut et bandeau sur l'accueil). Les matières marquées `bonus: true` dans `data/modules.js` (JavaScript, Lua, C++, Java) ne comptent ni dans la progression générale ni au classement.
+Page `bonus.html` (lien « Bonus » dans la barre du haut et bandeau sur l'accueil). Les matières marquées `bonus: true` dans `data/modules.js` ne comptent ni dans la progression générale ni au classement.
 
-Chaque langage a ses chapitres (cours + exercices, donc évaluations) et un labo de 16 missions (console puis jeux) :
+| Module | Chapitres | Labo |
+|---|---|---|
+| JavaScript | 8 : bases, conditions et boucles, fonctions, tableaux et objets, classes et modules, DOM, asynchrone et API REST, jeux | 40 missions |
+| Lua | 12 : bases, conditions et boucles, fonctions, tables, chaînes et motifs, closures, métatables, objets et héritage, erreurs et modules, coroutines, jeux, écosystème (LÖVE, Roblox) | 44 missions |
+| C++ | 12 : bases, conditions et boucles, fonctions et références, vector et string, pointeurs, classes, héritage, RAII et pointeurs intelligents, STL et lambdas, templates et opérateurs, exceptions/fichiers/projet, jeux | 45 missions |
+| Java | 12 : bases, conditions et boucles, méthodes et tableaux, chaînes, POO, héritage et interfaces, collections, exceptions, lambdas et streams, enum et records, fichiers/JDBC/Maven/JUnit, jeux | 45 missions |
+| C# | 2 : syntaxe et collections ; classes, propriétés, LINQ, accès aux données | |
+| Git et GitHub | 4 : bases, branches et fusions, GitHub et pull requests, annuler et bonnes pratiques | |
+| Scripts Bash | 4 : premier script, conditions/boucles/fonctions, regex avec grep/sed/awk, SSH/cron/sauvegardes | |
+| PowerShell | 2 : cmdlets et pipeline d'objets ; scripts, Active Directory, administration à distance | |
+| Docker | 2 : images et conteneurs ; Dockerfile et Docker Compose | |
+| Sécurité web | 2 : injection SQL, XSS, CSRF ; mots de passe, sessions, contrôle d'accès, HTTPS | |
+
+**Code exécutable dans les cours.** Dans les chapitres JavaScript, Lua, C++ et Java, les blocs « Exécuter » (`assets/essai.js`) sont de petits éditeurs : on modifie le code, on le relance, la sortie s'affiche dessous. Chaque chapitre a un tutoriel pas à pas et des « défis » qui ouvrent la mission correspondante du labo (`labo-xxx.html#m=<mission>`).
 
 | Langage | Exécution dans le navigateur |
 |---|---|
 | JavaScript | Web Worker (`assets/run-jeu.js`) |
 | Lua 5.4 | wasmoon (`assets/vendor/wasmoon/`) |
-| C++20 | clang compilé en WebAssembly (`assets/vendor/clang/`, @browserrun/clang), exécution WASI maison |
-| Java | javac + TeaVM en WebAssembly (`assets/vendor/java/`, @live-codes/java-wasm) |
+| C++20 | clang compilé en WebAssembly (`assets/vendor/clang/`), sans exceptions ni fichiers |
+| Java | javac + TeaVM en WebAssembly (`assets/vendor/java/`) |
 
-`assets/jeu.js` fournit une même API de jeu aux quatre langages (`effacer`, `rect`, `cercle`, `ligne`, `texte`, `touche`, `toucheAppuyee`, `clic`, `sourisX/Y`, `hasard`, 480 × 320, `update(dt)` / `draw()` à 60 images/s), l'écran (canvas, clavier, souris, croix tactile) et les scénarios de test sans affichage utilisés par la règle `jeu { etapes, test }` des labos. En C++ : `#include "jeu.h"` ; en Java : `public class Main extends Jeu` puis `lancer(new Main())`.
+`assets/jeu.js` fournit une même API de jeu aux quatre langages (`effacer`, `rect`, `cercle`, `ligne`, `texte`, `touche`, `toucheAppuyee`, `clic`, `sourisX/Y`, `hasard`, 480 × 320, `update(dt)` / `draw()` à 60 images/s). En C++ : `#include "jeu.h"` ; en Java : `public class Main extends Jeu` puis `lancer(new Main())`.
 
-## Lancer en local
-
-Aucune installation : c'est un site statique (HTML, CSS, JavaScript).
-
-```bash
-python3 -m http.server 8000
-```
-
-Puis ouvrir http://localhost:8000.
-
-## Structure
-
-```
-index.html          page d'accueil
-data/modules.js     liste des modules et chapitres
-assets/             style.css, app.js, module.js, chapter.js, terminal.js
-modules/<matière>/  une page HTML par chapitre
-```
-
-## Ajouter un chapitre
-
-1. Créer `modules/<matière>/<chapitre>.html` en copiant un chapitre existant : le cours va dans `<article id="cours">`, les exercices dans `window.EF_EXERCICES`.
-2. Déclarer le chapitre dans `data/modules.js`.
-
-## Crédits
-
-Icônes : [Lucide](https://lucide.dev) (licence ISC). PHP : [php-wasm](https://github.com/seanmorris/php-wasm) (Apache-2.0 / GPL-2.0). Python : [Pyodide](https://pyodide.org) (MPL-2.0). Polices : Bricolage Grotesque et Hanken Grotesk (Google Fonts).
+**Ces pages sont générées.** Sources et générateur dans `outils/` (voir `outils/README.md`) : `python3 outils/gen.py` régénère les chapitres, les labos, la partie bonus de `data/modules.js` et de `data/eval-textes.js`. Chaque solution de labo et chaque bloc exécutable est vérifié automatiquement (`outils/verif.js`).
