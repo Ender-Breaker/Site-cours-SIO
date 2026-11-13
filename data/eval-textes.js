@@ -429,5 +429,49 @@ window.EF_EVAL_TEXTES = {
         { n: "concaténer une saisie dans la requête est dangereux", rx: "concaten|coll|\\+|apostrophe|guillemet|saisie" },
         { n: "un attaquant pourrait lire ou détruire des données", rx: "lire|vol|supprim|detrui|drop|contourn|acced|pirat|attaqu" }],
       corrige: "<p>Construire une requête en <b>concaténant</b> une saisie de l'utilisateur permet l'<b>injection SQL</b> : la saisie est interprétée comme du code SQL, et un attaquant peut lire ou détruire les données. Avec un <code>PreparedStatement</code>, la requête contient des <code>?</code> et la saisie est transmise séparément, comme une <b>donnée</b> qui ne sera jamais exécutée.</p>" }
+  ],
+  "javascript": [
+    { q: "Quelle est la différence entre <code>let</code>, <code>const</code> et <code>var</code> ?",
+      notions: [
+        { n: "const : la variable ne peut pas être réaffectée", rx: "const.*(reaffect|constant|chang|modifi|fixe)|(reaffect|constant|ne change).*const" },
+        { n: "let : variable modifiable", rx: "let" },
+        { n: "let et const ont une portée de bloc", rx: "bloc|accolade|portee" },
+        { n: "var : ancienne forme, portée de fonction, à éviter", rx: "var.*(ancien|fonction|eviter|hoist|remont)|(ancien|eviter|deconseill).*var" }],
+      corrige: "<p><code>const</code> déclare une variable qu'on ne peut pas <b>réaffecter</b> ; <code>let</code> une variable <b>modifiable</b>. Toutes deux ont une <b>portée de bloc</b> (les accolades). <code>var</code> est l'ancienne forme : sa portée est la fonction entière, ce qui provoque des bugs ; on l'évite. Règle : <code>const</code> par défaut, <code>let</code> si la valeur doit changer.</p>" },
+    { q: "Explique la différence entre <code>==</code> et <code>===</code> en JavaScript.",
+      notions: [
+        { n: "=== compare la valeur ET le type", rx: "type" },
+        { n: "== convertit les types avant de comparer", rx: "conver|coercition|transform|cast" },
+        { n: "un exemple : \"5\" == 5 est vrai, \"5\" === 5 est faux", rx: "\\\"5\\\"|'5'|\\\"1\\\"|'1'|\\\"0\\\"|'0'|chaine.*nombre|nombre.*chaine|exemple" },
+        { n: "on utilise toujours ===", rx: "toujours|prefer|recommand|eviter|strict" }],
+      corrige: "<p><code>===</code> (égalité <b>stricte</b>) compare la valeur <b>et le type</b>. <code>==</code> <b>convertit</b> d'abord les deux côtés vers un type commun : <code>\"5\" == 5</code> est vrai, alors que <code>\"5\" === 5</code> est faux. Ces conversions donnent des résultats surprenants : on utilise <b>toujours</b> <code>===</code> et <code>!==</code>.</p>" },
+    { q: "À quoi servent <code>map</code>, <code>filter</code> et <code>reduce</code> sur un tableau ?",
+      notions: [
+        { n: "map transforme chaque élément et renvoie un nouveau tableau", rx: "map.*(transform|appliqu|chaque|nouveau)|(transform|appliqu).*map" },
+        { n: "filter garde les éléments qui vérifient une condition", rx: "filter.*(gard|condition|test|select|vrai)|(gard|select).*filter" },
+        { n: "reduce combine tous les éléments en une seule valeur", rx: "reduce.*(combin|une seule|somme|cumul|accumul|total)|(somme|cumul|accumul).*reduce" },
+        { n: "ils prennent une fonction en argument et ne modifient pas le tableau d'origine", rx: "fonction|callback|fleche|=>|ne modifi|sans modifi|nouveau tableau" }],
+      corrige: "<p><code>map</code> <b>transforme</b> chaque élément et renvoie un nouveau tableau de même taille. <code>filter</code> ne <b>garde</b> que les éléments pour lesquels la fonction renvoie vrai. <code>reduce</code> <b>combine</b> tous les éléments en une seule valeur (une somme, par exemple). Tous trois reçoivent une <b>fonction</b> et ne modifient pas le tableau d'origine.</p>" },
+    { q: "Qu'est-ce que le DOM ? Comment modifie-t-on une page et réagit-on à un clic ?",
+      notions: [
+        { n: "le DOM est la représentation de la page sous forme d'arbre d'objets", rx: "arbre|objet|representation|structure|noeud" },
+        { n: "on sélectionne un élément (querySelector, getElementById)", rx: "queryselector|getelementbyid|selection" },
+        { n: "on modifie son contenu ou son style (textContent, classList…)", rx: "textcontent|innerhtml|classlist|style|attribut|modifi" },
+        { n: "on écoute un événement avec addEventListener", rx: "addeventlistener|evenement|ecout|click|onclick" }],
+      corrige: "<p>Le <b>DOM</b> est la représentation de la page HTML sous forme d'un <b>arbre d'objets</b> manipulable en JavaScript. On <b>sélectionne</b> un élément (<code>document.querySelector</code>), on le <b>modifie</b> (<code>textContent</code>, <code>classList</code>, <code>style</code>), et on réagit aux actions de l'utilisateur en <b>écoutant un événement</b> : <code>bouton.addEventListener(\"click\", fonction)</code>.</p>" },
+    { q: "Qu'est-ce que le format JSON et à quoi sert-il ?",
+      notions: [
+        { n: "un format texte pour représenter des données (objets, tableaux)", rx: "texte|format|objet|tableau|structure" },
+        { n: "il sert à échanger des données (API, serveur, fichier de configuration)", rx: "api|serveur|echang|transmet|envoy|stock|config|requete" },
+        { n: "JSON.parse : texte → objet", rx: "parse" },
+        { n: "JSON.stringify : objet → texte", rx: "stringify" }],
+      corrige: "<p><b>JSON</b> est un <b>format texte</b> qui représente des données structurées (objets, tableaux, nombres, chaînes). C'est le format d'<b>échange</b> standard entre un site et un serveur (API REST) et pour les fichiers de configuration. <code>JSON.parse(texte)</code> transforme le texte en objet ; <code>JSON.stringify(objet)</code> fait l'inverse.</p>" },
+    { q: "Explique le principe de la boucle de jeu (update / draw).",
+      notions: [
+        { n: "le moteur appelle les fonctions à chaque image (60 fois par seconde)", rx: "60|chaque image|chaque frame|par seconde|en boucle|repet" },
+        { n: "update met à jour la logique (positions, collisions, score)", rx: "update.*(logique|position|deplac|calcul|etat|collision)|(logique|deplac).*update" },
+        { n: "draw affiche l'état courant", rx: "draw.*(affich|dessin)|(affich|dessin).*draw" },
+        { n: "dt : temps écoulé, pour un mouvement indépendant de la machine", rx: "\\bdt\\b|temps ecoule|delta|independan" }],
+      corrige: "<p>Le moteur appelle les fonctions du jeu <b>à chaque image</b>, environ 60 fois par seconde. <code>update(dt)</code> met à jour la <b>logique</b> : déplacements, collisions, score. <code>draw()</code> se contente d'<b>afficher</b> l'état courant. Le paramètre <code>dt</code> (temps écoulé depuis l'image précédente) permet un mouvement identique sur toutes les machines.</p>" }
   ]
 };

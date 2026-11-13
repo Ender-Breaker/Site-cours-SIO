@@ -14,7 +14,7 @@ window.EF_CODE = {
  "langue": "js",
  "key": "ef-labo-js",
  "titre": "Labo JavaScript",
- "sousTitre": "Du vrai JavaScript exécuté dans ton navigateur : programmes console puis jeux (dessin, clavier, souris, collisions).",
+ "sousTitre": "Du vrai JavaScript : programmes console, tableaux et objets, classes, JSON, puis des jeux en canvas dans le navigateur.",
  "ico": "JS",
  "couleur": "js",
  "fichier": "main.js",
@@ -124,6 +124,118 @@ window.EF_CODE = {
      "stdin": [
       "100"
      ]
+    },
+    {
+     "id": "js-conv",
+     "titre": "Heures, minutes, secondes",
+     "texte": "<p>Lis un nombre de secondes et affiche-le sous la forme <b>H h M min S s<\/b>. La division entière donne les heures, le reste donne ce qu'il reste à convertir.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>console.log(Math.floor(7 / 2), 7 % 2);   // 3 1<\/code><\/pre>",
+     "depart": "const s = Number(lire());\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>3725<\/code> → <code>1 h 2 min 5 s<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3725"
+          ],
+          "out": "^1 h 2 min 5 s[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>59<\/code> → <code>0 h 0 min 59 s<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "59"
+          ],
+          "out": "^0 h 0 min 59 s[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>86399<\/code> → <code>23 h 59 min 59 s<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "86399"
+          ],
+          "out": "^23 h 59 min 59 s[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "En JavaScript, <code>/<\/code> donne un nombre à virgule : utilise <code>Math.floor(s / 3600)<\/code> pour la division entière.",
+     "solution": "const s = Number(lire());\nconst h = Math.floor(s / 3600);\nconst m = Math.floor((s % 3600) / 60);\nconsole.log(h + \" h \" + m + \" min \" + (s % 60) + \" s\");\n",
+     "stdin": [
+      "3725"
+     ]
+    },
+    {
+     "id": "js-moyenne",
+     "titre": "La moyenne de trois notes",
+     "texte": "<p>Lis trois notes (une par ligne) et affiche <b>Moyenne : X<\/b> avec exactement <b>deux décimales<\/b>.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>console.log((3.14159).toFixed(2));   // \"3.14\"<\/code><\/pre>",
+     "depart": "const a = Number(lire());\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>12, 15, 9<\/code> → <code>Moyenne : 12.00<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "12",
+           "15",
+           "9"
+          ],
+          "out": "^Moyenne : 12\\.00[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>10, 11, 11<\/code> → <code>Moyenne : 10.67<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "10",
+           "11",
+           "11"
+          ],
+          "out": "^Moyenne : 10\\.67[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>20, 20, 19<\/code> → <code>Moyenne : 19.67<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "20",
+           "20",
+           "19"
+          ],
+          "out": "^Moyenne : 19\\.67[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>valeur.toFixed(2)<\/code> renvoie le nombre avec deux décimales (sous forme de texte).",
+     "solution": "const a = Number(lire());\nconst b = Number(lire());\nconst c = Number(lire());\nconsole.log(\"Moyenne : \" + ((a + b + c) / 3).toFixed(2));\n",
+     "stdin": [
+      "12",
+      "15",
+      "9"
+     ]
     }
    ]
   },
@@ -176,6 +288,84 @@ window.EF_CODE = {
      "solution": "const n = Number(lire());\nif (n % 2 === 0) {\n  console.log(\"pair\");\n} else {\n  console.log(\"impair\");\n}\n",
      "stdin": [
       "4"
+     ]
+    },
+    {
+     "id": "js-mention",
+     "titre": "La mention",
+     "texte": "<p>Lis une note sur 20 et affiche la mention : <b>Insuffisant<\/b> (moins de 10), <b>Passable<\/b> (de 10 à moins de 12), <b>Assez bien<\/b> (de 12 à moins de 14), <b>Bien<\/b> (de 14 à moins de 16), <b>Très bien<\/b> (16 et plus).<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>if (x &lt; 10) { … }\nelse if (x &lt; 20) { … }\nelse { … }<\/code><\/pre>",
+     "depart": "const note = Number(lire());\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>8<\/code> → <code>Insuffisant<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "8"
+          ],
+          "out": "^Insuffisant[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>10<\/code> → <code>Passable<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "10"
+          ],
+          "out": "^Passable[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>13<\/code> → <code>Assez bien<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "13"
+          ],
+          "out": "^Assez bien[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>15.5<\/code> → <code>Bien<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "15.5"
+          ],
+          "out": "^Bien[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>18<\/code> → <code>Très bien<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "18"
+          ],
+          "out": "^Très bien[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Enchaîne les <code>else if<\/code> du plus petit seuil au plus grand.",
+     "solution": "const note = Number(lire());\nif (note < 10) console.log(\"Insuffisant\");\nelse if (note < 12) console.log(\"Passable\");\nelse if (note < 14) console.log(\"Assez bien\");\nelse if (note < 16) console.log(\"Bien\");\nelse console.log(\"Très bien\");\n",
+     "stdin": [
+      "8"
      ]
     },
     {
@@ -278,11 +468,223 @@ window.EF_CODE = {
       "5",
       "0"
      ]
+    },
+    {
+     "id": "js-fizzbuzz",
+     "titre": "FizzBuzz",
+     "texte": "<p>Lis un entier n et affiche les nombres de 1 à n, un par ligne. Mais : pour un multiple de 3 affiche <b>Fizz<\/b>, pour un multiple de 5 affiche <b>Buzz<\/b>, et pour un multiple des deux affiche <b>FizzBuzz<\/b>. C'est l'exercice le plus célèbre des entretiens d'embauche.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>if (i % 3 === 0) { … }   // i est un multiple de 3<\/code><\/pre>",
+     "depart": "const n = Number(lire());\n",
+     "objectifs": [
+      {
+       "txt": "Avec 15 : de <code>1<\/code> à <code>FizzBuzz<\/code>, 15 lignes",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "15"
+          ],
+          "out": "^1[ \\t]*\\n2[ \\t]*\\nFizz[ \\t]*\\n4[ \\t]*\\nBuzz[ \\t]*\\nFizz[ \\t]*\\n7[ \\t]*\\n8[ \\t]*\\nFizz[ \\t]*\\nBuzz[ \\t]*\\n11[ \\t]*\\nFizz[ \\t]*\\n13[ \\t]*\\n14[ \\t]*\\nFizzBuzz[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Avec 5 : on s'arrête à <code>Buzz<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "5"
+          ],
+          "out": "^1[ \\t]*\\n2[ \\t]*\\nFizz[ \\t]*\\n4[ \\t]*\\nBuzz[ \\t]*$",
+          "notout": "^7\\s*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Teste d'abord le cas « multiple de 15 », sinon il ne sera jamais atteint.",
+     "solution": "const n = Number(lire());\nfor (let i = 1; i <= n; i++) {\n  if (i % 15 === 0) console.log(\"FizzBuzz\");\n  else if (i % 3 === 0) console.log(\"Fizz\");\n  else if (i % 5 === 0) console.log(\"Buzz\");\n  else console.log(i);\n}\n",
+     "stdin": [
+      "15"
+     ]
+    },
+    {
+     "id": "js-rebours",
+     "titre": "Compte à rebours",
+     "texte": "<p>Lis un entier n et affiche le compte à rebours de n à 1, un nombre par ligne, puis <b>Décollage !<\/b><\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>for (let i = 10; i &gt;= 1; i--) { … }<\/code><\/pre>",
+     "depart": "const n = Number(lire());\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>3<\/code> → <code>3 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3"
+          ],
+          "out": "^3[ \\t]*\\n2[ \\t]*\\n1[ \\t]*\\nDécollage ![ \\t]*$",
+          "notout": "^[4-9]"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>1<\/code> → <code>1 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1"
+          ],
+          "out": "^1[ \\t]*\\nDécollage ![ \\t]*$",
+          "notout": "^[2-9]"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>10<\/code> → <code>10 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "10"
+          ],
+          "out": "^10[ \\t]*\\n9[ \\t]*\\n8[ \\t]*\\n7[ \\t]*\\n6[ \\t]*\\n5[ \\t]*\\n4[ \\t]*\\n3[ \\t]*\\n2[ \\t]*\\n1[ \\t]*\\nDécollage ![ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>for (let i = n; i &gt;= 1; i--)<\/code>",
+     "solution": "const n = Number(lire());\nfor (let i = n; i >= 1; i--) {\n  console.log(i);\n}\nconsole.log(\"Décollage !\");\n",
+     "stdin": [
+      "3"
+     ]
+    },
+    {
+     "id": "js-devine",
+     "titre": "Plus ou moins",
+     "texte": "<p>Le nombre secret est <b>42<\/b>. Lis des essais (un par ligne) jusqu'à ce que le joueur trouve. Pour chaque essai raté, affiche <b>Trop petit<\/b> ou <b>Trop grand<\/b>. Quand il trouve, affiche <b>Gagné ! Essais : N<\/b> où N est le nombre total d'essais.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>do {\n  …\n} while (condition);   // au moins un tour<\/code><\/pre>",
+     "depart": "const SECRET = 42;\nlet essais = 0;\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>50, 30, 42<\/code> → <code>Trop grand …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "50",
+           "30",
+           "42"
+          ],
+          "out": "^Trop grand[ \\t]*\\nTrop petit[ \\t]*\\nGagné ! Essais : 3[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>42<\/code> → <code>Gagné ! Essais : 1<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "42"
+          ],
+          "out": "^Gagné ! Essais : 1[ \\t]*$",
+          "notout": "Trop"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>1, 2, 3, 41, 43, 42<\/code> → <code>Gagné ! Essais : 6<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1",
+           "2",
+           "3",
+           "41",
+           "43",
+           "42"
+          ],
+          "out": "^Gagné ! Essais : 6[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Une boucle <code>do { … } while (essai !== SECRET);<\/code> ; déclare <code>let essai;<\/code> avant la boucle.",
+     "solution": "const SECRET = 42;\nlet essais = 0;\nlet essai;\ndo {\n  essai = Number(lire());\n  essais++;\n  if (essai < SECRET) console.log(\"Trop petit\");\n  else if (essai > SECRET) console.log(\"Trop grand\");\n} while (essai !== SECRET);\nconsole.log(\"Gagné ! Essais : \" + essais);\n",
+     "stdin": [
+      "50",
+      "30",
+      "42"
+     ]
+    },
+    {
+     "id": "js-pgcd",
+     "titre": "Le PGCD par l'algorithme d'Euclide",
+     "texte": "<p>Lis deux entiers a et b et affiche <b>PGCD : X<\/b>. Algorithme d'Euclide : tant que b n'est pas nul, on remplace (a, b) par (b, reste de a divisé par b). À la fin, le PGCD est a.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>[a, b] = [b, a % b];   // les deux affectations en même temps<\/code><\/pre>",
+     "depart": "let a = Number(lire());\nlet b = Number(lire());\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>48, 18<\/code> → <code>PGCD : 6<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "48",
+           "18"
+          ],
+          "out": "^PGCD : 6[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>17, 5<\/code> → <code>PGCD : 1<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "17",
+           "5"
+          ],
+          "out": "^PGCD : 1[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>100, 75<\/code> → <code>PGCD : 25<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "100",
+           "75"
+          ],
+          "out": "^PGCD : 25[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>while (b !== 0) { [a, b] = [b, a % b]; }<\/code>",
+     "solution": "let a = Number(lire());\nlet b = Number(lire());\nwhile (b !== 0) {\n  [a, b] = [b, a % b];\n}\nconsole.log(\"PGCD : \" + a);\n",
+     "stdin": [
+      "48",
+      "18"
+     ]
     }
    ]
   },
   {
-   "titre": "Fonctions, tableaux, objets",
+   "titre": "Fonctions",
    "missions": [
     {
      "id": "js-premier",
@@ -356,6 +758,268 @@ window.EF_CODE = {
      ]
     },
     {
+     "id": "js-minmax",
+     "titre": "Minimum et maximum",
+     "texte": "<p>Lis un entier n, puis n nombres (un par ligne). Affiche <b>Min : X<\/b> puis <b>Max : Y<\/b> sur deux lignes. Écris une fonction qui reçoit la liste et calcule les deux valeurs.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>function deux() { return [1, 2]; }\nconst [a, b] = deux();        // décomposition<\/code><\/pre>",
+     "depart": "function minmax(t) {\n  // renvoie un tableau [mini, maxi]\n}\n\nconst n = Number(lire());\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>4, 12, 5, 19, 8<\/code> → <code>Min : 5 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "4",
+           "12",
+           "5",
+           "19",
+           "8"
+          ],
+          "out": "^Min : 5[ \\t]*\\nMax : 19[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>3, -2, -7, -1<\/code> → <code>Min : -7 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "-2",
+           "-7",
+           "-1"
+          ],
+          "out": "^Min : -7[ \\t]*\\nMax : -1[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>1, 6<\/code> → <code>Min : 6 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1",
+           "6"
+          ],
+          "out": "^Min : 6[ \\t]*\\nMax : 6[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Une fonction renvoie les deux valeurs",
+       "r": [
+        {
+         "code": "return\\s*(\\[[^\\]]+,[^\\]]+\\]|\\{[^}]+,[^}]+\\})"
+        }
+       ]
+      }
+     ],
+     "indice": "Renvoie un tableau <code>[mini, maxi]<\/code> et récupère-le avec <code>const [mini, maxi] = minmax(t);<\/code>.",
+     "solution": "function minmax(t) {\n  let mini = t[0], maxi = t[0];\n  for (const v of t) {\n    if (v < mini) mini = v;\n    if (v > maxi) maxi = v;\n  }\n  return [mini, maxi];\n}\n\nconst n = Number(lire());\nconst t = [];\nfor (let i = 0; i < n; i++) t.push(Number(lire()));\nconst [mini, maxi] = minmax(t);\nconsole.log(\"Min : \" + mini);\nconsole.log(\"Max : \" + maxi);\n",
+     "stdin": [
+      "4",
+      "12",
+      "5",
+      "19",
+      "8"
+     ]
+    },
+    {
+     "id": "js-factorielle",
+     "titre": "La factorielle, en récursif",
+     "texte": "<p>Lis un entier n et affiche <b>n! = résultat<\/b>. La factorielle de n est n × (n − 1) × … × 1, et 0! vaut 1. Écris une fonction <b>récursive<\/b> : elle s'appelle elle-même avec n − 1.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>function compte(n) {\n  if (n === 0) return 0;        // cas d'arrêt\n  return 1 + compte(n - 1);     // appel récursif\n}<\/code><\/pre>",
+     "depart": "function factorielle(n) {\n  // à compléter\n}\n\nconst n = Number(lire());\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>5<\/code> → <code>5! = 120<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "5"
+          ],
+          "out": "^5! = 120[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>0<\/code> → <code>0! = 1<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "0"
+          ],
+          "out": "^0! = 1[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>10<\/code> → <code>10! = 3628800<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "10"
+          ],
+          "out": "^10! = 3628800[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "La fonction s'appelle elle-même",
+       "r": [
+        {
+         "code": "function\\s+(\\w+)\\s*\\([\\s\\S]*\\b\\1\\s*\\([\\s\\S]*\\b\\1\\s*\\("
+        }
+       ]
+      }
+     ],
+     "indice": "Cas d'arrêt : <code>if (n &lt;= 1) return 1;<\/code>. Sinon <code>return n * factorielle(n - 1);<\/code>.",
+     "solution": "function factorielle(n) {\n  if (n <= 1) return 1;\n  return n * factorielle(n - 1);\n}\n\nconst n = Number(lire());\nconsole.log(n + \"! = \" + factorielle(n));\n",
+     "stdin": [
+      "5"
+     ]
+    },
+    {
+     "id": "js-fibo",
+     "titre": "La suite de Fibonacci",
+     "texte": "<p>Lis un entier n (au moins 1) et affiche les n premiers termes de la suite de Fibonacci, séparés par un espace. La suite commence par 0 et 1, puis chaque terme est la somme des deux précédents.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>[a, b] = [b, a + b];         // avance d'un terme\nconsole.log(t.join(\" \"));    // colle un tableau avec des espaces<\/code><\/pre>",
+     "depart": "const n = Number(lire());\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>8<\/code> → <code>0 1 1 2 3 5 8 13<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "8"
+          ],
+          "out": "^0 1 1 2 3 5 8 13[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>1<\/code> → <code>0<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1"
+          ],
+          "out": "^0[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>12<\/code> → <code>0 1 1 2 3 5 8 13 21 34 55 89<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "12"
+          ],
+          "out": "^0 1 1 2 3 5 8 13 21 34 55 89[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Range les termes dans un tableau puis affiche <code>t.join(\" \")<\/code>.",
+     "solution": "const n = Number(lire());\nlet a = 0, b = 1;\nconst t = [];\nfor (let i = 0; i < n; i++) {\n  t.push(a);\n  [a, b] = [b, a + b];\n}\nconsole.log(t.join(\" \"));\n",
+     "stdin": [
+      "8"
+     ]
+    },
+    {
+     "id": "js-binaire",
+     "titre": "Du décimal au binaire",
+     "texte": "<p>Lis un entier positif et affiche son écriture en <b>binaire<\/b>. Méthode des divisions successives : on divise par 2 tant que le nombre n'est pas nul, et les restes lus du dernier au premier donnent le résultat. N'utilise pas de fonction de conversion toute faite.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>const reste = n % 2;          // le dernier chiffre binaire\nn = Math.floor(n / 2);        // on passe au suivant<\/code><\/pre>",
+     "depart": "let n = Number(lire());\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>10<\/code> → <code>1010<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "10"
+          ],
+          "out": "^1010[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>255<\/code> → <code>11111111<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "255"
+          ],
+          "out": "^11111111[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>1<\/code> → <code>1<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1"
+          ],
+          "out": "^1[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>0<\/code> → <code>0<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "0"
+          ],
+          "out": "^0[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Sans <code>toString(2)<\/code>",
+       "r": [
+        {
+         "nocode": "toString\\s*\\(\\s*2\\s*\\)"
+        }
+       ]
+      }
+     ],
+     "indice": "Ajoute chaque reste <b>devant<\/b> : <code>bits = (n % 2) + bits;<\/code>. Pense au cas n = 0.",
+     "solution": "let n = Number(lire());\nlet bits = \"\";\nif (n === 0) bits = \"0\";\nwhile (n > 0) {\n  bits = (n % 2) + bits;\n  n = Math.floor(n / 2);\n}\nconsole.log(bits);\n",
+     "stdin": [
+      "10"
+     ]
+    }
+   ]
+  },
+  {
+   "titre": "Tableaux et objets",
+   "missions": [
+    {
      "id": "js-tableau",
      "titre": "Un tableau",
      "texte": "<p>Lis un entier n, puis n nombres que tu ranges dans un tableau. Affiche ensuite <b>max = …<\/b> puis <b>moyenne = …<\/b>.<\/p><p><b>Exemple<\/b><\/p><pre><code>const t = [];\nt.push(4);\nfor (const x of t) { … }<\/code><\/pre>",
@@ -414,6 +1078,439 @@ window.EF_CODE = {
      ]
     },
     {
+     "id": "js-inverser",
+     "titre": "Inverser une liste",
+     "texte": "<p>Lis un entier n, puis n mots (un par ligne). Range-les dans une liste, puis affiche-les <b>dans l'ordre inverse<\/b>, séparés par un espace.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>for (let i = t.length - 1; i &gt;= 0; i--) { … }   // du dernier au premier<\/code><\/pre>",
+     "depart": "const n = Number(lire());\nconst t = [];\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>3, a, b, c<\/code> → <code>c b a<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "a",
+           "b",
+           "c"
+          ],
+          "out": "^c b a[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>4, 10, 20, 30, 40<\/code> → <code>40 30 20 10<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "4",
+           "10",
+           "20",
+           "30",
+           "40"
+          ],
+          "out": "^40 30 20 10[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>1, seul<\/code> → <code>seul<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1",
+           "seul"
+          ],
+          "out": "^seul[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Parcours les indices de <code>t.length - 1<\/code> à <code>0<\/code>, puis <code>r.join(\" \")<\/code>.",
+     "solution": "const n = Number(lire());\nconst t = [];\nfor (let i = 0; i < n; i++) t.push(lire());\nconst r = [];\nfor (let i = t.length - 1; i >= 0; i--) r.push(t[i]);\nconsole.log(r.join(\" \"));\n",
+     "stdin": [
+      "3",
+      "a",
+      "b",
+      "c"
+     ]
+    },
+    {
+     "id": "js-tri",
+     "titre": "Trier des nombres",
+     "texte": "<p>Lis un entier n, puis n entiers (un par ligne). Affiche-les triés dans l'ordre <b>croissant<\/b>, séparés par un espace. Utilise la fonction de tri du langage. Attention : ce sont des nombres, 9 doit passer avant 10.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>t.sort((a, b) =&gt; a - b);   // tri numérique croissant<\/code><\/pre>",
+     "depart": "const n = Number(lire());\nconst t = [];\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>5, 5, 2, 8, 1, 9<\/code> → <code>1 2 5 8 9<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "5",
+           "5",
+           "2",
+           "8",
+           "1",
+           "9"
+          ],
+          "out": "^1 2 5 8 9[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>3, 10, 9, 100<\/code> → <code>9 10 100<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "10",
+           "9",
+           "100"
+          ],
+          "out": "^9 10 100[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>4, -1, 3, -5, 0<\/code> → <code>-5 -1 0 3<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "4",
+           "-1",
+           "3",
+           "-5",
+           "0"
+          ],
+          "out": "^-5 -1 0 3[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Sans fonction de comparaison, <code>sort()<\/code> trie comme du <b>texte<\/b> : 10 passerait avant 9. Écris <code>t.sort((a, b) =&gt; a - b)<\/code>.",
+     "solution": "const n = Number(lire());\nconst t = [];\nfor (let i = 0; i < n; i++) t.push(Number(lire()));\nt.sort((a, b) => a - b);\nconsole.log(t.join(\" \"));\n",
+     "stdin": [
+      "5",
+      "5",
+      "2",
+      "8",
+      "1",
+      "9"
+     ]
+    },
+    {
+     "id": "js-inventaire",
+     "titre": "L'inventaire",
+     "texte": "<p>Lis un entier n, puis n articles : pour chacun, son <b>nom<\/b> sur une ligne et sa <b>quantité<\/b> sur la ligne suivante. Un même nom peut revenir plusieurs fois : additionne ses quantités dans un dictionnaire. Affiche ensuite une ligne <b>nom : total<\/b> par article, dans l'ordre <b>alphabétique<\/b>.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>stock[nom] = (stock[nom] || 0) + qte;    // 0 la première fois\nObject.keys(stock).sort()                // les clés, triées<\/code><\/pre>",
+     "depart": "const n = Number(lire());\nconst stock = {};\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>3, souris, 3, clavier, 2, souris, 5<\/code> → <code>clavier : 2 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "souris",
+           "3",
+           "clavier",
+           "2",
+           "souris",
+           "5"
+          ],
+          "out": "^clavier : 2[ \\t]*\\nsouris : 8[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>4, ecran, 1, cable, 10, ecran, 1, adaptateur, 4<\/code> → <code>adaptateur : 4 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "4",
+           "ecran",
+           "1",
+           "cable",
+           "10",
+           "ecran",
+           "1",
+           "adaptateur",
+           "4"
+          ],
+          "out": "^adaptateur : 4[ \\t]*\\ncable : 10[ \\t]*\\necran : 2[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Un objet <code>{}<\/code> sert de dictionnaire ; <code>Object.keys(stock).sort()<\/code> donne les noms dans l'ordre alphabétique.",
+     "solution": "const n = Number(lire());\nconst stock = {};\nfor (let i = 0; i < n; i++) {\n  const nom = lire();\n  const qte = Number(lire());\n  stock[nom] = (stock[nom] || 0) + qte;\n}\nfor (const nom of Object.keys(stock).sort()) {\n  console.log(nom + \" : \" + stock[nom]);\n}\n",
+     "stdin": [
+      "3",
+      "souris",
+      "3",
+      "clavier",
+      "2",
+      "souris",
+      "5"
+     ]
+    },
+    {
+     "id": "js-doublons",
+     "titre": "Supprimer les doublons",
+     "texte": "<p>Lis un entier n, puis n mots (un par ligne). Affiche chaque mot <b>une seule fois<\/b>, dans l'ordre de sa première apparition, séparés par un espace.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>const s = new Set([\"a\", \"b\", \"a\"]);   // {\"a\", \"b\"}\nconsole.log([...s]);                  // retransformé en tableau<\/code><\/pre>",
+     "depart": "const n = Number(lire());\nconst vus = new Set();\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>5, a, b, a, c, b<\/code> → <code>a b c<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "5",
+           "a",
+           "b",
+           "a",
+           "c",
+           "b"
+          ],
+          "out": "^a b c[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>3, x, x, x<\/code> → <code>x<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "x",
+           "x",
+           "x"
+          ],
+          "out": "^x[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>4, lua, java, cpp, java<\/code> → <code>lua java cpp<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "4",
+           "lua",
+           "java",
+           "cpp",
+           "java"
+          ],
+          "out": "^lua java cpp[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Un <code>Set<\/code> ignore les doublons et garde l'ordre d'insertion ; <code>[...vus]<\/code> le transforme en tableau.",
+     "solution": "const n = Number(lire());\nconst vus = new Set();\nfor (let i = 0; i < n; i++) vus.add(lire());\nconsole.log([...vus].join(\" \"));\n",
+     "stdin": [
+      "5",
+      "a",
+      "b",
+      "a",
+      "c",
+      "b"
+     ]
+    },
+    {
+     "id": "js-mapfilter",
+     "titre": "map, filter et reduce",
+     "texte": "<p>Lis un entier n, puis n prix hors taxes. Sans écrire de boucle <code>for<\/code> de calcul, affiche trois lignes : les prix <b>TTC<\/b> (× 1.2) arrondis à l'entier et séparés par un espace, puis <b>Plus de 50 : X<\/b> (le nombre de prix TTC strictement supérieurs à 50), puis <b>Total : Y<\/b> (la somme des prix TTC arrondis).<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>const t = [1, 2, 3];\nt.map(x =&gt; x * 2);                  // [2, 4, 6]\nt.filter(x =&gt; x &gt; 1);               // [2, 3]\nt.reduce((s, x) =&gt; s + x, 0);       // 6<\/code><\/pre>",
+     "depart": "const n = Number(lire());\nconst ht = [];\nfor (let i = 0; i < n; i++) ht.push(Number(lire()));\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>3, 10, 50, 100<\/code> → <code>12 60 120 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "10",
+           "50",
+           "100"
+          ],
+          "out": "^12 60 120[ \\t]*\\nPlus de 50 : 2[ \\t]*\\nTotal : 192[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>2, 5, 40<\/code> → <code>6 48 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "2",
+           "5",
+           "40"
+          ],
+          "out": "^6 48[ \\t]*\\nPlus de 50 : 0[ \\t]*\\nTotal : 54[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Utilise <code>map<\/code>, <code>filter<\/code> et <code>reduce<\/code>",
+       "r": [
+        {
+         "code": "\\.map\\s*\\([\\s\\S]*\\.filter\\s*\\([\\s\\S]*\\.reduce\\s*\\(|\\.map\\s*\\([\\s\\S]*\\.reduce\\s*\\([\\s\\S]*\\.filter\\s*\\("
+        }
+       ]
+      }
+     ],
+     "indice": "<code>const ttc = ht.map(p =&gt; Math.round(p * 1.2));<\/code> puis <code>ttc.filter(…).length<\/code> et <code>ttc.reduce((s, p) =&gt; s + p, 0)<\/code>.",
+     "solution": "const n = Number(lire());\nconst ht = [];\nfor (let i = 0; i < n; i++) ht.push(Number(lire()));\nconst ttc = ht.map(p => Math.round(p * 1.2));\nconsole.log(ttc.join(\" \"));\nconsole.log(\"Plus de 50 : \" + ttc.filter(p => p > 50).length);\nconsole.log(\"Total : \" + ttc.reduce((s, p) => s + p, 0));\n",
+     "stdin": [
+      "3",
+      "10",
+      "50",
+      "100"
+     ]
+    },
+    {
+     "id": "js-compte",
+     "titre": "Un objet : le compte bancaire",
+     "texte": "<p>Crée un type <b>Compte<\/b> qui garde un solde, avec deux opérations : <b>deposer(montant)<\/b> et <b>retirer(montant)<\/b>. Si le solde ne suffit pas, <b>retirer<\/b> affiche <code>Solde insuffisant<\/code> et ne change rien. Le programme principal est déjà écrit en bas.<\/p><p><b>Exemple<\/b><\/p><pre><code>class Chien {\n  constructor(nom) { this.nom = nom; }\n  aboyer() { console.log(this.nom + &quot; : Ouaf&quot;); }\n}<\/code><\/pre>",
+     "depart": "// Écris la classe Compte ici\n\nconst c = new Compte(100);\nc.deposer(50);\nc.retirer(30);\nc.retirer(500);\nconsole.log(\"Solde : \" + c.solde);\n",
+     "objectifs": [
+      {
+       "txt": "Le type Compte est défini",
+       "r": [
+        {
+         "code": "class\\s+Compte\\b"
+        }
+       ]
+      },
+      {
+       "txt": "Le retrait trop gros affiche <code>Solde insuffisant<\/code>",
+       "r": [
+        {
+         "out": "Solde insuffisant"
+        },
+        {
+         "noerr": true
+        }
+       ]
+      },
+      {
+       "txt": "Le solde final est <code>120<\/code>",
+       "r": [
+        {
+         "out": "Solde : 120(?![\\d.])"
+        }
+       ]
+      }
+     ],
+     "indice": "Dans les méthodes, l'objet courant est <code>this<\/code>.",
+     "solution": "class Compte {\n  constructor(solde) {\n    this.solde = solde;\n  }\n  deposer(m) {\n    this.solde += m;\n  }\n  retirer(m) {\n    if (m > this.solde) {\n      console.log(\"Solde insuffisant\");\n      return;\n    }\n    this.solde -= m;\n  }\n}\n\nconst c = new Compte(100);\nc.deposer(50);\nc.retirer(30);\nc.retirer(500);\nconsole.log(\"Solde : \" + c.solde);\n"
+    },
+    {
+     "id": "js-heritage",
+     "titre": "Classes et héritage",
+     "texte": "<p>La classe <b>Animal<\/b> est écrite. Crée deux classes filles avec <code>extends<\/code> : <b>Chien<\/b>, dont <code>crier()<\/code> renvoie <code>\"Ouaf\"<\/code>, et <b>Chat<\/b>, dont <code>crier()<\/code> renvoie <code>\"Miaou\"<\/code>. Elles héritent de <code>presenter()<\/code> sans la réécrire.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>class Fille extends Mere {\n  methode() { return \"…\"; }      // redéfinition\n}<\/code><\/pre>",
+     "depart": "class Animal {\n  constructor(nom) { this.nom = nom; }\n  crier() { return \"...\"; }\n  presenter() { return this.nom + \" fait \" + this.crier(); }\n}\n\n// à compléter : les classes Chien et Chat\n\nfor (const a of [new Chien(\"Rex\"), new Chat(\"Tigrou\"), new Animal(\"Truc\")]) {\n  console.log(a.presenter());\n}\n",
+     "objectifs": [
+      {
+       "txt": "Le programme affiche <code>Rex fait Ouaf …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [],
+          "out": "^Rex fait Ouaf[ \\t]*\\nTigrou fait Miaou[ \\t]*\\nTruc fait \\.\\.\\.[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Les deux classes utilisent <code>extends Animal<\/code>",
+       "r": [
+        {
+         "code": "class\\s+\\w+\\s+extends\\s+Animal[\\s\\S]*class\\s+\\w+\\s+extends\\s+Animal"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>class Chien extends Animal { crier() { return \"Ouaf\"; } }<\/code> : le constructeur est hérité.",
+     "solution": "class Animal {\n  constructor(nom) { this.nom = nom; }\n  crier() { return \"...\"; }\n  presenter() { return this.nom + \" fait \" + this.crier(); }\n}\n\nclass Chien extends Animal {\n  crier() { return \"Ouaf\"; }\n}\n\nclass Chat extends Animal {\n  crier() { return \"Miaou\"; }\n}\n\nfor (const a of [new Chien(\"Rex\"), new Chat(\"Tigrou\"), new Animal(\"Truc\")]) {\n  console.log(a.presenter());\n}\n"
+    },
+    {
+     "id": "js-json",
+     "titre": "Lire du JSON",
+     "texte": "<p>Le programme reçoit sur une ligne un texte <b>JSON<\/b> : un tableau d'élèves, chacun avec un <code>nom<\/code> et une <code>note<\/code>. Convertis-le en objets avec <code>JSON.parse<\/code>, puis affiche le <b>nom du meilleur élève<\/b> et, sur la ligne suivante, <b>Moyenne : X<\/b> avec une décimale.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>const o = JSON.parse('{\"nom\": \"Léa\", \"age\": 17}');\nconsole.log(o.nom);                    // Léa\nconsole.log(JSON.stringify(o));        // l'inverse : objet → texte<\/code><\/pre>",
+     "depart": "const texte = lire();\n",
+     "objectifs": [
+      {
+       "txt": "Trois élèves → <code>Zoé<\/code> puis <code>Moyenne : 14.0<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "[{\"nom\":\"Léa\",\"note\":15},{\"nom\":\"Sam\",\"note\":9},{\"nom\":\"Zoé\",\"note\":18}]"
+          ],
+          "out": "^Zoé[ \\t]*\\nMoyenne : 14\\.0[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Un seul élève → <code>Tom<\/code> puis <code>Moyenne : 12.5<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "[{\"nom\":\"Tom\",\"note\":12.5}]"
+          ],
+          "out": "^Tom[ \\t]*\\nMoyenne : 12\\.5[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Utilise <code>JSON.parse<\/code>",
+       "r": [
+        {
+         "code": "JSON\\.parse\\s*\\("
+        }
+       ]
+      }
+     ],
+     "indice": "<code>const eleves = JSON.parse(lire());<\/code> donne un tableau d'objets : <code>eleves[0].nom<\/code>, <code>eleves[0].note<\/code>.",
+     "solution": "const eleves = JSON.parse(lire());\nlet meilleur = eleves[0];\nlet somme = 0;\nfor (const e of eleves) {\n  if (e.note > meilleur.note) meilleur = e;\n  somme += e.note;\n}\nconsole.log(meilleur.nom);\nconsole.log(\"Moyenne : \" + (somme / eleves.length).toFixed(1));\n",
+     "stdin": [
+      "[{\"nom\":\"Léa\",\"note\":15},{\"nom\":\"Sam\",\"note\":9},{\"nom\":\"Zoé\",\"note\":18}]"
+     ]
+    }
+   ]
+  },
+  {
+   "titre": "Chaînes de caractères",
+   "missions": [
+    {
      "id": "js-palindrome",
      "titre": "Les chaînes de caractères",
      "texte": "<p>Lis un mot, affiche-le <b>à l'envers<\/b> sur une ligne, puis <b>palindrome<\/b> s'il se lit pareil dans les deux sens, sinon <b>pas un palindrome<\/b>.<\/p><p><b>Exemple<\/b><\/p><pre><code>&quot;abc&quot;.split(&quot;&quot;)   // [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]\n[&quot;a&quot;, &quot;b&quot;].reverse().join(&quot;&quot;)<\/code><\/pre>",
@@ -453,41 +1550,225 @@ window.EF_CODE = {
      ]
     },
     {
-     "id": "js-compte",
-     "titre": "Un objet : le compte bancaire",
-     "texte": "<p>Crée un type <b>Compte<\/b> qui garde un solde, avec deux opérations : <b>deposer(montant)<\/b> et <b>retirer(montant)<\/b>. Si le solde ne suffit pas, <b>retirer<\/b> affiche <code>Solde insuffisant<\/code> et ne change rien. Le programme principal est déjà écrit en bas.<\/p><p><b>Exemple<\/b><\/p><pre><code>class Chien {\n  constructor(nom) { this.nom = nom; }\n  aboyer() { console.log(this.nom + &quot; : Ouaf&quot;); }\n}<\/code><\/pre>",
-     "depart": "// Écris la classe Compte ici\n\nconst c = new Compte(100);\nc.deposer(50);\nc.retirer(30);\nc.retirer(500);\nconsole.log(\"Solde : \" + c.solde);\n",
+     "id": "js-voyelles",
+     "titre": "Compter les voyelles",
+     "texte": "<p>Lis un mot écrit en minuscules sans accent et affiche <b>Voyelles : N<\/b>. Les voyelles sont a, e, i, o, u et y.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>for (const c of mot) { … }             // chaque caractère\n\"aeiouy\".includes(c)                   // c est-il une voyelle ?<\/code><\/pre>",
+     "depart": "const mot = lire();\n",
      "objectifs": [
       {
-       "txt": "Le type Compte est défini",
+       "txt": "Entrée <code>bonjour<\/code> → <code>Voyelles : 3<\/code>",
        "r": [
         {
-         "code": "class\\s+Compte\\b"
+         "test": {
+          "stdin": [
+           "bonjour"
+          ],
+          "out": "^Voyelles : 3[ \\t]*$"
+         }
         }
        ]
       },
       {
-       "txt": "Le retrait trop gros affiche <code>Solde insuffisant<\/code>",
+       "txt": "Entrée <code>rythme<\/code> → <code>Voyelles : 2<\/code>",
        "r": [
         {
-         "out": "Solde insuffisant"
-        },
-        {
-         "noerr": true
+         "test": {
+          "stdin": [
+           "rythme"
+          ],
+          "out": "^Voyelles : 2[ \\t]*$"
+         }
         }
        ]
       },
       {
-       "txt": "Le solde final est <code>120<\/code>",
+       "txt": "Entrée <code>brrr<\/code> → <code>Voyelles : 0<\/code>",
        "r": [
         {
-         "out": "Solde : 120(?![\\d.])"
+         "test": {
+          "stdin": [
+           "brrr"
+          ],
+          "out": "^Voyelles : 0[ \\t]*$"
+         }
         }
        ]
       }
      ],
-     "indice": "Dans les méthodes, l'objet courant est <code>this<\/code>.",
-     "solution": "class Compte {\n  constructor(solde) {\n    this.solde = solde;\n  }\n  deposer(m) {\n    this.solde += m;\n  }\n  retirer(m) {\n    if (m > this.solde) {\n      console.log(\"Solde insuffisant\");\n      return;\n    }\n    this.solde -= m;\n  }\n}\n\nconst c = new Compte(100);\nc.deposer(50);\nc.retirer(30);\nc.retirer(500);\nconsole.log(\"Solde : \" + c.solde);\n"
+     "indice": "Parcours le mot avec <code>for (const c of mot)<\/code> et teste <code>\"aeiouy\".includes(c)<\/code>.",
+     "solution": "const mot = lire();\nlet n = 0;\nfor (const c of mot) {\n  if (\"aeiouy\".includes(c)) n++;\n}\nconsole.log(\"Voyelles : \" + n);\n",
+     "stdin": [
+      "bonjour"
+     ]
+    },
+    {
+     "id": "js-mots",
+     "titre": "Compter les mots",
+     "texte": "<p>Lis une phrase et affiche <b>Mots : N<\/b>. Les mots sont séparés par un ou <b>plusieurs<\/b> espaces.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>\"a  b\".split(/\\s+/);   // [\"a\", \"b\"] : découpe sur un ou plusieurs espaces<\/code><\/pre>",
+     "depart": "const phrase = lire();\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>le chat dort<\/code> → <code>Mots : 3<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "le chat dort"
+          ],
+          "out": "^Mots : 3[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>bonjour<\/code> → <code>Mots : 1<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "bonjour"
+          ],
+          "out": "^Mots : 1[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>un  deux   trois quatre<\/code> → <code>Mots : 4<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "un  deux   trois quatre"
+          ],
+          "out": "^Mots : 4[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>phrase.trim().split(/\\s+/)<\/code> renvoie le tableau des mots.",
+     "solution": "const phrase = lire();\nconst mots = phrase.trim().split(/\\s+/);\nconsole.log(\"Mots : \" + mots.length);\n",
+     "stdin": [
+      "le chat dort"
+     ]
+    },
+    {
+     "id": "js-cesar",
+     "titre": "Le chiffre de César",
+     "texte": "<p>Lis un texte en minuscules sans accent et affiche-le <b>chiffré<\/b> : chaque lettre est décalée de 3 rangs dans l'alphabet (a devient d, b devient e…), et après z on revient à a (x devient a). Les espaces ne changent pas.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>\"a\".charCodeAt(0);            // 97 : le code de la lettre a\nString.fromCharCode(100);     // \"d\"<\/code><\/pre>",
+     "depart": "const texte = lire();\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>abc<\/code> → <code>def<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "abc"
+          ],
+          "out": "^def[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>xyz<\/code> → <code>abc<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "xyz"
+          ],
+          "out": "^abc[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>bonjour le monde<\/code> → <code>erqmrxu oh prqgh<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "bonjour le monde"
+          ],
+          "out": "^erqmrxu oh prqgh[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Code − 97 donne le rang de 0 à 25 ; ajoute 3, prends le reste modulo 26, rajoute 97, puis <code>String.fromCharCode<\/code>.",
+     "solution": "const texte = lire();\nlet res = \"\";\nfor (const c of texte) {\n  if (c >= \"a\" && c <= \"z\") {\n    res += String.fromCharCode((c.charCodeAt(0) - 97 + 3) % 26 + 97);\n  } else {\n    res += c;\n  }\n}\nconsole.log(res);\n",
+     "stdin": [
+      "abc"
+     ]
+    },
+    {
+     "id": "js-parentheses",
+     "titre": "Parenthèses équilibrées",
+     "texte": "<p>Lis une expression et affiche <b>équilibré<\/b> si ses parenthèses sont correctement ouvertes et fermées, sinon <b>non équilibré<\/b>. Parcours le texte avec un compteur : +1 pour une ouvrante, −1 pour une fermante. Le compteur ne doit jamais devenir négatif et doit finir à 0.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>if (c === \"(\") niveau++;<\/code><\/pre>",
+     "depart": "const expr = lire();\nlet niveau = 0;\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>(()())<\/code> → <code>équilibré<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "(()())"
+          ],
+          "out": "^équilibré[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>(()<\/code> → <code>non équilibré<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "(()"
+          ],
+          "out": "^non équilibré[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>)(<\/code> → <code>non équilibré<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           ")("
+          ],
+          "out": "^non équilibré[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>((a+b)*c)<\/code> → <code>équilibré<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "((a+b)*c)"
+          ],
+          "out": "^équilibré[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Deux conditions : le compteur ne passe jamais sous 0, et il vaut 0 à la fin.",
+     "solution": "const expr = lire();\nlet niveau = 0;\nlet ok = true;\nfor (const c of expr) {\n  if (c === \"(\") niveau++;\n  else if (c === \")\") {\n    niveau--;\n    if (niveau < 0) ok = false;\n  }\n}\nconsole.log(ok && niveau === 0 ? \"équilibré\" : \"non équilibré\");\n",
+     "stdin": [
+      "(()())"
+     ]
     }
    ]
   },
@@ -706,12 +1987,7 @@ window.EF_CODE = {
      ],
      "indice": "Rebondir = changer le signe de la vitesse : <code>vx = -vx<\/code>.",
      "solution": "let x = 100, y = 80;\nlet vx = 4, vy = 3;\n\nfunction update(dt) {\n  x = x + vx;\n  y = y + vy;\n  if (x < 12 || x > LARGEUR - 12) vx = -vx;\n  if (y < 12 || y > HAUTEUR - 12) vy = -vy;\n}\n\nfunction draw() {\n  effacer(\"black\");\n  cercle(x, y, 12, \"red\");\n}\n"
-    }
-   ]
-  },
-  {
-   "titre": "Mini-jeux",
-   "missions": [
+    },
     {
      "id": "js-clics",
      "titre": "Compter les clics",
@@ -838,7 +2114,12 @@ window.EF_CODE = {
      ],
      "indice": "<code>clic()<\/code> n'est vrai qu'à l'image du clic : parfait pour compter.",
      "solution": "let score = 0;\n\nfunction update(dt) {\n  if (clic()) score = score + 1;\n}\n\nfunction draw() {\n  effacer(\"black\");\n  texte(\"Score : \" + score, 16, 16, 28, \"white\");\n  cercle(sourisX(), sourisY(), 10, \"yellow\");\n}\n"
-    },
+    }
+   ]
+  },
+  {
+   "titre": "Mini-jeux",
+   "missions": [
     {
      "id": "js-saut",
      "titre": "Sauter avec la gravité",
@@ -1062,6 +2343,197 @@ window.EF_CODE = {
      ],
      "indice": "Collision : le fruit est à hauteur de la raquette (<code>fy<\/code> entre 280 et 300) ET au-dessus d'elle (<code>fx<\/code> entre <code>px<\/code> et <code>px + 80<\/code>).",
      "solution": "let px = 200;\nlet fx = hasard(20, 460), fy = 0;\nlet score = 0;\n\nfunction nouveauFruit() {\n  fx = hasard(20, 460);\n  fy = 0;\n}\n\nfunction update(dt) {\n  if (touche(\"droite\")) px += 6;\n  if (touche(\"gauche\")) px -= 6;\n  px = Math.max(0, Math.min(LARGEUR - 80, px));\n  fy += 4;\n  if (fy >= 280 && fy <= 300 && fx >= px && fx <= px + 80) {\n    score++;\n    nouveauFruit();\n  } else if (fy > HAUTEUR) {\n    nouveauFruit();\n  }\n}\n\nfunction draw() {\n  effacer(\"black\");\n  rect(px, 290, 80, 12, \"white\");\n  cercle(fx, fy, 10, \"red\");\n  texte(\"Score : \" + score, 16, 16, 24, \"white\");\n}\n"
+    },
+    {
+     "id": "js-etoiles",
+     "titre": "La pluie d'étoiles",
+     "texte": "<p>Fais tomber <b>5 étoiles<\/b>. Ce sont des cercles <b>blancs<\/b> (<code>\"white\"<\/code>) de rayon 3, rangés dans une <b>liste<\/b>. Leurs x valent 60, 150, 240, 330 et 420 ; leurs y de départ valent 0, 40, 80, 120 et 160. À chaque image, chaque étoile descend de <b>2 pixels<\/b> ; dès que son y dépasse 320, elle repart à y = 0. Le fond est noir.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>etoiles.push({ x: 60, y: 0 });            // un objet par étoile\nfor (const e of etoiles) e.y += 2;<\/code><\/pre>",
+     "depart": "const etoiles = [];\n\nfunction setup() {\n  // crée les 5 étoiles\n}\n\nfunction update(dt) {\n}\n\nfunction draw() {\n  effacer(\"black\");\n}\n",
+     "objectifs": [
+      {
+       "txt": "5 cercles blancs à chaque image",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 30
+           }
+          ],
+          "test": "const c = F.map(q => T(q, 'cercle').filter(v => v[4] === 'white').sort((a, b) => a[1] - b[1]));\nreturn c.every(f => f.length === 5) && [60, 150, 240, 330, 420].every((x, i) => c[0][i][1] === x);"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Chaque étoile descend de 2 pixels par image",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 30
+           }
+          ],
+          "test": "const c = F.map(q => T(q, 'cercle').filter(v => v[4] === 'white').sort((a, b) => a[1] - b[1]));\nreturn c[0].every((v, i) => c[10][i][2] - v[2] === 20 && c[1][i][2] - v[2] === 2);"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Les étoiles partent de hauteurs différentes",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 3
+           }
+          ],
+          "test": "const c = F.map(q => T(q, 'cercle').filter(v => v[4] === 'white').sort((a, b) => a[1] - b[1]));\nreturn new Set(c[0].map(v => v[2])).size === 5;"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Arrivées en bas, elles repartent du haut et ne sortent jamais",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 200
+           }
+          ],
+          "test": "const c = F.map(q => T(q, 'cercle').filter(v => v[4] === 'white').sort((a, b) => a[1] - b[1]));\nreturn c.every(f => f.every(v => v[2] >= 0 && v[2] <= 322)) && [0, 1, 2, 3, 4].every(i => c.some((f, k) => k && f[i][2] < c[k - 1][i][2]));"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Crée les étoiles dans <code>setup<\/code> : <code>etoiles.push({ x: 60 + i * 90, y: i * 40 });<\/code>.",
+     "solution": "const etoiles = [];\n\nfunction setup() {\n  for (let i = 0; i < 5; i++) {\n    etoiles.push({ x: 60 + i * 90, y: i * 40 });\n  }\n}\n\nfunction update(dt) {\n  for (const e of etoiles) {\n    e.y += 2;\n    if (e.y > 320) e.y = 0;\n  }\n}\n\nfunction draw() {\n  effacer(\"black\");\n  for (const e of etoiles) {\n    cercle(e.x, e.y, 3, \"white\");\n  }\n}\n"
+    },
+    {
+     "id": "js-tir",
+     "titre": "Tirer des projectiles",
+     "texte": "<p>Un vaisseau (rectangle <b>bleu<\/b> <code>\"blue\"<\/code> de 40 × 20, en y = 290) part de x = 220 et se déplace de 5 pixels par image avec les flèches gauche et droite. À chaque <b>appui<\/b> sur espace, il crée un tir : un rectangle <b>jaune<\/b> (<code>\"yellow\"<\/code>) de 4 × 10 placé en (x du vaisseau + 18, 280). Chaque tir monte de <b>8 pixels<\/b> par image et il est <b>retiré de la liste<\/b> quand son y devient négatif. Le fond est noir.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>tirs = tirs.filter(t =&gt; t.y &gt;= 0);   // ne garde que les tirs encore à l'écran<\/code><\/pre>",
+     "depart": "let x = 220;\nlet tirs = [];\n\nfunction update(dt) {\n}\n\nfunction draw() {\n  effacer(\"black\");\n  rect(x, 290, 40, 20, \"blue\");\n}\n",
+     "objectifs": [
+      {
+       "txt": "Le vaisseau bleu se déplace avec les flèches",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1
+           },
+           {
+            "n": 10,
+            "k": [
+             "droite"
+            ]
+           }
+          ],
+          "test": "const x = P('rect', 'blue').map(v => v && v[1]);\nreturn x[0] === 220 && x[10] === 270;"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Aucun tir tant qu'on n'appuie pas sur espace",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 5
+           }
+          ],
+          "test": "const t = F.map(q => T(q, 'rect').filter(v => v[5] === 'yellow'));\nreturn t.every(f => f.length === 0);"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Un appui sur espace crée un seul tir, qui monte de 8 pixels par image",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 2
+           },
+           {
+            "n": 1,
+            "p": [
+             "espace"
+            ]
+           },
+           {
+            "n": 6
+           }
+          ],
+          "test": "const t = F.map(q => T(q, 'rect').filter(v => v[5] === 'yellow'));\nreturn t[1].length === 0 && t[4].length === 1 && t[8].length === 1 && t[4][0][2] - t[5][0][2] === 8 && t[4][0][1] === 238;"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Deux appuis : deux tirs à l'écran",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1,
+            "p": [
+             "espace"
+            ]
+           },
+           {
+            "n": 5
+           },
+           {
+            "n": 1,
+            "p": [
+             "espace"
+            ]
+           },
+           {
+            "n": 3
+           }
+          ],
+          "test": "const t = F.map(q => T(q, 'rect').filter(v => v[5] === 'yellow'));\nreturn t[t.length - 1].length === 2;"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Un tir sorti de l'écran est retiré de la liste",
+       "r": [
+        {
+         "jeu": {
+          "etapes": [
+           {
+            "n": 1,
+            "p": [
+             "espace"
+            ]
+           },
+           {
+            "n": 60
+           }
+          ],
+          "test": "const t = F.map(q => T(q, 'rect').filter(v => v[5] === 'yellow'));\nreturn t[2].length === 1 && t[t.length - 1].length === 0 && t.every(f => f.every(v => v[2] >= -10));"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>toucheAppuyee(\"espace\")<\/code> n'est vrai qu'une image par appui. <code>filter<\/code> retire les tirs sortis de l'écran.",
+     "solution": "let x = 220;\nlet tirs = [];\n\nfunction update(dt) {\n  if (touche(\"gauche\")) x -= 5;\n  if (touche(\"droite\")) x += 5;\n  if (toucheAppuyee(\"espace\")) tirs.push({ x: x + 18, y: 280 });\n  for (const t of tirs) t.y -= 8;\n  tirs = tirs.filter(t => t.y >= 0);\n}\n\nfunction draw() {\n  effacer(\"black\");\n  rect(x, 290, 40, 20, \"blue\");\n  for (const t of tirs) {\n    rect(t.x, t.y, 4, 10, \"yellow\");\n  }\n}\n"
     }
    ]
   }

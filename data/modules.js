@@ -169,20 +169,22 @@ window.EF_MODULES = [
 
   /* ---------- Cours bonus : hors programme, ne comptent ni dans la progression ni au classement ---------- */
   {
-    id: "javascript", bonus: true,
+    id: "javascript", bonus: true, evalTextuel: true,
     titre: "JavaScript",
     sousTitre: "Bonus · le langage du web",
     icone: "JS",
     option: "BONUS",
     couleur: "js",
-    description: "Variables, fonctions, tableaux, objets, DOM et événements, puis des jeux en canvas dans le navigateur.",
-    labos: [{ href: "labo-js.html", ico: "JS", titre: "Labo JavaScript", court: "JavaScript", texte: "16 missions : programmes console puis jeux (dessin, clavier, souris, rebonds, gravité, mini-jeu complet). Plus un bac à sable." }],
+    description: "Le langage du web : variables, fonctions, tableaux et objets, classes et modules, DOM et événements, asynchrone et API REST, puis des jeux en canvas.",
+    labos: [{ href: "labo-js.html", ico: "JS", titre: "Labo JavaScript", court: "JavaScript", texte: "40 missions : bases, fonctions, tableaux et objets (map, filter, reduce, JSON, classes), chaînes, puis des jeux (dessin, clavier, souris, gravité, tirs). Plus un bac à sable." }],
     chapitres: [
       { id: "js-bases", titre: "JavaScript : variables, types et opérateurs", niveau: "facile" },
       { id: "js-conditions-boucles", titre: "JavaScript : conditions et boucles", niveau: "facile" },
       { id: "js-fonctions", titre: "JavaScript : les fonctions", niveau: "moyen" },
       { id: "js-tableaux-objets", titre: "JavaScript : tableaux et objets", niveau: "moyen" },
+      { id: "js-classes-modules", titre: "JavaScript : classes, modules et gestion des erreurs", niveau: "moyen" },
       { id: "js-dom-evenements", titre: "JavaScript : le DOM et les événements", niveau: "moyen" },
+      { id: "js-async-api", titre: "JavaScript : asynchrone, fetch et API REST", niveau: "difficile" },
       { id: "js-jeu-canvas", titre: "JavaScript : créer un jeu dans le navigateur", niveau: "difficile" }
     ]
   },

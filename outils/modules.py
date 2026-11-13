@@ -1,16 +1,11 @@
 """Fiches des modules bonus (ordre = ordre d'affichage). {n} dans le texte d'un labo = nombre de missions."""
 MODULES = {
     "javascript": dict(
-        titre="JavaScript", sousTitre="Bonus · le langage du web", icone="JS", couleur="js",
-        description="Variables, fonctions, tableaux, objets, DOM et événements, puis des jeux en canvas dans le navigateur.",
+        titre="JavaScript", sousTitre="Bonus · le langage du web", icone="JS", couleur="js", textuel=True,
+        description="Le langage du web : variables, fonctions, tableaux et objets, classes et modules, DOM et événements, asynchrone et API REST, puis des jeux en canvas.",
         labo=dict(href="labo-js.html", titre="Labo JavaScript", court="JavaScript",
-                  texte="16 missions : programmes console puis jeux (dessin, clavier, souris, rebonds, gravité, mini-jeu complet). Plus un bac à sable."),
-        fixes=[("js-bases", "JavaScript : variables, types et opérateurs", "facile"),
-               ("js-conditions-boucles", "JavaScript : conditions et boucles", "facile"),
-               ("js-fonctions", "JavaScript : les fonctions", "moyen"),
-               ("js-tableaux-objets", "JavaScript : tableaux et objets", "moyen"),
-               ("js-dom-evenements", "JavaScript : le DOM et les événements", "moyen"),
-               ("js-jeu-canvas", "JavaScript : créer un jeu dans le navigateur", "difficile")]),
+                  sousTitre="Du vrai JavaScript : programmes console, tableaux et objets, classes, JSON, puis des jeux en canvas dans le navigateur.",
+                  texte="{n} missions : bases, fonctions, tableaux et objets (map, filter, reduce, JSON, classes), chaînes, puis des jeux (dessin, clavier, souris, gravité, tirs). Plus un bac à sable.")),
     "lua": dict(
         titre="Lua", sousTitre="Bonus · le langage des jeux", icone="Lua", couleur="lua", textuel=True,
         description="Le cours complet du langage de Roblox, LÖVE et des scripts de jeux : bases, tables, chaînes, closures, métatables, objets, coroutines, puis des jeux.",

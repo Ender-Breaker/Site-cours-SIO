@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>JavaScript : asynchrone, fetch et API REST — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="javascript" data-chapter="js-async-api">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/javascript.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>Charger des données depuis un serveur prend du temps. JavaScript ne <b>bloque</b> pas la page en attendant : il lance l'opération, continue, et reprend quand la réponse arrive. C'est la programmation <b>asynchrone</b>.</p>
+<div class="box"><b>Où tester ?</b><p>Ces exemples font des requêtes réseau : essaie-les dans la console de ton navigateur (F12), sur n'importe quelle page.</p></div>
+<h2>1. Le principe</h2>
+<pre><code>console.log("1 : avant");
+setTimeout(() =&gt; console.log("3 : une seconde plus tard"), 1000);   // n'attend pas
+console.log("2 : après");</code></pre>
+<p>L'ordre d'affichage est 1, 2, 3 : <code>setTimeout</code> programme la fonction et rend la main tout de suite.</p>
+<h2>2. Les promesses</h2>
+<p>Une <b>promesse</b> (<code>Promise</code>) représente un résultat qui arrivera plus tard. Elle est *en attente*, puis *tenue* (avec une valeur) ou *rompue* (avec une erreur).</p>
+<pre><code>fetch("https://api.exemple.fr/produits")           // renvoie une promesse
+  .then(reponse =&gt; reponse.json())                  // quand la réponse arrive
+  .then(produits =&gt; console.log(produits.length))   // quand le JSON est lu
+  .catch(erreur =&gt; console.log("Échec :", erreur.message));</code></pre>
+<h2>3. <code>async</code> / <code>await</code> : la forme à utiliser</h2>
+<p><code>await</code> met la fonction en pause jusqu'à ce que la promesse soit tenue, <b>sans bloquer la page</b>. Le code se lit de haut en bas, comme du code ordinaire.</p>
+<pre><code>async function chargerProduits() {
+  try {
+    const reponse = await fetch("https://api.exemple.fr/produits");
+    if (!reponse.ok) throw new Error("HTTP " + reponse.status);   // 404, 500…
+    const produits = await reponse.json();
+    return produits;
+  } catch (e) {
+    console.log("Impossible de charger :", e.message);
+    return [];
+  }
+}
+
+const produits = await chargerProduits();     // await : seulement dans une fonction async ou un module</code></pre>
+<div class="box attention"><b><code>fetch</code> ne rejette pas sur une erreur 404</b><p><code>fetch</code> n'échoue que si le réseau est coupé. Une réponse 404 ou 500 est une réponse « réussie » : il faut tester <code>reponse.ok</code> (ou <code>reponse.status</code>) soi-même.</p></div>
+<h2>4. Les API REST</h2>
+<p>Une <b>API REST</b> expose des données par des URL, manipulées avec les <b>méthodes HTTP</b>. Les échanges se font en JSON.</p>
+<table><tr><th>Méthode</th><th>Action</th><th>Exemple</th></tr><tr><td><code>GET</code></td><td>lire</td><td><code>GET /produits</code>, <code>GET /produits/12</code></td></tr><tr><td><code>POST</code></td><td>créer</td><td><code>POST /produits</code></td></tr><tr><td><code>PUT</code> / <code>PATCH</code></td><td>modifier</td><td><code>PUT /produits/12</code></td></tr><tr><td><code>DELETE</code></td><td>supprimer</td><td><code>DELETE /produits/12</code></td></tr></table>
+<table><tr><th>Code</th><th>Signification</th></tr><tr><td><code>200</code> <code>201</code> <code>204</code></td><td>succès, créé, succès sans contenu</td></tr><tr><td><code>400</code></td><td>requête incorrecte</td></tr><tr><td><code>401</code> <code>403</code></td><td>non authentifié, interdit</td></tr><tr><td><code>404</code></td><td>introuvable</td></tr><tr><td><code>500</code></td><td>erreur du serveur</td></tr></table>
+<pre><code>const reponse = await fetch("https://api.exemple.fr/produits", {
+  method: "POST",
+  headers: { "Content-Type": "application/json", "Authorization": "Bearer " + jeton },
+  body: JSON.stringify({ nom: "Souris", prix: 19.9 }),
+});
+const cree = await reponse.json();
+console.log(reponse.status, cree.id);</code></pre>
+<h2>5. Plusieurs requêtes en parallèle</h2>
+<pre><code>const [clients, produits] = await Promise.all([
+  fetch("/api/clients").then(r =&gt; r.json()),
+  fetch("/api/produits").then(r =&gt; r.json()),
+]);</code></pre>
+<p><code>Promise.all</code> lance tout en même temps et attend que <b>toutes</b> les promesses soient tenues.</p>
+<section class="tuto"><h3><small>Tutoriel</small>Afficher les données d'une API dans une page</h3>
+<div class="etape"><h4>Charger</h4>
+<pre><code>async function charger() {
+  const reponse = await fetch("https://jsonplaceholder.typicode.com/users");
+  if (!reponse.ok) throw new Error("HTTP " + reponse.status);
+  return reponse.json();
+}</code></pre>
+</div>
+<div class="etape"><h4>Afficher</h4>
+<p><code>textContent</code> et <code>createElement</code> : aucune faille XSS possible, même si l'API renvoie du HTML.</p>
+<pre><code>function afficher(utilisateurs) {
+  const liste = document.querySelector("#liste");
+  liste.replaceChildren();                       // vide la liste
+  for (const u of utilisateurs) {
+    const li = document.createElement("li");
+    li.textContent = `${u.name} — ${u.email}`;
+    liste.append(li);
+  }
+}</code></pre>
+</div>
+<div class="etape"><h4>Relier, avec un état de chargement et les erreurs</h4>
+<pre><code>const etat = document.querySelector("#etat");
+etat.textContent = "Chargement…";
+try {
+  afficher(await charger());
+  etat.textContent = "";
+} catch (e) {
+  etat.textContent = "Impossible de charger les données : " + e.message;
+}</code></pre>
+</div>
+</section>
+<div class="box retenir"><b>À retenir</b><p>Asynchrone : l'opération est lancée, le code continue, le résultat arrive plus tard. </p><p> <code>const r = await fetch(url); const data = await r.json();</code> dans une fonction <code>async</code>, entouré de <code>try / catch</code>. </p><p> Tester <code>r.ok</code> : <code>fetch</code> ne rejette pas sur un 404. </p><p> REST : <code>GET</code> lire, <code>POST</code> créer, <code>PUT</code> modifier, <code>DELETE</code> supprimer ; échanges en JSON. </p><p> <code>Promise.all</code> pour paralléliser.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-js.html">Labo JavaScript</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "Que renvoie `fetch(url)` ?",
+  "type": "qcm",
+  "options": [
+   "Un tableau",
+   "Du texte",
+   "Une promesse",
+   "Les données directement"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel mot-clé attend le résultat d'une promesse ?",
+  "type": "qcm",
+  "options": [
+   "`await`",
+   "`then`",
+   "`wait`",
+   "`sleep`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Où peut-on utiliser `await` ?",
+  "type": "qcm",
+  "options": [
+   "Dans une fonction `async` (ou un module)",
+   "Partout",
+   "Uniquement dans un callback",
+   "Uniquement dans une boucle"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle méthode lit le corps d'une réponse au format JSON ?",
+  "type": "qcm",
+  "options": [
+   "`reponse.json()`",
+   "`reponse.body`",
+   "`reponse.parse()`",
+   "`JSON.read(reponse)`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "`fetch` rejette-t-il sa promesse sur une réponse 404 ?",
+  "type": "qcm",
+  "options": [
+   "Oui, toujours",
+   "Seulement en HTTPS",
+   "Non : il faut tester `reponse.ok`",
+   "Seulement avec POST"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle méthode HTTP sert à créer une ressource ?",
+  "type": "qcm",
+  "options": [
+   "`GET`",
+   "`READ`",
+   "`DELETE`",
+   "`POST`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle méthode HTTP sert à lire une ressource ?",
+  "type": "qcm",
+  "options": [
+   "`PUT`",
+   "`GET`",
+   "`POST`",
+   "`FETCH`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que signifie le code HTTP 404 ?",
+  "type": "qcm",
+  "options": [
+   "Succès",
+   "Ressource introuvable",
+   "Erreur du serveur",
+   "Accès interdit"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que signifie le code HTTP 500 ?",
+  "type": "qcm",
+  "options": [
+   "Erreur du serveur",
+   "Succès",
+   "Introuvable",
+   "Non authentifié"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Dans quel format les API REST échangent-elles le plus souvent ?",
+  "type": "qcm",
+  "options": [
+   "PDF",
+   "CSV",
+   "JSON",
+   "HTML"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Dans quel ordre s'affichent : log(\"A\"); setTimeout(() => log(\"B\"), 0); log(\"C\"); ?",
+  "type": "qcm",
+  "options": [
+   "C, B, A",
+   "A, C, B",
+   "A, B, C",
+   "B, A, C"
+  ],
+  "answer": 1,
+  "explication": "Le callback passe après le code en cours."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait `Promise.all([p1, p2])` ?",
+  "type": "qcm",
+  "options": [
+   "Attend la première",
+   "Annule les promesses",
+   "Les exécute l'une après l'autre",
+   "Attend que toutes les promesses soient tenues"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "`await` bloque toute la page pendant l'attente.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Seule la fonction async est en pause."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel bloc attrape l'erreur d'un await qui échoue (try / ___) ?",
+  "type": "saisie",
+  "answers": [
+   "catch"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque méthode HTTP à son action.",
+  "type": "associer",
+  "paires": [
+   [
+    "`GET`",
+    "lire"
+   ],
+   [
+    "`POST`",
+    "créer"
+   ],
+   [
+    "`PUT`",
+    "modifier"
+   ],
+   [
+    "`DELETE`",
+    "supprimer"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

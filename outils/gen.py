@@ -18,9 +18,11 @@ LANGUE = {"lua": "lua", "cpp": "cpp", "java": "java", "javascript": "js"}
 # ---------------------------------------------------------------- balisage léger → HTML
 def inline(s):
     out = []
-    for i, part in enumerate(s.split("`")):
-        if i % 2:
-            out.append("<code>" + html.escape(part, quote=False) + "</code>")
+    for part in re.split(r"(``.+?``|`[^`]*`)", s):
+        if part.startswith("``") and part.endswith("``") and len(part) > 4:
+            out.append("<code>" + html.escape(part[2:-2].strip(), quote=False) + "</code>")
+        elif part.startswith("`") and part.endswith("`") and len(part) > 1:
+            out.append("<code>" + html.escape(part[1:-1], quote=False) + "</code>")
         else:
             p = html.escape(part, quote=False)
             p = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", p)

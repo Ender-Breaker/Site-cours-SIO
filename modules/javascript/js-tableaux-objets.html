@@ -11,195 +11,290 @@
 </head>
 <body data-module="javascript" data-chapter="js-tableaux-objets">
 
-<!-- ============ COURS ============ -->
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/javascript.txt) -->
 <article id="cours">
 <div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
 <h2>1. Les tableaux</h2>
-<pre><code>const notes = [12, 15, 9];
-notes[0]          // 12 (les indices commencent à 0)
-notes.length      // 3
-notes.push(18);   // ajoute à la fin
-notes.pop();      // retire le dernier
-notes.includes(9) // true
-notes.indexOf(15) // 1</code></pre>
-
-<h2>2. Les méthodes qui transforment</h2>
-<pre><code>const doubles = notes.map(n =&gt; n * 2);           // [24, 30, 18]
-const admis   = notes.filter(n =&gt; n &gt;= 10);       // [12, 15]
-const total   = notes.reduce((acc, n) =&gt; acc + n, 0);   // 36
-const trie    = [...notes].sort((a, b) =&gt; a - b);       // copie triée
-notes.forEach((n, i) =&gt; console.log(i, n));</code></pre>
-<div class="box attention"><b>sort() trie du texte par défaut</b><p><code>[10, 9, 1].sort()</code> donne <code>[1, 10, 9]</code>. Pour des nombres, donne une fonction de comparaison : <code>sort((a, b) =&gt; a - b)</code>.</p></div>
-
+<div class="essai" data-langue="js"><pre><code>const fruits = ["pomme", "kiwi"];
+fruits.push("poire");                   // ajoute à la fin
+fruits.unshift("ananas");               // ajoute au début
+console.log(fruits, fruits.length, fruits[0]);
+console.log(fruits.pop(), fruits.shift());      // retire le dernier, le premier
+console.log(fruits.includes("kiwi"), fruits.indexOf("kiwi"), fruits.join(" | "));
+console.log(fruits.slice(0, 1));        // copie d'une portion
+console.log([3, 1, 2].reverse(), [5, 10, 9].sort((a, b) =&gt; a - b));
+console.log(fruits[99]);                // undefined : pas d'erreur</code></pre></div>
+<div class="box attention"><b>Trier des nombres</b><p>Sans argument, <code>sort()</code> trie comme du <b>texte</b> : <code>[10, 9, 100].sort()</code> donne <code>[10, 100, 9]</code>. Pour des nombres : <code>sort((a, b) =&gt; a - b)</code>.</p></div>
+<h2>2. <code>map</code>, <code>filter</code>, <code>reduce</code> et compagnie</h2>
+<p>Ces méthodes reçoivent une fonction et renvoient un <b>nouveau</b> résultat, sans modifier le tableau.</p>
+<div class="essai" data-langue="js"><pre><code>const prix = [12, 5, 30, 8];
+console.log(prix.map(p =&gt; p * 2));                    // transforme chaque élément
+console.log(prix.filter(p =&gt; p &gt;= 10));               // garde selon un test
+console.log(prix.reduce((total, p) =&gt; total + p, 0)); // combine en une valeur
+console.log(prix.find(p =&gt; p &gt; 10), prix.findIndex(p =&gt; p &gt; 10));
+console.log(prix.some(p =&gt; p &gt; 20), prix.every(p =&gt; p &gt; 0));
+prix.forEach((p, i) =&gt; console.log(i, p));            // simple parcours
+console.log(prix.filter(p =&gt; p &gt;= 10).map(p =&gt; p * 1.2).reduce((s, p) =&gt; s + p, 0));   // enchaînement</code></pre></div>
 <h2>3. Les objets</h2>
-<pre><code>const eleve = { nom: &quot;Léa&quot;, age: 19, option: &quot;SLAM&quot; };
-eleve.nom            // &quot;Léa&quot;
-eleve[&quot;age&quot;]         // 19
-eleve.ville = &quot;Rennes&quot;;   // ajoute une propriété
-for (const cle in eleve) console.log(cle, eleve[cle]);
-Object.keys(eleve)   // [&quot;nom&quot;, &quot;age&quot;, &quot;option&quot;, &quot;ville&quot;]</code></pre>
-
-<h2>4. Déstructuration et décomposition</h2>
-<pre><code>const { nom, age } = eleve;      // extrait des propriétés
-const [premier, second] = notes; // extrait des éléments
-const copie = { ...eleve, age: 20 };   // copie modifiée
-const tout = [...notes, 20, 14];</code></pre>
-
-<h2>5. Les classes</h2>
-<pre><code>class Compte {
-  constructor(solde) { this.solde = solde; }
-  deposer(m) { this.solde += m; }
-}
-const c = new Compte(100);
-c.deposer(50);</code></pre>
-
+<div class="essai" data-langue="js"><pre><code>const joueur = { nom: "Léa", pv: 10, inventaire: ["épée"] };
+console.log(joueur.nom, joueur["pv"]);           // deux écritures
+joueur.niveau = 3;                               // ajoute une propriété
+delete joueur.pv;                                // supprime
+console.log(Object.keys(joueur), Object.values(joueur).length);
+for (const [cle, valeur] of Object.entries(joueur)) console.log(cle, "→", valeur);
+console.log("nom" in joueur, joueur.absent);     // true  undefined</code></pre></div>
+<h2>4. Décomposition et copie</h2>
+<div class="essai" data-langue="js"><pre><code>const eleve = { nom: "Sam", note: 15, option: "SLAM" };
+const { nom, note } = eleve;                     // décomposition d'objet
+console.log(nom, note);
+const copie = { ...eleve, note: 18 };            // copie avec une propriété modifiée
+console.log(eleve.note, copie.note);
+const tous = [...[1, 2], ...[3, 4]];             // fusion de tableaux
+console.log(tous);
+const meme = eleve;                              // PAS une copie : même objet
+meme.note = 0;
+console.log(eleve.note);</code></pre></div>
+<h2>5. Tableaux d'objets : le cas le plus courant</h2>
+<div class="essai" data-langue="js"><pre><code>const eleves = [
+  { nom: "Léa", note: 15, option: "SLAM" },
+  { nom: "Sam", note: 9, option: "SISR" },
+  { nom: "Zoé", note: 18, option: "SLAM" },
+];
+const admisSlam = eleves
+  .filter(e =&gt; e.option === "SLAM" &amp;&amp; e.note &gt;= 10)
+  .sort((a, b) =&gt; b.note - a.note)
+  .map(e =&gt; e.nom);
+console.log(admisSlam.join(", "));
+console.log(eleves.reduce((s, e) =&gt; s + e.note, 0) / eleves.length);</code></pre></div>
 <h2>6. JSON</h2>
-<p>Le format <b>JSON</b> (JavaScript Object Notation) sert à échanger des données entre un serveur et une page :</p>
-<pre><code>const texte = JSON.stringify(eleve);   // objet → texte
-const objet = JSON.parse(texte);       // texte → objet</code></pre><div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-js.html">labo JavaScript</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+<p><b>JSON</b> est le format texte d'échange de données du web. Il ressemble à un objet JavaScript, avec des guillemets doubles obligatoires.</p>
+<div class="essai" data-langue="js"><pre><code>const texte = '{"nom":"Léa","notes":[12,15],"majeur":false}';
+const obj = JSON.parse(texte);                   // texte → objet
+console.log(obj.nom, obj.notes[1]);
+obj.notes.push(18);
+console.log(JSON.stringify(obj));                // objet → texte
+console.log(JSON.stringify(obj, null, 2));       // mis en forme</code></pre></div>
+<section class="tuto"><h3><small>Tutoriel</small>Un inventaire de magasin</h3>
+<div class="etape"><h4>Compter avec un objet</h4>
+<div class="essai" data-langue="js"><pre><code>const stock = {};
+function ajouter(nom, qte) { stock[nom] = (stock[nom] || 0) + qte; }
+ajouter("souris", 3); ajouter("clavier", 2); ajouter("souris", 5);
+console.log(stock);</code></pre></div>
+</div>
+<div class="etape"><h4>Afficher trié, trouver le maximum</h4>
+<div class="essai" data-langue="js"><pre><code>const stock = { souris: 8, clavier: 2, ecran: 4 };
+for (const nom of Object.keys(stock).sort()) console.log(`${nom} : ${stock[nom]}`);
+const [meilleur, qte] = Object.entries(stock).sort((a, b) =&gt; b[1] - a[1])[0];
+console.log(meilleur, qte);</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : map, filter, reduce</b><p>Sans boucle <code>for</code>.</p><a class="defi-go" href="labo-js.html#m=js-mapfilter">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : l'inventaire</b><p>Un objet comme dictionnaire.</p><a class="defi-go" href="labo-js.html#m=js-inventaire">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : lire du JSON</b><p><code>JSON.parse</code> puis un parcours.</p><a class="defi-go" href="labo-js.html#m=js-json">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p>Tableau : <code>push</code>, <code>pop</code>, <code>length</code>, <code>includes</code>, <code>join</code>, <code>sort((a, b) =&gt; a - b)</code>. </p><p> <code>map</code> transforme, <code>filter</code> garde, <code>reduce</code> combine, <code>find</code> cherche. </p><p> Objet : <code>o.cle</code>, <code>Object.keys/values/entries</code>. </p><p> <code>{ ...o }</code> et <code>[...t]</code> copient ; <code>const { a } = o</code> décompose. </p><p> <code>JSON.parse</code> et <code>JSON.stringify</code>.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-js.html">Labo JavaScript</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
 </article>
 
 <!-- ============ EXERCICES ============ -->
 <script>
 window.EF_EXERCICES = [
  {
-  "type": "qcm",
   "niveau": "facile",
-  "q": "Quel est l'indice du premier élément d'un tableau ?",
+  "q": "Quelle méthode ajoute un élément à la fin d'un tableau ?",
+  "type": "qcm",
   "options": [
-   "0",
-   "1",
-   "-1"
+   "`push`",
+   "`unshift`",
+   "`append`",
+   "`add`"
   ],
   "answer": 0,
   "explication": ""
  },
  {
-  "type": "qcm",
   "niveau": "facile",
-  "q": "Quelle méthode ajoute un élément à la fin ?",
+  "q": "Quelle propriété donne la taille d'un tableau ?",
+  "type": "qcm",
   "options": [
-   "`add()`",
-   "`push()`",
-   "`append()`",
-   "`insert()`"
+   "`size()`",
+   "`len`",
+   "`length`",
+   "`count`"
   ],
-  "answer": 1,
+  "answer": 2,
   "explication": ""
  },
  {
-  "type": "qcm",
   "niveau": "moyen",
-  "q": "Que donne `[1, 2, 3].map(x => x * 10)` ?",
-  "options": [
-   "[10, 20, 30]",
-   "60",
-   "[1, 2, 3]",
-   "[11, 12, 13]"
-  ],
-  "answer": 0,
-  "explication": ""
- },
- {
+  "q": "Que renvoie `[10, 9, 100].sort()` ?",
   "type": "qcm",
-  "niveau": "moyen",
-  "q": "Que donne `[5, 12, 8].filter(x => x > 6)` ?",
   "options": [
-   "[12, 8]",
-   "[5]",
-   "true",
-   "[12]"
+   "`[10, 100, 9]`",
+   "`[9, 10, 100]`",
+   "`[100, 10, 9]`",
+   "Une erreur"
   ],
   "answer": 0,
+  "explication": "Sans comparateur, le tri est alphabétique."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que renvoie `[1, 2, 3].map(x => x * 2)` ?",
+  "type": "qcm",
+  "options": [
+   "`[2]`",
+   "`[1, 2, 3]`",
+   "`[2, 4, 6]`",
+   "6"
+  ],
+  "answer": 2,
   "explication": ""
  },
  {
-  "type": "qcm",
   "niveau": "moyen",
-  "q": "Que donne `[1, 2, 3].reduce((a, n) => a + n, 0)` ?",
+  "q": "Que renvoie `[1, 2, 3, 4].filter(x => x % 2 === 0)` ?",
+  "type": "qcm",
+  "options": [
+   "2",
+   "`[1, 3]`",
+   "`[2, 4]`",
+   "`[true, false]`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que renvoie `[1, 2, 3].reduce((s, x) => s + x, 0)` ?",
+  "type": "qcm",
   "options": [
    "6",
-   "[1, 2, 3]",
+   "`[6]`",
    "0",
-   "123"
+   "3"
   ],
   "answer": 0,
   "explication": ""
  },
  {
+  "niveau": "moyen",
+  "q": "`joueur.nom` est équivalent à…",
   "type": "qcm",
-  "niveau": "difficile",
-  "q": "Que donne `[10, 9, 1].sort()` ?",
   "options": [
-   "[1, 9, 10]",
-   "[1, 10, 9]",
-   "[10, 9, 1]",
-   "Erreur"
+   "`joueur[nom]`",
+   "`joueur->nom`",
+   "`joueur(nom)`",
+   "`joueur[\"nom\"]`"
   ],
-  "answer": 1,
-  "explication": "Tri alphabétique par défaut."
- },
- {
-  "type": "qcm",
-  "niveau": "facile",
-  "q": "Comment lire la propriété nom de l'objet e ?",
-  "options": [
-   "`e->nom`",
-   "`e.nom`",
-   "`e::nom`",
-   "`e(nom)`"
-  ],
-  "answer": 1,
+  "answer": 3,
   "explication": ""
  },
  {
-  "type": "qcm",
   "niveau": "moyen",
-  "q": "Que fait `const { nom } = eleve;` ?",
+  "q": "Que renvoie `Object.keys({ a: 1, b: 2 })` ?",
+  "type": "qcm",
   "options": [
-   "Crée un objet",
-   "Extrait eleve.nom dans une variable nom",
-   "Supprime nom",
-   "Erreur"
+   "`[\"a\", \"b\"]`",
+   "`{a, b}`",
+   "2",
+   "`[1, 2]`"
   ],
-  "answer": 1,
-  "explication": "Déstructuration."
+  "answer": 0,
+  "explication": ""
  },
  {
+  "niveau": "difficile",
+  "q": "Après `const b = a; b.x = 5;` (a est un objet), que vaut `a.x` ?",
   "type": "qcm",
+  "options": [
+   "5",
+   "`undefined`",
+   "Sa valeur d'avant",
+   "Une erreur"
+  ],
+  "answer": 0,
+  "explication": "a et b désignent le même objet."
+ },
+ {
   "niveau": "moyen",
-  "q": "Quelle fonction transforme un objet en texte JSON ?",
+  "q": "Que fait `{ ...eleve, note: 18 }` ?",
+  "type": "qcm",
+  "options": [
+   "Fusionne deux tableaux",
+   "Une erreur",
+   "Crée une copie avec note remplacée par 18",
+   "Modifie eleve"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle fonction transforme un texte JSON en objet ?",
+  "type": "qcm",
   "options": [
    "`JSON.parse`",
+   "`JSON.read`",
    "`JSON.stringify`",
-   "`toString`",
-   "`JSON.text`"
+   "`Object.from`"
   ],
-  "answer": 1,
+  "answer": 0,
   "explication": ""
  },
  {
-  "type": "saisie",
   "niveau": "moyen",
-  "q": "Quelle propriété donne le nombre d'éléments d'un tableau ?",
-  "answers": [
-   "length",
-   ".length"
-  ],
-  "explication": ""
- },
- {
+  "q": "map modifie le tableau d'origine.",
   "type": "vf",
+  "answer": false,
+  "explication": "Il renvoie un nouveau tableau."
+ },
+ {
   "niveau": "moyen",
-  "q": "Un objet déclaré avec const peut quand même voir ses propriétés modifiées.",
+  "q": "En JSON, les clés doivent être entre guillemets doubles.",
+  "type": "vf",
   "answer": true,
-  "explication": "const empêche la réaffectation de la variable, pas la modification de l'objet."
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle méthode de tableau renvoie le premier élément qui vérifie un test ?",
+  "type": "saisie",
+  "answers": [
+   "find"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque méthode à son rôle.",
+  "type": "associer",
+  "paires": [
+   [
+    "`map`",
+    "transformer"
+   ],
+   [
+    "`filter`",
+    "garder selon un test"
+   ],
+   [
+    "`reduce`",
+    "combiner en une valeur"
+   ],
+   [
+    "`join`",
+    "coller en une chaîne"
+   ]
+  ],
+  "explication": ""
  }
 ];
 </script>
 <script src="../../data/modules.js"></script>
 <script src="../../assets/app.js"></script>
 <script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
 <script src="../../assets/chapter.js"></script>
 </body>
 </html>

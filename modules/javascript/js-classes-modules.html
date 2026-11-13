@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>JavaScript : classes, modules et gestion des erreurs — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="javascript" data-chapter="js-classes-modules">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/javascript.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<h2>1. Les classes</h2>
+<div class="essai" data-langue="js"><pre><code>class Compte {
+  #solde = 0;                            // # : attribut privé
+  constructor(titulaire, solde = 0) {
+    this.titulaire = titulaire;
+    this.#solde = solde;
+  }
+  deposer(montant) {
+    if (montant &gt; 0) this.#solde += montant;
+    return this;                         // permet d'enchaîner
+  }
+  retirer(montant) {
+    if (montant &gt; this.#solde) return false;
+    this.#solde -= montant;
+    return true;
+  }
+  get solde() { return this.#solde; }    // accesseur : s'utilise comme une propriété
+  static creerVide(nom) { return new Compte(nom); }     // méthode de classe
+}
+const c = new Compte("Léa", 100);
+c.deposer(50).deposer(10);
+console.log(c.retirer(500), c.retirer(30), c.solde);
+console.log(Compte.creerVide("Sam").solde);</code></pre></div>
+<h2>2. L'héritage</h2>
+<div class="essai" data-langue="js"><pre><code>class Animal {
+  constructor(nom) { this.nom = nom; }
+  crier() { return "..."; }
+  presenter() { return `${this.nom} fait ${this.crier()}`; }
+}
+class Chien extends Animal {
+  crier() { return "Ouaf"; }             // redéfinition
+}
+class Chiot extends Chien {
+  constructor(nom, age) {
+    super(nom);                          // appelle le constructeur de la mère
+    this.age = age;
+  }
+  crier() { return super.crier() + " (aigu)"; }
+}
+for (const a of [new Animal("Truc"), new Chien("Rex"), new Chiot("Pif", 1)]) {
+  console.log(a.presenter(), a instanceof Chien);
+}</code></pre></div>
+<h2>3. Le piège de <code>this</code></h2>
+<p><code>this</code> désigne l'objet <b>sur lequel la méthode est appelée</b>. Si on détache la méthode de son objet, <code>this</code> est perdu. Les fonctions fléchées, elles, gardent le <code>this</code> de l'endroit où elles sont écrites.</p>
+<div class="essai" data-langue="js"><pre><code>class Minuteur {
+  constructor() { this.ticks = 0; }
+  tick() { this.ticks++; }
+  lancer(n) {
+    for (let i = 0; i &lt; n; i++) [1].forEach(() =&gt; this.tick());   // fléchée : this conservé
+    return this.ticks;
+  }
+}
+console.log(new Minuteur().lancer(3));</code></pre></div>
+<h2>4. Les erreurs : <code>try</code>, <code>catch</code>, <code>throw</code></h2>
+<div class="essai" data-langue="js"><pre><code>function diviser(a, b) {
+  if (b === 0) throw new Error("division par zéro");
+  return a / b;
+}
+for (const b of [2, 0]) {
+  try {
+    console.log(diviser(10, b));
+  } catch (e) {
+    console.log("Erreur :", e.message);
+  } finally {
+    console.log("  (essai terminé)");
+  }
+}
+try {
+  JSON.parse("{pas du json}");
+} catch (e) {
+  console.log(e.name);                   // SyntaxError
+}</code></pre></div>
+<h2>5. Les modules</h2>
+<p>Un vrai projet est découpé en fichiers. Chaque fichier <b>exporte</b> ce qu'il veut partager, et <b>importe</b> ce dont il a besoin.</p>
+<pre><code>// fichier geometrie.js
+export const PI = 3.14159;
+export function aireCercle(r) { return PI * r * r; }
+export default class Point { /* … */ }        // un export par défaut par fichier</code></pre>
+<pre><code>// fichier main.js
+import Point, { aireCercle, PI } from "./geometrie.js";
+console.log(aireCercle(2));</code></pre>
+<pre><code>&lt;script type="module" src="main.js"&gt;&lt;/script&gt;</code></pre>
+<p>Côté serveur, <b>Node.js</b> exécute JavaScript hors du navigateur ; <b>npm</b> installe les bibliothèques décrites dans <code>package.json</code> (<code>npm install</code>, <code>npm run …</code>).</p>
+<div class="box defi"><b>Défi : classes et héritage</b><p>Deux classes filles et une méthode redéfinie.</p><a class="defi-go" href="labo-js.html#m=js-heritage">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : le compte bancaire</b><p>Une classe complète.</p><a class="defi-go" href="labo-js.html#m=js-compte">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p><code>class Nom { constructor(…) { this.x = … } methode() { … } }</code> ; <code>new Nom(…)</code>. </p><p> <code>#attribut</code> est privé ; <code>get</code> crée un accesseur ; <code>static</code> une méthode de classe. </p><p> <code>class Fille extends Mere</code>, <code>super(…)</code> et <code>super.methode()</code>. </p><p> <code>try { … } catch (e) { … }</code>, <code>throw new Error("message")</code>. </p><p> <code>export</code> / <code>import</code> découpent le code en modules.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-js.html">Labo JavaScript</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "Quelle méthode est appelée par `new` ?",
+  "type": "qcm",
+  "options": [
+   "`new`",
+   "`constructor`",
+   "`create`",
+   "`init`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment déclare-t-on un attribut privé dans une classe JavaScript ?",
+  "type": "qcm",
+  "options": [
+   "Avec `_`",
+   "Avec le mot-clé private",
+   "Avec `#` devant son nom",
+   "C'est impossible"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel mot-clé fait hériter une classe ?",
+  "type": "qcm",
+  "options": [
+   "`:`",
+   "`implements`",
+   "`extends`",
+   "`inherits`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait `super(nom)` dans un constructeur ?",
+  "type": "qcm",
+  "options": [
+   "Rend la classe prioritaire",
+   "Appelle le constructeur de la classe mère",
+   "Supprime nom",
+   "Crée une copie"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que désigne `this` dans une méthode ?",
+  "type": "qcm",
+  "options": [
+   "La fenêtre du navigateur, toujours",
+   "La classe",
+   "L'objet sur lequel la méthode est appelée",
+   "Le fichier"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel mot-clé lève une erreur ?",
+  "type": "qcm",
+  "options": [
+   "`raise`",
+   "`error`",
+   "`catch`",
+   "`throw`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle propriété d'une erreur contient son texte ?",
+  "type": "qcm",
+  "options": [
+   "`message`",
+   "`what`",
+   "`text`",
+   "`info`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel mot-clé rend une fonction utilisable depuis un autre fichier ?",
+  "type": "qcm",
+  "options": [
+   "`export`",
+   "`global`",
+   "`share`",
+   "`public`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel outil installe les bibliothèques d'un projet Node.js ?",
+  "type": "qcm",
+  "options": [
+   "maven",
+   "apt",
+   "npm",
+   "pip"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi utiliser une fonction fléchée comme callback dans une méthode ?",
+  "type": "qcm",
+  "options": [
+   "Elle est plus rapide",
+   "Elle est privée",
+   "Elle conserve le this de la méthode",
+   "Elle ne peut pas lever d'erreur"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Une méthode static s'appelle sur la classe, pas sur un objet.",
+  "type": "vf",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Le bloc finally ne s'exécute que s'il y a eu une erreur.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Il s'exécute dans tous les cas."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel attribut de la balise script active les modules (type=\"___\") ?",
+  "type": "saisie",
+  "answers": [
+   "module"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque mot-clé à son rôle.",
+  "type": "associer",
+  "paires": [
+   [
+    "`class`",
+    "définir une classe"
+   ],
+   [
+    "`extends`",
+    "hériter"
+   ],
+   [
+    "`super`",
+    "accéder à la classe mère"
+   ],
+   [
+    "`static`",
+    "membre de la classe"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

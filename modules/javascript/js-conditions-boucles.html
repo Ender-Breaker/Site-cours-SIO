@@ -11,177 +11,259 @@
 </head>
 <body data-module="javascript" data-chapter="js-conditions-boucles">
 
-<!-- ============ COURS ============ -->
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/javascript.txt) -->
 <article id="cours">
 <div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
-<h2>1. Comparaisons</h2>
-<pre><code>5 === 5       // true  : égalité stricte (même valeur ET même type)
-5 === &quot;5&quot;     // false
-5 == &quot;5&quot;      // true  : égalité large (convertit) → à éviter
-5 !== 3       // true  : différent
-a &gt; b, a &lt;= b
-&amp;&amp; (et)   || (ou)   ! (non)</code></pre>
-<div class="box retenir"><b>Toujours === et !==</b><p>L'égalité large <code>==</code> fait des conversions surprenantes (<code>0 == ""</code> est vrai). Utilise <code>===</code>.</p></div>
-
-<h2>2. if, else if, else</h2>
-<pre><code>if (note &gt;= 16) {
-  console.log(&quot;Très bien&quot;);
+<h2>1. <code>if</code>, <code>else if</code>, <code>else</code></h2>
+<div class="essai" data-langue="js" data-stdin="15"><pre><code>const note = Number(lire());
+if (note &gt;= 16) {
+  console.log("Très bien");
 } else if (note &gt;= 10) {
-  console.log(&quot;Admis&quot;);
+  console.log("Admis");
 } else {
-  console.log(&quot;Recalé&quot;);
-}
-
-const statut = age &gt;= 18 ? &quot;majeur&quot; : &quot;mineur&quot;;   // opérateur ternaire</code></pre>
-<p>Valeurs « fausses » (falsy) : <code>false</code>, <code>0</code>, <code>""</code>, <code>null</code>, <code>undefined</code>, <code>NaN</code>. Tout le reste est vrai dans un <code>if</code>.</p>
-
-<h2>3. switch</h2>
-<pre><code>switch (jour) {
-  case &quot;samedi&quot;:
-  case &quot;dimanche&quot;:
-    console.log(&quot;Week-end&quot;);
-    break;
-  default:
-    console.log(&quot;Semaine&quot;);
-}</code></pre>
-
+  console.log("Recalé");
+}</code></pre></div>
+<h2>2. Comparer et combiner</h2>
+<table><tr><th>Opérateur</th><th>Sens</th></tr><tr><td><code>===</code> <code>!==</code></td><td>égal, différent (strict)</td></tr><tr><td><code>&lt;</code> <code>&lt;=</code> <code>&gt;</code> <code>&gt;=</code></td><td>comparaisons</td></tr><tr><td><code>&amp;&amp;</code></td><td>et</td></tr><tr><td><code>||</code></td><td>ou</td></tr><tr><td><code>!</code></td><td>non</td></tr></table>
+<div class="essai" data-langue="js"><pre><code>const age = 17, carte = true;
+console.log(age &gt;= 18 &amp;&amp; carte, age &gt;= 18 || carte, !carte);
+const pseudo = "";
+console.log(pseudo || "Invité");          // || renvoie la première valeur « vraie »
+console.log(null ?? "défaut", 0 ?? 5);    // ?? : seulement si null ou undefined
+console.log(age &gt;= 18 ? "majeur" : "mineur");   // ternaire</code></pre></div>
+<div class="box attention"><b>Les valeurs « fausses »</b><p>Dans une condition, <code>false</code>, <code>0</code>, <code>""</code>, <code>null</code>, <code>undefined</code> et <code>NaN</code> sont considérés comme faux. Tout le reste est vrai, y compris <code>"0"</code>, <code>[]</code> et <code>{}</code>.</p></div>
+<h2>3. <code>switch</code></h2>
+<div class="essai" data-langue="js" data-stdin="3"><pre><code>const jour = Number(lire());
+switch (jour) {
+  case 1: console.log("lundi"); break;
+  case 2: console.log("mardi"); break;
+  case 6:
+  case 7: console.log("repos"); break;
+  default: console.log("autre jour");
+}</code></pre></div>
 <h2>4. Les boucles</h2>
-<pre><code>for (let i = 1; i &lt;= 5; i++) {      // compteur
+<div class="essai" data-langue="js"><pre><code>let n = 1;
+while (n &lt; 100) n *= 2;                  // tant que
+console.log(n);
+
+for (let i = 1; i &lt;= 5; i++) console.log("tour", i);     // nombre de tours connu
+
+const fruits = ["pomme", "kiwi", "poire"];
+for (const f of fruits) console.log(f);                  // for…of : chaque VALEUR
+for (const c of "abc") console.log(c);                   // marche aussi sur une chaîne
+
+for (let i = 1; i &lt;= 10; i++) {
+  if (i % 2 === 0) continue;             // tour suivant
+  if (i &gt; 7) break;                      // sortie
   console.log(i);
-}
-
-let n = 100;
-while (n &gt; 1) {                      // tant que
-  n = n / 2;
-}
-
-const fruits = [&quot;pomme&quot;, &quot;kiwi&quot;];
-for (const f of fruits) {            // chaque élément d&#x27;un tableau
-  console.log(f);
-}</code></pre>
-<p><code>break</code> sort de la boucle, <code>continue</code> passe au tour suivant. Une boucle dont la condition ne devient jamais fausse bloque la page : le labo l'arrête au bout de quelques secondes.</p>
-<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-js.html">labo JavaScript</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+}</code></pre></div>
+<div class="box attention"><b><code>for…of</code>, pas <code>for…in</code></b><p><code>for…in</code> parcourt les <b>clés</b> (les indices, sous forme de texte) et réserve des surprises sur les tableaux. Pour un tableau, c'est toujours <code>for…of</code>.</p></div>
+<section class="tuto"><h3><small>Tutoriel</small>Le jeu du « plus ou moins »</h3>
+<div class="etape"><h4>Une seule comparaison</h4>
+<div class="essai" data-langue="js" data-stdin="50"><pre><code>const SECRET = 42;
+const essai = Number(lire());
+if (essai &lt; SECRET) console.log("Trop petit");
+else if (essai &gt; SECRET) console.log("Trop grand");
+else console.log("Gagné !");</code></pre></div>
+</div>
+<div class="etape"><h4>Répéter et compter</h4>
+<p><code>do … while</code> exécute le bloc au moins une fois.</p>
+<div class="essai" data-langue="js" data-stdin="50&#10;30&#10;42"><pre><code>const SECRET = 42;
+let essai, essais = 0;
+do {
+  essai = Number(lire());
+  essais++;
+  if (essai &lt; SECRET) console.log("Trop petit");
+  else if (essai &gt; SECRET) console.log("Trop grand");
+} while (essai !== SECRET);
+console.log(`Gagné ! Essais : ${essais}`);</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : la mention</b><p>Une cascade de <code>else if</code>.</p><a class="defi-go" href="labo-js.html#m=js-mention">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : FizzBuzz</b><p>Le grand classique des entretiens d'embauche.</p><a class="defi-go" href="labo-js.html#m=js-fizzbuzz">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : le PGCD</b><p>L'algorithme d'Euclide avec un <code>while</code>.</p><a class="defi-go" href="labo-js.html#m=js-pgcd">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p><code>if (…) { … } else if (…) { … } else { … }</code>. </p><p> <code>&amp;&amp;</code>, <code>||</code>, <code>!</code> ; <code>a || défaut</code> et <code>a ?? défaut</code>. </p><p> Valeurs fausses : <code>false</code>, <code>0</code>, <code>""</code>, <code>null</code>, <code>undefined</code>, <code>NaN</code>. </p><p> <code>for (let i = 0; i &lt; n; i++)</code>, <code>while</code>, <code>do … while</code>, <code>for (const x of tableau)</code>.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-js.html">Labo JavaScript</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
 </article>
 
 <!-- ============ EXERCICES ============ -->
 <script>
 window.EF_EXERCICES = [
  {
-  "type": "qcm",
   "niveau": "facile",
-  "q": "Quel opérateur teste l'égalité stricte ?",
+  "q": "Comment s'écrit « et » logique ?",
+  "type": "qcm",
   "options": [
-   "`=`",
-   "`==`",
-   "`===`",
-   "`!=`"
+   "`+`",
+   "`and`",
+   "`&and`",
+   "`&&`"
   ],
-  "answer": 2,
+  "answer": 3,
   "explication": ""
  },
  {
+  "niveau": "facile",
+  "q": "Comment s'écrit « différent » (strict) ?",
   "type": "qcm",
-  "niveau": "moyen",
-  "q": "Que vaut `5 == \"5\"` ?",
   "options": [
-   "true",
-   "false",
-   "Erreur",
-   "undefined"
+   "`!==`",
+   "`~=`",
+   "`<>`",
+   "`=!`"
   ],
   "answer": 0,
-  "explication": "== convertit : à éviter."
- },
- {
-  "type": "qcm",
-  "niveau": "moyen",
-  "q": "Que vaut `5 === \"5\"` ?",
-  "options": [
-   "true",
-   "false"
-  ],
-  "answer": 1,
-  "explication": "Types différents."
- },
- {
-  "type": "qcm",
-  "niveau": "facile",
-  "q": "Comment écrit-on « et » logique ?",
-  "options": [
-   "`and`",
-   "`&&`",
-   "`&`",
-   "`et`"
-  ],
-  "answer": 1,
   "explication": ""
  },
  {
-  "type": "qcm",
   "niveau": "moyen",
-  "q": "Laquelle de ces valeurs est « fausse » dans un if ?",
+  "q": "Combien de tours fait `for (let i = 0; i < 5; i++)` ?",
+  "type": "qcm",
+  "options": [
+   "5",
+   "4",
+   "6",
+   "Une infinité"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle boucle parcourt les valeurs d'un tableau ?",
+  "type": "qcm",
+  "options": [
+   "`for…of`",
+   "`foreach…in`",
+   "`for…in`",
+   "`loop`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que vaut `\"\" || \"Invité\"` ?",
+  "type": "qcm",
+  "options": [
+   "`true`",
+   "`\"Invité\"`",
+   "`false`",
+   "`\"\"`"
+  ],
+  "answer": 1,
+  "explication": "La chaîne vide est « fausse »."
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que vaut `0 ?? 5` ?",
+  "type": "qcm",
+  "options": [
+   "5",
+   "0",
+   "`false`",
+   "`null`"
+  ],
+  "answer": 1,
+  "explication": "?? ne remplace que null et undefined."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Laquelle de ces valeurs est considérée comme vraie ?",
+  "type": "qcm",
   "options": [
    "`\"0\"`",
-   "`[]`",
-   "`0`",
-   "`\"false\"`"
-  ],
-  "answer": 2,
-  "explication": "Le nombre 0 est falsy ; la chaîne \"0\" est vraie."
- },
- {
-  "type": "qcm",
-  "niveau": "moyen",
-  "q": "Que fait `x = age >= 18 ? \"majeur\" : \"mineur\"` ?",
-  "options": [
-   "Erreur de syntaxe",
-   "Choisit une valeur selon la condition",
-   "Compare deux textes",
-   "Crée une boucle"
-  ],
-  "answer": 1,
-  "explication": "Opérateur ternaire."
- },
- {
-  "type": "qcm",
-  "niveau": "facile",
-  "q": "Quelle boucle parcourt chaque élément d'un tableau ?",
-  "options": [
-   "`for (const x of t)`",
-   "`for (const x in t)` uniquement",
-   "`foreach t as x`",
-   "`loop t`"
+   "`null`",
+   "0",
+   "`\"\"`"
   ],
   "answer": 0,
-  "explication": ""
+  "explication": "Une chaîne non vide est vraie."
  },
  {
-  "type": "qcm",
   "niveau": "moyen",
-  "q": "Combien de fois s'exécute `for (let i = 0; i < 5; i++)` ?",
+  "q": "Que fait `break` ?",
+  "type": "qcm",
   "options": [
-   "4",
-   "5",
-   "6",
-   "Infini"
+   "Passe au tour suivant",
+   "Sort de la boucle",
+   "Arrête le programme",
+   "Rien"
   ],
   "answer": 1,
   "explication": ""
  },
  {
-  "type": "saisie",
   "niveau": "moyen",
-  "q": "Quel mot-clé sort immédiatement d'une boucle ?",
+  "q": "Que vaut `age >= 18 ? \"majeur\" : \"mineur\"` si age vaut 15 ?",
+  "type": "qcm",
+  "options": [
+   "`\"majeur\"`",
+   "`\"mineur\"`",
+   "15",
+   "`false`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que se passe-t-il sans `break` dans un `case` ?",
+  "type": "qcm",
+  "options": [
+   "Rien",
+   "Le switch s'arrête",
+   "Une erreur",
+   "L'exécution continue dans le cas suivant"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Un tableau vide `[]` est considéré comme faux dans une condition.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Tous les objets, même vides, sont vrais."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Une boucle do … while s'exécute au moins une fois.",
+  "type": "vf",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel mot-clé passe directement au tour de boucle suivant ?",
+  "type": "saisie",
   "answers": [
-   "break"
+   "continue"
   ],
   "explication": ""
  },
  {
-  "type": "vf",
   "niveau": "moyen",
-  "q": "Dans un switch, oublier break fait continuer l'exécution dans le cas suivant.",
-  "answer": true,
+  "q": "Associe chaque boucle à son usage.",
+  "type": "associer",
+  "paires": [
+   [
+    "`for`",
+    "nombre de tours connu"
+   ],
+   [
+    "`while`",
+    "tester avant chaque tour"
+   ],
+   [
+    "`do … while`",
+    "au moins un tour"
+   ],
+   [
+    "`for…of`",
+    "parcourir un tableau"
+   ]
+  ],
   "explication": ""
  }
 ];
@@ -189,6 +271,8 @@ window.EF_EXERCICES = [
 <script src="../../data/modules.js"></script>
 <script src="../../assets/app.js"></script>
 <script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
 <script src="../../assets/chapter.js"></script>
 </body>
 </html>

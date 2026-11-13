@@ -1,0 +1,1059 @@
+=== js-bases | JavaScript : variables, types et opérateurs | f
+**JavaScript** est le langage du web : c'est le seul que tous les navigateurs exécutent. Il anime les pages (menus, formulaires, jeux), et avec Node.js il tourne aussi côté serveur. Pour l'option SLAM, c'est un passage obligé.
+
+!info Comment suivre ce cours | Chaque bloc avec un bouton **Exécuter** tourne pour de vrai dans ton navigateur. Modifie le code et relance : c'est en changeant les exemples qu'on apprend.
+
+## 1. Afficher et commenter
+
+```run
+console.log("Bonjour !");
+console.log("Total :", 42, true);      // plusieurs valeurs, séparées par un espace
+// un commentaire sur une ligne
+/* un commentaire
+   sur plusieurs lignes */
+```
+
+## 2. Variables : `const` et `let`
+
+```run
+const prenom = "Léa";      // const : ne sera jamais réaffectée
+let score = 0;             // let : peut changer
+score = score + 10;
+score += 5;                // raccourci
+score++;                   // + 1
+console.log(prenom, score);
+let inconnue;              // déclarée sans valeur
+console.log(inconnue);     // undefined
+```
+
+!attention Jamais `var` | `var` est l'ancienne façon de déclarer : sa portée est la fonction entière et non le bloc, ce qui cause des bugs. Écris `const` par défaut, `let` quand la valeur doit changer.
+
+## 3. Les types
+
+| Type | Exemples |
+| `number` | `42`, `3.14` (un seul type pour entiers et décimaux) |
+| `string` | `"texte"`, `'texte'`, `` `texte ${variable}` `` |
+| `boolean` | `true`, `false` |
+| `undefined` | variable sans valeur |
+| `null` | « rien », mis volontairement |
+| `object` | objets `{…}`, tableaux `[…]` |
+| `function` | les fonctions sont des valeurs |
+
+```run
+console.log(typeof 42, typeof "42", typeof true, typeof undefined, typeof {}, typeof [], typeof console.log);
+console.log(7 / 2, Math.floor(7 / 2), 7 % 2, 2 ** 10);    // 3.5  3  1  1024
+console.log(0.1 + 0.2);                                    // 0.30000000000000004 : les décimaux sont approchés
+console.log((0.1 + 0.2).toFixed(2), Math.round(2.5), Math.max(3, 8));
+```
+
+## 4. Les chaînes et les gabarits
+
+```run
+const nom = "Léa", age = 17;
+console.log("Bonjour " + nom + ", tu as " + age + " ans");      // concaténation
+console.log(`Bonjour ${nom}, dans 10 ans tu auras ${age + 10} ans`);   // gabarit : accents graves
+console.log(nom.length, nom.toUpperCase(), nom[0], nom.includes("é"));
+```
+
+## 5. Convertir, et les pièges de `+`
+
+```run
+console.log("5" + 3);            // "53" : + avec une chaîne = concaténation
+console.log("5" - 3);            // 2    : - convertit en nombre
+console.log(Number("42") + 1, parseInt("42px"), Number("abc"));   // 43  42  NaN
+console.log(String(42).length, (42).toString(2));
+console.log(5 == "5", 5 === "5");    // true  false
+```
+
+!attention Toujours `===` | `==` convertit les types avant de comparer (`0 == ""` est vrai !). `===` compare la valeur **et** le type : utilise toujours `===` et `!==`.
+
+## 6. Lire une entrée
+
+Dans le labo, `lire()` renvoie la ligne suivante des entrées, sous forme de **texte**. Dans une page web, on lit plutôt la valeur d'un champ de formulaire (chapitre DOM).
+
+```run stdin=Léa|17
+const nom = lire();
+const age = Number(lire());        // conversion indispensable pour calculer
+console.log(`Bonjour ${nom}, dans 10 ans tu auras ${age + 10} ans.`);
+```
+
+!tuto Ton premier vrai programme : le ticket de caisse
+# Lire et convertir
+Sans `Number`, `prix * quantite` marcherait par chance, mais `prix + quantite` collerait les textes.
+```run stdin=4.5|3
+const prix = Number(lire());
+const quantite = Number(lire());
+console.log(prix, quantite, typeof prix);
+```
+# Calculer et mettre en forme
+```run stdin=4.5|3
+const TVA = 0.2;
+const prix = Number(lire());
+const quantite = Number(lire());
+const ht = prix * quantite;
+console.log(`HT : ${ht.toFixed(2)} €`);
+console.log(`TVA : ${(ht * TVA).toFixed(2)} €`);
+console.log(`TTC : ${(ht * (1 + TVA)).toFixed(2)} €`);
+```
+!fin
+
+!defi Défi : heures, minutes, secondes | `Math.floor` et le modulo. | js-conv
+!defi Défi : la moyenne | Convertis les entrées et affiche deux décimales. | js-moyenne
+
+!retenir À retenir | `const` par défaut, `let` si la valeur change, jamais `var`. ¶ Un seul type `number` ; `/` donne un décimal, `Math.floor` pour l'entier. ¶ Gabarits : `` `Bonjour ${nom}` ``. ¶ `"5" + 3` vaut `"53"` : convertis avec `Number(…)`. ¶ Toujours `===`.
+--- exos
+Q¤f¤Quel mot-clé déclare une variable qui ne sera pas réaffectée ?¤`const`;;`let`;;`var`;;`final`¤
+Q¤f¤Quelle instruction affiche dans la console ?¤`console.log(…)`;;`print(…)`;;`echo …`;;`System.out.println(…)`¤
+Q¤m¤Que vaut `"5" + 3` ?¤`"53"`;;8;;`NaN`;;Une erreur¤Avec une chaîne, + concatène.
+Q¤m¤Que vaut `"5" - 3` ?¤2;;`"53"`;;`NaN`;;`"2"`¤- convertit en nombre.
+Q¤m¤Que vaut `5 === "5"` ?¤`false`;;`true`;;`undefined`;;Une erreur¤=== compare aussi le type.
+Q¤m¤Que vaut `7 / 2` en JavaScript ?¤3.5;;3;;4;;1¤Pas de division entière automatique.
+Q¤m¤Que vaut une variable déclarée avec `let x;` ?¤`undefined`;;`null`;;0;;`""`¤
+Q¤m¤Dans un gabarit (texte entre accents graves), comment insère-t-on la variable nom ?¤`${nom}`;;`{nom}`;;`$nom`;;`%nom%`¤
+Q¤m¤Que renvoie `typeof []` ?¤`"object"`;;`"array"`;;`"list"`;;`"undefined"`¤Un tableau est un objet.
+Q¤m¤Que renvoie `Number("abc")` ?¤`NaN`;;0;;`undefined`;;Une erreur¤
+Q¤d¤Que vaut `0.1 + 0.2 === 0.3` ?¤`false`;;`true`;;`NaN`;;Une erreur¤Les décimaux sont stockés de façon approchée.
+V¤m¤JavaScript a deux types distincts pour les entiers et les décimaux.¤F¤Un seul type : number.
+V¤m¤On peut réaffecter une variable déclarée avec const.¤F¤
+S¤m¤Quelle fonction arrondit à l'entier inférieur (Math.___) ?¤floor;;Math.floor¤
+A¤m¤Associe chaque valeur à son type.¤`42`=>number;;`"42"`=>string;;`true`=>boolean;;`{}`=>object¤
+
+=== js-conditions-boucles | JavaScript : conditions et boucles | f
+## 1. `if`, `else if`, `else`
+
+```run stdin=15
+const note = Number(lire());
+if (note >= 16) {
+  console.log("Très bien");
+} else if (note >= 10) {
+  console.log("Admis");
+} else {
+  console.log("Recalé");
+}
+```
+
+## 2. Comparer et combiner
+
+| Opérateur | Sens |
+| `===` `!==` | égal, différent (strict) |
+| `<` `<=` `>` `>=` | comparaisons |
+| `&&` | et |
+| `||` | ou |
+| `!` | non |
+
+```run
+const age = 17, carte = true;
+console.log(age >= 18 && carte, age >= 18 || carte, !carte);
+const pseudo = "";
+console.log(pseudo || "Invité");          // || renvoie la première valeur « vraie »
+console.log(null ?? "défaut", 0 ?? 5);    // ?? : seulement si null ou undefined
+console.log(age >= 18 ? "majeur" : "mineur");   // ternaire
+```
+
+!attention Les valeurs « fausses » | Dans une condition, `false`, `0`, `""`, `null`, `undefined` et `NaN` sont considérés comme faux. Tout le reste est vrai, y compris `"0"`, `[]` et `{}`.
+
+## 3. `switch`
+
+```run stdin=3
+const jour = Number(lire());
+switch (jour) {
+  case 1: console.log("lundi"); break;
+  case 2: console.log("mardi"); break;
+  case 6:
+  case 7: console.log("repos"); break;
+  default: console.log("autre jour");
+}
+```
+
+## 4. Les boucles
+
+```run
+let n = 1;
+while (n < 100) n *= 2;                  // tant que
+console.log(n);
+
+for (let i = 1; i <= 5; i++) console.log("tour", i);     // nombre de tours connu
+
+const fruits = ["pomme", "kiwi", "poire"];
+for (const f of fruits) console.log(f);                  // for…of : chaque VALEUR
+for (const c of "abc") console.log(c);                   // marche aussi sur une chaîne
+
+for (let i = 1; i <= 10; i++) {
+  if (i % 2 === 0) continue;             // tour suivant
+  if (i > 7) break;                      // sortie
+  console.log(i);
+}
+```
+
+!attention `for…of`, pas `for…in` | `for…in` parcourt les **clés** (les indices, sous forme de texte) et réserve des surprises sur les tableaux. Pour un tableau, c'est toujours `for…of`.
+
+!tuto Le jeu du « plus ou moins »
+# Une seule comparaison
+```run stdin=50
+const SECRET = 42;
+const essai = Number(lire());
+if (essai < SECRET) console.log("Trop petit");
+else if (essai > SECRET) console.log("Trop grand");
+else console.log("Gagné !");
+```
+# Répéter et compter
+`do … while` exécute le bloc au moins une fois.
+```run stdin=50|30|42
+const SECRET = 42;
+let essai, essais = 0;
+do {
+  essai = Number(lire());
+  essais++;
+  if (essai < SECRET) console.log("Trop petit");
+  else if (essai > SECRET) console.log("Trop grand");
+} while (essai !== SECRET);
+console.log(`Gagné ! Essais : ${essais}`);
+```
+!fin
+
+!defi Défi : la mention | Une cascade de `else if`. | js-mention
+!defi Défi : FizzBuzz | Le grand classique des entretiens d'embauche. | js-fizzbuzz
+!defi Défi : le PGCD | L'algorithme d'Euclide avec un `while`. | js-pgcd
+
+!retenir À retenir | `if (…) { … } else if (…) { … } else { … }`. ¶ `&&`, `||`, `!` ; `a || défaut` et `a ?? défaut`. ¶ Valeurs fausses : `false`, `0`, `""`, `null`, `undefined`, `NaN`. ¶ `for (let i = 0; i < n; i++)`, `while`, `do … while`, `for (const x of tableau)`.
+--- exos
+Q¤f¤Comment s'écrit « et » logique ?¤`&&`;;`and`;;`&and`;;`+`¤
+Q¤f¤Comment s'écrit « différent » (strict) ?¤`!==`;;`<>`;;`~=`;;`=!`¤
+Q¤m¤Combien de tours fait `for (let i = 0; i < 5; i++)` ?¤5;;4;;6;;Une infinité¤
+Q¤m¤Quelle boucle parcourt les valeurs d'un tableau ?¤`for…of`;;`for…in`;;`foreach…in`;;`loop`¤
+Q¤m¤Que vaut `"" || "Invité"` ?¤`"Invité"`;;`""`;;`true`;;`false`¤La chaîne vide est « fausse ».
+Q¤d¤Que vaut `0 ?? 5` ?¤0;;5;;`null`;;`false`¤?? ne remplace que null et undefined.
+Q¤m¤Laquelle de ces valeurs est considérée comme vraie ?¤`"0"`;;0;;`""`;;`null`¤Une chaîne non vide est vraie.
+Q¤m¤Que fait `break` ?¤Sort de la boucle;;Passe au tour suivant;;Arrête le programme;;Rien¤
+Q¤m¤Que vaut `age >= 18 ? "majeur" : "mineur"` si age vaut 15 ?¤`"mineur"`;;`"majeur"`;;`false`;;15¤
+Q¤d¤Que se passe-t-il sans `break` dans un `case` ?¤L'exécution continue dans le cas suivant;;Une erreur;;Le switch s'arrête;;Rien¤
+V¤m¤Un tableau vide `[]` est considéré comme faux dans une condition.¤F¤Tous les objets, même vides, sont vrais.
+V¤m¤Une boucle do … while s'exécute au moins une fois.¤V¤
+S¤m¤Quel mot-clé passe directement au tour de boucle suivant ?¤continue¤
+A¤m¤Associe chaque boucle à son usage.¤`for`=>nombre de tours connu;;`while`=>tester avant chaque tour;;`do … while`=>au moins un tour;;`for…of`=>parcourir un tableau¤
+
+=== js-fonctions | JavaScript : les fonctions | m
+## 1. Déclarer et appeler
+
+```run
+function aire(largeur, hauteur) {
+  return largeur * hauteur;
+}
+function saluer(nom = "inconnu") {       // valeur par défaut
+  console.log(`Salut ${nom}`);
+}
+console.log(aire(3, 4));
+saluer("Léa");
+saluer();
+console.log(aire(3));                    // NaN : hauteur vaut undefined
+```
+
+Une fonction sans `return` renvoie `undefined`. Un argument manquant vaut `undefined`, un argument en trop est ignoré.
+
+## 2. Les fonctions fléchées
+
+```run
+const carre = (x) => x * x;              // return implicite
+const somme = (a, b) => {
+  const s = a + b;
+  return s;                              // avec des accolades, return explicite
+};
+const direBonjour = () => console.log("Bonjour");
+console.log(carre(7), somme(3, 4));
+direBonjour();
+```
+
+## 3. Les fonctions sont des valeurs
+
+On peut passer une fonction en argument : c'est un **callback**. Tout JavaScript repose là-dessus (événements, tableaux, requêtes réseau).
+
+```run
+function appliquer(f, valeur) {
+  return f(valeur);
+}
+console.log(appliquer(x => x * 2, 21));
+console.log(appliquer(Math.sqrt, 49));
+
+function repeter(n, action) {
+  for (let i = 1; i <= n; i++) action(i);
+}
+repeter(3, i => console.log(`tour ${i}`));
+```
+
+## 4. Portée et closures
+
+Une variable `let` ou `const` n'existe que dans son bloc `{ }`. Une fonction garde l'accès aux variables de l'endroit où elle a été créée : c'est une **closure**.
+
+```run
+function creerCompteur() {
+  let n = 0;                       // privée : inaccessible de l'extérieur
+  return () => {
+    n++;
+    return n;
+  };
+}
+const a = creerCompteur(), b = creerCompteur();
+console.log(a(), a(), a(), b());   // 1 2 3 1 : chaque compteur a son propre n
+```
+
+## 5. Paramètres du reste et décomposition
+
+```run
+function total(...nombres) {             // ...nombres : tous les arguments dans un tableau
+  let s = 0;
+  for (const n of nombres) s += n;
+  return s;
+}
+console.log(total(1, 2, 3), total());
+
+function minmax(t) { return [Math.min(...t), Math.max(...t)]; }   // ...t : étale le tableau
+const [mini, maxi] = minmax([12, 5, 19]);                         // décomposition
+console.log(mini, maxi);
+```
+
+## 6. Récursivité
+
+```run
+function factorielle(n) {
+  if (n <= 1) return 1;                  // cas d'arrêt
+  return n * factorielle(n - 1);
+}
+console.log(factorielle(5), factorielle(10));
+```
+
+!tuto Une boîte à outils de statistiques
+# Des fonctions simples
+```run
+const somme = t => { let s = 0; for (const v of t) s += v; return s; };
+const moyenne = t => somme(t) / t.length;
+console.log(moyenne([12, 5, 19, 8]));
+```
+# Une fonction qui reçoit un test
+La même fonction sert pour tous les critères : ajoute le tien.
+```run
+function compter(t, test) {
+  let n = 0;
+  for (const v of t) if (test(v)) n++;
+  return n;
+}
+const notes = [12, 5, 19, 8, 10];
+console.log(compter(notes, v => v >= 10));
+console.log(compter(notes, v => v % 2 === 0));
+```
+!fin
+
+!defi Défi : minimum et maximum | Renvoie deux valeurs dans un tableau. | js-minmax
+!defi Défi : la factorielle | Une fonction récursive. | js-factorielle
+
+!retenir À retenir | `function nom(params) { return … }` ou `const nom = (params) => …`. ¶ Paramètre manquant = `undefined` ; valeur par défaut avec `param = valeur`. ¶ Une fonction passée en argument est un callback. ¶ Closure : une fonction garde l'accès aux variables de son lieu de création. ¶ `...` rassemble ou étale ; `const [a, b] = tableau` décompose.
+--- exos
+Q¤f¤Quel mot-clé renvoie une valeur ?¤`return`;;`yield`;;`give`;;`result`¤
+Q¤m¤Que renvoie une fonction sans return ?¤`undefined`;;`null`;;0;;Une erreur¤
+Q¤m¤Quelle écriture est une fonction fléchée correcte ?¤`const f = (x) => x * 2;`;;`const f = x -> x * 2;`;;`function f => x * 2`;;`const f(x) = x * 2;`¤
+Q¤m¤Que vaut un paramètre non fourni à l'appel ?¤`undefined`;;`null`;;0;;Une erreur¤
+Q¤m¤Qu'est-ce qu'un callback ?¤Une fonction passée en argument à une autre fonction;;Une fonction récursive;;Une erreur;;Un rappel de variable¤
+Q¤m¤Qu'est-ce qu'une closure ?¤Une fonction qui garde l'accès aux variables de son lieu de création;;Une fonction sans paramètre;;Une fonction fermée à la modification;;Un objet¤
+Q¤d¤Après `const a = creerCompteur(), b = creerCompteur(); a(); a();`, que renvoie `b()` ?¤1;;3;;2;;`undefined`¤Chaque compteur a sa propre variable.
+Q¤m¤Que fait `...nombres` dans `function total(...nombres)` ?¤Rassemble tous les arguments dans un tableau;;Répète la fonction;;Crée trois paramètres;;Rien¤
+Q¤m¤Que fait `const [a, b] = [1, 2];` ?¤Affecte 1 à a et 2 à b;;Crée un tableau;;Compare deux tableaux;;Une erreur¤
+Q¤m¤Comment donner la valeur par défaut "inconnu" au paramètre nom ?¤`function f(nom = "inconnu")`;;`function f(nom || "inconnu")`;;`function f(nom: "inconnu")`;;`function f(default nom)`¤
+V¤m¤Une fonction fléchée avec accolades a besoin d'un return explicite.¤V¤
+V¤m¤Une variable let déclarée dans une fonction est visible à l'extérieur.¤F¤
+S¤m¤Que renvoie `Math.max(...[3, 9, 4])` ?¤9¤
+A¤m¤Associe l'écriture à son rôle.¤`x => x * 2`=>fonction fléchée;;`...args`=>paramètres du reste;;`p = 0`=>valeur par défaut;;`const [a, b] = t`=>décomposition¤
+
+=== js-tableaux-objets | JavaScript : tableaux et objets | m
+## 1. Les tableaux
+
+```run
+const fruits = ["pomme", "kiwi"];
+fruits.push("poire");                   // ajoute à la fin
+fruits.unshift("ananas");               // ajoute au début
+console.log(fruits, fruits.length, fruits[0]);
+console.log(fruits.pop(), fruits.shift());      // retire le dernier, le premier
+console.log(fruits.includes("kiwi"), fruits.indexOf("kiwi"), fruits.join(" | "));
+console.log(fruits.slice(0, 1));        // copie d'une portion
+console.log([3, 1, 2].reverse(), [5, 10, 9].sort((a, b) => a - b));
+console.log(fruits[99]);                // undefined : pas d'erreur
+```
+
+!attention Trier des nombres | Sans argument, `sort()` trie comme du **texte** : `[10, 9, 100].sort()` donne `[10, 100, 9]`. Pour des nombres : `sort((a, b) => a - b)`.
+
+## 2. `map`, `filter`, `reduce` et compagnie
+
+Ces méthodes reçoivent une fonction et renvoient un **nouveau** résultat, sans modifier le tableau.
+
+```run
+const prix = [12, 5, 30, 8];
+console.log(prix.map(p => p * 2));                    // transforme chaque élément
+console.log(prix.filter(p => p >= 10));               // garde selon un test
+console.log(prix.reduce((total, p) => total + p, 0)); // combine en une valeur
+console.log(prix.find(p => p > 10), prix.findIndex(p => p > 10));
+console.log(prix.some(p => p > 20), prix.every(p => p > 0));
+prix.forEach((p, i) => console.log(i, p));            // simple parcours
+console.log(prix.filter(p => p >= 10).map(p => p * 1.2).reduce((s, p) => s + p, 0));   // enchaînement
+```
+
+## 3. Les objets
+
+```run
+const joueur = { nom: "Léa", pv: 10, inventaire: ["épée"] };
+console.log(joueur.nom, joueur["pv"]);           // deux écritures
+joueur.niveau = 3;                               // ajoute une propriété
+delete joueur.pv;                                // supprime
+console.log(Object.keys(joueur), Object.values(joueur).length);
+for (const [cle, valeur] of Object.entries(joueur)) console.log(cle, "→", valeur);
+console.log("nom" in joueur, joueur.absent);     // true  undefined
+```
+
+## 4. Décomposition et copie
+
+```run
+const eleve = { nom: "Sam", note: 15, option: "SLAM" };
+const { nom, note } = eleve;                     // décomposition d'objet
+console.log(nom, note);
+const copie = { ...eleve, note: 18 };            // copie avec une propriété modifiée
+console.log(eleve.note, copie.note);
+const tous = [...[1, 2], ...[3, 4]];             // fusion de tableaux
+console.log(tous);
+const meme = eleve;                              // PAS une copie : même objet
+meme.note = 0;
+console.log(eleve.note);
+```
+
+## 5. Tableaux d'objets : le cas le plus courant
+
+```run
+const eleves = [
+  { nom: "Léa", note: 15, option: "SLAM" },
+  { nom: "Sam", note: 9, option: "SISR" },
+  { nom: "Zoé", note: 18, option: "SLAM" },
+];
+const admisSlam = eleves
+  .filter(e => e.option === "SLAM" && e.note >= 10)
+  .sort((a, b) => b.note - a.note)
+  .map(e => e.nom);
+console.log(admisSlam.join(", "));
+console.log(eleves.reduce((s, e) => s + e.note, 0) / eleves.length);
+```
+
+## 6. JSON
+
+**JSON** est le format texte d'échange de données du web. Il ressemble à un objet JavaScript, avec des guillemets doubles obligatoires.
+
+```run
+const texte = '{"nom":"Léa","notes":[12,15],"majeur":false}';
+const obj = JSON.parse(texte);                   // texte → objet
+console.log(obj.nom, obj.notes[1]);
+obj.notes.push(18);
+console.log(JSON.stringify(obj));                // objet → texte
+console.log(JSON.stringify(obj, null, 2));       // mis en forme
+```
+
+!tuto Un inventaire de magasin
+# Compter avec un objet
+```run
+const stock = {};
+function ajouter(nom, qte) { stock[nom] = (stock[nom] || 0) + qte; }
+ajouter("souris", 3); ajouter("clavier", 2); ajouter("souris", 5);
+console.log(stock);
+```
+# Afficher trié, trouver le maximum
+```run
+const stock = { souris: 8, clavier: 2, ecran: 4 };
+for (const nom of Object.keys(stock).sort()) console.log(`${nom} : ${stock[nom]}`);
+const [meilleur, qte] = Object.entries(stock).sort((a, b) => b[1] - a[1])[0];
+console.log(meilleur, qte);
+```
+!fin
+
+!defi Défi : map, filter, reduce | Sans boucle `for`. | js-mapfilter
+!defi Défi : l'inventaire | Un objet comme dictionnaire. | js-inventaire
+!defi Défi : lire du JSON | `JSON.parse` puis un parcours. | js-json
+
+!retenir À retenir | Tableau : `push`, `pop`, `length`, `includes`, `join`, `sort((a, b) => a - b)`. ¶ `map` transforme, `filter` garde, `reduce` combine, `find` cherche. ¶ Objet : `o.cle`, `Object.keys/values/entries`. ¶ `{ ...o }` et `[...t]` copient ; `const { a } = o` décompose. ¶ `JSON.parse` et `JSON.stringify`.
+--- exos
+Q¤f¤Quelle méthode ajoute un élément à la fin d'un tableau ?¤`push`;;`add`;;`append`;;`unshift`¤
+Q¤f¤Quelle propriété donne la taille d'un tableau ?¤`length`;;`size()`;;`count`;;`len`¤
+Q¤m¤Que renvoie `[10, 9, 100].sort()` ?¤`[10, 100, 9]`;;`[9, 10, 100]`;;`[100, 10, 9]`;;Une erreur¤Sans comparateur, le tri est alphabétique.
+Q¤m¤Que renvoie `[1, 2, 3].map(x => x * 2)` ?¤`[2, 4, 6]`;;`[1, 2, 3]`;;6;;`[2]`¤
+Q¤m¤Que renvoie `[1, 2, 3, 4].filter(x => x % 2 === 0)` ?¤`[2, 4]`;;`[1, 3]`;;2;;`[true, false]`¤
+Q¤m¤Que renvoie `[1, 2, 3].reduce((s, x) => s + x, 0)` ?¤6;;`[6]`;;0;;3¤
+Q¤m¤`joueur.nom` est équivalent à…¤`joueur["nom"]`;;`joueur[nom]`;;`joueur(nom)`;;`joueur->nom`¤
+Q¤m¤Que renvoie `Object.keys({ a: 1, b: 2 })` ?¤`["a", "b"]`;;`[1, 2]`;;2;;`{a, b}`¤
+Q¤d¤Après `const b = a; b.x = 5;` (a est un objet), que vaut `a.x` ?¤5;;Sa valeur d'avant;;`undefined`;;Une erreur¤a et b désignent le même objet.
+Q¤m¤Que fait `{ ...eleve, note: 18 }` ?¤Crée une copie avec note remplacée par 18;;Modifie eleve;;Fusionne deux tableaux;;Une erreur¤
+Q¤m¤Quelle fonction transforme un texte JSON en objet ?¤`JSON.parse`;;`JSON.stringify`;;`JSON.read`;;`Object.from`¤
+V¤m¤map modifie le tableau d'origine.¤F¤Il renvoie un nouveau tableau.
+V¤m¤En JSON, les clés doivent être entre guillemets doubles.¤V¤
+S¤m¤Quelle méthode de tableau renvoie le premier élément qui vérifie un test ?¤find¤
+A¤m¤Associe chaque méthode à son rôle.¤`map`=>transformer;;`filter`=>garder selon un test;;`reduce`=>combiner en une valeur;;`join`=>coller en une chaîne¤
+
+=== js-classes-modules | JavaScript : classes, modules et gestion des erreurs | m
+## 1. Les classes
+
+```run
+class Compte {
+  #solde = 0;                            // # : attribut privé
+  constructor(titulaire, solde = 0) {
+    this.titulaire = titulaire;
+    this.#solde = solde;
+  }
+  deposer(montant) {
+    if (montant > 0) this.#solde += montant;
+    return this;                         // permet d'enchaîner
+  }
+  retirer(montant) {
+    if (montant > this.#solde) return false;
+    this.#solde -= montant;
+    return true;
+  }
+  get solde() { return this.#solde; }    // accesseur : s'utilise comme une propriété
+  static creerVide(nom) { return new Compte(nom); }     // méthode de classe
+}
+const c = new Compte("Léa", 100);
+c.deposer(50).deposer(10);
+console.log(c.retirer(500), c.retirer(30), c.solde);
+console.log(Compte.creerVide("Sam").solde);
+```
+
+## 2. L'héritage
+
+```run
+class Animal {
+  constructor(nom) { this.nom = nom; }
+  crier() { return "..."; }
+  presenter() { return `${this.nom} fait ${this.crier()}`; }
+}
+class Chien extends Animal {
+  crier() { return "Ouaf"; }             // redéfinition
+}
+class Chiot extends Chien {
+  constructor(nom, age) {
+    super(nom);                          // appelle le constructeur de la mère
+    this.age = age;
+  }
+  crier() { return super.crier() + " (aigu)"; }
+}
+for (const a of [new Animal("Truc"), new Chien("Rex"), new Chiot("Pif", 1)]) {
+  console.log(a.presenter(), a instanceof Chien);
+}
+```
+
+## 3. Le piège de `this`
+
+`this` désigne l'objet **sur lequel la méthode est appelée**. Si on détache la méthode de son objet, `this` est perdu. Les fonctions fléchées, elles, gardent le `this` de l'endroit où elles sont écrites.
+
+```run
+class Minuteur {
+  constructor() { this.ticks = 0; }
+  tick() { this.ticks++; }
+  lancer(n) {
+    for (let i = 0; i < n; i++) [1].forEach(() => this.tick());   // fléchée : this conservé
+    return this.ticks;
+  }
+}
+console.log(new Minuteur().lancer(3));
+```
+
+## 4. Les erreurs : `try`, `catch`, `throw`
+
+```run
+function diviser(a, b) {
+  if (b === 0) throw new Error("division par zéro");
+  return a / b;
+}
+for (const b of [2, 0]) {
+  try {
+    console.log(diviser(10, b));
+  } catch (e) {
+    console.log("Erreur :", e.message);
+  } finally {
+    console.log("  (essai terminé)");
+  }
+}
+try {
+  JSON.parse("{pas du json}");
+} catch (e) {
+  console.log(e.name);                   // SyntaxError
+}
+```
+
+## 5. Les modules
+
+Un vrai projet est découpé en fichiers. Chaque fichier **exporte** ce qu'il veut partager, et **importe** ce dont il a besoin.
+
+```
+// fichier geometrie.js
+export const PI = 3.14159;
+export function aireCercle(r) { return PI * r * r; }
+export default class Point { /* … */ }        // un export par défaut par fichier
+```
+
+```
+// fichier main.js
+import Point, { aireCercle, PI } from "./geometrie.js";
+console.log(aireCercle(2));
+```
+
+```
+<script type="module" src="main.js"></script>
+```
+
+Côté serveur, **Node.js** exécute JavaScript hors du navigateur ; **npm** installe les bibliothèques décrites dans `package.json` (`npm install`, `npm run …`).
+
+!defi Défi : classes et héritage | Deux classes filles et une méthode redéfinie. | js-heritage
+!defi Défi : le compte bancaire | Une classe complète. | js-compte
+
+!retenir À retenir | `class Nom { constructor(…) { this.x = … } methode() { … } }` ; `new Nom(…)`. ¶ `#attribut` est privé ; `get` crée un accesseur ; `static` une méthode de classe. ¶ `class Fille extends Mere`, `super(…)` et `super.methode()`. ¶ `try { … } catch (e) { … }`, `throw new Error("message")`. ¶ `export` / `import` découpent le code en modules.
+--- exos
+Q¤m¤Quelle méthode est appelée par `new` ?¤`constructor`;;`init`;;`new`;;`create`¤
+Q¤m¤Comment déclare-t-on un attribut privé dans une classe JavaScript ?¤Avec `#` devant son nom;;Avec le mot-clé private;;Avec `_`;;C'est impossible¤
+Q¤m¤Quel mot-clé fait hériter une classe ?¤`extends`;;`inherits`;;`implements`;;`:`¤
+Q¤m¤Que fait `super(nom)` dans un constructeur ?¤Appelle le constructeur de la classe mère;;Crée une copie;;Rend la classe prioritaire;;Supprime nom¤
+Q¤m¤Que désigne `this` dans une méthode ?¤L'objet sur lequel la méthode est appelée;;La classe;;La fenêtre du navigateur, toujours;;Le fichier¤
+Q¤m¤Quel mot-clé lève une erreur ?¤`throw`;;`raise`;;`error`;;`catch`¤
+Q¤m¤Quelle propriété d'une erreur contient son texte ?¤`message`;;`text`;;`what`;;`info`¤
+Q¤m¤Quel mot-clé rend une fonction utilisable depuis un autre fichier ?¤`export`;;`public`;;`share`;;`global`¤
+Q¤m¤Quel outil installe les bibliothèques d'un projet Node.js ?¤npm;;pip;;apt;;maven¤
+Q¤d¤Pourquoi utiliser une fonction fléchée comme callback dans une méthode ?¤Elle conserve le this de la méthode;;Elle est plus rapide;;Elle est privée;;Elle ne peut pas lever d'erreur¤
+V¤m¤Une méthode static s'appelle sur la classe, pas sur un objet.¤V¤
+V¤m¤Le bloc finally ne s'exécute que s'il y a eu une erreur.¤F¤Il s'exécute dans tous les cas.
+S¤m¤Quel attribut de la balise script active les modules (type="___") ?¤module¤
+A¤m¤Associe chaque mot-clé à son rôle.¤`class`=>définir une classe;;`extends`=>hériter;;`super`=>accéder à la classe mère;;`static`=>membre de la classe¤
+
+=== js-dom-evenements | JavaScript : le DOM et les événements | m
+Le **DOM** (*Document Object Model*) est la représentation de la page HTML sous forme d'un arbre d'objets. Avec lui, JavaScript lit et modifie la page pendant qu'elle est affichée.
+
+!info Où tester ? | Ces exemples ont besoin d'une page HTML : essaie-les dans le [labo HTML / CSS](../slam/labo-html.html#libre) ou dans la console de ton navigateur (touche F12).
+
+## 1. Sélectionner des éléments
+
+```
+const titre = document.querySelector("h1");               // le premier qui correspond
+const bouton = document.querySelector("#valider");        // par id
+const cartes = document.querySelectorAll(".carte");       // tous (une liste)
+const champ = document.getElementById("email");           // ancienne méthode, toujours valable
+
+cartes.forEach(c => console.log(c.textContent));
+```
+
+`querySelector` accepte n'importe quel **sélecteur CSS** : `"nav a"`, `"ul > li.actif"`, `"input[type=email]"`. Il renvoie `null` si rien ne correspond.
+
+## 2. Modifier le contenu, les classes, les attributs
+
+```
+titre.textContent = "Nouveau titre";            // texte seul : sûr
+zone.innerHTML = "<b>gras</b>";                 // HTML : jamais avec une saisie d'utilisateur
+bouton.classList.add("actif");                  // classes CSS
+bouton.classList.remove("cache");
+bouton.classList.toggle("ouvert");              // ajoute si absente, retire sinon
+lien.setAttribute("href", "https://exemple.fr");
+image.src = "photo.jpg";
+bouton.disabled = true;
+titre.style.color = "crimson";                  // style direct (préfère une classe)
+```
+
+!attention `innerHTML` et la faille XSS | Insérer avec `innerHTML` un texte venant d'un utilisateur lui permet d'injecter du HTML et du JavaScript dans ta page (faille **XSS**). Pour afficher une saisie, utilise toujours `textContent`.
+
+## 3. Créer et supprimer des éléments
+
+```
+const li = document.createElement("li");
+li.textContent = "Nouvelle tâche";
+li.classList.add("tache");
+document.querySelector("#liste").append(li);    // ajoute à la fin
+
+li.remove();                                    // supprime
+```
+
+## 4. Les événements
+
+```
+bouton.addEventListener("click", () => {
+  compteur++;
+  affichage.textContent = compteur;
+});
+
+champ.addEventListener("input", (e) => {        // à chaque frappe
+  apercu.textContent = e.target.value;          // e.target : l'élément concerné
+});
+
+formulaire.addEventListener("submit", (e) => {
+  e.preventDefault();                           // empêche le rechargement de la page
+  const email = champ.value.trim();
+  if (!email.includes("@")) erreur.textContent = "Adresse invalide";
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") fenetre.classList.add("cache");
+});
+```
+
+| Événement | Se produit quand |
+| `click` | on clique |
+| `input` | la valeur d'un champ change |
+| `submit` | un formulaire est envoyé |
+| `keydown` / `keyup` | une touche est enfoncée / relâchée |
+| `mouseover` | la souris survole |
+| `DOMContentLoaded` | la page est prête |
+
+## 5. La délégation d'événements
+
+Plutôt qu'un écouteur par ligne d'une liste, un seul sur le parent suffit : l'événement **remonte** dans l'arbre.
+
+```
+liste.addEventListener("click", (e) => {
+  const bouton = e.target.closest("button.supprimer");
+  if (bouton) bouton.closest("li").remove();    // marche aussi pour les lignes ajoutées plus tard
+});
+```
+
+## 6. Garder des données : `localStorage`
+
+```
+localStorage.setItem("theme", "sombre");
+const theme = localStorage.getItem("theme");                 // null si absent
+localStorage.setItem("taches", JSON.stringify(taches));      // un objet : passer par JSON
+const taches = JSON.parse(localStorage.getItem("taches") || "[]");
+```
+
+!tuto Une liste de tâches complète
+# Le HTML
+```
+<form id="form"><input id="champ" required><button>Ajouter</button></form>
+<ul id="liste"></ul>
+```
+# Ajouter une tâche
+```
+const form = document.querySelector("#form");
+const champ = document.querySelector("#champ");
+const liste = document.querySelector("#liste");
+
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const li = document.createElement("li");
+  li.textContent = champ.value.trim();          // textContent : pas de faille XSS
+  liste.append(li);
+  champ.value = "";
+});
+```
+# Cocher et supprimer
+Un seul écouteur sur la liste, grâce à la délégation.
+```
+liste.addEventListener("click", (e) => {
+  if (e.target.tagName === "LI") e.target.classList.toggle("fait");
+});
+liste.addEventListener("dblclick", (e) => {
+  if (e.target.tagName === "LI") e.target.remove();
+});
+```
+!fin
+
+!retenir À retenir | `document.querySelector(sélecteur CSS)` et `querySelectorAll`. ¶ `textContent` pour le texte, `classList.add/remove/toggle` pour les classes. ¶ `createElement` + `append` pour ajouter, `remove()` pour supprimer. ¶ `element.addEventListener("click", fonction)` ; `e.preventDefault()` sur un formulaire. ¶ Jamais `innerHTML` avec une saisie d'utilisateur.
+--- exos
+Q¤m¤Que signifie DOM ?¤Document Object Model;;Data Object Method;;Dynamic Output Mode;;Document Order Map¤
+Q¤m¤Quelle méthode sélectionne le premier élément correspondant à un sélecteur CSS ?¤`document.querySelector`;;`document.select`;;`document.find`;;`document.get`¤
+Q¤m¤Que renvoie `querySelector` si aucun élément ne correspond ?¤`null`;;`undefined`;;Une erreur;;Un tableau vide¤
+Q¤m¤Quelle propriété modifie le texte d'un élément sans interpréter de HTML ?¤`textContent`;;`innerHTML`;;`value`;;`html`¤
+Q¤m¤Quelle méthode ajoute ou retire une classe selon qu'elle est présente ?¤`classList.toggle`;;`classList.add`;;`classList.switch`;;`className.flip`¤
+Q¤m¤Quelle méthode associe une fonction à un événement ?¤`addEventListener`;;`onEvent`;;`listen`;;`attach`¤
+Q¤m¤À quoi sert `e.preventDefault()` dans un écouteur de submit ?¤À empêcher l'envoi et le rechargement de la page;;À arrêter le script;;À vider le formulaire;;À afficher une erreur¤
+Q¤m¤Quel événement se déclenche à chaque modification d'un champ ?¤`input`;;`click`;;`submit`;;`load`¤
+Q¤d¤Pourquoi éviter `innerHTML` avec une saisie d'utilisateur ?¤Risque d'injection de code (faille XSS);;C'est trop lent;;Cela efface la page;;Ce n'est pas standard¤
+Q¤d¤Qu'est-ce que la délégation d'événements ?¤Écouter sur un parent les événements de ses enfants;;Confier un événement à un serveur;;Supprimer un écouteur;;Écouter deux événements à la fois¤
+Q¤m¤Comment enregistrer un tableau dans localStorage ?¤En le convertissant avec `JSON.stringify`;;Directement;;Avec `localStorage.push`;;C'est impossible¤
+V¤m¤`querySelectorAll` renvoie tous les éléments correspondants.¤V¤
+S¤m¤Quelle méthode de document crée un nouvel élément ?¤createElement¤
+A¤m¤Associe chaque événement à son déclencheur.¤`click`=>un clic;;`submit`=>l'envoi d'un formulaire;;`keydown`=>une touche enfoncée;;`input`=>une frappe dans un champ¤
+
+=== js-async-api | JavaScript : asynchrone, fetch et API REST | d
+Charger des données depuis un serveur prend du temps. JavaScript ne **bloque** pas la page en attendant : il lance l'opération, continue, et reprend quand la réponse arrive. C'est la programmation **asynchrone**.
+
+!info Où tester ? | Ces exemples font des requêtes réseau : essaie-les dans la console de ton navigateur (F12), sur n'importe quelle page.
+
+## 1. Le principe
+
+```
+console.log("1 : avant");
+setTimeout(() => console.log("3 : une seconde plus tard"), 1000);   // n'attend pas
+console.log("2 : après");
+```
+
+L'ordre d'affichage est 1, 2, 3 : `setTimeout` programme la fonction et rend la main tout de suite.
+
+## 2. Les promesses
+
+Une **promesse** (`Promise`) représente un résultat qui arrivera plus tard. Elle est *en attente*, puis *tenue* (avec une valeur) ou *rompue* (avec une erreur).
+
+```
+fetch("https://api.exemple.fr/produits")           // renvoie une promesse
+  .then(reponse => reponse.json())                  // quand la réponse arrive
+  .then(produits => console.log(produits.length))   // quand le JSON est lu
+  .catch(erreur => console.log("Échec :", erreur.message));
+```
+
+## 3. `async` / `await` : la forme à utiliser
+
+`await` met la fonction en pause jusqu'à ce que la promesse soit tenue, **sans bloquer la page**. Le code se lit de haut en bas, comme du code ordinaire.
+
+```
+async function chargerProduits() {
+  try {
+    const reponse = await fetch("https://api.exemple.fr/produits");
+    if (!reponse.ok) throw new Error("HTTP " + reponse.status);   // 404, 500…
+    const produits = await reponse.json();
+    return produits;
+  } catch (e) {
+    console.log("Impossible de charger :", e.message);
+    return [];
+  }
+}
+
+const produits = await chargerProduits();     // await : seulement dans une fonction async ou un module
+```
+
+!attention `fetch` ne rejette pas sur une erreur 404 | `fetch` n'échoue que si le réseau est coupé. Une réponse 404 ou 500 est une réponse « réussie » : il faut tester `reponse.ok` (ou `reponse.status`) soi-même.
+
+## 4. Les API REST
+
+Une **API REST** expose des données par des URL, manipulées avec les **méthodes HTTP**. Les échanges se font en JSON.
+
+| Méthode | Action | Exemple |
+| `GET` | lire | `GET /produits`, `GET /produits/12` |
+| `POST` | créer | `POST /produits` |
+| `PUT` / `PATCH` | modifier | `PUT /produits/12` |
+| `DELETE` | supprimer | `DELETE /produits/12` |
+
+| Code | Signification |
+| `200` `201` `204` | succès, créé, succès sans contenu |
+| `400` | requête incorrecte |
+| `401` `403` | non authentifié, interdit |
+| `404` | introuvable |
+| `500` | erreur du serveur |
+
+```
+const reponse = await fetch("https://api.exemple.fr/produits", {
+  method: "POST",
+  headers: { "Content-Type": "application/json", "Authorization": "Bearer " + jeton },
+  body: JSON.stringify({ nom: "Souris", prix: 19.9 }),
+});
+const cree = await reponse.json();
+console.log(reponse.status, cree.id);
+```
+
+## 5. Plusieurs requêtes en parallèle
+
+```
+const [clients, produits] = await Promise.all([
+  fetch("/api/clients").then(r => r.json()),
+  fetch("/api/produits").then(r => r.json()),
+]);
+```
+
+`Promise.all` lance tout en même temps et attend que **toutes** les promesses soient tenues.
+
+!tuto Afficher les données d'une API dans une page
+# Charger
+```
+async function charger() {
+  const reponse = await fetch("https://jsonplaceholder.typicode.com/users");
+  if (!reponse.ok) throw new Error("HTTP " + reponse.status);
+  return reponse.json();
+}
+```
+# Afficher
+`textContent` et `createElement` : aucune faille XSS possible, même si l'API renvoie du HTML.
+```
+function afficher(utilisateurs) {
+  const liste = document.querySelector("#liste");
+  liste.replaceChildren();                       // vide la liste
+  for (const u of utilisateurs) {
+    const li = document.createElement("li");
+    li.textContent = `${u.name} — ${u.email}`;
+    liste.append(li);
+  }
+}
+```
+# Relier, avec un état de chargement et les erreurs
+```
+const etat = document.querySelector("#etat");
+etat.textContent = "Chargement…";
+try {
+  afficher(await charger());
+  etat.textContent = "";
+} catch (e) {
+  etat.textContent = "Impossible de charger les données : " + e.message;
+}
+```
+!fin
+
+!retenir À retenir | Asynchrone : l'opération est lancée, le code continue, le résultat arrive plus tard. ¶ `const r = await fetch(url); const data = await r.json();` dans une fonction `async`, entouré de `try / catch`. ¶ Tester `r.ok` : `fetch` ne rejette pas sur un 404. ¶ REST : `GET` lire, `POST` créer, `PUT` modifier, `DELETE` supprimer ; échanges en JSON. ¶ `Promise.all` pour paralléliser.
+--- exos
+Q¤m¤Que renvoie `fetch(url)` ?¤Une promesse;;Les données directement;;Du texte;;Un tableau¤
+Q¤m¤Quel mot-clé attend le résultat d'une promesse ?¤`await`;;`wait`;;`then`;;`sleep`¤
+Q¤m¤Où peut-on utiliser `await` ?¤Dans une fonction `async` (ou un module);;Partout;;Uniquement dans une boucle;;Uniquement dans un callback¤
+Q¤m¤Quelle méthode lit le corps d'une réponse au format JSON ?¤`reponse.json()`;;`reponse.parse()`;;`JSON.read(reponse)`;;`reponse.body`¤
+Q¤d¤`fetch` rejette-t-il sa promesse sur une réponse 404 ?¤Non : il faut tester `reponse.ok`;;Oui, toujours;;Seulement en HTTPS;;Seulement avec POST¤
+Q¤m¤Quelle méthode HTTP sert à créer une ressource ?¤`POST`;;`GET`;;`DELETE`;;`READ`¤
+Q¤m¤Quelle méthode HTTP sert à lire une ressource ?¤`GET`;;`POST`;;`PUT`;;`FETCH`¤
+Q¤m¤Que signifie le code HTTP 404 ?¤Ressource introuvable;;Succès;;Erreur du serveur;;Accès interdit¤
+Q¤m¤Que signifie le code HTTP 500 ?¤Erreur du serveur;;Introuvable;;Succès;;Non authentifié¤
+Q¤m¤Dans quel format les API REST échangent-elles le plus souvent ?¤JSON;;CSV;;PDF;;HTML¤
+Q¤d¤Dans quel ordre s'affichent : log("A"); setTimeout(() => log("B"), 0); log("C"); ?¤A, C, B;;A, B, C;;B, A, C;;C, B, A¤Le callback passe après le code en cours.
+Q¤m¤Que fait `Promise.all([p1, p2])` ?¤Attend que toutes les promesses soient tenues;;Attend la première;;Annule les promesses;;Les exécute l'une après l'autre¤
+V¤m¤`await` bloque toute la page pendant l'attente.¤F¤Seule la fonction async est en pause.
+S¤m¤Quel bloc attrape l'erreur d'un await qui échoue (try / ___) ?¤catch¤
+A¤m¤Associe chaque méthode HTTP à son action.¤`GET`=>lire;;`POST`=>créer;;`PUT`=>modifier;;`DELETE`=>supprimer¤
+
+=== js-jeu-canvas | JavaScript : créer un jeu dans le navigateur | d
+Un jeu, c'est une boucle : **lire les entrées, mettre à jour, dessiner**, soixante fois par seconde.
+
+!info Où tester ? | Les jeux se lancent dans le [bac à sable du labo](labo-js.html#libre). Copie les exemples et modifie-les.
+
+## 1. La boucle de jeu du labo
+
+```
+let x = 50;
+
+function setup() { x = 50; }             // une fois au démarrage (facultatif)
+
+function update(dt) {                    // la logique, 60 fois par seconde
+  if (touche("droite")) x += 200 * dt;   // 200 pixels par seconde
+}
+
+function draw() {                        // l'affichage
+  effacer("black");
+  rect(x, 140, 40, 40, "gold");
+}
+```
+
+| Fonction | Rôle |
+| `effacer(c)` | remplit l'écran (480 × 320) |
+| `rect(x, y, l, h, c)`, `cercle(x, y, r, c)`, `ligne(x1, y1, x2, y2, c)` | formes |
+| `texte(t, x, y, taille, c)` | texte |
+| `touche("gauche")` / `toucheAppuyee("espace")` | touche maintenue / appuyée à cette image |
+| `sourisX()`, `sourisY()`, `clic()` | souris |
+| `hasard(a, b)`, `LARGEUR`, `HAUTEUR` | entier au hasard, 480, 320 |
+
+L'origine est en haut à gauche ; `y` augmente vers le bas.
+
+## 2. Le vrai canvas du navigateur
+
+Dans une page web, on dessine dans une balise `<canvas>` et on demande au navigateur de rappeler la fonction à chaque image :
+
+```
+const canvas = document.querySelector("canvas");
+const ctx = canvas.getContext("2d");
+const touches = {};
+addEventListener("keydown", e => touches[e.key] = true);
+addEventListener("keyup", e => touches[e.key] = false);
+
+let x = 50, avant = performance.now();
+function boucle(maintenant) {
+  const dt = (maintenant - avant) / 1000;          // secondes écoulées
+  avant = maintenant;
+  if (touches["ArrowRight"]) x += 200 * dt;         // update
+  ctx.fillStyle = "black";                          // draw
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "gold";
+  ctx.fillRect(x, 140, 40, 40);
+  requestAnimationFrame(boucle);                    // image suivante
+}
+requestAnimationFrame(boucle);
+```
+
+## 3. Gravité, collisions, listes d'objets
+
+```run
+const collision = (a, b) => a.x < b.x + b.l && b.x < a.x + a.l && a.y < b.y + b.h && b.y < a.y + a.h;
+const joueur = { x: 100, y: 100, l: 40, h: 40 };
+console.log(collision(joueur, { x: 130, y: 120, l: 20, h: 20 }));   // true
+console.log(collision(joueur, { x: 300, y: 100, l: 20, h: 20 }));   // false
+
+let tirs = [{ y: 50 }, { y: -5 }, { y: 120 }];
+tirs.forEach(t => t.y -= 10);
+tirs = tirs.filter(t => t.y >= 0);                 // retire ceux qui sont sortis
+console.log(tirs.length);
+```
+
+```
+let y = 260, vy = 0;
+function update(dt) {
+  if (toucheAppuyee("espace") && y >= 260) vy = -9;    // saut seulement au sol
+  vy += 0.5;                                           // gravité
+  y = Math.min(260, y + vy);
+  if (y === 260) vy = 0;
+}
+```
+
+## 4. Les états du jeu
+
+```
+let etat = "menu", score = 0;
+function update(dt) {
+  if (etat === "menu" && toucheAppuyee("espace")) { etat = "jeu"; score = 0; }
+  else if (etat === "jeu") { score++; if (score > 300) etat = "fin"; }
+  else if (etat === "fin" && toucheAppuyee("espace")) etat = "menu";
+}
+function draw() {
+  effacer("black");
+  if (etat === "menu") texte("ESPACE pour jouer", 130, 150, 24, "white");
+  else if (etat === "jeu") texte("Score : " + score, 16, 16, 24, "white");
+  else texte("Perdu ! Score : " + score, 130, 150, 24, "tomato");
+}
+```
+
+!tuto Un jeu complet : esquive les météorites
+# Le vaisseau
+```
+const vaisseau = { x: 220, y: 280, l: 40, h: 20 };
+function update(dt) {
+  if (touche("gauche")) vaisseau.x -= 5;
+  if (touche("droite")) vaisseau.x += 5;
+  vaisseau.x = Math.max(0, Math.min(LARGEUR - vaisseau.l, vaisseau.x));
+}
+function draw() {
+  effacer("#0d0e1a");
+  rect(vaisseau.x, vaisseau.y, vaisseau.l, vaisseau.h, "deepskyblue");
+}
+```
+# Les météorites, la collision, le score
+```
+let meteores = [], chrono = 0, perdu = false, score = 0;
+const collision = (a, b) => a.x < b.x + b.l && b.x < a.x + a.l && a.y < b.y + b.h && b.y < a.y + a.h;
+
+// dans update, avant le reste :
+  if (perdu) return;
+  score++; chrono++;
+  if (chrono % 30 === 0) meteores.push({ x: hasard(0, LARGEUR - 20), y: -20, l: 20, h: 20 });
+  for (const m of meteores) { m.y += 3; if (collision(vaisseau, m)) perdu = true; }
+  meteores = meteores.filter(m => m.y < HAUTEUR);
+
+// dans draw :
+  for (const m of meteores) rect(m.x, m.y, m.l, m.h, "orange");
+  texte("Score : " + score, 12, 12, 20, "white");
+  if (perdu) texte("PERDU", 190, 140, 36, "tomato");
+```
+!fin
+
+!defi Défi : la pluie d'étoiles | Un tableau d'objets mis à jour à chaque image. | js-etoiles
+!defi Défi : tirer des projectiles | Créer et supprimer des objets en cours de partie. | js-tir
+!defi Défi : attrape les fruits | Un mini-jeu complet avec score. | js-fruits
+
+!retenir À retenir | `update(dt)` pour la logique, `draw()` pour l'affichage, 60 fois par seconde. ¶ Dans une vraie page : `<canvas>`, `getContext("2d")`, `requestAnimationFrame`. ¶ Multiplier les vitesses par `dt`. ¶ Collision de rectangles : chevauchement sur les deux axes. ¶ `tableau.filter(…)` pour retirer des objets.
+--- exos
+Q¤f¤Quelle fonction contient la logique du jeu dans le labo ?¤`update`;;`draw`;;`setup`;;`main`¤
+Q¤f¤Combien de fois par seconde update et draw sont-elles appelées ?¤60;;1;;10;;1000¤
+Q¤m¤Que représente `dt` ?¤Le temps écoulé depuis l'image précédente;;Le numéro de l'image;;La date;;La taille de l'écran¤
+Q¤m¤Quelle balise HTML sert de surface de dessin ?¤`<canvas>`;;`<draw>`;;`<game>`;;`<svg-game>`¤
+Q¤m¤Quelle fonction du navigateur demande à être rappelé à la prochaine image ?¤`requestAnimationFrame`;;`setInterval`;;`nextFrame`;;`loop`¤
+Q¤m¤Où se trouve le point (0, 0) ?¤En haut à gauche;;En bas à gauche;;Au centre;;En bas à droite¤
+Q¤m¤Quelle fonction utiliser pour un saut déclenché une fois par appui ?¤`toucheAppuyee`;;`touche`;;`clic`;;`hasard`¤
+Q¤m¤Comment retirer d'un tableau les objets sortis de l'écran ?¤`tirs = tirs.filter(t => t.y >= 0)`;;`tirs.delete()`;;`tirs.clear()`;;`tirs.pop()`¤
+Q¤d¤Deux rectangles sont en collision quand…¤ils se chevauchent sur l'axe x ET sur l'axe y;;ils se chevauchent sur un seul axe;;ils ont la même taille;;leurs coins coïncident¤
+Q¤d¤Pourquoi multiplier une vitesse par dt ?¤Pour un mouvement identique sur toutes les machines;;Pour ralentir le jeu;;Pour éviter les collisions;;Pour arrondir¤
+V¤m¤draw doit contenir les déplacements et le calcul du score.¤F¤draw ne fait qu'afficher.
+V¤m¤Quand y augmente, l'objet descend.¤V¤
+S¤m¤Quelle constante contient la largeur de l'écran du labo ?¤LARGEUR¤
+A¤m¤Associe chaque fonction à son rôle.¤`effacer`=>remplir l'écran;;`cercle`=>dessiner un disque;;`hasard`=>entier aléatoire;;`texte`=>écrire à l'écran¤

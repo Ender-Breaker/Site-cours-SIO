@@ -11,192 +11,290 @@
 </head>
 <body data-module="javascript" data-chapter="js-jeu-canvas">
 
-<!-- ============ COURS ============ -->
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/javascript.txt) -->
 <article id="cours">
 <div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
-<p>Un jeu vidéo, c'est une <b>boucle</b> qui tourne environ 60 fois par seconde : lire les entrées (clavier, souris), mettre à jour l'état du jeu (positions, score), puis dessiner l'image. Dans le navigateur, on dessine dans une balise <code>&lt;canvas&gt;</code>.</p>
+<p>Un jeu, c'est une boucle : <b>lire les entrées, mettre à jour, dessiner</b>, soixante fois par seconde.</p>
+<div class="box"><b>Où tester ?</b><p>Les jeux se lancent dans le <a href="labo-js.html#libre">bac à sable du labo</a>. Copie les exemples et modifie-les.</p></div>
+<h2>1. La boucle de jeu du labo</h2>
+<pre><code>let x = 50;
 
-<h2>1. Le canvas</h2>
-<pre><code>&lt;canvas id=&quot;jeu&quot; width=&quot;480&quot; height=&quot;320&quot;&gt;&lt;/canvas&gt;
-&lt;script&gt;
-  const ctx = document.getElementById(&quot;jeu&quot;).getContext(&quot;2d&quot;);
-  ctx.fillStyle = &quot;red&quot;;
-  ctx.fillRect(40, 40, 100, 60);           // rectangle plein
-  ctx.beginPath();
-  ctx.arc(300, 160, 40, 0, Math.PI * 2);   // cercle
-  ctx.fill();
-  ctx.font = &quot;24px sans-serif&quot;;
-  ctx.fillText(&quot;Mon jeu&quot;, 20, 280);
-&lt;/script&gt;</code></pre>
-<p>L'origine (0, 0) est en <b>haut à gauche</b> ; x augmente vers la droite, y vers le <b>bas</b>.</p>
+function setup() { x = 50; }             // une fois au démarrage (facultatif)
 
-<h2>2. La boucle de jeu</h2>
-<pre><code>let x = 0, dernier = 0;
+function update(dt) {                    // la logique, 60 fois par seconde
+  if (touche("droite")) x += 200 * dt;   // 200 pixels par seconde
+}
+
+function draw() {                        // l'affichage
+  effacer("black");
+  rect(x, 140, 40, 40, "gold");
+}</code></pre>
+<table><tr><th>Fonction</th><th>Rôle</th></tr><tr><td><code>effacer(c)</code></td><td>remplit l'écran (480 × 320)</td></tr><tr><td><code>rect(x, y, l, h, c)</code>, <code>cercle(x, y, r, c)</code>, <code>ligne(x1, y1, x2, y2, c)</code></td><td>formes</td></tr><tr><td><code>texte(t, x, y, taille, c)</code></td><td>texte</td></tr><tr><td><code>touche("gauche")</code> / <code>toucheAppuyee("espace")</code></td><td>touche maintenue / appuyée à cette image</td></tr><tr><td><code>sourisX()</code>, <code>sourisY()</code>, <code>clic()</code></td><td>souris</td></tr><tr><td><code>hasard(a, b)</code>, <code>LARGEUR</code>, <code>HAUTEUR</code></td><td>entier au hasard, 480, 320</td></tr></table>
+<p>L'origine est en haut à gauche ; <code>y</code> augmente vers le bas.</p>
+<h2>2. Le vrai canvas du navigateur</h2>
+<p>Dans une page web, on dessine dans une balise <code>&lt;canvas&gt;</code> et on demande au navigateur de rappeler la fonction à chaque image :</p>
+<pre><code>const canvas = document.querySelector("canvas");
+const ctx = canvas.getContext("2d");
 const touches = {};
-document.addEventListener(&quot;keydown&quot;, e =&gt; touches[e.key] = true);
-document.addEventListener(&quot;keyup&quot;,   e =&gt; touches[e.key] = false);
+addEventListener("keydown", e =&gt; touches[e.key] = true);
+addEventListener("keyup", e =&gt; touches[e.key] = false);
 
-function boucle(t) {
-  const dt = (t - dernier) / 1000;   // secondes écoulées depuis l&#x27;image précédente
-  dernier = t;
-  if (touches[&quot;ArrowRight&quot;]) x += 200 * dt;   // 200 pixels par seconde
-  ctx.fillStyle = &quot;black&quot;;
-  ctx.fillRect(0, 0, 480, 320);               // effacer
-  ctx.fillStyle = &quot;blue&quot;;
-  ctx.fillRect(x, 140, 40, 40);               // dessiner
-  requestAnimationFrame(boucle);              // image suivante
+let x = 50, avant = performance.now();
+function boucle(maintenant) {
+  const dt = (maintenant - avant) / 1000;          // secondes écoulées
+  avant = maintenant;
+  if (touches["ArrowRight"]) x += 200 * dt;         // update
+  ctx.fillStyle = "black";                          // draw
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "gold";
+  ctx.fillRect(x, 140, 40, 40);
+  requestAnimationFrame(boucle);                    // image suivante
 }
 requestAnimationFrame(boucle);</code></pre>
-<div class="box retenir"><b>update puis draw</b><p>Sépare toujours la <b>mise à jour</b> (logique, déplacements, collisions) du <b>dessin</b>. Le labo fait exactement ça : il appelle ta fonction <code>update(dt)</code> puis <code>draw()</code> à chaque image, et fournit des fonctions simples (<code>rect</code>, <code>cercle</code>, <code>texte</code>, <code>touche</code>…) qui utilisent le canvas pour toi.</p></div>
+<h2>3. Gravité, collisions, listes d'objets</h2>
+<div class="essai" data-langue="js"><pre><code>const collision = (a, b) =&gt; a.x &lt; b.x + b.l &amp;&amp; b.x &lt; a.x + a.l &amp;&amp; a.y &lt; b.y + b.h &amp;&amp; b.y &lt; a.y + a.h;
+const joueur = { x: 100, y: 100, l: 40, h: 40 };
+console.log(collision(joueur, { x: 130, y: 120, l: 20, h: 20 }));   // true
+console.log(collision(joueur, { x: 300, y: 100, l: 20, h: 20 }));   // false
 
-<h2>3. Mouvement et rebonds</h2>
-<pre><code>let x = 100, y = 80, vx = 4, vy = 3;     // position et vitesse
+let tirs = [{ y: 50 }, { y: -5 }, { y: 120 }];
+tirs.forEach(t =&gt; t.y -= 10);
+tirs = tirs.filter(t =&gt; t.y &gt;= 0);                 // retire ceux qui sont sortis
+console.log(tirs.length);</code></pre></div>
+<pre><code>let y = 260, vy = 0;
 function update(dt) {
-  x += vx;  y += vy;
-  if (x &lt; 12 || x &gt; LARGEUR - 12) vx = -vx;   // rebond horizontal
-  if (y &lt; 12 || y &gt; HAUTEUR - 12) vy = -vy;   // rebond vertical
+  if (toucheAppuyee("espace") &amp;&amp; y &gt;= 260) vy = -9;    // saut seulement au sol
+  vy += 0.5;                                           // gravité
+  y = Math.min(260, y + vy);
+  if (y === 260) vy = 0;
 }</code></pre>
-<p>La <b>gravité</b> est une accélération : à chaque image on ajoute une petite valeur à la vitesse verticale (<code>vy += 0.6</code>), puis la vitesse à la position.</p>
-
-<h2>4. Les collisions</h2>
-<pre><code>// deux rectangles se touchent si…
-function collision(a, b) {
-  return a.x &lt; b.x + b.l &amp;&amp; a.x + a.l &gt; b.x &amp;&amp;
-         a.y &lt; b.y + b.h &amp;&amp; a.y + a.h &gt; b.y;
+<h2>4. Les états du jeu</h2>
+<pre><code>let etat = "menu", score = 0;
+function update(dt) {
+  if (etat === "menu" &amp;&amp; toucheAppuyee("espace")) { etat = "jeu"; score = 0; }
+  else if (etat === "jeu") { score++; if (score &gt; 300) etat = "fin"; }
+  else if (etat === "fin" &amp;&amp; toucheAppuyee("espace")) etat = "menu";
 }
-// un cercle et un point : distance au centre
-const touche = Math.hypot(px - cx, py - cy) &lt; r;</code></pre>
+function draw() {
+  effacer("black");
+  if (etat === "menu") texte("ESPACE pour jouer", 130, 150, 24, "white");
+  else if (etat === "jeu") texte("Score : " + score, 16, 16, 24, "white");
+  else texte("Perdu ! Score : " + score, 130, 150, 24, "tomato");
+}</code></pre>
+<section class="tuto"><h3><small>Tutoriel</small>Un jeu complet : esquive les météorites</h3>
+<div class="etape"><h4>Le vaisseau</h4>
+<pre><code>const vaisseau = { x: 220, y: 280, l: 40, h: 20 };
+function update(dt) {
+  if (touche("gauche")) vaisseau.x -= 5;
+  if (touche("droite")) vaisseau.x += 5;
+  vaisseau.x = Math.max(0, Math.min(LARGEUR - vaisseau.l, vaisseau.x));
+}
+function draw() {
+  effacer("#0d0e1a");
+  rect(vaisseau.x, vaisseau.y, vaisseau.l, vaisseau.h, "deepskyblue");
+}</code></pre>
+</div>
+<div class="etape"><h4>Les météorites, la collision, le score</h4>
+<pre><code>let meteores = [], chrono = 0, perdu = false, score = 0;
+const collision = (a, b) =&gt; a.x &lt; b.x + b.l &amp;&amp; b.x &lt; a.x + a.l &amp;&amp; a.y &lt; b.y + b.h &amp;&amp; b.y &lt; a.y + a.h;
 
-<h2>5. Organiser un jeu</h2>
-<ul>
-<li>Un objet par entité : <code>{ x, y, vx, vy }</code> ; un tableau pour les ennemis ou les projectiles.</li>
-<li>Des états : <code>"menu"</code>, <code>"jeu"</code>, <code>"perdu"</code> ; <code>update</code> et <code>draw</code> font un <code>switch</code> dessus.</li>
-<li><code>Math.random()</code> pour l'aléatoire (le labo propose <code>hasard(a, b)</code>).</li>
-</ul>
-<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-js.html">labo JavaScript</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+// dans update, avant le reste :
+  if (perdu) return;
+  score++; chrono++;
+  if (chrono % 30 === 0) meteores.push({ x: hasard(0, LARGEUR - 20), y: -20, l: 20, h: 20 });
+  for (const m of meteores) { m.y += 3; if (collision(vaisseau, m)) perdu = true; }
+  meteores = meteores.filter(m =&gt; m.y &lt; HAUTEUR);
+
+// dans draw :
+  for (const m of meteores) rect(m.x, m.y, m.l, m.h, "orange");
+  texte("Score : " + score, 12, 12, 20, "white");
+  if (perdu) texte("PERDU", 190, 140, 36, "tomato");</code></pre>
+</div>
+</section>
+<div class="box defi"><b>Défi : la pluie d'étoiles</b><p>Un tableau d'objets mis à jour à chaque image.</p><a class="defi-go" href="labo-js.html#m=js-etoiles">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : tirer des projectiles</b><p>Créer et supprimer des objets en cours de partie.</p><a class="defi-go" href="labo-js.html#m=js-tir">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : attrape les fruits</b><p>Un mini-jeu complet avec score.</p><a class="defi-go" href="labo-js.html#m=js-fruits">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p><code>update(dt)</code> pour la logique, <code>draw()</code> pour l'affichage, 60 fois par seconde. </p><p> Dans une vraie page : <code>&lt;canvas&gt;</code>, <code>getContext("2d")</code>, <code>requestAnimationFrame</code>. </p><p> Multiplier les vitesses par <code>dt</code>. </p><p> Collision de rectangles : chevauchement sur les deux axes. </p><p> <code>tableau.filter(…)</code> pour retirer des objets.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-js.html">Labo JavaScript</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
 </article>
 
 <!-- ============ EXERCICES ============ -->
 <script>
 window.EF_EXERCICES = [
  {
-  "type": "qcm",
   "niveau": "facile",
-  "q": "Dans un canvas, où se trouve le point (0, 0) ?",
-  "options": [
-   "Au centre",
-   "En bas à gauche",
-   "En haut à gauche",
-   "En haut à droite"
-  ],
-  "answer": 2,
-  "explication": ""
- },
- {
+  "q": "Quelle fonction contient la logique du jeu dans le labo ?",
   "type": "qcm",
-  "niveau": "moyen",
-  "q": "Quand y augmente, l'objet se déplace…",
   "options": [
-   "vers le haut",
-   "vers le bas",
-   "vers la droite",
-   "vers la gauche"
+   "`draw`",
+   "`update`",
+   "`setup`",
+   "`main`"
   ],
   "answer": 1,
   "explication": ""
  },
  {
+  "niveau": "facile",
+  "q": "Combien de fois par seconde update et draw sont-elles appelées ?",
   "type": "qcm",
-  "niveau": "moyen",
-  "q": "Quelle fonction demande au navigateur d'appeler la prochaine image ?",
   "options": [
-   "`setInterval`",
-   "`requestAnimationFrame`",
-   "`nextFrame`",
-   "`ctx.loop`"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "qcm",
-  "niveau": "moyen",
-  "q": "Pourquoi efface-t-on l'écran à chaque image ?",
-  "options": [
-   "Pour économiser la mémoire",
-   "Sinon les anciennes positions restent dessinées",
-   "C'est obligatoire en JavaScript",
-   "Pour le son"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "qcm",
-  "niveau": "moyen",
-  "q": "Comment faire rebondir une balle sur un bord vertical ?",
-  "options": [
-   "`x = 0`",
-   "`vx = -vx`",
-   "`vy = 0`",
-   "`x = -x`"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "qcm",
-  "niveau": "difficile",
-  "q": "Pourquoi multiplier une vitesse par dt (temps écoulé) ?",
-  "options": [
-   "Pour que le jeu aille à la même vitesse quel que soit le nombre d'images par seconde",
-   "Pour ralentir le jeu",
-   "C'est obligatoire",
-   "Pour la gravité uniquement"
+   "60",
+   "1",
+   "1000",
+   "10"
   ],
   "answer": 0,
   "explication": ""
  },
  {
-  "type": "qcm",
   "niveau": "moyen",
-  "q": "Comment simuler la gravité ?",
+  "q": "Que représente `dt` ?",
+  "type": "qcm",
   "options": [
-   "Diminuer y à chaque image",
-   "Ajouter une petite valeur à vy à chaque image",
-   "Mettre vy à 0",
-   "Inverser vx"
+   "La date",
+   "La taille de l'écran",
+   "Le temps écoulé depuis l'image précédente",
+   "Le numéro de l'image"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle balise HTML sert de surface de dessin ?",
+  "type": "qcm",
+  "options": [
+   "`<svg-game>`",
+   "`<game>`",
+   "`<draw>`",
+   "`<canvas>`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle fonction du navigateur demande à être rappelé à la prochaine image ?",
+  "type": "qcm",
+  "options": [
+   "`setInterval`",
+   "`requestAnimationFrame`",
+   "`loop`",
+   "`nextFrame`"
   ],
   "answer": 1,
   "explication": ""
  },
  {
-  "type": "vf",
   "niveau": "moyen",
-  "q": "update() calcule les nouvelles positions et draw() dessine l'image.",
+  "q": "Où se trouve le point (0, 0) ?",
+  "type": "qcm",
+  "options": [
+   "En haut à gauche",
+   "En bas à gauche",
+   "Au centre",
+   "En bas à droite"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle fonction utiliser pour un saut déclenché une fois par appui ?",
+  "type": "qcm",
+  "options": [
+   "`toucheAppuyee`",
+   "`clic`",
+   "`hasard`",
+   "`touche`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment retirer d'un tableau les objets sortis de l'écran ?",
+  "type": "qcm",
+  "options": [
+   "`tirs.pop()`",
+   "`tirs.clear()`",
+   "`tirs.delete()`",
+   "`tirs = tirs.filter(t => t.y >= 0)`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Deux rectangles sont en collision quand…",
+  "type": "qcm",
+  "options": [
+   "ils ont la même taille",
+   "leurs coins coïncident",
+   "ils se chevauchent sur l'axe x ET sur l'axe y",
+   "ils se chevauchent sur un seul axe"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi multiplier une vitesse par dt ?",
+  "type": "qcm",
+  "options": [
+   "Pour un mouvement identique sur toutes les machines",
+   "Pour arrondir",
+   "Pour éviter les collisions",
+   "Pour ralentir le jeu"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "draw doit contenir les déplacements et le calcul du score.",
+  "type": "vf",
+  "answer": false,
+  "explication": "draw ne fait qu'afficher."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quand y augmente, l'objet descend.",
+  "type": "vf",
   "answer": true,
   "explication": ""
  },
  {
-  "type": "qcm",
-  "niveau": "difficile",
-  "q": "Deux rectangles a et b se chevauchent si…",
-  "options": [
-   "a.x === b.x",
-   "a.x < b.x + b.l && a.x + a.l > b.x && a.y < b.y + b.h && a.y + a.h > b.y",
-   "a.x + a.y > b.x + b.y",
-   "a.l === b.l"
+  "niveau": "moyen",
+  "q": "Quelle constante contient la largeur de l'écran du labo ?",
+  "type": "saisie",
+  "answers": [
+   "LARGEUR"
   ],
-  "answer": 1,
   "explication": ""
  },
  {
-  "type": "saisie",
   "niveau": "moyen",
-  "q": "Quelle balise HTML sert de surface de dessin pour un jeu ?",
-  "answers": [
-   "canvas",
-   "<canvas>"
+  "q": "Associe chaque fonction à son rôle.",
+  "type": "associer",
+  "paires": [
+   [
+    "`effacer`",
+    "remplir l'écran"
+   ],
+   [
+    "`cercle`",
+    "dessiner un disque"
+   ],
+   [
+    "`hasard`",
+    "entier aléatoire"
+   ],
+   [
+    "`texte`",
+    "écrire à l'écran"
+   ]
   ],
   "explication": ""
  }
@@ -205,6 +303,8 @@ window.EF_EXERCICES = [
 <script src="../../data/modules.js"></script>
 <script src="../../assets/app.js"></script>
 <script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
 <script src="../../assets/chapter.js"></script>
 </body>
 </html>

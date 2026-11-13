@@ -11,171 +11,273 @@
 </head>
 <body data-module="javascript" data-chapter="js-fonctions">
 
-<!-- ============ COURS ============ -->
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/javascript.txt) -->
 <article id="cours">
 <div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
-<h2>1. Déclarer une fonction</h2>
-<pre><code>function carre(x) {
-  return x * x;
+<h2>1. Déclarer et appeler</h2>
+<div class="essai" data-langue="js"><pre><code>function aire(largeur, hauteur) {
+  return largeur * hauteur;
 }
-carre(5);   // 25
-
-function saluer(nom = &quot;inconnu&quot;) {   // paramètre par défaut
-  console.log(&quot;Salut &quot; + nom);
-}</code></pre>
-<p>Une fonction sans <code>return</code> renvoie <code>undefined</code>. Les paramètres sont des variables locales.</p>
-
-<h2>2. Fonctions fléchées</h2>
-<pre><code>const carre = (x) =&gt; x * x;            // return implicite
+function saluer(nom = "inconnu") {       // valeur par défaut
+  console.log(`Salut ${nom}`);
+}
+console.log(aire(3, 4));
+saluer("Léa");
+saluer();
+console.log(aire(3));                    // NaN : hauteur vaut undefined</code></pre></div>
+<p>Une fonction sans <code>return</code> renvoie <code>undefined</code>. Un argument manquant vaut <code>undefined</code>, un argument en trop est ignoré.</p>
+<h2>2. Les fonctions fléchées</h2>
+<div class="essai" data-langue="js"><pre><code>const carre = (x) =&gt; x * x;              // return implicite
 const somme = (a, b) =&gt; {
   const s = a + b;
-  return s;
+  return s;                              // avec des accolades, return explicite
 };
-const direBonjour = () =&gt; console.log(&quot;Bonjour&quot;);</code></pre>
-
-<h2>3. La portée</h2>
-<pre><code>let total = 0;              // globale
-function ajouter(n) {
-  const double = n * 2;     // locale : n&#x27;existe que dans la fonction
-  total += double;
+const direBonjour = () =&gt; console.log("Bonjour");
+console.log(carre(7), somme(3, 4));
+direBonjour();</code></pre></div>
+<h2>3. Les fonctions sont des valeurs</h2>
+<p>On peut passer une fonction en argument : c'est un <b>callback</b>. Tout JavaScript repose là-dessus (événements, tableaux, requêtes réseau).</p>
+<div class="essai" data-langue="js"><pre><code>function appliquer(f, valeur) {
+  return f(valeur);
 }
-if (true) {
-  let a = 1;                // n&#x27;existe que dans ce bloc { }
-}</code></pre>
+console.log(appliquer(x =&gt; x * 2, 21));
+console.log(appliquer(Math.sqrt, 49));
 
-<h2>4. Les fonctions sont des valeurs</h2>
-<p>On peut ranger une fonction dans une variable, la passer en paramètre à une autre (un <b>callback</b>) ou la renvoyer :</p>
-<pre><code>function repeter(n, action) {
-  for (let i = 0; i &lt; n; i++) action(i);
+function repeter(n, action) {
+  for (let i = 1; i &lt;= n; i++) action(i);
 }
-repeter(3, (i) =&gt; console.log(&quot;Tour &quot; + i));
+repeter(3, i =&gt; console.log(`tour ${i}`));</code></pre></div>
+<h2>4. Portée et closures</h2>
+<p>Une variable <code>let</code> ou <code>const</code> n'existe que dans son bloc <code>{ }</code>. Une fonction garde l'accès aux variables de l'endroit où elle a été créée : c'est une <b>closure</b>.</p>
+<div class="essai" data-langue="js"><pre><code>function creerCompteur() {
+  let n = 0;                       // privée : inaccessible de l'extérieur
+  return () =&gt; {
+    n++;
+    return n;
+  };
+}
+const a = creerCompteur(), b = creerCompteur();
+console.log(a(), a(), a(), b());   // 1 2 3 1 : chaque compteur a son propre n</code></pre></div>
+<h2>5. Paramètres du reste et décomposition</h2>
+<div class="essai" data-langue="js"><pre><code>function total(...nombres) {             // ...nombres : tous les arguments dans un tableau
+  let s = 0;
+  for (const n of nombres) s += n;
+  return s;
+}
+console.log(total(1, 2, 3), total());
 
-setTimeout(() =&gt; console.log(&quot;1 seconde plus tard&quot;), 1000);
-bouton.addEventListener(&quot;click&quot;, () =&gt; alert(&quot;Clic !&quot;));</code></pre>
-<div class="box retenir"><b>Pourquoi des fonctions ?</b><p>Ne pas répéter le même code, lui donner un nom qui explique ce qu'il fait, et pouvoir le tester séparément. Une bonne fonction fait <b>une seule chose</b>.</p></div>
-
-<h2>5. La récursivité</h2>
-<pre><code>function factorielle(n) {
-  if (n &lt;= 1) return 1;          // cas de base : indispensable
+function minmax(t) { return [Math.min(...t), Math.max(...t)]; }   // ...t : étale le tableau
+const [mini, maxi] = minmax([12, 5, 19]);                         // décomposition
+console.log(mini, maxi);</code></pre></div>
+<h2>6. Récursivité</h2>
+<div class="essai" data-langue="js"><pre><code>function factorielle(n) {
+  if (n &lt;= 1) return 1;                  // cas d'arrêt
   return n * factorielle(n - 1);
-}</code></pre><div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-js.html">labo JavaScript</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
+}
+console.log(factorielle(5), factorielle(10));</code></pre></div>
+<section class="tuto"><h3><small>Tutoriel</small>Une boîte à outils de statistiques</h3>
+<div class="etape"><h4>Des fonctions simples</h4>
+<div class="essai" data-langue="js"><pre><code>const somme = t =&gt; { let s = 0; for (const v of t) s += v; return s; };
+const moyenne = t =&gt; somme(t) / t.length;
+console.log(moyenne([12, 5, 19, 8]));</code></pre></div>
+</div>
+<div class="etape"><h4>Une fonction qui reçoit un test</h4>
+<p>La même fonction sert pour tous les critères : ajoute le tien.</p>
+<div class="essai" data-langue="js"><pre><code>function compter(t, test) {
+  let n = 0;
+  for (const v of t) if (test(v)) n++;
+  return n;
+}
+const notes = [12, 5, 19, 8, 10];
+console.log(compter(notes, v =&gt; v &gt;= 10));
+console.log(compter(notes, v =&gt; v % 2 === 0));</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : minimum et maximum</b><p>Renvoie deux valeurs dans un tableau.</p><a class="defi-go" href="labo-js.html#m=js-minmax">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : la factorielle</b><p>Une fonction récursive.</p><a class="defi-go" href="labo-js.html#m=js-factorielle">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p><code>function nom(params) { return … }</code> ou <code>const nom = (params) =&gt; …</code>. </p><p> Paramètre manquant = <code>undefined</code> ; valeur par défaut avec <code>param = valeur</code>. </p><p> Une fonction passée en argument est un callback. </p><p> Closure : une fonction garde l'accès aux variables de son lieu de création. </p><p> <code>...</code> rassemble ou étale ; <code>const [a, b] = tableau</code> décompose.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-js.html">Labo JavaScript</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>
 </article>
 
 <!-- ============ EXERCICES ============ -->
 <script>
 window.EF_EXERCICES = [
  {
-  "type": "qcm",
   "niveau": "facile",
-  "q": "Que renvoie une fonction sans return ?",
-  "options": [
-   "0",
-   "null",
-   "undefined",
-   "Une erreur"
-  ],
-  "answer": 2,
-  "explication": ""
- },
- {
+  "q": "Quel mot-clé renvoie une valeur ?",
   "type": "qcm",
-  "niveau": "facile",
-  "q": "Que vaut `carre(4)` si `const carre = x => x * x;` ?",
   "options": [
-   "8",
-   "16",
-   "x*x",
-   "undefined"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
-  "type": "qcm",
-  "niveau": "moyen",
-  "q": "Qu'est-ce qu'un callback ?",
-  "options": [
-   "Une fonction passée en paramètre à une autre",
-   "Une variable globale",
-   "Une erreur",
-   "Un type de boucle"
+   "`return`",
+   "`yield`",
+   "`give`",
+   "`result`"
   ],
   "answer": 0,
   "explication": ""
  },
  {
-  "type": "qcm",
   "niveau": "moyen",
-  "q": "Une variable déclarée avec let dans une fonction est…",
+  "q": "Que renvoie une fonction sans return ?",
+  "type": "qcm",
   "options": [
-   "globale",
-   "locale à la fonction (et au bloc)",
-   "visible partout",
-   "constante"
+   "Une erreur",
+   "`null`",
+   "0",
+   "`undefined`"
   ],
-  "answer": 1,
+  "answer": 3,
   "explication": ""
  },
  {
-  "type": "qcm",
   "niveau": "moyen",
-  "q": "Que fait `function f(nom = \"inconnu\")` ?",
+  "q": "Quelle écriture est une fonction fléchée correcte ?",
+  "type": "qcm",
   "options": [
-   "Oblige à passer nom",
-   "Donne une valeur par défaut à nom",
-   "Crée une constante",
-   "Erreur"
+   "`const f = (x) => x * 2;`",
+   "`const f = x -> x * 2;`",
+   "`function f => x * 2`",
+   "`const f(x) = x * 2;`"
   ],
-  "answer": 1,
+  "answer": 0,
   "explication": ""
  },
  {
+  "niveau": "moyen",
+  "q": "Que vaut un paramètre non fourni à l'appel ?",
   "type": "qcm",
+  "options": [
+   "Une erreur",
+   "`null`",
+   "0",
+   "`undefined`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'un callback ?",
+  "type": "qcm",
+  "options": [
+   "Une fonction passée en argument à une autre fonction",
+   "Une erreur",
+   "Une fonction récursive",
+   "Un rappel de variable"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'une closure ?",
+  "type": "qcm",
+  "options": [
+   "Un objet",
+   "Une fonction sans paramètre",
+   "Une fonction qui garde l'accès aux variables de son lieu de création",
+   "Une fonction fermée à la modification"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
   "niveau": "difficile",
-  "q": "Que manque-t-il à une fonction récursive qui ne s'arrête jamais ?",
-  "options": [
-   "Un return",
-   "Un cas de base",
-   "Une boucle",
-   "Un paramètre"
-  ],
-  "answer": 1,
-  "explication": ""
- },
- {
+  "q": "Après `const a = creerCompteur(), b = creerCompteur(); a(); a();`, que renvoie `b()` ?",
   "type": "qcm",
-  "niveau": "moyen",
-  "q": "`setTimeout(f, 1000)` exécute f…",
   "options": [
-   "1000 fois",
-   "après 1 seconde",
-   "toutes les secondes",
-   "immédiatement"
+   "1",
+   "3",
+   "2",
+   "`undefined`"
   ],
-  "answer": 1,
+  "answer": 0,
+  "explication": "Chaque compteur a sa propre variable."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait `...nombres` dans `function total(...nombres)` ?",
+  "type": "qcm",
+  "options": [
+   "Rassemble tous les arguments dans un tableau",
+   "Rien",
+   "Répète la fonction",
+   "Crée trois paramètres"
+  ],
+  "answer": 0,
   "explication": ""
  },
  {
-  "type": "vf",
   "niveau": "moyen",
-  "q": "Une fonction fléchée à une seule expression renvoie sa valeur sans écrire return.",
+  "q": "Que fait `const [a, b] = [1, 2];` ?",
+  "type": "qcm",
+  "options": [
+   "Affecte 1 à a et 2 à b",
+   "Une erreur",
+   "Crée un tableau",
+   "Compare deux tableaux"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment donner la valeur par défaut \"inconnu\" au paramètre nom ?",
+  "type": "qcm",
+  "options": [
+   "`function f(default nom)`",
+   "`function f(nom: \"inconnu\")`",
+   "`function f(nom || \"inconnu\")`",
+   "`function f(nom = \"inconnu\")`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Une fonction fléchée avec accolades a besoin d'un return explicite.",
+  "type": "vf",
   "answer": true,
   "explication": ""
  },
  {
+  "niveau": "moyen",
+  "q": "Une variable let déclarée dans une fonction est visible à l'extérieur.",
+  "type": "vf",
+  "answer": false,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que renvoie `Math.max(...[3, 9, 4])` ?",
   "type": "saisie",
-  "niveau": "moyen",
-  "q": "Écris la flèche qui sépare les paramètres du corps d'une fonction fléchée.",
   "answers": [
-   "=>"
+   "9"
   ],
   "explication": ""
  },
  {
-  "type": "vf",
-  "niveau": "facile",
-  "q": "En JavaScript, on peut ranger une fonction dans une variable.",
-  "answer": true,
+  "niveau": "moyen",
+  "q": "Associe l'écriture à son rôle.",
+  "type": "associer",
+  "paires": [
+   [
+    "`x",
+    "x * 2`",
+    "fonction fléchée"
+   ],
+   [
+    "`...args`",
+    "paramètres du reste"
+   ],
+   [
+    "`p = 0`",
+    "valeur par défaut"
+   ],
+   [
+    "`const [a, b] = t`",
+    "décomposition"
+   ]
+  ],
   "explication": ""
  }
 ];
@@ -183,6 +285,8 @@ window.EF_EXERCICES = [
 <script src="../../data/modules.js"></script>
 <script src="../../assets/app.js"></script>
 <script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
 <script src="../../assets/chapter.js"></script>
 </body>
 </html>
