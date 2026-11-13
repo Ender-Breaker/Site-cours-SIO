@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Sécurité web : injection SQL, XSS et CSRF — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="securite-web" data-chapter="secu-injections">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/securite-web.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>Un site web reçoit des données de n'importe qui. Les trois attaques de ce chapitre exploitent toutes la même erreur : <b>faire confiance à ce que l'utilisateur envoie</b>. Elles figurent dans le classement <b>OWASP Top 10</b>, la référence des risques web, et relèvent du bloc 3 (cybersécurité) du BTS.</p>
+<div class="box attention"><b>Cadre légal</b><p>S'introduire dans un système sans autorisation est un délit (articles 323-1 et suivants du Code pénal), même « pour tester ». Ne t'entraîne que sur tes propres applications ou sur des environnements prévus pour cela (DVWA, Root-Me, TryHackMe, OWASP Juice Shop).</p></div>
+<h2>1. L'injection SQL</h2>
+<p>Le code vulnérable <b>colle</b> une saisie dans une requête :</p>
+<pre><code>// VULNÉRABLE
+$sql = "SELECT * FROM utilisateurs WHERE login = '" . $_POST["login"] . "' AND mdp = '" . $_POST["mdp"] . "'";</code></pre>
+<p>Si l'attaquant saisit le login <code>admin' -- </code> (avec n'importe quel mot de passe), la requête devient :</p>
+<pre><code>SELECT * FROM utilisateurs WHERE login = 'admin' -- ' AND mdp = '…'</code></pre>
+<p>Tout ce qui suit <code>--</code> est un commentaire : le mot de passe n'est plus vérifié. Avec d'autres saisies, l'attaquant peut lire toute la base, la modifier ou la détruire.</p>
+<h3>La parade : les requêtes préparées</h3>
+<pre><code>// CORRECT (PHP avec PDO)
+$requete = $pdo-&gt;prepare("SELECT * FROM utilisateurs WHERE login = ?");
+$requete-&gt;execute([$_POST["login"]]);
+$utilisateur = $requete-&gt;fetch();</code></pre>
+<p>La requête et les données voyagent <b>séparément</b> : la saisie est toujours traitée comme une valeur, jamais comme du SQL. Compléments : un compte de base de données aux <b>droits minimaux</b> (pas de <code>DROP</code> pour l'application) et aucun message d'erreur SQL affiché au visiteur.</p>
+<h2>2. Le XSS (*Cross-Site Scripting*)</h2>
+<p>L'attaquant fait exécuter <b>son JavaScript</b> dans le navigateur des autres visiteurs. Il suffit qu'une page réaffiche une saisie sans précaution :</p>
+<pre><code>// VULNÉRABLE
+echo "&lt;p&gt;Bonjour " . $_GET["nom"] . "&lt;/p&gt;";</code></pre>
+<p>Avec l'adresse <code>page.php?nom=&lt;script&gt;…&lt;/script&gt;</code>, le script s'exécute chez la victime : vol du cookie de session, fausse page de connexion, actions réalisées à sa place.</p>
+<table><tr><th>Type</th><th>Où est le code malveillant</th></tr><tr><td>XSS <b>stocké</b></td><td>enregistré en base (commentaire, pseudo) : toutes les visites sont piégées</td></tr><tr><td>XSS <b>réfléchi</b></td><td>dans le lien envoyé à la victime</td></tr><tr><td>XSS <b>DOM</b></td><td>injecté par le JavaScript de la page (<code>innerHTML</code>)</td></tr></table>
+<h3>La parade : échapper à l'affichage</h3>
+<pre><code>// CORRECT
+echo "&lt;p&gt;Bonjour " . htmlspecialchars($_GET["nom"], ENT_QUOTES, "UTF-8") . "&lt;/p&gt;";</code></pre>
+<p><code>htmlspecialchars</code> transforme <code>&lt;</code> en <code>&amp;lt;</code> : le texte est affiché, pas interprété. En JavaScript, on utilise <code>textContent</code> et jamais <code>innerHTML</code> avec une saisie. Les moteurs de gabarits (Twig, Blade, React) échappent par défaut. En renfort : l'en-tête <b>Content-Security-Policy</b> et des cookies <code>HttpOnly</code>.</p>
+<h2>3. Le CSRF (*Cross-Site Request Forgery*)</h2>
+<p>La victime est connectée à son site. Elle visite une page piégée qui déclenche, <b>à son insu</b>, une requête vers ce site ; le navigateur y joint automatiquement son cookie de session.</p>
+<pre><code>&lt;!-- sur le site de l'attaquant --&gt;
+&lt;form action="https://banque.exemple/virement" method="post"&gt;
+  &lt;input type="hidden" name="vers" value="compte-attaquant"&gt;
+  &lt;input type="hidden" name="montant" value="1000"&gt;
+&lt;/form&gt;
+&lt;script&gt;document.forms[0].submit()&lt;/script&gt;</code></pre>
+<h3>La parade : le jeton CSRF</h3>
+<p>Le serveur place dans chaque formulaire un <b>jeton aléatoire</b> lié à la session, et refuse toute requête qui ne le renvoie pas. Le site de l'attaquant ne peut pas le deviner.</p>
+<pre><code>&lt;input type="hidden" name="csrf" value="&lt;?= $_SESSION["csrf"] ?&gt;"&gt;</code></pre>
+<pre><code>if (!hash_equals($_SESSION["csrf"], $_POST["csrf"] ?? "")) { http_response_code(403); exit; }</code></pre>
+<p>En complément : cookies avec l'attribut <code>SameSite=Lax</code> ou <code>Strict</code>, et jamais d'action modifiante en <code>GET</code>.</p>
+<h2>4. Valider côté serveur</h2>
+<p>La validation en HTML (<code>required</code>, <code>type="email"</code>) et en JavaScript améliore le confort, mais <b>ne protège de rien</b> : il suffit d'envoyer la requête sans passer par le formulaire. Toute donnée reçue est validée <b>côté serveur</b> : type, longueur, format, valeurs autorisées.</p>
+<table><tr><th>Attaque</th><th>Cause</th><th>Parade principale</th></tr><tr><td>Injection SQL</td><td>saisie collée dans une requête</td><td>requêtes préparées</td></tr><tr><td>XSS</td><td>saisie réaffichée sans échappement</td><td><code>htmlspecialchars</code>, <code>textContent</code></td></tr><tr><td>CSRF</td><td>requête forgée depuis un autre site</td><td>jeton CSRF, cookies <code>SameSite</code></td></tr></table>
+<section class="tuto"><h3><small>Tutoriel</small>Auditer un formulaire de recherche</h3>
+<div class="etape"><h4>Repérer la faille</h4>
+<pre><code>$q = $_GET["q"];
+$resultats = $pdo-&gt;query("SELECT * FROM produits WHERE nom LIKE '%$q%'");
+echo "&lt;h2&gt;Résultats pour $q&lt;/h2&gt;";</code></pre>
+<p>Deux failles : la saisie est collée dans le SQL (injection) et réaffichée telle quelle (XSS).</p>
+</div>
+<div class="etape"><h4>Corriger l'injection</h4>
+<pre><code>$requete = $pdo-&gt;prepare("SELECT * FROM produits WHERE nom LIKE ?");
+$requete-&gt;execute(["%" . $q . "%"]);</code></pre>
+</div>
+<div class="etape"><h4>Corriger le XSS et valider</h4>
+<pre><code>$q = trim($_GET["q"] ?? "");
+if (mb_strlen($q) &gt; 50) { $q = mb_substr($q, 0, 50); }
+echo "&lt;h2&gt;Résultats pour " . htmlspecialchars($q, ENT_QUOTES, "UTF-8") . "&lt;/h2&gt;";</code></pre>
+</div>
+</section>
+<div class="box retenir"><b>À retenir</b><p>Ne jamais faire confiance à une donnée venue du client. </p><p> Injection SQL → requêtes préparées. </p><p> XSS → échapper à l'affichage (<code>htmlspecialchars</code>, <code>textContent</code>). </p><p> CSRF → jeton aléatoire dans les formulaires, cookies <code>SameSite</code>. </p><p> La validation se fait toujours côté serveur.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "Quelle erreur de programmation permet une injection SQL ?",
+  "type": "qcm",
+  "options": [
+   "Oublier un index",
+   "Utiliser une base de données",
+   "Coller une saisie de l'utilisateur dans le texte d'une requête",
+   "Utiliser SELECT *"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle est la parade principale contre l'injection SQL ?",
+  "type": "qcm",
+  "options": [
+   "Les requêtes préparées",
+   "Le chiffrement HTTPS",
+   "Un mot de passe long",
+   "Un pare-feu"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que permet une faille XSS ?",
+  "type": "qcm",
+  "options": [
+   "Lire les fichiers du serveur",
+   "Exécuter du JavaScript dans le navigateur d'un autre visiteur",
+   "Deviner un mot de passe",
+   "Saturer le réseau"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle fonction PHP neutralise le HTML avant affichage ?",
+  "type": "qcm",
+  "options": [
+   "`htmlspecialchars`",
+   "`mysql_escape`",
+   "`md5`",
+   "`strip`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "En JavaScript, quelle propriété affiche une saisie sans risque de XSS ?",
+  "type": "qcm",
+  "options": [
+   "`textContent`",
+   "`innerHTML`",
+   "`document.write`",
+   "`outerHTML`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'un XSS stocké ?",
+  "type": "qcm",
+  "options": [
+   "Le script est dans un lien",
+   "Le script est sur le poste de la victime",
+   "Le script est enregistré en base et servi à tous les visiteurs",
+   "Le script est dans un cookie"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait une attaque CSRF ?",
+  "type": "qcm",
+  "options": [
+   "Elle vole un mot de passe par force brute",
+   "Elle fait envoyer à la victime connectée une requête qu'elle n'a pas voulue",
+   "Elle injecte du SQL",
+   "Elle écoute le réseau"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle est la parade principale contre le CSRF ?",
+  "type": "qcm",
+  "options": [
+   "Une requête préparée",
+   "Un mot de passe long",
+   "htmlspecialchars",
+   "Un jeton aléatoire dans chaque formulaire"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Pourquoi la validation en JavaScript ne suffit-elle pas ?",
+  "type": "qcm",
+  "options": [
+   "Les navigateurs la désactivent",
+   "Elle suffit",
+   "On peut envoyer la requête sans passer par le formulaire",
+   "JavaScript est trop lent"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce que l'OWASP Top 10 ?",
+  "type": "qcm",
+  "options": [
+   "Un antivirus",
+   "Une liste de mots de passe",
+   "Une norme réseau",
+   "Le classement de référence des risques de sécurité web"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Avec le login `admin' -- `, pourquoi le mot de passe n'est-il plus vérifié ?",
+  "type": "qcm",
+  "options": [
+   "Le reste de la requête devient un commentaire SQL",
+   "La base plante",
+   "Le mot de passe est vide",
+   "admin n'a pas de mot de passe"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Quel attribut de cookie empêche JavaScript de le lire ?",
+  "type": "qcm",
+  "options": [
+   "`Secure`",
+   "`Path`",
+   "`Expires`",
+   "`HttpOnly`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel attribut de cookie limite son envoi depuis un autre site ?",
+  "type": "qcm",
+  "options": [
+   "`SameSite`",
+   "`Domain`",
+   "`HttpOnly`",
+   "`Max-Age`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Tester une faille sur un site qui ne t'appartient pas, sans autorisation, est légal si tu ne fais pas de dégâts.",
+  "type": "vf",
+  "answer": false,
+  "explication": "L'accès frauduleux est un délit en lui-même."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Une action qui modifie des données ne doit pas être déclenchée par une requête GET.",
+  "type": "vf",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque attaque à sa parade.",
+  "type": "associer",
+  "paires": [
+   [
+    "injection SQL",
+    "requêtes préparées"
+   ],
+   [
+    "XSS",
+    "échappement à l'affichage"
+   ],
+   [
+    "CSRF",
+    "jeton dans le formulaire"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

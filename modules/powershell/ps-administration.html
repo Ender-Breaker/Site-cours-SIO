@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>PowerShell : scripts et administration — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="powershell" data-chapter="ps-administration">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/powershell.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<h2>1. Écrire un script</h2>
+<p>Un script est un fichier <code>.ps1</code>. Par sécurité, Windows bloque leur exécution par défaut.</p>
+<pre><code>Get-ExecutionPolicy                              # Restricted sur un poste neuf
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser   # autorise tes scripts locaux
+.\rapport.ps1                                    # lance le script (le .\ est obligatoire)</code></pre>
+<pre><code># rapport.ps1
+param(
+    [string]$Dossier = "C:\Logs",                # paramètre avec valeur par défaut
+    [int]$Jours = 7
+)
+Write-Host "Analyse de $Dossier sur $Jours jours"</code></pre>
+<pre><code>.\rapport.ps1 -Dossier D:\Journaux -Jours 30</code></pre>
+<h2>2. Conditions et boucles</h2>
+<pre><code>if (Test-Path "C:\Sauvegardes") {
+    Write-Host "Le dossier existe"
+} elseif ($Jours -gt 30) {
+    Write-Host "Période longue"
+} else {
+    New-Item -ItemType Directory -Path "C:\Sauvegardes" | Out-Null
+}
+
+foreach ($poste in @("pc01", "pc02", "pc03")) {
+    if (Test-Connection $poste -Count 1 -Quiet) { "$poste répond" } else { "$poste ne répond PAS" }
+}
+
+for ($i = 1; $i -le 3; $i++) { "Tour $i" }
+$n = 0
+while ($n -lt 3) { $n++ }
+
+Get-ChildItem *.log | ForEach-Object { "$($_.Name) : $($_.Length) octets" }</code></pre>
+<h2>3. Fonctions et gestion des erreurs</h2>
+<pre><code>function Get-EspaceLibre {
+    param([string]$Lettre = "C")
+    $disque = Get-PSDrive $Lettre
+    return [math]::Round($disque.Free / 1GB, 1)
+}
+"Libre sur C : $(Get-EspaceLibre) Go"
+
+try {
+    Get-Content "C:\absent.txt" -ErrorAction Stop     # Stop : transforme l'erreur en exception
+} catch {
+    Write-Warning "Lecture impossible : $($_.Exception.Message)"
+} finally {
+    "Fin du traitement"
+}</code></pre>
+<h2>4. Services, processus, journaux</h2>
+<pre><code>Get-Service Spooler
+Restart-Service Spooler                          # relance le service d'impression
+Set-Service Spooler -StartupType Automatic
+Stop-Process -Name notepad
+Get-EventLog -LogName System -EntryType Error -Newest 10
+Get-WinEvent -FilterHashtable @{ LogName = "Security"; Id = 4625 } -MaxEvents 20    # échecs de connexion</code></pre>
+<h2>5. Active Directory</h2>
+<p>Sur un contrôleur de domaine (module <code>ActiveDirectory</code>) :</p>
+<pre><code>Get-ADUser -Filter * -SearchBase "OU=SIO,DC=lycee,DC=local" | Select-Object Name, SamAccountName
+Get-ADUser lea.martin -Properties LastLogonDate, MemberOf
+
+New-ADUser -Name "Léa Martin" -SamAccountName "lea.martin" `
+    -UserPrincipalName "lea.martin@lycee.local" -Path "OU=SIO,DC=lycee,DC=local" `
+    -AccountPassword (Read-Host "Mot de passe" -AsSecureString) `
+    -ChangePasswordAtLogon $true -Enabled $true
+
+Add-ADGroupMember -Identity "G_SIO1" -Members "lea.martin"
+Disable-ADAccount lea.martin
+Unlock-ADAccount lea.martin
+Search-ADAccount -AccountInactive -TimeSpan 90.00:00:00 -UsersOnly     # comptes inactifs depuis 90 jours</code></pre>
+<p>L'accent grave <code>`</code> en fin de ligne poursuit la commande sur la ligne suivante.</p>
+<h2>6. Administrer à distance</h2>
+<pre><code>Enter-PSSession -ComputerName srv-fichiers       # un terminal sur la machine distante
+Invoke-Command -ComputerName pc01, pc02, pc03 -ScriptBlock { Get-Service Spooler }</code></pre>
+<p><code>Invoke-Command</code> exécute le même bloc sur plusieurs machines <b>en parallèle</b> et rassemble les résultats.</p>
+<h2>7. Bonnes pratiques</h2>
+<ul><li>Tester d'abord avec <code>-WhatIf</code> : la commande <b>affiche</b> ce qu'elle ferait, sans rien modifier (<code>Remove-Item *.tmp -WhatIf</code>).</li><li>Jamais de mot de passe en clair dans un script : <code>Read-Host -AsSecureString</code> ou <code>Get-Credential</code>.</li><li>Des paramètres plutôt que des valeurs écrites en dur.</li><li>Journaliser ce que fait le script (<code>Start-Transcript</code>, ou <code>Add-Content</code> dans un fichier).</li><li>Versionner les scripts avec Git.</li></ul>
+<section class="tuto"><h3><small>Tutoriel</small>Créer des comptes à partir d'un fichier CSV</h3>
+<div class="etape"><h4>Le fichier</h4>
+<pre><code>Prenom;Nom;Classe
+Léa;Martin;SIO1
+Sam;Durand;SIO1</code></pre>
+</div>
+<div class="etape"><h4>Le lire et construire l'identifiant</h4>
+<pre><code>$eleves = Import-Csv eleves.csv -Delimiter ";"
+foreach ($e in $eleves) {
+    $login = ("{0}.{1}" -f $e.Prenom, $e.Nom).ToLower()
+    "$login (classe $($e.Classe))"
+}</code></pre>
+</div>
+<div class="etape"><h4>Créer les comptes, sans doublon, avec un journal</h4>
+<p>Lance d'abord le script avec <code>-WhatIf</code> ajouté à <code>New-ADUser</code> pour vérifier.</p>
+<pre><code>$mdp = Read-Host "Mot de passe initial" -AsSecureString     # jamais écrit dans le script
+foreach ($e in $eleves) {
+    $login = ("{0}.{1}" -f $e.Prenom, $e.Nom).ToLower()
+    if (Get-ADUser -Filter "SamAccountName -eq '$login'") {
+        Add-Content journal.txt "$login existe déjà"
+        continue
+    }
+    New-ADUser -Name "$($e.Prenom) $($e.Nom)" -SamAccountName $login `
+        -Path "OU=$($e.Classe),DC=lycee,DC=local" `
+        -AccountPassword $mdp `
+        -ChangePasswordAtLogon $true -Enabled $true
+    Add-Content journal.txt "$login créé"
+}</code></pre>
+</div>
+</section>
+<div class="box retenir"><b>À retenir</b><p>Un script est un fichier <code>.ps1</code>, lancé avec <code>.\script.ps1</code> ; <code>param(…)</code> déclare ses paramètres. </p><p> <code>if / elseif / else</code>, <code>foreach ($x in $liste)</code>, <code>try / catch</code> avec <code>-ErrorAction Stop</code>. </p><p> <code>Get-Service</code>, <code>Restart-Service</code>, <code>Get-EventLog</code>. </p><p> Active Directory : <code>Get-ADUser</code>, <code>New-ADUser</code>, <code>Add-ADGroupMember</code>. </p><p> <code>Invoke-Command</code> pour agir à distance ; <code>-WhatIf</code> pour simuler.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "facile",
+  "q": "Quelle est l'extension d'un script PowerShell ?",
+  "type": "qcm",
+  "options": [
+   "`.sh`",
+   "`.psh`",
+   "`.bat`",
+   "`.ps1`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment lance-t-on le script rapport.ps1 du dossier courant ?",
+  "type": "qcm",
+  "options": [
+   "`start rapport`",
+   "`.\\rapport.ps1`",
+   "`rapport.ps1`",
+   "`run rapport.ps1`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle cmdlet règle la politique d'exécution des scripts ?",
+  "type": "qcm",
+  "options": [
+   "`Set-ScriptMode`",
+   "`Enable-Scripts`",
+   "`Set-ExecutionPolicy`",
+   "`Allow-Script`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel bloc déclare les paramètres d'un script ?",
+  "type": "qcm",
+  "options": [
+   "`param( … )`",
+   "`define( … )`",
+   "`input( … )`",
+   "`args( … )`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle cmdlet teste l'existence d'un fichier ou d'un dossier ?",
+  "type": "qcm",
+  "options": [
+   "`Get-Exists`",
+   "`Exists-Item`",
+   "`Check-File`",
+   "`Test-Path`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle cmdlet teste si une machine répond au ping ?",
+  "type": "qcm",
+  "options": [
+   "`Check-Network`",
+   "`Ping-Host`",
+   "`Get-Ping`",
+   "`Test-Connection`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle cmdlet relance un service ?",
+  "type": "qcm",
+  "options": [
+   "`Reload-Service`",
+   "`Start-Again`",
+   "`Restart-Service`",
+   "`Reset-Service`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle cmdlet crée un utilisateur Active Directory ?",
+  "type": "qcm",
+  "options": [
+   "`New-ADUser`",
+   "`Create-ADUser`",
+   "`Add-User`",
+   "`Set-ADUser`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle cmdlet ajoute un utilisateur à un groupe AD ?",
+  "type": "qcm",
+  "options": [
+   "`Join-ADGroup`",
+   "`Add-ADGroupMember`",
+   "`Set-ADGroup`",
+   "`New-ADGroupUser`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait le paramètre `-WhatIf` ?",
+  "type": "qcm",
+  "options": [
+   "Il ignore les erreurs",
+   "Il demande une confirmation",
+   "Il exécute en administrateur",
+   "Il montre ce que ferait la commande sans rien modifier"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle cmdlet exécute un bloc de script sur plusieurs machines distantes ?",
+  "type": "qcm",
+  "options": [
+   "`Send-Script`",
+   "`Run-Remote`",
+   "`Start-Session`",
+   "`Invoke-Command`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "À quoi sert `-ErrorAction Stop` dans un bloc try ?",
+  "type": "qcm",
+  "options": [
+   "À transformer l'erreur en exception attrapable par catch",
+   "À ignorer l'erreur",
+   "À afficher l'erreur en rouge",
+   "À arrêter Windows"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment éviter d'écrire un mot de passe en clair dans un script ?",
+  "type": "qcm",
+  "options": [
+   "`Read-Host -AsSecureString` ou `Get-Credential`",
+   "Le coder en base64",
+   "Le mettre dans un commentaire",
+   "L'écrire à l'envers"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Par défaut, un poste Windows neuf autorise l'exécution de tous les scripts PowerShell.",
+  "type": "vf",
+  "answer": false,
+  "explication": "La politique par défaut est Restricted."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle cmdlet importe un fichier CSV sous forme d'objets ?",
+  "type": "saisie",
+  "answers": [
+   "Import-Csv"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque cmdlet à son rôle.",
+  "type": "associer",
+  "paires": [
+   [
+    "`Get-ADUser`",
+    "lire un compte"
+   ],
+   [
+    "`New-ADUser`",
+    "créer un compte"
+   ],
+   [
+    "`Disable-ADAccount`",
+    "désactiver un compte"
+   ],
+   [
+    "`Unlock-ADAccount`",
+    "déverrouiller un compte"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

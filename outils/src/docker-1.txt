@@ -1,0 +1,287 @@
+=== docker-bases | Docker : images et conteneurs | m
+« Ça marche sur ma machine » : **Docker** supprime ce problème. Il emballe une application **avec tout ce dont elle a besoin** (bibliothèques, configuration, version exacte de PHP ou de MariaDB) dans un **conteneur** qui tourne à l'identique partout. Côté SLAM, il donne un environnement de développement en une commande ; côté SISR, il déploie et isole des services.
+
+## 1. Conteneur ou machine virtuelle ?
+
+| | Machine virtuelle | Conteneur |
+| Contient | un système d'exploitation complet | l'application et ses dépendances |
+| Noyau | le sien | celui de la machine hôte, partagé |
+| Démarrage | dizaines de secondes | moins d'une seconde |
+| Taille | plusieurs Go | quelques dizaines de Mo |
+| Isolation | très forte | bonne, mais plus légère |
+
+## 2. Le vocabulaire
+
+| Terme | Définition |
+| **Image** | le modèle en lecture seule (comme une classe) |
+| **Conteneur** | une instance en cours d'exécution d'une image (comme un objet) |
+| **Registre** | l'entrepôt d'images ; Docker Hub est le registre public |
+| **Dockerfile** | la recette de fabrication d'une image |
+| **Volume** | un espace de stockage qui survit au conteneur |
+
+## 3. Lancer des conteneurs
+
+```
+docker run hello-world                       # télécharge l'image et lance un conteneur
+docker run -d --name web -p 8080:80 nginx    # un serveur web en arrière-plan
+```
+
+| Option | Rôle |
+| `-d` | en arrière-plan (*detached*) |
+| `--name web` | donne un nom au conteneur |
+| `-p 8080:80` | relie le port 8080 de la machine au port 80 du conteneur |
+| `-e CLE=valeur` | définit une variable d'environnement |
+| `-v dossier:/chemin` | monte un dossier ou un volume |
+| `--rm` | supprime le conteneur à son arrêt |
+| `-it` | mode interactif (un terminal) |
+
+Après la deuxième commande, `http://localhost:8080` affiche la page de nginx.
+
+## 4. Observer et gérer
+
+```
+docker ps                        # conteneurs en cours
+docker ps -a                     # tous, y compris arrêtés
+docker logs web                  # ce que le conteneur a affiché
+docker logs -f web               # … en continu
+docker exec -it web bash         # ouvre un terminal DANS le conteneur
+docker stop web                  # arrête
+docker start web                 # relance
+docker rm web                    # supprime le conteneur
+docker images                    # images présentes sur la machine
+docker rmi nginx                 # supprime une image
+docker system prune              # nettoie ce qui ne sert plus
+```
+
+## 5. Les données : volumes et montages
+
+Un conteneur est **éphémère** : quand on le supprime, tout ce qu'il a écrit disparaît. Les données à conserver vont dans un **volume**.
+
+```
+docker volume create donnees-bdd
+docker run -d --name bdd \
+  -e MARIADB_ROOT_PASSWORD=secret \
+  -v donnees-bdd:/var/lib/mysql \
+  mariadb:11
+
+docker run -d -p 8080:80 -v "$(pwd)/site":/usr/share/nginx/html:ro nginx
+```
+
+La seconde commande **monte un dossier** de ta machine dans le conteneur (`:ro` : en lecture seule) : tu modifies tes fichiers avec ton éditeur, nginx les sert aussitôt.
+
+## 6. Les étiquettes de version
+
+```
+docker pull php:8.3-apache       # une version précise
+docker pull mariadb:11
+docker pull nginx:latest         # « latest » : la plus récente… qui change sans prévenir
+```
+
+!attention Jamais `latest` en production | L'étiquette `latest` désigne une version différente selon le jour où tu la télécharges. Fixe toujours une version (`mariadb:11.4`) : ton déploiement reste reproductible.
+
+!tuto Un serveur web avec ta page
+# Lancer nginx
+```
+docker run -d --name web -p 8080:80 nginx:1.27
+docker ps
+```
+# Regarder à l'intérieur
+```
+docker exec -it web bash
+ls /usr/share/nginx/html         # la page par défaut est ici
+exit
+```
+# Servir ton propre dossier
+```
+docker rm -f web                 # -f : arrête et supprime
+mkdir site && echo "<h1>Mon site</h1>" > site/index.html
+docker run -d --name web -p 8080:80 -v "$(pwd)/site":/usr/share/nginx/html:ro nginx:1.27
+```
+Modifie `site/index.html` et recharge la page : le changement est immédiat.
+!fin
+
+!retenir À retenir | Image = modèle ; conteneur = instance en cours d'exécution. ¶ `docker run -d --name nom -p hôte:conteneur image`. ¶ `docker ps`, `docker logs`, `docker exec -it nom bash`, `docker stop`, `docker rm`. ¶ Un conteneur est éphémère : les données durables vont dans un volume (`-v`). ¶ Toujours une version précise, jamais `latest`.
+--- exos
+Q¤m¤Qu'est-ce qu'un conteneur Docker ?¤Une instance en cours d'exécution d'une image;;Une machine virtuelle complète;;Un fichier de configuration;;Un disque dur virtuel¤
+Q¤m¤Qu'est-ce qu'une image Docker ?¤Un modèle en lecture seule servant à créer des conteneurs;;Une capture d'écran;;Un conteneur arrêté;;Une sauvegarde¤
+Q¤m¤Quelle différence principale avec une machine virtuelle ?¤Le conteneur partage le noyau de la machine hôte;;Le conteneur a son propre noyau;;Le conteneur est plus lent à démarrer;;Aucune¤
+Q¤m¤Que fait l'option `-p 8080:80` ?¤Relie le port 8080 de la machine au port 80 du conteneur;;Limite la mémoire;;Lance 8080 conteneurs;;Relie le port 80 de la machine au 8080 du conteneur¤
+Q¤m¤Que fait l'option `-d` de docker run ?¤Lance le conteneur en arrière-plan;;Supprime le conteneur;;Active le débogage;;Télécharge l'image¤
+Q¤m¤Quelle commande liste les conteneurs en cours d'exécution ?¤`docker ps`;;`docker list`;;`docker images`;;`docker status`¤
+Q¤m¤Quelle commande ouvre un terminal dans le conteneur web ?¤`docker exec -it web bash`;;`docker open web`;;`docker ssh web`;;`docker run web bash`¤
+Q¤m¤Quelle commande affiche ce qu'un conteneur a écrit sur sa sortie ?¤`docker logs`;;`docker print`;;`docker cat`;;`docker out`¤
+Q¤m¤Que deviennent les données écrites dans un conteneur quand on le supprime ?¤Elles sont perdues, sauf si elles sont dans un volume;;Elles restent dans l'image;;Elles sont envoyées sur Docker Hub;;Elles sont archivées¤
+Q¤m¤À quoi sert un volume ?¤À conserver des données au-delà de la vie d'un conteneur;;À régler le son;;À limiter le processeur;;À relier deux réseaux¤
+Q¤m¤Qu'est-ce que Docker Hub ?¤Le registre public d'images;;Un éditeur de Dockerfile;;Un système d'exploitation;;Un outil de supervision¤
+Q¤d¤Pourquoi éviter l'étiquette `latest` en production ?¤Elle désigne une version qui change dans le temps;;Elle est payante;;Elle est plus lente;;Elle n'existe pas¤
+Q¤m¤Quelle option passe une variable d'environnement au conteneur ?¤`-e`;;`-v`;;`-p`;;`-x`¤
+V¤m¤Un conteneur démarre en général plus vite qu'une machine virtuelle.¤V¤
+S¤m¤Quelle commande télécharge une image sans la lancer (docker ____ nginx) ?¤pull¤
+A¤m¤Associe chaque commande à son rôle.¤`docker run`=>créer et lancer un conteneur;;`docker ps`=>lister les conteneurs;;`docker stop`=>arrêter;;`docker rm`=>supprimer un conteneur;;`docker images`=>lister les images¤
+
+=== docker-compose | Docker : Dockerfile et Docker Compose | m
+## 1. Le Dockerfile : fabriquer sa propre image
+
+Un **Dockerfile** est la recette d'une image : on part d'une image de base, puis on ajoute ce qu'il faut.
+
+```
+# Dockerfile
+FROM php:8.3-apache                      # image de départ
+
+RUN docker-php-ext-install pdo_mysql     # commande exécutée pendant la construction
+
+WORKDIR /var/www/html                    # dossier de travail
+COPY src/ .                              # copie le code dans l'image
+
+EXPOSE 80                                # documente le port utilisé
+```
+
+```
+docker build -t mon-site:1.0 .           # construit l'image (le . : dossier courant)
+docker run -d -p 8080:80 mon-site:1.0
+```
+
+| Instruction | Rôle |
+| `FROM` | l'image de base |
+| `RUN` | exécute une commande à la construction (installer un paquet) |
+| `COPY` | copie des fichiers de ta machine dans l'image |
+| `WORKDIR` | fixe le dossier courant |
+| `ENV` | définit une variable d'environnement |
+| `EXPOSE` | indique le port d'écoute |
+| `CMD` | la commande lancée au démarrage du conteneur |
+
+Chaque instruction crée une **couche** mise en cache : place en dernier ce qui change souvent (ton code), pour que les reconstructions soient rapides. Un fichier `.dockerignore` exclut ce qui ne doit pas entrer dans l'image (`.git`, `node_modules`, `.env`).
+
+## 2. Docker Compose : plusieurs conteneurs
+
+Une application réelle a plusieurs services : un serveur web, une base de données, parfois un outil d'administration. **Docker Compose** les décrit dans un seul fichier `compose.yaml` et les lance ensemble.
+
+```
+# compose.yaml
+services:
+  web:
+    build: .                             # construit l'image depuis le Dockerfile
+    ports:
+      - "8080:80"
+    volumes:
+      - ./src:/var/www/html              # le code est modifiable en direct
+    depends_on:
+      - bdd
+    environment:
+      DB_HOST: bdd                       # le nom du service sert de nom d'hôte
+      DB_NAME: parc
+      DB_USER: app
+      DB_PASSWORD: ${DB_PASSWORD}        # lu dans le fichier .env
+
+  bdd:
+    image: mariadb:11.4
+    environment:
+      MARIADB_DATABASE: parc
+      MARIADB_USER: app
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - donnees:/var/lib/mysql           # les données survivent
+
+  adminer:
+    image: adminer:4
+    ports:
+      - "8081:8080"
+
+volumes:
+  donnees:
+```
+
+```
+docker compose up -d             # construit, crée le réseau et lance tout
+docker compose ps
+docker compose logs -f web
+docker compose exec bdd mariadb -u app -p parc
+docker compose down              # arrête et supprime les conteneurs (les volumes restent)
+docker compose down -v           # … et supprime aussi les volumes
+```
+
+!attention L'indentation compte | Un fichier YAML se structure avec des **espaces** (jamais de tabulations), deux par niveau. Un décalage d'un espace change le sens du fichier ou le rend invalide.
+
+## 3. Le réseau entre conteneurs
+
+Compose crée un réseau privé où chaque service est joignable **par son nom**. Dans le code PHP, l'hôte de la base de données n'est donc pas `localhost` mais `bdd` :
+
+```
+$pdo = new PDO("mysql:host=bdd;dbname=parc;charset=utf8mb4", "app", getenv("DB_PASSWORD"));
+```
+
+Seuls les ports listés sous `ports:` sont accessibles depuis ta machine : ici, la base de données n'est pas exposée à l'extérieur.
+
+## 4. Les secrets
+
+Les mots de passe ne s'écrivent pas dans `compose.yaml` (qui est versionné) : ils vont dans un fichier `.env`, placé à côté et listé dans `.gitignore`.
+
+```
+# .env (jamais dans Git)
+DB_PASSWORD=Un-Mot-De-Passe-Long
+DB_ROOT_PASSWORD=Un-Autre-Encore-Plus-Long
+```
+
+## 5. Où Docker est utilisé
+
+| Usage | Exemple |
+| Environnement de développement | toute l'équipe a la même pile PHP + MariaDB en une commande |
+| Tests automatiques | GitHub Actions lance les tests dans un conteneur à chaque `push` |
+| Déploiement | la même image tourne en test puis en production |
+| Services d'infrastructure | GLPI, Nextcloud, Zabbix, Portainer s'installent en quelques lignes |
+| Orchestration à grande échelle | Kubernetes pilote des milliers de conteneurs |
+
+!tuto Une pile web complète en trois fichiers
+# Le code
+```
+mkdir -p projet/src && cd projet
+echo '<?php echo "Bonjour depuis PHP " . PHP_VERSION;' > src/index.php
+```
+# Le Dockerfile et compose.yaml
+```
+# Dockerfile
+FROM php:8.3-apache
+RUN docker-php-ext-install pdo_mysql
+```
+```
+# compose.yaml
+services:
+  web:
+    build: .
+    ports: ["8080:80"]
+    volumes: ["./src:/var/www/html"]
+  bdd:
+    image: mariadb:11.4
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes: ["donnees:/var/lib/mysql"]
+volumes:
+  donnees:
+```
+# Lancer
+```
+echo "DB_ROOT_PASSWORD=change-moi" > .env
+docker compose up -d
+```
+Ouvre `http://localhost:8080`. Un coéquipier qui clone le dépôt obtient exactement le même environnement avec la même commande.
+!fin
+
+!retenir À retenir | Dockerfile : `FROM`, `RUN`, `COPY`, `WORKDIR`, `CMD` ; `docker build -t nom:version .`. ¶ `compose.yaml` décrit les services, leurs ports, volumes et variables. ¶ `docker compose up -d` lance tout, `docker compose down` arrête tout. ¶ Entre conteneurs, on s'appelle par le **nom du service**. ¶ Les secrets vont dans `.env`, jamais dans Git.
+--- exos
+Q¤m¤Qu'est-ce qu'un Dockerfile ?¤La recette de fabrication d'une image;;Un conteneur arrêté;;Un fichier de journal;;Une sauvegarde de volume¤
+Q¤m¤Quelle instruction choisit l'image de base ?¤`FROM`;;`BASE`;;`IMPORT`;;`USE`¤
+Q¤m¤Quelle instruction exécute une commande pendant la construction de l'image ?¤`RUN`;;`CMD`;;`EXEC`;;`DO`¤
+Q¤m¤Quelle instruction copie des fichiers de ta machine dans l'image ?¤`COPY`;;`MOVE`;;`PUT`;;`INCLUDE`¤
+Q¤m¤Quelle différence entre RUN et CMD ?¤RUN s'exécute à la construction, CMD au démarrage du conteneur;;Aucune;;CMD s'exécute à la construction;;RUN est réservé à Windows¤
+Q¤m¤Quelle commande construit une image à partir du Dockerfile du dossier courant ?¤`docker build -t nom .`;;`docker make nom`;;`docker create -f nom`;;`docker compile .`¤
+Q¤m¤À quoi sert Docker Compose ?¤À décrire et lancer plusieurs conteneurs ensemble;;À compresser des images;;À écrire des Dockerfile;;À remplacer Docker¤
+Q¤m¤Quelle commande lance tous les services en arrière-plan ?¤`docker compose up -d`;;`docker compose start all`;;`docker run compose`;;`docker compose go`¤
+Q¤m¤Quelle commande arrête et supprime les conteneurs d'un projet Compose ?¤`docker compose down`;;`docker compose stop --rm`;;`docker compose kill`;;`docker compose end`¤
+Q¤d¤Dans un projet Compose, quel nom d'hôte le service web utilise-t-il pour joindre le service bdd ?¤`bdd` (le nom du service);;`localhost`;;`127.0.0.1`;;L'adresse IP publique¤
+Q¤m¤Où range-t-on les mots de passe utilisés par compose.yaml ?¤Dans un fichier `.env` ignoré par Git;;Directement dans compose.yaml;;Dans le Dockerfile;;Dans le README¤
+Q¤d¤Pourquoi copier le code en dernier dans un Dockerfile ?¤Pour profiter du cache des couches précédentes à chaque reconstruction;;Parce que COPY doit être la dernière instruction;;Pour réduire la taille;;Par convention uniquement¤
+Q¤m¤Avec quoi indente-t-on un fichier YAML ?¤Des espaces;;Des tabulations;;Les deux indifféremment;;Rien : l'indentation est libre¤
+V¤m¤`docker compose down` supprime les volumes par défaut.¤F¤Il faut ajouter -v.
+S¤m¤Quel fichier exclut des fichiers de la construction d'une image ?¤.dockerignore¤
+A¤m¤Associe chaque instruction à son rôle.¤`FROM`=>image de base;;`RUN`=>commande de construction;;`COPY`=>ajouter des fichiers;;`CMD`=>commande de démarrage;;`EXPOSE`=>port d'écoute¤

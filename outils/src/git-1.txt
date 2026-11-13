@@ -1,0 +1,486 @@
+=== git-bases | Git : enregistrer l'histoire d'un projet | f
+**Git** est un logiciel de **gestion de versions** : il enregistre l'histoire d'un projet, étape par étape. Il permet de revenir en arrière, de travailler à plusieurs sans s'écraser, et de savoir qui a changé quoi et pourquoi. C'est l'outil le plus demandé en stage, en SLAM comme en SISR (scripts, configurations, documentation) : il est attendu dans ton portfolio de l'épreuve E5.
+
+!info Git n'est pas GitHub | **Git** est le logiciel, installé sur ta machine. **GitHub** (comme GitLab) est un site qui héberge des dépôts Git et ajoute des outils de collaboration.
+
+## 1. Installer et se présenter
+
+```
+git --version                                   # vérifie l'installation
+git config --global user.name "Léa Martin"      # à faire une seule fois
+git config --global user.email "lea@exemple.fr"
+git config --global init.defaultBranch main
+```
+
+Ton nom et ton adresse sont inscrits dans chaque enregistrement que tu fais.
+
+## 2. Les trois zones
+
+| Zone | Contenu | Commande pour y entrer |
+| Répertoire de travail | tes fichiers, tels que tu les modifies | (ton éditeur) |
+| Index (*staging area*) | ce qui partira dans le prochain commit | `git add` |
+| Dépôt (dossier caché `.git`) | l'historique des commits | `git commit` |
+
+Un **commit** est une photographie complète du projet à un instant donné, avec un auteur, une date, un message et un identifiant unique (un *hash* comme `a1b2c3d`).
+
+## 3. Le cycle de base
+
+```
+mkdir mon-site && cd mon-site
+git init                         # crée le dépôt (dossier .git)
+git status                       # où en est-on ? À taper sans modération
+
+# … on crée index.html …
+git add index.html               # place le fichier dans l'index
+git add .                        # … ou tout ce qui a changé
+git commit -m "Ajoute la page d'accueil"
+
+git log                          # l'historique complet
+git log --oneline                # une ligne par commit
+```
+
+```
+$ git status
+Sur la branche main
+Modifications qui ne seront pas validées :
+        modifié :         index.html
+Fichiers non suivis :
+        style.css
+```
+
+## 4. Voir ce qui a changé
+
+```
+git diff                 # modifications pas encore ajoutées à l'index
+git diff --staged        # ce qui est dans l'index, prêt à être commité
+git show a1b2c3d         # le contenu d'un commit précis
+git log -p index.html    # l'histoire d'un fichier, avec les modifications
+```
+
+## 5. Ignorer des fichiers : `.gitignore`
+
+Certains fichiers ne doivent **jamais** être versionnés : mots de passe, dépendances téléchargées, fichiers générés.
+
+```
+# fichier .gitignore à la racine du projet
+.env                 # secrets, mots de passe
+node_modules/        # dépendances (se réinstallent)
+vendor/
+target/
+*.log
+.vscode/
+```
+
+!attention Jamais de secret dans Git | Un mot de passe ou une clé d'API commité reste dans l'historique **même si tu le supprimes ensuite**. S'il a été poussé sur GitHub, il faut le considérer comme volé et le changer immédiatement. Mets les secrets dans un fichier `.env` listé dans `.gitignore`.
+
+## 6. De bons messages de commit
+
+Un commit = **un changement cohérent**. Son message dit **ce que le commit fait**, au présent, en une ligne courte.
+
+| À éviter | À écrire |
+| `modifs` | `Corrige le calcul de la TVA` |
+| `ça marche enfin` | `Ajoute la validation du formulaire de contact` |
+| `v2 finale ok` | `Supprime le script de sauvegarde obsolète` |
+
+!tuto Ton premier dépôt, pas à pas
+# Créer le projet et le dépôt
+```
+mkdir portfolio && cd portfolio
+git init
+echo "# Mon portfolio" > README.md
+git status                        # README.md apparaît en « non suivi »
+```
+# Premier commit
+```
+git add README.md
+git status                        # il est maintenant « à valider »
+git commit -m "Ajoute le README"
+git log --oneline
+```
+# Modifier et commiter à nouveau
+```
+echo "BTS SIO option SLAM" >> README.md
+git diff                          # montre la ligne ajoutée
+git add .
+git commit -m "Précise la formation dans le README"
+git log --oneline                 # deux commits
+```
+!fin
+
+!retenir À retenir | `git init` crée le dépôt. ¶ `git status` : toujours, avant et après chaque action. ¶ `git add fichier` puis `git commit -m "message"` enregistrent une étape. ¶ `git log --oneline` et `git diff` pour lire l'histoire et les changements. ¶ `.gitignore` liste ce qui ne doit pas être versionné ; jamais de secret dans un dépôt.
+--- exos
+Q¤f¤Qu'est-ce que Git ?¤Un logiciel de gestion de versions;;Un site d'hébergement de code;;Un éditeur de texte;;Un langage de programmation¤
+Q¤f¤Quelle commande crée un dépôt Git dans le dossier courant ?¤`git init`;;`git start`;;`git new`;;`git create`¤
+Q¤f¤Quelle commande affiche l'état des fichiers ?¤`git status`;;`git state`;;`git info`;;`git check`¤
+Q¤m¤Quelle commande place un fichier dans l'index ?¤`git add`;;`git commit`;;`git push`;;`git stage-file`¤
+Q¤m¤Qu'est-ce qu'un commit ?¤Une photographie du projet à un instant donné, avec un message;;Un fichier de configuration;;Une copie du dépôt sur GitHub;;Une branche¤
+Q¤m¤Que contient l'index (staging area) ?¤Ce qui partira dans le prochain commit;;Tous les fichiers du projet;;L'historique;;Les fichiers ignorés¤
+Q¤m¤Quelle commande affiche l'historique sur une ligne par commit ?¤`git log --oneline`;;`git history`;;`git list`;;`git show --all`¤
+Q¤m¤Que montre `git diff` (sans option) ?¤Les modifications pas encore ajoutées à l'index;;Le dernier commit;;La liste des branches;;Les fichiers ignorés¤
+Q¤m¤À quoi sert le fichier `.gitignore` ?¤À lister les fichiers que Git ne doit pas versionner;;À supprimer des fichiers;;À cacher le dépôt;;À configurer son nom¤
+Q¤d¤Un mot de passe a été commité puis supprimé dans un commit suivant. Est-il encore accessible ?¤Oui, il reste dans l'historique;;Non, il a disparu;;Seulement pendant 24 heures;;Seulement en local¤
+Q¤m¤Quel est le meilleur message de commit ?¤Corrige le calcul de la TVA;;modifs;;ça marche;;version finale 2¤
+Q¤m¤Où Git range-t-il l'historique du projet ?¤Dans le dossier caché `.git`;;Dans `.gitignore`;;Sur GitHub uniquement;;Dans le fichier README¤
+V¤f¤Git et GitHub sont la même chose.¤F¤Git est le logiciel ; GitHub un site d'hébergement.
+V¤m¤Un dossier `node_modules` doit être versionné.¤F¤Les dépendances se réinstallent : on les ignore.
+S¤m¤Quelle commande enregistre un commit avec le message init ? (complète : git ______ -m "init")¤commit¤
+S¤m¤Écris la commande qui ajoute tous les fichiers modifiés à l'index.¤git add .;;git add -A;;git add --all¤
+A¤m¤Associe chaque commande à son rôle.¤`git init`=>créer un dépôt;;`git add`=>préparer le prochain commit;;`git commit`=>enregistrer une étape;;`git log`=>lire l'historique¤
+
+=== git-branches | Git : les branches et les fusions | m
+Une **branche** est une ligne de développement indépendante. Elle permet de travailler sur une fonctionnalité ou une correction sans toucher à la version qui marche. Créer une branche est instantané : c'est juste une étiquette posée sur un commit.
+
+## 1. Créer et changer de branche
+
+```
+git branch                       # liste les branches ; * marque la branche courante
+git switch -c contact            # crée la branche « contact » et s'y place
+git switch main                  # revient sur main
+git branch -d contact            # supprime une branche déjà fusionnée
+```
+
+`git checkout -b contact` est l'ancienne écriture de `git switch -c contact` : tu la verras partout.
+
+**HEAD** désigne « là où tu es » : la branche courante et son dernier commit.
+
+## 2. Travailler sur une branche
+
+```
+git switch -c formulaire-contact
+# … on modifie contact.html …
+git add .
+git commit -m "Ajoute le formulaire de contact"
+git log --oneline --graph --all          # dessine l'arbre des branches
+```
+
+Pendant ce temps, `main` n'a pas bougé : si un bug urgent arrive, on y revient, on le corrige, et la fonctionnalité en cours reste à l'abri sur sa branche.
+
+## 3. Fusionner : `git merge`
+
+On se place sur la branche qui **reçoit**, et on fusionne l'autre.
+
+```
+git switch main
+git merge formulaire-contact
+```
+
+| Cas | Ce que fait Git |
+| `main` n'a pas avancé depuis la création de la branche | *fast-forward* : l'étiquette `main` avance simplement |
+| les deux branches ont avancé | un **commit de fusion** réunit les deux histoires |
+| les deux ont modifié les mêmes lignes | **conflit** : Git s'arrête et te demande de trancher |
+
+## 4. Résoudre un conflit
+
+```
+$ git merge formulaire-contact
+CONFLIT (contenu) : Conflit de fusion dans index.html
+La fusion automatique a échoué ; réglez les conflits et validez le résultat.
+```
+
+Git a marqué la zone en conflit dans le fichier :
+
+```
+<<<<<<< HEAD
+<h1>Bienvenue sur mon site</h1>
+=======
+<h1>Bienvenue sur le portfolio de Léa</h1>
+>>>>>>> formulaire-contact
+```
+
+1. Ouvre le fichier et **choisis** ce qu'il faut garder (une version, l'autre, ou un mélange).
+2. Supprime les trois lignes de marqueurs `<<<<<<<`, `=======`, `>>>>>>>`.
+3. `git add index.html` puis `git commit` pour terminer la fusion.
+
+`git merge --abort` annule tout et revient à l'état d'avant la fusion. Un conflit n'est pas une erreur : c'est Git qui refuse de deviner à ta place.
+
+## 5. Une méthode de travail simple
+
+- `main` contient toujours une version **qui fonctionne**.
+- Une branche par tâche, avec un nom explicite : `correction-menu-mobile`, `ajout-page-contact`.
+- Des commits petits et fréquents.
+- On fusionne dans `main` quand la tâche est terminée et testée, puis on supprime la branche.
+
+!tuto Une fonctionnalité sur une branche
+# Créer la branche et travailler
+```
+git switch -c page-contact
+echo "<h1>Contact</h1>" > contact.html
+git add contact.html
+git commit -m "Ajoute la page de contact"
+```
+# Revenir sur main : la page a « disparu »
+Elle n'existe que sur l'autre branche. Rien n'est perdu.
+```
+git switch main
+ls                               # pas de contact.html ici
+git log --oneline --graph --all
+```
+# Fusionner et nettoyer
+```
+git merge page-contact           # main reçoit la page
+ls                               # contact.html est là
+git branch -d page-contact
+```
+!fin
+
+!retenir À retenir | `git switch -c nom` crée une branche et s'y place ; `git switch main` revient. ¶ `git merge branche` fusionne **dans** la branche courante. ¶ Conflit : éditer le fichier, retirer les marqueurs, `git add`, `git commit`. ¶ `main` reste toujours fonctionnelle : une branche par tâche.
+--- exos
+Q¤m¤Qu'est-ce qu'une branche ?¤Une ligne de développement indépendante;;Une copie du projet sur un autre disque;;Un fichier de configuration;;Un commit particulier¤
+Q¤m¤Quelle commande crée la branche test et s'y place ?¤`git switch -c test`;;`git branch test --go`;;`git new test`;;`git merge test`¤
+Q¤m¤Quelle commande liste les branches ?¤`git branch`;;`git list`;;`git branches --show`;;`git status -b`¤
+Q¤m¤Pour fusionner la branche contact dans main, où faut-il se placer ?¤Sur main;;Sur contact;;Peu importe;;Sur une troisième branche¤
+Q¤m¤Que désigne HEAD ?¤La branche courante et son dernier commit;;Le premier commit du projet;;Le dépôt distant;;Le fichier principal¤
+Q¤m¤Quand un conflit de fusion se produit-il ?¤Quand les deux branches ont modifié les mêmes lignes;;À chaque fusion;;Quand une branche est vide;;Quand le message de commit est trop long¤
+Q¤m¤Que signifient les lignes entre `<<<<<<< HEAD` et `=======` ?¤La version de la branche courante;;La version de l'autre branche;;Une erreur de syntaxe;;Le résultat de la fusion¤
+Q¤m¤Quelle commande annule une fusion en cours ?¤`git merge --abort`;;`git undo`;;`git merge --stop`;;`git reset merge`¤
+Q¤d¤Qu'est-ce qu'une fusion fast-forward ?¤L'étiquette de la branche avance sans créer de commit de fusion;;Une fusion plus rapide grâce au réseau;;Une fusion qui ignore les conflits;;Une fusion de trois branches¤
+Q¤m¤Après avoir résolu un conflit dans index.html, que faut-il faire ?¤`git add index.html` puis `git commit`;;`git merge` à nouveau;;Rien;;`git push --force`¤
+Q¤m¤Quelle commande supprime une branche fusionnée ?¤`git branch -d nom`;;`git delete nom`;;`git remove nom`;;`git switch -d nom`¤
+V¤m¤Créer une branche copie tous les fichiers du projet sur le disque.¤F¤Une branche n'est qu'une étiquette sur un commit.
+V¤m¤Un fichier créé sur une branche n'apparaît pas dans main tant qu'on n'a pas fusionné.¤V¤
+S¤m¤Quelle ancienne commande équivaut à `git switch -c contact` ? (git ________ -b contact)¤checkout¤
+A¤m¤Associe chaque commande à son rôle.¤`git switch`=>changer de branche;;`git merge`=>fusionner;;`git branch`=>lister les branches;;`git log --graph`=>dessiner l'historique¤
+
+=== git-github | Git : GitHub et le travail en équipe | m
+Un **dépôt distant** (*remote*) est une copie du dépôt hébergée sur un serveur : GitHub, GitLab ou le serveur de ton entreprise. C'est lui qui permet de sauvegarder, de partager et de collaborer.
+
+## 1. Relier son dépôt à GitHub
+
+```
+git remote add origin https://github.com/lea/portfolio.git    # « origin » : nom donné au distant
+git remote -v                                                 # vérifie
+git push -u origin main          # premier envoi ; -u mémorise le lien
+git push                         # les fois suivantes
+```
+
+Pour récupérer un projet existant, une seule commande :
+
+```
+git clone https://github.com/lea/portfolio.git
+```
+
+## 2. Envoyer et recevoir
+
+| Commande | Effet |
+| `git push` | envoie tes commits vers le distant |
+| `git fetch` | télécharge les nouveautés **sans** modifier tes fichiers |
+| `git pull` | `fetch` puis fusion : met ta branche à jour |
+| `git clone` | copie un dépôt distant complet |
+
+```
+git pull                         # avant de commencer à travailler
+# … commits …
+git push                         # quand une étape est terminée
+```
+
+!attention `push` refusé | Si quelqu'un a poussé avant toi, Git refuse ton `push` : fais d'abord `git pull`, règle un éventuel conflit, puis `git push`. N'utilise **jamais** `git push --force` sur une branche partagée : tu écraserais le travail des autres.
+
+## 3. S'authentifier
+
+GitHub n'accepte plus les mots de passe en ligne de commande. Deux solutions :
+
+- une **clé SSH** : `ssh-keygen -t ed25519`, puis on colle la clé **publique** (`~/.ssh/id_ed25519.pub`) dans les réglages de GitHub. L'adresse du dépôt devient `git@github.com:lea/portfolio.git` ;
+- un **jeton d'accès personnel** (*token*) utilisé à la place du mot de passe en HTTPS.
+
+## 4. La pull request
+
+Sur un projet d'équipe, personne ne pousse directement sur `main`. On propose ses modifications dans une **pull request** (PR ; *merge request* sur GitLab).
+
+1. Créer une branche et y commiter : `git switch -c correction-menu`.
+2. La pousser : `git push -u origin correction-menu`.
+3. Sur GitHub, ouvrir une pull request vers `main` : titre, description, captures.
+4. Un coéquipier **relit** le code, commente, demande des changements.
+5. Quand c'est validé, on **fusionne** la PR, puis on supprime la branche.
+
+La relecture attrape les bugs, diffuse les connaissances dans l'équipe, et laisse une trace écrite des décisions.
+
+## 5. Fork, issues et le reste
+
+| Outil | Rôle |
+| *Fork* | ta copie personnelle du dépôt de quelqu'un d'autre, pour proposer une contribution |
+| *Issue* | un ticket : bug à corriger, idée, tâche |
+| `README.md` | la page d'accueil du dépôt, en Markdown |
+| *Releases* / tags | les versions publiées (`git tag v1.0`) |
+| GitHub Actions | automatisation : tests et déploiement à chaque `push` |
+| GitHub Pages | hébergement gratuit d'un site statique |
+
+## 6. Un bon README
+
+Le README est la première chose que voit un recruteur ou un jury sur ton dépôt. Il s'écrit en **Markdown** :
+
+```
+# Gestion de parc informatique
+
+Application web de suivi du matériel (projet de BTS SIO).
+
+## Fonctionnalités
+- Inventaire du matériel
+- Suivi des interventions
+
+## Installation
+1. `git clone https://github.com/lea/parc.git`
+2. `composer install`
+3. Copier `.env.exemple` en `.env` et renseigner la base de données
+
+## Technologies
+PHP 8, MariaDB, Bootstrap
+```
+
+!tuto Publier un projet sur GitHub
+# Créer le dépôt en ligne
+Sur GitHub : *New repository*, donne-lui un nom, laisse-le **vide** (sans README), puis copie son adresse.
+# Relier et pousser
+```
+git remote add origin https://github.com/ton-compte/portfolio.git
+git push -u origin main
+```
+# Travailler ensuite
+```
+git pull                                  # récupère ce qui a changé
+git switch -c ajout-projets
+# … modifications …
+git add . && git commit -m "Ajoute la section projets"
+git push -u origin ajout-projets
+# puis : ouvrir une pull request sur GitHub
+```
+!fin
+
+!retenir À retenir | `git clone` copie un dépôt distant ; `git remote add origin URL` relie un dépôt local. ¶ `git pull` avant de travailler, `git push` après. ¶ Jamais de `push --force` sur une branche partagée. ¶ Pull request : une branche, une relecture, une fusion. ¶ Authentification par clé SSH ou jeton.
+--- exos
+Q¤f¤Quelle commande copie un dépôt distant sur ta machine ?¤`git clone`;;`git copy`;;`git download`;;`git fetch --all`¤
+Q¤f¤Quelle commande envoie tes commits vers le dépôt distant ?¤`git push`;;`git send`;;`git upload`;;`git commit --remote`¤
+Q¤m¤Quelle commande récupère et fusionne les nouveautés du distant ?¤`git pull`;;`git push`;;`git get`;;`git status`¤
+Q¤m¤Quel nom donne-t-on par convention au dépôt distant principal ?¤origin;;main;;remote;;github¤
+Q¤m¤Quelle est la différence entre fetch et pull ?¤fetch télécharge sans modifier tes fichiers, pull fusionne en plus;;Aucune;;fetch envoie, pull reçoit;;pull est plus ancien¤
+Q¤m¤Que faire quand `git push` est refusé parce que le distant a avancé ?¤`git pull` puis `git push`;;`git push --force`;;Supprimer le dépôt;;`git init`¤
+Q¤d¤Pourquoi `git push --force` est-il dangereux sur une branche partagée ?¤Il écrase les commits des autres;;Il est très lent;;Il supprime le dépôt local;;Il change ton mot de passe¤
+Q¤m¤Qu'est-ce qu'une pull request ?¤Une proposition de fusion d'une branche, soumise à relecture;;Une demande de téléchargement;;Un ticket de bug;;Une sauvegarde¤
+Q¤m¤Qu'est-ce qu'un fork ?¤Ta copie personnelle du dépôt de quelqu'un d'autre;;Une branche locale;;Un conflit;;Un commit de fusion¤
+Q¤m¤Qu'est-ce qu'une issue ?¤Un ticket : bug, idée ou tâche;;Une erreur de Git;;Une branche abandonnée;;Un fichier ignoré¤
+Q¤m¤Quelle clé colle-t-on dans les réglages de GitHub pour l'authentification SSH ?¤La clé publique;;La clé privée;;Les deux;;Le mot de passe du compte¤
+Q¤m¤En quel langage écrit-on le README d'un dépôt ?¤Markdown;;HTML uniquement;;LaTeX;;YAML¤
+V¤m¤Sur un projet d'équipe, on pousse directement ses commits sur main.¤F¤On passe par une branche et une pull request.
+V¤m¤GitHub accepte encore le mot de passe du compte pour git push en ligne de commande.¤F¤Il faut une clé SSH ou un jeton.
+S¤m¤Quelle commande affiche les dépôts distants configurés ? (git ______ -v)¤remote¤
+A¤m¤Associe chaque commande à son rôle.¤`git clone`=>copier un dépôt distant;;`git push`=>envoyer ses commits;;`git pull`=>récupérer et fusionner;;`git remote add`=>relier à un distant¤
+
+=== git-annuler | Git : annuler, corriger et bonnes pratiques | m
+Git ne perd presque jamais rien : il existe une commande pour chaque situation. L'important est de savoir **où** se trouve ce qu'on veut annuler.
+
+## 1. Quelle commande pour quelle situation ?
+
+| Situation | Commande |
+| J'ai modifié un fichier et je veux retrouver la version du dernier commit | `git restore fichier` |
+| J'ai fait `git add` par erreur | `git restore --staged fichier` |
+| Mon dernier message de commit est faux | `git commit --amend -m "Nouveau message"` |
+| J'ai oublié un fichier dans le dernier commit | `git add fichier` puis `git commit --amend --no-edit` |
+| Je veux annuler un commit déjà poussé | `git revert a1b2c3d` |
+| Je veux défaire mes derniers commits **locaux** | `git reset` |
+
+!attention `git restore fichier` est définitif | Les modifications non commitées qu'il efface ne sont enregistrées nulle part : elles sont perdues pour de bon.
+
+## 2. `revert` ou `reset` ?
+
+```
+git revert a1b2c3d           # crée un NOUVEAU commit qui annule a1b2c3d
+```
+
+`revert` n'efface rien : il ajoute un commit inverse. C'est la seule méthode correcte pour un commit **déjà partagé**.
+
+```
+git reset --soft HEAD~1      # défait le dernier commit, garde les changements dans l'index
+git reset HEAD~1             # défait le dernier commit, garde les changements dans les fichiers
+git reset --hard HEAD~1      # défait le dernier commit ET efface les changements
+```
+
+`reset` réécrit l'histoire : à réserver aux commits qui n'ont **pas encore été poussés**. `HEAD~1` signifie « un commit avant HEAD ».
+
+## 3. Mettre de côté : `git stash`
+
+Tu es au milieu d'une modification et il faut changer de branche tout de suite :
+
+```
+git stash                    # range les modifications en cours, le dossier redevient propre
+git switch main              # … on corrige l'urgence …
+git switch ma-branche
+git stash pop                # reprend là où on en était
+git stash list               # ce qui est en attente
+```
+
+## 4. Retrouver un commit « perdu »
+
+```
+git reflog                   # le journal de tous les déplacements de HEAD
+git switch -c sauvetage a1b2c3d      # recrée une branche sur le commit retrouvé
+```
+
+Même après un `reset --hard`, le commit reste récupérable pendant plusieurs semaines grâce à `reflog`.
+
+## 5. Enquêter
+
+```
+git log --oneline --author="Léa" --since="2 weeks ago"
+git log -S "motDePasse"              # commits qui ont ajouté ou retiré ce texte
+git blame config.php                 # qui a écrit chaque ligne, et dans quel commit
+git bisect start                     # recherche du commit qui a introduit un bug
+```
+
+## 6. Les étiquettes de version
+
+```
+git tag v1.0                         # marque le commit courant
+git tag                              # liste
+git push origin v1.0                 # les tags se poussent explicitement
+```
+
+La numérotation habituelle est **majeur.mineur.correctif** : `2.4.1`. On incrémente le correctif pour un bug, le mineur pour une nouveauté compatible, le majeur pour un changement incompatible.
+
+## 7. Les bonnes pratiques
+
+- `git status` avant chaque `add`, `commit` et `push`.
+- `git pull` avant de commencer à travailler.
+- Des commits petits, un sujet par commit, un message clair.
+- Une branche par tâche ; `main` toujours fonctionnelle.
+- Un `.gitignore` dès le premier commit ; aucun secret dans le dépôt.
+- Ne jamais réécrire une histoire déjà partagée (`reset`, `amend`, `push --force`).
+
+!info Pour les SISR aussi | Scripts d'administration, fichiers de configuration (`nginx.conf`, règles de pare-feu), playbooks Ansible, documentation : tout ce qui est du texte gagne à être versionné. C'est le principe de l'*infrastructure as code* : on sait ce qui a changé sur un serveur, quand, et par qui.
+
+!tuto Réparer trois erreurs courantes
+# Un message de commit raté
+```
+git commit -m "modifs"
+git commit --amend -m "Corrige l'alignement du menu sur mobile"
+```
+# Un fichier ajouté par erreur
+```
+git add .                            # oups : .env est parti dans l'index
+git restore --staged .env            # il en sort (le fichier n'est pas modifié)
+echo ".env" >> .gitignore
+```
+# Un commit déjà poussé qui casse tout
+```
+git log --oneline                    # repère son identifiant, par exemple a1b2c3d
+git revert a1b2c3d                   # crée le commit inverse
+git push
+```
+!fin
+
+!retenir À retenir | `git restore fichier` annule une modification, `git restore --staged fichier` annule un `add`. ¶ `git commit --amend` corrige le dernier commit (non poussé). ¶ `git revert` annule un commit partagé en créant un commit inverse ; `git reset` réécrit l'histoire locale. ¶ `git stash` met de côté, `git reflog` retrouve ce qu'on croyait perdu.
+--- exos
+Q¤m¤Quelle commande retire un fichier de l'index sans toucher à son contenu ?¤`git restore --staged fichier`;;`git rm fichier`;;`git reset --hard`;;`git clean`¤
+Q¤m¤Quelle commande corrige le message du dernier commit ?¤`git commit --amend`;;`git commit --fix`;;`git edit`;;`git log --edit`¤
+Q¤m¤Comment annuler proprement un commit déjà poussé ?¤`git revert` : un nouveau commit qui l'annule;;`git reset --hard` puis push --force;;Supprimer le dépôt;;`git restore`¤
+Q¤m¤Que fait `git stash` ?¤Met de côté les modifications en cours;;Supprime les modifications;;Crée une branche;;Envoie sur GitHub¤
+Q¤m¤Quelle commande reprend ce qui a été mis de côté ?¤`git stash pop`;;`git stash back`;;`git unstash`;;`git restore stash`¤
+Q¤d¤Que fait `git reset --hard HEAD~1` ?¤Défait le dernier commit et efface ses changements;;Défait le dernier commit en gardant les fichiers;;Annule un push;;Crée un commit inverse¤
+Q¤d¤Que signifie `HEAD~1` ?¤Le commit précédant le commit courant;;Le premier commit;;La branche main;;Le prochain commit¤
+Q¤m¤Quelle commande montre qui a écrit chaque ligne d'un fichier ?¤`git blame`;;`git who`;;`git author`;;`git log --lines`¤
+Q¤d¤Quelle commande permet de retrouver un commit après un reset --hard ?¤`git reflog`;;`git log`;;`git status`;;`git find`¤
+Q¤m¤Que marque `git tag v1.0` ?¤Le commit courant comme version 1.0;;Une nouvelle branche;;Un fichier;;Un dépôt distant¤
+Q¤m¤Dans la version 2.4.1, que représente le dernier chiffre ?¤Un correctif de bug;;Un changement incompatible;;Une nouveauté;;L'année¤
+Q¤d¤Pourquoi ne pas utiliser `git reset` sur des commits déjà poussés ?¤Cela réécrit une histoire que d'autres ont déjà récupérée;;C'est trop lent;;Git l'interdit;;Cela supprime le dépôt distant¤
+V¤m¤`git restore fichier` permet de retrouver plus tard les modifications effacées.¤F¤Elles n'étaient enregistrées nulle part : elles sont perdues.
+V¤m¤Versionner des fichiers de configuration de serveur avec Git est une bonne pratique.¤V¤C'est le principe de l'infrastructure as code.
+S¤m¤Quelle commande crée un commit qui annule le commit a1b2c3d ? (git ______ a1b2c3d)¤revert¤
+A¤m¤Associe chaque situation à la commande.¤modification à jeter=>`git restore`;;commit partagé à annuler=>`git revert`;;travail à mettre de côté=>`git stash`;;commit perdu à retrouver=>`git reflog`¤

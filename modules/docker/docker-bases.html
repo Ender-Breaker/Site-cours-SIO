@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Docker : images et conteneurs — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="docker" data-chapter="docker-bases">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/docker.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>« Ça marche sur ma machine » : <b>Docker</b> supprime ce problème. Il emballe une application <b>avec tout ce dont elle a besoin</b> (bibliothèques, configuration, version exacte de PHP ou de MariaDB) dans un <b>conteneur</b> qui tourne à l'identique partout. Côté SLAM, il donne un environnement de développement en une commande ; côté SISR, il déploie et isole des services.</p>
+<h2>1. Conteneur ou machine virtuelle ?</h2>
+<table><tr><th></th><th>Machine virtuelle</th><th>Conteneur</th></tr><tr><td>Contient</td><td>un système d'exploitation complet</td><td>l'application et ses dépendances</td></tr><tr><td>Noyau</td><td>le sien</td><td>celui de la machine hôte, partagé</td></tr><tr><td>Démarrage</td><td>dizaines de secondes</td><td>moins d'une seconde</td></tr><tr><td>Taille</td><td>plusieurs Go</td><td>quelques dizaines de Mo</td></tr><tr><td>Isolation</td><td>très forte</td><td>bonne, mais plus légère</td></tr></table>
+<h2>2. Le vocabulaire</h2>
+<table><tr><th>Terme</th><th>Définition</th></tr><tr><td><b>Image</b></td><td>le modèle en lecture seule (comme une classe)</td></tr><tr><td><b>Conteneur</b></td><td>une instance en cours d'exécution d'une image (comme un objet)</td></tr><tr><td><b>Registre</b></td><td>l'entrepôt d'images ; Docker Hub est le registre public</td></tr><tr><td><b>Dockerfile</b></td><td>la recette de fabrication d'une image</td></tr><tr><td><b>Volume</b></td><td>un espace de stockage qui survit au conteneur</td></tr></table>
+<h2>3. Lancer des conteneurs</h2>
+<pre><code>docker run hello-world                       # télécharge l'image et lance un conteneur
+docker run -d --name web -p 8080:80 nginx    # un serveur web en arrière-plan</code></pre>
+<table><tr><th>Option</th><th>Rôle</th></tr><tr><td><code>-d</code></td><td>en arrière-plan (*detached*)</td></tr><tr><td><code>--name web</code></td><td>donne un nom au conteneur</td></tr><tr><td><code>-p 8080:80</code></td><td>relie le port 8080 de la machine au port 80 du conteneur</td></tr><tr><td><code>-e CLE=valeur</code></td><td>définit une variable d'environnement</td></tr><tr><td><code>-v dossier:/chemin</code></td><td>monte un dossier ou un volume</td></tr><tr><td><code>--rm</code></td><td>supprime le conteneur à son arrêt</td></tr><tr><td><code>-it</code></td><td>mode interactif (un terminal)</td></tr></table>
+<p>Après la deuxième commande, <code>http://localhost:8080</code> affiche la page de nginx.</p>
+<h2>4. Observer et gérer</h2>
+<pre><code>docker ps                        # conteneurs en cours
+docker ps -a                     # tous, y compris arrêtés
+docker logs web                  # ce que le conteneur a affiché
+docker logs -f web               # … en continu
+docker exec -it web bash         # ouvre un terminal DANS le conteneur
+docker stop web                  # arrête
+docker start web                 # relance
+docker rm web                    # supprime le conteneur
+docker images                    # images présentes sur la machine
+docker rmi nginx                 # supprime une image
+docker system prune              # nettoie ce qui ne sert plus</code></pre>
+<h2>5. Les données : volumes et montages</h2>
+<p>Un conteneur est <b>éphémère</b> : quand on le supprime, tout ce qu'il a écrit disparaît. Les données à conserver vont dans un <b>volume</b>.</p>
+<pre><code>docker volume create donnees-bdd
+docker run -d --name bdd \
+  -e MARIADB_ROOT_PASSWORD=secret \
+  -v donnees-bdd:/var/lib/mysql \
+  mariadb:11
+
+docker run -d -p 8080:80 -v "$(pwd)/site":/usr/share/nginx/html:ro nginx</code></pre>
+<p>La seconde commande <b>monte un dossier</b> de ta machine dans le conteneur (<code>:ro</code> : en lecture seule) : tu modifies tes fichiers avec ton éditeur, nginx les sert aussitôt.</p>
+<h2>6. Les étiquettes de version</h2>
+<pre><code>docker pull php:8.3-apache       # une version précise
+docker pull mariadb:11
+docker pull nginx:latest         # « latest » : la plus récente… qui change sans prévenir</code></pre>
+<div class="box attention"><b>Jamais <code>latest</code> en production</b><p>L'étiquette <code>latest</code> désigne une version différente selon le jour où tu la télécharges. Fixe toujours une version (<code>mariadb:11.4</code>) : ton déploiement reste reproductible.</p></div>
+<section class="tuto"><h3><small>Tutoriel</small>Un serveur web avec ta page</h3>
+<div class="etape"><h4>Lancer nginx</h4>
+<pre><code>docker run -d --name web -p 8080:80 nginx:1.27
+docker ps</code></pre>
+</div>
+<div class="etape"><h4>Regarder à l'intérieur</h4>
+<pre><code>docker exec -it web bash
+ls /usr/share/nginx/html         # la page par défaut est ici
+exit</code></pre>
+</div>
+<div class="etape"><h4>Servir ton propre dossier</h4>
+<pre><code>docker rm -f web                 # -f : arrête et supprime
+mkdir site &amp;&amp; echo "&lt;h1&gt;Mon site&lt;/h1&gt;" &gt; site/index.html
+docker run -d --name web -p 8080:80 -v "$(pwd)/site":/usr/share/nginx/html:ro nginx:1.27</code></pre>
+<p>Modifie <code>site/index.html</code> et recharge la page : le changement est immédiat.</p>
+</div>
+</section>
+<div class="box retenir"><b>À retenir</b><p>Image = modèle ; conteneur = instance en cours d'exécution. </p><p> <code>docker run -d --name nom -p hôte:conteneur image</code>. </p><p> <code>docker ps</code>, <code>docker logs</code>, <code>docker exec -it nom bash</code>, <code>docker stop</code>, <code>docker rm</code>. </p><p> Un conteneur est éphémère : les données durables vont dans un volume (<code>-v</code>). </p><p> Toujours une version précise, jamais <code>latest</code>.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'un conteneur Docker ?",
+  "type": "qcm",
+  "options": [
+   "Un disque dur virtuel",
+   "Une machine virtuelle complète",
+   "Une instance en cours d'exécution d'une image",
+   "Un fichier de configuration"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'une image Docker ?",
+  "type": "qcm",
+  "options": [
+   "Un conteneur arrêté",
+   "Une capture d'écran",
+   "Un modèle en lecture seule servant à créer des conteneurs",
+   "Une sauvegarde"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle différence principale avec une machine virtuelle ?",
+  "type": "qcm",
+  "options": [
+   "Aucune",
+   "Le conteneur partage le noyau de la machine hôte",
+   "Le conteneur a son propre noyau",
+   "Le conteneur est plus lent à démarrer"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait l'option `-p 8080:80` ?",
+  "type": "qcm",
+  "options": [
+   "Relie le port 8080 de la machine au port 80 du conteneur",
+   "Relie le port 80 de la machine au 8080 du conteneur",
+   "Limite la mémoire",
+   "Lance 8080 conteneurs"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait l'option `-d` de docker run ?",
+  "type": "qcm",
+  "options": [
+   "Lance le conteneur en arrière-plan",
+   "Télécharge l'image",
+   "Active le débogage",
+   "Supprime le conteneur"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande liste les conteneurs en cours d'exécution ?",
+  "type": "qcm",
+  "options": [
+   "`docker list`",
+   "`docker ps`",
+   "`docker images`",
+   "`docker status`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande ouvre un terminal dans le conteneur web ?",
+  "type": "qcm",
+  "options": [
+   "`docker exec -it web bash`",
+   "`docker run web bash`",
+   "`docker open web`",
+   "`docker ssh web`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande affiche ce qu'un conteneur a écrit sur sa sortie ?",
+  "type": "qcm",
+  "options": [
+   "`docker cat`",
+   "`docker print`",
+   "`docker out`",
+   "`docker logs`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que deviennent les données écrites dans un conteneur quand on le supprime ?",
+  "type": "qcm",
+  "options": [
+   "Elles sont perdues, sauf si elles sont dans un volume",
+   "Elles restent dans l'image",
+   "Elles sont archivées",
+   "Elles sont envoyées sur Docker Hub"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "À quoi sert un volume ?",
+  "type": "qcm",
+  "options": [
+   "À limiter le processeur",
+   "À régler le son",
+   "À conserver des données au-delà de la vie d'un conteneur",
+   "À relier deux réseaux"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce que Docker Hub ?",
+  "type": "qcm",
+  "options": [
+   "Un système d'exploitation",
+   "Le registre public d'images",
+   "Un outil de supervision",
+   "Un éditeur de Dockerfile"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi éviter l'étiquette `latest` en production ?",
+  "type": "qcm",
+  "options": [
+   "Elle désigne une version qui change dans le temps",
+   "Elle est payante",
+   "Elle n'existe pas",
+   "Elle est plus lente"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle option passe une variable d'environnement au conteneur ?",
+  "type": "qcm",
+  "options": [
+   "`-e`",
+   "`-v`",
+   "`-x`",
+   "`-p`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Un conteneur démarre en général plus vite qu'une machine virtuelle.",
+  "type": "vf",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande télécharge une image sans la lancer (docker ____ nginx) ?",
+  "type": "saisie",
+  "answers": [
+   "pull"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque commande à son rôle.",
+  "type": "associer",
+  "paires": [
+   [
+    "`docker run`",
+    "créer et lancer un conteneur"
+   ],
+   [
+    "`docker ps`",
+    "lister les conteneurs"
+   ],
+   [
+    "`docker stop`",
+    "arrêter"
+   ],
+   [
+    "`docker rm`",
+    "supprimer un conteneur"
+   ],
+   [
+    "`docker images`",
+    "lister les images"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

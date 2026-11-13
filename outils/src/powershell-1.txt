@@ -1,0 +1,296 @@
+=== ps-bases | PowerShell : cmdlets, objets et pipeline | f
+**PowerShell** est le shell et le langage de script de Windows (il existe aussi pour Linux et macOS). Il sert à administrer les postes, Windows Server, Active Directory, Microsoft 365. Sa grande différence avec Bash : les commandes n'échangent pas du **texte**, mais des **objets**.
+
+## 1. Les cmdlets : Verbe-Nom
+
+Toutes les commandes suivent la même forme, ce qui les rend devinables.
+
+```
+Get-Process                      # liste les processus
+Get-Service                      # liste les services
+Get-ChildItem C:\Users           # contenu d'un dossier (alias : dir, ls, gci)
+Get-Content notes.txt            # contenu d'un fichier (alias : cat, type)
+Set-Location C:\Scripts          # change de dossier (alias : cd)
+New-Item -ItemType Directory -Name Projet
+Remove-Item ancien.txt
+Copy-Item a.txt b.txt
+```
+
+| Verbe | Rôle |
+| `Get` | lire |
+| `Set` | modifier |
+| `New` | créer |
+| `Remove` | supprimer |
+| `Start` / `Stop` / `Restart` | démarrer / arrêter / redémarrer |
+
+## 2. Trouver de l'aide
+
+```
+Get-Command *service*            # quelles commandes parlent de services ?
+Get-Help Get-Service -Examples   # des exemples d'utilisation
+Get-Service | Get-Member         # quelles propriétés et méthodes ont ces objets ?
+```
+
+Ces trois commandes suffisent à tout découvrir sans quitter le terminal.
+
+## 3. Le pipeline d'objets
+
+Le tube `|` transmet des **objets** complets, avec leurs propriétés. Pas besoin de découper du texte avec `cut` ou `awk`.
+
+```
+Get-Service | Where-Object Status -eq "Running"                  # filtre
+Get-Process | Sort-Object CPU -Descending | Select-Object -First 5 Name, CPU
+Get-ChildItem C:\Logs -Filter *.log | Measure-Object Length -Sum
+Get-Process | Where-Object { $_.WorkingSet -gt 200MB } | Select-Object Name, Id
+Get-Service | Group-Object Status
+```
+
+| Cmdlet | Rôle | Équivalent Linux |
+| `Where-Object` | filtrer | `grep` |
+| `Select-Object` | choisir des propriétés ou les N premiers | `cut`, `head` |
+| `Sort-Object` | trier | `sort` |
+| `Measure-Object` | compter, additionner | `wc` |
+| `Group-Object` | regrouper | `uniq -c` |
+| `ForEach-Object` | agir sur chaque objet | une boucle |
+
+Dans un bloc `{ }`, `$_` désigne **l'objet en cours**.
+
+## 4. Les opérateurs de comparaison
+
+| Opérateur | Sens |
+| `-eq` `-ne` | égal, différent |
+| `-gt` `-ge` `-lt` `-le` | supérieur, supérieur ou égal, inférieur, inférieur ou égal |
+| `-like` | correspond à un motif avec `*` : `-like "*.log"` |
+| `-match` | correspond à une expression régulière |
+| `-and` `-or` `-not` | et, ou, non |
+
+PowerShell ne tient pas compte de la casse par défaut : `"ABC" -eq "abc"` est vrai.
+
+## 5. Exporter et mettre en forme
+
+```
+Get-Service | Export-Csv services.csv -NoTypeInformation -Encoding UTF8
+Import-Csv utilisateurs.csv                      # chaque ligne devient un objet
+Get-Process | ConvertTo-Json
+Get-Service | Out-File services.txt
+Get-Process | Format-Table Name, Id, CPU -AutoSize
+Get-Process | Out-GridView                       # une fenêtre triable et filtrable
+```
+
+## 6. Variables et types
+
+```
+$nom = "Léa"                     # toutes les variables commencent par $
+$age = 17
+$liste = @("pc01", "pc02", "pc03")               # tableau
+$compte = @{ Nom = "Léa"; Service = "SIO" }      # table de hachage (dictionnaire)
+"Bonjour $nom, tu as $age ans"                   # guillemets doubles : variables remplacées
+'Bonjour $nom'                                   # guillemets simples : texte littéral
+"Il y a $($liste.Count) postes"                  # $( ) pour une expression
+$liste[0]; $compte.Nom; $compte["Service"]
+```
+
+!tuto Faire l'état d'un poste
+# Les informations système
+```
+Get-ComputerInfo | Select-Object CsName, OsName, OsVersion
+```
+# L'espace disque
+```
+Get-PSDrive -PSProvider FileSystem | Select-Object Name, @{ n = "LibreGo"; e = { [math]::Round($_.Free / 1GB, 1) } }
+```
+# Les services arrêtés qui devraient tourner
+```
+Get-Service | Where-Object { $_.StartType -eq "Automatic" -and $_.Status -ne "Running" }
+```
+# Un rapport dans un fichier
+```
+Get-Service | Where-Object Status -eq "Running" | Select-Object Name, DisplayName | Export-Csv rapport.csv -NoTypeInformation
+```
+!fin
+
+!retenir À retenir | Cmdlets en `Verbe-Nom` : `Get-`, `Set-`, `New-`, `Remove-`. ¶ `Get-Command`, `Get-Help`, `Get-Member` pour tout découvrir. ¶ Le pipeline transmet des **objets** : `Where-Object`, `Select-Object`, `Sort-Object`. ¶ `$_` : l'objet en cours. ¶ Comparaisons : `-eq`, `-gt`, `-like`, `-and`. ¶ `Export-Csv` / `Import-Csv`.
+--- exos
+Q¤f¤Quelle forme ont les commandes PowerShell ?¤Verbe-Nom;;Nom.Verbe;;nom_verbe;;VERBE NOM¤
+Q¤f¤Quelle cmdlet liste les processus ?¤`Get-Process`;;`List-Process`;;`Show-Tasks`;;`ps-list`¤
+Q¤m¤Que transmet le pipeline `|` en PowerShell ?¤Des objets avec leurs propriétés;;Du texte brut uniquement;;Des fichiers;;Des nombres¤
+Q¤m¤Quelle cmdlet filtre les objets selon une condition ?¤`Where-Object`;;`Select-Object`;;`Filter-List`;;`Find-Object`¤
+Q¤m¤Quelle cmdlet choisit certaines propriétés ou les N premiers objets ?¤`Select-Object`;;`Where-Object`;;`Sort-Object`;;`Group-Object`¤
+Q¤m¤Que désigne `$_` dans un bloc de script ?¤L'objet en cours de traitement;;La dernière erreur;;Le dossier courant;;Le nom du script¤
+Q¤m¤Quel opérateur teste l'égalité ?¤`-eq`;;`==`;;`=`;;`-is`¤
+Q¤m¤Quel opérateur compare à un motif avec `*` ?¤`-like`;;`-match`;;`-eq`;;`-in`¤
+Q¤m¤Quelle cmdlet affiche les propriétés et méthodes d'un objet ?¤`Get-Member`;;`Get-Help`;;`Get-Command`;;`Show-Object`¤
+Q¤m¤Quelle cmdlet exporte des objets dans un fichier CSV ?¤`Export-Csv`;;`Out-Csv`;;`Save-Csv`;;`Write-Csv`¤
+Q¤m¤Comment déclare-t-on un tableau ?¤`@("a", "b")`;;`["a", "b"]`;;`{"a", "b"}`;;`array("a", "b")`¤
+Q¤m¤Qu'affiche `'Bonjour $nom'` (guillemets simples) ?¤Bonjour $nom;;Bonjour suivi de la valeur de nom;;Une erreur;;Rien¤
+Q¤d¤Que renvoie `"ABC" -eq "abc"` ?¤True : PowerShell ignore la casse par défaut;;False;;Une erreur;;$null¤
+V¤f¤En PowerShell, le nom d'une variable commence par $.¤V¤
+S¤m¤Quelle cmdlet trie des objets (____-Object) ?¤Sort;;Sort-Object¤
+A¤m¤Associe chaque cmdlet à son équivalent Linux.¤`Get-ChildItem`=>ls;;`Get-Content`=>cat;;`Where-Object`=>grep;;`Sort-Object`=>sort;;`Set-Location`=>cd¤
+
+=== ps-administration | PowerShell : scripts et administration | m
+## 1. Écrire un script
+
+Un script est un fichier `.ps1`. Par sécurité, Windows bloque leur exécution par défaut.
+
+```
+Get-ExecutionPolicy                              # Restricted sur un poste neuf
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser   # autorise tes scripts locaux
+.\rapport.ps1                                    # lance le script (le .\ est obligatoire)
+```
+
+```
+# rapport.ps1
+param(
+    [string]$Dossier = "C:\Logs",                # paramètre avec valeur par défaut
+    [int]$Jours = 7
+)
+Write-Host "Analyse de $Dossier sur $Jours jours"
+```
+
+```
+.\rapport.ps1 -Dossier D:\Journaux -Jours 30
+```
+
+## 2. Conditions et boucles
+
+```
+if (Test-Path "C:\Sauvegardes") {
+    Write-Host "Le dossier existe"
+} elseif ($Jours -gt 30) {
+    Write-Host "Période longue"
+} else {
+    New-Item -ItemType Directory -Path "C:\Sauvegardes" | Out-Null
+}
+
+foreach ($poste in @("pc01", "pc02", "pc03")) {
+    if (Test-Connection $poste -Count 1 -Quiet) { "$poste répond" } else { "$poste ne répond PAS" }
+}
+
+for ($i = 1; $i -le 3; $i++) { "Tour $i" }
+$n = 0
+while ($n -lt 3) { $n++ }
+
+Get-ChildItem *.log | ForEach-Object { "$($_.Name) : $($_.Length) octets" }
+```
+
+## 3. Fonctions et gestion des erreurs
+
+```
+function Get-EspaceLibre {
+    param([string]$Lettre = "C")
+    $disque = Get-PSDrive $Lettre
+    return [math]::Round($disque.Free / 1GB, 1)
+}
+"Libre sur C : $(Get-EspaceLibre) Go"
+
+try {
+    Get-Content "C:\absent.txt" -ErrorAction Stop     # Stop : transforme l'erreur en exception
+} catch {
+    Write-Warning "Lecture impossible : $($_.Exception.Message)"
+} finally {
+    "Fin du traitement"
+}
+```
+
+## 4. Services, processus, journaux
+
+```
+Get-Service Spooler
+Restart-Service Spooler                          # relance le service d'impression
+Set-Service Spooler -StartupType Automatic
+Stop-Process -Name notepad
+Get-EventLog -LogName System -EntryType Error -Newest 10
+Get-WinEvent -FilterHashtable @{ LogName = "Security"; Id = 4625 } -MaxEvents 20    # échecs de connexion
+```
+
+## 5. Active Directory
+
+Sur un contrôleur de domaine (module `ActiveDirectory`) :
+
+```
+Get-ADUser -Filter * -SearchBase "OU=SIO,DC=lycee,DC=local" | Select-Object Name, SamAccountName
+Get-ADUser lea.martin -Properties LastLogonDate, MemberOf
+
+New-ADUser -Name "Léa Martin" -SamAccountName "lea.martin" `
+    -UserPrincipalName "lea.martin@lycee.local" -Path "OU=SIO,DC=lycee,DC=local" `
+    -AccountPassword (Read-Host "Mot de passe" -AsSecureString) `
+    -ChangePasswordAtLogon $true -Enabled $true
+
+Add-ADGroupMember -Identity "G_SIO1" -Members "lea.martin"
+Disable-ADAccount lea.martin
+Unlock-ADAccount lea.martin
+Search-ADAccount -AccountInactive -TimeSpan 90.00:00:00 -UsersOnly     # comptes inactifs depuis 90 jours
+```
+
+L'accent grave `` ` `` en fin de ligne poursuit la commande sur la ligne suivante.
+
+## 6. Administrer à distance
+
+```
+Enter-PSSession -ComputerName srv-fichiers       # un terminal sur la machine distante
+Invoke-Command -ComputerName pc01, pc02, pc03 -ScriptBlock { Get-Service Spooler }
+```
+
+`Invoke-Command` exécute le même bloc sur plusieurs machines **en parallèle** et rassemble les résultats.
+
+## 7. Bonnes pratiques
+
+- Tester d'abord avec `-WhatIf` : la commande **affiche** ce qu'elle ferait, sans rien modifier (`Remove-Item *.tmp -WhatIf`).
+- Jamais de mot de passe en clair dans un script : `Read-Host -AsSecureString` ou `Get-Credential`.
+- Des paramètres plutôt que des valeurs écrites en dur.
+- Journaliser ce que fait le script (`Start-Transcript`, ou `Add-Content` dans un fichier).
+- Versionner les scripts avec Git.
+
+!tuto Créer des comptes à partir d'un fichier CSV
+# Le fichier
+```
+Prenom;Nom;Classe
+Léa;Martin;SIO1
+Sam;Durand;SIO1
+```
+# Le lire et construire l'identifiant
+```
+$eleves = Import-Csv eleves.csv -Delimiter ";"
+foreach ($e in $eleves) {
+    $login = ("{0}.{1}" -f $e.Prenom, $e.Nom).ToLower()
+    "$login (classe $($e.Classe))"
+}
+```
+# Créer les comptes, sans doublon, avec un journal
+Lance d'abord le script avec `-WhatIf` ajouté à `New-ADUser` pour vérifier.
+```
+$mdp = Read-Host "Mot de passe initial" -AsSecureString     # jamais écrit dans le script
+foreach ($e in $eleves) {
+    $login = ("{0}.{1}" -f $e.Prenom, $e.Nom).ToLower()
+    if (Get-ADUser -Filter "SamAccountName -eq '$login'") {
+        Add-Content journal.txt "$login existe déjà"
+        continue
+    }
+    New-ADUser -Name "$($e.Prenom) $($e.Nom)" -SamAccountName $login `
+        -Path "OU=$($e.Classe),DC=lycee,DC=local" `
+        -AccountPassword $mdp `
+        -ChangePasswordAtLogon $true -Enabled $true
+    Add-Content journal.txt "$login créé"
+}
+```
+!fin
+
+!retenir À retenir | Un script est un fichier `.ps1`, lancé avec `.\script.ps1` ; `param(…)` déclare ses paramètres. ¶ `if / elseif / else`, `foreach ($x in $liste)`, `try / catch` avec `-ErrorAction Stop`. ¶ `Get-Service`, `Restart-Service`, `Get-EventLog`. ¶ Active Directory : `Get-ADUser`, `New-ADUser`, `Add-ADGroupMember`. ¶ `Invoke-Command` pour agir à distance ; `-WhatIf` pour simuler.
+--- exos
+Q¤f¤Quelle est l'extension d'un script PowerShell ?¤`.ps1`;;`.psh`;;`.bat`;;`.sh`¤
+Q¤m¤Comment lance-t-on le script rapport.ps1 du dossier courant ?¤`.\rapport.ps1`;;`rapport.ps1`;;`run rapport.ps1`;;`start rapport`¤
+Q¤m¤Quelle cmdlet règle la politique d'exécution des scripts ?¤`Set-ExecutionPolicy`;;`Enable-Scripts`;;`Set-ScriptMode`;;`Allow-Script`¤
+Q¤m¤Quel bloc déclare les paramètres d'un script ?¤`param( … )`;;`args( … )`;;`input( … )`;;`define( … )`¤
+Q¤m¤Quelle cmdlet teste l'existence d'un fichier ou d'un dossier ?¤`Test-Path`;;`Exists-Item`;;`Check-File`;;`Get-Exists`¤
+Q¤m¤Quelle cmdlet teste si une machine répond au ping ?¤`Test-Connection`;;`Ping-Host`;;`Get-Ping`;;`Check-Network`¤
+Q¤m¤Quelle cmdlet relance un service ?¤`Restart-Service`;;`Reload-Service`;;`Reset-Service`;;`Start-Again`¤
+Q¤m¤Quelle cmdlet crée un utilisateur Active Directory ?¤`New-ADUser`;;`Add-User`;;`Create-ADUser`;;`Set-ADUser`¤
+Q¤m¤Quelle cmdlet ajoute un utilisateur à un groupe AD ?¤`Add-ADGroupMember`;;`Set-ADGroup`;;`Join-ADGroup`;;`New-ADGroupUser`¤
+Q¤m¤Que fait le paramètre `-WhatIf` ?¤Il montre ce que ferait la commande sans rien modifier;;Il demande une confirmation;;Il ignore les erreurs;;Il exécute en administrateur¤
+Q¤m¤Quelle cmdlet exécute un bloc de script sur plusieurs machines distantes ?¤`Invoke-Command`;;`Run-Remote`;;`Send-Script`;;`Start-Session`¤
+Q¤d¤À quoi sert `-ErrorAction Stop` dans un bloc try ?¤À transformer l'erreur en exception attrapable par catch;;À ignorer l'erreur;;À arrêter Windows;;À afficher l'erreur en rouge¤
+Q¤m¤Comment éviter d'écrire un mot de passe en clair dans un script ?¤`Read-Host -AsSecureString` ou `Get-Credential`;;Le mettre dans un commentaire;;Le coder en base64;;L'écrire à l'envers¤
+V¤m¤Par défaut, un poste Windows neuf autorise l'exécution de tous les scripts PowerShell.¤F¤La politique par défaut est Restricted.
+S¤m¤Quelle cmdlet importe un fichier CSV sous forme d'objets ?¤Import-Csv¤
+A¤m¤Associe chaque cmdlet à son rôle.¤`Get-ADUser`=>lire un compte;;`New-ADUser`=>créer un compte;;`Disable-ADAccount`=>désactiver un compte;;`Unlock-ADAccount`=>déverrouiller un compte¤

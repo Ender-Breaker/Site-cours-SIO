@@ -1,0 +1,574 @@
+=== bash-scripts | Bash : écrire son premier script | f
+Un **script Bash** est un fichier texte qui contient les commandes que tu taperais dans le terminal. L'administrateur système s'en sert pour **automatiser** tout ce qui se répète : sauvegardes, création de comptes, installation de serveurs, surveillance. Ce cours prolonge les chapitres Linux de la matière SISR.
+
+## 1. Le premier script
+
+```
+#!/bin/bash
+# sauvegarde.sh : mon premier script
+echo "Bonjour $USER"
+echo "Nous sommes le $(date +%d/%m/%Y)"
+```
+
+```
+chmod +x sauvegarde.sh       # donne le droit d'exécution
+./sauvegarde.sh              # lance le script
+bash sauvegarde.sh           # autre façon, sans le droit x
+```
+
+La première ligne `#!/bin/bash` (le *shebang*) indique quel programme doit interpréter le fichier.
+
+## 2. Les variables
+
+```
+nom="Léa"                    # PAS d'espace autour du =
+age=17
+echo "Bonjour $nom, tu as $age ans"
+echo "Fichier : ${nom}_notes.txt"        # accolades pour délimiter le nom
+readonly MAX=10                          # constante
+```
+
+!attention Pas d'espace autour du `=` | `nom = "Léa"` ne fonctionne pas : Bash cherche une commande appelée `nom`. C'est l'erreur numéro 1 en Bash.
+
+## 3. Guillemets : doubles, simples, ou rien
+
+| Écriture | Effet | `echo` affiche (avec `nom=Léa`) |
+| `"Bonjour $nom"` | les variables sont remplacées | `Bonjour Léa` |
+| `'Bonjour $nom'` | texte littéral, rien n'est remplacé | `Bonjour $nom` |
+| `$nom` sans guillemets | remplacé, puis **découpé** sur les espaces | dangereux |
+
+Règle : mets **toujours** tes variables entre guillemets doubles : `rm "$fichier"`. Sans eux, un nom de fichier contenant un espace est coupé en deux.
+
+## 4. Substitution de commande et calculs
+
+```
+aujourdhui=$(date +%F)                   # le résultat d'une commande dans une variable
+nb=$(ls /etc | wc -l)
+echo "Il y a $nb fichiers dans /etc"
+
+total=$(( 5 + 3 * 2 ))                   # calcul entier : $(( … ))
+compteur=$(( compteur + 1 ))
+echo "$(( 17 / 5 )) reste $(( 17 % 5 ))"
+```
+
+## 5. Les arguments du script
+
+```
+#!/bin/bash
+echo "Nom du script : $0"
+echo "Premier argument : $1"
+echo "Deuxième argument : $2"
+echo "Nombre d'arguments : $#"
+echo "Tous les arguments : $@"
+```
+
+```
+./creer.sh lea sio1          # $1 vaut lea, $2 vaut sio1, $# vaut 2
+```
+
+## 6. Lire une saisie
+
+```
+read -p "Nom d'utilisateur : " utilisateur
+read -s -p "Mot de passe : " motdepasse      # -s : saisie masquée
+echo
+echo "Création de $utilisateur…"
+```
+
+## 7. Le code de retour
+
+Chaque commande renvoie un **code de retour** : `0` signifie succès, toute autre valeur une erreur. Il est disponible dans `$?` juste après la commande.
+
+```
+ls /etc/passwd
+echo $?                      # 0 : succès
+ls /dossier/inexistant
+echo $?                      # 2 : erreur
+exit 1                       # un script signale lui-même son échec
+```
+
+| Enchaînement | Signifie |
+| `cmd1 && cmd2` | cmd2 seulement si cmd1 a réussi |
+| `cmd1 || cmd2` | cmd2 seulement si cmd1 a échoué |
+| `cmd1 ; cmd2` | cmd2 dans tous les cas |
+
+```
+mkdir /sauvegardes && echo "Dossier créé" || echo "Échec de la création"
+```
+
+!tuto Un script qui présente la machine
+# Les informations de base
+```
+#!/bin/bash
+echo "Machine : $(hostname)"
+echo "Utilisateur : $USER"
+echo "Date : $(date '+%d/%m/%Y %H:%M')"
+```
+# Des mesures utiles
+```
+echo "Espace libre sur / : $(df -h / | tail -1 | awk '{print $4}')"
+echo "Mémoire libre : $(free -h | awk '/Mem/ {print $7}')"
+echo "Utilisateurs connectés : $(who | wc -l)"
+```
+# Un argument pour choisir le dossier à mesurer
+`${1:-/home}` : le premier argument, ou `/home` s'il est absent.
+```
+dossier="${1:-/home}"
+echo "Taille de $dossier : $(du -sh "$dossier" 2>/dev/null | cut -f1)"
+```
+!fin
+
+!retenir À retenir | `#!/bin/bash` en première ligne, puis `chmod +x script.sh` et `./script.sh`. ¶ `variable=valeur` sans espace ; `"$variable"` toujours entre guillemets doubles. ¶ `$(commande)` récupère un résultat, `$(( calcul ))` calcule. ¶ `$1`, `$2`, `$#`, `$@` : les arguments. ¶ `$?` : code de retour (0 = succès) ; `&&` et `||` enchaînent selon le résultat.
+--- exos
+Q¤f¤Par quelle ligne commence un script Bash ?¤`#!/bin/bash`;;`<?bash`;;`// bash`;;`#include bash`¤
+Q¤f¤Quelle commande rend un script exécutable ?¤`chmod +x script.sh`;;`run script.sh`;;`exec script.sh`;;`chown +x script.sh`¤
+Q¤m¤Quelle affectation est correcte ?¤`nom="Léa"`;;`nom = "Léa"`;;`$nom="Léa"`;;`set nom "Léa"`¤Pas d'espace autour du =.
+Q¤m¤Avec `nom=Léa`, qu'affiche `echo 'Bonjour $nom'` ?¤Bonjour $nom;;Bonjour Léa;;Bonjour;;Une erreur¤Les guillemets simples n'interprètent rien.
+Q¤m¤Que contient `$1` ?¤Le premier argument du script;;Le nom du script;;Le nombre d'arguments;;Le code de retour¤
+Q¤m¤Que contient `$#` ?¤Le nombre d'arguments;;Le dernier argument;;Le numéro du processus;;Le code de retour¤
+Q¤m¤Que contient `$?` ?¤Le code de retour de la dernière commande;;Le nombre d'arguments;;Le nom de l'utilisateur;;Une valeur aléatoire¤
+Q¤m¤Quel code de retour signifie « succès » ?¤0;;1;;-1;;255¤
+Q¤m¤Que fait `$(date)` dans une commande ?¤Il est remplacé par le résultat de la commande date;;Il affiche le mot date;;Il crée une variable date;;Il provoque une erreur¤
+Q¤m¤Comment calculer 5 + 3 en Bash ?¤`$(( 5 + 3 ))`;;`5 + 3`;;`calc(5 + 3)`;;`[5 + 3]`¤
+Q¤m¤Dans `cmd1 && cmd2`, quand cmd2 s'exécute-t-elle ?¤Seulement si cmd1 a réussi;;Seulement si cmd1 a échoué;;Toujours;;Jamais¤
+Q¤d¤Pourquoi écrire `rm "$fichier"` avec des guillemets ?¤Pour qu'un nom contenant un espace ne soit pas coupé en deux;;Pour aller plus vite;;Parce que rm l'exige;;Pour masquer le nom¤
+Q¤m¤Quelle commande lit une saisie de l'utilisateur dans la variable nom ?¤`read nom`;;`input nom`;;`scan nom`;;`get nom`¤
+V¤m¤Un script peut être lancé avec `bash script.sh` même sans le droit d'exécution.¤V¤
+S¤m¤Quelle commande termine un script en signalant une erreur (____ 1) ?¤exit¤
+A¤m¤Associe chaque variable spéciale à son contenu.¤`$0`=>nom du script;;`$1`=>premier argument;;`$#`=>nombre d'arguments;;`$?`=>code de retour;;`$USER`=>utilisateur courant¤
+
+=== bash-conditions-boucles | Bash : conditions, boucles et fonctions | m
+## 1. `if` et les tests
+
+```
+if [[ -f /etc/passwd ]]; then
+    echo "Le fichier existe"
+elif [[ -d /etc ]]; then
+    echo "Seul le dossier existe"
+else
+    echo "Rien"
+fi
+```
+
+Les espaces après `[[` et avant `]]` sont **obligatoires**. `fi` ferme le `if`.
+
+| Test sur les fichiers | Vrai si |
+| `-e chemin` | le chemin existe |
+| `-f chemin` | c'est un fichier |
+| `-d chemin` | c'est un dossier |
+| `-r` `-w` `-x` | lisible, modifiable, exécutable |
+| `-s chemin` | le fichier n'est pas vide |
+
+| Test sur les textes | Vrai si |
+| `"$a" == "$b"` | égaux |
+| `"$a" != "$b"` | différents |
+| `-z "$a"` | vide |
+| `-n "$a"` | non vide |
+
+| Test sur les nombres | Vrai si |
+| `-eq` `-ne` | égal, différent |
+| `-lt` `-le` | inférieur, inférieur ou égal |
+| `-gt` `-ge` | supérieur, supérieur ou égal |
+
+```
+if [[ $# -lt 1 ]]; then
+    echo "Usage : $0 <utilisateur>" >&2      # >&2 : sur la sortie d'erreur
+    exit 1
+fi
+
+if [[ "$USER" != "root" ]]; then
+    echo "Ce script doit être lancé avec sudo" >&2
+    exit 1
+fi
+
+if (( age >= 18 )); then echo "majeur"; fi   # (( )) : comparaisons arithmétiques classiques
+if [[ -d "$dossier" && -w "$dossier" ]]; then echo "dossier modifiable"; fi
+```
+
+Un `if` peut aussi tester directement le **succès d'une commande** :
+
+```
+if grep -q "^lea:" /etc/passwd; then
+    echo "L'utilisateur lea existe"
+fi
+if ! ping -c 1 -W 2 192.168.1.1 > /dev/null; then
+    echo "La passerelle ne répond pas"
+fi
+```
+
+## 2. `case`
+
+```
+case "$1" in
+    start)   echo "Démarrage" ;;
+    stop)    echo "Arrêt" ;;
+    restart) echo "Redémarrage" ;;
+    *)       echo "Usage : $0 {start|stop|restart}" ; exit 1 ;;
+esac
+```
+
+## 3. La boucle `for`
+
+```
+for prenom in lea sam zoe; do
+    echo "Bonjour $prenom"
+done
+
+for fichier in /var/log/*.log; do            # tous les fichiers correspondants
+    echo "$fichier : $(wc -l < "$fichier") lignes"
+done
+
+for i in {1..5}; do echo "Tour $i"; done     # une suite de nombres
+for (( i = 0; i < 3; i++ )); do echo "$i"; done
+
+for arg in "$@"; do echo "Argument : $arg"; done
+```
+
+## 4. La boucle `while`
+
+```
+compteur=1
+while [[ $compteur -le 3 ]]; do
+    echo "Essai $compteur"
+    compteur=$(( compteur + 1 ))
+done
+
+while read -r ligne; do                      # lire un fichier ligne par ligne
+    echo "Lu : $ligne"
+done < utilisateurs.txt
+
+while IFS=";" read -r nom prenom classe; do  # découper un fichier CSV
+    echo "$prenom $nom est en $classe"
+done < eleves.csv
+```
+
+`break` sort de la boucle, `continue` passe au tour suivant.
+
+## 5. Les fonctions
+
+```
+journal() {
+    echo "[$(date '+%F %T')] $1" >> /var/log/monscript.log
+}
+
+existe_utilisateur() {
+    id "$1" > /dev/null 2>&1                 # le code de retour de id devient celui de la fonction
+}
+
+journal "Début du traitement"
+if existe_utilisateur "lea"; then
+    journal "lea existe déjà"
+fi
+```
+
+Dans une fonction, `$1`, `$2`… sont **ses** arguments. `local variable=valeur` crée une variable propre à la fonction ; `return n` fixe son code de retour.
+
+## 6. Un script robuste
+
+```
+#!/bin/bash
+set -euo pipefail
+# -e : arrête le script à la première erreur
+# -u : erreur si on utilise une variable non définie
+# -o pipefail : une erreur dans un tube n'est pas masquée
+```
+
+!tuto Créer des comptes à partir d'un fichier
+# Vérifier les arguments et les droits
+```
+#!/bin/bash
+set -euo pipefail
+if [[ $# -ne 1 || ! -f "$1" ]]; then
+    echo "Usage : $0 <fichier.csv>" >&2
+    exit 1
+fi
+if [[ "$(id -u)" -ne 0 ]]; then
+    echo "À lancer avec sudo" >&2
+    exit 1
+fi
+```
+# Parcourir le fichier
+Chaque ligne contient `identifiant;Nom complet`.
+```
+while IFS=";" read -r identifiant nom; do
+    echo "À créer : $identifiant ($nom)"
+done < "$1"
+```
+# Créer seulement ceux qui n'existent pas
+```
+while IFS=";" read -r identifiant nom; do
+    if id "$identifiant" > /dev/null 2>&1; then
+        echo "$identifiant existe déjà : ignoré"
+        continue
+    fi
+    useradd -m -c "$nom" -s /bin/bash "$identifiant"
+    echo "$identifiant créé"
+done < "$1"
+```
+!fin
+
+!retenir À retenir | `if [[ condition ]]; then … elif … else … fi`. ¶ Fichiers : `-f`, `-d`, `-e`. Textes : `==`, `!=`, `-z`. Nombres : `-eq`, `-lt`, `-gt`. ¶ `for x in liste; do … done` ; `while read -r ligne; do … done < fichier`. ¶ `case "$1" in motif) … ;; esac`. ¶ `nom() { … }` définit une fonction ; `set -euo pipefail` rend le script strict.
+--- exos
+Q¤f¤Par quel mot se termine un `if` en Bash ?¤`fi`;;`end`;;`endif`;;`done`¤
+Q¤f¤Par quel mot se termine une boucle `for` ?¤`done`;;`end`;;`rof`;;`next`¤
+Q¤m¤Quel test vérifie qu'un chemin est un fichier ?¤`-f`;;`-d`;;`-z`;;`-x`¤
+Q¤m¤Quel test vérifie qu'un chemin est un dossier ?¤`-d`;;`-f`;;`-e`;;`-n`¤
+Q¤m¤Quel opérateur compare deux nombres pour « inférieur à » dans `[[ ]]` ?¤`-lt`;;`<<`;;`-inf`;;`-less`¤
+Q¤m¤Que teste `-z "$a"` ?¤Que la chaîne est vide;;Que le fichier existe;;Que a vaut zéro;;Que a est un nombre¤
+Q¤m¤Que parcourt `for f in /var/log/*.log` ?¤Tous les fichiers .log de /var/log;;Le texte « /var/log/*.log »;;Les lignes d'un fichier;;Rien¤
+Q¤m¤Comment lire un fichier ligne par ligne ?¤`while read -r ligne; do … done < fichier`;;`for ligne in fichier`;;`cat fichier | each`;;`read fichier`¤
+Q¤m¤Par quel mot se termine un `case` ?¤`esac`;;`end`;;`done`;;`fi`¤
+Q¤m¤Dans une fonction, que désigne `$1` ?¤Le premier argument de la fonction;;Le premier argument du script;;Le nom de la fonction;;Le code de retour¤
+Q¤d¤Que fait `set -e` ?¤Arrête le script à la première commande en erreur;;Affiche chaque commande;;Exporte les variables;;Active les couleurs¤
+Q¤d¤Que fait `>&2` dans `echo "Erreur" >&2` ?¤Envoie le message sur la sortie d'erreur;;Écrit dans un fichier nommé 2;;Répète deux fois;;Ignore le message¤
+Q¤m¤Que teste `if grep -q "lea" fichier; then` ?¤Si la commande grep a réussi (motif trouvé);;Si le fichier existe;;Si grep est installé;;Si lea est connecté¤
+V¤m¤Les espaces autour de la condition dans `[[ … ]]` sont facultatifs.¤F¤Ils sont obligatoires.
+S¤m¤Quel mot-clé crée une variable propre à une fonction ?¤local¤
+A¤m¤Associe chaque opérateur à sa signification.¤`-eq`=>égal;;`-ne`=>différent;;`-gt`=>supérieur;;`-le`=>inférieur ou égal¤
+
+=== bash-regex-texte | Bash : expressions régulières, grep, sed et awk | m
+Journaux, fichiers de configuration, exports CSV : l'administration système consiste beaucoup à **chercher et transformer du texte**. Les expressions régulières (*regex*) décrivent des motifs de texte ; on les retrouve à l'identique en PHP, JavaScript, Java, Python.
+
+## 1. Les expressions régulières
+
+| Motif | Signifie | Exemple |
+| `.` | n'importe quel caractère | `a.c` : abc, a5c |
+| `^` `$` | début, fin de ligne | `^root`, `bash$` |
+| `[abc]` `[a-z]` `[0-9]` | un caractère de l'ensemble | `[0-9][0-9]` |
+| `[^0-9]` | un caractère hors de l'ensemble | |
+| `*` | 0 fois ou plus | `ab*` : a, ab, abbb |
+| `+` | 1 fois ou plus | `[0-9]+` |
+| `?` | 0 ou 1 fois | `https?` |
+| `{3}` `{2,4}` | exactement 3 fois, de 2 à 4 fois | `[0-9]{5}` : un code postal |
+| `(ab|cd)` | l'un ou l'autre | `(erreur|echec)` |
+| `\.` | un vrai point (échappé) | `192\.168` |
+
+## 2. `grep` : chercher
+
+```
+grep "erreur" /var/log/syslog            # les lignes qui contiennent « erreur »
+grep -i "erreur" fichier                 # sans tenir compte de la casse
+grep -v "^#" /etc/ssh/sshd_config        # les lignes qui NE commencent PAS par #
+grep -n "root" /etc/passwd               # avec les numéros de ligne
+grep -c "Failed password" auth.log       # compte les lignes
+grep -r "TODO" ~/projet                  # dans tout un dossier
+grep -E "^[a-z]+:x:[0-9]{4}:" /etc/passwd    # -E : regex étendues (+, ?, {}, |)
+grep -oE "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" auth.log   # -o : seulement ce qui correspond
+```
+
+## 3. `sed` : remplacer
+
+```
+sed 's/ancien/nouveau/' fichier          # remplace la 1re occurrence de chaque ligne
+sed 's/ancien/nouveau/g' fichier         # g : toutes les occurrences
+sed -i 's/Port 22/Port 2222/' sshd_config    # -i : modifie le fichier lui-même
+sed -i.bak 's/a/b/g' fichier             # … en gardant une copie fichier.bak
+sed '/^#/d' fichier                      # supprime les lignes de commentaire
+sed -n '5,10p' fichier                   # affiche les lignes 5 à 10
+sed -E 's/([0-9]+)-([0-9]+)/\2-\1/' f    # \1, \2 : les groupes capturés
+```
+
+## 4. `awk` : travailler en colonnes
+
+`awk` découpe chaque ligne en champs : `$1`, `$2`… et `$0` pour la ligne entière.
+
+```
+awk '{print $1}' fichier                 # la première colonne
+awk -F: '{print $1, $7}' /etc/passwd     # -F: : le séparateur est « : »
+awk -F: '$3 >= 1000 {print $1}' /etc/passwd      # condition : les comptes « humains »
+df -h | awk 'NR > 1 {print $5, $6}'      # NR : numéro de ligne (on saute l'en-tête)
+awk '{somme += $2} END {print somme}' ventes.txt # un total
+```
+
+## 5. Combiner avec les tubes
+
+```
+# Les 5 adresses IP qui échouent le plus à se connecter en SSH
+grep "Failed password" /var/log/auth.log \
+  | grep -oE "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" \
+  | sort | uniq -c | sort -rn | head -5
+
+# Les utilisateurs dont le shell est bash, triés
+grep "bash$" /etc/passwd | cut -d: -f1 | sort
+
+# Nombre de requêtes par code HTTP dans un journal nginx
+awk '{print $9}' /var/log/nginx/access.log | sort | uniq -c | sort -rn
+```
+
+Le couple `sort | uniq -c | sort -rn` (trier, compter les doublons, classer) est le réflexe de base pour analyser un journal.
+
+!tuto Analyser les tentatives d'intrusion
+# Repérer les lignes
+```
+grep "Failed password" /var/log/auth.log | tail -3
+```
+# Extraire l'adresse IP
+```
+grep "Failed password" /var/log/auth.log | grep -oE "[0-9]+(\.[0-9]+){3}"
+```
+# Compter et classer
+```
+grep "Failed password" /var/log/auth.log \
+  | grep -oE "[0-9]+(\.[0-9]+){3}" | sort | uniq -c | sort -rn | head -10
+```
+# Aller plus loin
+C'est exactement ce que fait l'outil **fail2ban** automatiquement : il surveille les journaux avec des regex et bannit les adresses trop insistantes avec le pare-feu.
+!fin
+
+!retenir À retenir | Regex : `.` un caractère, `[0-9]` un chiffre, `+` un ou plus, `*` zéro ou plus, `?` facultatif, `^` début, `$` fin, `\.` un vrai point. ¶ `grep -E motif` cherche (`-i`, `-v`, `-c`, `-o`, `-r`). ¶ `sed 's/a/b/g'` remplace (`-i` dans le fichier). ¶ `awk -F: '{print $1}'` extrait des colonnes. ¶ `sort | uniq -c | sort -rn` compte et classe.
+--- exos
+Q¤m¤Que signifie `^` au début d'une expression régulière ?¤Le début de la ligne;;La fin de la ligne;;N'importe quel caractère;;Une négation¤
+Q¤m¤Que signifie `[0-9]+` ?¤Un chiffre ou plus;;Exactement un chiffre;;Zéro chiffre ou plus;;Le texte « 0-9 »¤
+Q¤m¤Que signifie le point `.` dans une regex ?¤N'importe quel caractère;;Un point;;La fin de la ligne;;Un espace¤
+Q¤m¤Comment désigner un vrai point ?¤`\.`;;`.`;;`[dot]`;;`..`¤
+Q¤m¤Que reconnaît `https?` ?¤http et https;;Seulement https;;http suivi d'un caractère;;Tous les protocoles¤
+Q¤m¤Quelle option de grep ignore la casse ?¤`-i`;;`-v`;;`-c`;;`-n`¤
+Q¤m¤Quelle option de grep affiche les lignes qui ne correspondent PAS ?¤`-v`;;`-i`;;`-o`;;`-r`¤
+Q¤m¤Quelle option de grep compte les lignes correspondantes ?¤`-c`;;`-n`;;`-l`;;`-o`¤
+Q¤m¤Que fait `sed 's/chat/chien/g' fichier` ?¤Affiche le fichier en remplaçant tous les « chat » par « chien »;;Supprime les lignes contenant chat;;Compte les chats;;Modifie le fichier sur le disque¤Sans -i, le fichier n'est pas modifié.
+Q¤m¤Quelle option de sed modifie directement le fichier ?¤`-i`;;`-w`;;`-f`;;`-s`¤
+Q¤m¤Que désigne `$1` dans awk ?¤Le premier champ de la ligne;;Le premier argument du script;;La première ligne;;Le premier fichier¤
+Q¤m¤Comment indiquer à awk que le séparateur est « : » ?¤`-F:`;;`-d:`;;`-s:`;;`--sep :`¤
+Q¤d¤À quoi sert l'enchaînement `sort | uniq -c | sort -rn` ?¤À compter les lignes identiques et à les classer par fréquence;;À supprimer les doublons uniquement;;À trier par ordre alphabétique;;À numéroter les lignes¤
+Q¤d¤Quel motif reconnaît un code postal français (5 chiffres) sur toute la ligne ?¤`^[0-9]{5}$`;;`[0-9]*`;;`^.....$`;;`[5]`¤
+V¤m¤Les expressions régulières s'utilisent aussi en JavaScript, PHP, Java et Python.¤V¤
+S¤m¤Quelle option de grep active les expressions régulières étendues (grep -_) ?¤E¤
+A¤m¤Associe chaque outil à son rôle principal.¤`grep`=>chercher des lignes;;`sed`=>remplacer du texte;;`awk`=>extraire des colonnes;;`uniq -c`=>compter les doublons¤
+
+=== bash-ssh-cron | Bash : SSH, tâches planifiées et sauvegardes | m
+## 1. SSH : administrer à distance
+
+**SSH** ouvre un terminal chiffré sur une machine distante. C'est l'outil quotidien de l'administrateur.
+
+```
+ssh lea@192.168.1.50                 # connexion
+ssh -p 2222 lea@serveur.exemple.fr   # sur un autre port que 22
+ssh lea@serveur "df -h /"            # exécute une seule commande et revient
+exit                                 # ferme la session
+```
+
+## 2. Les clés SSH
+
+Plutôt qu'un mot de passe, on utilise une **paire de clés** : la clé **privée** reste sur ton poste, la clé **publique** est déposée sur le serveur.
+
+```
+ssh-keygen -t ed25519 -C "lea@portable"     # crée ~/.ssh/id_ed25519 (privée) et .pub (publique)
+ssh-copy-id lea@192.168.1.50                # dépose la clé publique sur le serveur
+ssh lea@192.168.1.50                        # plus de mot de passe demandé
+```
+
+La clé publique est ajoutée au fichier `~/.ssh/authorized_keys` du serveur.
+
+!attention La clé privée ne se partage jamais | Ne l'envoie pas, ne la copie pas dans un dépôt Git, ne la colle dans aucun site. Protège-la par une phrase de passe. Si elle fuit, retire immédiatement la clé publique correspondante de tous les serveurs.
+
+Le fichier `~/.ssh/config` évite de retaper les options :
+
+```
+Host web
+    HostName 192.168.1.50
+    User lea
+    Port 2222
+```
+
+```
+ssh web                               # équivaut à ssh -p 2222 lea@192.168.1.50
+```
+
+## 3. Sécuriser le serveur SSH
+
+Dans `/etc/ssh/sshd_config`, puis `sudo systemctl restart ssh` :
+
+```
+PermitRootLogin no               # pas de connexion directe en root
+PasswordAuthentication no        # clés uniquement
+Port 2222                        # facultatif : réduit le bruit des robots
+AllowUsers lea admin             # liste blanche
+```
+
+## 4. Copier des fichiers
+
+```
+scp rapport.pdf lea@web:/home/lea/              # copie vers le serveur
+scp lea@web:/var/log/syslog ./                  # copie depuis le serveur
+rsync -avz --delete site/ lea@web:/var/www/site/    # synchronise : ne transfère que les différences
+```
+
+`rsync` est l'outil des sauvegardes : `-a` conserve droits et dates, `-v` détaille, `-z` compresse, `--delete` supprime à l'arrivée ce qui a disparu au départ.
+
+## 5. `cron` : planifier
+
+```
+crontab -e                       # édite les tâches de l'utilisateur
+crontab -l                       # les affiche
+```
+
+Chaque ligne : cinq champs de date, puis la commande.
+
+```
+# minute  heure  jour-du-mois  mois  jour-de-la-semaine   commande
+  30      2      *             *     *                    /usr/local/bin/sauvegarde.sh
+  0       *      *             *     *                    /usr/local/bin/verif-disque.sh
+  */15    *      *             *     *                    /usr/local/bin/ping-serveurs.sh
+  0       8      *             *     1-5                  /usr/local/bin/rapport.sh
+  0       3      1             *     *                    /usr/local/bin/archivage.sh
+```
+
+| Écriture | Signifie |
+| `*` | toutes les valeurs |
+| `*/15` | toutes les 15 unités |
+| `1-5` | de 1 à 5 (lundi à vendredi) |
+| `1,15` | le 1 et le 15 |
+
+Lecture : la première ligne s'exécute tous les jours à 2 h 30 ; la troisième toutes les 15 minutes ; la quatrième à 8 h du lundi au vendredi.
+
+!attention Dans cron, l'environnement est minimal | Utilise des **chemins absolus** pour les commandes et les fichiers, et redirige les sorties vers un journal : `… >> /var/log/sauvegarde.log 2>&1`.
+
+!tuto Un script de sauvegarde complet
+# Archiver avec la date dans le nom
+```
+#!/bin/bash
+set -euo pipefail
+SOURCE="/var/www/site"
+DESTINATION="/sauvegardes"
+ARCHIVE="$DESTINATION/site-$(date +%F).tar.gz"
+
+mkdir -p "$DESTINATION"
+tar -czf "$ARCHIVE" -C "$(dirname "$SOURCE")" "$(basename "$SOURCE")"
+echo "Archive créée : $ARCHIVE ($(du -h "$ARCHIVE" | cut -f1))"
+```
+# Supprimer les archives de plus de 7 jours
+```
+find "$DESTINATION" -name "site-*.tar.gz" -mtime +7 -delete
+```
+# Copier sur un autre serveur
+Une sauvegarde qui reste sur la même machine n'en est pas une.
+```
+rsync -az "$DESTINATION/" sauvegarde@nas:/volume1/sauvegardes/site/
+```
+# Planifier et journaliser
+```
+# crontab -e
+30 2 * * * /usr/local/bin/sauvegarde.sh >> /var/log/sauvegarde.log 2>&1
+```
+# La règle 3-2-1
+**3** copies des données, sur **2** supports différents, dont **1** hors site. Et une sauvegarde n'existe que si on a **testé sa restauration**.
+!fin
+
+!retenir À retenir | `ssh utilisateur@hôte` ; `ssh-keygen` puis `ssh-copy-id` pour les clés ; la clé privée ne quitte jamais ton poste. ¶ `scp` copie, `rsync -avz` synchronise. ¶ `crontab -e` : minute, heure, jour du mois, mois, jour de la semaine, commande. ¶ Dans cron : chemins absolus et sortie redirigée vers un journal. ¶ Sauvegardes : règle 3-2-1 et test de restauration.
+--- exos
+Q¤f¤Quelle commande ouvre une session sur une machine distante ?¤`ssh`;;`telnet-secure`;;`remote`;;`connect`¤
+Q¤f¤Quel est le port par défaut de SSH ?¤22;;80;;443;;3389¤
+Q¤m¤Quelle commande crée une paire de clés SSH ?¤`ssh-keygen`;;`ssh-create`;;`keymake`;;`ssh-copy-id`¤
+Q¤m¤Quelle clé dépose-t-on sur le serveur ?¤La clé publique;;La clé privée;;Les deux;;Aucune¤
+Q¤m¤Dans quel fichier du serveur sont rangées les clés publiques autorisées ?¤`~/.ssh/authorized_keys`;;`/etc/passwd`;;`~/.ssh/config`;;`/etc/ssh/keys`¤
+Q¤m¤Quelle directive de sshd_config interdit la connexion directe de root ?¤`PermitRootLogin no`;;`DenyRoot yes`;;`RootAccess off`;;`AllowRoot false`¤
+Q¤m¤Quelle commande synchronise deux dossiers en ne transférant que les différences ?¤`rsync`;;`scp`;;`cp -r`;;`tar`¤
+Q¤m¤Quelle commande édite les tâches planifiées de l'utilisateur ?¤`crontab -e`;;`cron edit`;;`at -e`;;`schedule`¤
+Q¤m¤Que signifie la ligne cron `30 2 * * *` ?¤Tous les jours à 2 h 30;;Toutes les 30 minutes;;Le 30 février;;À 2 h le 30 du mois¤
+Q¤m¤Que signifie `*/15 * * * *` ?¤Toutes les 15 minutes;;À 15 h tous les jours;;Le 15 de chaque mois;;15 fois par jour¤
+Q¤d¤Que signifie `0 8 * * 1-5` ?¤À 8 h du lundi au vendredi;;À 8 h les cinq premiers jours du mois;;De 1 h à 5 h;;Toutes les 8 heures¤
+Q¤d¤Pourquoi utiliser des chemins absolus dans un script lancé par cron ?¤L'environnement de cron est minimal (PATH réduit);;Cron ne lit pas les chemins relatifs par sécurité;;C'est plus rapide;;Ce n'est pas nécessaire¤
+Q¤m¤Que dit la règle 3-2-1 ?¤3 copies, sur 2 supports, dont 1 hors site;;3 sauvegardes par jour;;3 serveurs, 2 disques, 1 administrateur;;3 mots de passe¤
+V¤m¤On peut envoyer sa clé privée SSH par e-mail à un collègue pour lui donner accès.¤F¤La clé privée ne se partage jamais.
+S¤m¤Quelle commande dépose ta clé publique sur un serveur (ssh-____-id) ?¤copy;;ssh-copy-id¤
+A¤m¤Associe chaque commande à son rôle.¤`ssh`=>terminal distant;;`scp`=>copier un fichier;;`rsync`=>synchroniser;;`crontab`=>planifier¤

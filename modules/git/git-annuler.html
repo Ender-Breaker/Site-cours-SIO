@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Git : annuler, corriger et bonnes pratiques — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="git" data-chapter="git-annuler">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/git.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>Git ne perd presque jamais rien : il existe une commande pour chaque situation. L'important est de savoir <b>où</b> se trouve ce qu'on veut annuler.</p>
+<h2>1. Quelle commande pour quelle situation ?</h2>
+<table><tr><th>Situation</th><th>Commande</th></tr><tr><td>J'ai modifié un fichier et je veux retrouver la version du dernier commit</td><td><code>git restore fichier</code></td></tr><tr><td>J'ai fait <code>git add</code> par erreur</td><td><code>git restore --staged fichier</code></td></tr><tr><td>Mon dernier message de commit est faux</td><td><code>git commit --amend -m "Nouveau message"</code></td></tr><tr><td>J'ai oublié un fichier dans le dernier commit</td><td><code>git add fichier</code> puis <code>git commit --amend --no-edit</code></td></tr><tr><td>Je veux annuler un commit déjà poussé</td><td><code>git revert a1b2c3d</code></td></tr><tr><td>Je veux défaire mes derniers commits <b>locaux</b></td><td><code>git reset</code></td></tr></table>
+<div class="box attention"><b><code>git restore fichier</code> est définitif</b><p>Les modifications non commitées qu'il efface ne sont enregistrées nulle part : elles sont perdues pour de bon.</p></div>
+<h2>2. <code>revert</code> ou <code>reset</code> ?</h2>
+<pre><code>git revert a1b2c3d           # crée un NOUVEAU commit qui annule a1b2c3d</code></pre>
+<p><code>revert</code> n'efface rien : il ajoute un commit inverse. C'est la seule méthode correcte pour un commit <b>déjà partagé</b>.</p>
+<pre><code>git reset --soft HEAD~1      # défait le dernier commit, garde les changements dans l'index
+git reset HEAD~1             # défait le dernier commit, garde les changements dans les fichiers
+git reset --hard HEAD~1      # défait le dernier commit ET efface les changements</code></pre>
+<p><code>reset</code> réécrit l'histoire : à réserver aux commits qui n'ont <b>pas encore été poussés</b>. <code>HEAD~1</code> signifie « un commit avant HEAD ».</p>
+<h2>3. Mettre de côté : <code>git stash</code></h2>
+<p>Tu es au milieu d'une modification et il faut changer de branche tout de suite :</p>
+<pre><code>git stash                    # range les modifications en cours, le dossier redevient propre
+git switch main              # … on corrige l'urgence …
+git switch ma-branche
+git stash pop                # reprend là où on en était
+git stash list               # ce qui est en attente</code></pre>
+<h2>4. Retrouver un commit « perdu »</h2>
+<pre><code>git reflog                   # le journal de tous les déplacements de HEAD
+git switch -c sauvetage a1b2c3d      # recrée une branche sur le commit retrouvé</code></pre>
+<p>Même après un <code>reset --hard</code>, le commit reste récupérable pendant plusieurs semaines grâce à <code>reflog</code>.</p>
+<h2>5. Enquêter</h2>
+<pre><code>git log --oneline --author="Léa" --since="2 weeks ago"
+git log -S "motDePasse"              # commits qui ont ajouté ou retiré ce texte
+git blame config.php                 # qui a écrit chaque ligne, et dans quel commit
+git bisect start                     # recherche du commit qui a introduit un bug</code></pre>
+<h2>6. Les étiquettes de version</h2>
+<pre><code>git tag v1.0                         # marque le commit courant
+git tag                              # liste
+git push origin v1.0                 # les tags se poussent explicitement</code></pre>
+<p>La numérotation habituelle est <b>majeur.mineur.correctif</b> : <code>2.4.1</code>. On incrémente le correctif pour un bug, le mineur pour une nouveauté compatible, le majeur pour un changement incompatible.</p>
+<h2>7. Les bonnes pratiques</h2>
+<ul><li><code>git status</code> avant chaque <code>add</code>, <code>commit</code> et <code>push</code>.</li><li><code>git pull</code> avant de commencer à travailler.</li><li>Des commits petits, un sujet par commit, un message clair.</li><li>Une branche par tâche ; <code>main</code> toujours fonctionnelle.</li><li>Un <code>.gitignore</code> dès le premier commit ; aucun secret dans le dépôt.</li><li>Ne jamais réécrire une histoire déjà partagée (<code>reset</code>, <code>amend</code>, <code>push --force</code>).</li></ul>
+<div class="box"><b>Pour les SISR aussi</b><p>Scripts d'administration, fichiers de configuration (<code>nginx.conf</code>, règles de pare-feu), playbooks Ansible, documentation : tout ce qui est du texte gagne à être versionné. C'est le principe de l'*infrastructure as code* : on sait ce qui a changé sur un serveur, quand, et par qui.</p></div>
+<section class="tuto"><h3><small>Tutoriel</small>Réparer trois erreurs courantes</h3>
+<div class="etape"><h4>Un message de commit raté</h4>
+<pre><code>git commit -m "modifs"
+git commit --amend -m "Corrige l'alignement du menu sur mobile"</code></pre>
+</div>
+<div class="etape"><h4>Un fichier ajouté par erreur</h4>
+<pre><code>git add .                            # oups : .env est parti dans l'index
+git restore --staged .env            # il en sort (le fichier n'est pas modifié)
+echo ".env" &gt;&gt; .gitignore</code></pre>
+</div>
+<div class="etape"><h4>Un commit déjà poussé qui casse tout</h4>
+<pre><code>git log --oneline                    # repère son identifiant, par exemple a1b2c3d
+git revert a1b2c3d                   # crée le commit inverse
+git push</code></pre>
+</div>
+</section>
+<div class="box retenir"><b>À retenir</b><p><code>git restore fichier</code> annule une modification, <code>git restore --staged fichier</code> annule un <code>add</code>. </p><p> <code>git commit --amend</code> corrige le dernier commit (non poussé). </p><p> <code>git revert</code> annule un commit partagé en créant un commit inverse ; <code>git reset</code> réécrit l'histoire locale. </p><p> <code>git stash</code> met de côté, <code>git reflog</code> retrouve ce qu'on croyait perdu.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande retire un fichier de l'index sans toucher à son contenu ?",
+  "type": "qcm",
+  "options": [
+   "`git reset --hard`",
+   "`git clean`",
+   "`git restore --staged fichier`",
+   "`git rm fichier`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande corrige le message du dernier commit ?",
+  "type": "qcm",
+  "options": [
+   "`git log --edit`",
+   "`git edit`",
+   "`git commit --amend`",
+   "`git commit --fix`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment annuler proprement un commit déjà poussé ?",
+  "type": "qcm",
+  "options": [
+   "Supprimer le dépôt",
+   "`git reset --hard` puis push --force",
+   "`git restore`",
+   "`git revert` : un nouveau commit qui l'annule"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait `git stash` ?",
+  "type": "qcm",
+  "options": [
+   "Crée une branche",
+   "Envoie sur GitHub",
+   "Supprime les modifications",
+   "Met de côté les modifications en cours"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande reprend ce qui a été mis de côté ?",
+  "type": "qcm",
+  "options": [
+   "`git restore stash`",
+   "`git stash back`",
+   "`git stash pop`",
+   "`git unstash`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que fait `git reset --hard HEAD~1` ?",
+  "type": "qcm",
+  "options": [
+   "Défait le dernier commit et efface ses changements",
+   "Crée un commit inverse",
+   "Annule un push",
+   "Défait le dernier commit en gardant les fichiers"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que signifie `HEAD~1` ?",
+  "type": "qcm",
+  "options": [
+   "Le prochain commit",
+   "La branche main",
+   "Le commit précédant le commit courant",
+   "Le premier commit"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande montre qui a écrit chaque ligne d'un fichier ?",
+  "type": "qcm",
+  "options": [
+   "`git blame`",
+   "`git who`",
+   "`git log --lines`",
+   "`git author`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Quelle commande permet de retrouver un commit après un reset --hard ?",
+  "type": "qcm",
+  "options": [
+   "`git find`",
+   "`git reflog`",
+   "`git status`",
+   "`git log`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que marque `git tag v1.0` ?",
+  "type": "qcm",
+  "options": [
+   "Un dépôt distant",
+   "Un fichier",
+   "Une nouvelle branche",
+   "Le commit courant comme version 1.0"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Dans la version 2.4.1, que représente le dernier chiffre ?",
+  "type": "qcm",
+  "options": [
+   "Un changement incompatible",
+   "L'année",
+   "Un correctif de bug",
+   "Une nouveauté"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi ne pas utiliser `git reset` sur des commits déjà poussés ?",
+  "type": "qcm",
+  "options": [
+   "Cela réécrit une histoire que d'autres ont déjà récupérée",
+   "Git l'interdit",
+   "C'est trop lent",
+   "Cela supprime le dépôt distant"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "`git restore fichier` permet de retrouver plus tard les modifications effacées.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Elles n'étaient enregistrées nulle part : elles sont perdues."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Versionner des fichiers de configuration de serveur avec Git est une bonne pratique.",
+  "type": "vf",
+  "answer": true,
+  "explication": "C'est le principe de l'infrastructure as code."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande crée un commit qui annule le commit a1b2c3d ? (git ______ a1b2c3d)",
+  "type": "saisie",
+  "answers": [
+   "revert"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque situation à la commande.",
+  "type": "associer",
+  "paires": [
+   [
+    "modification à jeter",
+    "`git restore`"
+   ],
+   [
+    "commit partagé à annuler",
+    "`git revert`"
+   ],
+   [
+    "travail à mettre de côté",
+    "`git stash`"
+   ],
+   [
+    "commit perdu à retrouver",
+    "`git reflog`"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

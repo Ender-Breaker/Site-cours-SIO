@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Docker : Dockerfile et Docker Compose — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="docker" data-chapter="docker-compose">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/docker.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<h2>1. Le Dockerfile : fabriquer sa propre image</h2>
+<p>Un <b>Dockerfile</b> est la recette d'une image : on part d'une image de base, puis on ajoute ce qu'il faut.</p>
+<pre><code># Dockerfile
+FROM php:8.3-apache                      # image de départ
+
+RUN docker-php-ext-install pdo_mysql     # commande exécutée pendant la construction
+
+WORKDIR /var/www/html                    # dossier de travail
+COPY src/ .                              # copie le code dans l'image
+
+EXPOSE 80                                # documente le port utilisé</code></pre>
+<pre><code>docker build -t mon-site:1.0 .           # construit l'image (le . : dossier courant)
+docker run -d -p 8080:80 mon-site:1.0</code></pre>
+<table><tr><th>Instruction</th><th>Rôle</th></tr><tr><td><code>FROM</code></td><td>l'image de base</td></tr><tr><td><code>RUN</code></td><td>exécute une commande à la construction (installer un paquet)</td></tr><tr><td><code>COPY</code></td><td>copie des fichiers de ta machine dans l'image</td></tr><tr><td><code>WORKDIR</code></td><td>fixe le dossier courant</td></tr><tr><td><code>ENV</code></td><td>définit une variable d'environnement</td></tr><tr><td><code>EXPOSE</code></td><td>indique le port d'écoute</td></tr><tr><td><code>CMD</code></td><td>la commande lancée au démarrage du conteneur</td></tr></table>
+<p>Chaque instruction crée une <b>couche</b> mise en cache : place en dernier ce qui change souvent (ton code), pour que les reconstructions soient rapides. Un fichier <code>.dockerignore</code> exclut ce qui ne doit pas entrer dans l'image (<code>.git</code>, <code>node_modules</code>, <code>.env</code>).</p>
+<h2>2. Docker Compose : plusieurs conteneurs</h2>
+<p>Une application réelle a plusieurs services : un serveur web, une base de données, parfois un outil d'administration. <b>Docker Compose</b> les décrit dans un seul fichier <code>compose.yaml</code> et les lance ensemble.</p>
+<pre><code># compose.yaml
+services:
+  web:
+    build: .                             # construit l'image depuis le Dockerfile
+    ports:
+      - "8080:80"
+    volumes:
+      - ./src:/var/www/html              # le code est modifiable en direct
+    depends_on:
+      - bdd
+    environment:
+      DB_HOST: bdd                       # le nom du service sert de nom d'hôte
+      DB_NAME: parc
+      DB_USER: app
+      DB_PASSWORD: ${DB_PASSWORD}        # lu dans le fichier .env
+
+  bdd:
+    image: mariadb:11.4
+    environment:
+      MARIADB_DATABASE: parc
+      MARIADB_USER: app
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - donnees:/var/lib/mysql           # les données survivent
+
+  adminer:
+    image: adminer:4
+    ports:
+      - "8081:8080"
+
+volumes:
+  donnees:</code></pre>
+<pre><code>docker compose up -d             # construit, crée le réseau et lance tout
+docker compose ps
+docker compose logs -f web
+docker compose exec bdd mariadb -u app -p parc
+docker compose down              # arrête et supprime les conteneurs (les volumes restent)
+docker compose down -v           # … et supprime aussi les volumes</code></pre>
+<div class="box attention"><b>L'indentation compte</b><p>Un fichier YAML se structure avec des <b>espaces</b> (jamais de tabulations), deux par niveau. Un décalage d'un espace change le sens du fichier ou le rend invalide.</p></div>
+<h2>3. Le réseau entre conteneurs</h2>
+<p>Compose crée un réseau privé où chaque service est joignable <b>par son nom</b>. Dans le code PHP, l'hôte de la base de données n'est donc pas <code>localhost</code> mais <code>bdd</code> :</p>
+<pre><code>$pdo = new PDO("mysql:host=bdd;dbname=parc;charset=utf8mb4", "app", getenv("DB_PASSWORD"));</code></pre>
+<p>Seuls les ports listés sous <code>ports:</code> sont accessibles depuis ta machine : ici, la base de données n'est pas exposée à l'extérieur.</p>
+<h2>4. Les secrets</h2>
+<p>Les mots de passe ne s'écrivent pas dans <code>compose.yaml</code> (qui est versionné) : ils vont dans un fichier <code>.env</code>, placé à côté et listé dans <code>.gitignore</code>.</p>
+<pre><code># .env (jamais dans Git)
+DB_PASSWORD=Un-Mot-De-Passe-Long
+DB_ROOT_PASSWORD=Un-Autre-Encore-Plus-Long</code></pre>
+<h2>5. Où Docker est utilisé</h2>
+<table><tr><th>Usage</th><th>Exemple</th></tr><tr><td>Environnement de développement</td><td>toute l'équipe a la même pile PHP + MariaDB en une commande</td></tr><tr><td>Tests automatiques</td><td>GitHub Actions lance les tests dans un conteneur à chaque <code>push</code></td></tr><tr><td>Déploiement</td><td>la même image tourne en test puis en production</td></tr><tr><td>Services d'infrastructure</td><td>GLPI, Nextcloud, Zabbix, Portainer s'installent en quelques lignes</td></tr><tr><td>Orchestration à grande échelle</td><td>Kubernetes pilote des milliers de conteneurs</td></tr></table>
+<section class="tuto"><h3><small>Tutoriel</small>Une pile web complète en trois fichiers</h3>
+<div class="etape"><h4>Le code</h4>
+<pre><code>mkdir -p projet/src &amp;&amp; cd projet
+echo '&lt;?php echo "Bonjour depuis PHP " . PHP_VERSION;' &gt; src/index.php</code></pre>
+</div>
+<div class="etape"><h4>Le Dockerfile et compose.yaml</h4>
+<pre><code># Dockerfile
+FROM php:8.3-apache
+RUN docker-php-ext-install pdo_mysql</code></pre>
+<pre><code># compose.yaml
+services:
+  web:
+    build: .
+    ports: ["8080:80"]
+    volumes: ["./src:/var/www/html"]
+  bdd:
+    image: mariadb:11.4
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes: ["donnees:/var/lib/mysql"]
+volumes:
+  donnees:</code></pre>
+</div>
+<div class="etape"><h4>Lancer</h4>
+<pre><code>echo "DB_ROOT_PASSWORD=change-moi" &gt; .env
+docker compose up -d</code></pre>
+<p>Ouvre <code>http://localhost:8080</code>. Un coéquipier qui clone le dépôt obtient exactement le même environnement avec la même commande.</p>
+</div>
+</section>
+<div class="box retenir"><b>À retenir</b><p>Dockerfile : <code>FROM</code>, <code>RUN</code>, <code>COPY</code>, <code>WORKDIR</code>, <code>CMD</code> ; <code>docker build -t nom:version .</code>. </p><p> <code>compose.yaml</code> décrit les services, leurs ports, volumes et variables. </p><p> <code>docker compose up -d</code> lance tout, <code>docker compose down</code> arrête tout. </p><p> Entre conteneurs, on s'appelle par le <b>nom du service</b>. </p><p> Les secrets vont dans <code>.env</code>, jamais dans Git.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'un Dockerfile ?",
+  "type": "qcm",
+  "options": [
+   "La recette de fabrication d'une image",
+   "Un conteneur arrêté",
+   "Une sauvegarde de volume",
+   "Un fichier de journal"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle instruction choisit l'image de base ?",
+  "type": "qcm",
+  "options": [
+   "`FROM`",
+   "`USE`",
+   "`IMPORT`",
+   "`BASE`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle instruction exécute une commande pendant la construction de l'image ?",
+  "type": "qcm",
+  "options": [
+   "`EXEC`",
+   "`DO`",
+   "`RUN`",
+   "`CMD`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle instruction copie des fichiers de ta machine dans l'image ?",
+  "type": "qcm",
+  "options": [
+   "`PUT`",
+   "`COPY`",
+   "`MOVE`",
+   "`INCLUDE`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle différence entre RUN et CMD ?",
+  "type": "qcm",
+  "options": [
+   "RUN est réservé à Windows",
+   "CMD s'exécute à la construction",
+   "RUN s'exécute à la construction, CMD au démarrage du conteneur",
+   "Aucune"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande construit une image à partir du Dockerfile du dossier courant ?",
+  "type": "qcm",
+  "options": [
+   "`docker make nom`",
+   "`docker compile .`",
+   "`docker create -f nom`",
+   "`docker build -t nom .`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "À quoi sert Docker Compose ?",
+  "type": "qcm",
+  "options": [
+   "À écrire des Dockerfile",
+   "À compresser des images",
+   "À décrire et lancer plusieurs conteneurs ensemble",
+   "À remplacer Docker"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande lance tous les services en arrière-plan ?",
+  "type": "qcm",
+  "options": [
+   "`docker compose up -d`",
+   "`docker compose start all`",
+   "`docker compose go`",
+   "`docker run compose`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande arrête et supprime les conteneurs d'un projet Compose ?",
+  "type": "qcm",
+  "options": [
+   "`docker compose down`",
+   "`docker compose stop --rm`",
+   "`docker compose end`",
+   "`docker compose kill`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Dans un projet Compose, quel nom d'hôte le service web utilise-t-il pour joindre le service bdd ?",
+  "type": "qcm",
+  "options": [
+   "`localhost`",
+   "L'adresse IP publique",
+   "`127.0.0.1`",
+   "`bdd` (le nom du service)"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Où range-t-on les mots de passe utilisés par compose.yaml ?",
+  "type": "qcm",
+  "options": [
+   "Dans un fichier `.env` ignoré par Git",
+   "Dans le README",
+   "Dans le Dockerfile",
+   "Directement dans compose.yaml"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi copier le code en dernier dans un Dockerfile ?",
+  "type": "qcm",
+  "options": [
+   "Pour réduire la taille",
+   "Pour profiter du cache des couches précédentes à chaque reconstruction",
+   "Par convention uniquement",
+   "Parce que COPY doit être la dernière instruction"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Avec quoi indente-t-on un fichier YAML ?",
+  "type": "qcm",
+  "options": [
+   "Les deux indifféremment",
+   "Des tabulations",
+   "Des espaces",
+   "Rien : l'indentation est libre"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "`docker compose down` supprime les volumes par défaut.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Il faut ajouter -v."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel fichier exclut des fichiers de la construction d'une image ?",
+  "type": "saisie",
+  "answers": [
+   ".dockerignore"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque instruction à son rôle.",
+  "type": "associer",
+  "paires": [
+   [
+    "`FROM`",
+    "image de base"
+   ],
+   [
+    "`RUN`",
+    "commande de construction"
+   ],
+   [
+    "`COPY`",
+    "ajouter des fichiers"
+   ],
+   [
+    "`CMD`",
+    "commande de démarrage"
+   ],
+   [
+    "`EXPOSE`",
+    "port d'écoute"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

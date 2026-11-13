@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Bash : expressions régulières, grep, sed et awk — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="bash" data-chapter="bash-regex-texte">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/bash.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>Journaux, fichiers de configuration, exports CSV : l'administration système consiste beaucoup à <b>chercher et transformer du texte</b>. Les expressions régulières (*regex*) décrivent des motifs de texte ; on les retrouve à l'identique en PHP, JavaScript, Java, Python.</p>
+<h2>1. Les expressions régulières</h2>
+<table><tr><th>Motif</th><th>Signifie</th><th>Exemple</th></tr><tr><td><code>.</code></td><td>n'importe quel caractère</td><td><code>a.c</code> : abc, a5c</td></tr><tr><td><code>^</code> <code>$</code></td><td>début, fin de ligne</td><td><code>^root</code>, <code>bash$</code></td></tr><tr><td><code>[abc]</code> <code>[a-z]</code> <code>[0-9]</code></td><td>un caractère de l'ensemble</td><td><code>[0-9][0-9]</code></td></tr><tr><td><code>[^0-9]</code></td><td>un caractère hors de l'ensemble</td><td></td></tr><tr><td><code>*</code></td><td>0 fois ou plus</td><td><code>ab*</code> : a, ab, abbb</td></tr><tr><td><code>+</code></td><td>1 fois ou plus</td><td><code>[0-9]+</code></td></tr><tr><td><code>?</code></td><td>0 ou 1 fois</td><td><code>https?</code></td></tr><tr><td><code>{3}</code> <code>{2,4}</code></td><td>exactement 3 fois, de 2 à 4 fois</td><td><code>[0-9]{5}</code> : un code postal</td></tr><tr><td><code>(ab|cd)</code></td><td>l'un ou l'autre</td><td><code>(erreur|echec)</code></td></tr><tr><td><code>\.</code></td><td>un vrai point (échappé)</td><td><code>192\.168</code></td></tr></table>
+<h2>2. <code>grep</code> : chercher</h2>
+<pre><code>grep "erreur" /var/log/syslog            # les lignes qui contiennent « erreur »
+grep -i "erreur" fichier                 # sans tenir compte de la casse
+grep -v "^#" /etc/ssh/sshd_config        # les lignes qui NE commencent PAS par #
+grep -n "root" /etc/passwd               # avec les numéros de ligne
+grep -c "Failed password" auth.log       # compte les lignes
+grep -r "TODO" ~/projet                  # dans tout un dossier
+grep -E "^[a-z]+:x:[0-9]{4}:" /etc/passwd    # -E : regex étendues (+, ?, {}, |)
+grep -oE "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" auth.log   # -o : seulement ce qui correspond</code></pre>
+<h2>3. <code>sed</code> : remplacer</h2>
+<pre><code>sed 's/ancien/nouveau/' fichier          # remplace la 1re occurrence de chaque ligne
+sed 's/ancien/nouveau/g' fichier         # g : toutes les occurrences
+sed -i 's/Port 22/Port 2222/' sshd_config    # -i : modifie le fichier lui-même
+sed -i.bak 's/a/b/g' fichier             # … en gardant une copie fichier.bak
+sed '/^#/d' fichier                      # supprime les lignes de commentaire
+sed -n '5,10p' fichier                   # affiche les lignes 5 à 10
+sed -E 's/([0-9]+)-([0-9]+)/\2-\1/' f    # \1, \2 : les groupes capturés</code></pre>
+<h2>4. <code>awk</code> : travailler en colonnes</h2>
+<p><code>awk</code> découpe chaque ligne en champs : <code>$1</code>, <code>$2</code>… et <code>$0</code> pour la ligne entière.</p>
+<pre><code>awk '{print $1}' fichier                 # la première colonne
+awk -F: '{print $1, $7}' /etc/passwd     # -F: : le séparateur est « : »
+awk -F: '$3 &gt;= 1000 {print $1}' /etc/passwd      # condition : les comptes « humains »
+df -h | awk 'NR &gt; 1 {print $5, $6}'      # NR : numéro de ligne (on saute l'en-tête)
+awk '{somme += $2} END {print somme}' ventes.txt # un total</code></pre>
+<h2>5. Combiner avec les tubes</h2>
+<pre><code># Les 5 adresses IP qui échouent le plus à se connecter en SSH
+grep "Failed password" /var/log/auth.log \
+  | grep -oE "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" \
+  | sort | uniq -c | sort -rn | head -5
+
+# Les utilisateurs dont le shell est bash, triés
+grep "bash$" /etc/passwd | cut -d: -f1 | sort
+
+# Nombre de requêtes par code HTTP dans un journal nginx
+awk '{print $9}' /var/log/nginx/access.log | sort | uniq -c | sort -rn</code></pre>
+<p>Le couple <code>sort | uniq -c | sort -rn</code> (trier, compter les doublons, classer) est le réflexe de base pour analyser un journal.</p>
+<section class="tuto"><h3><small>Tutoriel</small>Analyser les tentatives d'intrusion</h3>
+<div class="etape"><h4>Repérer les lignes</h4>
+<pre><code>grep "Failed password" /var/log/auth.log | tail -3</code></pre>
+</div>
+<div class="etape"><h4>Extraire l'adresse IP</h4>
+<pre><code>grep "Failed password" /var/log/auth.log | grep -oE "[0-9]+(\.[0-9]+){3}"</code></pre>
+</div>
+<div class="etape"><h4>Compter et classer</h4>
+<pre><code>grep "Failed password" /var/log/auth.log \
+  | grep -oE "[0-9]+(\.[0-9]+){3}" | sort | uniq -c | sort -rn | head -10</code></pre>
+</div>
+<div class="etape"><h4>Aller plus loin</h4>
+<p>C'est exactement ce que fait l'outil <b>fail2ban</b> automatiquement : il surveille les journaux avec des regex et bannit les adresses trop insistantes avec le pare-feu.</p>
+</div>
+</section>
+<div class="box retenir"><b>À retenir</b><p>Regex : <code>.</code> un caractère, <code>[0-9]</code> un chiffre, <code>+</code> un ou plus, <code>*</code> zéro ou plus, <code>?</code> facultatif, <code>^</code> début, <code>$</code> fin, <code>\.</code> un vrai point. </p><p> <code>grep -E motif</code> cherche (<code>-i</code>, <code>-v</code>, <code>-c</code>, <code>-o</code>, <code>-r</code>). </p><p> <code>sed 's/a/b/g'</code> remplace (<code>-i</code> dans le fichier). </p><p> <code>awk -F: '{print $1}'</code> extrait des colonnes. </p><p> `sort</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "Que signifie `^` au début d'une expression régulière ?",
+  "type": "qcm",
+  "options": [
+   "Le début de la ligne",
+   "La fin de la ligne",
+   "Une négation",
+   "N'importe quel caractère"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que signifie `[0-9]+` ?",
+  "type": "qcm",
+  "options": [
+   "Un chiffre ou plus",
+   "Exactement un chiffre",
+   "Le texte « 0-9 »",
+   "Zéro chiffre ou plus"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que signifie le point `.` dans une regex ?",
+  "type": "qcm",
+  "options": [
+   "La fin de la ligne",
+   "N'importe quel caractère",
+   "Un espace",
+   "Un point"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment désigner un vrai point ?",
+  "type": "qcm",
+  "options": [
+   "`.`",
+   "`..`",
+   "`\\.`",
+   "`[dot]`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que reconnaît `https?` ?",
+  "type": "qcm",
+  "options": [
+   "Tous les protocoles",
+   "http suivi d'un caractère",
+   "http et https",
+   "Seulement https"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle option de grep ignore la casse ?",
+  "type": "qcm",
+  "options": [
+   "`-c`",
+   "`-i`",
+   "`-v`",
+   "`-n`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle option de grep affiche les lignes qui ne correspondent PAS ?",
+  "type": "qcm",
+  "options": [
+   "`-r`",
+   "`-v`",
+   "`-o`",
+   "`-i`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle option de grep compte les lignes correspondantes ?",
+  "type": "qcm",
+  "options": [
+   "`-l`",
+   "`-n`",
+   "`-c`",
+   "`-o`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait `sed 's/chat/chien/g' fichier` ?",
+  "type": "qcm",
+  "options": [
+   "Supprime les lignes contenant chat",
+   "Affiche le fichier en remplaçant tous les « chat » par « chien »",
+   "Modifie le fichier sur le disque",
+   "Compte les chats"
+  ],
+  "answer": 1,
+  "explication": "Sans -i, le fichier n'est pas modifié."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle option de sed modifie directement le fichier ?",
+  "type": "qcm",
+  "options": [
+   "`-w`",
+   "`-f`",
+   "`-i`",
+   "`-s`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que désigne `$1` dans awk ?",
+  "type": "qcm",
+  "options": [
+   "Le premier argument du script",
+   "Le premier champ de la ligne",
+   "Le premier fichier",
+   "La première ligne"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment indiquer à awk que le séparateur est « : » ?",
+  "type": "qcm",
+  "options": [
+   "`-d:`",
+   "`--sep :`",
+   "`-s:`",
+   "`-F:`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "À quoi sert l'enchaînement `sort | uniq -c | sort -rn` ?",
+  "type": "qcm",
+  "options": [
+   "À numéroter les lignes",
+   "À compter les lignes identiques et à les classer par fréquence",
+   "À supprimer les doublons uniquement",
+   "À trier par ordre alphabétique"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Quel motif reconnaît un code postal français (5 chiffres) sur toute la ligne ?",
+  "type": "qcm",
+  "options": [
+   "`^.....$`",
+   "`[5]`",
+   "`^[0-9]{5}$`",
+   "`[0-9]*`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Les expressions régulières s'utilisent aussi en JavaScript, PHP, Java et Python.",
+  "type": "vf",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle option de grep active les expressions régulières étendues (grep -_) ?",
+  "type": "saisie",
+  "answers": [
+   "E"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque outil à son rôle principal.",
+  "type": "associer",
+  "paires": [
+   [
+    "`grep`",
+    "chercher des lignes"
+   ],
+   [
+    "`sed`",
+    "remplacer du texte"
+   ],
+   [
+    "`awk`",
+    "extraire des colonnes"
+   ],
+   [
+    "`uniq -c`",
+    "compter les doublons"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

@@ -1,0 +1,414 @@
+=== cs-bases | C# : la syntaxe, les types et les collections | f
+Le **C#** (« C sharp ») est le langage de la plateforme **.NET** de Microsoft. C'est l'un des langages les plus enseignés en option SLAM : applications de bureau (WinForms, WPF), sites et API (ASP.NET Core), jeux (Unity). Sa syntaxe est très proche de celle de Java : si tu as suivi le cours Java de ce site, tu connais déjà les trois quarts du C#.
+
+!info Pour pratiquer | Installe le **SDK .NET** (gratuit) et **Visual Studio Community** ou VS Code. En ligne de commande : `dotnet new console -n MonProjet`, puis `dotnet run`.
+
+## 1. Le programme minimal
+
+```
+// Program.cs : depuis .NET 6, pas besoin de classe ni de Main pour débuter
+Console.WriteLine("Bonjour !");
+```
+
+La forme complète, que tu verras dans les sujets et les projets plus anciens :
+
+```
+using System;
+
+namespace MonProjet
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Bonjour !");
+        }
+    }
+}
+```
+
+## 2. Variables et types
+
+```
+int age = 17;
+double prix = 19.99;
+decimal montant = 19.99m;            // decimal : pour l'argent, sans erreur d'arrondi
+bool majeur = false;
+char initiale = 'L';
+string prenom = "Léa";               // string en minuscules
+var total = prix * 3;                // var : type déduit (double)
+const double TVA = 0.2;              // constante
+
+Console.WriteLine($"{prenom} a {age} ans");          // chaîne interpolée : $"…{variable}…"
+Console.WriteLine($"Prix : {prix:F2} €");            // F2 : deux décimales
+Console.WriteLine(7 / 2);                            // 3 : division entière, comme en Java
+Console.WriteLine((double)7 / 2);                    // 3,5
+```
+
+## 3. Lire au clavier et convertir
+
+```
+Console.Write("Ton âge : ");
+string saisie = Console.ReadLine();
+int age = int.Parse(saisie);                         // lève une exception si ce n'est pas un nombre
+
+if (int.TryParse(saisie, out int n))                 // la forme sûre : renvoie true ou false
+    Console.WriteLine($"Dans 10 ans : {n + 10}");
+else
+    Console.WriteLine("Ce n'est pas un nombre");
+```
+
+## 4. Conditions et boucles
+
+Identiques à Java : `if / else if / else`, `switch`, `while`, `do … while`, `for`. Le parcours d'une collection s'écrit `foreach … in`.
+
+```
+if (note >= 16) Console.WriteLine("Très bien");
+else if (note >= 10) Console.WriteLine("Admis");
+else Console.WriteLine("Recalé");
+
+string mention = note switch                         // expression switch
+{
+    >= 16 => "Très bien",
+    >= 10 => "Admis",
+    _ => "Recalé"                                    // _ : cas par défaut
+};
+
+for (int i = 1; i <= 5; i++) Console.Write(i + " ");
+
+string[] fruits = { "pomme", "kiwi", "poire" };
+foreach (string f in fruits) Console.WriteLine(f);
+```
+
+!info Bonne nouvelle | En C#, `==` compare le **contenu** des `string` (contrairement à Java) : `if (reponse == "oui")` fonctionne comme on s'y attend.
+
+## 5. Méthodes
+
+```
+static double Aire(double largeur, double hauteur)   // PascalCase pour les méthodes
+{
+    return largeur * hauteur;
+}
+
+static double Ttc(double ht, double taux = 0.2) => ht * (1 + taux);     // corps d'expression, valeur par défaut
+
+static bool Diviser(int a, int b, out int resultat)                     // out : un second résultat
+{
+    resultat = b == 0 ? 0 : a / b;
+    return b != 0;
+}
+```
+
+## 6. Les collections
+
+```
+using System.Collections.Generic;
+
+List<string> noms = new List<string> { "Léa", "Sam" };
+noms.Add("Zoé");
+noms.Remove("Sam");
+Console.WriteLine($"{noms.Count} noms, le premier : {noms[0]}");       // Count, et crochets
+foreach (string n in noms) Console.WriteLine(n);
+
+Dictionary<string, int> stock = new Dictionary<string, int>();
+stock["souris"] = 3;
+stock["clavier"] = 2;
+if (stock.ContainsKey("souris")) stock["souris"] += 5;
+foreach (var (nom, qte) in stock) Console.WriteLine($"{nom} : {qte}");
+foreach (KeyValuePair<string, int> p in stock) Console.WriteLine($"{p.Key} : {p.Value}");
+
+HashSet<string> vus = new HashSet<string>();
+int[] notes = { 12, 15, 9 };
+Console.WriteLine(notes.Length);
+```
+
+## 7. Du Java au C# : la table de correspondance
+
+| Java | C# |
+| `System.out.println(x)` | `Console.WriteLine(x)` |
+| `String`, `boolean` | `string`, `bool` |
+| `final` | `const` (ou `readonly` pour un attribut) |
+| `ArrayList<String>` | `List<string>` |
+| `HashMap<K, V>` | `Dictionary<K, V>` |
+| `liste.size()`, `liste.get(i)` | `liste.Count`, `liste[i]` |
+| `for (String s : liste)` | `foreach (string s in liste)` |
+| `a.equals(b)` pour les chaînes | `a == b` |
+| `Integer.parseInt(s)` | `int.Parse(s)` |
+| `package` / `import` | `namespace` / `using` |
+| méthodes en `camelCase` | méthodes en `PascalCase` |
+| `"a" + x` ou `String.format` | `$"a{x}"` |
+
+!tuto Un inventaire en console
+# Lire des articles
+```
+var stock = new Dictionary<string, int>();
+Console.Write("Nombre d'articles : ");
+int n = int.Parse(Console.ReadLine());
+for (int i = 0; i < n; i++)
+{
+    Console.Write("Nom : ");
+    string nom = Console.ReadLine();
+    Console.Write("Quantité : ");
+    int qte = int.Parse(Console.ReadLine());
+    stock[nom] = stock.GetValueOrDefault(nom) + qte;     // 0 si la clé est absente
+}
+```
+# Afficher trié
+```
+foreach (var (nom, qte) in stock.OrderBy(p => p.Key))    // OrderBy : LINQ, chapitre suivant
+    Console.WriteLine($"{nom,-15}{qte,5}");              // alignement : 15 à gauche, 5 à droite
+```
+!fin
+
+!retenir À retenir | `Console.WriteLine($"…{variable}…")` affiche ; `Console.ReadLine()` lit ; `int.Parse` / `int.TryParse` convertissent. ¶ Types : `int`, `double`, `decimal`, `bool`, `string`, `var`. ¶ `foreach (var x in collection)`. ¶ `List<T>` (`Add`, `Count`, `[i]`) et `Dictionary<K, V>`. ¶ Méthodes et classes en PascalCase ; `==` compare le contenu des chaînes.
+--- exos
+Q¤f¤Quelle instruction affiche une ligne en C# ?¤`Console.WriteLine(…)`;;`System.out.println(…)`;;`print(…)`;;`echo …`¤
+Q¤f¤Quelle instruction lit une ligne au clavier ?¤`Console.ReadLine()`;;`Console.Read.Line()`;;`input()`;;`Scanner.next()`¤
+Q¤m¤Comment écrit-on une chaîne interpolée ?¤`$"Bonjour {nom}"`;;`"Bonjour ${nom}"`;;`f"Bonjour {nom}"`;;`"Bonjour " . nom`¤
+Q¤m¤Quel type choisir pour un montant d'argent exact ?¤`decimal`;;`float`;;`int`;;`money`¤
+Q¤m¤Quelle méthode convertit un texte en entier sans lever d'exception ?¤`int.TryParse`;;`int.Parse`;;`Convert.Try`;;`int.Safe`¤
+Q¤m¤Quelle boucle parcourt une collection ?¤`foreach (var x in liste)`;;`for (var x : liste)`;;`for x in liste:`;;`each (x of liste)`¤
+Q¤m¤Quelle classe correspond à l'ArrayList de Java ?¤`List<T>`;;`Array<T>`;;`Vector<T>`;;`Collection<T>`¤
+Q¤m¤Quelle classe correspond à la HashMap de Java ?¤`Dictionary<K, V>`;;`Map<K, V>`;;`Hashtable<K>`;;`Pairs<K, V>`¤
+Q¤m¤Comment obtenir le nombre d'éléments d'une `List<T>` ?¤`liste.Count`;;`liste.size()`;;`liste.length`;;`liste.Length()`¤
+Q¤m¤En C#, comment compare-t-on le contenu de deux string ?¤Avec `==`;;Uniquement avec Equals;;Avec `===`;;Avec compareTo¤
+Q¤m¤Quelle convention de nommage pour une méthode en C# ?¤PascalCase : `CalculerTotal`;;camelCase : `calculerTotal`;;snake_case;;MAJUSCULES¤
+Q¤m¤Que vaut `7 / 2` en C# ?¤3;;3,5;;4;;Une erreur¤Division entière, comme en Java.
+Q¤m¤Quel mot-clé remplace `import` de Java ?¤`using`;;`include`;;`require`;;`load`¤
+V¤m¤La syntaxe du C# est très proche de celle de Java.¤V¤
+S¤m¤Quelle commande crée un projet console avec le SDK .NET (dotnet ___ console) ?¤new¤
+A¤m¤Associe chaque écriture Java à son équivalent C#.¤`String`=>`string`;;`boolean`=>`bool`;;`final`=>`const`;;`package`=>`namespace`;;`import`=>`using`¤
+
+=== cs-poo | C# : classes, propriétés, LINQ et accès aux données | m
+## 1. Classes et propriétés
+
+Là où Java écrit des accesseurs `getX` / `setX`, C# a des **propriétés** : elles s'utilisent comme des attributs mais peuvent contenir du contrôle.
+
+```
+class Compte
+{
+    public string Titulaire { get; set; }            // propriété automatique
+    public double Solde { get; private set; }        // lisible partout, modifiable dans la classe seulement
+
+    private string _code;                            // attribut privé (convention : tiret bas)
+    public string Code
+    {
+        get { return _code; }
+        set { if (value.Length == 4) _code = value; }     // value : la valeur affectée
+    }
+
+    public Compte(string titulaire, double solde = 0)     // constructeur
+    {
+        Titulaire = titulaire;
+        Solde = solde;
+    }
+
+    public void Deposer(double montant)
+    {
+        if (montant <= 0) throw new ArgumentException("Montant invalide");
+        Solde += montant;
+    }
+
+    public override string ToString() => $"{Titulaire} : {Solde:F2} €";
+}
+```
+
+```
+var c = new Compte("Léa", 100);
+c.Deposer(50);
+c.Titulaire = "Léa Martin";          // appelle le set
+Console.WriteLine(c.Solde);          // appelle le get
+// c.Solde = 1000000;                // refusé : set privé
+Console.WriteLine(c);                // appelle ToString
+```
+
+## 2. Héritage et interfaces
+
+```
+abstract class Forme
+{
+    public abstract double Aire();                        // à définir dans les filles
+    public virtual string Nom() => "forme";               // virtual : redéfinissable
+    public string Description() => $"{Nom()} d'aire {Aire():F2}";
+}
+
+class Rectangle : Forme                                   // « : » remplace extends
+{
+    private readonly double l, h;
+    public Rectangle(double l, double h) { this.l = l; this.h = h; }
+    public override double Aire() => l * h;               // override obligatoire
+    public override string Nom() => "rectangle";
+}
+
+interface IExportable                                     // convention : un I devant le nom
+{
+    string VersCsv();
+}
+
+class Produit : IExportable                               // « : » remplace aussi implements
+{
+    public string Nom { get; set; }
+    public double Prix { get; set; }
+    public string VersCsv() => $"{Nom};{Prix}";
+}
+```
+
+| Java | C# |
+| `class B extends A implements I` | `class B : A, I` |
+| `super(…)` / `super.methode()` | `base(…)` / `base.Methode()` |
+| redéfinition libre, `@Override` conseillé | `virtual` dans la mère **et** `override` dans la fille |
+| `getX()` / `setX()` | propriété `X { get; set; }` |
+| `toString()` | `ToString()` |
+
+## 3. Les exceptions
+
+```
+try
+{
+    int n = int.Parse(Console.ReadLine());
+    Console.WriteLine(100 / n);
+}
+catch (FormatException)
+{
+    Console.WriteLine("Il faut un nombre entier.");
+}
+catch (DivideByZeroException e)
+{
+    Console.WriteLine($"Erreur : {e.Message}");
+}
+finally
+{
+    Console.WriteLine("Fin");
+}
+```
+
+Toutes les exceptions C# sont « non vérifiées » : pas de `throws` dans les signatures. Le bloc `using` ferme automatiquement une ressource, comme le `try`-with-resources de Java.
+
+## 4. LINQ : interroger les collections
+
+**LINQ** permet de filtrer, trier et agréger une collection comme on écrirait une requête SQL. C'est l'équivalent des streams de Java.
+
+```
+using System.Linq;
+
+var eleves = new List<Eleve>
+{
+    new Eleve("Léa", "SLAM", 15), new Eleve("Sam", "SISR", 9),
+    new Eleve("Zoé", "SLAM", 18), new Eleve("Tom", "SISR", 12)
+};
+
+var admisSlam = eleves
+    .Where(e => e.Option == "SLAM" && e.Note >= 10)       // filtre
+    .OrderByDescending(e => e.Note)                       // tri
+    .Select(e => e.Nom);                                  // projection
+Console.WriteLine(string.Join(", ", admisSlam));          // Zoé, Léa
+
+double moyenne = eleves.Average(e => e.Note);
+int nbAdmis = eleves.Count(e => e.Note >= 10);
+Eleve meilleur = eleves.MaxBy(e => e.Note);
+bool tousAdmis = eleves.All(e => e.Note >= 10);
+var parOption = eleves.GroupBy(e => e.Option);
+foreach (var groupe in parOption)
+    Console.WriteLine($"{groupe.Key} : {groupe.Count()} élèves");
+```
+
+| LINQ | SQL | Stream Java |
+| `Where` | `WHERE` | `filter` |
+| `Select` | `SELECT` | `map` |
+| `OrderBy` | `ORDER BY` | `sorted` |
+| `GroupBy` | `GROUP BY` | `groupingBy` |
+| `Count`, `Sum`, `Average`, `Max` | `COUNT`, `SUM`, `AVG`, `MAX` | `count`, `sum`, `average`, `max` |
+| `First`, `FirstOrDefault` | `LIMIT 1` | `findFirst` |
+
+## 5. Accéder à une base de données
+
+Avec ADO.NET, le schéma est le même qu'en JDBC : **connexion → commande paramétrée → lecteur**.
+
+```
+using MySqlConnector;
+
+string chaine = "Server=localhost;Database=parc;User ID=app;Password=…";
+using var cnx = new MySqlConnection(chaine);
+cnx.Open();
+
+using var cmd = new MySqlCommand("SELECT nom, prix FROM materiel WHERE prix > @seuil", cnx);
+cmd.Parameters.AddWithValue("@seuil", 100);               // paramètre : pas d'injection SQL
+
+using var lecteur = cmd.ExecuteReader();
+while (lecteur.Read())
+    Console.WriteLine($"{lecteur.GetString("nom")} : {lecteur.GetDouble("prix")}");
+```
+
+!attention Toujours des paramètres | Comme en PHP et en Java : ne construis jamais une requête en concaténant une saisie. Les paramètres `@nom` transmettent la saisie comme une donnée.
+
+Dans les projets récents, on utilise souvent **Entity Framework Core**, un ORM : on manipule des objets et des requêtes LINQ, et il génère le SQL.
+
+```
+var chers = contexte.Materiels.Where(m => m.Prix > 100).OrderBy(m => m.Nom).ToList();
+```
+
+## 6. L'écosystème .NET
+
+| Besoin | Technologie |
+| Application de bureau Windows | WinForms, WPF |
+| Site web et API REST | ASP.NET Core |
+| Application mobile et multiplateforme | .NET MAUI |
+| Jeu vidéo | Unity |
+| Accès aux données | ADO.NET, Entity Framework Core |
+| Bibliothèques | NuGet (`dotnet add package …`) |
+| Tests unitaires | xUnit, NUnit, MSTest |
+
+!tuto Une gestion de tickets d'assistance
+# Le modèle
+```
+enum Priorite { Basse, Normale, Urgente }
+
+class Ticket
+{
+    public int Numero { get; }
+    public string Titre { get; }
+    public Priorite Priorite { get; }
+    public bool Resolu { get; private set; }
+
+    public Ticket(int numero, string titre, Priorite priorite)
+    {
+        Numero = numero; Titre = titre; Priorite = priorite;
+    }
+    public void Resoudre() => Resolu = true;
+}
+```
+# La liste et les requêtes LINQ
+```
+var tickets = new List<Ticket>
+{
+    new Ticket(1, "Imprimante hors ligne", Priorite.Normale),
+    new Ticket(2, "Serveur de fichiers en panne", Priorite.Urgente),
+    new Ticket(3, "Mot de passe oublié", Priorite.Basse)
+};
+tickets[2].Resoudre();
+
+var aTraiter = tickets.Where(t => !t.Resolu).OrderByDescending(t => t.Priorite);
+foreach (var t in aTraiter)
+    Console.WriteLine($"#{t.Numero} [{t.Priorite}] {t.Titre}");
+Console.WriteLine($"{tickets.Count(t => t.Resolu)} ticket(s) résolu(s)");
+```
+!fin
+
+!retenir À retenir | Propriété : `public Type Nom { get; set; }` ; `private set` pour protéger l'écriture. ¶ `class Fille : Mere, IInterface` ; `virtual` dans la mère, `override` dans la fille ; `base` au lieu de `super`. ¶ `try / catch / finally`, `throw new …Exception(…)`. ¶ LINQ : `Where`, `Select`, `OrderBy`, `Count`, `Average`, `GroupBy`. ¶ Base de données : requêtes **paramétrées** (`@nom`), ou Entity Framework.
+--- exos
+Q¤m¤Qu'est-ce qu'une propriété en C# ?¤Un membre qui s'utilise comme un attribut mais passe par get et set;;Une méthode statique;;Un attribut public sans contrôle;;Une constante¤
+Q¤m¤Que signifie `public double Solde { get; private set; }` ?¤Lisible partout, modifiable seulement dans la classe;;Modifiable partout;;Invisible hors de la classe;;Constante¤
+Q¤m¤Dans un `set`, que contient le mot-clé `value` ?¤La valeur qu'on est en train d'affecter;;L'ancienne valeur;;Le nom de la propriété;;Rien¤
+Q¤m¤Comment une classe hérite-t-elle d'une autre en C# ?¤`class Fille : Mere`;;`class Fille extends Mere`;;`class Fille inherits Mere`;;`class Fille(Mere)`¤
+Q¤m¤Quel mot-clé appelle le constructeur de la classe mère ?¤`base`;;`super`;;`parent`;;`this`¤
+Q¤m¤Pour redéfinir une méthode en C#, que faut-il ?¤`virtual` (ou abstract) dans la mère et `override` dans la fille;;Rien de particulier;;Seulement @Override;;Le mot-clé new uniquement¤
+Q¤m¤Quelle convention de nommage pour une interface ?¤Un I devant le nom : `IExportable`;;Un suffixe Interface;;Tout en majuscules;;Un tiret bas devant¤
+Q¤m¤Quelle exception lève `int.Parse("abc")` ?¤`FormatException`;;`NumberFormatException`;;`ParseError`;;`InvalidCastException`¤
+Q¤m¤Qu'est-ce que LINQ ?¤Un langage de requêtes intégré pour interroger les collections;;Un moteur de base de données;;Un outil de tests;;Un format de fichier¤
+Q¤m¤Quelle méthode LINQ filtre une collection ?¤`Where`;;`Select`;;`Filter`;;`Find`¤
+Q¤m¤Quelle méthode LINQ transforme chaque élément (projection) ?¤`Select`;;`Where`;;`Map`;;`Convert`¤
+Q¤m¤Quel est l'équivalent Java de LINQ ?¤Les streams;;Les threads;;Les packages;;Les annotations¤
+Q¤m¤Comment transmettre une valeur à une requête SQL en ADO.NET sans risque d'injection ?¤Avec un paramètre `@nom`;;En concaténant la saisie;;Avec string.Format;;En la mettant entre apostrophes¤
+Q¤m¤Qu'est-ce qu'Entity Framework Core ?¤Un ORM : il fait le lien entre objets et tables;;Un serveur web;;Un éditeur de code;;Un langage¤
+V¤m¤En C#, une méthode doit déclarer les exceptions qu'elle peut lever avec throws.¤F¤Il n'y a pas d'exceptions vérifiées en C#.
+A¤m¤Associe chaque méthode LINQ à son équivalent SQL.¤`Where`=>WHERE;;`Select`=>SELECT;;`OrderBy`=>ORDER BY;;`GroupBy`=>GROUP BY;;`Count`=>COUNT¤

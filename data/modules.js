@@ -259,5 +259,87 @@ window.EF_MODULES = [
       { id: "java-projets", titre: "Java en vrai : fichiers, base de données, Maven et tests", niveau: "moyen" },
       { id: "java-jeu", titre: "Java : créer un jeu dans le navigateur", niveau: "difficile" }
     ]
+  },
+  {
+    id: "csharp", bonus: true,
+    titre: "C#",
+    sousTitre: "Bonus · SLAM · le langage de .NET",
+    icone: "C#",
+    option: "BONUS",
+    couleur: "cs",
+    description: "Le langage le plus demandé en SLAM avec Java : syntaxe, collections, classes et propriétés, héritage, LINQ, accès aux bases de données. Avec la table de correspondance Java ↔ C#.",
+    chapitres: [
+      { id: "cs-bases", titre: "C# : la syntaxe, les types et les collections", niveau: "facile" },
+      { id: "cs-poo", titre: "C# : classes, propriétés, LINQ et accès aux données", niveau: "moyen" }
+    ]
+  },
+  {
+    id: "git", bonus: true,
+    titre: "Git et GitHub",
+    sousTitre: "Bonus · SLAM et SISR · versionner son travail",
+    icone: "Git",
+    option: "BONUS",
+    couleur: "git",
+    description: "L'outil attendu en stage et dans le portfolio : commits, branches, fusions et conflits, GitHub, pull requests, et comment réparer ses erreurs.",
+    chapitres: [
+      { id: "git-bases", titre: "Git : enregistrer l'histoire d'un projet", niveau: "facile" },
+      { id: "git-branches", titre: "Git : les branches et les fusions", niveau: "moyen" },
+      { id: "git-github", titre: "Git : GitHub et le travail en équipe", niveau: "moyen" },
+      { id: "git-annuler", titre: "Git : annuler, corriger et bonnes pratiques", niveau: "moyen" }
+    ]
+  },
+  {
+    id: "bash", bonus: true,
+    titre: "Scripts Bash",
+    sousTitre: "Bonus · SISR · automatiser Linux",
+    icone: "#!",
+    option: "BONUS",
+    couleur: "bash",
+    description: "Écrire des scripts d'administration : variables, tests, boucles, fonctions, expressions régulières avec grep, sed et awk, SSH, cron et sauvegardes.",
+    chapitres: [
+      { id: "bash-scripts", titre: "Bash : écrire son premier script", niveau: "facile" },
+      { id: "bash-conditions-boucles", titre: "Bash : conditions, boucles et fonctions", niveau: "moyen" },
+      { id: "bash-regex-texte", titre: "Bash : expressions régulières, grep, sed et awk", niveau: "moyen" },
+      { id: "bash-ssh-cron", titre: "Bash : SSH, tâches planifiées et sauvegardes", niveau: "moyen" }
+    ]
+  },
+  {
+    id: "powershell", bonus: true,
+    titre: "PowerShell",
+    sousTitre: "Bonus · SISR · administrer Windows",
+    icone: "PS>",
+    option: "BONUS",
+    couleur: "ps",
+    description: "Le shell de Windows Server : cmdlets, pipeline d'objets, scripts, services, journaux, comptes Active Directory et administration à distance.",
+    chapitres: [
+      { id: "ps-bases", titre: "PowerShell : cmdlets, objets et pipeline", niveau: "facile" },
+      { id: "ps-administration", titre: "PowerShell : scripts et administration", niveau: "moyen" }
+    ]
+  },
+  {
+    id: "docker", bonus: true,
+    titre: "Docker",
+    sousTitre: "Bonus · SLAM et SISR · conteneurs",
+    icone: "Dkr",
+    option: "BONUS",
+    couleur: "docker",
+    description: "Emballer et déployer une application : images, conteneurs, volumes, Dockerfile, et une pile web complète avec Docker Compose.",
+    chapitres: [
+      { id: "docker-bases", titre: "Docker : images et conteneurs", niveau: "moyen" },
+      { id: "docker-compose", titre: "Docker : Dockerfile et Docker Compose", niveau: "moyen" }
+    ]
+  },
+  {
+    id: "securite-web", bonus: true,
+    titre: "Sécurité web",
+    sousTitre: "Bonus · SLAM et bloc 3 · OWASP",
+    icone: "Sec",
+    option: "BONUS",
+    couleur: "secu",
+    description: "Comprendre et corriger les failles classiques : injection SQL, XSS, CSRF, stockage des mots de passe, sessions, contrôle d'accès et HTTPS.",
+    chapitres: [
+      { id: "secu-injections", titre: "Sécurité web : injection SQL, XSS et CSRF", niveau: "moyen" },
+      { id: "secu-authentification", titre: "Sécurité web : mots de passe, sessions et HTTPS", niveau: "moyen" }
+    ]
   }
 ];

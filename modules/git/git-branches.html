@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Git : les branches et les fusions — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="git" data-chapter="git-branches">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/git.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>Une <b>branche</b> est une ligne de développement indépendante. Elle permet de travailler sur une fonctionnalité ou une correction sans toucher à la version qui marche. Créer une branche est instantané : c'est juste une étiquette posée sur un commit.</p>
+<h2>1. Créer et changer de branche</h2>
+<pre><code>git branch                       # liste les branches ; * marque la branche courante
+git switch -c contact            # crée la branche « contact » et s'y place
+git switch main                  # revient sur main
+git branch -d contact            # supprime une branche déjà fusionnée</code></pre>
+<p><code>git checkout -b contact</code> est l'ancienne écriture de <code>git switch -c contact</code> : tu la verras partout.</p>
+<p><b>HEAD</b> désigne « là où tu es » : la branche courante et son dernier commit.</p>
+<h2>2. Travailler sur une branche</h2>
+<pre><code>git switch -c formulaire-contact
+# … on modifie contact.html …
+git add .
+git commit -m "Ajoute le formulaire de contact"
+git log --oneline --graph --all          # dessine l'arbre des branches</code></pre>
+<p>Pendant ce temps, <code>main</code> n'a pas bougé : si un bug urgent arrive, on y revient, on le corrige, et la fonctionnalité en cours reste à l'abri sur sa branche.</p>
+<h2>3. Fusionner : <code>git merge</code></h2>
+<p>On se place sur la branche qui <b>reçoit</b>, et on fusionne l'autre.</p>
+<pre><code>git switch main
+git merge formulaire-contact</code></pre>
+<table><tr><th>Cas</th><th>Ce que fait Git</th></tr><tr><td><code>main</code> n'a pas avancé depuis la création de la branche</td><td>*fast-forward* : l'étiquette <code>main</code> avance simplement</td></tr><tr><td>les deux branches ont avancé</td><td>un <b>commit de fusion</b> réunit les deux histoires</td></tr><tr><td>les deux ont modifié les mêmes lignes</td><td><b>conflit</b> : Git s'arrête et te demande de trancher</td></tr></table>
+<h2>4. Résoudre un conflit</h2>
+<pre><code>$ git merge formulaire-contact
+CONFLIT (contenu) : Conflit de fusion dans index.html
+La fusion automatique a échoué ; réglez les conflits et validez le résultat.</code></pre>
+<p>Git a marqué la zone en conflit dans le fichier :</p>
+<pre><code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+&lt;h1&gt;Bienvenue sur mon site&lt;/h1&gt;
+=======
+&lt;h1&gt;Bienvenue sur le portfolio de Léa&lt;/h1&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; formulaire-contact</code></pre>
+<ol><li>Ouvre le fichier et <b>choisis</b> ce qu'il faut garder (une version, l'autre, ou un mélange).</li><li>Supprime les trois lignes de marqueurs <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>, <code>=======</code>, <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>.</li><li><code>git add index.html</code> puis <code>git commit</code> pour terminer la fusion.</li></ol>
+<p><code>git merge --abort</code> annule tout et revient à l'état d'avant la fusion. Un conflit n'est pas une erreur : c'est Git qui refuse de deviner à ta place.</p>
+<h2>5. Une méthode de travail simple</h2>
+<ul><li><code>main</code> contient toujours une version <b>qui fonctionne</b>.</li><li>Une branche par tâche, avec un nom explicite : <code>correction-menu-mobile</code>, <code>ajout-page-contact</code>.</li><li>Des commits petits et fréquents.</li><li>On fusionne dans <code>main</code> quand la tâche est terminée et testée, puis on supprime la branche.</li></ul>
+<section class="tuto"><h3><small>Tutoriel</small>Une fonctionnalité sur une branche</h3>
+<div class="etape"><h4>Créer la branche et travailler</h4>
+<pre><code>git switch -c page-contact
+echo "&lt;h1&gt;Contact&lt;/h1&gt;" &gt; contact.html
+git add contact.html
+git commit -m "Ajoute la page de contact"</code></pre>
+</div>
+<div class="etape"><h4>Revenir sur main : la page a « disparu »</h4>
+<p>Elle n'existe que sur l'autre branche. Rien n'est perdu.</p>
+<pre><code>git switch main
+ls                               # pas de contact.html ici
+git log --oneline --graph --all</code></pre>
+</div>
+<div class="etape"><h4>Fusionner et nettoyer</h4>
+<pre><code>git merge page-contact           # main reçoit la page
+ls                               # contact.html est là
+git branch -d page-contact</code></pre>
+</div>
+</section>
+<div class="box retenir"><b>À retenir</b><p><code>git switch -c nom</code> crée une branche et s'y place ; <code>git switch main</code> revient. </p><p> <code>git merge branche</code> fusionne <b>dans</b> la branche courante. </p><p> Conflit : éditer le fichier, retirer les marqueurs, <code>git add</code>, <code>git commit</code>. </p><p> <code>main</code> reste toujours fonctionnelle : une branche par tâche.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'une branche ?",
+  "type": "qcm",
+  "options": [
+   "Un commit particulier",
+   "Une copie du projet sur un autre disque",
+   "Une ligne de développement indépendante",
+   "Un fichier de configuration"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande crée la branche test et s'y place ?",
+  "type": "qcm",
+  "options": [
+   "`git switch -c test`",
+   "`git branch test --go`",
+   "`git merge test`",
+   "`git new test`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande liste les branches ?",
+  "type": "qcm",
+  "options": [
+   "`git status -b`",
+   "`git list`",
+   "`git branch`",
+   "`git branches --show`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Pour fusionner la branche contact dans main, où faut-il se placer ?",
+  "type": "qcm",
+  "options": [
+   "Peu importe",
+   "Sur une troisième branche",
+   "Sur contact",
+   "Sur main"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que désigne HEAD ?",
+  "type": "qcm",
+  "options": [
+   "Le dépôt distant",
+   "Le premier commit du projet",
+   "Le fichier principal",
+   "La branche courante et son dernier commit"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quand un conflit de fusion se produit-il ?",
+  "type": "qcm",
+  "options": [
+   "Quand les deux branches ont modifié les mêmes lignes",
+   "Quand une branche est vide",
+   "À chaque fusion",
+   "Quand le message de commit est trop long"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que signifient les lignes entre `<<<<<<< HEAD` et `=======` ?",
+  "type": "qcm",
+  "options": [
+   "Le résultat de la fusion",
+   "La version de la branche courante",
+   "Une erreur de syntaxe",
+   "La version de l'autre branche"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande annule une fusion en cours ?",
+  "type": "qcm",
+  "options": [
+   "`git reset merge`",
+   "`git undo`",
+   "`git merge --stop`",
+   "`git merge --abort`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Qu'est-ce qu'une fusion fast-forward ?",
+  "type": "qcm",
+  "options": [
+   "Une fusion de trois branches",
+   "Une fusion plus rapide grâce au réseau",
+   "Une fusion qui ignore les conflits",
+   "L'étiquette de la branche avance sans créer de commit de fusion"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Après avoir résolu un conflit dans index.html, que faut-il faire ?",
+  "type": "qcm",
+  "options": [
+   "`git push --force`",
+   "`git merge` à nouveau",
+   "`git add index.html` puis `git commit`",
+   "Rien"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande supprime une branche fusionnée ?",
+  "type": "qcm",
+  "options": [
+   "`git delete nom`",
+   "`git switch -d nom`",
+   "`git remove nom`",
+   "`git branch -d nom`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Créer une branche copie tous les fichiers du projet sur le disque.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Une branche n'est qu'une étiquette sur un commit."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Un fichier créé sur une branche n'apparaît pas dans main tant qu'on n'a pas fusionné.",
+  "type": "vf",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle ancienne commande équivaut à `git switch -c contact` ? (git ________ -b contact)",
+  "type": "saisie",
+  "answers": [
+   "checkout"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque commande à son rôle.",
+  "type": "associer",
+  "paires": [
+   [
+    "`git switch`",
+    "changer de branche"
+   ],
+   [
+    "`git merge`",
+    "fusionner"
+   ],
+   [
+    "`git branch`",
+    "lister les branches"
+   ],
+   [
+    "`git log --graph`",
+    "dessiner l'historique"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

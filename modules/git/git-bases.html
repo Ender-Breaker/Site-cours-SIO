@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Git : enregistrer l'histoire d'un projet — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="git" data-chapter="git-bases">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/git.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p><b>Git</b> est un logiciel de <b>gestion de versions</b> : il enregistre l'histoire d'un projet, étape par étape. Il permet de revenir en arrière, de travailler à plusieurs sans s'écraser, et de savoir qui a changé quoi et pourquoi. C'est l'outil le plus demandé en stage, en SLAM comme en SISR (scripts, configurations, documentation) : il est attendu dans ton portfolio de l'épreuve E5.</p>
+<div class="box"><b>Git n'est pas GitHub</b><p><b>Git</b> est le logiciel, installé sur ta machine. <b>GitHub</b> (comme GitLab) est un site qui héberge des dépôts Git et ajoute des outils de collaboration.</p></div>
+<h2>1. Installer et se présenter</h2>
+<pre><code>git --version                                   # vérifie l'installation
+git config --global user.name "Léa Martin"      # à faire une seule fois
+git config --global user.email "lea@exemple.fr"
+git config --global init.defaultBranch main</code></pre>
+<p>Ton nom et ton adresse sont inscrits dans chaque enregistrement que tu fais.</p>
+<h2>2. Les trois zones</h2>
+<table><tr><th>Zone</th><th>Contenu</th><th>Commande pour y entrer</th></tr><tr><td>Répertoire de travail</td><td>tes fichiers, tels que tu les modifies</td><td>(ton éditeur)</td></tr><tr><td>Index (*staging area*)</td><td>ce qui partira dans le prochain commit</td><td><code>git add</code></td></tr><tr><td>Dépôt (dossier caché <code>.git</code>)</td><td>l'historique des commits</td><td><code>git commit</code></td></tr></table>
+<p>Un <b>commit</b> est une photographie complète du projet à un instant donné, avec un auteur, une date, un message et un identifiant unique (un *hash* comme <code>a1b2c3d</code>).</p>
+<h2>3. Le cycle de base</h2>
+<pre><code>mkdir mon-site &amp;&amp; cd mon-site
+git init                         # crée le dépôt (dossier .git)
+git status                       # où en est-on ? À taper sans modération
+
+# … on crée index.html …
+git add index.html               # place le fichier dans l'index
+git add .                        # … ou tout ce qui a changé
+git commit -m "Ajoute la page d'accueil"
+
+git log                          # l'historique complet
+git log --oneline                # une ligne par commit</code></pre>
+<pre><code>$ git status
+Sur la branche main
+Modifications qui ne seront pas validées :
+        modifié :         index.html
+Fichiers non suivis :
+        style.css</code></pre>
+<h2>4. Voir ce qui a changé</h2>
+<pre><code>git diff                 # modifications pas encore ajoutées à l'index
+git diff --staged        # ce qui est dans l'index, prêt à être commité
+git show a1b2c3d         # le contenu d'un commit précis
+git log -p index.html    # l'histoire d'un fichier, avec les modifications</code></pre>
+<h2>5. Ignorer des fichiers : <code>.gitignore</code></h2>
+<p>Certains fichiers ne doivent <b>jamais</b> être versionnés : mots de passe, dépendances téléchargées, fichiers générés.</p>
+<pre><code># fichier .gitignore à la racine du projet
+.env                 # secrets, mots de passe
+node_modules/        # dépendances (se réinstallent)
+vendor/
+target/
+*.log
+.vscode/</code></pre>
+<div class="box attention"><b>Jamais de secret dans Git</b><p>Un mot de passe ou une clé d'API commité reste dans l'historique <b>même si tu le supprimes ensuite</b>. S'il a été poussé sur GitHub, il faut le considérer comme volé et le changer immédiatement. Mets les secrets dans un fichier <code>.env</code> listé dans <code>.gitignore</code>.</p></div>
+<h2>6. De bons messages de commit</h2>
+<p>Un commit = <b>un changement cohérent</b>. Son message dit <b>ce que le commit fait</b>, au présent, en une ligne courte.</p>
+<table><tr><th>À éviter</th><th>À écrire</th></tr><tr><td><code>modifs</code></td><td><code>Corrige le calcul de la TVA</code></td></tr><tr><td><code>ça marche enfin</code></td><td><code>Ajoute la validation du formulaire de contact</code></td></tr><tr><td><code>v2 finale ok</code></td><td><code>Supprime le script de sauvegarde obsolète</code></td></tr></table>
+<section class="tuto"><h3><small>Tutoriel</small>Ton premier dépôt, pas à pas</h3>
+<div class="etape"><h4>Créer le projet et le dépôt</h4>
+<pre><code>mkdir portfolio &amp;&amp; cd portfolio
+git init
+echo "# Mon portfolio" &gt; README.md
+git status                        # README.md apparaît en « non suivi »</code></pre>
+</div>
+<div class="etape"><h4>Premier commit</h4>
+<pre><code>git add README.md
+git status                        # il est maintenant « à valider »
+git commit -m "Ajoute le README"
+git log --oneline</code></pre>
+</div>
+<div class="etape"><h4>Modifier et commiter à nouveau</h4>
+<pre><code>echo "BTS SIO option SLAM" &gt;&gt; README.md
+git diff                          # montre la ligne ajoutée
+git add .
+git commit -m "Précise la formation dans le README"
+git log --oneline                 # deux commits</code></pre>
+</div>
+</section>
+<div class="box retenir"><b>À retenir</b><p><code>git init</code> crée le dépôt. </p><p> <code>git status</code> : toujours, avant et après chaque action. </p><p> <code>git add fichier</code> puis <code>git commit -m "message"</code> enregistrent une étape. </p><p> <code>git log --oneline</code> et <code>git diff</code> pour lire l'histoire et les changements. </p><p> <code>.gitignore</code> liste ce qui ne doit pas être versionné ; jamais de secret dans un dépôt.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "facile",
+  "q": "Qu'est-ce que Git ?",
+  "type": "qcm",
+  "options": [
+   "Un langage de programmation",
+   "Un site d'hébergement de code",
+   "Un logiciel de gestion de versions",
+   "Un éditeur de texte"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "facile",
+  "q": "Quelle commande crée un dépôt Git dans le dossier courant ?",
+  "type": "qcm",
+  "options": [
+   "`git start`",
+   "`git create`",
+   "`git new`",
+   "`git init`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "facile",
+  "q": "Quelle commande affiche l'état des fichiers ?",
+  "type": "qcm",
+  "options": [
+   "`git check`",
+   "`git state`",
+   "`git info`",
+   "`git status`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande place un fichier dans l'index ?",
+  "type": "qcm",
+  "options": [
+   "`git push`",
+   "`git stage-file`",
+   "`git commit`",
+   "`git add`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'un commit ?",
+  "type": "qcm",
+  "options": [
+   "Une photographie du projet à un instant donné, avec un message",
+   "Une branche",
+   "Un fichier de configuration",
+   "Une copie du dépôt sur GitHub"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que contient l'index (staging area) ?",
+  "type": "qcm",
+  "options": [
+   "Ce qui partira dans le prochain commit",
+   "Tous les fichiers du projet",
+   "Les fichiers ignorés",
+   "L'historique"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande affiche l'historique sur une ligne par commit ?",
+  "type": "qcm",
+  "options": [
+   "`git list`",
+   "`git log --oneline`",
+   "`git history`",
+   "`git show --all`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que montre `git diff` (sans option) ?",
+  "type": "qcm",
+  "options": [
+   "La liste des branches",
+   "Les modifications pas encore ajoutées à l'index",
+   "Les fichiers ignorés",
+   "Le dernier commit"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "À quoi sert le fichier `.gitignore` ?",
+  "type": "qcm",
+  "options": [
+   "À configurer son nom",
+   "À supprimer des fichiers",
+   "À cacher le dépôt",
+   "À lister les fichiers que Git ne doit pas versionner"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Un mot de passe a été commité puis supprimé dans un commit suivant. Est-il encore accessible ?",
+  "type": "qcm",
+  "options": [
+   "Oui, il reste dans l'historique",
+   "Non, il a disparu",
+   "Seulement pendant 24 heures",
+   "Seulement en local"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel est le meilleur message de commit ?",
+  "type": "qcm",
+  "options": [
+   "ça marche",
+   "modifs",
+   "version finale 2",
+   "Corrige le calcul de la TVA"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Où Git range-t-il l'historique du projet ?",
+  "type": "qcm",
+  "options": [
+   "Dans le fichier README",
+   "Sur GitHub uniquement",
+   "Dans le dossier caché `.git`",
+   "Dans `.gitignore`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "facile",
+  "q": "Git et GitHub sont la même chose.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Git est le logiciel ; GitHub un site d'hébergement."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Un dossier `node_modules` doit être versionné.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Les dépendances se réinstallent : on les ignore."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande enregistre un commit avec le message init ? (complète : git ______ -m \"init\")",
+  "type": "saisie",
+  "answers": [
+   "commit"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Écris la commande qui ajoute tous les fichiers modifiés à l'index.",
+  "type": "saisie",
+  "answers": [
+   "git add .",
+   "git add -A",
+   "git add --all"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque commande à son rôle.",
+  "type": "associer",
+  "paires": [
+   [
+    "`git init`",
+    "créer un dépôt"
+   ],
+   [
+    "`git add`",
+    "préparer le prochain commit"
+   ],
+   [
+    "`git commit`",
+    "enregistrer une étape"
+   ],
+   [
+    "`git log`",
+    "lire l'historique"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

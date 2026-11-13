@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>PowerShell : cmdlets, objets et pipeline — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="powershell" data-chapter="ps-bases">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/powershell.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p><b>PowerShell</b> est le shell et le langage de script de Windows (il existe aussi pour Linux et macOS). Il sert à administrer les postes, Windows Server, Active Directory, Microsoft 365. Sa grande différence avec Bash : les commandes n'échangent pas du <b>texte</b>, mais des <b>objets</b>.</p>
+<h2>1. Les cmdlets : Verbe-Nom</h2>
+<p>Toutes les commandes suivent la même forme, ce qui les rend devinables.</p>
+<pre><code>Get-Process                      # liste les processus
+Get-Service                      # liste les services
+Get-ChildItem C:\Users           # contenu d'un dossier (alias : dir, ls, gci)
+Get-Content notes.txt            # contenu d'un fichier (alias : cat, type)
+Set-Location C:\Scripts          # change de dossier (alias : cd)
+New-Item -ItemType Directory -Name Projet
+Remove-Item ancien.txt
+Copy-Item a.txt b.txt</code></pre>
+<table><tr><th>Verbe</th><th>Rôle</th></tr><tr><td><code>Get</code></td><td>lire</td></tr><tr><td><code>Set</code></td><td>modifier</td></tr><tr><td><code>New</code></td><td>créer</td></tr><tr><td><code>Remove</code></td><td>supprimer</td></tr><tr><td><code>Start</code> / <code>Stop</code> / <code>Restart</code></td><td>démarrer / arrêter / redémarrer</td></tr></table>
+<h2>2. Trouver de l'aide</h2>
+<pre><code>Get-Command *service*            # quelles commandes parlent de services ?
+Get-Help Get-Service -Examples   # des exemples d'utilisation
+Get-Service | Get-Member         # quelles propriétés et méthodes ont ces objets ?</code></pre>
+<p>Ces trois commandes suffisent à tout découvrir sans quitter le terminal.</p>
+<h2>3. Le pipeline d'objets</h2>
+<p>Le tube <code>|</code> transmet des <b>objets</b> complets, avec leurs propriétés. Pas besoin de découper du texte avec <code>cut</code> ou <code>awk</code>.</p>
+<pre><code>Get-Service | Where-Object Status -eq "Running"                  # filtre
+Get-Process | Sort-Object CPU -Descending | Select-Object -First 5 Name, CPU
+Get-ChildItem C:\Logs -Filter *.log | Measure-Object Length -Sum
+Get-Process | Where-Object { $_.WorkingSet -gt 200MB } | Select-Object Name, Id
+Get-Service | Group-Object Status</code></pre>
+<table><tr><th>Cmdlet</th><th>Rôle</th><th>Équivalent Linux</th></tr><tr><td><code>Where-Object</code></td><td>filtrer</td><td><code>grep</code></td></tr><tr><td><code>Select-Object</code></td><td>choisir des propriétés ou les N premiers</td><td><code>cut</code>, <code>head</code></td></tr><tr><td><code>Sort-Object</code></td><td>trier</td><td><code>sort</code></td></tr><tr><td><code>Measure-Object</code></td><td>compter, additionner</td><td><code>wc</code></td></tr><tr><td><code>Group-Object</code></td><td>regrouper</td><td><code>uniq -c</code></td></tr><tr><td><code>ForEach-Object</code></td><td>agir sur chaque objet</td><td>une boucle</td></tr></table>
+<p>Dans un bloc <code>{ }</code>, <code>$_</code> désigne <b>l'objet en cours</b>.</p>
+<h2>4. Les opérateurs de comparaison</h2>
+<table><tr><th>Opérateur</th><th>Sens</th></tr><tr><td><code>-eq</code> <code>-ne</code></td><td>égal, différent</td></tr><tr><td><code>-gt</code> <code>-ge</code> <code>-lt</code> <code>-le</code></td><td>supérieur, supérieur ou égal, inférieur, inférieur ou égal</td></tr><tr><td><code>-like</code></td><td>correspond à un motif avec <code>*</code> : <code>-like "*.log"</code></td></tr><tr><td><code>-match</code></td><td>correspond à une expression régulière</td></tr><tr><td><code>-and</code> <code>-or</code> <code>-not</code></td><td>et, ou, non</td></tr></table>
+<p>PowerShell ne tient pas compte de la casse par défaut : <code>"ABC" -eq "abc"</code> est vrai.</p>
+<h2>5. Exporter et mettre en forme</h2>
+<pre><code>Get-Service | Export-Csv services.csv -NoTypeInformation -Encoding UTF8
+Import-Csv utilisateurs.csv                      # chaque ligne devient un objet
+Get-Process | ConvertTo-Json
+Get-Service | Out-File services.txt
+Get-Process | Format-Table Name, Id, CPU -AutoSize
+Get-Process | Out-GridView                       # une fenêtre triable et filtrable</code></pre>
+<h2>6. Variables et types</h2>
+<pre><code>$nom = "Léa"                     # toutes les variables commencent par $
+$age = 17
+$liste = @("pc01", "pc02", "pc03")               # tableau
+$compte = @{ Nom = "Léa"; Service = "SIO" }      # table de hachage (dictionnaire)
+"Bonjour $nom, tu as $age ans"                   # guillemets doubles : variables remplacées
+'Bonjour $nom'                                   # guillemets simples : texte littéral
+"Il y a $($liste.Count) postes"                  # $( ) pour une expression
+$liste[0]; $compte.Nom; $compte["Service"]</code></pre>
+<section class="tuto"><h3><small>Tutoriel</small>Faire l'état d'un poste</h3>
+<div class="etape"><h4>Les informations système</h4>
+<pre><code>Get-ComputerInfo | Select-Object CsName, OsName, OsVersion</code></pre>
+</div>
+<div class="etape"><h4>L'espace disque</h4>
+<pre><code>Get-PSDrive -PSProvider FileSystem | Select-Object Name, @{ n = "LibreGo"; e = { [math]::Round($_.Free / 1GB, 1) } }</code></pre>
+</div>
+<div class="etape"><h4>Les services arrêtés qui devraient tourner</h4>
+<pre><code>Get-Service | Where-Object { $_.StartType -eq "Automatic" -and $_.Status -ne "Running" }</code></pre>
+</div>
+<div class="etape"><h4>Un rapport dans un fichier</h4>
+<pre><code>Get-Service | Where-Object Status -eq "Running" | Select-Object Name, DisplayName | Export-Csv rapport.csv -NoTypeInformation</code></pre>
+</div>
+</section>
+<div class="box retenir"><b>À retenir</b><p>Cmdlets en <code>Verbe-Nom</code> : <code>Get-</code>, <code>Set-</code>, <code>New-</code>, <code>Remove-</code>. </p><p> <code>Get-Command</code>, <code>Get-Help</code>, <code>Get-Member</code> pour tout découvrir. </p><p> Le pipeline transmet des <b>objets</b> : <code>Where-Object</code>, <code>Select-Object</code>, <code>Sort-Object</code>. </p><p> <code>$_</code> : l'objet en cours. </p><p> Comparaisons : <code>-eq</code>, <code>-gt</code>, <code>-like</code>, <code>-and</code>. </p><p> <code>Export-Csv</code> / <code>Import-Csv</code>.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "facile",
+  "q": "Quelle forme ont les commandes PowerShell ?",
+  "type": "qcm",
+  "options": [
+   "Verbe-Nom",
+   "VERBE NOM",
+   "nom_verbe",
+   "Nom.Verbe"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "facile",
+  "q": "Quelle cmdlet liste les processus ?",
+  "type": "qcm",
+  "options": [
+   "`ps-list`",
+   "`Show-Tasks`",
+   "`Get-Process`",
+   "`List-Process`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que transmet le pipeline `|` en PowerShell ?",
+  "type": "qcm",
+  "options": [
+   "Du texte brut uniquement",
+   "Des nombres",
+   "Des objets avec leurs propriétés",
+   "Des fichiers"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle cmdlet filtre les objets selon une condition ?",
+  "type": "qcm",
+  "options": [
+   "`Where-Object`",
+   "`Filter-List`",
+   "`Select-Object`",
+   "`Find-Object`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle cmdlet choisit certaines propriétés ou les N premiers objets ?",
+  "type": "qcm",
+  "options": [
+   "`Where-Object`",
+   "`Sort-Object`",
+   "`Select-Object`",
+   "`Group-Object`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que désigne `$_` dans un bloc de script ?",
+  "type": "qcm",
+  "options": [
+   "Le dossier courant",
+   "La dernière erreur",
+   "Le nom du script",
+   "L'objet en cours de traitement"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel opérateur teste l'égalité ?",
+  "type": "qcm",
+  "options": [
+   "`-is`",
+   "`-eq`",
+   "`=`",
+   "`==`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel opérateur compare à un motif avec `*` ?",
+  "type": "qcm",
+  "options": [
+   "`-like`",
+   "`-match`",
+   "`-in`",
+   "`-eq`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle cmdlet affiche les propriétés et méthodes d'un objet ?",
+  "type": "qcm",
+  "options": [
+   "`Show-Object`",
+   "`Get-Help`",
+   "`Get-Member`",
+   "`Get-Command`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle cmdlet exporte des objets dans un fichier CSV ?",
+  "type": "qcm",
+  "options": [
+   "`Save-Csv`",
+   "`Write-Csv`",
+   "`Out-Csv`",
+   "`Export-Csv`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment déclare-t-on un tableau ?",
+  "type": "qcm",
+  "options": [
+   "`{\"a\", \"b\"}`",
+   "`@(\"a\", \"b\")`",
+   "`array(\"a\", \"b\")`",
+   "`[\"a\", \"b\"]`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'affiche `'Bonjour $nom'` (guillemets simples) ?",
+  "type": "qcm",
+  "options": [
+   "Bonjour suivi de la valeur de nom",
+   "Une erreur",
+   "Rien",
+   "Bonjour $nom"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que renvoie `\"ABC\" -eq \"abc\"` ?",
+  "type": "qcm",
+  "options": [
+   "Une erreur",
+   "False",
+   "True : PowerShell ignore la casse par défaut",
+   "$null"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "facile",
+  "q": "En PowerShell, le nom d'une variable commence par $.",
+  "type": "vf",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle cmdlet trie des objets (____-Object) ?",
+  "type": "saisie",
+  "answers": [
+   "Sort",
+   "Sort-Object"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque cmdlet à son équivalent Linux.",
+  "type": "associer",
+  "paires": [
+   [
+    "`Get-ChildItem`",
+    "ls"
+   ],
+   [
+    "`Get-Content`",
+    "cat"
+   ],
+   [
+    "`Where-Object`",
+    "grep"
+   ],
+   [
+    "`Sort-Object`",
+    "sort"
+   ],
+   [
+    "`Set-Location`",
+    "cd"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

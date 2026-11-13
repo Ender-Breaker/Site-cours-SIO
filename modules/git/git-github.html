@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Git : GitHub et le travail en équipe — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="git" data-chapter="git-github">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/git.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>Un <b>dépôt distant</b> (*remote*) est une copie du dépôt hébergée sur un serveur : GitHub, GitLab ou le serveur de ton entreprise. C'est lui qui permet de sauvegarder, de partager et de collaborer.</p>
+<h2>1. Relier son dépôt à GitHub</h2>
+<pre><code>git remote add origin https://github.com/lea/portfolio.git    # « origin » : nom donné au distant
+git remote -v                                                 # vérifie
+git push -u origin main          # premier envoi ; -u mémorise le lien
+git push                         # les fois suivantes</code></pre>
+<p>Pour récupérer un projet existant, une seule commande :</p>
+<pre><code>git clone https://github.com/lea/portfolio.git</code></pre>
+<h2>2. Envoyer et recevoir</h2>
+<table><tr><th>Commande</th><th>Effet</th></tr><tr><td><code>git push</code></td><td>envoie tes commits vers le distant</td></tr><tr><td><code>git fetch</code></td><td>télécharge les nouveautés <b>sans</b> modifier tes fichiers</td></tr><tr><td><code>git pull</code></td><td><code>fetch</code> puis fusion : met ta branche à jour</td></tr><tr><td><code>git clone</code></td><td>copie un dépôt distant complet</td></tr></table>
+<pre><code>git pull                         # avant de commencer à travailler
+# … commits …
+git push                         # quand une étape est terminée</code></pre>
+<div class="box attention"><b><code>push</code> refusé</b><p>Si quelqu'un a poussé avant toi, Git refuse ton <code>push</code> : fais d'abord <code>git pull</code>, règle un éventuel conflit, puis <code>git push</code>. N'utilise <b>jamais</b> <code>git push --force</code> sur une branche partagée : tu écraserais le travail des autres.</p></div>
+<h2>3. S'authentifier</h2>
+<p>GitHub n'accepte plus les mots de passe en ligne de commande. Deux solutions :</p>
+<ul><li>une <b>clé SSH</b> : <code>ssh-keygen -t ed25519</code>, puis on colle la clé <b>publique</b> (<code>~/.ssh/id_ed25519.pub</code>) dans les réglages de GitHub. L'adresse du dépôt devient <code>git@github.com:lea/portfolio.git</code> ;</li><li>un <b>jeton d'accès personnel</b> (*token*) utilisé à la place du mot de passe en HTTPS.</li></ul>
+<h2>4. La pull request</h2>
+<p>Sur un projet d'équipe, personne ne pousse directement sur <code>main</code>. On propose ses modifications dans une <b>pull request</b> (PR ; *merge request* sur GitLab).</p>
+<ol><li>Créer une branche et y commiter : <code>git switch -c correction-menu</code>.</li><li>La pousser : <code>git push -u origin correction-menu</code>.</li><li>Sur GitHub, ouvrir une pull request vers <code>main</code> : titre, description, captures.</li><li>Un coéquipier <b>relit</b> le code, commente, demande des changements.</li><li>Quand c'est validé, on <b>fusionne</b> la PR, puis on supprime la branche.</li></ol>
+<p>La relecture attrape les bugs, diffuse les connaissances dans l'équipe, et laisse une trace écrite des décisions.</p>
+<h2>5. Fork, issues et le reste</h2>
+<table><tr><th>Outil</th><th>Rôle</th></tr><tr><td>*Fork*</td><td>ta copie personnelle du dépôt de quelqu'un d'autre, pour proposer une contribution</td></tr><tr><td>*Issue*</td><td>un ticket : bug à corriger, idée, tâche</td></tr><tr><td><code>README.md</code></td><td>la page d'accueil du dépôt, en Markdown</td></tr><tr><td>*Releases* / tags</td><td>les versions publiées (<code>git tag v1.0</code>)</td></tr><tr><td>GitHub Actions</td><td>automatisation : tests et déploiement à chaque <code>push</code></td></tr><tr><td>GitHub Pages</td><td>hébergement gratuit d'un site statique</td></tr></table>
+<h2>6. Un bon README</h2>
+<p>Le README est la première chose que voit un recruteur ou un jury sur ton dépôt. Il s'écrit en <b>Markdown</b> :</p>
+<pre><code># Gestion de parc informatique
+
+Application web de suivi du matériel (projet de BTS SIO).
+
+## Fonctionnalités
+- Inventaire du matériel
+- Suivi des interventions
+
+## Installation
+1. `git clone https://github.com/lea/parc.git`
+2. `composer install`
+3. Copier `.env.exemple` en `.env` et renseigner la base de données
+
+## Technologies
+PHP 8, MariaDB, Bootstrap</code></pre>
+<section class="tuto"><h3><small>Tutoriel</small>Publier un projet sur GitHub</h3>
+<div class="etape"><h4>Créer le dépôt en ligne</h4>
+<p>Sur GitHub : *New repository*, donne-lui un nom, laisse-le <b>vide</b> (sans README), puis copie son adresse.</p>
+</div>
+<div class="etape"><h4>Relier et pousser</h4>
+<pre><code>git remote add origin https://github.com/ton-compte/portfolio.git
+git push -u origin main</code></pre>
+</div>
+<div class="etape"><h4>Travailler ensuite</h4>
+<pre><code>git pull                                  # récupère ce qui a changé
+git switch -c ajout-projets
+# … modifications …
+git add . &amp;&amp; git commit -m "Ajoute la section projets"
+git push -u origin ajout-projets
+# puis : ouvrir une pull request sur GitHub</code></pre>
+</div>
+</section>
+<div class="box retenir"><b>À retenir</b><p><code>git clone</code> copie un dépôt distant ; <code>git remote add origin URL</code> relie un dépôt local. </p><p> <code>git pull</code> avant de travailler, <code>git push</code> après. </p><p> Jamais de <code>push --force</code> sur une branche partagée. </p><p> Pull request : une branche, une relecture, une fusion. </p><p> Authentification par clé SSH ou jeton.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "facile",
+  "q": "Quelle commande copie un dépôt distant sur ta machine ?",
+  "type": "qcm",
+  "options": [
+   "`git clone`",
+   "`git copy`",
+   "`git download`",
+   "`git fetch --all`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "facile",
+  "q": "Quelle commande envoie tes commits vers le dépôt distant ?",
+  "type": "qcm",
+  "options": [
+   "`git upload`",
+   "`git commit --remote`",
+   "`git push`",
+   "`git send`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande récupère et fusionne les nouveautés du distant ?",
+  "type": "qcm",
+  "options": [
+   "`git push`",
+   "`git status`",
+   "`git pull`",
+   "`git get`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel nom donne-t-on par convention au dépôt distant principal ?",
+  "type": "qcm",
+  "options": [
+   "github",
+   "origin",
+   "remote",
+   "main"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle est la différence entre fetch et pull ?",
+  "type": "qcm",
+  "options": [
+   "pull est plus ancien",
+   "fetch envoie, pull reçoit",
+   "fetch télécharge sans modifier tes fichiers, pull fusionne en plus",
+   "Aucune"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que faire quand `git push` est refusé parce que le distant a avancé ?",
+  "type": "qcm",
+  "options": [
+   "`git push --force`",
+   "`git pull` puis `git push`",
+   "Supprimer le dépôt",
+   "`git init`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi `git push --force` est-il dangereux sur une branche partagée ?",
+  "type": "qcm",
+  "options": [
+   "Il est très lent",
+   "Il supprime le dépôt local",
+   "Il change ton mot de passe",
+   "Il écrase les commits des autres"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'une pull request ?",
+  "type": "qcm",
+  "options": [
+   "Une sauvegarde",
+   "Une proposition de fusion d'une branche, soumise à relecture",
+   "Un ticket de bug",
+   "Une demande de téléchargement"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'un fork ?",
+  "type": "qcm",
+  "options": [
+   "Une branche locale",
+   "Un conflit",
+   "Ta copie personnelle du dépôt de quelqu'un d'autre",
+   "Un commit de fusion"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'une issue ?",
+  "type": "qcm",
+  "options": [
+   "Un fichier ignoré",
+   "Une branche abandonnée",
+   "Une erreur de Git",
+   "Un ticket : bug, idée ou tâche"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle clé colle-t-on dans les réglages de GitHub pour l'authentification SSH ?",
+  "type": "qcm",
+  "options": [
+   "Le mot de passe du compte",
+   "La clé publique",
+   "La clé privée",
+   "Les deux"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "En quel langage écrit-on le README d'un dépôt ?",
+  "type": "qcm",
+  "options": [
+   "YAML",
+   "LaTeX",
+   "Markdown",
+   "HTML uniquement"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Sur un projet d'équipe, on pousse directement ses commits sur main.",
+  "type": "vf",
+  "answer": false,
+  "explication": "On passe par une branche et une pull request."
+ },
+ {
+  "niveau": "moyen",
+  "q": "GitHub accepte encore le mot de passe du compte pour git push en ligne de commande.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Il faut une clé SSH ou un jeton."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande affiche les dépôts distants configurés ? (git ______ -v)",
+  "type": "saisie",
+  "answers": [
+   "remote"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque commande à son rôle.",
+  "type": "associer",
+  "paires": [
+   [
+    "`git clone`",
+    "copier un dépôt distant"
+   ],
+   [
+    "`git push`",
+    "envoyer ses commits"
+   ],
+   [
+    "`git pull`",
+    "récupérer et fusionner"
+   ],
+   [
+    "`git remote add`",
+    "relier à un distant"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

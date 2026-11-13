@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>C# : classes, propriétés, LINQ et accès aux données — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="csharp" data-chapter="cs-poo">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/csharp.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<h2>1. Classes et propriétés</h2>
+<p>Là où Java écrit des accesseurs <code>getX</code> / <code>setX</code>, C# a des <b>propriétés</b> : elles s'utilisent comme des attributs mais peuvent contenir du contrôle.</p>
+<pre><code>class Compte
+{
+    public string Titulaire { get; set; }            // propriété automatique
+    public double Solde { get; private set; }        // lisible partout, modifiable dans la classe seulement
+
+    private string _code;                            // attribut privé (convention : tiret bas)
+    public string Code
+    {
+        get { return _code; }
+        set { if (value.Length == 4) _code = value; }     // value : la valeur affectée
+    }
+
+    public Compte(string titulaire, double solde = 0)     // constructeur
+    {
+        Titulaire = titulaire;
+        Solde = solde;
+    }
+
+    public void Deposer(double montant)
+    {
+        if (montant &lt;= 0) throw new ArgumentException("Montant invalide");
+        Solde += montant;
+    }
+
+    public override string ToString() =&gt; $"{Titulaire} : {Solde:F2} €";
+}</code></pre>
+<pre><code>var c = new Compte("Léa", 100);
+c.Deposer(50);
+c.Titulaire = "Léa Martin";          // appelle le set
+Console.WriteLine(c.Solde);          // appelle le get
+// c.Solde = 1000000;                // refusé : set privé
+Console.WriteLine(c);                // appelle ToString</code></pre>
+<h2>2. Héritage et interfaces</h2>
+<pre><code>abstract class Forme
+{
+    public abstract double Aire();                        // à définir dans les filles
+    public virtual string Nom() =&gt; "forme";               // virtual : redéfinissable
+    public string Description() =&gt; $"{Nom()} d'aire {Aire():F2}";
+}
+
+class Rectangle : Forme                                   // « : » remplace extends
+{
+    private readonly double l, h;
+    public Rectangle(double l, double h) { this.l = l; this.h = h; }
+    public override double Aire() =&gt; l * h;               // override obligatoire
+    public override string Nom() =&gt; "rectangle";
+}
+
+interface IExportable                                     // convention : un I devant le nom
+{
+    string VersCsv();
+}
+
+class Produit : IExportable                               // « : » remplace aussi implements
+{
+    public string Nom { get; set; }
+    public double Prix { get; set; }
+    public string VersCsv() =&gt; $"{Nom};{Prix}";
+}</code></pre>
+<table><tr><th>Java</th><th>C#</th></tr><tr><td><code>class B extends A implements I</code></td><td><code>class B : A, I</code></td></tr><tr><td><code>super(…)</code> / <code>super.methode()</code></td><td><code>base(…)</code> / <code>base.Methode()</code></td></tr><tr><td>redéfinition libre, <code>@Override</code> conseillé</td><td><code>virtual</code> dans la mère <b>et</b> <code>override</code> dans la fille</td></tr><tr><td><code>getX()</code> / <code>setX()</code></td><td>propriété <code>X { get; set; }</code></td></tr><tr><td><code>toString()</code></td><td><code>ToString()</code></td></tr></table>
+<h2>3. Les exceptions</h2>
+<pre><code>try
+{
+    int n = int.Parse(Console.ReadLine());
+    Console.WriteLine(100 / n);
+}
+catch (FormatException)
+{
+    Console.WriteLine("Il faut un nombre entier.");
+}
+catch (DivideByZeroException e)
+{
+    Console.WriteLine($"Erreur : {e.Message}");
+}
+finally
+{
+    Console.WriteLine("Fin");
+}</code></pre>
+<p>Toutes les exceptions C# sont « non vérifiées » : pas de <code>throws</code> dans les signatures. Le bloc <code>using</code> ferme automatiquement une ressource, comme le <code>try</code>-with-resources de Java.</p>
+<h2>4. LINQ : interroger les collections</h2>
+<p><b>LINQ</b> permet de filtrer, trier et agréger une collection comme on écrirait une requête SQL. C'est l'équivalent des streams de Java.</p>
+<pre><code>using System.Linq;
+
+var eleves = new List&lt;Eleve&gt;
+{
+    new Eleve("Léa", "SLAM", 15), new Eleve("Sam", "SISR", 9),
+    new Eleve("Zoé", "SLAM", 18), new Eleve("Tom", "SISR", 12)
+};
+
+var admisSlam = eleves
+    .Where(e =&gt; e.Option == "SLAM" &amp;&amp; e.Note &gt;= 10)       // filtre
+    .OrderByDescending(e =&gt; e.Note)                       // tri
+    .Select(e =&gt; e.Nom);                                  // projection
+Console.WriteLine(string.Join(", ", admisSlam));          // Zoé, Léa
+
+double moyenne = eleves.Average(e =&gt; e.Note);
+int nbAdmis = eleves.Count(e =&gt; e.Note &gt;= 10);
+Eleve meilleur = eleves.MaxBy(e =&gt; e.Note);
+bool tousAdmis = eleves.All(e =&gt; e.Note &gt;= 10);
+var parOption = eleves.GroupBy(e =&gt; e.Option);
+foreach (var groupe in parOption)
+    Console.WriteLine($"{groupe.Key} : {groupe.Count()} élèves");</code></pre>
+<table><tr><th>LINQ</th><th>SQL</th><th>Stream Java</th></tr><tr><td><code>Where</code></td><td><code>WHERE</code></td><td><code>filter</code></td></tr><tr><td><code>Select</code></td><td><code>SELECT</code></td><td><code>map</code></td></tr><tr><td><code>OrderBy</code></td><td><code>ORDER BY</code></td><td><code>sorted</code></td></tr><tr><td><code>GroupBy</code></td><td><code>GROUP BY</code></td><td><code>groupingBy</code></td></tr><tr><td><code>Count</code>, <code>Sum</code>, <code>Average</code>, <code>Max</code></td><td><code>COUNT</code>, <code>SUM</code>, <code>AVG</code>, <code>MAX</code></td><td><code>count</code>, <code>sum</code>, <code>average</code>, <code>max</code></td></tr><tr><td><code>First</code>, <code>FirstOrDefault</code></td><td><code>LIMIT 1</code></td><td><code>findFirst</code></td></tr></table>
+<h2>5. Accéder à une base de données</h2>
+<p>Avec ADO.NET, le schéma est le même qu'en JDBC : <b>connexion → commande paramétrée → lecteur</b>.</p>
+<pre><code>using MySqlConnector;
+
+string chaine = "Server=localhost;Database=parc;User ID=app;Password=…";
+using var cnx = new MySqlConnection(chaine);
+cnx.Open();
+
+using var cmd = new MySqlCommand("SELECT nom, prix FROM materiel WHERE prix &gt; @seuil", cnx);
+cmd.Parameters.AddWithValue("@seuil", 100);               // paramètre : pas d'injection SQL
+
+using var lecteur = cmd.ExecuteReader();
+while (lecteur.Read())
+    Console.WriteLine($"{lecteur.GetString("nom")} : {lecteur.GetDouble("prix")}");</code></pre>
+<div class="box attention"><b>Toujours des paramètres</b><p>Comme en PHP et en Java : ne construis jamais une requête en concaténant une saisie. Les paramètres <code>@nom</code> transmettent la saisie comme une donnée.</p></div>
+<p>Dans les projets récents, on utilise souvent <b>Entity Framework Core</b>, un ORM : on manipule des objets et des requêtes LINQ, et il génère le SQL.</p>
+<pre><code>var chers = contexte.Materiels.Where(m =&gt; m.Prix &gt; 100).OrderBy(m =&gt; m.Nom).ToList();</code></pre>
+<h2>6. L'écosystème .NET</h2>
+<table><tr><th>Besoin</th><th>Technologie</th></tr><tr><td>Application de bureau Windows</td><td>WinForms, WPF</td></tr><tr><td>Site web et API REST</td><td>ASP.NET Core</td></tr><tr><td>Application mobile et multiplateforme</td><td>.NET MAUI</td></tr><tr><td>Jeu vidéo</td><td>Unity</td></tr><tr><td>Accès aux données</td><td>ADO.NET, Entity Framework Core</td></tr><tr><td>Bibliothèques</td><td>NuGet (<code>dotnet add package …</code>)</td></tr><tr><td>Tests unitaires</td><td>xUnit, NUnit, MSTest</td></tr></table>
+<section class="tuto"><h3><small>Tutoriel</small>Une gestion de tickets d'assistance</h3>
+<div class="etape"><h4>Le modèle</h4>
+<pre><code>enum Priorite { Basse, Normale, Urgente }
+
+class Ticket
+{
+    public int Numero { get; }
+    public string Titre { get; }
+    public Priorite Priorite { get; }
+    public bool Resolu { get; private set; }
+
+    public Ticket(int numero, string titre, Priorite priorite)
+    {
+        Numero = numero; Titre = titre; Priorite = priorite;
+    }
+    public void Resoudre() =&gt; Resolu = true;
+}</code></pre>
+</div>
+<div class="etape"><h4>La liste et les requêtes LINQ</h4>
+<pre><code>var tickets = new List&lt;Ticket&gt;
+{
+    new Ticket(1, "Imprimante hors ligne", Priorite.Normale),
+    new Ticket(2, "Serveur de fichiers en panne", Priorite.Urgente),
+    new Ticket(3, "Mot de passe oublié", Priorite.Basse)
+};
+tickets[2].Resoudre();
+
+var aTraiter = tickets.Where(t =&gt; !t.Resolu).OrderByDescending(t =&gt; t.Priorite);
+foreach (var t in aTraiter)
+    Console.WriteLine($"#{t.Numero} [{t.Priorite}] {t.Titre}");
+Console.WriteLine($"{tickets.Count(t =&gt; t.Resolu)} ticket(s) résolu(s)");</code></pre>
+</div>
+</section>
+<div class="box retenir"><b>À retenir</b><p>Propriété : <code>public Type Nom { get; set; }</code> ; <code>private set</code> pour protéger l'écriture. </p><p> <code>class Fille : Mere, IInterface</code> ; <code>virtual</code> dans la mère, <code>override</code> dans la fille ; <code>base</code> au lieu de <code>super</code>. </p><p> <code>try / catch / finally</code>, <code>throw new …Exception(…)</code>. </p><p> LINQ : <code>Where</code>, <code>Select</code>, <code>OrderBy</code>, <code>Count</code>, <code>Average</code>, <code>GroupBy</code>. </p><p> Base de données : requêtes <b>paramétrées</b> (<code>@nom</code>), ou Entity Framework.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'une propriété en C# ?",
+  "type": "qcm",
+  "options": [
+   "Un attribut public sans contrôle",
+   "Une méthode statique",
+   "Un membre qui s'utilise comme un attribut mais passe par get et set",
+   "Une constante"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que signifie `public double Solde { get; private set; }` ?",
+  "type": "qcm",
+  "options": [
+   "Modifiable partout",
+   "Invisible hors de la classe",
+   "Constante",
+   "Lisible partout, modifiable seulement dans la classe"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Dans un `set`, que contient le mot-clé `value` ?",
+  "type": "qcm",
+  "options": [
+   "La valeur qu'on est en train d'affecter",
+   "Le nom de la propriété",
+   "L'ancienne valeur",
+   "Rien"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment une classe hérite-t-elle d'une autre en C# ?",
+  "type": "qcm",
+  "options": [
+   "`class Fille extends Mere`",
+   "`class Fille(Mere)`",
+   "`class Fille inherits Mere`",
+   "`class Fille : Mere`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel mot-clé appelle le constructeur de la classe mère ?",
+  "type": "qcm",
+  "options": [
+   "`parent`",
+   "`this`",
+   "`super`",
+   "`base`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Pour redéfinir une méthode en C#, que faut-il ?",
+  "type": "qcm",
+  "options": [
+   "Le mot-clé new uniquement",
+   "`virtual` (ou abstract) dans la mère et `override` dans la fille",
+   "Seulement @Override",
+   "Rien de particulier"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle convention de nommage pour une interface ?",
+  "type": "qcm",
+  "options": [
+   "Un suffixe Interface",
+   "Tout en majuscules",
+   "Un I devant le nom : `IExportable`",
+   "Un tiret bas devant"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle exception lève `int.Parse(\"abc\")` ?",
+  "type": "qcm",
+  "options": [
+   "`FormatException`",
+   "`InvalidCastException`",
+   "`ParseError`",
+   "`NumberFormatException`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce que LINQ ?",
+  "type": "qcm",
+  "options": [
+   "Un moteur de base de données",
+   "Un langage de requêtes intégré pour interroger les collections",
+   "Un format de fichier",
+   "Un outil de tests"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle méthode LINQ filtre une collection ?",
+  "type": "qcm",
+  "options": [
+   "`Filter`",
+   "`Find`",
+   "`Select`",
+   "`Where`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle méthode LINQ transforme chaque élément (projection) ?",
+  "type": "qcm",
+  "options": [
+   "`Where`",
+   "`Map`",
+   "`Select`",
+   "`Convert`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel est l'équivalent Java de LINQ ?",
+  "type": "qcm",
+  "options": [
+   "Les streams",
+   "Les packages",
+   "Les threads",
+   "Les annotations"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment transmettre une valeur à une requête SQL en ADO.NET sans risque d'injection ?",
+  "type": "qcm",
+  "options": [
+   "En la mettant entre apostrophes",
+   "Avec un paramètre `@nom`",
+   "Avec string.Format",
+   "En concaténant la saisie"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'Entity Framework Core ?",
+  "type": "qcm",
+  "options": [
+   "Un ORM : il fait le lien entre objets et tables",
+   "Un serveur web",
+   "Un langage",
+   "Un éditeur de code"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "En C#, une méthode doit déclarer les exceptions qu'elle peut lever avec throws.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Il n'y a pas d'exceptions vérifiées en C#."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque méthode LINQ à son équivalent SQL.",
+  "type": "associer",
+  "paires": [
+   [
+    "`Where`",
+    "WHERE"
+   ],
+   [
+    "`Select`",
+    "SELECT"
+   ],
+   [
+    "`OrderBy`",
+    "ORDER BY"
+   ],
+   [
+    "`GroupBy`",
+    "GROUP BY"
+   ],
+   [
+    "`Count`",
+    "COUNT"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

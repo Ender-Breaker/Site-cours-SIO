@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>C# : la syntaxe, les types et les collections — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="csharp" data-chapter="cs-bases">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/csharp.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>Le <b>C#</b> (« C sharp ») est le langage de la plateforme <b>.NET</b> de Microsoft. C'est l'un des langages les plus enseignés en option SLAM : applications de bureau (WinForms, WPF), sites et API (ASP.NET Core), jeux (Unity). Sa syntaxe est très proche de celle de Java : si tu as suivi le cours Java de ce site, tu connais déjà les trois quarts du C#.</p>
+<div class="box"><b>Pour pratiquer</b><p>Installe le <b>SDK .NET</b> (gratuit) et <b>Visual Studio Community</b> ou VS Code. En ligne de commande : <code>dotnet new console -n MonProjet</code>, puis <code>dotnet run</code>.</p></div>
+<h2>1. Le programme minimal</h2>
+<pre><code>// Program.cs : depuis .NET 6, pas besoin de classe ni de Main pour débuter
+Console.WriteLine("Bonjour !");</code></pre>
+<p>La forme complète, que tu verras dans les sujets et les projets plus anciens :</p>
+<pre><code>using System;
+
+namespace MonProjet
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Bonjour !");
+        }
+    }
+}</code></pre>
+<h2>2. Variables et types</h2>
+<pre><code>int age = 17;
+double prix = 19.99;
+decimal montant = 19.99m;            // decimal : pour l'argent, sans erreur d'arrondi
+bool majeur = false;
+char initiale = 'L';
+string prenom = "Léa";               // string en minuscules
+var total = prix * 3;                // var : type déduit (double)
+const double TVA = 0.2;              // constante
+
+Console.WriteLine($"{prenom} a {age} ans");          // chaîne interpolée : $"…{variable}…"
+Console.WriteLine($"Prix : {prix:F2} €");            // F2 : deux décimales
+Console.WriteLine(7 / 2);                            // 3 : division entière, comme en Java
+Console.WriteLine((double)7 / 2);                    // 3,5</code></pre>
+<h2>3. Lire au clavier et convertir</h2>
+<pre><code>Console.Write("Ton âge : ");
+string saisie = Console.ReadLine();
+int age = int.Parse(saisie);                         // lève une exception si ce n'est pas un nombre
+
+if (int.TryParse(saisie, out int n))                 // la forme sûre : renvoie true ou false
+    Console.WriteLine($"Dans 10 ans : {n + 10}");
+else
+    Console.WriteLine("Ce n'est pas un nombre");</code></pre>
+<h2>4. Conditions et boucles</h2>
+<p>Identiques à Java : <code>if / else if / else</code>, <code>switch</code>, <code>while</code>, <code>do … while</code>, <code>for</code>. Le parcours d'une collection s'écrit <code>foreach … in</code>.</p>
+<pre><code>if (note &gt;= 16) Console.WriteLine("Très bien");
+else if (note &gt;= 10) Console.WriteLine("Admis");
+else Console.WriteLine("Recalé");
+
+string mention = note switch                         // expression switch
+{
+    &gt;= 16 =&gt; "Très bien",
+    &gt;= 10 =&gt; "Admis",
+    _ =&gt; "Recalé"                                    // _ : cas par défaut
+};
+
+for (int i = 1; i &lt;= 5; i++) Console.Write(i + " ");
+
+string[] fruits = { "pomme", "kiwi", "poire" };
+foreach (string f in fruits) Console.WriteLine(f);</code></pre>
+<div class="box"><b>Bonne nouvelle</b><p>En C#, <code>==</code> compare le <b>contenu</b> des <code>string</code> (contrairement à Java) : <code>if (reponse == "oui")</code> fonctionne comme on s'y attend.</p></div>
+<h2>5. Méthodes</h2>
+<pre><code>static double Aire(double largeur, double hauteur)   // PascalCase pour les méthodes
+{
+    return largeur * hauteur;
+}
+
+static double Ttc(double ht, double taux = 0.2) =&gt; ht * (1 + taux);     // corps d'expression, valeur par défaut
+
+static bool Diviser(int a, int b, out int resultat)                     // out : un second résultat
+{
+    resultat = b == 0 ? 0 : a / b;
+    return b != 0;
+}</code></pre>
+<h2>6. Les collections</h2>
+<pre><code>using System.Collections.Generic;
+
+List&lt;string&gt; noms = new List&lt;string&gt; { "Léa", "Sam" };
+noms.Add("Zoé");
+noms.Remove("Sam");
+Console.WriteLine($"{noms.Count} noms, le premier : {noms[0]}");       // Count, et crochets
+foreach (string n in noms) Console.WriteLine(n);
+
+Dictionary&lt;string, int&gt; stock = new Dictionary&lt;string, int&gt;();
+stock["souris"] = 3;
+stock["clavier"] = 2;
+if (stock.ContainsKey("souris")) stock["souris"] += 5;
+foreach (var (nom, qte) in stock) Console.WriteLine($"{nom} : {qte}");
+foreach (KeyValuePair&lt;string, int&gt; p in stock) Console.WriteLine($"{p.Key} : {p.Value}");
+
+HashSet&lt;string&gt; vus = new HashSet&lt;string&gt;();
+int[] notes = { 12, 15, 9 };
+Console.WriteLine(notes.Length);</code></pre>
+<h2>7. Du Java au C# : la table de correspondance</h2>
+<table><tr><th>Java</th><th>C#</th></tr><tr><td><code>System.out.println(x)</code></td><td><code>Console.WriteLine(x)</code></td></tr><tr><td><code>String</code>, <code>boolean</code></td><td><code>string</code>, <code>bool</code></td></tr><tr><td><code>final</code></td><td><code>const</code> (ou <code>readonly</code> pour un attribut)</td></tr><tr><td><code>ArrayList&lt;String&gt;</code></td><td><code>List&lt;string&gt;</code></td></tr><tr><td><code>HashMap&lt;K, V&gt;</code></td><td><code>Dictionary&lt;K, V&gt;</code></td></tr><tr><td><code>liste.size()</code>, <code>liste.get(i)</code></td><td><code>liste.Count</code>, <code>liste[i]</code></td></tr><tr><td><code>for (String s : liste)</code></td><td><code>foreach (string s in liste)</code></td></tr><tr><td><code>a.equals(b)</code> pour les chaînes</td><td><code>a == b</code></td></tr><tr><td><code>Integer.parseInt(s)</code></td><td><code>int.Parse(s)</code></td></tr><tr><td><code>package</code> / <code>import</code></td><td><code>namespace</code> / <code>using</code></td></tr><tr><td>méthodes en <code>camelCase</code></td><td>méthodes en <code>PascalCase</code></td></tr><tr><td><code>"a" + x</code> ou <code>String.format</code></td><td><code>$"a{x}"</code></td></tr></table>
+<section class="tuto"><h3><small>Tutoriel</small>Un inventaire en console</h3>
+<div class="etape"><h4>Lire des articles</h4>
+<pre><code>var stock = new Dictionary&lt;string, int&gt;();
+Console.Write("Nombre d'articles : ");
+int n = int.Parse(Console.ReadLine());
+for (int i = 0; i &lt; n; i++)
+{
+    Console.Write("Nom : ");
+    string nom = Console.ReadLine();
+    Console.Write("Quantité : ");
+    int qte = int.Parse(Console.ReadLine());
+    stock[nom] = stock.GetValueOrDefault(nom) + qte;     // 0 si la clé est absente
+}</code></pre>
+</div>
+<div class="etape"><h4>Afficher trié</h4>
+<pre><code>foreach (var (nom, qte) in stock.OrderBy(p =&gt; p.Key))    // OrderBy : LINQ, chapitre suivant
+    Console.WriteLine($"{nom,-15}{qte,5}");              // alignement : 15 à gauche, 5 à droite</code></pre>
+</div>
+</section>
+<div class="box retenir"><b>À retenir</b><p><code>Console.WriteLine($"…{variable}…")</code> affiche ; <code>Console.ReadLine()</code> lit ; <code>int.Parse</code> / <code>int.TryParse</code> convertissent. </p><p> Types : <code>int</code>, <code>double</code>, <code>decimal</code>, <code>bool</code>, <code>string</code>, <code>var</code>. </p><p> <code>foreach (var x in collection)</code>. </p><p> <code>List&lt;T&gt;</code> (<code>Add</code>, <code>Count</code>, <code>[i]</code>) et <code>Dictionary&lt;K, V&gt;</code>. </p><p> Méthodes et classes en PascalCase ; <code>==</code> compare le contenu des chaînes.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "facile",
+  "q": "Quelle instruction affiche une ligne en C# ?",
+  "type": "qcm",
+  "options": [
+   "`Console.WriteLine(…)`",
+   "`echo …`",
+   "`print(…)`",
+   "`System.out.println(…)`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "facile",
+  "q": "Quelle instruction lit une ligne au clavier ?",
+  "type": "qcm",
+  "options": [
+   "`Console.ReadLine()`",
+   "`input()`",
+   "`Scanner.next()`",
+   "`Console.Read.Line()`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment écrit-on une chaîne interpolée ?",
+  "type": "qcm",
+  "options": [
+   "`$\"Bonjour {nom}\"`",
+   "`f\"Bonjour {nom}\"`",
+   "`\"Bonjour ${nom}\"`",
+   "`\"Bonjour \" . nom`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel type choisir pour un montant d'argent exact ?",
+  "type": "qcm",
+  "options": [
+   "`money`",
+   "`float`",
+   "`decimal`",
+   "`int`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle méthode convertit un texte en entier sans lever d'exception ?",
+  "type": "qcm",
+  "options": [
+   "`int.Safe`",
+   "`int.TryParse`",
+   "`Convert.Try`",
+   "`int.Parse`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle boucle parcourt une collection ?",
+  "type": "qcm",
+  "options": [
+   "`foreach (var x in liste)`",
+   "`for (var x : liste)`",
+   "`each (x of liste)`",
+   "`for x in liste:`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle classe correspond à l'ArrayList de Java ?",
+  "type": "qcm",
+  "options": [
+   "`List<T>`",
+   "`Vector<T>`",
+   "`Array<T>`",
+   "`Collection<T>`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle classe correspond à la HashMap de Java ?",
+  "type": "qcm",
+  "options": [
+   "`Dictionary<K, V>`",
+   "`Pairs<K, V>`",
+   "`Hashtable<K>`",
+   "`Map<K, V>`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment obtenir le nombre d'éléments d'une `List<T>` ?",
+  "type": "qcm",
+  "options": [
+   "`liste.size()`",
+   "`liste.length`",
+   "`liste.Length()`",
+   "`liste.Count`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "En C#, comment compare-t-on le contenu de deux string ?",
+  "type": "qcm",
+  "options": [
+   "Uniquement avec Equals",
+   "Avec compareTo",
+   "Avec `==`",
+   "Avec `===`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle convention de nommage pour une méthode en C# ?",
+  "type": "qcm",
+  "options": [
+   "snake_case",
+   "camelCase : `calculerTotal`",
+   "MAJUSCULES",
+   "PascalCase : `CalculerTotal`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que vaut `7 / 2` en C# ?",
+  "type": "qcm",
+  "options": [
+   "3,5",
+   "3",
+   "4",
+   "Une erreur"
+  ],
+  "answer": 1,
+  "explication": "Division entière, comme en Java."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel mot-clé remplace `import` de Java ?",
+  "type": "qcm",
+  "options": [
+   "`require`",
+   "`load`",
+   "`using`",
+   "`include`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "La syntaxe du C# est très proche de celle de Java.",
+  "type": "vf",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande crée un projet console avec le SDK .NET (dotnet ___ console) ?",
+  "type": "saisie",
+  "answers": [
+   "new"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque écriture Java à son équivalent C#.",
+  "type": "associer",
+  "paires": [
+   [
+    "`String`",
+    "`string`"
+   ],
+   [
+    "`boolean`",
+    "`bool`"
+   ],
+   [
+    "`final`",
+    "`const`"
+   ],
+   [
+    "`package`",
+    "`namespace`"
+   ],
+   [
+    "`import`",
+    "`using`"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

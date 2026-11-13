@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Bash : conditions, boucles et fonctions — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="bash" data-chapter="bash-conditions-boucles">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/bash.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<h2>1. <code>if</code> et les tests</h2>
+<pre><code>if [[ -f /etc/passwd ]]; then
+    echo "Le fichier existe"
+elif [[ -d /etc ]]; then
+    echo "Seul le dossier existe"
+else
+    echo "Rien"
+fi</code></pre>
+<p>Les espaces après <code>[[</code> et avant <code>]]</code> sont <b>obligatoires</b>. <code>fi</code> ferme le <code>if</code>.</p>
+<table><tr><th>Test sur les fichiers</th><th>Vrai si</th></tr><tr><td><code>-e chemin</code></td><td>le chemin existe</td></tr><tr><td><code>-f chemin</code></td><td>c'est un fichier</td></tr><tr><td><code>-d chemin</code></td><td>c'est un dossier</td></tr><tr><td><code>-r</code> <code>-w</code> <code>-x</code></td><td>lisible, modifiable, exécutable</td></tr><tr><td><code>-s chemin</code></td><td>le fichier n'est pas vide</td></tr></table>
+<table><tr><th>Test sur les textes</th><th>Vrai si</th></tr><tr><td><code>"$a" == "$b"</code></td><td>égaux</td></tr><tr><td><code>"$a" != "$b"</code></td><td>différents</td></tr><tr><td><code>-z "$a"</code></td><td>vide</td></tr><tr><td><code>-n "$a"</code></td><td>non vide</td></tr></table>
+<table><tr><th>Test sur les nombres</th><th>Vrai si</th></tr><tr><td><code>-eq</code> <code>-ne</code></td><td>égal, différent</td></tr><tr><td><code>-lt</code> <code>-le</code></td><td>inférieur, inférieur ou égal</td></tr><tr><td><code>-gt</code> <code>-ge</code></td><td>supérieur, supérieur ou égal</td></tr></table>
+<pre><code>if [[ $# -lt 1 ]]; then
+    echo "Usage : $0 &lt;utilisateur&gt;" &gt;&amp;2      # &gt;&amp;2 : sur la sortie d'erreur
+    exit 1
+fi
+
+if [[ "$USER" != "root" ]]; then
+    echo "Ce script doit être lancé avec sudo" &gt;&amp;2
+    exit 1
+fi
+
+if (( age &gt;= 18 )); then echo "majeur"; fi   # (( )) : comparaisons arithmétiques classiques
+if [[ -d "$dossier" &amp;&amp; -w "$dossier" ]]; then echo "dossier modifiable"; fi</code></pre>
+<p>Un <code>if</code> peut aussi tester directement le <b>succès d'une commande</b> :</p>
+<pre><code>if grep -q "^lea:" /etc/passwd; then
+    echo "L'utilisateur lea existe"
+fi
+if ! ping -c 1 -W 2 192.168.1.1 &gt; /dev/null; then
+    echo "La passerelle ne répond pas"
+fi</code></pre>
+<h2>2. <code>case</code></h2>
+<pre><code>case "$1" in
+    start)   echo "Démarrage" ;;
+    stop)    echo "Arrêt" ;;
+    restart) echo "Redémarrage" ;;
+    *)       echo "Usage : $0 {start|stop|restart}" ; exit 1 ;;
+esac</code></pre>
+<h2>3. La boucle <code>for</code></h2>
+<pre><code>for prenom in lea sam zoe; do
+    echo "Bonjour $prenom"
+done
+
+for fichier in /var/log/*.log; do            # tous les fichiers correspondants
+    echo "$fichier : $(wc -l &lt; "$fichier") lignes"
+done
+
+for i in {1..5}; do echo "Tour $i"; done     # une suite de nombres
+for (( i = 0; i &lt; 3; i++ )); do echo "$i"; done
+
+for arg in "$@"; do echo "Argument : $arg"; done</code></pre>
+<h2>4. La boucle <code>while</code></h2>
+<pre><code>compteur=1
+while [[ $compteur -le 3 ]]; do
+    echo "Essai $compteur"
+    compteur=$(( compteur + 1 ))
+done
+
+while read -r ligne; do                      # lire un fichier ligne par ligne
+    echo "Lu : $ligne"
+done &lt; utilisateurs.txt
+
+while IFS=";" read -r nom prenom classe; do  # découper un fichier CSV
+    echo "$prenom $nom est en $classe"
+done &lt; eleves.csv</code></pre>
+<p><code>break</code> sort de la boucle, <code>continue</code> passe au tour suivant.</p>
+<h2>5. Les fonctions</h2>
+<pre><code>journal() {
+    echo "[$(date '+%F %T')] $1" &gt;&gt; /var/log/monscript.log
+}
+
+existe_utilisateur() {
+    id "$1" &gt; /dev/null 2&gt;&amp;1                 # le code de retour de id devient celui de la fonction
+}
+
+journal "Début du traitement"
+if existe_utilisateur "lea"; then
+    journal "lea existe déjà"
+fi</code></pre>
+<p>Dans une fonction, <code>$1</code>, <code>$2</code>… sont <b>ses</b> arguments. <code>local variable=valeur</code> crée une variable propre à la fonction ; <code>return n</code> fixe son code de retour.</p>
+<h2>6. Un script robuste</h2>
+<pre><code>#!/bin/bash
+set -euo pipefail
+# -e : arrête le script à la première erreur
+# -u : erreur si on utilise une variable non définie
+# -o pipefail : une erreur dans un tube n'est pas masquée</code></pre>
+<section class="tuto"><h3><small>Tutoriel</small>Créer des comptes à partir d'un fichier</h3>
+<div class="etape"><h4>Vérifier les arguments et les droits</h4>
+<pre><code>#!/bin/bash
+set -euo pipefail
+if [[ $# -ne 1 || ! -f "$1" ]]; then
+    echo "Usage : $0 &lt;fichier.csv&gt;" &gt;&amp;2
+    exit 1
+fi
+if [[ "$(id -u)" -ne 0 ]]; then
+    echo "À lancer avec sudo" &gt;&amp;2
+    exit 1
+fi</code></pre>
+</div>
+<div class="etape"><h4>Parcourir le fichier</h4>
+<p>Chaque ligne contient <code>identifiant;Nom complet</code>.</p>
+<pre><code>while IFS=";" read -r identifiant nom; do
+    echo "À créer : $identifiant ($nom)"
+done &lt; "$1"</code></pre>
+</div>
+<div class="etape"><h4>Créer seulement ceux qui n'existent pas</h4>
+<pre><code>while IFS=";" read -r identifiant nom; do
+    if id "$identifiant" &gt; /dev/null 2&gt;&amp;1; then
+        echo "$identifiant existe déjà : ignoré"
+        continue
+    fi
+    useradd -m -c "$nom" -s /bin/bash "$identifiant"
+    echo "$identifiant créé"
+done &lt; "$1"</code></pre>
+</div>
+</section>
+<div class="box retenir"><b>À retenir</b><p><code>if [[ condition ]]; then … elif … else … fi</code>. </p><p> Fichiers : <code>-f</code>, <code>-d</code>, <code>-e</code>. Textes : <code>==</code>, <code>!=</code>, <code>-z</code>. Nombres : <code>-eq</code>, <code>-lt</code>, <code>-gt</code>. </p><p> <code>for x in liste; do … done</code> ; <code>while read -r ligne; do … done &lt; fichier</code>. </p><p> <code>case "$1" in motif) … ;; esac</code>. </p><p> <code>nom() { … }</code> définit une fonction ; <code>set -euo pipefail</code> rend le script strict.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "facile",
+  "q": "Par quel mot se termine un `if` en Bash ?",
+  "type": "qcm",
+  "options": [
+   "`done`",
+   "`end`",
+   "`endif`",
+   "`fi`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "facile",
+  "q": "Par quel mot se termine une boucle `for` ?",
+  "type": "qcm",
+  "options": [
+   "`end`",
+   "`next`",
+   "`rof`",
+   "`done`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel test vérifie qu'un chemin est un fichier ?",
+  "type": "qcm",
+  "options": [
+   "`-d`",
+   "`-x`",
+   "`-f`",
+   "`-z`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel test vérifie qu'un chemin est un dossier ?",
+  "type": "qcm",
+  "options": [
+   "`-e`",
+   "`-d`",
+   "`-n`",
+   "`-f`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel opérateur compare deux nombres pour « inférieur à » dans `[[ ]]` ?",
+  "type": "qcm",
+  "options": [
+   "`<<`",
+   "`-inf`",
+   "`-lt`",
+   "`-less`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que teste `-z \"$a\"` ?",
+  "type": "qcm",
+  "options": [
+   "Que a est un nombre",
+   "Que le fichier existe",
+   "Que la chaîne est vide",
+   "Que a vaut zéro"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que parcourt `for f in /var/log/*.log` ?",
+  "type": "qcm",
+  "options": [
+   "Les lignes d'un fichier",
+   "Le texte « /var/log/*.log »",
+   "Rien",
+   "Tous les fichiers .log de /var/log"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment lire un fichier ligne par ligne ?",
+  "type": "qcm",
+  "options": [
+   "`for ligne in fichier`",
+   "`cat fichier | each`",
+   "`read fichier`",
+   "`while read -r ligne; do … done < fichier`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Par quel mot se termine un `case` ?",
+  "type": "qcm",
+  "options": [
+   "`fi`",
+   "`done`",
+   "`end`",
+   "`esac`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Dans une fonction, que désigne `$1` ?",
+  "type": "qcm",
+  "options": [
+   "Le premier argument du script",
+   "Le premier argument de la fonction",
+   "Le code de retour",
+   "Le nom de la fonction"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que fait `set -e` ?",
+  "type": "qcm",
+  "options": [
+   "Exporte les variables",
+   "Affiche chaque commande",
+   "Arrête le script à la première commande en erreur",
+   "Active les couleurs"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que fait `>&2` dans `echo \"Erreur\" >&2` ?",
+  "type": "qcm",
+  "options": [
+   "Répète deux fois",
+   "Écrit dans un fichier nommé 2",
+   "Envoie le message sur la sortie d'erreur",
+   "Ignore le message"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que teste `if grep -q \"lea\" fichier; then` ?",
+  "type": "qcm",
+  "options": [
+   "Si lea est connecté",
+   "Si grep est installé",
+   "Si la commande grep a réussi (motif trouvé)",
+   "Si le fichier existe"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Les espaces autour de la condition dans `[[ … ]]` sont facultatifs.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Ils sont obligatoires."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel mot-clé crée une variable propre à une fonction ?",
+  "type": "saisie",
+  "answers": [
+   "local"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque opérateur à sa signification.",
+  "type": "associer",
+  "paires": [
+   [
+    "`-eq`",
+    "égal"
+   ],
+   [
+    "`-ne`",
+    "différent"
+   ],
+   [
+    "`-gt`",
+    "supérieur"
+   ],
+   [
+    "`-le`",
+    "inférieur ou égal"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

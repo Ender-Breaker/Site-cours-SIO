@@ -18,7 +18,7 @@ const B = "http://localhost:8765/";
     await pg.waitForFunction("window.EFCodeLab", { timeout: 30000 });
     const ids = await pg.evaluate(() => EFCodeLab.missions.map((m) => m.id));
     for (const id of ids) {
-      if (b && !id.includes(b)) continue;
+      if (b && !new RegExp(b).test(id)) continue;
       const r = await pg.evaluate(async (id) => {
         const m = EFCodeLab.missions.find((x) => x.id === id);
         const sol = Array.isArray(m.solution) ? m.solution.join("\n") : m.solution;

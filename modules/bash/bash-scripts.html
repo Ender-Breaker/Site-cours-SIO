@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Bash : écrire son premier script — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="bash" data-chapter="bash-scripts">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/bash.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>Un <b>script Bash</b> est un fichier texte qui contient les commandes que tu taperais dans le terminal. L'administrateur système s'en sert pour <b>automatiser</b> tout ce qui se répète : sauvegardes, création de comptes, installation de serveurs, surveillance. Ce cours prolonge les chapitres Linux de la matière SISR.</p>
+<h2>1. Le premier script</h2>
+<pre><code>#!/bin/bash
+# sauvegarde.sh : mon premier script
+echo "Bonjour $USER"
+echo "Nous sommes le $(date +%d/%m/%Y)"</code></pre>
+<pre><code>chmod +x sauvegarde.sh       # donne le droit d'exécution
+./sauvegarde.sh              # lance le script
+bash sauvegarde.sh           # autre façon, sans le droit x</code></pre>
+<p>La première ligne <code>#!/bin/bash</code> (le *shebang*) indique quel programme doit interpréter le fichier.</p>
+<h2>2. Les variables</h2>
+<pre><code>nom="Léa"                    # PAS d'espace autour du =
+age=17
+echo "Bonjour $nom, tu as $age ans"
+echo "Fichier : ${nom}_notes.txt"        # accolades pour délimiter le nom
+readonly MAX=10                          # constante</code></pre>
+<div class="box attention"><b>Pas d'espace autour du <code>=</code></b><p><code>nom = "Léa"</code> ne fonctionne pas : Bash cherche une commande appelée <code>nom</code>. C'est l'erreur numéro 1 en Bash.</p></div>
+<h2>3. Guillemets : doubles, simples, ou rien</h2>
+<table><tr><th>Écriture</th><th>Effet</th><th><code>echo</code> affiche (avec <code>nom=Léa</code>)</th></tr><tr><td><code>"Bonjour $nom"</code></td><td>les variables sont remplacées</td><td><code>Bonjour Léa</code></td></tr><tr><td><code>'Bonjour $nom'</code></td><td>texte littéral, rien n'est remplacé</td><td><code>Bonjour $nom</code></td></tr><tr><td><code>$nom</code> sans guillemets</td><td>remplacé, puis <b>découpé</b> sur les espaces</td><td>dangereux</td></tr></table>
+<p>Règle : mets <b>toujours</b> tes variables entre guillemets doubles : <code>rm "$fichier"</code>. Sans eux, un nom de fichier contenant un espace est coupé en deux.</p>
+<h2>4. Substitution de commande et calculs</h2>
+<pre><code>aujourdhui=$(date +%F)                   # le résultat d'une commande dans une variable
+nb=$(ls /etc | wc -l)
+echo "Il y a $nb fichiers dans /etc"
+
+total=$(( 5 + 3 * 2 ))                   # calcul entier : $(( … ))
+compteur=$(( compteur + 1 ))
+echo "$(( 17 / 5 )) reste $(( 17 % 5 ))"</code></pre>
+<h2>5. Les arguments du script</h2>
+<pre><code>#!/bin/bash
+echo "Nom du script : $0"
+echo "Premier argument : $1"
+echo "Deuxième argument : $2"
+echo "Nombre d'arguments : $#"
+echo "Tous les arguments : $@"</code></pre>
+<pre><code>./creer.sh lea sio1          # $1 vaut lea, $2 vaut sio1, $# vaut 2</code></pre>
+<h2>6. Lire une saisie</h2>
+<pre><code>read -p "Nom d'utilisateur : " utilisateur
+read -s -p "Mot de passe : " motdepasse      # -s : saisie masquée
+echo
+echo "Création de $utilisateur…"</code></pre>
+<h2>7. Le code de retour</h2>
+<p>Chaque commande renvoie un <b>code de retour</b> : <code>0</code> signifie succès, toute autre valeur une erreur. Il est disponible dans <code>$?</code> juste après la commande.</p>
+<pre><code>ls /etc/passwd
+echo $?                      # 0 : succès
+ls /dossier/inexistant
+echo $?                      # 2 : erreur
+exit 1                       # un script signale lui-même son échec</code></pre>
+<table><tr><th>Enchaînement</th><th>Signifie</th></tr><tr><td><code>cmd1 &amp;&amp; cmd2</code></td><td>cmd2 seulement si cmd1 a réussi</td></tr><tr><td><code>cmd1 || cmd2</code></td><td>cmd2 seulement si cmd1 a échoué</td></tr><tr><td><code>cmd1 ; cmd2</code></td><td>cmd2 dans tous les cas</td></tr></table>
+<pre><code>mkdir /sauvegardes &amp;&amp; echo "Dossier créé" || echo "Échec de la création"</code></pre>
+<section class="tuto"><h3><small>Tutoriel</small>Un script qui présente la machine</h3>
+<div class="etape"><h4>Les informations de base</h4>
+<pre><code>#!/bin/bash
+echo "Machine : $(hostname)"
+echo "Utilisateur : $USER"
+echo "Date : $(date '+%d/%m/%Y %H:%M')"</code></pre>
+</div>
+<div class="etape"><h4>Des mesures utiles</h4>
+<pre><code>echo "Espace libre sur / : $(df -h / | tail -1 | awk '{print $4}')"
+echo "Mémoire libre : $(free -h | awk '/Mem/ {print $7}')"
+echo "Utilisateurs connectés : $(who | wc -l)"</code></pre>
+</div>
+<div class="etape"><h4>Un argument pour choisir le dossier à mesurer</h4>
+<p><code>${1:-/home}</code> : le premier argument, ou <code>/home</code> s'il est absent.</p>
+<pre><code>dossier="${1:-/home}"
+echo "Taille de $dossier : $(du -sh "$dossier" 2&gt;/dev/null | cut -f1)"</code></pre>
+</div>
+</section>
+<div class="box retenir"><b>À retenir</b><p><code>#!/bin/bash</code> en première ligne, puis <code>chmod +x script.sh</code> et <code>./script.sh</code>. </p><p> <code>variable=valeur</code> sans espace ; <code>"$variable"</code> toujours entre guillemets doubles. </p><p> <code>$(commande)</code> récupère un résultat, <code>$(( calcul ))</code> calcule. </p><p> <code>$1</code>, <code>$2</code>, <code>$#</code>, <code>$@</code> : les arguments. </p><p> <code>$?</code> : code de retour (0 = succès) ; <code>&amp;&amp;</code> et <code>||</code> enchaînent selon le résultat.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "facile",
+  "q": "Par quelle ligne commence un script Bash ?",
+  "type": "qcm",
+  "options": [
+   "`#!/bin/bash`",
+   "`#include bash`",
+   "`<?bash`",
+   "`// bash`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "facile",
+  "q": "Quelle commande rend un script exécutable ?",
+  "type": "qcm",
+  "options": [
+   "`exec script.sh`",
+   "`chown +x script.sh`",
+   "`run script.sh`",
+   "`chmod +x script.sh`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle affectation est correcte ?",
+  "type": "qcm",
+  "options": [
+   "`set nom \"Léa\"`",
+   "`nom=\"Léa\"`",
+   "`$nom=\"Léa\"`",
+   "`nom = \"Léa\"`"
+  ],
+  "answer": 1,
+  "explication": "Pas d'espace autour du =."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Avec `nom=Léa`, qu'affiche `echo 'Bonjour $nom'` ?",
+  "type": "qcm",
+  "options": [
+   "Bonjour",
+   "Une erreur",
+   "Bonjour Léa",
+   "Bonjour $nom"
+  ],
+  "answer": 3,
+  "explication": "Les guillemets simples n'interprètent rien."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que contient `$1` ?",
+  "type": "qcm",
+  "options": [
+   "Le nom du script",
+   "Le code de retour",
+   "Le nombre d'arguments",
+   "Le premier argument du script"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que contient `$#` ?",
+  "type": "qcm",
+  "options": [
+   "Le dernier argument",
+   "Le code de retour",
+   "Le nombre d'arguments",
+   "Le numéro du processus"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que contient `$?` ?",
+  "type": "qcm",
+  "options": [
+   "Une valeur aléatoire",
+   "Le code de retour de la dernière commande",
+   "Le nombre d'arguments",
+   "Le nom de l'utilisateur"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel code de retour signifie « succès » ?",
+  "type": "qcm",
+  "options": [
+   "-1",
+   "255",
+   "0",
+   "1"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait `$(date)` dans une commande ?",
+  "type": "qcm",
+  "options": [
+   "Il crée une variable date",
+   "Il est remplacé par le résultat de la commande date",
+   "Il provoque une erreur",
+   "Il affiche le mot date"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment calculer 5 + 3 en Bash ?",
+  "type": "qcm",
+  "options": [
+   "`[5 + 3]`",
+   "`calc(5 + 3)`",
+   "`$(( 5 + 3 ))`",
+   "`5 + 3`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Dans `cmd1 && cmd2`, quand cmd2 s'exécute-t-elle ?",
+  "type": "qcm",
+  "options": [
+   "Seulement si cmd1 a réussi",
+   "Jamais",
+   "Toujours",
+   "Seulement si cmd1 a échoué"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi écrire `rm \"$fichier\"` avec des guillemets ?",
+  "type": "qcm",
+  "options": [
+   "Pour masquer le nom",
+   "Parce que rm l'exige",
+   "Pour qu'un nom contenant un espace ne soit pas coupé en deux",
+   "Pour aller plus vite"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande lit une saisie de l'utilisateur dans la variable nom ?",
+  "type": "qcm",
+  "options": [
+   "`scan nom`",
+   "`input nom`",
+   "`get nom`",
+   "`read nom`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Un script peut être lancé avec `bash script.sh` même sans le droit d'exécution.",
+  "type": "vf",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande termine un script en signalant une erreur (____ 1) ?",
+  "type": "saisie",
+  "answers": [
+   "exit"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque variable spéciale à son contenu.",
+  "type": "associer",
+  "paires": [
+   [
+    "`$0`",
+    "nom du script"
+   ],
+   [
+    "`$1`",
+    "premier argument"
+   ],
+   [
+    "`$#`",
+    "nombre d'arguments"
+   ],
+   [
+    "`$?`",
+    "code de retour"
+   ],
+   [
+    "`$USER`",
+    "utilisateur courant"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

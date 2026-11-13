@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Bash : SSH, tâches planifiées et sauvegardes — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="bash" data-chapter="bash-ssh-cron">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/bash.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<h2>1. SSH : administrer à distance</h2>
+<p><b>SSH</b> ouvre un terminal chiffré sur une machine distante. C'est l'outil quotidien de l'administrateur.</p>
+<pre><code>ssh lea@192.168.1.50                 # connexion
+ssh -p 2222 lea@serveur.exemple.fr   # sur un autre port que 22
+ssh lea@serveur "df -h /"            # exécute une seule commande et revient
+exit                                 # ferme la session</code></pre>
+<h2>2. Les clés SSH</h2>
+<p>Plutôt qu'un mot de passe, on utilise une <b>paire de clés</b> : la clé <b>privée</b> reste sur ton poste, la clé <b>publique</b> est déposée sur le serveur.</p>
+<pre><code>ssh-keygen -t ed25519 -C "lea@portable"     # crée ~/.ssh/id_ed25519 (privée) et .pub (publique)
+ssh-copy-id lea@192.168.1.50                # dépose la clé publique sur le serveur
+ssh lea@192.168.1.50                        # plus de mot de passe demandé</code></pre>
+<p>La clé publique est ajoutée au fichier <code>~/.ssh/authorized_keys</code> du serveur.</p>
+<div class="box attention"><b>La clé privée ne se partage jamais</b><p>Ne l'envoie pas, ne la copie pas dans un dépôt Git, ne la colle dans aucun site. Protège-la par une phrase de passe. Si elle fuit, retire immédiatement la clé publique correspondante de tous les serveurs.</p></div>
+<p>Le fichier <code>~/.ssh/config</code> évite de retaper les options :</p>
+<pre><code>Host web
+    HostName 192.168.1.50
+    User lea
+    Port 2222</code></pre>
+<pre><code>ssh web                               # équivaut à ssh -p 2222 lea@192.168.1.50</code></pre>
+<h2>3. Sécuriser le serveur SSH</h2>
+<p>Dans <code>/etc/ssh/sshd_config</code>, puis <code>sudo systemctl restart ssh</code> :</p>
+<pre><code>PermitRootLogin no               # pas de connexion directe en root
+PasswordAuthentication no        # clés uniquement
+Port 2222                        # facultatif : réduit le bruit des robots
+AllowUsers lea admin             # liste blanche</code></pre>
+<h2>4. Copier des fichiers</h2>
+<pre><code>scp rapport.pdf lea@web:/home/lea/              # copie vers le serveur
+scp lea@web:/var/log/syslog ./                  # copie depuis le serveur
+rsync -avz --delete site/ lea@web:/var/www/site/    # synchronise : ne transfère que les différences</code></pre>
+<p><code>rsync</code> est l'outil des sauvegardes : <code>-a</code> conserve droits et dates, <code>-v</code> détaille, <code>-z</code> compresse, <code>--delete</code> supprime à l'arrivée ce qui a disparu au départ.</p>
+<h2>5. <code>cron</code> : planifier</h2>
+<pre><code>crontab -e                       # édite les tâches de l'utilisateur
+crontab -l                       # les affiche</code></pre>
+<p>Chaque ligne : cinq champs de date, puis la commande.</p>
+<pre><code># minute  heure  jour-du-mois  mois  jour-de-la-semaine   commande
+  30      2      *             *     *                    /usr/local/bin/sauvegarde.sh
+  0       *      *             *     *                    /usr/local/bin/verif-disque.sh
+  */15    *      *             *     *                    /usr/local/bin/ping-serveurs.sh
+  0       8      *             *     1-5                  /usr/local/bin/rapport.sh
+  0       3      1             *     *                    /usr/local/bin/archivage.sh</code></pre>
+<table><tr><th>Écriture</th><th>Signifie</th></tr><tr><td><code>*</code></td><td>toutes les valeurs</td></tr><tr><td><code>*/15</code></td><td>toutes les 15 unités</td></tr><tr><td><code>1-5</code></td><td>de 1 à 5 (lundi à vendredi)</td></tr><tr><td><code>1,15</code></td><td>le 1 et le 15</td></tr></table>
+<p>Lecture : la première ligne s'exécute tous les jours à 2 h 30 ; la troisième toutes les 15 minutes ; la quatrième à 8 h du lundi au vendredi.</p>
+<div class="box attention"><b>Dans cron, l'environnement est minimal</b><p>Utilise des <b>chemins absolus</b> pour les commandes et les fichiers, et redirige les sorties vers un journal : <code>… &gt;&gt; /var/log/sauvegarde.log 2&gt;&amp;1</code>.</p></div>
+<section class="tuto"><h3><small>Tutoriel</small>Un script de sauvegarde complet</h3>
+<div class="etape"><h4>Archiver avec la date dans le nom</h4>
+<pre><code>#!/bin/bash
+set -euo pipefail
+SOURCE="/var/www/site"
+DESTINATION="/sauvegardes"
+ARCHIVE="$DESTINATION/site-$(date +%F).tar.gz"
+
+mkdir -p "$DESTINATION"
+tar -czf "$ARCHIVE" -C "$(dirname "$SOURCE")" "$(basename "$SOURCE")"
+echo "Archive créée : $ARCHIVE ($(du -h "$ARCHIVE" | cut -f1))"</code></pre>
+</div>
+<div class="etape"><h4>Supprimer les archives de plus de 7 jours</h4>
+<pre><code>find "$DESTINATION" -name "site-*.tar.gz" -mtime +7 -delete</code></pre>
+</div>
+<div class="etape"><h4>Copier sur un autre serveur</h4>
+<p>Une sauvegarde qui reste sur la même machine n'en est pas une.</p>
+<pre><code>rsync -az "$DESTINATION/" sauvegarde@nas:/volume1/sauvegardes/site/</code></pre>
+</div>
+<div class="etape"><h4>Planifier et journaliser</h4>
+<pre><code># crontab -e
+30 2 * * * /usr/local/bin/sauvegarde.sh &gt;&gt; /var/log/sauvegarde.log 2&gt;&amp;1</code></pre>
+</div>
+<div class="etape"><h4>La règle 3-2-1</h4>
+<p><b>3</b> copies des données, sur <b>2</b> supports différents, dont <b>1</b> hors site. Et une sauvegarde n'existe que si on a <b>testé sa restauration</b>.</p>
+</div>
+</section>
+<div class="box retenir"><b>À retenir</b><p><code>ssh utilisateur@hôte</code> ; <code>ssh-keygen</code> puis <code>ssh-copy-id</code> pour les clés ; la clé privée ne quitte jamais ton poste. </p><p> <code>scp</code> copie, <code>rsync -avz</code> synchronise. </p><p> <code>crontab -e</code> : minute, heure, jour du mois, mois, jour de la semaine, commande. </p><p> Dans cron : chemins absolus et sortie redirigée vers un journal. </p><p> Sauvegardes : règle 3-2-1 et test de restauration.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "facile",
+  "q": "Quelle commande ouvre une session sur une machine distante ?",
+  "type": "qcm",
+  "options": [
+   "`remote`",
+   "`telnet-secure`",
+   "`connect`",
+   "`ssh`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "facile",
+  "q": "Quel est le port par défaut de SSH ?",
+  "type": "qcm",
+  "options": [
+   "3389",
+   "443",
+   "22",
+   "80"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande crée une paire de clés SSH ?",
+  "type": "qcm",
+  "options": [
+   "`ssh-keygen`",
+   "`ssh-copy-id`",
+   "`ssh-create`",
+   "`keymake`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle clé dépose-t-on sur le serveur ?",
+  "type": "qcm",
+  "options": [
+   "Aucune",
+   "Les deux",
+   "La clé publique",
+   "La clé privée"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Dans quel fichier du serveur sont rangées les clés publiques autorisées ?",
+  "type": "qcm",
+  "options": [
+   "`/etc/passwd`",
+   "`~/.ssh/config`",
+   "`/etc/ssh/keys`",
+   "`~/.ssh/authorized_keys`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle directive de sshd_config interdit la connexion directe de root ?",
+  "type": "qcm",
+  "options": [
+   "`PermitRootLogin no`",
+   "`RootAccess off`",
+   "`DenyRoot yes`",
+   "`AllowRoot false`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande synchronise deux dossiers en ne transférant que les différences ?",
+  "type": "qcm",
+  "options": [
+   "`scp`",
+   "`tar`",
+   "`rsync`",
+   "`cp -r`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande édite les tâches planifiées de l'utilisateur ?",
+  "type": "qcm",
+  "options": [
+   "`schedule`",
+   "`crontab -e`",
+   "`cron edit`",
+   "`at -e`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que signifie la ligne cron `30 2 * * *` ?",
+  "type": "qcm",
+  "options": [
+   "Le 30 février",
+   "Tous les jours à 2 h 30",
+   "À 2 h le 30 du mois",
+   "Toutes les 30 minutes"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que signifie `*/15 * * * *` ?",
+  "type": "qcm",
+  "options": [
+   "15 fois par jour",
+   "Le 15 de chaque mois",
+   "À 15 h tous les jours",
+   "Toutes les 15 minutes"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que signifie `0 8 * * 1-5` ?",
+  "type": "qcm",
+  "options": [
+   "À 8 h du lundi au vendredi",
+   "À 8 h les cinq premiers jours du mois",
+   "Toutes les 8 heures",
+   "De 1 h à 5 h"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi utiliser des chemins absolus dans un script lancé par cron ?",
+  "type": "qcm",
+  "options": [
+   "Cron ne lit pas les chemins relatifs par sécurité",
+   "C'est plus rapide",
+   "L'environnement de cron est minimal (PATH réduit)",
+   "Ce n'est pas nécessaire"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que dit la règle 3-2-1 ?",
+  "type": "qcm",
+  "options": [
+   "3 sauvegardes par jour",
+   "3 mots de passe",
+   "3 serveurs, 2 disques, 1 administrateur",
+   "3 copies, sur 2 supports, dont 1 hors site"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "On peut envoyer sa clé privée SSH par e-mail à un collègue pour lui donner accès.",
+  "type": "vf",
+  "answer": false,
+  "explication": "La clé privée ne se partage jamais."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande dépose ta clé publique sur un serveur (ssh-____-id) ?",
+  "type": "saisie",
+  "answers": [
+   "copy",
+   "ssh-copy-id"
+  ],
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque commande à son rôle.",
+  "type": "associer",
+  "paires": [
+   [
+    "`ssh`",
+    "terminal distant"
+   ],
+   [
+    "`scp`",
+    "copier un fichier"
+   ],
+   [
+    "`rsync`",
+    "synchroniser"
+   ],
+   [
+    "`crontab`",
+    "planifier"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

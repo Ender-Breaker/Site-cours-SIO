@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Sécurité web : mots de passe, sessions et HTTPS — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="securite-web" data-chapter="secu-authentification">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/securite-web.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<h2>1. Ne jamais stocker un mot de passe en clair</h2>
+<p>Si la base de données fuit, tous les comptes sont compromis, y compris sur les autres sites où les utilisateurs ont réutilisé leur mot de passe. On stocke une <b>empreinte</b> (*hash*) : le résultat d'une fonction à sens unique.</p>
+<table><tr><th>Méthode</th><th>Verdict</th></tr><tr><td>En clair</td><td>inacceptable</td></tr><tr><td>MD5, SHA-1, SHA-256 simples</td><td>trop <b>rapides</b> : des milliards d'essais par seconde</td></tr><tr><td>bcrypt, Argon2</td><td>conçus pour être <b>lents</b> et salés : la bonne réponse</td></tr></table>
+<pre><code>// À l'inscription
+$empreinte = password_hash($motDePasse, PASSWORD_DEFAULT);     // bcrypt, sel aléatoire inclus
+// … enregistrer $empreinte en base …
+
+// À la connexion
+if (password_verify($saisie, $empreinteEnBase)) {
+    // mot de passe correct
+}</code></pre>
+<p>Le <b>sel</b> est une valeur aléatoire ajoutée à chaque mot de passe avant le hachage : deux utilisateurs avec le même mot de passe ont des empreintes différentes, et les tables d'empreintes précalculées (*rainbow tables*) deviennent inutiles. <code>password_hash</code> s'en charge tout seul.</p>
+<div class="box attention"><b>Hacher n'est pas chiffrer</b><p>Un <b>chiffrement</b> est réversible avec la clé ; un <b>hachage</b> ne l'est pas. Un mot de passe se hache : personne, pas même l'administrateur, ne doit pouvoir le retrouver. Un site qui te renvoie ton mot de passe par e-mail le stocke mal.</p></div>
+<h2>2. Des mots de passe solides</h2>
+<p>La CNIL et l'ANSSI recommandent de privilégier la <b>longueur</b> : une phrase de passe de quatre ou cinq mots résiste mieux qu'un mot court bourré de symboles. Côté application :</p>
+<ul><li>longueur minimale (12 caractères), sans plafond ridicule ;</li><li>limiter les tentatives (blocage temporaire, délai croissant) ;</li><li>proposer la <b>double authentification</b> (code TOTP, clé de sécurité) ;</li><li>un message unique « identifiant ou mot de passe incorrect », pour ne pas révéler quels comptes existent.</li></ul>
+<h2>3. Les sessions</h2>
+<p>HTTP est <b>sans état</b> : le serveur ne se souvient pas de toi d'une requête à l'autre. Après la connexion, il crée une <b>session</b> et envoie son identifiant dans un <b>cookie</b> que le navigateur renverra à chaque requête.</p>
+<pre><code>session_start();
+// après un password_verify réussi :
+session_regenerate_id(true);             // nouvel identifiant : contre la fixation de session
+$_SESSION["utilisateur_id"] = $utilisateur["id"];
+
+// sur chaque page protégée :
+if (!isset($_SESSION["utilisateur_id"])) { header("Location: connexion.php"); exit; }</code></pre>
+<table><tr><th>Attribut du cookie</th><th>Protège contre</th></tr><tr><td><code>HttpOnly</code></td><td>la lecture par JavaScript (vol par XSS)</td></tr><tr><td><code>Secure</code></td><td>l'envoi en clair sur HTTP</td></tr><tr><td><code>SameSite=Lax</code></td><td>l'envoi depuis un autre site (CSRF)</td></tr></table>
+<h2>4. Authentifier n'est pas autoriser</h2>
+<p><b>Authentification</b> : qui es-tu ? <b>Autorisation</b> : as-tu le droit de faire cela ? L'oubli de la seconde est la faille numéro 1 de l'OWASP (*Broken Access Control*).</p>
+<pre><code>// VULNÉRABLE : facture.php?id=1042 affiche n'importe quelle facture
+$requete = $pdo-&gt;prepare("SELECT * FROM factures WHERE id = ?");
+
+// CORRECT : on vérifie que la facture appartient à l'utilisateur connecté
+$requete = $pdo-&gt;prepare("SELECT * FROM factures WHERE id = ? AND client_id = ?");
+$requete-&gt;execute([$_GET["id"], $_SESSION["utilisateur_id"]]);</code></pre>
+<p>Cacher un bouton ne suffit pas : chaque page et chaque action vérifie les droits <b>côté serveur</b>. On applique le principe du <b>moindre privilège</b> : chacun n'a que les droits nécessaires à son rôle.</p>
+<h2>5. HTTPS</h2>
+<p>HTTPS = HTTP dans un tunnel <b>TLS</b>. Il apporte trois garanties :</p>
+<table><tr><th>Garantie</th><th>Signifie</th></tr><tr><td>Confidentialité</td><td>personne sur le réseau ne lit les échanges</td></tr><tr><td>Intégrité</td><td>personne ne les modifie en route</td></tr><tr><td>Authenticité</td><td>le <b>certificat</b> prouve que tu parles au bon serveur</td></tr></table>
+<p>Le certificat est délivré par une <b>autorité de certification</b> ; Let's Encrypt en fournit gratuitement (outil <code>certbot</code>). Sans HTTPS, mots de passe et cookies de session circulent en clair sur le Wi-Fi public. On force HTTPS avec une redirection et l'en-tête <code>Strict-Transport-Security</code> (HSTS).</p>
+<h2>6. Les autres réflexes</h2>
+<ul><li><b>Mettre à jour</b> : serveur, CMS, bibliothèques. La plupart des piratages exploitent une faille déjà corrigée.</li><li>Pas de <b>secret dans le code</b> ni dans Git : fichier <code>.env</code>, hors du dossier public.</li><li><b>Envoi de fichiers</b> : vérifier le type réel et la taille, renommer, stocker hors de la racine web.</li><li><b>Journaliser</b> les connexions et les erreurs, sans jamais y écrire de mot de passe.</li><li><b>Sauvegarder</b> et tester la restauration.</li><li>Messages d'erreur neutres pour le visiteur, détaillés dans les journaux.</li></ul>
+<section class="tuto"><h3><small>Tutoriel</small>Une inscription et une connexion correctes</h3>
+<div class="etape"><h4>L'inscription</h4>
+<pre><code>$login = trim($_POST["login"] ?? "");
+$mdp = $_POST["mdp"] ?? "";
+if (mb_strlen($mdp) &lt; 12) { exit("Mot de passe trop court"); }
+$requete = $pdo-&gt;prepare("INSERT INTO utilisateurs (login, empreinte) VALUES (?, ?)");
+$requete-&gt;execute([$login, password_hash($mdp, PASSWORD_DEFAULT)]);</code></pre>
+</div>
+<div class="etape"><h4>La connexion</h4>
+<p>Le même message dans les deux cas d'échec.</p>
+<pre><code>$requete = $pdo-&gt;prepare("SELECT id, empreinte FROM utilisateurs WHERE login = ?");
+$requete-&gt;execute([$login]);
+$u = $requete-&gt;fetch();
+if (!$u || !password_verify($mdp, $u["empreinte"])) {
+    exit("Identifiant ou mot de passe incorrect");
+}
+session_regenerate_id(true);
+$_SESSION["utilisateur_id"] = $u["id"];</code></pre>
+</div>
+<div class="etape"><h4>La déconnexion</h4>
+<pre><code>session_start();
+$_SESSION = [];
+session_destroy();
+header("Location: index.php");</code></pre>
+</div>
+</section>
+<div class="box retenir"><b>À retenir</b><p>Un mot de passe se <b>hache</b> avec <code>password_hash</code> (bcrypt, sel inclus) et se vérifie avec <code>password_verify</code>. </p><p> Session : identifiant dans un cookie <code>HttpOnly</code>, <code>Secure</code>, <code>SameSite</code> ; <code>session_regenerate_id</code> après la connexion. </p><p> Authentifier (qui ?) puis autoriser (a-t-il le droit ?), côté serveur, à chaque action. </p><p> HTTPS : confidentialité, intégrité, authenticité. </p><p> Mises à jour, moindre privilège, aucun secret dans le code.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "Comment doit-on stocker un mot de passe ?",
+  "type": "qcm",
+  "options": [
+   "En clair",
+   "Haché en MD5",
+   "Sous forme d'empreinte calculée avec bcrypt ou Argon2",
+   "Chiffré avec une clé connue de l'administrateur"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle fonction PHP crée l'empreinte d'un mot de passe ?",
+  "type": "qcm",
+  "options": [
+   "`base64_encode`",
+   "`password_hash`",
+   "`crypt_password`",
+   "`md5`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle fonction PHP vérifie un mot de passe saisi ?",
+  "type": "qcm",
+  "options": [
+   "`strcmp`",
+   "`password_check`",
+   "`hash_equals_password`",
+   "`password_verify`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Pourquoi MD5 et SHA-256 seuls sont-ils inadaptés aux mots de passe ?",
+  "type": "qcm",
+  "options": [
+   "Ils sont payants",
+   "Ils sont trop rapides : on peut tester des milliards de mots de passe",
+   "Ils sont réversibles",
+   "Ils sont trop lents"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "À quoi sert le sel ?",
+  "type": "qcm",
+  "options": [
+   "À raccourcir le mot de passe",
+   "À chiffrer la base",
+   "À accélérer le calcul",
+   "À donner des empreintes différentes à deux mots de passe identiques"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle différence entre hacher et chiffrer ?",
+  "type": "qcm",
+  "options": [
+   "Le chiffrement est à sens unique",
+   "Le hachage utilise une clé",
+   "Aucune",
+   "Le hachage est à sens unique, le chiffrement est réversible avec la clé"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que privilégier pour un mot de passe solide ?",
+  "type": "qcm",
+  "options": [
+   "Le même partout",
+   "Un mot court avec des symboles",
+   "Sa date de naissance",
+   "La longueur (une phrase de passe)"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Où l'identifiant de session est-il conservé côté navigateur ?",
+  "type": "qcm",
+  "options": [
+   "Dans la base de données",
+   "Dans un cookie",
+   "Dans l'URL",
+   "Dans le code HTML"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle différence entre authentification et autorisation ?",
+  "type": "qcm",
+  "options": [
+   "Aucune",
+   "Mot de passe / cookie",
+   "Côté client / côté serveur",
+   "Qui es-tu ? / As-tu le droit de faire cela ?"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que garantit HTTPS ?",
+  "type": "qcm",
+  "options": [
+   "L'absence de virus sur le site",
+   "Confidentialité, intégrité et authenticité du serveur",
+   "La rapidité du site",
+   "L'honnêteté du commerçant"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qui délivre un certificat TLS ?",
+  "type": "qcm",
+  "options": [
+   "Le fournisseur d'accès",
+   "Le navigateur",
+   "N'importe quel site",
+   "Une autorité de certification"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi afficher « identifiant ou mot de passe incorrect » plutôt que « identifiant inconnu » ?",
+  "type": "qcm",
+  "options": [
+   "C'est plus court",
+   "Pour ralentir le site",
+   "C'est une obligation du RGPD",
+   "Pour ne pas révéler quels comptes existent"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi appeler `session_regenerate_id` après la connexion ?",
+  "type": "qcm",
+  "options": [
+   "Contre la fixation de session",
+   "Pour prolonger la session",
+   "Pour accélérer le site",
+   "Pour hacher le mot de passe"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que dit le principe du moindre privilège ?",
+  "type": "qcm",
+  "options": [
+   "Les droits sont accordés à la demande de l'utilisateur",
+   "Seul root a des droits",
+   "Tout le monde est administrateur",
+   "Chacun n'a que les droits nécessaires à son rôle"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Cacher un bouton dans l'interface suffit à empêcher une action.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Le serveur doit vérifier les droits à chaque requête."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque attribut de cookie à sa protection.",
+  "type": "associer",
+  "paires": [
+   [
+    "`HttpOnly`",
+    "pas de lecture par JavaScript"
+   ],
+   [
+    "`Secure`",
+    "envoi en HTTPS uniquement"
+   ],
+   [
+    "`SameSite`",
+    "pas d'envoi depuis un autre site"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>
