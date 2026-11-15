@@ -17,7 +17,8 @@
     }).map(function (t) {
       return '<option value="' + m.id + "_" + t + '">' + esc(m.titre) + " · " + TYPES[t] + '</option>';
     }).join("") + (m.labos || []).map(function (l, i) {
-      var nom = m.labos.length > 1 ? "Pratique · " + (l.court || l.titre) : "Pratique";
+      if (l.sansExamen) return "";
+      var nom = m.labos.filter(function (x) { return !x.sansExamen; }).length > 1 ? "Pratique · " + (l.court || l.titre) : "Pratique";
       return '<option value="' + (i && l.cle ? l.cle : m.id) + '_pratique">' + esc(m.titre) + " · " + esc(nom) + '</option>';
     }).join("") + '</optgroup>';
   });

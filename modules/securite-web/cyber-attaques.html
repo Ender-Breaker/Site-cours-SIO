@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Cybersécurité : les grandes familles d'attaques — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="securite-web" data-chapter="cyber-attaques">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/securite-web.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>Ce chapitre fait le tour des attaques que tu dois savoir <b>reconnaître</b>. Pour chacune : le principe, les signes qui la trahissent, et la parade. Les attaques propres aux sites web (injection SQL, XSS, CSRF) ont leur propre chapitre.</p>
+<h2>1. Les logiciels malveillants (*malwares*)</h2>
+<table><tr><th>Type</th><th>Ce qu'il fait</th><th>Comment il arrive</th></tr><tr><td><b>Virus</b></td><td>s'attache à un fichier et se propage quand on l'ouvre</td><td>pièce jointe, téléchargement</td></tr><tr><td><b>Ver</b> (*worm*)</td><td>se propage <b>seul</b> par le réseau</td><td>faille d'un service exposé</td></tr><tr><td><b>Cheval de Troie</b></td><td>se fait passer pour un logiciel utile</td><td>faux logiciel, logiciel piraté</td></tr><tr><td><b>Rançongiciel</b> (*ransomware*)</td><td>chiffre les fichiers et exige une rançon</td><td>hameçonnage, accès distant mal protégé</td></tr><tr><td><b>Logiciel espion</b> (*spyware*), enregistreur de frappe</td><td>vole mots de passe et données</td><td>cheval de Troie</td></tr><tr><td><b>Rootkit</b></td><td>se cache au cœur du système</td><td>après une élévation de privilèges</td></tr><tr><td><b>Botnet</b></td><td>transforme la machine en « zombie » pilotée à distance</td><td>toutes les voies ci-dessus</td></tr><tr><td><b>Porte dérobée</b> (*backdoor*)</td><td>laisse un accès secret</td><td>installée par l'attaquant</td></tr></table>
+<p>Signes : machine lente, ventilateur qui s'emballe, fichiers renommés avec une extension inconnue, antivirus désactivé, connexions réseau vers des adresses inconnues.</p>
+<p>Parades : mises à jour, antivirus ou <b>EDR</b>, pas de droits administrateur au quotidien, <b>sauvegardes hors ligne</b>, filtrage des pièces jointes.</p>
+<div class="box attention"><b>Face à un rançongiciel</b><p><b>Débrancher</b> la machine du réseau (câble et Wi-Fi) sans l'éteindre, prévenir le responsable, ne pas payer (aucune garantie, et cela finance les attaquants), restaurer depuis une sauvegarde saine, porter plainte.</p></div>
+<h2>2. Les attaques sur les mots de passe</h2>
+<table><tr><th>Attaque</th><th>Principe</th><th>Parade</th></tr><tr><td>Force brute</td><td>essayer toutes les combinaisons</td><td>longueur, blocage après N échecs</td></tr><tr><td>Dictionnaire</td><td>essayer les mots de passe les plus courants</td><td>pas de mot du dictionnaire, liste noire</td></tr><tr><td>*Credential stuffing*</td><td>rejouer des couples identifiant / mot de passe volés ailleurs</td><td>un mot de passe <b>différent</b> par site, MFA</td></tr><tr><td>*Password spraying*</td><td>un seul mot de passe courant essayé sur des milliers de comptes</td><td>MFA, détection</td></tr><tr><td>Vol de la base d'empreintes</td><td>casser les empreintes hors ligne</td><td>bcrypt / Argon2 avec sel</td></tr></table>
+<div class="essai" data-langue="js"><pre><code>// Pourquoi la longueur compte plus que les symboles : le nombre de combinaisons
+function combinaisons(alphabet, longueur) { return Math.pow(alphabet, longueur); }
+const parSeconde = 1e10;       // dix milliards d'essais par seconde (matériel spécialisé, empreintes rapides)
+const duree = n =&gt; {
+  const s = n / parSeconde;
+  if (s &lt; 60) return s.toFixed(1) + " secondes";
+  if (s &lt; 86400) return (s / 3600).toFixed(1) + " heures";
+  if (s &lt; 3.15e7) return (s / 86400).toFixed(0) + " jours";
+  return (s / 3.15e7).toExponential(1) + " années";
+};
+console.log("8 minuscules           :", duree(combinaisons(26, 8)));
+console.log("8 caractères variés    :", duree(combinaisons(94, 8)));
+console.log("12 caractères variés   :", duree(combinaisons(94, 12)));
+console.log("phrase de 20 minuscules:", duree(combinaisons(26, 20)));</code></pre></div>
+<h2>3. Les attaques réseau</h2>
+<table><tr><th>Attaque</th><th>Principe</th><th>Parade</th></tr><tr><td><b>Déni de service</b> (DoS / DDoS)</td><td>saturer un service de requêtes, souvent depuis un botnet</td><td>protection anti-DDoS, limitation de débit, CDN</td></tr><tr><td><b>Homme du milieu</b> (MITM)</td><td>s'intercaler entre deux machines pour lire ou modifier les échanges</td><td>HTTPS, VPN, certificats vérifiés</td></tr><tr><td><b>Écoute</b> (*sniffing*)</td><td>capturer le trafic non chiffré</td><td>chiffrement de bout en bout</td></tr><tr><td><b>Usurpation</b> (*spoofing*)</td><td>falsifier une adresse IP, MAC, ARP ou DNS</td><td>sécurisation des commutateurs, DNSSEC</td></tr><tr><td><b>Faux point d'accès Wi-Fi</b></td><td>imiter un réseau connu pour capter les connexions</td><td>VPN, ne pas se connecter automatiquement</td></tr><tr><td><b>Balayage de ports</b></td><td>repérer les services ouverts : c'est la reconnaissance</td><td>pare-feu, fermer l'inutile, détection</td></tr></table>
+<h2>4. L'exploitation de vulnérabilités</h2>
+<table><tr><th>Notion</th><th>Définition</th></tr><tr><td>Faille non corrigée</td><td>la vulnérabilité est connue et un correctif existe, mais n'a pas été installé : le cas le plus fréquent</td></tr><tr><td><b>Zero-day</b></td><td>vulnérabilité inconnue de l'éditeur : aucun correctif n'existe encore</td></tr><tr><td>Configuration par défaut</td><td>mot de passe d'usine, page d'administration exposée, service inutile actif</td></tr><tr><td>Élévation de privilèges</td><td>passer d'un compte limité à administrateur</td></tr><tr><td>Attaque de la chaîne d'approvisionnement</td><td>piéger un logiciel ou une bibliothèque que la cible utilise</td></tr></table>
+<p>Parade principale : <b>mettre à jour</b>, vite et partout, et réduire la surface d'attaque (ce qui n'est pas installé ne peut pas être attaqué).</p>
+<h2>5. La menace interne et physique</h2>
+<p>Un employé mécontent, un prestataire trop curieux, un poste laissé déverrouillé, une clé USB trouvée sur le parking et branchée par curiosité, un visiteur qui se connecte à une prise réseau libre. Parades : <b>moindre privilège</b>, verrouillage automatique des sessions, journalisation, contrôle des ports réseau (802.1X), sensibilisation.</p>
+<h2>6. Tableau de synthèse</h2>
+<table><tr><th>Pilier visé</th><th>Attaques typiques</th></tr><tr><td>Disponibilité</td><td>DDoS, rançongiciel, sabotage</td></tr><tr><td>Intégrité</td><td>modification de base de données, défacement de site, homme du milieu</td></tr><tr><td>Confidentialité</td><td>hameçonnage, logiciel espion, écoute, fuite de données</td></tr></table>
+<section class="tuto"><h3><small>Tutoriel</small>Reconnaître une attaque à ses traces</h3>
+<div class="etape"><h4>Dans un journal d'authentification</h4>
+<p>Des centaines d'échecs en quelques minutes depuis la même adresse, sur un seul compte : <b>force brute</b>.</p>
+<pre><code>Nov 13 03:12:01 srv sshd[411]: Failed password for root from 203.0.113.7 port 51122 ssh2
+Nov 13 03:12:02 srv sshd[411]: Failed password for root from 203.0.113.7 port 51124 ssh2
+Nov 13 03:12:03 srv sshd[411]: Failed password for root from 203.0.113.7 port 51130 ssh2</code></pre>
+</div>
+<div class="etape"><h4>Dans un journal de serveur web</h4>
+<p>Des apostrophes, des mots-clés SQL ou des balises dans les paramètres : une tentative d'<b>injection</b>.</p>
+<pre><code>GET /produit.php?id=12'%20OR%20'1'='1 HTTP/1.1" 200
+GET /recherche.php?q=&lt;script&gt;… HTTP/1.1" 200</code></pre>
+</div>
+<div class="etape"><h4>Sur un poste</h4>
+<p>Des fichiers renommés <code>rapport.docx.locked</code> et un fichier <code>LISEZ-MOI.txt</code> dans chaque dossier : <b>rançongiciel</b>. Réflexe : isoler la machine du réseau.</p>
+</div>
+<div class="etape"><h4>À toi</h4>
+<p>Entraîne-toi à faire ces analyses avec du code dans le <a href="labo-cyber.html">labo cybersécurité</a> et en ligne de commande dans le <a href="labo-defense.html">labo terminal</a>.</p>
+</div>
+</section>
+<div class="box defi"><b>Défi : compter les échecs de connexion</b><p>Analyse un journal d'authentification.</p><a class="defi-go" href="labo-cyber.html#m=cy-echecs">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : qui faut-il bannir ?</b><p>Repère les adresses trop insistantes, comme fail2ban.</p><a class="defi-go" href="labo-cyber.html#m=cy-bannir">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p>Malwares : virus, ver, cheval de Troie, rançongiciel, espion, rootkit, botnet. </p><p> Mots de passe : force brute, dictionnaire, credential stuffing → longueur, unicité, MFA. </p><p> Réseau : DDoS, homme du milieu, écoute, usurpation → chiffrement et filtrage. </p><p> La plupart des intrusions passent par une faille <b>déjà corrigée</b> ou une configuration par défaut. </p><p> Rançongiciel : isoler, ne pas payer, restaurer.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cyber.html">labo cybersécurité</a> te fait écrire des protections, casser des chiffres faibles et analyser des programmes. Le <a href="labo-defense.html">labo terminal</a> te fait enquêter et durcir un serveur. Et le <a href="duel.html">duel attaque / défense</a> t'oppose à un autre élève.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "Quel malware se propage seul par le réseau, sans action de l'utilisateur ?",
+  "type": "qcm",
+  "options": [
+   "Le rootkit",
+   "Le cheval de Troie",
+   "Le logiciel espion",
+   "Le ver"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel malware se fait passer pour un logiciel utile ?",
+  "type": "qcm",
+  "options": [
+   "Le rançongiciel",
+   "Le cheval de Troie",
+   "Le ver",
+   "Le botnet"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait un rançongiciel ?",
+  "type": "qcm",
+  "options": [
+   "Il vole uniquement les mots de passe",
+   "Il affiche de la publicité",
+   "Il ralentit le réseau",
+   "Il chiffre les fichiers et exige une rançon"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel est le premier réflexe face à un poste touché par un rançongiciel ?",
+  "type": "qcm",
+  "options": [
+   "Supprimer l'antivirus",
+   "L'isoler du réseau",
+   "Le redémarrer plusieurs fois",
+   "Payer la rançon"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'un botnet ?",
+  "type": "qcm",
+  "options": [
+   "Un robot de discussion",
+   "Un réseau de machines infectées pilotées à distance",
+   "Un antivirus en réseau",
+   "Un pare-feu"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce que le credential stuffing ?",
+  "type": "qcm",
+  "options": [
+   "Essayer toutes les combinaisons",
+   "Deviner la question secrète",
+   "Voler un cookie",
+   "Rejouer des identifiants volés sur un autre site"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle protection rend inutile un mot de passe volé ?",
+  "type": "qcm",
+  "options": [
+   "Un antivirus",
+   "L'authentification multifacteur (MFA)",
+   "Le mode privé du navigateur",
+   "Un mot de passe plus court"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que vise une attaque DDoS ?",
+  "type": "qcm",
+  "options": [
+   "La confidentialité",
+   "La disponibilité du service",
+   "L'intégrité",
+   "Les mots de passe"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que permet une attaque de l'homme du milieu ?",
+  "type": "qcm",
+  "options": [
+   "Lire ou modifier les échanges entre deux machines",
+   "Deviner un mot de passe",
+   "Saturer un serveur",
+   "Chiffrer un disque"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle est la parade principale contre l'homme du milieu ?",
+  "type": "qcm",
+  "options": [
+   "Le chiffrement (HTTPS, VPN) avec vérification du certificat",
+   "Un antivirus",
+   "Un mot de passe long",
+   "Une sauvegarde"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'une faille zero-day ?",
+  "type": "qcm",
+  "options": [
+   "Une vulnérabilité pour laquelle aucun correctif n'existe encore",
+   "Un virus très rapide",
+   "Une faille corrigée le jour même",
+   "Une faille sans gravité"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Par où passent la majorité des intrusions ?",
+  "type": "qcm",
+  "options": [
+   "Des zero-day",
+   "Des attaques physiques",
+   "Des failles déjà corrigées mais non mises à jour, et des configurations par défaut",
+   "Des erreurs du fournisseur d'accès"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "À quoi sert un balayage de ports pour un attaquant ?",
+  "type": "qcm",
+  "options": [
+   "À chiffrer des fichiers",
+   "À saturer le réseau",
+   "À voler des mots de passe",
+   "À repérer les services ouverts : c'est de la reconnaissance"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Des centaines de « Failed password for root » depuis la même adresse en deux minutes indiquent…",
+  "type": "qcm",
+  "options": [
+   "une panne du serveur",
+   "une attaque par force brute",
+   "un utilisateur distrait",
+   "un déni de service"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que faire d'une clé USB trouvée sur le parking ?",
+  "type": "qcm",
+  "options": [
+   "Ne pas la brancher et la remettre au service informatique",
+   "La garder",
+   "La formater sur son poste",
+   "La brancher pour identifier son propriétaire"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Payer la rançon garantit de récupérer ses fichiers.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Aucune garantie, et cela finance les attaquants."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque attaque à sa parade principale.",
+  "type": "associer",
+  "paires": [
+   [
+    "force brute",
+    "blocage après N échecs"
+   ],
+   [
+    "rançongiciel",
+    "sauvegardes hors ligne"
+   ],
+   [
+    "homme du milieu",
+    "chiffrement"
+   ],
+   [
+    "faille connue",
+    "mise à jour"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

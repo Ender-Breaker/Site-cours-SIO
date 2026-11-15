@@ -33,7 +33,7 @@
     if (type === "pratique" && +l > 0) return (laboDe(m, l).cle || m.id + "-" + l) + "_pratique";
     return type === "chapitre" ? m.id + "_chap_" + cid : m.id + "_" + type;
   }
-  function nomPratique(m, l) { return (m.labos || []).length > 1 ? "Pratique · " + (laboDe(m, l).court || laboDe(m, l).titre) : "Pratique"; }
+  function nomPratique(m, l) { return (m.labos || []).filter(function (x) { return !x.sansExamen; }).length > 1 ? "Pratique · " + (laboDe(m, l).court || laboDe(m, l).titre) : "Pratique"; }
 
   /* Parties d'une épreuve : { k: "q"|"t"|"p", n, poids, chap? } */
   function parties(m, type, cid) {
@@ -73,7 +73,7 @@
       if (m.bonus && !bonusVu) { bonusVu = true; h += '</div><h2 class="ev-h2">Cours bonus <small class="lb-small">· hors classement</small></h2><div class="ev-grid">'; }
       var types = ["questionnaire"];
       if (TEXTES[m.id]) types.push("textuel");
-      (m.labos || []).forEach(function (x, i) { types.push("pratique:" + i); });
+      (m.labos || []).forEach(function (x, i) { if (!x.sansExamen) types.push("pratique:" + i); });
       types.push("examen");
       h += '<div class="ev-mod c-' + m.couleur + '"><div class="ev-mod-t"><span class="ico">' + esc(m.icone) + '</span><div><b>' + esc(m.titre) + '</b><span>' + esc(m.sousTitre) + '</span></div></div>' +
         '<div class="ev-btns">' + types.map(function (tt) {
@@ -381,7 +381,7 @@
   function route() {
     var h = {}; location.hash.replace(/^#/, "").split("&").forEach(function (kv) { var p = kv.split("="); if (p[0]) h[p[0]] = decodeURIComponent(p[1] || ""); });
     var m = h.m && modDe(h.m);
-    if (m && TYPES[h.t] && (h.t !== "chapitre" || (h.c && chapDe(m, h.c))) && (h.t !== "textuel" || TEXTES[m.id]) && (h.t !== "pratique" || laboDe(m, h.l))) consignes(m, h.t, h.c, h.l);
+    if (m && TYPES[h.t] && (h.t !== "chapitre" || (h.c && chapDe(m, h.c))) && (h.t !== "textuel" || TEXTES[m.id]) && (h.t !== "pratique" || (laboDe(m, h.l) && !laboDe(m, h.l).sansExamen))) consignes(m, h.t, h.c, h.l);
     else accueil();
   }
 

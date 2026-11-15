@@ -1,270 +1,469 @@
-=== secu-injections | Sécurité web : injection SQL, XSS et CSRF | m
-Un site web reçoit des données de n'importe qui. Les trois attaques de ce chapitre exploitent toutes la même erreur : **faire confiance à ce que l'utilisateur envoie**. Elles figurent dans le classement **OWASP Top 10**, la référence des risques web, et relèvent du bloc 3 (cybersécurité) du BTS.
+=== cyber-panorama | Cybersécurité : les bases, le vocabulaire et la loi | f
+La **cybersécurité** protège les systèmes, les réseaux et les données contre les accès non autorisés, les pannes provoquées et les vols. C'est le bloc 3 du BTS SIO, commun aux deux options, et l'un des secteurs qui recrutent le plus. Pour bien défendre, il faut comprendre comment on attaque : c'est le fil de ce cours.
 
-!attention Cadre légal | S'introduire dans un système sans autorisation est un délit (articles 323-1 et suivants du Code pénal), même « pour tester ». Ne t'entraîne que sur tes propres applications ou sur des environnements prévus pour cela (DVWA, Root-Me, TryHackMe, OWASP Juice Shop).
+!attention Le cadre légal d'abord | En France, accéder ou se maintenir **sans autorisation** dans un système est un délit, même sans rien casser et même « pour aider » : jusqu'à 3 ans de prison et 100 000 € d'amende (article 323-1 du Code pénal), davantage si des données sont modifiées ou si le système appartient à l'État. Tout ce que tu apprends ici se pratique **uniquement** sur tes propres machines, dans les labos de ce site, ou sur des plateformes prévues pour cela (Root-Me, TryHackMe, Hack The Box, les CTF).
 
-## 1. L'injection SQL
+## 1. Les trois piliers : D, I, C
 
-Le code vulnérable **colle** une saisie dans une requête :
+| Pilier | Question | Exemple d'atteinte |
+| **D**isponibilité | le service répond-il quand on en a besoin ? | site saturé par un déni de service, fichiers chiffrés par un rançongiciel |
+| **I**ntégrité | les données sont-elles exactes, non modifiées ? | une note changée dans la base, un virement détourné |
+| **C**onfidentialité | seules les bonnes personnes y ont-elles accès ? | fuite d'une base de clients |
 
-```
-// VULNÉRABLE
-$sql = "SELECT * FROM utilisateurs WHERE login = '" . $_POST["login"] . "' AND mdp = '" . $_POST["mdp"] . "'";
-```
+On ajoute souvent la **traçabilité** (ou preuve) : savoir qui a fait quoi, et quand. En anglais, on parle de la triade **CIA** (*Confidentiality, Integrity, Availability*).
 
-Si l'attaquant saisit le login `admin' -- ` (avec n'importe quel mot de passe), la requête devient :
+## 2. Vulnérabilité, menace, risque
 
-```
-SELECT * FROM utilisateurs WHERE login = 'admin' -- ' AND mdp = '…'
-```
+| Terme | Définition | Exemple |
+| **Actif** | ce qui a de la valeur | la base des clients |
+| **Vulnérabilité** | une faiblesse | un serveur pas mis à jour |
+| **Menace** | ce qui peut exploiter la faiblesse | un groupe de rançongiciel |
+| **Risque** | probabilité × impact | forte chance d'être chiffré, arrêt de l'activité |
+| **Exploit** | le moyen technique d'utiliser une vulnérabilité | |
+| **Correctif** (*patch*) | la mise à jour qui supprime la vulnérabilité | |
 
-Tout ce qui suit `--` est un commentaire : le mot de passe n'est plus vérifié. Avec d'autres saisies, l'attaquant peut lire toute la base, la modifier ou la détruire.
+On ne peut pas supprimer tous les risques : on les **réduit** (protections), on les **transfère** (assurance), on les **évite** (ne pas proposer le service), ou on les **accepte** en connaissance de cause.
 
-### La parade : les requêtes préparées
+Les vulnérabilités connues portent un identifiant **CVE** (par exemple CVE-2021-44228, « Log4Shell ») et une note de gravité **CVSS** de 0 à 10.
 
-```
-// CORRECT (PHP avec PDO)
-$requete = $pdo->prepare("SELECT * FROM utilisateurs WHERE login = ?");
-$requete->execute([$_POST["login"]]);
-$utilisateur = $requete->fetch();
-```
-
-La requête et les données voyagent **séparément** : la saisie est toujours traitée comme une valeur, jamais comme du SQL. Compléments : un compte de base de données aux **droits minimaux** (pas de `DROP` pour l'application) et aucun message d'erreur SQL affiché au visiteur.
-
-## 2. Le XSS (*Cross-Site Scripting*)
-
-L'attaquant fait exécuter **son JavaScript** dans le navigateur des autres visiteurs. Il suffit qu'une page réaffiche une saisie sans précaution :
-
-```
-// VULNÉRABLE
-echo "<p>Bonjour " . $_GET["nom"] . "</p>";
-```
-
-Avec l'adresse `page.php?nom=<script>…</script>`, le script s'exécute chez la victime : vol du cookie de session, fausse page de connexion, actions réalisées à sa place.
-
-| Type | Où est le code malveillant |
-| XSS **stocké** | enregistré en base (commentaire, pseudo) : toutes les visites sont piégées |
-| XSS **réfléchi** | dans le lien envoyé à la victime |
-| XSS **DOM** | injecté par le JavaScript de la page (`innerHTML`) |
-
-### La parade : échapper à l'affichage
-
-```
-// CORRECT
-echo "<p>Bonjour " . htmlspecialchars($_GET["nom"], ENT_QUOTES, "UTF-8") . "</p>";
-```
-
-`htmlspecialchars` transforme `<` en `&lt;` : le texte est affiché, pas interprété. En JavaScript, on utilise `textContent` et jamais `innerHTML` avec une saisie. Les moteurs de gabarits (Twig, Blade, React) échappent par défaut. En renfort : l'en-tête **Content-Security-Policy** et des cookies `HttpOnly`.
-
-## 3. Le CSRF (*Cross-Site Request Forgery*)
-
-La victime est connectée à son site. Elle visite une page piégée qui déclenche, **à son insu**, une requête vers ce site ; le navigateur y joint automatiquement son cookie de session.
-
-```
-<!-- sur le site de l'attaquant -->
-<form action="https://banque.exemple/virement" method="post">
-  <input type="hidden" name="vers" value="compte-attaquant">
-  <input type="hidden" name="montant" value="1000">
-</form>
-<script>document.forms[0].submit()</script>
-```
-
-### La parade : le jeton CSRF
-
-Le serveur place dans chaque formulaire un **jeton aléatoire** lié à la session, et refuse toute requête qui ne le renvoie pas. Le site de l'attaquant ne peut pas le deviner.
-
-```
-<input type="hidden" name="csrf" value="<?= $_SESSION["csrf"] ?>">
-```
-
-```
-if (!hash_equals($_SESSION["csrf"], $_POST["csrf"] ?? "")) { http_response_code(403); exit; }
-```
-
-En complément : cookies avec l'attribut `SameSite=Lax` ou `Strict`, et jamais d'action modifiante en `GET`.
-
-## 4. Valider côté serveur
-
-La validation en HTML (`required`, `type="email"`) et en JavaScript améliore le confort, mais **ne protège de rien** : il suffit d'envoyer la requête sans passer par le formulaire. Toute donnée reçue est validée **côté serveur** : type, longueur, format, valeurs autorisées.
-
-| Attaque | Cause | Parade principale |
-| Injection SQL | saisie collée dans une requête | requêtes préparées |
-| XSS | saisie réaffichée sans échappement | `htmlspecialchars`, `textContent` |
-| CSRF | requête forgée depuis un autre site | jeton CSRF, cookies `SameSite` |
-
-!tuto Auditer un formulaire de recherche
-# Repérer la faille
-```
-$q = $_GET["q"];
-$resultats = $pdo->query("SELECT * FROM produits WHERE nom LIKE '%$q%'");
-echo "<h2>Résultats pour $q</h2>";
-```
-Deux failles : la saisie est collée dans le SQL (injection) et réaffichée telle quelle (XSS).
-# Corriger l'injection
-```
-$requete = $pdo->prepare("SELECT * FROM produits WHERE nom LIKE ?");
-$requete->execute(["%" . $q . "%"]);
-```
-# Corriger le XSS et valider
-```
-$q = trim($_GET["q"] ?? "");
-if (mb_strlen($q) > 50) { $q = mb_substr($q, 0, 50); }
-echo "<h2>Résultats pour " . htmlspecialchars($q, ENT_QUOTES, "UTF-8") . "</h2>";
-```
-!fin
-
-!retenir À retenir | Ne jamais faire confiance à une donnée venue du client. ¶ Injection SQL → requêtes préparées. ¶ XSS → échapper à l'affichage (`htmlspecialchars`, `textContent`). ¶ CSRF → jeton aléatoire dans les formulaires, cookies `SameSite`. ¶ La validation se fait toujours côté serveur.
---- exos
-Q¤m¤Quelle erreur de programmation permet une injection SQL ?¤Coller une saisie de l'utilisateur dans le texte d'une requête;;Utiliser une base de données;;Oublier un index;;Utiliser SELECT *¤
-Q¤m¤Quelle est la parade principale contre l'injection SQL ?¤Les requêtes préparées;;Un mot de passe long;;Le chiffrement HTTPS;;Un pare-feu¤
-Q¤m¤Que permet une faille XSS ?¤Exécuter du JavaScript dans le navigateur d'un autre visiteur;;Lire les fichiers du serveur;;Saturer le réseau;;Deviner un mot de passe¤
-Q¤m¤Quelle fonction PHP neutralise le HTML avant affichage ?¤`htmlspecialchars`;;`strip`;;`mysql_escape`;;`md5`¤
-Q¤m¤En JavaScript, quelle propriété affiche une saisie sans risque de XSS ?¤`textContent`;;`innerHTML`;;`outerHTML`;;`document.write`¤
-Q¤m¤Qu'est-ce qu'un XSS stocké ?¤Le script est enregistré en base et servi à tous les visiteurs;;Le script est dans un lien;;Le script est dans un cookie;;Le script est sur le poste de la victime¤
-Q¤m¤Que fait une attaque CSRF ?¤Elle fait envoyer à la victime connectée une requête qu'elle n'a pas voulue;;Elle vole un mot de passe par force brute;;Elle injecte du SQL;;Elle écoute le réseau¤
-Q¤m¤Quelle est la parade principale contre le CSRF ?¤Un jeton aléatoire dans chaque formulaire;;Une requête préparée;;htmlspecialchars;;Un mot de passe long¤
-Q¤m¤Pourquoi la validation en JavaScript ne suffit-elle pas ?¤On peut envoyer la requête sans passer par le formulaire;;JavaScript est trop lent;;Les navigateurs la désactivent;;Elle suffit¤
-Q¤m¤Qu'est-ce que l'OWASP Top 10 ?¤Le classement de référence des risques de sécurité web;;Une liste de mots de passe;;Un antivirus;;Une norme réseau¤
-Q¤d¤Avec le login `admin' -- `, pourquoi le mot de passe n'est-il plus vérifié ?¤Le reste de la requête devient un commentaire SQL;;Le mot de passe est vide;;admin n'a pas de mot de passe;;La base plante¤
-Q¤d¤Quel attribut de cookie empêche JavaScript de le lire ?¤`HttpOnly`;;`Secure`;;`Path`;;`Expires`¤
-Q¤m¤Quel attribut de cookie limite son envoi depuis un autre site ?¤`SameSite`;;`HttpOnly`;;`Domain`;;`Max-Age`¤
-V¤m¤Tester une faille sur un site qui ne t'appartient pas, sans autorisation, est légal si tu ne fais pas de dégâts.¤F¤L'accès frauduleux est un délit en lui-même.
-V¤m¤Une action qui modifie des données ne doit pas être déclenchée par une requête GET.¤V¤
-A¤m¤Associe chaque attaque à sa parade.¤injection SQL=>requêtes préparées;;XSS=>échappement à l'affichage;;CSRF=>jeton dans le formulaire¤
-
-=== secu-authentification | Sécurité web : mots de passe, sessions et HTTPS | m
-## 1. Ne jamais stocker un mot de passe en clair
-
-Si la base de données fuit, tous les comptes sont compromis, y compris sur les autres sites où les utilisateurs ont réutilisé leur mot de passe. On stocke une **empreinte** (*hash*) : le résultat d'une fonction à sens unique.
-
-| Méthode | Verdict |
-| En clair | inacceptable |
-| MD5, SHA-1, SHA-256 simples | trop **rapides** : des milliards d'essais par seconde |
-| bcrypt, Argon2 | conçus pour être **lents** et salés : la bonne réponse |
-
-```
-// À l'inscription
-$empreinte = password_hash($motDePasse, PASSWORD_DEFAULT);     // bcrypt, sel aléatoire inclus
-// … enregistrer $empreinte en base …
-
-// À la connexion
-if (password_verify($saisie, $empreinteEnBase)) {
-    // mot de passe correct
+```run
+// Un calcul de risque simplifié, comme dans une analyse de risques
+const risques = [
+  { nom: "Rançongiciel sur le serveur de fichiers", probabilite: 3, impact: 4 },
+  { nom: "Vol d'un ordinateur portable non chiffré", probabilite: 2, impact: 3 },
+  { nom: "Panne de courant", probabilite: 1, impact: 2 },
+];
+for (const r of risques.sort((a, b) => b.probabilite * b.impact - a.probabilite * a.impact)) {
+  console.log(`${r.probabilite * r.impact}  ${r.nom}`);
 }
 ```
 
-Le **sel** est une valeur aléatoire ajoutée à chaque mot de passe avant le hachage : deux utilisateurs avec le même mot de passe ont des empreintes différentes, et les tables d'empreintes précalculées (*rainbow tables*) deviennent inutiles. `password_hash` s'en charge tout seul.
+## 3. Qui attaque, et pourquoi ?
 
-!attention Hacher n'est pas chiffrer | Un **chiffrement** est réversible avec la clé ; un **hachage** ne l'est pas. Un mot de passe se hache : personne, pas même l'administrateur, ne doit pouvoir le retrouver. Un site qui te renvoie ton mot de passe par e-mail le stocke mal.
+| Acteur | Motivation |
+| Cybercriminels | l'argent : rançons, revente de données, fraude |
+| États et groupes soutenus par des États | espionnage, sabotage |
+| Hacktivistes | une cause politique |
+| Concurrents | espionnage industriel |
+| Menace interne | vengeance, négligence, erreur d'un employé |
+| Curieux (*script kiddies*) | le défi, avec des outils tout faits |
 
-## 2. Des mots de passe solides
+La plupart des attaques ne visent personne en particulier : des robots balaient Internet à la recherche de la moindre machine vulnérable. « Je n'intéresse personne » n'est pas une protection.
 
-La CNIL et l'ANSSI recommandent de privilégier la **longueur** : une phrase de passe de quatre ou cinq mots résiste mieux qu'un mot court bourré de symboles. Côté application :
+## 4. Les « chapeaux » et les équipes
 
-- longueur minimale (12 caractères), sans plafond ridicule ;
-- limiter les tentatives (blocage temporaire, délai croissant) ;
-- proposer la **double authentification** (code TOTP, clé de sécurité) ;
-- un message unique « identifiant ou mot de passe incorrect », pour ne pas révéler quels comptes existent.
+| Nom | Rôle |
+| *White hat* (hacker éthique) | cherche des failles **avec autorisation**, pour les faire corriger |
+| *Black hat* | attaque sans autorisation, à des fins malveillantes |
+| *Grey hat* | sans autorisation mais sans intention de nuire : **illégal quand même** |
+| *Red team* | l'équipe qui joue l'attaquant lors d'un exercice |
+| *Blue team* | l'équipe qui défend et détecte |
+| *Purple team* | les deux équipes qui travaillent ensemble |
 
-## 3. Les sessions
+## 5. Le déroulement d'une attaque
 
-HTTP est **sans état** : le serveur ne se souvient pas de toi d'une requête à l'autre. Après la connexion, il crée une **session** et envoie son identifiant dans un **cookie** que le navigateur renverra à chaque requête.
+Une attaque sérieuse suit des étapes, que décrivent des modèles comme la *Cyber Kill Chain* ou la matrice **MITRE ATT&CK** :
 
+1. **Reconnaissance** : collecter des informations sur la cible (site, employés, technologies).
+2. **Accès initial** : hameçonnage, mot de passe faible, faille d'un service exposé.
+3. **Exécution et persistance** : installer de quoi revenir.
+4. **Élévation de privilèges** : passer d'un compte ordinaire à un compte administrateur.
+5. **Déplacement latéral** : rebondir de machine en machine.
+6. **Action finale** : vol de données, chiffrement, sabotage.
+
+Chaque étape est une occasion de **détecter et de bloquer** : c'est le principe de la défense en profondeur. Tu peux t'y exercer dans le [duel attaque / défense](duel.html).
+
+## 6. Les textes à connaître
+
+| Texte | Ce qu'il impose |
+| Code pénal, art. 323-1 à 323-8 | interdit l'intrusion, l'entrave, la modification de données, et la détention d'outils sans motif légitime |
+| **RGPD** | protéger les données personnelles ; notifier la **CNIL sous 72 heures** en cas de violation |
+| Directive **NIS 2** | obligations de sécurité pour les entités essentielles et importantes |
+| Charte informatique | les règles d'usage dans l'entreprise ou le lycée |
+
+Les organismes de référence : l'**ANSSI** (agence nationale, guides et certifications), la **CNIL** (données personnelles), **cybermalveillance.gouv.fr** (assistance aux victimes), le **CERT-FR** (alertes).
+
+## 7. Les métiers
+
+| Métier | Mission |
+| Analyste SOC | surveiller les alertes et qualifier les incidents |
+| Pentesteur (auditeur) | tester la sécurité avec autorisation et rédiger un rapport |
+| Administrateur sécurité | pare-feu, sauvegardes, durcissement, correctifs |
+| Analyste en réponse à incident (CSIRT) | enquêter et remettre en état après une attaque |
+| Développeur sécurité (DevSecOps) | intégrer la sécurité dans le code et le déploiement |
+| RSSI | piloter la sécurité de l'organisation |
+| DPO | veiller au respect du RGPD |
+
+!retenir À retenir | Sécurité = **D**isponibilité, **I**ntégrité, **C**onfidentialité (+ traçabilité). ¶ Risque = probabilité × impact ; une vulnérabilité exploitée par une menace. ¶ Sans **autorisation écrite**, tester un système est un délit (art. 323-1). ¶ Une attaque suit des étapes : chacune peut être détectée. ¶ RGPD : notification à la CNIL sous 72 h.
+--- exos
+Q¤f¤Que signifient les lettres D, I, C ?¤Disponibilité, Intégrité, Confidentialité;;Données, Internet, Chiffrement;;Défense, Intrusion, Contrôle;;Détection, Identification, Correction¤
+Q¤m¤Un rançongiciel chiffre les fichiers d'un hôpital. Quel pilier est d'abord touché ?¤La disponibilité;;La confidentialité;;La traçabilité;;Aucun¤Les données ne sont plus utilisables.
+Q¤m¤Une base de clients est publiée sur Internet. Quel pilier est touché ?¤La confidentialité;;La disponibilité;;L'intégrité;;Aucun¤
+Q¤m¤Un élève modifie sa note dans la base. Quel pilier est touché ?¤L'intégrité;;La disponibilité;;La confidentialité;;Aucun¤
+Q¤m¤Qu'est-ce qu'une vulnérabilité ?¤Une faiblesse d'un système;;Un attaquant;;Une mise à jour;;Un antivirus¤
+Q¤m¤Comment calcule-t-on un risque ?¤Probabilité × impact;;Nombre de failles × nombre de serveurs;;Coût × durée;;Menace + correctif¤
+Q¤m¤Qu'est-ce qu'un identifiant CVE ?¤Le numéro d'une vulnérabilité connue;;Un certificat de sécurité;;Un type de virus;;Une clé de chiffrement¤
+Q¤m¤Que mesure le score CVSS ?¤La gravité d'une vulnérabilité, de 0 à 10;;La vitesse d'un réseau;;Le nombre d'attaques;;La force d'un mot de passe¤
+Q¤m¤Tester la sécurité du site de ton lycée sans autorisation, « pour aider », est…¤un délit;;légal si tu préviens ensuite;;légal si tu ne casses rien;;légal pour un étudiant en informatique¤Article 323-1 du Code pénal.
+Q¤m¤Qu'est-ce qu'un hacker éthique (white hat) ?¤Quelqu'un qui cherche des failles avec autorisation pour les faire corriger;;Un pirate repenti;;Un antivirus;;Un pirate qui ne vole que les riches¤
+Q¤m¤Dans un exercice, que fait la blue team ?¤Elle défend et détecte;;Elle attaque;;Elle arbitre;;Elle rédige les contrats¤
+Q¤m¤Sous quel délai faut-il notifier la CNIL d'une violation de données personnelles ?¤72 heures;;24 heures;;Un mois;;Aucun délai¤
+Q¤m¤Quelle agence publie les guides de sécurité de référence en France ?¤L'ANSSI;;La CNIL;;L'ARCEP;;L'INSEE¤
+Q¤d¤Pourquoi « je n'intéresse personne » n'est-il pas une protection ?¤La plupart des attaques sont automatisées et visent toute machine vulnérable;;Les pirates visent surtout les particuliers;;Les antivirus ne protègent que les entreprises;;C'en est une¤
+Q¤m¤Quelle est la première étape habituelle d'une attaque ciblée ?¤La reconnaissance;;Le chiffrement des données;;L'élévation de privilèges;;La demande de rançon¤
+V¤m¤Un grey hat, qui s'introduit sans autorisation mais sans intention de nuire, agit légalement.¤F¤L'intrusion est illégale quelle que soit l'intention.
+A¤m¤Associe chaque métier à sa mission.¤Analyste SOC=>surveiller les alertes;;Pentesteur=>tester avec autorisation;;RSSI=>piloter la sécurité;;DPO=>veiller au RGPD¤
+
+=== cyber-attaques | Cybersécurité : les grandes familles d'attaques | m
+Ce chapitre fait le tour des attaques que tu dois savoir **reconnaître**. Pour chacune : le principe, les signes qui la trahissent, et la parade. Les attaques propres aux sites web (injection SQL, XSS, CSRF) ont leur propre chapitre.
+
+## 1. Les logiciels malveillants (*malwares*)
+
+| Type | Ce qu'il fait | Comment il arrive |
+| **Virus** | s'attache à un fichier et se propage quand on l'ouvre | pièce jointe, téléchargement |
+| **Ver** (*worm*) | se propage **seul** par le réseau | faille d'un service exposé |
+| **Cheval de Troie** | se fait passer pour un logiciel utile | faux logiciel, logiciel piraté |
+| **Rançongiciel** (*ransomware*) | chiffre les fichiers et exige une rançon | hameçonnage, accès distant mal protégé |
+| **Logiciel espion** (*spyware*), enregistreur de frappe | vole mots de passe et données | cheval de Troie |
+| **Rootkit** | se cache au cœur du système | après une élévation de privilèges |
+| **Botnet** | transforme la machine en « zombie » pilotée à distance | toutes les voies ci-dessus |
+| **Porte dérobée** (*backdoor*) | laisse un accès secret | installée par l'attaquant |
+
+Signes : machine lente, ventilateur qui s'emballe, fichiers renommés avec une extension inconnue, antivirus désactivé, connexions réseau vers des adresses inconnues.
+
+Parades : mises à jour, antivirus ou **EDR**, pas de droits administrateur au quotidien, **sauvegardes hors ligne**, filtrage des pièces jointes.
+
+!attention Face à un rançongiciel | **Débrancher** la machine du réseau (câble et Wi-Fi) sans l'éteindre, prévenir le responsable, ne pas payer (aucune garantie, et cela finance les attaquants), restaurer depuis une sauvegarde saine, porter plainte.
+
+## 2. Les attaques sur les mots de passe
+
+| Attaque | Principe | Parade |
+| Force brute | essayer toutes les combinaisons | longueur, blocage après N échecs |
+| Dictionnaire | essayer les mots de passe les plus courants | pas de mot du dictionnaire, liste noire |
+| *Credential stuffing* | rejouer des couples identifiant / mot de passe volés ailleurs | un mot de passe **différent** par site, MFA |
+| *Password spraying* | un seul mot de passe courant essayé sur des milliers de comptes | MFA, détection |
+| Vol de la base d'empreintes | casser les empreintes hors ligne | bcrypt / Argon2 avec sel |
+
+```run
+// Pourquoi la longueur compte plus que les symboles : le nombre de combinaisons
+function combinaisons(alphabet, longueur) { return Math.pow(alphabet, longueur); }
+const parSeconde = 1e10;       // dix milliards d'essais par seconde (matériel spécialisé, empreintes rapides)
+const duree = n => {
+  const s = n / parSeconde;
+  if (s < 60) return s.toFixed(1) + " secondes";
+  if (s < 86400) return (s / 3600).toFixed(1) + " heures";
+  if (s < 3.15e7) return (s / 86400).toFixed(0) + " jours";
+  return (s / 3.15e7).toExponential(1) + " années";
+};
+console.log("8 minuscules           :", duree(combinaisons(26, 8)));
+console.log("8 caractères variés    :", duree(combinaisons(94, 8)));
+console.log("12 caractères variés   :", duree(combinaisons(94, 12)));
+console.log("phrase de 20 minuscules:", duree(combinaisons(26, 20)));
 ```
-session_start();
-// après un password_verify réussi :
-session_regenerate_id(true);             // nouvel identifiant : contre la fixation de session
-$_SESSION["utilisateur_id"] = $utilisateur["id"];
 
-// sur chaque page protégée :
-if (!isset($_SESSION["utilisateur_id"])) { header("Location: connexion.php"); exit; }
+## 3. Les attaques réseau
+
+| Attaque | Principe | Parade |
+| **Déni de service** (DoS / DDoS) | saturer un service de requêtes, souvent depuis un botnet | protection anti-DDoS, limitation de débit, CDN |
+| **Homme du milieu** (MITM) | s'intercaler entre deux machines pour lire ou modifier les échanges | HTTPS, VPN, certificats vérifiés |
+| **Écoute** (*sniffing*) | capturer le trafic non chiffré | chiffrement de bout en bout |
+| **Usurpation** (*spoofing*) | falsifier une adresse IP, MAC, ARP ou DNS | sécurisation des commutateurs, DNSSEC |
+| **Faux point d'accès Wi-Fi** | imiter un réseau connu pour capter les connexions | VPN, ne pas se connecter automatiquement |
+| **Balayage de ports** | repérer les services ouverts : c'est la reconnaissance | pare-feu, fermer l'inutile, détection |
+
+## 4. L'exploitation de vulnérabilités
+
+| Notion | Définition |
+| Faille non corrigée | la vulnérabilité est connue et un correctif existe, mais n'a pas été installé : le cas le plus fréquent |
+| **Zero-day** | vulnérabilité inconnue de l'éditeur : aucun correctif n'existe encore |
+| Configuration par défaut | mot de passe d'usine, page d'administration exposée, service inutile actif |
+| Élévation de privilèges | passer d'un compte limité à administrateur |
+| Attaque de la chaîne d'approvisionnement | piéger un logiciel ou une bibliothèque que la cible utilise |
+
+Parade principale : **mettre à jour**, vite et partout, et réduire la surface d'attaque (ce qui n'est pas installé ne peut pas être attaqué).
+
+## 5. La menace interne et physique
+
+Un employé mécontent, un prestataire trop curieux, un poste laissé déverrouillé, une clé USB trouvée sur le parking et branchée par curiosité, un visiteur qui se connecte à une prise réseau libre. Parades : **moindre privilège**, verrouillage automatique des sessions, journalisation, contrôle des ports réseau (802.1X), sensibilisation.
+
+## 6. Tableau de synthèse
+
+| Pilier visé | Attaques typiques |
+| Disponibilité | DDoS, rançongiciel, sabotage |
+| Intégrité | modification de base de données, défacement de site, homme du milieu |
+| Confidentialité | hameçonnage, logiciel espion, écoute, fuite de données |
+
+!tuto Reconnaître une attaque à ses traces
+# Dans un journal d'authentification
+Des centaines d'échecs en quelques minutes depuis la même adresse, sur un seul compte : **force brute**.
 ```
-
-| Attribut du cookie | Protège contre |
-| `HttpOnly` | la lecture par JavaScript (vol par XSS) |
-| `Secure` | l'envoi en clair sur HTTP |
-| `SameSite=Lax` | l'envoi depuis un autre site (CSRF) |
-
-## 4. Authentifier n'est pas autoriser
-
-**Authentification** : qui es-tu ? **Autorisation** : as-tu le droit de faire cela ? L'oubli de la seconde est la faille numéro 1 de l'OWASP (*Broken Access Control*).
-
+Nov 13 03:12:01 srv sshd[411]: Failed password for root from 203.0.113.7 port 51122 ssh2
+Nov 13 03:12:02 srv sshd[411]: Failed password for root from 203.0.113.7 port 51124 ssh2
+Nov 13 03:12:03 srv sshd[411]: Failed password for root from 203.0.113.7 port 51130 ssh2
 ```
-// VULNÉRABLE : facture.php?id=1042 affiche n'importe quelle facture
-$requete = $pdo->prepare("SELECT * FROM factures WHERE id = ?");
-
-// CORRECT : on vérifie que la facture appartient à l'utilisateur connecté
-$requete = $pdo->prepare("SELECT * FROM factures WHERE id = ? AND client_id = ?");
-$requete->execute([$_GET["id"], $_SESSION["utilisateur_id"]]);
+# Dans un journal de serveur web
+Des apostrophes, des mots-clés SQL ou des balises dans les paramètres : une tentative d'**injection**.
 ```
-
-Cacher un bouton ne suffit pas : chaque page et chaque action vérifie les droits **côté serveur**. On applique le principe du **moindre privilège** : chacun n'a que les droits nécessaires à son rôle.
-
-## 5. HTTPS
-
-HTTPS = HTTP dans un tunnel **TLS**. Il apporte trois garanties :
-
-| Garantie | Signifie |
-| Confidentialité | personne sur le réseau ne lit les échanges |
-| Intégrité | personne ne les modifie en route |
-| Authenticité | le **certificat** prouve que tu parles au bon serveur |
-
-Le certificat est délivré par une **autorité de certification** ; Let's Encrypt en fournit gratuitement (outil `certbot`). Sans HTTPS, mots de passe et cookies de session circulent en clair sur le Wi-Fi public. On force HTTPS avec une redirection et l'en-tête `Strict-Transport-Security` (HSTS).
-
-## 6. Les autres réflexes
-
-- **Mettre à jour** : serveur, CMS, bibliothèques. La plupart des piratages exploitent une faille déjà corrigée.
-- Pas de **secret dans le code** ni dans Git : fichier `.env`, hors du dossier public.
-- **Envoi de fichiers** : vérifier le type réel et la taille, renommer, stocker hors de la racine web.
-- **Journaliser** les connexions et les erreurs, sans jamais y écrire de mot de passe.
-- **Sauvegarder** et tester la restauration.
-- Messages d'erreur neutres pour le visiteur, détaillés dans les journaux.
-
-!tuto Une inscription et une connexion correctes
-# L'inscription
+GET /produit.php?id=12'%20OR%20'1'='1 HTTP/1.1" 200
+GET /recherche.php?q=<script>… HTTP/1.1" 200
 ```
-$login = trim($_POST["login"] ?? "");
-$mdp = $_POST["mdp"] ?? "";
-if (mb_strlen($mdp) < 12) { exit("Mot de passe trop court"); }
-$requete = $pdo->prepare("INSERT INTO utilisateurs (login, empreinte) VALUES (?, ?)");
-$requete->execute([$login, password_hash($mdp, PASSWORD_DEFAULT)]);
-```
-# La connexion
-Le même message dans les deux cas d'échec.
-```
-$requete = $pdo->prepare("SELECT id, empreinte FROM utilisateurs WHERE login = ?");
-$requete->execute([$login]);
-$u = $requete->fetch();
-if (!$u || !password_verify($mdp, $u["empreinte"])) {
-    exit("Identifiant ou mot de passe incorrect");
-}
-session_regenerate_id(true);
-$_SESSION["utilisateur_id"] = $u["id"];
-```
-# La déconnexion
-```
-session_start();
-$_SESSION = [];
-session_destroy();
-header("Location: index.php");
-```
+# Sur un poste
+Des fichiers renommés `rapport.docx.locked` et un fichier `LISEZ-MOI.txt` dans chaque dossier : **rançongiciel**. Réflexe : isoler la machine du réseau.
+# À toi
+Entraîne-toi à faire ces analyses avec du code dans le [labo cybersécurité](labo-cyber.html) et en ligne de commande dans le [labo terminal](labo-defense.html).
 !fin
 
-!retenir À retenir | Un mot de passe se **hache** avec `password_hash` (bcrypt, sel inclus) et se vérifie avec `password_verify`. ¶ Session : identifiant dans un cookie `HttpOnly`, `Secure`, `SameSite` ; `session_regenerate_id` après la connexion. ¶ Authentifier (qui ?) puis autoriser (a-t-il le droit ?), côté serveur, à chaque action. ¶ HTTPS : confidentialité, intégrité, authenticité. ¶ Mises à jour, moindre privilège, aucun secret dans le code.
+!defi Défi : compter les échecs de connexion | Analyse un journal d'authentification. | cy-echecs
+!defi Défi : qui faut-il bannir ? | Repère les adresses trop insistantes, comme fail2ban. | cy-bannir
+
+!retenir À retenir | Malwares : virus, ver, cheval de Troie, rançongiciel, espion, rootkit, botnet. ¶ Mots de passe : force brute, dictionnaire, credential stuffing → longueur, unicité, MFA. ¶ Réseau : DDoS, homme du milieu, écoute, usurpation → chiffrement et filtrage. ¶ La plupart des intrusions passent par une faille **déjà corrigée** ou une configuration par défaut. ¶ Rançongiciel : isoler, ne pas payer, restaurer.
 --- exos
-Q¤m¤Comment doit-on stocker un mot de passe ?¤Sous forme d'empreinte calculée avec bcrypt ou Argon2;;En clair;;Chiffré avec une clé connue de l'administrateur;;Haché en MD5¤
-Q¤m¤Quelle fonction PHP crée l'empreinte d'un mot de passe ?¤`password_hash`;;`md5`;;`crypt_password`;;`base64_encode`¤
-Q¤m¤Quelle fonction PHP vérifie un mot de passe saisi ?¤`password_verify`;;`password_check`;;`hash_equals_password`;;`strcmp`¤
-Q¤m¤Pourquoi MD5 et SHA-256 seuls sont-ils inadaptés aux mots de passe ?¤Ils sont trop rapides : on peut tester des milliards de mots de passe;;Ils sont réversibles;;Ils sont payants;;Ils sont trop lents¤
-Q¤m¤À quoi sert le sel ?¤À donner des empreintes différentes à deux mots de passe identiques;;À chiffrer la base;;À raccourcir le mot de passe;;À accélérer le calcul¤
-Q¤m¤Quelle différence entre hacher et chiffrer ?¤Le hachage est à sens unique, le chiffrement est réversible avec la clé;;Aucune;;Le chiffrement est à sens unique;;Le hachage utilise une clé¤
-Q¤m¤Que privilégier pour un mot de passe solide ?¤La longueur (une phrase de passe);;Un mot court avec des symboles;;Sa date de naissance;;Le même partout¤
-Q¤m¤Où l'identifiant de session est-il conservé côté navigateur ?¤Dans un cookie;;Dans l'URL;;Dans le code HTML;;Dans la base de données¤
-Q¤m¤Quelle différence entre authentification et autorisation ?¤Qui es-tu ? / As-tu le droit de faire cela ?;;Aucune;;Côté client / côté serveur;;Mot de passe / cookie¤
-Q¤m¤Que garantit HTTPS ?¤Confidentialité, intégrité et authenticité du serveur;;L'absence de virus sur le site;;La rapidité du site;;L'honnêteté du commerçant¤
-Q¤m¤Qui délivre un certificat TLS ?¤Une autorité de certification;;Le navigateur;;Le fournisseur d'accès;;N'importe quel site¤
-Q¤d¤Pourquoi afficher « identifiant ou mot de passe incorrect » plutôt que « identifiant inconnu » ?¤Pour ne pas révéler quels comptes existent;;C'est plus court;;C'est une obligation du RGPD;;Pour ralentir le site¤
-Q¤d¤Pourquoi appeler `session_regenerate_id` après la connexion ?¤Contre la fixation de session;;Pour accélérer le site;;Pour hacher le mot de passe;;Pour prolonger la session¤
-Q¤m¤Que dit le principe du moindre privilège ?¤Chacun n'a que les droits nécessaires à son rôle;;Tout le monde est administrateur;;Seul root a des droits;;Les droits sont accordés à la demande de l'utilisateur¤
-V¤m¤Cacher un bouton dans l'interface suffit à empêcher une action.¤F¤Le serveur doit vérifier les droits à chaque requête.
-A¤m¤Associe chaque attribut de cookie à sa protection.¤`HttpOnly`=>pas de lecture par JavaScript;;`Secure`=>envoi en HTTPS uniquement;;`SameSite`=>pas d'envoi depuis un autre site¤
+Q¤m¤Quel malware se propage seul par le réseau, sans action de l'utilisateur ?¤Le ver;;Le cheval de Troie;;Le logiciel espion;;Le rootkit¤
+Q¤m¤Quel malware se fait passer pour un logiciel utile ?¤Le cheval de Troie;;Le ver;;Le botnet;;Le rançongiciel¤
+Q¤m¤Que fait un rançongiciel ?¤Il chiffre les fichiers et exige une rançon;;Il affiche de la publicité;;Il ralentit le réseau;;Il vole uniquement les mots de passe¤
+Q¤m¤Quel est le premier réflexe face à un poste touché par un rançongiciel ?¤L'isoler du réseau;;Payer la rançon;;Le redémarrer plusieurs fois;;Supprimer l'antivirus¤
+Q¤m¤Qu'est-ce qu'un botnet ?¤Un réseau de machines infectées pilotées à distance;;Un antivirus en réseau;;Un robot de discussion;;Un pare-feu¤
+Q¤m¤Qu'est-ce que le credential stuffing ?¤Rejouer des identifiants volés sur un autre site;;Essayer toutes les combinaisons;;Deviner la question secrète;;Voler un cookie¤
+Q¤m¤Quelle protection rend inutile un mot de passe volé ?¤L'authentification multifacteur (MFA);;Un mot de passe plus court;;Un antivirus;;Le mode privé du navigateur¤
+Q¤m¤Que vise une attaque DDoS ?¤La disponibilité du service;;La confidentialité;;L'intégrité;;Les mots de passe¤
+Q¤m¤Que permet une attaque de l'homme du milieu ?¤Lire ou modifier les échanges entre deux machines;;Saturer un serveur;;Chiffrer un disque;;Deviner un mot de passe¤
+Q¤m¤Quelle est la parade principale contre l'homme du milieu ?¤Le chiffrement (HTTPS, VPN) avec vérification du certificat;;Un mot de passe long;;Un antivirus;;Une sauvegarde¤
+Q¤m¤Qu'est-ce qu'une faille zero-day ?¤Une vulnérabilité pour laquelle aucun correctif n'existe encore;;Une faille corrigée le jour même;;Un virus très rapide;;Une faille sans gravité¤
+Q¤d¤Par où passent la majorité des intrusions ?¤Des failles déjà corrigées mais non mises à jour, et des configurations par défaut;;Des zero-day;;Des attaques physiques;;Des erreurs du fournisseur d'accès¤
+Q¤m¤À quoi sert un balayage de ports pour un attaquant ?¤À repérer les services ouverts : c'est de la reconnaissance;;À voler des mots de passe;;À chiffrer des fichiers;;À saturer le réseau¤
+Q¤m¤Des centaines de « Failed password for root » depuis la même adresse en deux minutes indiquent…¤une attaque par force brute;;une panne du serveur;;un utilisateur distrait;;un déni de service¤
+Q¤m¤Que faire d'une clé USB trouvée sur le parking ?¤Ne pas la brancher et la remettre au service informatique;;La brancher pour identifier son propriétaire;;La formater sur son poste;;La garder¤
+V¤m¤Payer la rançon garantit de récupérer ses fichiers.¤F¤Aucune garantie, et cela finance les attaquants.
+A¤m¤Associe chaque attaque à sa parade principale.¤force brute=>blocage après N échecs;;rançongiciel=>sauvegardes hors ligne;;homme du milieu=>chiffrement;;faille connue=>mise à jour¤
+
+=== cyber-social | Cybersécurité : hameçonnage et ingénierie sociale | f
+La faille la plus exploitée n'est pas technique : c'est **l'humain**. L'**ingénierie sociale** consiste à manipuler une personne pour qu'elle donne une information ou fasse une action. Plus de la moitié des intrusions commencent par un message piégé.
+
+## 1. Les leviers psychologiques
+
+| Levier | Exemple |
+| **Urgence** | « Votre compte sera supprimé dans 24 heures » |
+| **Autorité** | un message qui semble venir du directeur, de la banque, de l'administration |
+| **Peur** | « Activité suspecte détectée sur votre compte » |
+| **Appât du gain** | « Vous avez gagné », « remboursement en attente » |
+| **Curiosité** | « Regarde cette photo de toi » |
+| **Envie d'aider** | « Je suis le nouveau stagiaire, tu peux m'ouvrir ? » |
+
+Un message qui te presse d'agir **tout de suite** doit te faire ralentir.
+
+## 2. Les formes d'hameçonnage
+
+| Nom | Canal |
+| *Phishing* | courriel envoyé en masse |
+| *Spear phishing* | courriel **ciblé**, personnalisé avec des informations sur la victime |
+| *Smishing* | SMS (faux colis, faux compte de formation, fausse amende) |
+| *Vishing* | appel téléphonique (faux conseiller bancaire, faux support technique) |
+| *Quishing* | code QR piégé |
+| Arnaque au président | un faux dirigeant demande un virement urgent et confidentiel |
+| Faux support | une fenêtre « votre ordinateur est infecté, appelez ce numéro » |
+
+## 3. Reconnaître un message piégé
+
+| Indice | À vérifier |
+| L'adresse de l'expéditeur | `service@banque-securite-fr.com` n'est pas le domaine de ta banque |
+| L'adresse réelle du lien | survole-le sans cliquer : le texte affiché et la destination diffèrent |
+| Le ton | urgence, menace, récompense |
+| La demande | mot de passe, code reçu par SMS, coordonnées bancaires : jamais par courriel |
+| La pièce jointe | `.exe`, `.js`, `.iso`, archive protégée, document qui demande d'« activer les macros » |
+| La forme | fautes, salutation vague (« cher client »), logo flou |
+
+Les noms de domaine trompeurs sont la technique reine : une lettre changée (`paypa1.com`), un sous-domaine qui fait illusion (`banque.fr.connexion-securisee.net` appartient à `connexion-securisee.net`), ou un caractère d'un autre alphabet qui ressemble à s'y méprendre.
+
+```run
+// Quel est le vrai domaine d'une adresse ? Ce qui précède le premier « / », lu de droite à gauche.
+function domaine(url) {
+  const hote = url.replace(/^https?:\/\//, "").split("/")[0].split("@").pop().split(":")[0];
+  const niveaux = /\.(gouv|asso)\.fr$|\.co\.uk$/.test(hote) ? 3 : 2;      // certains suffixes comptent deux niveaux
+  return hote.split(".").slice(-niveaux).join(".");
+}
+for (const u of [
+  "https://www.impots.gouv.fr/accueil",
+  "https://impots.gouv.fr.remboursement-en-ligne.net/connexion",
+  "https://ameli.fr@serveur-inconnu.example/login",
+  "http://paypa1.com/securite",
+]) console.log(domaine(u).padEnd(28), "←", u);
+```
+
+Le cadenas (HTTPS) prouve seulement que la connexion est chiffrée : un site d'hameçonnage peut parfaitement l'afficher.
+
+## 4. Les bons réflexes
+
+- Ne **jamais** cliquer sur le lien d'un message inattendu : aller sur le site en tapant l'adresse soi-même ou via ses favoris.
+- Vérifier par un **autre canal** : rappeler la personne sur un numéro connu.
+- Ne jamais donner un mot de passe ou un code reçu par SMS : aucun service légitime ne le demande.
+- **Signaler** : au service informatique, sur `signal-spam.fr`, par SMS au 33700, sur la plateforme PHAROS.
+- Si tu as cliqué et saisi ton mot de passe : le changer **immédiatement** (et partout où il sert), prévenir, surveiller ses comptes.
+
+## 5. Protéger ses comptes
+
+| Mesure | Pourquoi |
+| Un **gestionnaire de mots de passe** | un mot de passe long, aléatoire et différent par site, sans avoir à les retenir |
+| L'**authentification multifacteur** | un mot de passe volé ne suffit plus |
+| Des mises à jour automatiques | les failles connues sont fermées |
+| Vérifier ses fuites sur `haveibeenpwned.com` | savoir quels comptes changer |
+| Limiter ce qu'on publie | date de naissance, employeur, animaux : tout sert à personnaliser une attaque |
+
+Les facteurs d'authentification : ce que je **sais** (mot de passe), ce que je **possède** (téléphone, clé de sécurité), ce que je **suis** (empreinte). Le MFA en combine au moins deux. Une clé de sécurité matérielle (FIDO2) résiste même à l'hameçonnage ; un code reçu par SMS est le facteur le plus faible.
+
+## 6. Côté entreprise
+
+- **Sensibiliser** régulièrement, avec des campagnes d'hameçonnage simulées (annoncées dans la charte).
+- Une procédure pour les virements : **double validation**, rappel sur un numéro connu.
+- Filtrage du courrier : anti-spam, analyse des pièces jointes, protocoles **SPF**, **DKIM** et **DMARC** qui empêchent d'usurper le domaine de l'entreprise.
+- Un moyen simple de signaler, et **aucune sanction** pour celui qui signale son erreur : la rapidité compte plus que tout.
+
+!tuto Analyser un courriel suspect
+# Le message
+```
+De : Service Clients <securite@ameli-remboursement.info>
+Objet : [URGENT] Remboursement de 248,60 € en attente
+
+Cher(e) assuré(e),
+Suite à un trop-perçu, un remboursement de 248,60 € vous attend.
+Sans action de votre part sous 24h, il sera annulé.
+>> Confirmer mes coordonnées bancaires <<
+```
+# Les indices
+Domaine de l'expéditeur étranger à l'organisme ; urgence (« sous 24h ») ; appât du gain ; salutation vague ; demande de coordonnées bancaires.
+# La bonne réaction
+Ne pas cliquer. Se connecter à son compte en tapant soi-même l'adresse officielle : aucun remboursement n'y figure. Signaler le message, puis le supprimer.
+!fin
+
+!retenir À retenir | L'ingénierie sociale joue sur l'urgence, l'autorité, la peur, le gain. ¶ Vérifier le **domaine réel** de l'expéditeur et du lien ; le cadenas ne prouve pas l'honnêteté du site. ¶ Jamais de mot de passe ni de code par courriel, SMS ou téléphone. ¶ Gestionnaire de mots de passe + MFA. ¶ En cas d'erreur : changer le mot de passe et prévenir tout de suite.
+--- exos
+Q¤f¤Qu'est-ce que l'hameçonnage (phishing) ?¤Un message qui se fait passer pour un organisme de confiance afin de voler des informations;;Un virus qui chiffre les fichiers;;Une attaque qui sature un serveur;;Un outil de test¤
+Q¤m¤Qu'est-ce que le spear phishing ?¤Un hameçonnage ciblé et personnalisé;;Un hameçonnage par SMS;;Un hameçonnage par téléphone;;Un hameçonnage par code QR¤
+Q¤m¤Comment appelle-t-on l'hameçonnage par SMS ?¤Smishing;;Vishing;;Quishing;;Spoofing¤
+Q¤m¤Comment appelle-t-on l'hameçonnage par téléphone ?¤Vishing;;Smishing;;Pharming;;Sniffing¤
+Q¤m¤Quel levier psychologique utilise « votre compte sera supprimé dans 24 heures » ?¤L'urgence;;La curiosité;;L'envie d'aider;;L'appât du gain¤
+Q¤m¤À qui appartient l'adresse `https://banque.fr.connexion-securisee.net/login` ?¤Au domaine connexion-securisee.net;;À banque.fr;;À fr.connexion;;Au navigateur¤Le domaine se lit juste avant le premier /.
+Q¤m¤Que prouve le cadenas HTTPS d'un site ?¤Seulement que la connexion est chiffrée;;Que le site est honnête;;Que le site appartient à une banque;;Qu'il n'y a pas de virus¤
+Q¤m¤Un courriel de ta banque te demande ton mot de passe. Que fais-tu ?¤Je ne réponds pas : aucune banque ne le demande;;Je le donne s'il y a le logo;;Je réponds pour vérifier;;Je clique pour voir¤
+Q¤m¤Tu as saisi ton mot de passe sur un faux site. Premier réflexe ?¤Le changer immédiatement, partout où il sert, et prévenir;;Attendre de voir;;Éteindre l'ordinateur;;Supprimer le courriel¤
+Q¤m¤Qu'est-ce que l'arnaque au président ?¤Un faux dirigeant demande un virement urgent et confidentiel;;Un vol de mot de passe du directeur;;Un faux site d'élection;;Une panne du serveur de direction¤
+Q¤m¤Quels sont les trois facteurs d'authentification ?¤Ce que je sais, ce que je possède, ce que je suis;;Nom, prénom, mot de passe;;Mot de passe, question secrète, date de naissance;;Login, IP, navigateur¤
+Q¤m¤Quel second facteur résiste le mieux à l'hameçonnage ?¤Une clé de sécurité matérielle (FIDO2);;Un code par SMS;;Une question secrète;;Un second mot de passe¤
+Q¤m¤À quoi sert un gestionnaire de mots de passe ?¤À avoir un mot de passe long et différent par site sans les retenir;;À partager ses mots de passe;;À retrouver les mots de passe des autres;;À supprimer les mots de passe¤
+Q¤d¤À quoi servent SPF, DKIM et DMARC ?¤À empêcher l'usurpation du domaine d'expédition des courriels;;À chiffrer les pièces jointes;;À accélérer l'envoi;;À bloquer les publicités¤
+Q¤m¤Pourquoi ne faut-il pas sanctionner un employé qui signale avoir cliqué ?¤Pour que les erreurs soient signalées vite;;Parce que c'est interdit par le RGPD;;Parce que ce n'est jamais grave;;Pour faire plaisir¤
+V¤m¤Une pièce jointe qui demande d'« activer les macros » doit éveiller la méfiance.¤V¤
+A¤m¤Associe chaque technique à son canal.¤phishing=>courriel;;smishing=>SMS;;vishing=>téléphone;;quishing=>code QR¤
+
+=== cyber-protections | Cybersécurité : les types de protection | m
+Aucune protection n'est parfaite. On en empile donc plusieurs, de nature différente : si l'une cède, la suivante tient. C'est la **défense en profondeur**, comme les enceintes successives d'un château fort.
+
+## 1. Prévenir, détecter, réagir
+
+| Famille | Rôle | Exemples |
+| **Prévention** | empêcher l'attaque | pare-feu, mises à jour, MFA, chiffrement, durcissement |
+| **Détection** | s'apercevoir qu'elle a lieu | journaux, IDS, antivirus / EDR, supervision, SIEM |
+| **Réaction** | limiter les dégâts et repartir | sauvegardes, plan de reprise, procédure d'incident |
+
+Une entreprise qui ne fait que de la prévention découvre son intrusion des mois plus tard.
+
+## 2. Filtrer le réseau
+
+| Protection | Rôle |
+| **Pare-feu** | autorise ou bloque les flux selon des règles (adresse, port, protocole) |
+| **DMZ** | zone isolée pour les serveurs exposés à Internet (web, messagerie) |
+| **Segmentation** (VLAN) | séparer les réseaux : élèves, administration, serveurs, invités |
+| **VPN** | tunnel chiffré pour les accès distants |
+| **Proxy** / filtrage web | bloque les sites dangereux, journalise |
+| **WAF** | pare-feu applicatif : filtre les requêtes HTTP malveillantes |
+| **IDS / IPS** | détecte (IDS) ou bloque (IPS) les comportements suspects sur le réseau |
+| **NAC / 802.1X** | n'accepte sur le réseau que les machines authentifiées |
+
+La règle d'or d'un pare-feu : **tout interdire par défaut**, puis autoriser seulement ce qui est nécessaire.
+
+```
+# Exemple avec ufw sur un serveur web Linux
+sudo ufw default deny incoming       # tout ce qui entre est refusé par défaut
+sudo ufw default allow outgoing
+sudo ufw allow 443/tcp               # HTTPS pour tout le monde
+sudo ufw allow from 192.168.10.0/24 to any port 22 proto tcp   # SSH : réseau d'administration seulement
+sudo ufw enable
+sudo ufw status verbose
+```
+
+## 3. Protéger les postes et les serveurs
+
+| Protection | Rôle |
+| **Mises à jour** (gestion des correctifs) | ferme les failles connues : la mesure la plus rentable |
+| **Antivirus** | reconnaît les malwares connus par leur signature |
+| **EDR** | surveille les **comportements** (un tableur qui lance PowerShell) et peut isoler le poste |
+| **Durcissement** (*hardening*) | désactiver l'inutile, configurer strictement |
+| **Chiffrement du disque** (BitLocker, LUKS) | un portable volé ne livre pas ses données |
+| **Liste blanche d'applications** | seuls les programmes approuvés s'exécutent |
+| **Comptes sans droits administrateur** | un malware lancé par l'utilisateur ne peut pas tout casser |
+
+## 4. Contrôler les accès
+
+- **Moindre privilège** : chaque compte n'a que les droits nécessaires à son travail.
+- **Séparation des tâches** : celui qui demande n'est pas celui qui valide.
+- **MFA** sur tout ce qui est exposé : messagerie, VPN, administration.
+- Des comptes **nominatifs** (pas de compte « admin » partagé), désactivés dès le départ de la personne.
+- Un **bastion** : point de passage unique et journalisé pour administrer les serveurs.
+- Modèle **Zero Trust** : ne jamais faire confiance par défaut, même à l'intérieur du réseau ; vérifier chaque accès.
+
+## 5. Protéger les données
+
+| Mesure | Protège |
+| Chiffrement **en transit** (TLS, VPN) | contre l'écoute du réseau |
+| Chiffrement **au repos** (disque, base de données) | contre le vol du support |
+| **Sauvegardes 3-2-1** | 3 copies, 2 supports, 1 hors site, dont une **hors ligne** que le rançongiciel ne peut pas atteindre |
+| Tests de restauration | une sauvegarde jamais testée n'est qu'un espoir |
+| Classification et droits | qui a le droit de lire quoi |
+| Effacement sécurisé | avant de donner ou de jeter un disque |
+
+## 6. Surveiller
+
+| Outil | Rôle |
+| Journaux (*logs*) centralisés | garder la trace de ce qui se passe, hors de portée de l'attaquant |
+| **SIEM** | rassemble et corrèle les journaux, déclenche des alertes |
+| **SOC** | l'équipe qui surveille les alertes, souvent 24 h sur 24 |
+| Supervision (Zabbix, Nagios) | disponibilité et charge des services |
+| Scanner de vulnérabilités | liste les failles connues de son propre parc |
+| *Honeypot* (pot de miel) | un leurre : toute connexion y est suspecte |
+
+## 7. L'organisation
+
+La technique ne suffit pas : il faut une **politique de sécurité** (PSSI), une **charte** signée par les utilisateurs, de la **sensibilisation**, un **plan de continuité** (PCA : continuer pendant la crise) et un **plan de reprise** (PRA : redémarrer après), avec deux objectifs chiffrés : le **RTO** (durée maximale d'interruption) et le **RPO** (quantité maximale de données perdues, donc fréquence des sauvegardes). Le guide d'hygiène informatique de l'ANSSI résume 42 mesures de base.
+
+!tuto Sécuriser le réseau d'une petite entreprise
+# L'état des lieux
+Une box, un seul réseau pour tout le monde, un NAS avec le mot de passe d'usine, pas de sauvegarde externe, le même compte « admin » pour les cinq employés.
+# Les mesures immédiates, gratuites
+Changer tous les mots de passe par défaut ; un compte nominatif par personne ; activer les mises à jour automatiques ; activer le MFA sur la messagerie ; désactiver l'accès distant inutile de la box.
+# Les mesures structurantes
+Séparer le réseau en trois : postes, serveurs, invités (Wi-Fi séparé). Un pare-feu qui interdit par défaut. Sauvegarde quotidienne du NAS vers un disque déconnecté et vers un stockage distant chiffré.
+# Vérifier
+Restaurer un fichier depuis la sauvegarde. Regarder les journaux du pare-feu. Recommencer chaque mois.
+!fin
+
+!defi Défi : filtrer avec une liste blanche | N'accepter que les valeurs prévues. | cy-liste-blanche
+!defi Défi : une politique de mots de passe | Vérifie la solidité d'un mot de passe. | cy-motdepasse
+
+!retenir À retenir | Défense en profondeur : plusieurs couches indépendantes. ¶ Prévenir, détecter, réagir. ¶ Pare-feu : tout interdire par défaut ; segmenter ; DMZ pour ce qui est exposé. ¶ Mises à jour, EDR, moindre privilège, MFA, chiffrement. ¶ Sauvegardes 3-2-1 avec une copie hors ligne, et restauration testée. ¶ Journaux centralisés : sans eux, pas de détection ni d'enquête.
+--- exos
+Q¤m¤Qu'est-ce que la défense en profondeur ?¤Empiler plusieurs protections indépendantes;;Installer le meilleur antivirus;;Cacher les serveurs en sous-sol;;Chiffrer deux fois¤
+Q¤m¤Quelles sont les trois familles de mesures ?¤Prévention, détection, réaction;;Achat, installation, maintenance;;Réseau, système, données;;Pare-feu, antivirus, sauvegarde¤
+Q¤m¤Quelle est la règle d'or de la configuration d'un pare-feu ?¤Tout interdire par défaut, puis autoriser le nécessaire;;Tout autoriser, puis bloquer le dangereux;;Bloquer seulement les ports connus;;Autoriser tout le trafic sortant et entrant du réseau local¤
+Q¤m¤À quoi sert une DMZ ?¤À isoler les serveurs exposés à Internet du réseau interne;;À accélérer le Wi-Fi;;À stocker les sauvegardes;;À chiffrer les courriels¤
+Q¤m¤À quoi sert la segmentation en VLAN ?¤À séparer les réseaux pour limiter la propagation d'une attaque;;À augmenter le débit;;À économiser des adresses IP;;À remplacer le pare-feu¤
+Q¤m¤Quelle différence entre un IDS et un IPS ?¤L'IDS détecte et alerte, l'IPS bloque en plus;;Aucune;;L'IPS ne fait que journaliser;;L'IDS est matériel, l'IPS logiciel¤
+Q¤m¤Quelle différence entre un antivirus classique et un EDR ?¤L'EDR surveille les comportements et peut isoler le poste;;L'EDR est gratuit;;L'antivirus est plus récent;;Aucune¤
+Q¤m¤Que protège le chiffrement du disque d'un ordinateur portable ?¤Les données en cas de vol de la machine;;La machine contre les virus;;Le réseau Wi-Fi;;Les mots de passe des sites¤
+Q¤m¤Que signifie le principe du moindre privilège ?¤Chaque compte n'a que les droits nécessaires;;Personne n'a de droits;;Seul le directeur est administrateur;;Les droits sont temporaires¤
+Q¤m¤Pourquoi une des sauvegardes doit-elle être hors ligne ?¤Pour qu'un rançongiciel ne puisse pas la chiffrer;;Pour aller plus vite;;Pour économiser de l'électricité;;Parce que la loi l'impose¤
+Q¤m¤Qu'est-ce qu'un SIEM ?¤Un outil qui centralise et corrèle les journaux pour alerter;;Un pare-feu;;Un antivirus;;Un type de sauvegarde¤
+Q¤m¤Qu'est-ce qu'un honeypot ?¤Un leurre destiné à attirer et repérer les attaquants;;Un mot de passe piégé;;Une sauvegarde chiffrée;;Un virus¤
+Q¤m¤Que mesure le RPO ?¤La quantité maximale de données qu'on accepte de perdre;;La durée maximale d'interruption;;Le nombre de pare-feu;;Le prix de la sauvegarde¤
+Q¤m¤Que mesure le RTO ?¤La durée maximale d'interruption acceptable;;La quantité de données perdues;;Le temps de réponse du réseau;;La durée de vie d'un mot de passe¤
+Q¤d¤Que dit le modèle Zero Trust ?¤Ne jamais faire confiance par défaut, même à l'intérieur du réseau;;Ne faire confiance qu'au réseau interne;;Ne faire confiance à aucun logiciel libre;;Interdire Internet¤
+V¤m¤Une sauvegarde qui n'a jamais été restaurée pour essai est une protection fiable.¤F¤Seul un test de restauration prouve qu'elle fonctionne.
+A¤m¤Associe chaque outil à son rôle.¤pare-feu=>filtrer les flux;;VPN=>tunnel chiffré;;WAF=>filtrer les requêtes web;;EDR=>surveiller les postes;;SIEM=>corréler les journaux¤

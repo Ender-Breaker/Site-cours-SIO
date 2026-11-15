@@ -27,7 +27,7 @@
 
     (mod.labos || []).forEach(function (l) {
       html += '<a class="labo-promo" href="' + esc(l.href) + '"><div class="lp-ico">' + esc(l.ico) + '</div><div><h3>' + esc(l.titre) + '</h3><p>' + esc(l.texte) + '</p></div>' +
-        '<span class="btn primary">Ouvrir le labo →</span></a>';
+        '<span class="btn primary">' + esc(l.bouton || "Ouvrir le labo") + ' →</span></a>';
     });
 
     if (mod.chapitres.length) {
@@ -35,7 +35,8 @@
       var epr = [["examen", "Examen blanc", "L'épreuve complète, sous chrono"], ["questionnaire", "Questionnaire", "10 questions · 6 min"]];
       if (mod.evalTextuel) epr.push(["textuel", "Textuel", "3 questions ouvertes · 12 min"]);
       (mod.labos || []).forEach(function (l, i) {
-        epr.push(["pratique" + (i ? "&l=" + i : ""), mod.labos.length > 1 ? "Pratique · " + (l.court || l.titre) : "Pratique", l.examTexte || "3 missions de labo · 15 min", i && l.cle ? l.cle + "_pratique" : mod.id + "_pratique"]);
+        if (l.sansExamen) return;
+        epr.push(["pratique" + (i ? "&l=" + i : ""), mod.labos.filter(function (x) { return !x.sansExamen; }).length > 1 ? "Pratique · " + (l.court || l.titre) : "Pratique", l.examTexte || "3 missions de labo · 15 min", i && l.cle ? l.cle + "_pratique" : mod.id + "_pratique"]);
       });
       html += '<section class="mod-evals"><div class="mod-evals-t"><h2>' + I("timer") + ' Évaluations</h2>' + (mod.bonus ? '<span class="lb-small">Hors classement</span>' : '<a href="../../classement.html">' + I("trophy") + ' Classement</a>') + '</div><div class="mod-evals-l">' +
         epr.map(function (e) {

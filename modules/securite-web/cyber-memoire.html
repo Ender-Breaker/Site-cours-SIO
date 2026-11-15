@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Cybersécurité : les failles de mémoire et leurs protections — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="securite-web" data-chapter="cyber-memoire">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/securite-web.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>En C et en C++, le programmeur gère lui-même la mémoire. Une erreur d'un octet peut suffire à faire planter un programme, ou à en donner le contrôle à quelqu'un d'autre. Ces failles restent parmi les plus graves : elles touchent les systèmes d'exploitation, les navigateurs, les équipements réseau. Ce chapitre explique <b>pourquoi</b> elles existent et <b>comment on s'en protège</b> ; il suppose connus les pointeurs (cours C++).</p>
+<h2>1. La pile d'une fonction</h2>
+<p>À chaque appel de fonction, le programme réserve sur la <b>pile</b> une zone qui contient ses variables locales et l'<b>adresse de retour</b> : l'endroit où reprendre quand la fonction se termine.</p>
+<pre><code>adresses hautes
+┌──────────────────────────┐
+│ adresse de retour        │  ← où le programme reprendra
+│ ancien pointeur de pile  │
+│ char nom[8]              │  ← les variables locales, juste en dessous
+└──────────────────────────┘
+adresses basses</code></pre>
+<h2>2. Le dépassement de tampon</h2>
+<p>Un <b>tampon</b> (*buffer*) est un tableau de taille fixe. Si le programme y écrit plus de données qu'il ne peut en contenir, le surplus <b>écrase ce qui se trouve à côté</b>.</p>
+<pre><code>// VULNÉRABLE
+void saluer() {
+    char nom[8];
+    gets(nom);                 // lit sans aucune limite : supprimée du langage depuis 2011
+    printf("Bonjour %s\n", nom);
+}</code></pre>
+<p>Avec une saisie de 8 caractères ou plus, les octets en trop débordent sur les données voisines, jusqu'à l'adresse de retour. Le plus souvent le programme plante (*segmentation fault*). Dans le pire des cas, un attaquant choisit soigneusement ce qui est écrit et <b>détourne l'exécution</b> du programme.</p>
+<pre><code>// CORRECT
+void saluer() {
+    char nom[8];
+    if (fgets(nom, sizeof(nom), stdin)) {      // au plus 7 caractères + le zéro final
+        printf("Bonjour %s\n", nom);
+    }
+}</code></pre>
+<table><tr><th>Fonction dangereuse</th><th>Remplacement</th></tr><tr><td><code>gets</code></td><td><code>fgets(tampon, taille, stdin)</code></td></tr><tr><td><code>strcpy</code>, <code>strcat</code></td><td><code>strncpy</code> / <code>strlcpy</code>, <code>snprintf</code></td></tr><tr><td><code>sprintf</code></td><td><code>snprintf(tampon, taille, …)</code></td></tr><tr><td><code>scanf("%s", …)</code></td><td><code>scanf("%7s", …)</code> avec une largeur</td></tr></table>
+<p>En C++, <code>std::string</code> et <code>std::vector</code> gèrent leur taille eux-mêmes : c'est une raison de plus de les préférer aux tableaux du C.</p>
+<h2>3. Les autres erreurs de mémoire</h2>
+<table><tr><th>Faille</th><th>Ce qui se passe</th></tr><tr><td>Lecture hors limites</td><td>lire au-delà d'un tableau : fuite de données voisines (c'était la faille <b>Heartbleed</b>)</td></tr><tr><td>*Use-after-free*</td><td>utiliser une zone déjà libérée, que le programme a peut-être réattribuée</td></tr><tr><td>Double libération</td><td>deux <code>free</code> / <code>delete</code> sur la même adresse</td></tr><tr><td>Dépassement d'entier</td><td><code>taille + 1</code> qui repasse à 0 : le tampon réservé est trop petit</td></tr><tr><td>Chaîne de format</td><td><code>printf(saisie)</code> au lieu de <code>printf("%s", saisie)</code> : la saisie est interprétée comme un format</td></tr><tr><td>Pointeur nul</td><td>déréférencement de <code>nullptr</code> : plantage, donc déni de service</td></tr></table>
+<p>Une démonstration sans danger du dépassement d'entier : sur 8 bits, 255 + 1 vaut 0.</p>
+<div class="essai" data-langue="js"><pre><code>const sur8bits = n =&gt; n &amp; 0xFF;                 // ne garde que 8 bits, comme un unsigned char
+console.log(sur8bits(200 + 55), sur8bits(255 + 1), sur8bits(250 + 10));
+const longueurAnnoncee = 255;
+const tailleReservee = sur8bits(longueurAnnoncee + 1);    // +1 pour le zéro final…
+console.log("octets réservés :", tailleReservee, "pour", longueurAnnoncee, "octets à copier");</code></pre></div>
+<h2>4. Les protections du système et du compilateur</h2>
+<p>Elles ne corrigent pas le bug : elles rendent son exploitation très difficile.</p>
+<table><tr><th>Protection</th><th>Principe</th></tr><tr><td><b>Canari de pile</b> (*stack protector*)</td><td>une valeur aléatoire placée avant l'adresse de retour ; si elle a changé au retour de la fonction, le programme s'arrête</td></tr><tr><td><b>NX / DEP</b></td><td>la pile et le tas sont <b>non exécutables</b> : des données ne peuvent pas être lancées comme du code</td></tr><tr><td><b>ASLR</b></td><td>les adresses de la pile, du tas et des bibliothèques changent à chaque exécution</td></tr><tr><td><b>PIE</b></td><td>le programme lui-même est chargé à une adresse aléatoire</td></tr><tr><td><b>RELRO</b></td><td>certaines tables internes passent en lecture seule après le chargement</td></tr><tr><td><code>_FORTIFY_SOURCE</code></td><td>vérifications ajoutées aux fonctions comme <code>strcpy</code></td></tr></table>
+<pre><code>gcc -Wall -Wextra -O2 -D_FORTIFY_SOURCE=2 -fstack-protector-strong -fPIE -pie programme.c</code></pre>
+<p>Elles sont activées par défaut sur les systèmes modernes ; l'outil <code>checksec</code> montre lesquelles protègent un binaire.</p>
+<h2>5. La vraie solution : ne pas pouvoir se tromper</h2>
+<table><tr><th>Approche</th><th>Exemple</th></tr><tr><td>Langages à mémoire sûre</td><td><b>Rust</b>, Java, C#, Go, Python : pas d'écriture hors d'un tableau</td></tr><tr><td>C++ moderne</td><td><code>std::vector::at()</code>, <code>std::string</code>, pointeurs intelligents, pas de <code>new</code> / <code>delete</code> manuels</td></tr><tr><td>Analyse statique</td><td>le compilateur (<code>-Wall -Wextra</code>) et des outils signalent les fonctions dangereuses</td></tr><tr><td>Assainisseurs (*sanitizers*)</td><td><code>-fsanitize=address</code> détecte les débordements pendant les tests</td></tr><tr><td>*Fuzzing*</td><td>bombarder le programme d'entrées aléatoires pour trouver les plantages</td></tr><tr><td>Revue de code</td><td>un second regard sur tout ce qui manipule des tailles</td></tr></table>
+<p>C'est pour cela que les agences de sécurité recommandent les langages à mémoire sûre pour les nouveaux projets, et que Linux, Windows et Android accueillent du Rust.</p>
+<section class="tuto"><h3><small>Tutoriel</small>Lire un rapport de plantage</h3>
+<div class="etape"><h4>Le programme</h4>
+<pre><code>#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+int main(int argc, char** argv) {
+    char code[8];
+    strcpy(code, argv[1]);         // aucune vérification de taille
+    printf("Code : %s\n", code);
+}</code></pre>
+</div>
+<div class="etape"><h4>Le symptôme</h4>
+<p>Avec un argument court, tout va bien. Avec un argument long, le canari détecte l'écrasement et arrête le programme :</p>
+<pre><code>$ ./programme 1234
+Code : 1234
+$ ./programme AAAAAAAAAAAAAAAAAAAAAAAA
+*** stack smashing detected ***: terminated
+Abandon (core dumped)</code></pre>
+</div>
+<div class="etape"><h4>Le diagnostic avec l'assainisseur</h4>
+<p>Compilé avec <code>-fsanitize=address -g</code>, le programme indique la ligne fautive et la taille du tampon :</p>
+<pre><code>ERROR: AddressSanitizer: stack-buffer-overflow
+WRITE of size 25 at … in main programme.c:5
+[32, 40) 'code' &lt;== Memory access at offset 40 overflows this variable</code></pre>
+</div>
+<div class="etape"><h4>La correction</h4>
+<pre><code>snprintf(code, sizeof(code), "%s", argv[1]);     // tronque au lieu de déborder</code></pre>
+</div>
+</section>
+<div class="box retenir"><b>À retenir</b><p>Un dépassement de tampon écrit au-delà d'un tableau et écrase les données voisines, jusqu'à l'adresse de retour. </p><p> Bannir <code>gets</code>, <code>strcpy</code>, <code>sprintf</code> ; toujours passer la <b>taille</b> du tampon. </p><p> Protections : canari, NX / DEP, ASLR, PIE. </p><p> Elles compliquent l'exploitation mais ne corrigent pas le bug. </p><p> La meilleure défense : conteneurs sûrs, langages à mémoire sûre, tests avec assainisseurs.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cyber.html">labo cybersécurité</a> te fait écrire des protections, casser des chiffres faibles et analyser des programmes. Le <a href="labo-defense.html">labo terminal</a> te fait enquêter et durcir un serveur. Et le <a href="duel.html">duel attaque / défense</a> t'oppose à un autre élève.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'un dépassement de tampon ?",
+  "type": "qcm",
+  "options": [
+   "Une fuite de mots de passe",
+   "Un disque plein",
+   "Écrire plus de données que le tableau ne peut en contenir",
+   "Un réseau saturé"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que contient la pile en plus des variables locales ?",
+  "type": "qcm",
+  "options": [
+   "Les mots de passe",
+   "Les fichiers ouverts",
+   "L'adresse de retour de la fonction",
+   "Le code du programme"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Pourquoi `gets` a-t-elle été supprimée du langage C ?",
+  "type": "qcm",
+  "options": [
+   "Elle est trop lente",
+   "Elle est payante",
+   "Elle lit sans aucune limite de taille",
+   "Elle ne lit que des nombres"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Par quoi remplacer `gets(nom)` ?",
+  "type": "qcm",
+  "options": [
+   "`strcpy(nom, stdin)`",
+   "`read(nom)`",
+   "`scanf(\"%s\", nom)`",
+   "`fgets(nom, sizeof(nom), stdin)`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Par quoi remplacer `sprintf(t, …)` ?",
+  "type": "qcm",
+  "options": [
+   "`strcat(t, …)`",
+   "`printf(t, …)`",
+   "`gets(t)`",
+   "`snprintf(t, taille, …)`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait un canari de pile ?",
+  "type": "qcm",
+  "options": [
+   "Il détecte l'écrasement de la pile avant le retour de la fonction",
+   "Il agrandit les tampons",
+   "Il supprime les variables",
+   "Il chiffre la pile"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait la protection NX / DEP ?",
+  "type": "qcm",
+  "options": [
+   "Elle bloque le réseau",
+   "Elle chiffre le disque",
+   "Elle masque les mots de passe",
+   "Elle interdit d'exécuter des données comme du code"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait ASLR ?",
+  "type": "qcm",
+  "options": [
+   "Il accélère le programme",
+   "Il supprime les pointeurs",
+   "Il rend aléatoires les adresses mémoire à chaque exécution",
+   "Il vérifie les mots de passe"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'un use-after-free ?",
+  "type": "qcm",
+  "options": [
+   "Libérer deux fois une zone",
+   "Utiliser une zone mémoire déjà libérée",
+   "Lire un fichier fermé",
+   "Oublier de libérer"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Sur un octet non signé, que vaut 255 + 1 ?",
+  "type": "qcm",
+  "options": [
+   "-1",
+   "0",
+   "256",
+   "255"
+  ],
+  "answer": 1,
+  "explication": "C'est un dépassement d'entier."
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi `printf(saisie)` est-il dangereux ?",
+  "type": "qcm",
+  "options": [
+   "printf est obsolète",
+   "La saisie est interprétée comme une chaîne de format",
+   "La saisie est trop longue",
+   "Il manque un point-virgule"
+  ],
+  "answer": 1,
+  "explication": "On écrit `printf(\"%s\", saisie)`."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel langage système garantit la sûreté de la mémoire à la compilation ?",
+  "type": "qcm",
+  "options": [
+   "C++ avec new et delete",
+   "C",
+   "Assembleur",
+   "Rust"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle option de compilation détecte les débordements pendant les tests ?",
+  "type": "qcm",
+  "options": [
+   "`-w`",
+   "`-O3`",
+   "`-fsanitize=address`",
+   "`-s`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce que le fuzzing ?",
+  "type": "qcm",
+  "options": [
+   "Envoyer au programme une masse d'entrées aléatoires pour le faire planter",
+   "Mesurer la mémoire",
+   "Chiffrer le code",
+   "Compiler plus vite"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Les protections comme ASLR et les canaris…",
+  "type": "qcm",
+  "options": [
+   "rendent le C aussi sûr que Java",
+   "corrigent le bug",
+   "ralentissent trop pour être utilisées",
+   "compliquent l'exploitation mais ne corrigent pas le bug"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "En C++, std::string et std::vector évitent une grande partie des dépassements de tampon.",
+  "type": "vf",
+  "answer": true,
+  "explication": "Ils gèrent eux-mêmes leur taille."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque protection à son principe.",
+  "type": "associer",
+  "paires": [
+   [
+    "canari",
+    "valeur témoin avant l'adresse de retour"
+   ],
+   [
+    "NX",
+    "pile non exécutable"
+   ],
+   [
+    "ASLR",
+    "adresses aléatoires"
+   ],
+   [
+    "sanitizer",
+    "détection pendant les tests"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

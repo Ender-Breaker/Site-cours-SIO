@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Labo cybersécurité — Étude Facile</title>
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="securite-web">
+<script>
+window.EF_CODE = {
+ "langue": "js",
+ "key": "ef-labo-cyber",
+ "titre": "Labo cybersécurité",
+ "ico": "Sec",
+ "couleur": "secu",
+ "fichier": "main.js",
+ "sousTitre": "Écris des protections, casse des chiffres faibles, analyse des programmes et des journaux : en JavaScript, vérifié automatiquement.",
+ "module": {
+  "titre": "Cybersécurité",
+  "href": "index.html"
+ },
+ "libre": "// Bac à sable : écris ce que tu veux, le programme s'exécute dans la console.\nconst octets = [0x73, 0x69, 0x6f];\nconsole.log(octets.map(o => String.fromCharCode(o)).join(\"\"));\n",
+ "libreTexte": "<p>Un bac à sable JavaScript pour essayer un déchiffrement, convertir de l'hexadécimal ou tester une idée.<\/p><p class=\"lb-small\"><code>lire()<\/code> renvoie la ligne suivante des entrées ; <code>console.log<\/code> affiche.<\/p>",
+ "lecons": [
+  {
+   "titre": "Protéger une application",
+   "missions": [
+    {
+     "id": "cy-echapper",
+     "titre": "Échapper le HTML (contre le XSS)",
+     "texte": "<p>Une saisie réaffichée telle quelle dans une page permet d'y injecter des balises. Lis une ligne et affiche-la <b>échappée<\/b> : <code>&amp;<\/code> devient <code>&amp;amp;<\/code>, <code>&lt;<\/code> devient <code>&amp;lt;<\/code>, <code>&gt;<\/code> devient <code>&amp;gt;<\/code>, <code>\"<\/code> devient <code>&amp;quot;<\/code> et <code>'<\/code> devient <code>&amp;#39;<\/code>. Remplace <code>&amp;<\/code> <b>en premier<\/b>, sinon tu ré-échapperais tes propres remplacements.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>\"a&lt;b\".replaceAll(\"&lt;\", \"&amp;lt;\");   // \"a&amp;lt;b\"<\/code><\/pre>",
+     "depart": "const saisie = lire();\nconsole.log(saisie);\n",
+     "objectifs": [
+      {
+       "txt": "Les balises sont neutralisées",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "<b>Bonjour<\/b>"
+          ],
+          "out": "^&lt;b&gt;Bonjour&lt;/b&gt;[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "<code>&amp;<\/code> est échappé une seule fois",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "Tom & Léa"
+          ],
+          "out": "^Tom &amp; Léa[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Les guillemets et les apostrophes aussi",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "<img src=\"x\" onerror='a()'>"
+          ],
+          "out": "^&lt;img src=&quot;x&quot; onerror=&#39;a\\(\\)&#39;&gt;[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Enchaîne cinq <code>replaceAll<\/code>, en commençant par <code>&amp;<\/code>.",
+     "solution": "const saisie = lire();\nconst sur = saisie\n  .replaceAll(\"&\", \"&amp;\")\n  .replaceAll(\"<\", \"&lt;\")\n  .replaceAll(\">\", \"&gt;\")\n  .replaceAll('\"', \"&quot;\")\n  .replaceAll(\"'\", \"&#39;\");\nconsole.log(sur);\n",
+     "stdin": [
+      "<b>Bonjour<\/b>"
+     ]
+    },
+    {
+     "id": "cy-motdepasse",
+     "titre": "Une politique de mots de passe",
+     "texte": "<p>Lis un mot de passe et affiche <b>Solide<\/b> s'il fait au moins 12 caractères et contient au moins une minuscule, une majuscule et un chiffre. Sinon affiche <b>Faible<\/b>.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>/[A-Z]/.test(\"abcD\");   // true : il y a une majuscule<\/code><\/pre>",
+     "depart": "const mdp = lire();\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>Cheval-Agrafe-7-Bleu<\/code> → <code>Solide<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "Cheval-Agrafe-7-Bleu"
+          ],
+          "out": "^Solide[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Trop court : <code>Faible<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "Azerty123"
+          ],
+          "out": "^Faible[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Sans majuscule : <code>Faible<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "motdepassetreslong1"
+          ],
+          "out": "^Faible[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Sans chiffre : <code>Faible<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "MotDePasseTresLong"
+          ],
+          "out": "^Faible[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Quatre conditions reliées par <code>&amp;&amp;<\/code> : la longueur et trois expressions régulières.",
+     "solution": "const mdp = lire();\nconst ok = mdp.length >= 12 && /[a-z]/.test(mdp) && /[A-Z]/.test(mdp) && /[0-9]/.test(mdp);\nconsole.log(ok ? \"Solide\" : \"Faible\");\n",
+     "stdin": [
+      "Cheval-Agrafe-7-Bleu"
+     ]
+    },
+    {
+     "id": "cy-liste-blanche",
+     "titre": "Une liste blanche",
+     "texte": "<p>Une page trie des produits selon un paramètre <code>tri<\/code> reçu dans l'adresse. Ce paramètre sera placé dans une requête SQL : on ne peut accepter que des valeurs <b>prévues<\/b>. Lis la valeur reçue. Si elle vaut exactement <code>nom<\/code>, <code>prix<\/code> ou <code>date<\/code>, affiche <b>ORDER BY<\/b> suivi de la valeur. Dans tous les autres cas, affiche <b>ORDER BY nom<\/b> (la valeur par défaut).<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>[\"a\", \"b\"].includes(\"b\");   // true<\/code><\/pre>",
+     "depart": "const tri = lire();\nconsole.log(\"ORDER BY \" + tri);\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>prix<\/code> → <code>ORDER BY prix<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "prix"
+          ],
+          "out": "^ORDER BY prix[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>date<\/code> → <code>ORDER BY date<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "date"
+          ],
+          "out": "^ORDER BY date[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Une valeur imprévue est remplacée par la valeur par défaut",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "prix; DROP TABLE produits"
+          ],
+          "out": "^ORDER BY nom[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "La comparaison est exacte",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "PRIX"
+          ],
+          "out": "^ORDER BY nom[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Utilise une liste de valeurs autorisées",
+       "r": [
+        {
+         "code": "\\[[^\\]]*nom[^\\]]*prix[^\\]]*\\]|\\[[^\\]]*prix[^\\]]*nom[^\\]]*\\]|new Set|switch|==="
+        }
+       ]
+      }
+     ],
+     "indice": "On ne cherche pas à « nettoyer » la saisie : on vérifie qu'elle fait partie de la liste, sinon on prend la valeur par défaut.",
+     "solution": "const tri = lire();\nconst autorises = [\"nom\", \"prix\", \"date\"];\nconsole.log(\"ORDER BY \" + (autorises.includes(tri) ? tri : \"nom\"));\n",
+     "stdin": [
+      "prix"
+     ]
+    },
+    {
+     "id": "cy-nomfichier",
+     "titre": "Nettoyer un nom de fichier",
+     "texte": "<p>Un formulaire d'envoi de fichier reçoit un nom choisi par l'utilisateur. Un nom comme <code>../../etc/passwd<\/code> ferait sortir du dossier prévu (<b>traversée de répertoire<\/b>). Lis le nom et affiche un nom sûr : garde uniquement ce qui suit le dernier <code>/<\/code> ou <code>\\<\/code>, remplace tout caractère qui n'est pas une lettre sans accent, un chiffre, un point, un tiret ou un tiret bas par <code>_<\/code>, puis retire les points placés au début. Si le résultat est vide, affiche <b>fichier<\/b>.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>\"a/b/c.txt\".split(/[\\/\\\\]/).pop();   // \"c.txt\"\n\"..x\".replace(/^\\.+/, \"\");          // \"x\"<\/code><\/pre>",
+     "depart": "const nom = lire();\nconsole.log(nom);\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>rapport.pdf<\/code> → <code>rapport.pdf<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "rapport.pdf"
+          ],
+          "out": "^rapport\\.pdf[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Le chemin est retiré",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "../../etc/passwd"
+          ],
+          "out": "^passwd[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Les caractères imprévus deviennent <code>_<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "mon cv (final).pdf"
+          ],
+          "out": "^mon_cv__final_\\.pdf[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Pas de point au début",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           ".htaccess"
+          ],
+          "out": "^htaccess[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Un nom vide devient <code>fichier<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "../.."
+          ],
+          "out": "^fichier[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Trois étapes dans l'ordre : <code>split(/[\\/\\\\]/).pop()<\/code>, puis <code>replace(/[^a-zA-Z0-9._-]/g, \"_\")<\/code>, puis <code>replace(/^\\.+/, \"\")<\/code>.",
+     "solution": "const nom = lire();\nlet sur = nom.split(/[\\/\\\\]/).pop().replace(/[^a-zA-Z0-9._-]/g, \"_\").replace(/^\\.+/, \"\");\nconsole.log(sur || \"fichier\");\n",
+     "stdin": [
+      "rapport.pdf"
+     ]
+    },
+    {
+     "id": "cy-jeton",
+     "titre": "Vérifier un jeton CSRF",
+     "texte": "<p>Le serveur a rangé un jeton dans la session et en attend la copie dans chaque formulaire. Lis le jeton de la session (ligne 1) puis le jeton reçu (ligne 2). Affiche <b>Accepté<\/b> s'ils sont identiques et non vides, sinon <b>Refusé (403)<\/b>.<\/p>",
+     "depart": "const session = lire();\nconst recu = lire();\nconsole.log(\"Accepté\");\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>k9f2x7, k9f2x7<\/code> → <code>Accepté<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "k9f2x7",
+           "k9f2x7"
+          ],
+          "out": "^Accepté[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>k9f2x7, aaaaaa<\/code> → <code>Refusé (403)<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "k9f2x7",
+           "aaaaaa"
+          ],
+          "out": "^Refusé \\(403\\)[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Un jeton absent est refusé",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "k9f2x7",
+           ""
+          ],
+          "out": "^Refusé \\(403\\)[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Deux jetons vides : refusé aussi",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "",
+           ""
+          ],
+          "out": "^Refusé \\(403\\)[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Deux conditions : le jeton de session n'est pas vide, et les deux jetons sont strictement égaux.",
+     "solution": "const session = lire();\nconst recu = lire();\nconsole.log(session !== \"\" && session === recu ? \"Accepté\" : \"Refusé (403)\");\n",
+     "stdin": [
+      "k9f2x7",
+      "k9f2x7"
+     ]
+    }
+   ]
+  },
+  {
+   "titre": "Cryptographie",
+   "missions": [
+    {
+     "id": "cy-base64",
+     "titre": "Base64 n'est pas un chiffrement",
+     "texte": "<p>Un fichier de configuration contient un mot de passe « caché » en Base64. Lis le texte encodé et affiche-le décodé : aucune clé n'est nécessaire.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>atob(\"c2lv\");   // \"sio\"\nbtoa(\"sio\");    // \"c2lv\"<\/code><\/pre>",
+     "depart": "const encode = lire();\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>bW90ZGVwYXNzZT1BemVydHkxMjM=<\/code> → <code>motdepasse=Azerty123<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "bW90ZGVwYXNzZT1BemVydHkxMjM="
+          ],
+          "out": "^motdepasse=Azerty123[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>cm9vdDp0b29y<\/code> → <code>root:toor<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "cm9vdDp0b29y"
+          ],
+          "out": "^root:toor[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "La fonction <code>atob<\/code> décode le Base64.",
+     "solution": "const encode = lire();\nconsole.log(atob(encode));\n",
+     "stdin": [
+      "bW90ZGVwYXNzZT1BemVydHkxMjM="
+     ]
+    },
+    {
+     "id": "cy-cesar",
+     "titre": "Déchiffrer un chiffre de César",
+     "texte": "<p>Lis la clé (un entier de 1 à 25), puis un message chiffré en minuscules. Affiche le message <b>déchiffré<\/b> : chaque lettre recule de <code>clé<\/code> rangs dans l'alphabet, en bouclant de a vers z. Les autres caractères ne changent pas.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>\"d\".charCodeAt(0) - 97;            // 3 : le rang de d\nString.fromCharCode(0 + 97);       // \"a\"\n(3 - 5 + 26) % 26;                 // 24 : on reste entre 0 et 25<\/code><\/pre>",
+     "depart": "const cle = Number(lire());\nconst message = lire();\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>3, uhqghc yrxv d plgl<\/code> → <code>rendez vous a midi<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "uhqghc yrxv d plgl"
+          ],
+          "out": "^rendez vous a midi[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Chiffres et espaces inchangés",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "1",
+           "tjp 2026"
+          ],
+          "out": "^sio 2026[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>13, frphevgr<\/code> → <code>securite<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "13",
+           "frphevgr"
+          ],
+          "out": "^securite[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Rang de la lettre = code − 97 ; retire la clé, ajoute 26, prends le reste modulo 26, rajoute 97.",
+     "solution": "const cle = Number(lire());\nconst message = lire();\nconst clair = message.replace(/[a-z]/g, c => String.fromCharCode((c.charCodeAt(0) - 97 - cle + 26) % 26 + 97));\nconsole.log(clair);\n",
+     "stdin": [
+      "3",
+      "uhqghc yrxv d plgl"
+     ]
+    },
+    {
+     "id": "cy-cesar-force",
+     "titre": "César sans la clé",
+     "texte": "<p>Tu as intercepté un message chiffré par César, sans la clé. Tu sais seulement que le texte d'origine contient le mot <b>serveur<\/b>. Essaie les 25 clés ; affiche <b>Clé : N<\/b> puis, sur la ligne suivante, le message en clair.<\/p>",
+     "depart": "const message = lire();\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>sl zlyclby lza thpualuhua zljbypzl<\/code> → <code>Clé : 7 …<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "sl zlyclby lza thpualuhua zljbypzl"
+          ],
+          "out": "^Clé : 7[ \\t]*\\nle serveur est maintenant securise[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Une autre clé (9)",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "dw bnaenda fnk mxrc ncan vrb j sxda"
+          ],
+          "out": "^Clé : 9[ \\t]*\\nun serveur web doit etre mis a jour[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Une boucle essaie les clés",
+       "r": [
+        {
+         "code": "for\\s*\\(|while\\s*\\(|\\.forEach|Array\\.from"
+        }
+       ]
+      }
+     ],
+     "indice": "Une boucle de 1 à 25 ; pour chaque clé, déchiffre et teste <code>clair.includes(\"serveur\")<\/code>.",
+     "solution": "const message = lire();\nfor (let cle = 1; cle <= 25; cle++) {\n  const clair = message.replace(/[a-z]/g, c => String.fromCharCode((c.charCodeAt(0) - 97 - cle + 26) % 26 + 97));\n  if (clair.includes(\"serveur\")) {\n    console.log(\"Clé : \" + cle);\n    console.log(clair);\n  }\n}\n",
+     "stdin": [
+      "sl zlyclby lza thpualuhua zljbypzl"
+     ]
+    },
+    {
+     "id": "cy-xor",
+     "titre": "Déchiffrer un XOR",
+     "texte": "<p>Lis une clé (un texte), puis une suite d'octets en hexadécimal séparés par des espaces. Chaque octet a été chiffré par XOR avec le caractère correspondant de la clé, <b>répétée<\/b> autant que nécessaire. Affiche le texte en clair.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>parseInt(\"1f\", 16);          // 31\n31 ^ \"c\".charCodeAt(0);      // XOR avec le code de c\nindice % cle.length;         // position dans la clé répétée<\/code><\/pre>",
+     "depart": "const cle = lire();\nconst octets = lire().split(\" \");\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>cle, 02 18 11 02 1d 10 06 4c 04 43 00 45 02 19 07 06<\/code> → <code>attaque a l aube<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "cle",
+           "02 18 11 02 1d 10 06 4c 04 43 00 45 02 19 07 06"
+          ],
+          "out": "^attaque a l aube[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Une clé d'un seul caractère",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "k",
+           "38 22 24"
+          ],
+          "out": "^SIO[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>parseInt(h, 16) ^ cle.charCodeAt(i % cle.length)<\/code> puis <code>String.fromCharCode<\/code>.",
+     "solution": "const cle = lire();\nconst octets = lire().split(\" \");\nlet clair = \"\";\noctets.forEach((h, i) => {\n  clair += String.fromCharCode(parseInt(h, 16) ^ cle.charCodeAt(i % cle.length));\n});\nconsole.log(clair);\n",
+     "stdin": [
+      "cle",
+      "02 18 11 02 1d 10 06 4c 04 43 00 45 02 19 07 06"
+     ]
+    },
+    {
+     "id": "cy-frequence",
+     "titre": "L'analyse de fréquences",
+     "texte": "<p>Lis un texte chiffré par substitution (minuscules et espaces). Affiche la <b>lettre la plus fréquente<\/b> suivie de son nombre d'apparitions, sous la forme <b>x : N<\/b>. En français, c'est très probablement un <code>e<\/code>.<\/p>",
+     "depart": "const texte = lire();\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>ohv hohyhv gh vlr dssuhqqhqw od vhfxulwh<\/code> → <code>h : 9<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "ohv hohyhv gh vlr dssuhqqhqw od vhfxulwh"
+          ],
+          "out": "^h : 9[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>zzz aa b<\/code> → <code>z : 3<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "zzz aa b"
+          ],
+          "out": "^z : 3[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Un objet sert de compteur : <code>f[c] = (f[c] || 0) + 1<\/code>, puis une boucle cherche le maximum.",
+     "solution": "const texte = lire();\nconst f = {};\nfor (const c of texte) {\n  if (c >= \"a\" && c <= \"z\") f[c] = (f[c] || 0) + 1;\n}\nlet meilleure = \"\", maxi = 0;\nfor (const c in f) {\n  if (f[c] > maxi) { meilleure = c; maxi = f[c]; }\n}\nconsole.log(meilleure + \" : \" + maxi);\n",
+     "stdin": [
+      "ohv hohyhv gh vlr dssuhqqhqw od vhfxulwh"
+     ]
+    },
+    {
+     "id": "cy-empreinte",
+     "titre": "Vérifier l'intégrité par une empreinte",
+     "texte": "<p>Un éditeur publie l'empreinte de son fichier. Lis l'empreinte publiée (ligne 1), puis le contenu reçu (ligne 2). Calcule l'empreinte du contenu avec la fonction fournie et affiche <b>Intact<\/b> si elle correspond, sinon <b>Modifié<\/b>.<\/p>",
+     "depart": "function empreinte(texte) {\n  let h = 5381;\n  for (const c of texte) h = ((h * 33) ^ c.charCodeAt(0)) >>> 0;\n  return h.toString(16).padStart(8, \"0\");\n}\n\nconst publiee = lire();\nconst contenu = lire();\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>94e552b8, virement de 100 euros a Lea<\/code> → <code>Intact<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "94e552b8",
+           "virement de 100 euros a Lea"
+          ],
+          "out": "^Intact[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Un seul caractère changé : <code>Modifié<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "94e552b8",
+           "virement de 900 euros a Lea"
+          ],
+          "out": "^Modifié[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Compare <code>empreinte(contenu)<\/code> à l'empreinte publiée.",
+     "solution": "function empreinte(texte) {\n  let h = 5381;\n  for (const c of texte) h = ((h * 33) ^ c.charCodeAt(0)) >>> 0;\n  return h.toString(16).padStart(8, \"0\");\n}\n\nconst publiee = lire();\nconst contenu = lire();\nconsole.log(empreinte(contenu) === publiee ? \"Intact\" : \"Modifié\");\n",
+     "stdin": [
+      "94e552b8",
+      "virement de 100 euros a Lea"
+     ]
+    }
+   ]
+  },
+  {
+   "titre": "Rétro-ingénierie",
+   "missions": [
+    {
+     "id": "cy-hexa",
+     "titre": "De l'hexadécimal au texte",
+     "texte": "<p>Lis une suite d'octets en hexadécimal séparés par des espaces et affiche le texte ASCII correspondant.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>String.fromCharCode(parseInt(\"41\", 16));   // \"A\"<\/code><\/pre>",
+     "depart": "const octets = lire().split(\" \");\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>42 54 53 20 53 49 4f<\/code> → <code>BTS SIO<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "42 54 53 20 53 49 4f"
+          ],
+          "out": "^BTS SIO[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>66 6c 61 67 7b 68 65 78 7d<\/code> → <code>flag{hex}<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "66 6c 61 67 7b 68 65 78 7d"
+          ],
+          "out": "^flag\\{hex\\}[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>parseInt(h, 16)<\/code> donne le code, <code>String.fromCharCode<\/code> le caractère, <code>join(\"\")<\/code> assemble.",
+     "solution": "const octets = lire().split(\" \");\nconsole.log(octets.map(h => String.fromCharCode(parseInt(h, 16))).join(\"\"));\n",
+     "stdin": [
+      "42 54 53 20 53 49 4f"
+     ]
+    },
+    {
+     "id": "cy-magic",
+     "titre": "Les octets magiques",
+     "texte": "<p>L'extension d'un fichier ne prouve rien : son vrai type se lit dans ses premiers octets. Lis les premiers octets (hexadécimal, séparés par des espaces) et affiche le format : <b>ELF<\/b> (<code>7F 45 4C 46<\/code>), <b>EXE<\/b> (<code>4D 5A<\/code>), <b>PNG<\/b> (<code>89 50 4E 47<\/code>), <b>JPEG<\/b> (<code>FF D8 FF<\/code>), <b>PDF<\/b> (<code>25 50 44 46<\/code>), <b>ZIP<\/b> (<code>50 4B 03 04<\/code>), sinon <b>Inconnu<\/b>. La casse des lettres peut varier.<\/p>",
+     "depart": "const debut = lire().toUpperCase();\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>89 50 4E 47 0D 0A 1A 0A<\/code> → <code>PNG<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "89 50 4E 47 0D 0A 1A 0A"
+          ],
+          "out": "^PNG[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "En minuscules aussi : <code>EXE<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "4d 5a 90 00 03 00"
+          ],
+          "out": "^EXE[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>25 50 44 46 2D 31 2E 37<\/code> → <code>PDF<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "25 50 44 46 2D 31 2E 37"
+          ],
+          "out": "^PDF[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>7F 45 4C 46 02 01<\/code> → <code>ELF<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "7F 45 4C 46 02 01"
+          ],
+          "out": "^ELF[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>50 4B 03 04 14 00<\/code> → <code>ZIP<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "50 4B 03 04 14 00"
+          ],
+          "out": "^ZIP[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>FF D8 FF E0<\/code> → <code>JPEG<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "FF D8 FF E0"
+          ],
+          "out": "^JPEG[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>00 01 02 03<\/code> → <code>Inconnu<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "00 01 02 03"
+          ],
+          "out": "^Inconnu[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Un tableau de couples [signature, nom] et <code>debut.startsWith(signature)<\/code>.",
+     "solution": "const debut = lire().toUpperCase();\nconst signatures = [[\"7F 45 4C 46\", \"ELF\"], [\"4D 5A\", \"EXE\"], [\"89 50 4E 47\", \"PNG\"], [\"FF D8 FF\", \"JPEG\"], [\"25 50 44 46\", \"PDF\"], [\"50 4B 03 04\", \"ZIP\"]];\nlet format = \"Inconnu\";\nfor (const [sig, nom] of signatures) {\n  if (debut.startsWith(sig)) format = nom;\n}\nconsole.log(format);\n",
+     "stdin": [
+      "89 50 4E 47 0D 0A 1A 0A"
+     ]
+    },
+    {
+     "id": "cy-strings",
+     "titre": "Écrire la commande strings",
+     "texte": "<p>Lis les octets d'un fichier (hexadécimal, séparés par des espaces). Affiche, une par ligne, toutes les suites d'<b>au moins 4 caractères affichables<\/b> consécutifs (codes 32 à 126). C'est ce que fait la commande <code>strings<\/code>.<\/p>",
+     "depart": "const octets = lire().split(\" \").map(h => parseInt(h, 16));\n",
+     "objectifs": [
+      {
+       "txt": "Deux chaînes trouvées, <code>AB<\/code> (trop courte) ignorée",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "01 02 41 42 00 68 74 74 70 3a 2f 2f 63 32 2e 74 65 73 74 00 ff 6d 64 70 3d 73 69 6f"
+          ],
+          "out": "^http://c2\\.test[ \\t]*\\nmdp=sio[ \\t]*$",
+          "notout": "^AB\\s*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Aucune chaîne d'au moins 4 caractères : rien n'est affiché",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "73 69 6f 00 01"
+          ],
+          "out": "^$",
+          "notout": "sio"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Accumule les caractères affichables dans une variable ; à chaque octet non affichable (et à la fin), affiche-la si elle fait au moins 4 caractères, puis vide-la.",
+     "solution": "const octets = lire().split(\" \").map(h => parseInt(h, 16));\nlet cur = \"\";\nfor (const o of [...octets, 0]) {\n  if (o >= 32 && o <= 126) {\n    cur += String.fromCharCode(o);\n  } else {\n    if (cur.length >= 4) console.log(cur);\n    cur = \"\";\n  }\n}\n",
+     "stdin": [
+      "01 02 41 42 00 68 74 74 70 3a 2f 2f 63 32 2e 74 65 73 74 00 ff 6d 64 70 3d 73 69 6f"
+     ]
+    },
+    {
+     "id": "cy-crackme1",
+     "titre": "Crackme 1 : un décalage",
+     "texte": "<p>Ce programme d'entraînement vérifie un mot de passe. Lis la fonction <code>verifier<\/code>, comprends la transformation appliquée à la saisie, puis <b>calcule et affiche<\/b> le mot de passe attendu (ne le devine pas : inverse l'opération).<\/p>",
+     "depart": "const attendu = [100, 122, 99, 102, 115, 51, 49, 51, 55];\nfunction verifier(saisie) {\n  if (saisie.length !== attendu.length) return false;\n  for (let i = 0; i < saisie.length; i++) {\n    if (saisie.charCodeAt(i) + 1 !== attendu[i]) return false;\n  }\n  return true;\n}\n\n// à toi : calcule le mot de passe à partir du tableau attendu\n",
+     "objectifs": [
+      {
+       "txt": "Le programme affiche le mot de passe attendu",
+       "r": [
+        {
+         "test": {
+          "stdin": [],
+          "out": "^cyber2026[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Le mot de passe est calculé à partir du tableau",
+       "r": [
+        {
+         "code": "attendu\\s*\\.\\s*(map|forEach|reduce)|for\\s*\\([^)]*attendu|of\\s+attendu"
+        }
+       ]
+      },
+      {
+       "txt": "Il n'est pas écrit en dur",
+       "r": [
+        {
+         "nocode": "[\\\"'`]cyber2026[\\\"'`]"
+        }
+       ]
+      }
+     ],
+     "indice": "La fonction teste <code>code + 1 === attendu[i]<\/code> : donc <code>code = attendu[i] - 1<\/code>.",
+     "solution": "const attendu = [100, 122, 99, 102, 115, 51, 49, 51, 55];\nfunction verifier(saisie) {\n  if (saisie.length !== attendu.length) return false;\n  for (let i = 0; i < saisie.length; i++) {\n    if (saisie.charCodeAt(i) + 1 !== attendu[i]) return false;\n  }\n  return true;\n}\n\nconst solution = attendu.map(c => String.fromCharCode(c - 1)).join(\"\");\nconsole.log(solution);\n"
+    },
+    {
+     "id": "cy-crackme2",
+     "titre": "Crackme 2 : XOR et retournement",
+     "texte": "<p>Même exercice, un cran plus loin : la saisie est d'abord <b>retournée<\/b>, puis chaque caractère passe par un <b>XOR<\/b>. Inverse les opérations en partant de la dernière, et affiche le mot de passe.<\/p>",
+     "depart": "const attendu = [0x37, 0x3b, 0x3f, 0x2e, 0x3f, 0x2f, 0x36, 0x38];\nfunction verifier(saisie) {\n  const t = [...saisie].reverse().map(c => c.charCodeAt(0) ^ 0x5a);\n  return t.length === attendu.length && t.every((v, i) => v === attendu[i]);\n}\n\n// à toi : défais le XOR, puis le retournement\n",
+     "objectifs": [
+      {
+       "txt": "Le programme affiche le mot de passe attendu",
+       "r": [
+        {
+         "test": {
+          "stdin": [],
+          "out": "^blueteam[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Le mot de passe est calculé avec un XOR",
+       "r": [
+        {
+         "code": "\\^\\s*(0x5a|90)[\\s\\S]*\\^\\s*(0x5a|90)"
+        }
+       ]
+      },
+      {
+       "txt": "Il n'est pas écrit en dur",
+       "r": [
+        {
+         "nocode": "[\\\"'`]blueteam[\\\"'`]"
+        }
+       ]
+      }
+     ],
+     "indice": "Le XOR s'annule avec la même valeur : <code>v ^ 0x5a<\/code>. Puis <code>reverse()<\/code> remet les caractères dans l'ordre.",
+     "solution": "const attendu = [0x37, 0x3b, 0x3f, 0x2e, 0x3f, 0x2f, 0x36, 0x38];\nfunction verifier(saisie) {\n  const t = [...saisie].reverse().map(c => c.charCodeAt(0) ^ 0x5a);\n  return t.length === attendu.length && t.every((v, i) => v === attendu[i]);\n}\n\nconst solution = attendu.map(v => String.fromCharCode(v ^ 0x5a)).reverse().join(\"\");\nconsole.log(solution);\n"
+    },
+    {
+     "id": "cy-desobfusquer",
+     "titre": "Désobfusquer un script",
+     "texte": "<p>Un script trouvé sur un site piraté a été brouillé pour cacher l'adresse vers laquelle il envoie des données. Sans rien deviner, fais-lui <b>révéler<\/b> cette adresse : affiche la valeur de la variable <code>cible<\/code>. C'est ainsi qu'un analyste obtient un indicateur de compromission à bloquer sur le pare-feu.<\/p>",
+     "depart": "var _a = [104, 116, 116, 112, 115, 58, 47, 47];\nvar _b = \"ten.tset-noitartlifxe\";\nvar _c = [\"/\", \"up\", \"load\", \".php\"];\nfunction _d(x) { return x.map(function (c) { return String.fromCharCode(c); }).join(\"\"); }\nfunction _e(x) { return x.split(\"\").reverse().join(\"\"); }\nvar cible = _d(_a) + _e(_b) + _c.join(\"\");\n",
+     "objectifs": [
+      {
+       "txt": "Le programme affiche <code>https://exfiltration-test.net/upload.php<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [],
+          "out": "^https://exfiltration-test\\.net/upload\\.php[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "L'adresse n'est pas recopiée à la main",
+       "r": [
+        {
+         "nocode": "[\\\"'`]https://exfiltration"
+        }
+       ]
+      }
+     ],
+     "indice": "Le script construit lui-même la chaîne : il suffit de l'afficher avec <code>console.log(cible)<\/code>. Lis quand même <code>_d<\/code> et <code>_e<\/code> pour comprendre comment.",
+     "solution": "var _a = [104, 116, 116, 112, 115, 58, 47, 47];\nvar _b = \"ten.tset-noitartlifxe\";\nvar _c = [\"/\", \"up\", \"load\", \".php\"];\nfunction _d(x) { return x.map(function (c) { return String.fromCharCode(c); }).join(\"\"); }\nfunction _e(x) { return x.split(\"\").reverse().join(\"\"); }\nvar cible = _d(_a) + _e(_b) + _c.join(\"\");\nconsole.log(cible);\n"
+    }
+   ]
+  },
+  {
+   "titre": "Analyser des journaux",
+   "missions": [
+    {
+     "id": "cy-echecs",
+     "titre": "Compter les échecs de connexion",
+     "texte": "<p>Lis un entier n, puis n lignes d'un journal d'authentification. Affiche <b>Échecs : N<\/b>, le nombre de lignes qui contiennent <code>Failed password<\/code>.<\/p>",
+     "depart": "const n = Number(lire());\nconst lignes = [];\nfor (let i = 0; i < n; i++) lignes.push(lire());\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>6, 03:12:01 Failed password for root from 203.0.113.7, 03:12:02 Failed password for root from 203.0.113.7, 03:12:09 Accepted password for lea from 192.0.2.10, 03:12:11 Failed password for admin from 198.51.100.4, 03:12:15 Failed password for root from 203.0.113.7, 03:13:00 Failed password for root from 203.0.113.7<\/code> → <code>Échecs : 5<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "6",
+           "03:12:01 Failed password for root from 203.0.113.7",
+           "03:12:02 Failed password for root from 203.0.113.7",
+           "03:12:09 Accepted password for lea from 192.0.2.10",
+           "03:12:11 Failed password for admin from 198.51.100.4",
+           "03:12:15 Failed password for root from 203.0.113.7",
+           "03:13:00 Failed password for root from 203.0.113.7"
+          ],
+          "out": "^Échecs : 5[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>3, 08:00:01 Accepted password for lea from 192.0.2.10, 08:02:11 Failed password for lea from 192.0.2.10, 08:02:20 Accepted password for lea from 192.0.2.10<\/code> → <code>Échecs : 1<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "08:00:01 Accepted password for lea from 192.0.2.10",
+           "08:02:11 Failed password for lea from 192.0.2.10",
+           "08:02:20 Accepted password for lea from 192.0.2.10"
+          ],
+          "out": "^Échecs : 1[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>lignes.filter(l =&gt; l.includes(\"Failed password\")).length<\/code>",
+     "solution": "const n = Number(lire());\nconst lignes = [];\nfor (let i = 0; i < n; i++) lignes.push(lire());\nconsole.log(\"Échecs : \" + lignes.filter(l => l.includes(\"Failed password\")).length);\n",
+     "stdin": [
+      "6",
+      "03:12:01 Failed password for root from 203.0.113.7",
+      "03:12:02 Failed password for root from 203.0.113.7",
+      "03:12:09 Accepted password for lea from 192.0.2.10",
+      "03:12:11 Failed password for admin from 198.51.100.4",
+      "03:12:15 Failed password for root from 203.0.113.7",
+      "03:13:00 Failed password for root from 203.0.113.7"
+     ]
+    },
+    {
+     "id": "cy-bannir",
+     "titre": "Qui faut-il bannir ?",
+     "texte": "<p>Comme l'outil fail2ban : lis n lignes de journal et affiche, pour chaque adresse IP ayant <b>au moins 3 échecs<\/b>, une ligne <b>À bannir : adresse (N échecs)<\/b>, dans l'ordre alphabétique des adresses. Si aucune adresse n'atteint le seuil, affiche <b>Rien à bannir<\/b>. L'adresse est le dernier mot de la ligne.<\/p>",
+     "depart": "const n = Number(lire());\nconst lignes = [];\nfor (let i = 0; i < n; i++) lignes.push(lire());\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>6, 03:12:01 Failed password for root from 203.0.113.7, 03:12:02 Failed password for root from 203.0.113.7, 03:12:09 Accepted password for lea from 192.0.2.10, 03:12:11 Failed password for admin from 198.51.100.4, 03:12:15 Failed password for root from 203.0.113.7, 03:13:00 Failed password for root from 203.0.113.7<\/code> → <code>À bannir : 203.0.113.7 (4 échecs)<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "6",
+           "03:12:01 Failed password for root from 203.0.113.7",
+           "03:12:02 Failed password for root from 203.0.113.7",
+           "03:12:09 Accepted password for lea from 192.0.2.10",
+           "03:12:11 Failed password for admin from 198.51.100.4",
+           "03:12:15 Failed password for root from 203.0.113.7",
+           "03:13:00 Failed password for root from 203.0.113.7"
+          ],
+          "out": "^À bannir : 203\\.0\\.113\\.7 \\(4 échecs\\)[ \\t]*$",
+          "notout": "198\\.51\\.100\\.4"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>3, 08:00:01 Accepted password for lea from 192.0.2.10, 08:02:11 Failed password for lea from 192.0.2.10, 08:02:20 Accepted password for lea from 192.0.2.10<\/code> → <code>Rien à bannir<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "08:00:01 Accepted password for lea from 192.0.2.10",
+           "08:02:11 Failed password for lea from 192.0.2.10",
+           "08:02:20 Accepted password for lea from 192.0.2.10"
+          ],
+          "out": "^Rien à bannir[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>7, 03:12:01 Failed password for admin from 203.0.113.7, 03:12:02 Failed password for admin from 203.0.113.7, 03:12:04 Failed password for admin from 203.0.113.7, 03:13:10 Failed password for sam from 198.51.100.4, 03:14:40 Accepted password for admin from 203.0.113.7, 03:15:00 Accepted password for lea from 192.0.2.10, 03:16:02 Failed password for sam from 198.51.100.4<\/code> → <code>À bannir : 203.0.113.7 (3 échecs)<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "7",
+           "03:12:01 Failed password for admin from 203.0.113.7",
+           "03:12:02 Failed password for admin from 203.0.113.7",
+           "03:12:04 Failed password for admin from 203.0.113.7",
+           "03:13:10 Failed password for sam from 198.51.100.4",
+           "03:14:40 Accepted password for admin from 203.0.113.7",
+           "03:15:00 Accepted password for lea from 192.0.2.10",
+           "03:16:02 Failed password for sam from 198.51.100.4"
+          ],
+          "out": "^À bannir : 203\\.0\\.113\\.7 \\(3 échecs\\)[ \\t]*$",
+          "notout": "198\\.51\\.100\\.4"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Un objet compte les échecs par adresse (<code>l.split(\" \").pop()<\/code>), puis on filtre celles qui en ont au moins 3.",
+     "solution": "const n = Number(lire());\nconst lignes = [];\nfor (let i = 0; i < n; i++) lignes.push(lire());\nconst echecs = {};\nfor (const l of lignes) {\n  if (!l.includes(\"Failed password\")) continue;\n  const ip = l.split(\" \").pop();\n  echecs[ip] = (echecs[ip] || 0) + 1;\n}\nconst suspects = Object.keys(echecs).filter(ip => echecs[ip] >= 3).sort();\nif (suspects.length === 0) console.log(\"Rien à bannir\");\nfor (const ip of suspects) console.log(\"À bannir : \" + ip + \" (\" + echecs[ip] + \" échecs)\");\n",
+     "stdin": [
+      "6",
+      "03:12:01 Failed password for root from 203.0.113.7",
+      "03:12:02 Failed password for root from 203.0.113.7",
+      "03:12:09 Accepted password for lea from 192.0.2.10",
+      "03:12:11 Failed password for admin from 198.51.100.4",
+      "03:12:15 Failed password for root from 203.0.113.7",
+      "03:13:00 Failed password for root from 203.0.113.7"
+     ]
+    },
+    {
+     "id": "cy-compromis",
+     "titre": "Un compte a-t-il été compromis ?",
+     "texte": "<p>Le signe d'une force brute <b>réussie<\/b> : des échecs, puis une connexion acceptée depuis la <b>même adresse<\/b>. Lis n lignes de journal. Pour chaque ligne <code>Accepted<\/code> dont l'adresse a déjà au moins 3 échecs <b>avant<\/b> cette ligne, affiche <b>Compte compromis : utilisateur depuis adresse<\/b>. Si rien n'est détecté, affiche <b>Aucune compromission<\/b>. L'utilisateur est le mot qui suit <code>for<\/code>.<\/p>",
+     "depart": "const n = Number(lire());\nconst lignes = [];\nfor (let i = 0; i < n; i++) lignes.push(lire());\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>7, 03:12:01 Failed password for admin from 203.0.113.7, 03:12:02 Failed password for admin from 203.0.113.7, 03:12:04 Failed password for admin from 203.0.113.7, 03:13:10 Failed password for sam from 198.51.100.4, 03:14:40 Accepted password for admin from 203.0.113.7, 03:15:00 Accepted password for lea from 192.0.2.10, 03:16:02 Failed password for sam from 198.51.100.4<\/code> → <code>Compte compromis : admin depuis 203.0.113.7<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "7",
+           "03:12:01 Failed password for admin from 203.0.113.7",
+           "03:12:02 Failed password for admin from 203.0.113.7",
+           "03:12:04 Failed password for admin from 203.0.113.7",
+           "03:13:10 Failed password for sam from 198.51.100.4",
+           "03:14:40 Accepted password for admin from 203.0.113.7",
+           "03:15:00 Accepted password for lea from 192.0.2.10",
+           "03:16:02 Failed password for sam from 198.51.100.4"
+          ],
+          "out": "^Compte compromis : admin depuis 203\\.0\\.113\\.7[ \\t]*$",
+          "notout": "lea"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Entrée <code>6, 03:12:01 Failed password for root from 203.0.113.7, 03:12:02 Failed password for root from 203.0.113.7, 03:12:09 Accepted password for lea from 192.0.2.10, 03:12:11 Failed password for admin from 198.51.100.4, 03:12:15 Failed password for root from 203.0.113.7, 03:13:00 Failed password for root from 203.0.113.7<\/code> → <code>Aucune compromission<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "6",
+           "03:12:01 Failed password for root from 203.0.113.7",
+           "03:12:02 Failed password for root from 203.0.113.7",
+           "03:12:09 Accepted password for lea from 192.0.2.10",
+           "03:12:11 Failed password for admin from 198.51.100.4",
+           "03:12:15 Failed password for root from 203.0.113.7",
+           "03:13:00 Failed password for root from 203.0.113.7"
+          ],
+          "out": "^Aucune compromission[ \\t]*$"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Un seul échec avant la réussite : pas d'alerte",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "3",
+           "08:00:01 Accepted password for lea from 192.0.2.10",
+           "08:02:11 Failed password for lea from 192.0.2.10",
+           "08:02:20 Accepted password for lea from 192.0.2.10"
+          ],
+          "out": "^Aucune compromission[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Parcours les lignes dans l'ordre en comptant les échecs par adresse ; sur une ligne <code>Accepted<\/code>, regarde le compteur de son adresse.",
+     "solution": "const n = Number(lire());\nconst lignes = [];\nfor (let i = 0; i < n; i++) lignes.push(lire());\nconst echecs = {};\nlet alerte = false;\nfor (const l of lignes) {\n  const mots = l.split(\" \");\n  const ip = mots[mots.length - 1];\n  const utilisateur = mots[mots.indexOf(\"for\") + 1];\n  if (l.includes(\"Failed password\")) {\n    echecs[ip] = (echecs[ip] || 0) + 1;\n  } else if (l.includes(\"Accepted\") && (echecs[ip] || 0) >= 3) {\n    console.log(\"Compte compromis : \" + utilisateur + \" depuis \" + ip);\n    alerte = true;\n  }\n}\nif (!alerte) console.log(\"Aucune compromission\");\n",
+     "stdin": [
+      "7",
+      "03:12:01 Failed password for admin from 203.0.113.7",
+      "03:12:02 Failed password for admin from 203.0.113.7",
+      "03:12:04 Failed password for admin from 203.0.113.7",
+      "03:13:10 Failed password for sam from 198.51.100.4",
+      "03:14:40 Accepted password for admin from 203.0.113.7",
+      "03:15:00 Accepted password for lea from 192.0.2.10",
+      "03:16:02 Failed password for sam from 198.51.100.4"
+     ]
+    },
+    {
+     "id": "cy-scan",
+     "titre": "Détecter un balayage de ports",
+     "texte": "<p>Le journal d'un pare-feu donne, pour chaque connexion refusée, l'adresse source et le port visé, séparés par un espace. Lis n lignes. Une adresse qui a visé <b>au moins 5 ports différents<\/b> fait un balayage : affiche <b>Balayage : adresse (N ports)<\/b> pour chacune, dans l'ordre alphabétique. Sinon affiche <b>Aucun balayage<\/b>.<\/p>\n<p><b>Exemple<\/b><\/p>\n<pre><code>const s = new Set();\ns.add(22); s.add(22); s.add(80);\ns.size;   // 2 : les doublons ne comptent pas<\/code><\/pre>",
+     "depart": "const n = Number(lire());\nconst lignes = [];\nfor (let i = 0; i < n; i++) lignes.push(lire());\n",
+     "objectifs": [
+      {
+       "txt": "Entrée <code>8, 203.0.113.7 21, 203.0.113.7 22, 192.0.2.10 443, 203.0.113.7 23, 203.0.113.7 80, 203.0.113.7 3306, 203.0.113.7 22, 192.0.2.10 443<\/code> → <code>Balayage : 203.0.113.7 (5 ports)<\/code>",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "8",
+           "203.0.113.7 21",
+           "203.0.113.7 22",
+           "192.0.2.10 443",
+           "203.0.113.7 23",
+           "203.0.113.7 80",
+           "203.0.113.7 3306",
+           "203.0.113.7 22",
+           "192.0.2.10 443"
+          ],
+          "out": "^Balayage : 203\\.0\\.113\\.7 \\(5 ports\\)[ \\t]*$",
+          "notout": "192\\.0\\.2\\.10"
+         }
+        }
+       ]
+      },
+      {
+       "txt": "Cinq fois le même port n'est pas un balayage",
+       "r": [
+        {
+         "test": {
+          "stdin": [
+           "5",
+           "192.0.2.10 443",
+           "192.0.2.10 443",
+           "192.0.2.10 443",
+           "192.0.2.10 443",
+           "192.0.2.10 443"
+          ],
+          "out": "^Aucun balayage[ \\t]*$"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "Un <code>Set<\/code> par adresse pour ne compter chaque port qu'une fois ; <code>size<\/code> donne le nombre de ports distincts.",
+     "solution": "const n = Number(lire());\nconst lignes = [];\nfor (let i = 0; i < n; i++) lignes.push(lire());\nconst ports = {};\nfor (const l of lignes) {\n  const [ip, port] = l.split(\" \");\n  if (!ports[ip]) ports[ip] = new Set();\n  ports[ip].add(port);\n}\nconst scans = Object.keys(ports).filter(ip => ports[ip].size >= 5).sort();\nif (scans.length === 0) console.log(\"Aucun balayage\");\nfor (const ip of scans) console.log(\"Balayage : \" + ip + \" (\" + ports[ip].size + \" ports)\");\n",
+     "stdin": [
+      "8",
+      "203.0.113.7 21",
+      "203.0.113.7 22",
+      "192.0.2.10 443",
+      "203.0.113.7 23",
+      "203.0.113.7 80",
+      "203.0.113.7 3306",
+      "203.0.113.7 22",
+      "192.0.2.10 443"
+     ]
+    }
+   ]
+  }
+ ]
+};
+</script>
+  <script src="../../data/modules.js"></script>
+  <script src="../../assets/app.js"></script>
+  <script src="../../assets/jeu.js"></script>
+  <script src="../../assets/labo-code.js"></script>
+</body>
+</html>

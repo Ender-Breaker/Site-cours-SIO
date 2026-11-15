@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Cybersécurité : cryptographie, du code de César à TLS — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="securite-web" data-chapter="cyber-crypto">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/securite-web.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>La <b>cryptographie</b> rend une information illisible pour ceux qui n'ont pas la clé, prouve qu'elle n'a pas été modifiée, et prouve qui l'a écrite. Elle est derrière HTTPS, les mots de passe, les signatures, les cartes bancaires.</p>
+<h2>1. Encoder, chiffrer, hacher : trois choses différentes</h2>
+<table><tr><th>Opération</th><th>Réversible ?</th><th>Besoin d'une clé ?</th><th>Sert à</th></tr><tr><td><b>Encoder</b> (Base64, hexadécimal, URL)</td><td>oui, par tout le monde</td><td>non</td><td>transporter des données</td></tr><tr><td><b>Chiffrer</b> (AES, RSA)</td><td>oui, <b>avec la clé</b></td><td>oui</td><td>la confidentialité</td></tr><tr><td><b>Hacher</b> (SHA-256, bcrypt)</td><td><b>non</b></td><td>non</td><td>l'intégrité, les mots de passe</td></tr></table>
+<div class="essai" data-langue="js"><pre><code>// Base64 n'est PAS un chiffrement : n'importe qui le décode.
+const secret = "motdepasse=Azerty123";
+const encode = btoa(secret);
+console.log(encode);
+console.log(atob(encode));</code></pre></div>
+<div class="box attention"><b>Encoder n'est pas protéger</b><p>Un mot de passe « caché » en Base64 dans un fichier de configuration ou un cookie est en clair pour quiconque sait lire. C'est une erreur classique, et le premier réflexe en rétro-ingénierie.</p></div>
+<h2>2. Les chiffres historiques, et pourquoi ils sont cassés</h2>
+<p>Le <b>chiffre de César</b> décale chaque lettre. Il n'a que 25 clés possibles : on les essaie toutes.</p>
+<div class="essai" data-langue="js"><pre><code>function cesar(texte, cle) {
+  return texte.replace(/[a-z]/g, c =&gt; String.fromCharCode((c.charCodeAt(0) - 97 + cle + 26) % 26 + 97));
+}
+const message = cesar("rendez vous a midi", 3);
+console.log(message);
+for (let cle = 1; cle &lt;= 5; cle++) console.log(cle, cesar(message, -cle));   // attaque par force brute</code></pre></div>
+<p>La <b>substitution</b> (chaque lettre remplacée par une autre) a des milliards de milliards de clés, et tombe pourtant à l'<b>analyse de fréquences</b> : en français, la lettre la plus fréquente est le <code>e</code>.</p>
+<div class="essai" data-langue="js"><pre><code>function frequences(texte) {
+  const f = {};
+  for (const c of texte.replace(/[^a-z]/g, "")) f[c] = (f[c] || 0) + 1;
+  return Object.entries(f).sort((a, b) =&gt; b[1] - a[1]).slice(0, 4).map(([l, n]) =&gt; l + ":" + n).join(" ");
+}
+console.log(frequences("la securite est l affaire de tous et de chaque instant"));</code></pre></div>
+<p>Leçon : la solidité ne vient pas du secret de la méthode. <b>Principe de Kerckhoffs</b> : un système doit rester sûr même si tout est public, sauf la clé.</p>
+<h2>3. Le XOR, brique de base</h2>
+<p><code>a XOR b</code> vaut 1 si les bits sont différents. Appliquer deux fois la même clé redonne le message : c'est la base de nombreux chiffrements… et de beaucoup d'obfuscations que l'on rencontre en analyse de programmes.</p>
+<div class="essai" data-langue="js"><pre><code>function xor(octets, cle) { return octets.map((o, i) =&gt; o ^ cle.charCodeAt(i % cle.length)); }
+const clair = [..."attaque a l aube"].map(c =&gt; c.charCodeAt(0));
+const chiffre = xor(clair, "cle");
+console.log(chiffre.map(o =&gt; o.toString(16).padStart(2, "0")).join(" "));
+console.log(String.fromCharCode(...xor(chiffre, "cle")));       // la même opération déchiffre</code></pre></div>
+<p>Avec une clé courte et répétée, le XOR se casse facilement. Avec une clé aléatoire aussi longue que le message et jamais réutilisée (*masque jetable*), il est théoriquement incassable, mais impraticable.</p>
+<h2>4. Le chiffrement symétrique</h2>
+<p><b>Une seule clé</b> chiffre et déchiffre. Rapide, il protège les gros volumes : disques, fichiers, flux réseau.</p>
+<table><tr><th>Algorithme</th><th>État</th></tr><tr><td><b>AES</b> (128 ou 256 bits)</td><td>le standard actuel</td></tr><tr><td>ChaCha20</td><td>moderne, répandu sur mobile</td></tr><tr><td>DES, 3DES, RC4</td><td><b>obsolètes</b>, à bannir</td></tr></table>
+<p>Son problème : comment transmettre la clé à l'autre personne sans qu'on l'intercepte ?</p>
+<h2>5. Le chiffrement asymétrique</h2>
+<p>Chacun possède une <b>paire de clés</b> : une <b>publique</b>, que tout le monde peut connaître, et une <b>privée</b>, gardée secrète. Ce que l'une chiffre, seule l'autre le déchiffre.</p>
+<table><tr><th>Je veux…</th><th>J'utilise</th></tr><tr><td>envoyer un secret à Léa</td><td>la clé <b>publique de Léa</b> (elle seule pourra déchiffrer)</td></tr><tr><td>prouver que j'ai écrit un message</td><td>ma clé <b>privée</b> : c'est une <b>signature</b></td></tr><tr><td>vérifier la signature de Léa</td><td>la clé <b>publique de Léa</b></td></tr></table>
+<p>Algorithmes : <b>RSA</b>, courbes elliptiques (<b>ECDSA</b>, <b>Ed25519</b>). Ils sont lents : en pratique on s'en sert pour échanger une clé symétrique, puis on chiffre tout le reste en AES. C'est exactement ce que fait TLS, et ce que font tes clés SSH.</p>
+<h2>6. Les fonctions de hachage</h2>
+<p>Une fonction de hachage transforme n'importe quelle donnée en une <b>empreinte</b> de taille fixe.</p>
+<table><tr><th>Propriété</th><th>Signifie</th></tr><tr><td>Déterministe</td><td>la même entrée donne toujours la même empreinte</td></tr><tr><td>À sens unique</td><td>impossible de remonter de l'empreinte à l'entrée</td></tr><tr><td>Effet d'avalanche</td><td>un seul caractère changé bouleverse toute l'empreinte</td></tr><tr><td>Résistance aux collisions</td><td>impossible en pratique de trouver deux entrées de même empreinte</td></tr></table>
+<div class="essai" data-langue="js"><pre><code>// Un hachage jouet (djb2) pour voir les propriétés. En vrai : SHA-256.
+function empreinte(texte) {
+  let h = 5381;
+  for (const c of texte) h = ((h * 33) ^ c.charCodeAt(0)) &gt;&gt;&gt; 0;
+  return h.toString(16).padStart(8, "0");
+}
+console.log(empreinte("virement de 100 euros a Lea"));
+console.log(empreinte("virement de 900 euros a Lea"));     // un caractère change, tout change
+console.log(empreinte("virement de 100 euros a Lea"));     // identique à la première</code></pre></div>
+<table><tr><th>Algorithme</th><th>Usage</th></tr><tr><td><b>SHA-256</b>, SHA-3</td><td>intégrité de fichiers, signatures</td></tr><tr><td>MD5, SHA-1</td><td><b>cassés</b> (collisions) : plus pour la sécurité</td></tr><tr><td><b>bcrypt</b>, <b>Argon2</b></td><td>mots de passe : volontairement lents, avec sel</td></tr></table>
+<p>Vérifier un téléchargement : <code>sha256sum fichier.iso</code> (Linux) ou <code>Get-FileHash fichier.iso</code> (PowerShell), puis comparer avec l'empreinte publiée par l'éditeur.</p>
+<h2>7. Certificats et TLS</h2>
+<p>Un <b>certificat</b> associe une clé publique à une identité (un nom de domaine). Il est <b>signé</b> par une <b>autorité de certification</b> (AC) à laquelle ton navigateur fait confiance. L'ensemble forme une infrastructure à clés publiques (<b>PKI</b>).</p>
+<p>La poignée de main TLS, en résumé :</p>
+<ol><li>Le navigateur annonce les algorithmes qu'il connaît.</li><li>Le serveur envoie son <b>certificat</b>.</li><li>Le navigateur vérifie la signature de l'AC, le nom de domaine et les dates de validité.</li><li>Les deux s'accordent sur une <b>clé de session</b> symétrique, grâce à un échange asymétrique.</li><li>Toute la suite est chiffrée en AES avec cette clé.</li></ol>
+<section class="tuto"><h3><small>Tutoriel</small>Casser un chiffre de César par les fréquences</h3>
+<div class="etape"><h4>Compter les lettres</h4>
+<p>La lettre la plus fréquente du message chiffré est probablement un <code>e</code>.</p>
+<div class="essai" data-langue="js"><pre><code>const chiffre = "ohv hohyhv gh vlr dssuhqqhqw od vhfxulwh hq fkhufkdqw ohv idloohv";
+const f = {};
+for (const c of chiffre.replace(/[^a-z]/g, "")) f[c] = (f[c] || 0) + 1;
+const plusFrequente = Object.entries(f).sort((a, b) =&gt; b[1] - a[1])[0][0];
+console.log(plusFrequente);</code></pre></div>
+</div>
+<div class="etape"><h4>En déduire la clé</h4>
+<p>L'écart entre cette lettre et <code>e</code> donne le décalage.</p>
+<div class="essai" data-langue="js"><pre><code>const plusFrequente = "h";
+const cle = (plusFrequente.charCodeAt(0) - "e".charCodeAt(0) + 26) % 26;
+console.log("clé probable :", cle);</code></pre></div>
+</div>
+<div class="etape"><h4>Déchiffrer</h4>
+<div class="essai" data-langue="js"><pre><code>const chiffre = "ohv hohyhv gh vlr dssuhqqhqw od vhfxulwh hq fkhufkdqw ohv idloohv";
+const clair = chiffre.replace(/[a-z]/g, c =&gt; String.fromCharCode((c.charCodeAt(0) - 97 - 3 + 26) % 26 + 97));
+console.log(clair);</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : déchiffrer César</b><p>Avec la clé.</p><a class="defi-go" href="labo-cyber.html#m=cy-cesar">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : César sans la clé</b><p>Essaie les 25 décalages.</p><a class="defi-go" href="labo-cyber.html#m=cy-cesar-force">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : le XOR</b><p>Déchiffre des octets avec une clé répétée.</p><a class="defi-go" href="labo-cyber.html#m=cy-xor">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p>Encoder ≠ chiffrer ≠ hacher. </p><p> Symétrique (AES) : une clé, rapide. Asymétrique (RSA, Ed25519) : clé publique / clé privée, pour échanger une clé et signer. </p><p> Hachage : empreinte à sens unique (SHA-256 pour l'intégrité, bcrypt / Argon2 pour les mots de passe). </p><p> Certificat = clé publique + identité, signé par une autorité. </p><p> Kerckhoffs : seule la clé doit être secrète.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cyber.html">labo cybersécurité</a> te fait écrire des protections, casser des chiffres faibles et analyser des programmes. Le <a href="labo-defense.html">labo terminal</a> te fait enquêter et durcir un serveur. Et le <a href="duel.html">duel attaque / défense</a> t'oppose à un autre élève.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "Base64 est…",
+  "type": "qcm",
+  "options": [
+   "un hachage",
+   "un encodage, réversible par tout le monde",
+   "une signature",
+   "un chiffrement"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle opération est irréversible ?",
+  "type": "qcm",
+  "options": [
+   "Le chiffrement symétrique",
+   "Le chiffrement asymétrique",
+   "L'encodage",
+   "Le hachage"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Combien de clés utilise un chiffrement symétrique ?",
+  "type": "qcm",
+  "options": [
+   "Une par message",
+   "Deux, une publique et une privée",
+   "Une seule, partagée",
+   "Aucune"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel est le standard actuel du chiffrement symétrique ?",
+  "type": "qcm",
+  "options": [
+   "RC4",
+   "DES",
+   "MD5",
+   "AES"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Pour envoyer un message confidentiel à Léa, quelle clé utilises-tu ?",
+  "type": "qcm",
+  "options": [
+   "Ta clé privée",
+   "La clé privée de Léa",
+   "La clé publique de Léa",
+   "Ta clé publique"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Avec quelle clé signes-tu un message ?",
+  "type": "qcm",
+  "options": [
+   "Ta clé privée",
+   "La clé publique du destinataire",
+   "Ta clé publique",
+   "Une clé symétrique"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Pourquoi le chiffre de César est-il faible ?",
+  "type": "qcm",
+  "options": [
+   "Il n'a que 25 clés possibles",
+   "Il est trop lent",
+   "Il utilise des nombres",
+   "Il est secret"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle technique casse un chiffre de substitution ?",
+  "type": "qcm",
+  "options": [
+   "Le déni de service",
+   "La force brute sur 25 clés",
+   "L'analyse de fréquences",
+   "L'injection"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que dit le principe de Kerckhoffs ?",
+  "type": "qcm",
+  "options": [
+   "Une clé doit être courte",
+   "La sécurité doit reposer sur le secret de la clé, pas de la méthode",
+   "Il faut garder l'algorithme secret",
+   "Le chiffrement est inutile"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle propriété d'un hachage fait qu'un caractère modifié change toute l'empreinte ?",
+  "type": "qcm",
+  "options": [
+   "La compression",
+   "L'effet d'avalanche",
+   "La réversibilité",
+   "Le sel"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quels algorithmes de hachage ne doivent plus servir à la sécurité ?",
+  "type": "qcm",
+  "options": [
+   "bcrypt et Argon2",
+   "AES et RSA",
+   "SHA-256 et SHA-3",
+   "MD5 et SHA-1"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que contient un certificat TLS ?",
+  "type": "qcm",
+  "options": [
+   "Le mot de passe du site",
+   "L'historique du site",
+   "La clé privée du serveur",
+   "Une clé publique et une identité, signées par une autorité"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi TLS utilise-t-il de l'asymétrique puis du symétrique ?",
+  "type": "qcm",
+  "options": [
+   "Par compatibilité avec les vieux navigateurs",
+   "Parce que l'un des deux est cassé",
+   "L'asymétrique sert à échanger une clé, le symétrique (rapide) chiffre le reste",
+   "Pour chiffrer deux fois"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que vaut `x XOR cle XOR cle` ?",
+  "type": "qcm",
+  "options": [
+   "cle",
+   "0",
+   "x",
+   "1"
+  ],
+  "answer": 2,
+  "explication": "Appliquer deux fois la même clé annule l'opération."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande Linux calcule l'empreinte SHA-256 d'un fichier ?",
+  "type": "qcm",
+  "options": [
+   "`sha256sum`",
+   "`checkfile`",
+   "`hash256`",
+   "`md5`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Un mot de passe stocké en Base64 est protégé.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Base64 se décode sans clé."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque outil à son usage.",
+  "type": "associer",
+  "paires": [
+   [
+    "AES",
+    "chiffrer un disque"
+   ],
+   [
+    "RSA",
+    "échanger une clé, signer"
+   ],
+   [
+    "SHA-256",
+    "vérifier l'intégrité"
+   ],
+   [
+    "bcrypt",
+    "stocker un mot de passe"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

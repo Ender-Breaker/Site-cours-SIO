@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Rétro-ingénierie : lire de l'assembleur — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="securite-web" data-chapter="cyber-reverse-asm">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/securite-web.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>L'<b>assembleur</b> est la forme lisible du code machine : une ligne par instruction du processeur. On n'a pas besoin de savoir en écrire pour faire de la rétro-ingénierie, mais il faut savoir en <b>lire</b>. Ce chapitre couvre le x86-64 (PC), en syntaxe Intel : <code>instruction destination, source</code>.</p>
+<h2>1. Les registres</h2>
+<p>Un <b>registre</b> est une minuscule case mémoire à l'intérieur du processeur.</p>
+<table><tr><th>Registre</th><th>Rôle habituel</th></tr><tr><td><code>rax</code></td><td>résultat des calculs et <b>valeur de retour</b> d'une fonction</td></tr><tr><td><code>rdi</code>, <code>rsi</code>, <code>rdx</code>, <code>rcx</code></td><td>les quatre premiers <b>arguments</b> d'une fonction (Linux)</td></tr><tr><td><code>rbx</code>, <code>r8</code> … <code>r15</code></td><td>usage général</td></tr><tr><td><code>rsp</code></td><td>pointeur de pile : le sommet de la pile</td></tr><tr><td><code>rbp</code></td><td>pointeur de base : le repère des variables locales</td></tr><tr><td><code>rip</code></td><td>l'adresse de la prochaine instruction</td></tr></table>
+<p><code>eax</code> désigne les 32 bits bas de <code>rax</code>, <code>ax</code> les 16 bits bas, <code>al</code> les 8 bits bas : c'est le même registre vu par une fenêtre plus étroite.</p>
+<h2>2. Les instructions essentielles</h2>
+<table><tr><th>Instruction</th><th>Effet</th></tr><tr><td><code>mov a, b</code></td><td>a = b</td></tr><tr><td><code>add a, b</code> / <code>sub a, b</code></td><td>a = a + b / a = a − b</td></tr><tr><td><code>inc a</code> / <code>dec a</code></td><td>a++ / a--</td></tr><tr><td><code>imul a, b</code></td><td>a = a × b</td></tr><tr><td><code>xor a, b</code></td><td>a = a XOR b ; <code>xor eax, eax</code> met eax à zéro</td></tr><tr><td><code>and</code>, <code>or</code>, <code>shl</code>, <code>shr</code></td><td>opérations sur les bits, décalages</td></tr><tr><td><code>lea a, [b + c*4]</code></td><td>calcule une <b>adresse</b> (ou fait une addition rapide)</td></tr><tr><td><code>cmp a, b</code></td><td>compare en calculant a − b, sans garder le résultat : positionne les <b>drapeaux</b></td></tr><tr><td><code>test a, a</code></td><td>a est-il nul ?</td></tr><tr><td><code>jmp cible</code></td><td>saut inconditionnel</td></tr><tr><td><code>je</code> / <code>jne</code></td><td>saut si égal / si différent</td></tr><tr><td><code>jl</code>, <code>jle</code>, <code>jg</code>, <code>jge</code></td><td>saut si inférieur, inférieur ou égal, supérieur, supérieur ou égal</td></tr><tr><td><code>call fonction</code></td><td>appelle une fonction (empile l'adresse de retour)</td></tr><tr><td><code>ret</code></td><td>revient à l'appelant</td></tr><tr><td><code>push a</code> / <code>pop a</code></td><td>empile / dépile</td></tr></table>
+<p>Les crochets désignent la <b>mémoire</b> : <code>mov eax, [rbp-4]</code> lit la variable locale rangée 4 octets sous <code>rbp</code>.</p>
+<h2>3. Un simulateur pour s'entraîner</h2>
+<p>Ce mini-processeur exécute quelques instructions et affiche les registres après chaque ligne. Modifie le programme et relance.</p>
+<div class="essai" data-langue="js"><pre><code>function executer(programme) {
+  const r = { eax: 0, ebx: 0, ecx: 0 };
+  const val = x =&gt; (x in r ? r[x] : Number(x));
+  const lignes = programme.trim().split("\n").map(l =&gt; l.trim());
+  let egal = false, n = 0;
+  for (let i = 0; i &lt; lignes.length &amp;&amp; n++ &lt; 100; i++) {
+    const [op, a, b] = lignes[i].replace(",", "").split(/\s+/);
+    if (op === "mov") r[a] = val(b);
+    else if (op === "add") r[a] += val(b);
+    else if (op === "sub") r[a] -= val(b);
+    else if (op === "imul") r[a] *= val(b);
+    else if (op === "xor") r[a] ^= val(b);
+    else if (op === "cmp") egal = val(a) === val(b);
+    else if (op === "jne" &amp;&amp; !egal) i = lignes.indexOf(a + ":");
+    else if (op === "jmp") i = lignes.indexOf(a + ":");
+    if (!op.endsWith(":")) console.log(lignes[i].padEnd(14), JSON.stringify(r));
+  }
+}
+executer(`
+mov eax, 5
+mov ebx, 3
+add eax, ebx
+imul eax, 2
+xor ebx, ebx
+`);</code></pre></div>
+<h2>4. Reconnaître une condition</h2>
+<pre><code>    cmp   eax, 18            if (age &gt;= 18) {
+    jl    .sinon                 majeur();
+    call  majeur             } else {
+    jmp   .fin                   mineur();
+.sinon:                      }
+    call  mineur
+.fin:</code></pre>
+<p>Le saut est l'<b>inverse</b> de la condition du code source : <code>jl</code> (« saute si inférieur ») saute par-dessus le bloc du <code>if</code>. Un <code>cmp</code> suivi d'un saut conditionnel, c'est un <code>if</code>.</p>
+<h2>5. Reconnaître une boucle</h2>
+<pre><code>    mov   ecx, 0             for (int i = 0; i &lt; 10; i++) {
+.boucle:                         total += i;
+    cmp   ecx, 10            }
+    jge   .fin
+    add   eax, ecx
+    inc   ecx
+    jmp   .boucle
+.fin:</code></pre>
+<p>Un saut <b>vers l'arrière</b> signale une boucle. Essaie dans le simulateur : la somme de 1 à 4.</p>
+<div class="essai" data-langue="js"><pre><code>function executer(programme) {
+  const r = { eax: 0, ecx: 0 };
+  const val = x =&gt; (x in r ? r[x] : Number(x));
+  const lignes = programme.trim().split("\n").map(l =&gt; l.trim());
+  let egal = false, n = 0;
+  for (let i = 0; i &lt; lignes.length &amp;&amp; n++ &lt; 200; i++) {
+    const [op, a, b] = lignes[i].replace(",", "").split(/\s+/);
+    if (op === "mov") r[a] = val(b);
+    else if (op === "add") r[a] += val(b);
+    else if (op === "cmp") egal = val(a) === val(b);
+    else if (op === "jne" &amp;&amp; !egal) i = lignes.indexOf(a + ":");
+  }
+  console.log(JSON.stringify(r));
+}
+executer(`
+mov eax, 0
+mov ecx, 1
+boucle:
+add eax, ecx
+add ecx, 1
+cmp ecx, 5
+jne boucle
+`);</code></pre></div>
+<h2>6. Un appel de fonction</h2>
+<pre><code>    mov   edi, 3             ; 1er argument
+    mov   esi, 4             ; 2e argument
+    call  addition           ; résultat dans eax
+    ...
+addition:
+    push  rbp                ; prologue : sauvegarde le repère de l'appelant
+    mov   rbp, rsp
+    mov   eax, edi
+    add   eax, esi
+    pop   rbp                ; épilogue
+    ret</code></pre>
+<p>Quand tu vois <code>push rbp</code> / <code>mov rbp, rsp</code>, une fonction commence. Ce qui est dans <code>rdi</code>, <code>rsi</code>, <code>rdx</code> juste avant un <code>call</code> ce sont ses arguments ; ce qui est dans <code>rax</code> juste après, son résultat. C'est la <b>convention d'appel</b> (ici System V, celle de Linux ; Windows utilise <code>rcx</code>, <code>rdx</code>, <code>r8</code>, <code>r9</code>).</p>
+<h2>7. Du C à l'assembleur, et retour</h2>
+<p>Le meilleur exercice : écrire trois lignes de C, regarder ce que le compilateur en fait (<code>gcc -S -O0 -masm=intel fichier.c</code>, ou le site Compiler Explorer), puis recommencer avec <code>-O2</code>. Un décompilateur comme <b>Ghidra</b> fait le chemin inverse et propose :</p>
+<pre><code>bool verifier(char *saisie) {
+    return strcmp(saisie, "sio2026") == 0;
+}</code></pre>
+<p>Les noms (<code>verifier</code>, <code>saisie</code>) sont ceux que <b>l'analyste</b> a donnés : renommer les fonctions et les variables au fur et à mesure qu'on les comprend, c'est le cœur du travail.</p>
+<section class="tuto"><h3><small>Tutoriel</small>Lire une fonction inconnue</h3>
+<div class="etape"><h4>Le désassemblage</h4>
+<pre><code>mystere:
+    mov   eax, edi
+    imul  eax, edi
+    add   eax, 1
+    ret</code></pre>
+</div>
+<div class="etape"><h4>Ligne par ligne</h4>
+<p><code>edi</code> est le premier argument, appelons-le <code>x</code>. <code>eax = x</code>, puis <code>eax = eax × x</code>, puis <code>eax = eax + 1</code>, puis retour avec le résultat dans <code>eax</code>.</p>
+</div>
+<div class="etape"><h4>La réponse</h4>
+<p><code>int mystere(int x) { return x * x + 1; }</code>. Vérifie avec le simulateur : remplace <code>edi</code> par une valeur.</p>
+<div class="essai" data-langue="js"><pre><code>let eax = 0; const edi = 6;
+eax = edi;
+eax = eax * edi;
+eax = eax + 1;
+console.log(eax);</code></pre></div>
+</div>
+</section>
+<div class="box retenir"><b>À retenir</b><p>Syntaxe Intel : <code>instruction destination, source</code>. </p><p> <code>rax</code> : résultat ; <code>rdi</code>, <code>rsi</code>, <code>rdx</code> : arguments ; <code>rsp</code> / <code>rbp</code> : la pile ; <code>rip</code> : l'instruction suivante. </p><p> <code>cmp</code> + saut conditionnel = un <code>if</code> ; un saut vers l'arrière = une boucle ; <code>call</code> / <code>ret</code> = une fonction. </p><p> <code>[…]</code> = un accès à la mémoire. </p><p> On comprend en renommant petit à petit.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cyber.html">labo cybersécurité</a> te fait écrire des protections, casser des chiffres faibles et analyser des programmes. Le <a href="labo-defense.html">labo terminal</a> te fait enquêter et durcir un serveur. Et le <a href="duel.html">duel attaque / défense</a> t'oppose à un autre élève.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "En syntaxe Intel, que fait `mov eax, 5` ?",
+  "type": "qcm",
+  "options": [
+   "Il met eax dans 5",
+   "Il compare eax à 5",
+   "Il met 5 dans eax",
+   "Il ajoute 5 à eax"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Dans quel registre une fonction renvoie-t-elle son résultat ?",
+  "type": "qcm",
+  "options": [
+   "`rip`",
+   "`rsp`",
+   "`rdi`",
+   "`rax`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Sous Linux, quel registre contient le premier argument d'une fonction ?",
+  "type": "qcm",
+  "options": [
+   "`rdi`",
+   "`rax`",
+   "`rip`",
+   "`rbp`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que contient le registre `rip` ?",
+  "type": "qcm",
+  "options": [
+   "Le résultat du dernier calcul",
+   "Le sommet de la pile",
+   "L'adresse de la prochaine instruction",
+   "Le premier argument"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que contient le registre `rsp` ?",
+  "type": "qcm",
+  "options": [
+   "Un compteur de boucle",
+   "L'instruction suivante",
+   "L'adresse du sommet de la pile",
+   "La valeur de retour"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel est le lien entre `eax` et `rax` ?",
+  "type": "qcm",
+  "options": [
+   "eax est la copie de sauvegarde de rax",
+   "eax désigne les 32 bits bas de rax",
+   "eax est deux fois plus grand",
+   "Ce sont deux registres distincts"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait `xor eax, eax` ?",
+  "type": "qcm",
+  "options": [
+   "Il met eax à zéro",
+   "Il double eax",
+   "Rien",
+   "Il inverse eax"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait `cmp eax, 18` ?",
+  "type": "qcm",
+  "options": [
+   "Il met 18 dans eax",
+   "Il saute à la ligne 18",
+   "Il compare et positionne les drapeaux, sans modifier eax",
+   "Il soustrait 18 à eax"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait `jne cible` ?",
+  "type": "qcm",
+  "options": [
+   "Il saute si égal",
+   "Il saute si la comparaison précédente a donné « différent »",
+   "Il appelle une fonction",
+   "Il saute toujours"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que signalent un `cmp` suivi d'un saut conditionnel ?",
+  "type": "qcm",
+  "options": [
+   "Un appel de fonction",
+   "La fin du programme",
+   "Une déclaration de variable",
+   "Une condition (if)"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que signale un saut vers une adresse située plus haut dans le code ?",
+  "type": "qcm",
+  "options": [
+   "Une erreur",
+   "Un commentaire",
+   "Une boucle",
+   "Un retour de fonction"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait `call` ?",
+  "type": "qcm",
+  "options": [
+   "Il appelle une fonction en empilant l'adresse de retour",
+   "Il compare deux valeurs",
+   "Il lit la mémoire",
+   "Il termine le programme"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que désignent les crochets dans `mov eax, [rbp-4]` ?",
+  "type": "qcm",
+  "options": [
+   "Une lecture en mémoire à cette adresse",
+   "Un tableau",
+   "Un commentaire",
+   "Une valeur facultative"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que marquent `push rbp` puis `mov rbp, rsp` ?",
+  "type": "qcm",
+  "options": [
+   "La fin du programme",
+   "Une comparaison",
+   "Une boucle",
+   "Le début d'une fonction (prologue)"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Avec `mov eax, edi` / `imul eax, edi` / `add eax, 1` / `ret`, que calcule la fonction pour x ?",
+  "type": "qcm",
+  "options": [
+   "x × (x + 1)",
+   "x × x + 1",
+   "2x + 1",
+   "x + 1"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi le saut d'un `if (a >= 18)` est-il souvent `jl` ?",
+  "type": "qcm",
+  "options": [
+   "C'est une erreur du compilateur",
+   "jl signifie « supérieur »",
+   "Pour aller plus vite",
+   "Le saut contourne le bloc quand la condition est fausse"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Dans un décompilateur, les noms de variables affichés sont ceux du programmeur d'origine.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Ils ont disparu à la compilation : c'est l'analyste qui renomme."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque instruction à son effet.",
+  "type": "associer",
+  "paires": [
+   [
+    "`mov`",
+    "copier une valeur"
+   ],
+   [
+    "`add`",
+    "additionner"
+   ],
+   [
+    "`cmp`",
+    "comparer"
+   ],
+   [
+    "`jmp`",
+    "sauter"
+   ],
+   [
+    "`ret`",
+    "revenir à l'appelant"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

@@ -244,15 +244,17 @@ def chapitres(mid, fiche):
     src = "\n".join(open(f, encoding="utf-8").read() for f in sorted(glob.glob(os.path.join(ICI, "src", mid + "-*.txt"))))
     res = []
     labo = fiche.get("labo", {}).get("href")
+    lab0 = fiche.get("labo", {})
     for bloc in re.split(r"^=== ", src, flags=re.M)[1:]:
         tete, _, reste = bloc.partition("\n")
         cid, titre, niv = [x.strip() for x in tete.split(" | ")]
         cours, _, exos = reste.partition("\n--- exos\n")
         ex = [exercice(l) for l in exos.split("\n") if l.strip()]
-        langue = LANGUE.get(mid)
+        langue = LANGUE.get(mid) or fiche.get("langue")
         fin = ""
         if labo:
-            fin = '\n<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="%s">%s</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.</p></div>' % (labo, fiche["labo"]["titre"])
+            fin = '\n<div class="box retenir"><b>Passe à la pratique</b><p>%s</p></div>' % (
+                lab0.get("fin") or 'Le <a href="%s">%s</a> te fait écrire ces programmes pour de vrai, vérifiés automatiquement.' % (labo, lab0["titre"]))
         page = PAGE % dict(titre=html.escape(titre, quote=False), mid=mid, cid=cid, cours=balisage(cours, langue, labo), fin=fin, exos=js_json(ex),
                            essai='<script src="../../assets/jeu.js"></script>\n<script src="../../assets/essai.js"></script>\n' if langue else "")
         os.makedirs(os.path.join(RACINE, "modules", mid), exist_ok=True)
@@ -314,14 +316,42 @@ def M(id, titre, texte, depart, solution, tests=(), regles=(), indice="", stdin=
     return m
 
 
+LABO_PAGE = """<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>%s — Étude Facile</title>
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="%s">
+<script>
+window.EF_CODE = %s;
+</script>
+  <script src="../../data/modules.js"></script>
+  <script src="../../assets/app.js"></script>
+  <script src="../../assets/jeu.js"></script>
+  <script src="../../assets/labo-code.js"></script>
+</body>
+</html>
+"""
+
+
 def labo(mid, fiche):
     lab = fiche["labo"]
     chemin = os.path.join(RACINE, "modules", mid, lab["href"])
+    if not os.path.exists(chemin):  # nouveau labo : page créée depuis le modèle, avec la configuration lab["cfg"]
+        cfg0 = dict(lab["cfg"], lecons=[])
+        open(chemin, "w", encoding="utf-8").write(LABO_PAGE % (html.escape(lab["titre"]), mid, json.dumps(cfg0, ensure_ascii=False)))
     page = open(chemin, encoding="utf-8").read()
     a = page.index("window.EF_CODE = ") + len("window.EF_CODE = ")
     b = page.index("};\n</script>", a) + 1
     cfg = json.loads(page[a:b])
     anciennes = {m["id"]: m for l in cfg["lecons"] for m in l["missions"]}
+    for k, v in lab.get("cfg", {}).items():
+        cfg[k] = v
     spec = importlib.util.spec_from_file_location("labo_" + mid, os.path.join(ICI, "labos", mid + ".py"))
     mod = importlib.util.module_from_spec(spec); mod.M = M
     sc = importlib.util.spec_from_file_location("communs", os.path.join(ICI, "labos", "communs.py"))
@@ -362,12 +392,55 @@ def labo(mid, fiche):
 
 
 # ---------------------------------------------------------------- data/modules.js
+TERMINAL_PAGE = """<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>%s — %s — Étude Facile</title>
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="%s">
+<script>
+/* Page générée par outils/gen.py à partir de outils/labos/%s.py : ne pas modifier à la main. */
+window.EF_LABO = %s;
+</script>
+  <script src="../../data/modules.js"></script>
+  <script src="../../assets/app.js"></script>
+  <script src="../../assets/terminal.js"></script>
+  <script src="../../assets/labo.js"></script>
+</body>
+</html>
+"""
+
+
+def labo_terminal(mid, fiche, source):
+    """Labo en terminal simulé (moteur assets/labo.js) décrit dans outils/labos/<source>.py (variables HREF et LAB)."""
+    spec = importlib.util.spec_from_file_location("labo_" + source, os.path.join(ICI, "labos", source + ".py"))
+    m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
+    vus = set()
+    for l in m.LAB["lecons"]:
+        for x in l["missions"]:
+            assert x["id"] not in vus, "mission en double : " + x["id"]
+            vus.add(x["id"])
+    open(os.path.join(RACINE, "modules", mid, m.HREF), "w", encoding="utf-8").write(
+        TERMINAL_PAGE % (html.escape(m.LAB["titre"]), html.escape(fiche["titre"]), mid, source, js_json(m.LAB)))
+    return len(vus)
+
+
 def fiche_js(mid, f, chaps):
     lab = f.get("labo")
     l = '  {\n    id: "%s", bonus: true,%s\n    titre: %s,\n    sousTitre: %s,\n    icone: %s,\n    option: "BONUS",\n    couleur: "%s",\n    description: %s,\n' % (
         mid, " evalTextuel: true," if f.get("textuel") else "", *[json.dumps(f[k], ensure_ascii=False) for k in ("titre", "sousTitre", "icone")], f["couleur"], json.dumps(f["description"], ensure_ascii=False))
+    entrees = []
     if lab:
-        l += '    labos: [{ href: "%s", ico: %s, titre: %s, court: %s, texte: %s }],\n' % (lab["href"], json.dumps(f["icone"], ensure_ascii=False), *[json.dumps(lab[k], ensure_ascii=False) for k in ("titre", "court", "texte")])
+        entrees.append('{ href: "%s", ico: %s, titre: %s, court: %s, texte: %s }' % (lab["href"], json.dumps(f["icone"], ensure_ascii=False), *[json.dumps(lab[k], ensure_ascii=False) for k in ("titre", "court", "texte")]))
+    for x in f.get("autres_labos", []):  # labos écrits à la main (terminal, duel…) : champs recopiés tels quels
+        entrees.append("{ " + ", ".join("%s: %s" % (k, json.dumps(v, ensure_ascii=False)) for k, v in x.items() if k != "source") + " }")
+    if entrees:
+        l += "    labos: [\n      " + ",\n      ".join(entrees) + "\n    ],\n"
     l += "    chapitres: [\n" + ",\n".join('      { id: "%s", titre: %s, niveau: "%s" }' % (c["id"], json.dumps(c["titre"], ensure_ascii=False), c["niveau"]) for c in chaps) + "\n    ]\n  }"
     return l
 
@@ -415,6 +488,9 @@ def main():
             n, nl = labo(mid, f)
             f["labo"]["texte"] = f["labo"]["texte"].replace("{n}", str(n))
             info += ", labo : %d missions en %d leçons" % (n, nl)
+        for x in f.get("autres_labos", []):
+            if x.get("source"):
+                info += ", %s : %d missions" % (x["href"], labo_terminal(mid, f, x["source"]))
         fiches.append(fiche_js(mid, f, chaps))
         print(info)
     maj_modules_js(fiches)

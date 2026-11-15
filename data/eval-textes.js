@@ -473,5 +473,77 @@ window.EF_EVAL_TEXTES = {
         { n: "draw affiche l'état courant", rx: "draw.*(affich|dessin)|(affich|dessin).*draw" },
         { n: "dt : temps écoulé, pour un mouvement indépendant de la machine", rx: "\\bdt\\b|temps ecoule|delta|independan" }],
       corrige: "<p>Le moteur appelle les fonctions du jeu <b>à chaque image</b>, environ 60 fois par seconde. <code>update(dt)</code> met à jour la <b>logique</b> : déplacements, collisions, score. <code>draw()</code> se contente d'<b>afficher</b> l'état courant. Le paramètre <code>dt</code> (temps écoulé depuis l'image précédente) permet un mouvement identique sur toutes les machines.</p>" }
+  ],
+  "securite-web": [
+    { q: "Présente les trois piliers de la sécurité (D, I, C) et donne un exemple d'attaque contre chacun.",
+      notions: [
+        { n: "la disponibilité : le service reste accessible", rx: "disponib" },
+        { n: "l'intégrité : les données ne sont pas modifiées", rx: "integrit" },
+        { n: "la confidentialité : seules les personnes autorisées lisent", rx: "confidential" },
+        { n: "au moins un exemple d'attaque (déni de service, rançongiciel, vol de données…)", rx: "deni de service|ddos|rancon|vol de|fuite|modifi|defigur|satur|intercept" }],
+      corrige: "<p><b>Disponibilité</b> : le service reste accessible à ceux qui en ont besoin (visée par un déni de service ou un rançongiciel). <b>Intégrité</b> : les données ne sont modifiées que par ceux qui en ont le droit (visée par la modification d'un virement, la défiguration d'un site). <b>Confidentialité</b> : seules les personnes autorisées peuvent lire (visée par un vol de base de clients, une écoute du réseau).</p>" },
+    { q: "Quelle différence y a-t-il entre encoder, chiffrer et hacher ?",
+      notions: [
+        { n: "encoder change la forme, sans secret (Base64)", rx: "encod.*(sans (cle|secret)|base ?64|forme|format|revers)|base ?64" },
+        { n: "chiffrer rend illisible sans la clé, et c'est réversible avec elle", rx: "chiffr.*(cle|secret)|cle.*chiffr" },
+        { n: "hacher produit une empreinte à sens unique", rx: "hach.*(sens unique|irrevers|empreinte|impossible|pas revers)|empreinte" },
+        { n: "un usage : mots de passe hachés, échanges chiffrés…", rx: "mot de passe|mots de passe|integrit|https|tls|echange|stock" }],
+      corrige: "<p><b>Encoder</b> change seulement la représentation (Base64, hexadécimal) : aucun secret, n'importe qui décode. <b>Chiffrer</b> rend le message illisible sans la <b>clé</b>, et celui qui la possède retrouve le texte. <b>Hacher</b> calcule une <b>empreinte à sens unique</b> : on ne revient pas au texte. On chiffre des échanges (TLS), on hache des mots de passe et on vérifie l'intégrité d'un fichier par son empreinte.</p>" },
+    { q: "Comment une application doit-elle stocker les mots de passe de ses utilisateurs, et pourquoi ?",
+      notions: [
+        { n: "jamais en clair : on stocke une empreinte (hachage)", rx: "hach|empreinte" },
+        { n: "avec un sel propre à chaque utilisateur", rx: "\\bsel\\b|salt|sale" },
+        { n: "avec une fonction lente prévue pour cela (bcrypt, Argon2, password_hash)", rx: "bcrypt|argon|scrypt|password_hash|lent|cout" },
+        { n: "pour qu'une fuite de la base ne livre pas les mots de passe", rx: "fuite|vol|pirat|compromis|arc-en-ciel|rainbow|force brute|dictionnaire" }],
+      corrige: "<p>Jamais en clair ni chiffrés de façon réversible : on stocke une <b>empreinte</b> calculée par une fonction <b>lente</b> conçue pour les mots de passe (<code>password_hash</code> en PHP, bcrypt, Argon2), avec un <b>sel</b> aléatoire propre à chaque compte. Si la base fuit, l'attaquant ne récupère pas les mots de passe : le sel rend inutiles les tables précalculées, et la lenteur rend la force brute très coûteuse.</p>" },
+    { q: "Explique le principe de l'injection SQL et la manière correcte de s'en protéger.",
+      notions: [
+        { n: "une saisie de l'utilisateur est insérée dans la requête", rx: "saisie|entree|formulaire|parametre|utilisateur|concaten" },
+        { n: "elle est alors interprétée comme du SQL", rx: "interpret|execut|modifi.*requete|requete.*modifi|comme du (code|sql)" },
+        { n: "la parade : les requêtes préparées", rx: "prepar|parametr|bind|pdo" },
+        { n: "les données sont transmises séparément du code SQL", rx: "separ|jamais concaten|marqueur|\\?|:nom|:id" }],
+      corrige: "<p>L'application construit sa requête en y <b>collant une saisie</b> de l'utilisateur. Si cette saisie contient du SQL, la base l'<b>exécute</b> : l'attaquant peut lire ou modifier ce qu'il ne devrait pas. La seule protection fiable est la <b>requête préparée</b> : la requête est envoyée avec des marqueurs, puis les valeurs sont transmises <b>séparément</b>, et ne peuvent donc jamais être prises pour du code.</p>" },
+    { q: "Quels indices permettent de reconnaître un courriel d'hameçonnage ? Cites-en au moins trois.",
+      notions: [
+        { n: "l'adresse de l'expéditeur ou le domaine ne correspond pas", rx: "expediteur|adresse|domaine" },
+        { n: "un lien qui mène ailleurs que ce qu'il affiche", rx: "lien|url" },
+        { n: "l'urgence ou la menace", rx: "urgen|press|menace|delai|immediat|peur" },
+        { n: "une demande d'identifiants, de paiement ou une pièce jointe inattendue", rx: "mot de passe|identifiant|paiement|bancaire|piece jointe|virement|coordonnee" }],
+      corrige: "<p>L'<b>adresse de l'expéditeur</b> (un domaine proche mais différent), un <b>lien</b> dont la vraie destination ne correspond pas au texte affiché, un ton d'<b>urgence</b> ou de menace, une demande d'<b>identifiants</b> ou de paiement, une <b>pièce jointe</b> inattendue, des formules impersonnelles. Le bon réflexe : ne pas cliquer, aller soi-même sur le site par son adresse habituelle, et signaler le message.</p>" },
+    { q: "Qu'est-ce que la défense en profondeur ? Illustre avec le principe du moindre privilège.",
+      notions: [
+        { n: "plusieurs couches de protection indépendantes", rx: "couche|plusieurs|niveaux|barriere|superpos" },
+        { n: "si l'une cède, les autres tiennent encore", rx: "si (une|l'une)|cede|echoue|contourn|tombe|reste" },
+        { n: "moindre privilège : chacun n'a que les droits nécessaires", rx: "necessaire|minimum|strict|besoin|seulement les droits|que les droits" },
+        { n: "cela limite les dégâts d'un compte compromis", rx: "limite|degat|impact|compromis|propag" }],
+      corrige: "<p>La défense en profondeur consiste à empiler <b>plusieurs protections indépendantes</b> (pare-feu, mises à jour, authentification forte, sauvegardes, supervision) : aucune n'est parfaite, mais <b>si l'une cède, les suivantes tiennent</b>. Le <b>moindre privilège</b> en est un exemple : chaque compte et chaque programme n'a que les <b>droits strictement nécessaires</b>, ce qui <b>limite les dégâts</b> quand l'un d'eux est compromis.</p>" },
+    { q: "En rétro-ingénierie, quelle différence fais-tu entre l'analyse statique et l'analyse dynamique ?",
+      notions: [
+        { n: "statique : on examine le programme sans l'exécuter", rx: "statique.*sans|sans (l')?execut|sans le lancer" },
+        { n: "des outils statiques : strings, désassembleur, décompilateur", rx: "strings|desassembl|decompil|ghidra|hexa" },
+        { n: "dynamique : on l'exécute et on l'observe", rx: "dynamique.*(execut|lanc|observ)|en l'execut|pendant l'execution|debog|debug" },
+        { n: "dans un environnement isolé (machine virtuelle, bac à sable)", rx: "isol|machine virtuelle|\\bvm\\b|bac a sable|sandbox" }],
+      corrige: "<p>L'analyse <b>statique</b> étudie le fichier <b>sans l'exécuter</b> : type du fichier, chaînes lisibles (<code>strings</code>), désassemblage, décompilation. L'analyse <b>dynamique</b> <b>exécute</b> le programme et observe son comportement (débogueur, appels système, trafic réseau), toujours dans un <b>environnement isolé</b> comme une machine virtuelle. Les deux se complètent : la première guide la seconde.</p>" },
+    { q: "Un serveur de ton entreprise vient d'être compromis. Quelles sont les grandes étapes de la réponse ?",
+      notions: [
+        { n: "contenir : isoler la machine du réseau", rx: "isol|conten|confin|debranch|coup" },
+        { n: "préserver les preuves (journaux, copie) avant de corriger", rx: "preuve|journa|log|copie|image|conserv" },
+        { n: "éradiquer la cause et restaurer un système sain", rx: "eradiqu|supprim|corrig|restaur|reinstall|sauvegarde" },
+        { n: "déclarer et tirer les leçons (CNIL sous 72 h, retour d'expérience)", rx: "cnil|72|declar|notifi|retour d'experience|lecon|rapport|plainte" }],
+      corrige: "<p>On <b>contient</b> d'abord : la machine est isolée du réseau, sans être éteinte. On <b>préserve les preuves</b> (copie des journaux, image du disque) avant toute correction. On <b>éradique</b> la cause (compte ajouté, faille, porte dérobée) et on <b>restaure</b> depuis une source saine. Enfin on <b>déclare</b> (la CNIL sous 72 heures si des données personnelles sont touchées, dépôt de plainte) et on fait un <b>retour d'expérience</b>.</p>" },
+    { q: "Qu'est-ce qui distingue un test d'intrusion légal d'un piratage ?",
+      notions: [
+        { n: "une autorisation écrite du propriétaire du système", rx: "autoris|accord|contrat|convention|mandat|ecrit" },
+        { n: "un périmètre et des dates définis", rx: "perimetre|limite|cadre|date|duree|defini" },
+        { n: "un rapport remis au client avec les corrections", rx: "rapport|recommand|correct" },
+        { n: "sans autorisation, c'est un délit (article 323-1 du Code pénal)", rx: "323|delit|code penal|illegal|puni|amende|prison" }],
+      corrige: "<p>La technique est la même ; ce qui change, c'est le <b>cadre</b>. Un test d'intrusion repose sur une <b>autorisation écrite</b> du propriétaire, qui fixe le <b>périmètre</b>, les dates et les méthodes permises, et il se termine par un <b>rapport</b> avec des recommandations. Sans cette autorisation, accéder à un système est un <b>délit</b> (article 323-1 du Code pénal), même sans rien casser et même « pour rendre service ».</p>" },
+    { q: "Qu'est-ce qu'un dépassement de tampon, et quelles protections existent ?",
+      notions: [
+        { n: "on écrit plus de données que la zone prévue n'en contient", rx: "plus (de donnees|grand|long)|depass|trop (de|long)|au-dela|taille" },
+        { n: "les données voisines en mémoire sont écrasées (adresse de retour)", rx: "ecras|voisin|adresse de retour|pile|memoire" },
+        { n: "des protections : canari, pile non exécutable, ASLR", rx: "canari|aslr|non execut|\\bnx\\b|dep\\b|aleatoire" },
+        { n: "la vraie solution : vérifier les tailles, langage à mémoire sûre", rx: "verifi|control|borne|rust|memoire sure|langage|fgets|strncpy" }],
+      corrige: "<p>Un programme copie des données dans une zone de taille fixe <b>sans vérifier leur longueur</b> : ce qui dépasse <b>écrase les données voisines</b> en mémoire, parfois l'adresse de retour de la fonction. Les systèmes modernes ajoutent des protections (<b>canari</b> de pile, mémoire <b>non exécutable</b>, adresses <b>aléatoires</b> avec l'ASLR), mais la vraie solution est de <b>contrôler les tailles</b> et d'utiliser des langages qui gèrent la mémoire sans erreur possible.</p>" }
   ]
 };

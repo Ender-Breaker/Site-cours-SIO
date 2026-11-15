@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Cybersécurité : les types de protection — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="securite-web" data-chapter="cyber-protections">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/securite-web.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>Aucune protection n'est parfaite. On en empile donc plusieurs, de nature différente : si l'une cède, la suivante tient. C'est la <b>défense en profondeur</b>, comme les enceintes successives d'un château fort.</p>
+<h2>1. Prévenir, détecter, réagir</h2>
+<table><tr><th>Famille</th><th>Rôle</th><th>Exemples</th></tr><tr><td><b>Prévention</b></td><td>empêcher l'attaque</td><td>pare-feu, mises à jour, MFA, chiffrement, durcissement</td></tr><tr><td><b>Détection</b></td><td>s'apercevoir qu'elle a lieu</td><td>journaux, IDS, antivirus / EDR, supervision, SIEM</td></tr><tr><td><b>Réaction</b></td><td>limiter les dégâts et repartir</td><td>sauvegardes, plan de reprise, procédure d'incident</td></tr></table>
+<p>Une entreprise qui ne fait que de la prévention découvre son intrusion des mois plus tard.</p>
+<h2>2. Filtrer le réseau</h2>
+<table><tr><th>Protection</th><th>Rôle</th></tr><tr><td><b>Pare-feu</b></td><td>autorise ou bloque les flux selon des règles (adresse, port, protocole)</td></tr><tr><td><b>DMZ</b></td><td>zone isolée pour les serveurs exposés à Internet (web, messagerie)</td></tr><tr><td><b>Segmentation</b> (VLAN)</td><td>séparer les réseaux : élèves, administration, serveurs, invités</td></tr><tr><td><b>VPN</b></td><td>tunnel chiffré pour les accès distants</td></tr><tr><td><b>Proxy</b> / filtrage web</td><td>bloque les sites dangereux, journalise</td></tr><tr><td><b>WAF</b></td><td>pare-feu applicatif : filtre les requêtes HTTP malveillantes</td></tr><tr><td><b>IDS / IPS</b></td><td>détecte (IDS) ou bloque (IPS) les comportements suspects sur le réseau</td></tr><tr><td><b>NAC / 802.1X</b></td><td>n'accepte sur le réseau que les machines authentifiées</td></tr></table>
+<p>La règle d'or d'un pare-feu : <b>tout interdire par défaut</b>, puis autoriser seulement ce qui est nécessaire.</p>
+<pre><code># Exemple avec ufw sur un serveur web Linux
+sudo ufw default deny incoming       # tout ce qui entre est refusé par défaut
+sudo ufw default allow outgoing
+sudo ufw allow 443/tcp               # HTTPS pour tout le monde
+sudo ufw allow from 192.168.10.0/24 to any port 22 proto tcp   # SSH : réseau d'administration seulement
+sudo ufw enable
+sudo ufw status verbose</code></pre>
+<h2>3. Protéger les postes et les serveurs</h2>
+<table><tr><th>Protection</th><th>Rôle</th></tr><tr><td><b>Mises à jour</b> (gestion des correctifs)</td><td>ferme les failles connues : la mesure la plus rentable</td></tr><tr><td><b>Antivirus</b></td><td>reconnaît les malwares connus par leur signature</td></tr><tr><td><b>EDR</b></td><td>surveille les <b>comportements</b> (un tableur qui lance PowerShell) et peut isoler le poste</td></tr><tr><td><b>Durcissement</b> (*hardening*)</td><td>désactiver l'inutile, configurer strictement</td></tr><tr><td><b>Chiffrement du disque</b> (BitLocker, LUKS)</td><td>un portable volé ne livre pas ses données</td></tr><tr><td><b>Liste blanche d'applications</b></td><td>seuls les programmes approuvés s'exécutent</td></tr><tr><td><b>Comptes sans droits administrateur</b></td><td>un malware lancé par l'utilisateur ne peut pas tout casser</td></tr></table>
+<h2>4. Contrôler les accès</h2>
+<ul><li><b>Moindre privilège</b> : chaque compte n'a que les droits nécessaires à son travail.</li><li><b>Séparation des tâches</b> : celui qui demande n'est pas celui qui valide.</li><li><b>MFA</b> sur tout ce qui est exposé : messagerie, VPN, administration.</li><li>Des comptes <b>nominatifs</b> (pas de compte « admin » partagé), désactivés dès le départ de la personne.</li><li>Un <b>bastion</b> : point de passage unique et journalisé pour administrer les serveurs.</li><li>Modèle <b>Zero Trust</b> : ne jamais faire confiance par défaut, même à l'intérieur du réseau ; vérifier chaque accès.</li></ul>
+<h2>5. Protéger les données</h2>
+<table><tr><th>Mesure</th><th>Protège</th></tr><tr><td>Chiffrement <b>en transit</b> (TLS, VPN)</td><td>contre l'écoute du réseau</td></tr><tr><td>Chiffrement <b>au repos</b> (disque, base de données)</td><td>contre le vol du support</td></tr><tr><td><b>Sauvegardes 3-2-1</b></td><td>3 copies, 2 supports, 1 hors site, dont une <b>hors ligne</b> que le rançongiciel ne peut pas atteindre</td></tr><tr><td>Tests de restauration</td><td>une sauvegarde jamais testée n'est qu'un espoir</td></tr><tr><td>Classification et droits</td><td>qui a le droit de lire quoi</td></tr><tr><td>Effacement sécurisé</td><td>avant de donner ou de jeter un disque</td></tr></table>
+<h2>6. Surveiller</h2>
+<table><tr><th>Outil</th><th>Rôle</th></tr><tr><td>Journaux (*logs*) centralisés</td><td>garder la trace de ce qui se passe, hors de portée de l'attaquant</td></tr><tr><td><b>SIEM</b></td><td>rassemble et corrèle les journaux, déclenche des alertes</td></tr><tr><td><b>SOC</b></td><td>l'équipe qui surveille les alertes, souvent 24 h sur 24</td></tr><tr><td>Supervision (Zabbix, Nagios)</td><td>disponibilité et charge des services</td></tr><tr><td>Scanner de vulnérabilités</td><td>liste les failles connues de son propre parc</td></tr><tr><td>*Honeypot* (pot de miel)</td><td>un leurre : toute connexion y est suspecte</td></tr></table>
+<h2>7. L'organisation</h2>
+<p>La technique ne suffit pas : il faut une <b>politique de sécurité</b> (PSSI), une <b>charte</b> signée par les utilisateurs, de la <b>sensibilisation</b>, un <b>plan de continuité</b> (PCA : continuer pendant la crise) et un <b>plan de reprise</b> (PRA : redémarrer après), avec deux objectifs chiffrés : le <b>RTO</b> (durée maximale d'interruption) et le <b>RPO</b> (quantité maximale de données perdues, donc fréquence des sauvegardes). Le guide d'hygiène informatique de l'ANSSI résume 42 mesures de base.</p>
+<section class="tuto"><h3><small>Tutoriel</small>Sécuriser le réseau d'une petite entreprise</h3>
+<div class="etape"><h4>L'état des lieux</h4>
+<p>Une box, un seul réseau pour tout le monde, un NAS avec le mot de passe d'usine, pas de sauvegarde externe, le même compte « admin » pour les cinq employés.</p>
+</div>
+<div class="etape"><h4>Les mesures immédiates, gratuites</h4>
+<p>Changer tous les mots de passe par défaut ; un compte nominatif par personne ; activer les mises à jour automatiques ; activer le MFA sur la messagerie ; désactiver l'accès distant inutile de la box.</p>
+</div>
+<div class="etape"><h4>Les mesures structurantes</h4>
+<p>Séparer le réseau en trois : postes, serveurs, invités (Wi-Fi séparé). Un pare-feu qui interdit par défaut. Sauvegarde quotidienne du NAS vers un disque déconnecté et vers un stockage distant chiffré.</p>
+</div>
+<div class="etape"><h4>Vérifier</h4>
+<p>Restaurer un fichier depuis la sauvegarde. Regarder les journaux du pare-feu. Recommencer chaque mois.</p>
+</div>
+</section>
+<div class="box defi"><b>Défi : filtrer avec une liste blanche</b><p>N'accepter que les valeurs prévues.</p><a class="defi-go" href="labo-cyber.html#m=cy-liste-blanche">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : une politique de mots de passe</b><p>Vérifie la solidité d'un mot de passe.</p><a class="defi-go" href="labo-cyber.html#m=cy-motdepasse">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p>Défense en profondeur : plusieurs couches indépendantes. </p><p> Prévenir, détecter, réagir. </p><p> Pare-feu : tout interdire par défaut ; segmenter ; DMZ pour ce qui est exposé. </p><p> Mises à jour, EDR, moindre privilège, MFA, chiffrement. </p><p> Sauvegardes 3-2-1 avec une copie hors ligne, et restauration testée. </p><p> Journaux centralisés : sans eux, pas de détection ni d'enquête.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cyber.html">labo cybersécurité</a> te fait écrire des protections, casser des chiffres faibles et analyser des programmes. Le <a href="labo-defense.html">labo terminal</a> te fait enquêter et durcir un serveur. Et le <a href="duel.html">duel attaque / défense</a> t'oppose à un autre élève.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce que la défense en profondeur ?",
+  "type": "qcm",
+  "options": [
+   "Cacher les serveurs en sous-sol",
+   "Empiler plusieurs protections indépendantes",
+   "Chiffrer deux fois",
+   "Installer le meilleur antivirus"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelles sont les trois familles de mesures ?",
+  "type": "qcm",
+  "options": [
+   "Pare-feu, antivirus, sauvegarde",
+   "Achat, installation, maintenance",
+   "Prévention, détection, réaction",
+   "Réseau, système, données"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle est la règle d'or de la configuration d'un pare-feu ?",
+  "type": "qcm",
+  "options": [
+   "Autoriser tout le trafic sortant et entrant du réseau local",
+   "Bloquer seulement les ports connus",
+   "Tout autoriser, puis bloquer le dangereux",
+   "Tout interdire par défaut, puis autoriser le nécessaire"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "À quoi sert une DMZ ?",
+  "type": "qcm",
+  "options": [
+   "À chiffrer les courriels",
+   "À isoler les serveurs exposés à Internet du réseau interne",
+   "À stocker les sauvegardes",
+   "À accélérer le Wi-Fi"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "À quoi sert la segmentation en VLAN ?",
+  "type": "qcm",
+  "options": [
+   "À séparer les réseaux pour limiter la propagation d'une attaque",
+   "À augmenter le débit",
+   "À remplacer le pare-feu",
+   "À économiser des adresses IP"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle différence entre un IDS et un IPS ?",
+  "type": "qcm",
+  "options": [
+   "Aucune",
+   "L'IDS est matériel, l'IPS logiciel",
+   "L'IDS détecte et alerte, l'IPS bloque en plus",
+   "L'IPS ne fait que journaliser"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle différence entre un antivirus classique et un EDR ?",
+  "type": "qcm",
+  "options": [
+   "Aucune",
+   "L'EDR surveille les comportements et peut isoler le poste",
+   "L'antivirus est plus récent",
+   "L'EDR est gratuit"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que protège le chiffrement du disque d'un ordinateur portable ?",
+  "type": "qcm",
+  "options": [
+   "La machine contre les virus",
+   "Les mots de passe des sites",
+   "Les données en cas de vol de la machine",
+   "Le réseau Wi-Fi"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que signifie le principe du moindre privilège ?",
+  "type": "qcm",
+  "options": [
+   "Seul le directeur est administrateur",
+   "Les droits sont temporaires",
+   "Personne n'a de droits",
+   "Chaque compte n'a que les droits nécessaires"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Pourquoi une des sauvegardes doit-elle être hors ligne ?",
+  "type": "qcm",
+  "options": [
+   "Parce que la loi l'impose",
+   "Pour qu'un rançongiciel ne puisse pas la chiffrer",
+   "Pour aller plus vite",
+   "Pour économiser de l'électricité"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'un SIEM ?",
+  "type": "qcm",
+  "options": [
+   "Un antivirus",
+   "Un outil qui centralise et corrèle les journaux pour alerter",
+   "Un type de sauvegarde",
+   "Un pare-feu"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'un honeypot ?",
+  "type": "qcm",
+  "options": [
+   "Une sauvegarde chiffrée",
+   "Un leurre destiné à attirer et repérer les attaquants",
+   "Un virus",
+   "Un mot de passe piégé"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que mesure le RPO ?",
+  "type": "qcm",
+  "options": [
+   "La durée maximale d'interruption",
+   "Le nombre de pare-feu",
+   "Le prix de la sauvegarde",
+   "La quantité maximale de données qu'on accepte de perdre"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que mesure le RTO ?",
+  "type": "qcm",
+  "options": [
+   "La quantité de données perdues",
+   "La durée de vie d'un mot de passe",
+   "La durée maximale d'interruption acceptable",
+   "Le temps de réponse du réseau"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que dit le modèle Zero Trust ?",
+  "type": "qcm",
+  "options": [
+   "Ne faire confiance à aucun logiciel libre",
+   "Ne jamais faire confiance par défaut, même à l'intérieur du réseau",
+   "Interdire Internet",
+   "Ne faire confiance qu'au réseau interne"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Une sauvegarde qui n'a jamais été restaurée pour essai est une protection fiable.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Seul un test de restauration prouve qu'elle fonctionne."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque outil à son rôle.",
+  "type": "associer",
+  "paires": [
+   [
+    "pare-feu",
+    "filtrer les flux"
+   ],
+   [
+    "VPN",
+    "tunnel chiffré"
+   ],
+   [
+    "WAF",
+    "filtrer les requêtes web"
+   ],
+   [
+    "EDR",
+    "surveiller les postes"
+   ],
+   [
+    "SIEM",
+    "corréler les journaux"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

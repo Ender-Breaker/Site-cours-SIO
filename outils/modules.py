@@ -40,6 +40,20 @@ MODULES = {
         titre="Docker", sousTitre="Bonus · SLAM et SISR · conteneurs", icone="Dkr", couleur="docker",
         description="Emballer et déployer une application : images, conteneurs, volumes, Dockerfile, et une pile web complète avec Docker Compose."),
     "securite-web": dict(
-        titre="Sécurité web", sousTitre="Bonus · SLAM et bloc 3 · OWASP", icone="Sec", couleur="secu",
-        description="Comprendre et corriger les failles classiques : injection SQL, XSS, CSRF, stockage des mots de passe, sessions, contrôle d'accès et HTTPS."),
+        titre="Cybersécurité", sousTitre="Bonus · SLAM, SISR et bloc 3 · attaquer pour mieux défendre", icone="Sec", couleur="secu", textuel=True, langue="js",
+        description="Le cours complet : attaques et protections, hameçonnage, failles web, cryptographie, réseau, durcissement, failles de mémoire, rétro-ingénierie, réponse à incident, test d'intrusion. Avec trois labos, dont un duel attaque / défense à jouer contre un autre élève.",
+        labo=dict(href="labo-cyber.html", titre="Labo cybersécurité", court="Code",
+                  fin='Le <a href="labo-cyber.html">labo cybersécurité</a> te fait écrire des protections, casser des chiffres faibles et analyser des programmes. Le <a href="labo-defense.html">labo terminal</a> te fait enquêter et durcir un serveur. Et le <a href="duel.html">duel attaque / défense</a> t\'oppose à un autre élève.',
+                  texte="{n} missions de code : protéger une application, cryptographie, rétro-ingénierie (crackme, hexadécimal, désobfuscation), analyse de journaux. Vérifiées automatiquement.",
+                  cfg=dict(langue="js", key="ef-labo-cyber", titre="Labo cybersécurité", ico="Sec", couleur="secu", fichier="main.js",
+                           sousTitre="Écris des protections, casse des chiffres faibles, analyse des programmes et des journaux : en JavaScript, vérifié automatiquement.",
+                           module=dict(titre="Cybersécurité", href="index.html"),
+                           libre='// Bac à sable : écris ce que tu veux, le programme s\'exécute dans la console.\nconst octets = [0x73, 0x69, 0x6f];\nconsole.log(octets.map(o => String.fromCharCode(o)).join(""));\n',
+                           libreTexte="<p>Un bac à sable JavaScript pour essayer un déchiffrement, convertir de l'hexadécimal ou tester une idée.</p><p class=\"lb-small\"><code>lire()</code> renvoie la ligne suivante des entrées ; <code>console.log</code> affiche.</p>")),
+        autres_labos=[
+            dict(href="labo-defense.html", ico=">_", titre="Labo terminal : enquêter et durcir", court="Terminal", cle="securite-web-terminal", source="terminal_defense", examTexte="3 missions au terminal · 15 min",
+                 texte="Dans un terminal Linux simulé : fouiller les journaux après une attaque, repérer un compte suspect, corriger des droits dangereux, protéger des secrets."),
+            dict(href="duel.html", ico="VS", titre="Duel attaque / défense", court="Duel", sansExamen=True, bouton="Lancer un duel",
+                 texte="Un élève compose une attaque, un autre défend le réseau d'une entreprise : choisis tes protections, identifie les incidents, réagis. Seul contre l'ordinateur, à deux sur le même appareil, ou par lien envoyé à un ami."),
+        ]),
 }

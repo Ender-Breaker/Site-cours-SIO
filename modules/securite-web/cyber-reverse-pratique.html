@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Rétro-ingénierie : mener une analyse — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="securite-web" data-chapter="cyber-reverse-pratique">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/securite-web.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>Ce chapitre déroule la méthode sur des exemples écrits pour l'entraînement, comme ceux des CTF : un petit programme vérifie un mot de passe, et il faut comprendre <b>comment</b>.</p>
+<h2>1. La démarche</h2>
+<ol><li><b>Identifier</b> : type de fichier, architecture, empreinte (<code>file</code>, <code>sha256sum</code>).</li><li><b>Regarder sans exécuter</b> : chaînes, fonctions importées, structure (<code>strings</code>, puis un désassembleur).</li><li><b>Repérer le point d'intérêt</b> : le message « Mot de passe incorrect » mène à la fonction qui décide.</li><li><b>Comprendre la vérification</b> : remonter les calculs faits sur la saisie.</li><li><b>Vérifier son hypothèse</b> : exécuter dans un environnement isolé, avec un débogueur si besoin.</li><li><b>Documenter</b> : ce que fait le programme, comment on le sait.</li></ol>
+<h2>2. Niveau 1 : le secret en clair</h2>
+<div class="essai" data-langue="js"><pre><code>// Ce que « strings » montrerait immédiatement
+function verifier(saisie) {
+  return saisie === "sio2026";
+}
+console.log(verifier("test"), verifier("sio2026"));</code></pre></div>
+<p>Leçon pour le développeur : <b>un secret écrit dans un programme distribué n'est pas un secret</b>. Clé d'API, mot de passe de base de données, clé de licence : tout ce qui est dans le client finit par être lu.</p>
+<h2>3. Niveau 2 : le secret transformé</h2>
+<p>La comparaison se fait sur une version transformée. On lit la transformation, et on l'<b>inverse</b>.</p>
+<div class="essai" data-langue="js"><pre><code>// Le programme : chaque caractère de la saisie est décalé de 1 puis comparé
+const attendu = [116, 106, 112, 51, 49, 51, 55];
+function verifier(saisie) {
+  if (saisie.length !== attendu.length) return false;
+  for (let i = 0; i &lt; saisie.length; i++) {
+    if (saisie.charCodeAt(i) + 1 !== attendu[i]) return false;
+  }
+  return true;
+}
+// L'analyse : code + 1 = attendu  →  code = attendu − 1
+const solution = attendu.map(c =&gt; String.fromCharCode(c - 1)).join("");
+console.log(solution, verifier(solution));</code></pre></div>
+<h2>4. Niveau 3 : chaînes masquées par XOR</h2>
+<p>Pour échapper à <code>strings</code>, beaucoup de programmes (et la plupart des malwares) stockent leurs chaînes <b>chiffrées par XOR</b> et ne les déchiffrent qu'au moment de s'en servir. Comme le XOR est sa propre opération inverse, il suffit de retrouver la clé dans le code.</p>
+<div class="essai" data-langue="js"><pre><code>const masque = [0x39, 0x25, 0x25, 0x21, 0x6b, 0x7e, 0x7e, 0x32, 0x63, 0x7f, 0x34, 0x29, 0x34, 0x3c, 0x21, 0x3d, 0x34];
+const cle = 0x51;
+console.log(masque.map(o =&gt; String.fromCharCode(o ^ cle)).join(""));</code></pre></div>
+<p>C'est ainsi qu'un analyste extrait d'un logiciel malveillant l'adresse de son serveur de commande : un <b>indicateur de compromission</b> que l'on peut ensuite bloquer sur le pare-feu.</p>
+<h2>5. JavaScript minifié et obfusqué</h2>
+<p>Le JavaScript d'une page est livré au navigateur : il est toujours lisible. La <b>minification</b> le compacte (noms d'une lettre) ; l'<b>obfuscation</b> le brouille volontairement. Les outils de développement du navigateur (bouton « Pretty print ») et un peu de patience suffisent.</p>
+<div class="essai" data-langue="js"><pre><code>// Un script brouillé typique : que construit-il ?
+var _0 = [104, 116, 116, 112, 115, 58, 47, 47].map(function (c) { return String.fromCharCode(c); }).join("");
+var _1 = "rf.elpmexe".split("").reverse().join("");
+var _2 = ["/", "api", "/", "v1"].join("");
+console.log(_0 + _1 + _2);</code></pre></div>
+<p>Méthode : indenter, <b>exécuter les morceaux inoffensifs</b> pour voir ce qu'ils valent, renommer les variables, recommencer. Ne jamais lancer en entier un script inconnu hors d'un environnement isolé.</p>
+<h2>6. Les langages à bytecode se décompilent très bien</h2>
+<table><tr><th>Technologie</th><th>Outil</th><th>Résultat</th></tr><tr><td>Java (<code>.class</code>, <code>.jar</code>), Android (<code>.apk</code>)</td><td>JADX, CFR</td><td>code Java presque d'origine</td></tr><tr><td>.NET (C#)</td><td>ILSpy, dnSpy</td><td>code C# presque d'origine</td></tr><tr><td>Python (<code>.pyc</code>)</td><td>décompilateurs dédiés</td><td>code Python</td></tr><tr><td>C / C++ compilé</td><td>Ghidra, IDA</td><td>pseudo-C, sans les noms</td></tr></table>
+<p>Conséquence directe pour un développeur SLAM : une application Java, C# ou Android livre pratiquement son code source. Aucune règle métier sensible, aucun secret, aucune vérification de droits ne doit reposer sur le client.</p>
+<h2>7. Les protections, et leurs limites</h2>
+<table><tr><th>Protection</th><th>Effet</th><th>Limite</th></tr><tr><td>Suppression des symboles (*strip*)</td><td>plus de noms de fonctions</td><td>le code reste lisible</td></tr><tr><td>Obfuscation</td><td>code volontairement confus</td><td>ralentit l'analyse, ne l'empêche pas</td></tr><tr><td>Empaquetage (*packer*)</td><td>le vrai code est compressé ou chiffré, déballé en mémoire à l'exécution</td><td>l'analyse dynamique le récupère en mémoire</td></tr><tr><td>Anti-débogage, détection de machine virtuelle</td><td>le programme change de comportement s'il se sent observé</td><td>contournable ; fréquent dans les malwares</td></tr><tr><td><b>Vérification côté serveur</b></td><td>la décision n'est pas dans le client</td><td>la seule protection réelle</td></tr></table>
+<div class="box"><b>Ce que la rétro-ingénierie apprend aux développeurs</b><p>On ne protège pas un secret en le cachant dans le client : on ne l'y met pas. La licence, les droits, les prix, les scores se vérifient <b>sur le serveur</b>. Le client n'est qu'un affichage que l'utilisateur contrôle entièrement.</p></div>
+<h2>8. Côté défense : l'analyse de malware</h2>
+<p>Un analyste répond à quatre questions : <b>que fait-il</b> (chiffre, vole, espionne) ? <b>comment arrive-t-il et se maintient-il</b> (clé de registre, tâche planifiée) ? <b>avec qui communique-t-il</b> (domaines, adresses) ? <b>comment le reconnaître</b> ? Les réponses deviennent des <b>indicateurs de compromission</b> (empreintes, noms de fichiers, domaines) et des règles de détection (YARA, signatures) partagées avec la communauté. Des bacs à sable en ligne automatisent la première passe.</p>
+<section class="tuto"><h3><small>Tutoriel</small>Résoudre un crackme pas à pas</h3>
+<div class="etape"><h4>Lire la vérification</h4>
+<div class="essai" data-langue="js"><pre><code>const attendu = [0x2e, 0x39, 0x3e, 0x28, 0x2e, 0x38];
+function verifier(saisie) {
+  const t = [...saisie].reverse().map(c =&gt; c.charCodeAt(0) ^ 0x4b);
+  return t.length === attendu.length &amp;&amp; t.every((v, i) =&gt; v === attendu[i]);
+}
+console.log(verifier("devine"));</code></pre></div>
+</div>
+<div class="etape"><h4>Décrire ce qu'elle fait</h4>
+<p>La saisie est <b>retournée</b>, puis chaque caractère subit un <b>XOR avec 0x4b</b>, et le résultat est comparé au tableau.</p>
+</div>
+<div class="etape"><h4>Inverser, dans l'ordre inverse</h4>
+<p>On défait le XOR (même opération), puis on retourne.</p>
+<div class="essai" data-langue="js"><pre><code>const attendu = [0x2e, 0x39, 0x3e, 0x28, 0x2e, 0x38];
+const solution = attendu.map(v =&gt; String.fromCharCode(v ^ 0x4b)).reverse().join("");
+console.log(solution);</code></pre></div>
+</div>
+</section>
+<div class="box defi"><b>Défi : crackme 1</b><p>Un décalage à inverser.</p><a class="defi-go" href="labo-cyber.html#m=cy-crackme1">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : crackme 2</b><p>Un XOR et un retournement.</p><a class="defi-go" href="labo-cyber.html#m=cy-crackme2">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : désobfusquer un script</b><p>Retrouve l'adresse que construit un script brouillé.</p><a class="defi-go" href="labo-cyber.html#m=cy-desobfusquer">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p>Méthode : identifier, lire sans exécuter, trouver la fonction qui décide, inverser la transformation, vérifier. </p><p> Un secret placé dans un programme distribué sera lu. </p><p> Le XOR masque les chaînes mais s'inverse avec la même clé. </p><p> Java, C#, Android et JavaScript se relisent presque en clair. </p><p> La seule vraie protection est la vérification côté serveur.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cyber.html">labo cybersécurité</a> te fait écrire des protections, casser des chiffres faibles et analyser des programmes. Le <a href="labo-defense.html">labo terminal</a> te fait enquêter et durcir un serveur. Et le <a href="duel.html">duel attaque / défense</a> t'oppose à un autre élève.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "Quelle est la première étape de l'analyse d'un binaire inconnu ?",
+  "type": "qcm",
+  "options": [
+   "Le modifier",
+   "L'exécuter sur son poste",
+   "L'identifier : type, architecture, empreinte",
+   "Le supprimer"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Dans un crackme, comment trouve-t-on la fonction qui vérifie le mot de passe ?",
+  "type": "qcm",
+  "options": [
+   "En devinant",
+   "En partant du message d'erreur affiché",
+   "En lisant tout le programme dans l'ordre",
+   "En supprimant des octets au hasard"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Pourquoi un mot de passe écrit en clair dans un programme n'est-il pas protégé ?",
+  "type": "qcm",
+  "options": [
+   "Le compilateur le supprime",
+   "Il est trop court",
+   "Il est chiffré automatiquement",
+   "Il apparaît avec un simple strings"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Le programme compare `code + 1` à la valeur attendue 116. Quel est le code du caractère cherché ?",
+  "type": "qcm",
+  "options": [
+   "115",
+   "58",
+   "117",
+   "116"
+  ],
+  "answer": 0,
+  "explication": "On inverse l'opération."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Pourquoi le XOR est-il simple à inverser quand on a la clé ?",
+  "type": "qcm",
+  "options": [
+   "Il est à sens unique",
+   "Il n'utilise pas de clé",
+   "Il ne change rien",
+   "Appliquer deux fois la même clé redonne l'original"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Pourquoi les malwares masquent-ils leurs chaînes par XOR ?",
+  "type": "qcm",
+  "options": [
+   "Par obligation légale",
+   "Pour être plus petits",
+   "Pour s'exécuter plus vite",
+   "Pour ne pas apparaître avec strings"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce que l'obfuscation ?",
+  "type": "qcm",
+  "options": [
+   "Compresser un fichier",
+   "Rendre un code volontairement difficile à lire",
+   "Signer un programme",
+   "Chiffrer un disque"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle différence entre minification et obfuscation ?",
+  "type": "qcm",
+  "options": [
+   "La minification chiffre le code",
+   "Aucune",
+   "L'obfuscation accélère le code",
+   "La minification réduit la taille, l'obfuscation cherche à brouiller"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que peut-on dire d'une application Java ou C# distribuée ?",
+  "type": "qcm",
+  "options": [
+   "Elle est illisible",
+   "Elle est chiffrée par défaut",
+   "Elle ne contient pas de code",
+   "Elle se décompile en un code proche de l'original"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'un packer ?",
+  "type": "qcm",
+  "options": [
+   "Un gestionnaire de paquets",
+   "Un outil qui compresse ou chiffre le code, déballé en mémoire à l'exécution",
+   "Un compilateur",
+   "Un antivirus"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Où doit se faire la vérification d'une licence ou d'un droit d'accès ?",
+  "type": "qcm",
+  "options": [
+   "Dans le JavaScript de la page",
+   "Dans l'application mobile",
+   "Sur le serveur",
+   "Dans un fichier de configuration du client"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'un indicateur de compromission ?",
+  "type": "qcm",
+  "options": [
+   "Un mot de passe volé",
+   "Un type de pare-feu",
+   "Une trace permettant de reconnaître une attaque : empreinte, domaine, nom de fichier",
+   "Une note de gravité"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que ne faut-il jamais faire avec un script inconnu ?",
+  "type": "qcm",
+  "options": [
+   "Renommer ses variables",
+   "Le lancer en entier hors d'un environnement isolé",
+   "Le lire",
+   "L'indenter"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "La saisie est retournée puis XORée. Dans quel ordre inverse-t-on ?",
+  "type": "qcm",
+  "options": [
+   "D'abord le XOR, ensuite le retournement",
+   "On ne peut pas inverser",
+   "D'abord le retournement, ensuite le XOR",
+   "Peu importe dans tous les cas"
+  ],
+  "answer": 0,
+  "explication": "On défait les opérations en partant de la dernière."
+ },
+ {
+  "niveau": "moyen",
+  "q": "À quoi sert une règle YARA ?",
+  "type": "qcm",
+  "options": [
+   "À compiler un programme",
+   "À chiffrer un fichier",
+   "À détecter un malware par ses caractéristiques",
+   "À configurer un pare-feu"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "L'obfuscation rend un programme impossible à analyser.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Elle ralentit l'analyse, sans l'empêcher."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque technologie à son outil de décompilation.",
+  "type": "associer",
+  "paires": [
+   [
+    "Java / Android",
+    "JADX"
+   ],
+   [
+    ".NET (C#)",
+    "ILSpy"
+   ],
+   [
+    "C compilé",
+    "Ghidra"
+   ],
+   [
+    "JavaScript",
+    "outils du navigateur"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

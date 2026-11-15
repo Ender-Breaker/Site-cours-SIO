@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Cybersécurité : hameçonnage et ingénierie sociale — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="securite-web" data-chapter="cyber-social">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/securite-web.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>La faille la plus exploitée n'est pas technique : c'est <b>l'humain</b>. L'<b>ingénierie sociale</b> consiste à manipuler une personne pour qu'elle donne une information ou fasse une action. Plus de la moitié des intrusions commencent par un message piégé.</p>
+<h2>1. Les leviers psychologiques</h2>
+<table><tr><th>Levier</th><th>Exemple</th></tr><tr><td><b>Urgence</b></td><td>« Votre compte sera supprimé dans 24 heures »</td></tr><tr><td><b>Autorité</b></td><td>un message qui semble venir du directeur, de la banque, de l'administration</td></tr><tr><td><b>Peur</b></td><td>« Activité suspecte détectée sur votre compte »</td></tr><tr><td><b>Appât du gain</b></td><td>« Vous avez gagné », « remboursement en attente »</td></tr><tr><td><b>Curiosité</b></td><td>« Regarde cette photo de toi »</td></tr><tr><td><b>Envie d'aider</b></td><td>« Je suis le nouveau stagiaire, tu peux m'ouvrir ? »</td></tr></table>
+<p>Un message qui te presse d'agir <b>tout de suite</b> doit te faire ralentir.</p>
+<h2>2. Les formes d'hameçonnage</h2>
+<table><tr><th>Nom</th><th>Canal</th></tr><tr><td>*Phishing*</td><td>courriel envoyé en masse</td></tr><tr><td>*Spear phishing*</td><td>courriel <b>ciblé</b>, personnalisé avec des informations sur la victime</td></tr><tr><td>*Smishing*</td><td>SMS (faux colis, faux compte de formation, fausse amende)</td></tr><tr><td>*Vishing*</td><td>appel téléphonique (faux conseiller bancaire, faux support technique)</td></tr><tr><td>*Quishing*</td><td>code QR piégé</td></tr><tr><td>Arnaque au président</td><td>un faux dirigeant demande un virement urgent et confidentiel</td></tr><tr><td>Faux support</td><td>une fenêtre « votre ordinateur est infecté, appelez ce numéro »</td></tr></table>
+<h2>3. Reconnaître un message piégé</h2>
+<table><tr><th>Indice</th><th>À vérifier</th></tr><tr><td>L'adresse de l'expéditeur</td><td><code>service@banque-securite-fr.com</code> n'est pas le domaine de ta banque</td></tr><tr><td>L'adresse réelle du lien</td><td>survole-le sans cliquer : le texte affiché et la destination diffèrent</td></tr><tr><td>Le ton</td><td>urgence, menace, récompense</td></tr><tr><td>La demande</td><td>mot de passe, code reçu par SMS, coordonnées bancaires : jamais par courriel</td></tr><tr><td>La pièce jointe</td><td><code>.exe</code>, <code>.js</code>, <code>.iso</code>, archive protégée, document qui demande d'« activer les macros »</td></tr><tr><td>La forme</td><td>fautes, salutation vague (« cher client »), logo flou</td></tr></table>
+<p>Les noms de domaine trompeurs sont la technique reine : une lettre changée (<code>paypa1.com</code>), un sous-domaine qui fait illusion (<code>banque.fr.connexion-securisee.net</code> appartient à <code>connexion-securisee.net</code>), ou un caractère d'un autre alphabet qui ressemble à s'y méprendre.</p>
+<div class="essai" data-langue="js"><pre><code>// Quel est le vrai domaine d'une adresse ? Ce qui précède le premier « / », lu de droite à gauche.
+function domaine(url) {
+  const hote = url.replace(/^https?:\/\//, "").split("/")[0].split("@").pop().split(":")[0];
+  const niveaux = /\.(gouv|asso)\.fr$|\.co\.uk$/.test(hote) ? 3 : 2;      // certains suffixes comptent deux niveaux
+  return hote.split(".").slice(-niveaux).join(".");
+}
+for (const u of [
+  "https://www.impots.gouv.fr/accueil",
+  "https://impots.gouv.fr.remboursement-en-ligne.net/connexion",
+  "https://ameli.fr@serveur-inconnu.example/login",
+  "http://paypa1.com/securite",
+]) console.log(domaine(u).padEnd(28), "←", u);</code></pre></div>
+<p>Le cadenas (HTTPS) prouve seulement que la connexion est chiffrée : un site d'hameçonnage peut parfaitement l'afficher.</p>
+<h2>4. Les bons réflexes</h2>
+<ul><li>Ne <b>jamais</b> cliquer sur le lien d'un message inattendu : aller sur le site en tapant l'adresse soi-même ou via ses favoris.</li><li>Vérifier par un <b>autre canal</b> : rappeler la personne sur un numéro connu.</li><li>Ne jamais donner un mot de passe ou un code reçu par SMS : aucun service légitime ne le demande.</li><li><b>Signaler</b> : au service informatique, sur <code>signal-spam.fr</code>, par SMS au 33700, sur la plateforme PHAROS.</li><li>Si tu as cliqué et saisi ton mot de passe : le changer <b>immédiatement</b> (et partout où il sert), prévenir, surveiller ses comptes.</li></ul>
+<h2>5. Protéger ses comptes</h2>
+<table><tr><th>Mesure</th><th>Pourquoi</th></tr><tr><td>Un <b>gestionnaire de mots de passe</b></td><td>un mot de passe long, aléatoire et différent par site, sans avoir à les retenir</td></tr><tr><td>L'<b>authentification multifacteur</b></td><td>un mot de passe volé ne suffit plus</td></tr><tr><td>Des mises à jour automatiques</td><td>les failles connues sont fermées</td></tr><tr><td>Vérifier ses fuites sur <code>haveibeenpwned.com</code></td><td>savoir quels comptes changer</td></tr><tr><td>Limiter ce qu'on publie</td><td>date de naissance, employeur, animaux : tout sert à personnaliser une attaque</td></tr></table>
+<p>Les facteurs d'authentification : ce que je <b>sais</b> (mot de passe), ce que je <b>possède</b> (téléphone, clé de sécurité), ce que je <b>suis</b> (empreinte). Le MFA en combine au moins deux. Une clé de sécurité matérielle (FIDO2) résiste même à l'hameçonnage ; un code reçu par SMS est le facteur le plus faible.</p>
+<h2>6. Côté entreprise</h2>
+<ul><li><b>Sensibiliser</b> régulièrement, avec des campagnes d'hameçonnage simulées (annoncées dans la charte).</li><li>Une procédure pour les virements : <b>double validation</b>, rappel sur un numéro connu.</li><li>Filtrage du courrier : anti-spam, analyse des pièces jointes, protocoles <b>SPF</b>, <b>DKIM</b> et <b>DMARC</b> qui empêchent d'usurper le domaine de l'entreprise.</li><li>Un moyen simple de signaler, et <b>aucune sanction</b> pour celui qui signale son erreur : la rapidité compte plus que tout.</li></ul>
+<section class="tuto"><h3><small>Tutoriel</small>Analyser un courriel suspect</h3>
+<div class="etape"><h4>Le message</h4>
+<pre><code>De : Service Clients &lt;securite@ameli-remboursement.info&gt;
+Objet : [URGENT] Remboursement de 248,60 € en attente
+
+Cher(e) assuré(e),
+Suite à un trop-perçu, un remboursement de 248,60 € vous attend.
+Sans action de votre part sous 24h, il sera annulé.
+&gt;&gt; Confirmer mes coordonnées bancaires &lt;&lt;</code></pre>
+</div>
+<div class="etape"><h4>Les indices</h4>
+<p>Domaine de l'expéditeur étranger à l'organisme ; urgence (« sous 24h ») ; appât du gain ; salutation vague ; demande de coordonnées bancaires.</p>
+</div>
+<div class="etape"><h4>La bonne réaction</h4>
+<p>Ne pas cliquer. Se connecter à son compte en tapant soi-même l'adresse officielle : aucun remboursement n'y figure. Signaler le message, puis le supprimer.</p>
+</div>
+</section>
+<div class="box retenir"><b>À retenir</b><p>L'ingénierie sociale joue sur l'urgence, l'autorité, la peur, le gain. </p><p> Vérifier le <b>domaine réel</b> de l'expéditeur et du lien ; le cadenas ne prouve pas l'honnêteté du site. </p><p> Jamais de mot de passe ni de code par courriel, SMS ou téléphone. </p><p> Gestionnaire de mots de passe + MFA. </p><p> En cas d'erreur : changer le mot de passe et prévenir tout de suite.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cyber.html">labo cybersécurité</a> te fait écrire des protections, casser des chiffres faibles et analyser des programmes. Le <a href="labo-defense.html">labo terminal</a> te fait enquêter et durcir un serveur. Et le <a href="duel.html">duel attaque / défense</a> t'oppose à un autre élève.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "facile",
+  "q": "Qu'est-ce que l'hameçonnage (phishing) ?",
+  "type": "qcm",
+  "options": [
+   "Un outil de test",
+   "Une attaque qui sature un serveur",
+   "Un virus qui chiffre les fichiers",
+   "Un message qui se fait passer pour un organisme de confiance afin de voler des informations"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce que le spear phishing ?",
+  "type": "qcm",
+  "options": [
+   "Un hameçonnage par SMS",
+   "Un hameçonnage par téléphone",
+   "Un hameçonnage ciblé et personnalisé",
+   "Un hameçonnage par code QR"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment appelle-t-on l'hameçonnage par SMS ?",
+  "type": "qcm",
+  "options": [
+   "Smishing",
+   "Vishing",
+   "Spoofing",
+   "Quishing"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment appelle-t-on l'hameçonnage par téléphone ?",
+  "type": "qcm",
+  "options": [
+   "Sniffing",
+   "Pharming",
+   "Smishing",
+   "Vishing"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel levier psychologique utilise « votre compte sera supprimé dans 24 heures » ?",
+  "type": "qcm",
+  "options": [
+   "L'urgence",
+   "L'envie d'aider",
+   "La curiosité",
+   "L'appât du gain"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "À qui appartient l'adresse `https://banque.fr.connexion-securisee.net/login` ?",
+  "type": "qcm",
+  "options": [
+   "À banque.fr",
+   "À fr.connexion",
+   "Au navigateur",
+   "Au domaine connexion-securisee.net"
+  ],
+  "answer": 3,
+  "explication": "Le domaine se lit juste avant le premier /."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que prouve le cadenas HTTPS d'un site ?",
+  "type": "qcm",
+  "options": [
+   "Que le site est honnête",
+   "Qu'il n'y a pas de virus",
+   "Seulement que la connexion est chiffrée",
+   "Que le site appartient à une banque"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Un courriel de ta banque te demande ton mot de passe. Que fais-tu ?",
+  "type": "qcm",
+  "options": [
+   "Je réponds pour vérifier",
+   "Je le donne s'il y a le logo",
+   "Je ne réponds pas : aucune banque ne le demande",
+   "Je clique pour voir"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Tu as saisi ton mot de passe sur un faux site. Premier réflexe ?",
+  "type": "qcm",
+  "options": [
+   "Le changer immédiatement, partout où il sert, et prévenir",
+   "Éteindre l'ordinateur",
+   "Attendre de voir",
+   "Supprimer le courriel"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce que l'arnaque au président ?",
+  "type": "qcm",
+  "options": [
+   "Un vol de mot de passe du directeur",
+   "Un faux dirigeant demande un virement urgent et confidentiel",
+   "Un faux site d'élection",
+   "Une panne du serveur de direction"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quels sont les trois facteurs d'authentification ?",
+  "type": "qcm",
+  "options": [
+   "Mot de passe, question secrète, date de naissance",
+   "Nom, prénom, mot de passe",
+   "Ce que je sais, ce que je possède, ce que je suis",
+   "Login, IP, navigateur"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel second facteur résiste le mieux à l'hameçonnage ?",
+  "type": "qcm",
+  "options": [
+   "Une clé de sécurité matérielle (FIDO2)",
+   "Une question secrète",
+   "Un second mot de passe",
+   "Un code par SMS"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "À quoi sert un gestionnaire de mots de passe ?",
+  "type": "qcm",
+  "options": [
+   "À partager ses mots de passe",
+   "À supprimer les mots de passe",
+   "À avoir un mot de passe long et différent par site sans les retenir",
+   "À retrouver les mots de passe des autres"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "À quoi servent SPF, DKIM et DMARC ?",
+  "type": "qcm",
+  "options": [
+   "À empêcher l'usurpation du domaine d'expédition des courriels",
+   "À bloquer les publicités",
+   "À chiffrer les pièces jointes",
+   "À accélérer l'envoi"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Pourquoi ne faut-il pas sanctionner un employé qui signale avoir cliqué ?",
+  "type": "qcm",
+  "options": [
+   "Parce que ce n'est jamais grave",
+   "Pour que les erreurs soient signalées vite",
+   "Pour faire plaisir",
+   "Parce que c'est interdit par le RGPD"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Une pièce jointe qui demande d'« activer les macros » doit éveiller la méfiance.",
+  "type": "vf",
+  "answer": true,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque technique à son canal.",
+  "type": "associer",
+  "paires": [
+   [
+    "phishing",
+    "courriel"
+   ],
+   [
+    "smishing",
+    "SMS"
+   ],
+   [
+    "vishing",
+    "téléphone"
+   ],
+   [
+    "quishing",
+    "code QR"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

@@ -79,9 +79,21 @@ Page `bonus.html` (lien « Bonus » dans la barre du haut et bandeau sur l'accue
 | Scripts Bash | 4 : premier script, conditions/boucles/fonctions, regex avec grep/sed/awk, SSH/cron/sauvegardes | |
 | PowerShell | 2 : cmdlets et pipeline d'objets ; scripts, Active Directory, administration à distance | |
 | Docker | 2 : images et conteneurs ; Dockerfile et Docker Compose | |
-| Sécurité web | 2 : injection SQL, XSS, CSRF ; mots de passe, sessions, contrôle d'accès, HTTPS | |
+| Cybersécurité (`securite-web`) | 15 : bases et loi, familles d'attaques, hameçonnage, types de protection, failles web (injection SQL, XSS, CSRF), mots de passe et sessions, cryptographie, réseau, durcissement, failles de mémoire, rétro-ingénierie (bases, assembleur, analyse), réponse à incident, test d'intrusion et CTF | 21 missions de code, 14 missions au terminal, duel |
 
-**Code exécutable dans les cours.** Dans les chapitres JavaScript, Lua, C++ et Java, les blocs « Exécuter » (`assets/essai.js`) sont de petits éditeurs : on modifie le code, on le relance, la sortie s'affiche dessous. Chaque chapitre a un tutoriel pas à pas et des « défis » qui ouvrent la mission correspondante du labo (`labo-xxx.html#m=<mission>`).
+**Cybersécurité : trois labos.** Le module `securite-web` (titre « Cybersécurité ») a plusieurs labos, déclarés dans `labos: [...]` de sa fiche :
+
+| Page | Moteur | Contenu |
+|---|---|---|
+| `labo-cyber.html` | `assets/labo-code.js` (JavaScript) | 21 missions : écrire des protections (échappement HTML, liste blanche, nom de fichier, jeton CSRF), cryptographie (Base64, César, XOR, fréquences, empreinte), rétro-ingénierie (hexadécimal, octets magiques, `strings`, deux crackme, désobfuscation), analyse de journaux (force brute, compromission, balayage de ports) |
+| `labo-defense.html` | `assets/labo.js` + `assets/terminal.js` | 14 missions dans un terminal simulé : enquêter dans `auth.log` après une force brute SSH, repérer un compte à l'UID 0, corriger des droits dangereux, préserver les preuves |
+| `duel.html` | `assets/duel.js` | duel attaque / défense (voir ci-dessous) |
+
+**Duel attaque / défense.** Un jeu de simulation, sans serveur : l'attaquant compose un plan (4 à 6 attaques parmi 17, 10 points d'action), le défenseur achète des protections (18 au catalogue, budget serré) puis traite les incidents non bloqués (reconnaître l'attaque, choisir la bonne réaction, 45 s par décision). Quatre modes : défendre contre l'ordinateur (3 niveaux), attaquer l'ordinateur (3 cibles), à deux sur le même appareil, défi par lien (`duel.html#d=…`, puis lien de résultat `#r=…` à renvoyer). Points par attaque : bloquée 3–0, contenue 1–1, subie 0–2, réussie 0–3. Les liens contiennent les indices des tableaux `ATT` et `PROT` de `assets/duel.js` : on ajoute à la fin, on ne réordonne pas. Statistiques locales dans `ef-duel` (synchronisées avec le compte). Aucune attaque réelle n'est lancée : ce sont des fiches et des questions. Un labo marqué `sansExamen: true` (le duel) n'a pas d'évaluation pratique ; `cle` donne la clé d'évaluation d'un second labo (`securite-web-terminal_pratique`).
+
+Le moteur du labo terminal accepte maintenant `key`, `titre`, `sousTitre`, `couleur`, `moduleTitre` et `mid` dans `window.EF_LABO`, ce qui permet plusieurs labos terminal sur le site.
+
+**Code exécutable dans les cours.** Dans les chapitres JavaScript, Lua, C++, Java et Cybersécurité (en JavaScript), les blocs « Exécuter » (`assets/essai.js`) sont de petits éditeurs : on modifie le code, on le relance, la sortie s'affiche dessous. Chaque chapitre a un tutoriel pas à pas et des « défis » qui ouvrent la mission correspondante du labo (`labo-xxx.html#m=<mission>`).
 
 | Langage | Exécution dans le navigateur |
 |---|---|

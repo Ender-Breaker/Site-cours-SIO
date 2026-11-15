@@ -6,7 +6,9 @@
   "use strict";
   var EF = window.EtudeFacile, esc = EF.esc, el = EF.el, I = EF.icon;
   var LAB = window.EF_LABO;
-  var KEY = "ef-labo-terminal";
+  var KEY = LAB.key || "ef-labo-terminal";
+  var TITRE = LAB.titre || "Labo terminal", COUL = LAB.couleur || "emerald";
+  var MODNOM = LAB.moduleTitre || "SISR";
   var HOME = "/home/etu";
 
   /* ---------- progression ---------- */
@@ -21,12 +23,12 @@
 
   /* ---------- squelette ---------- */
   document.body.appendChild(EF.header("../../"));
-  var main = el("main", "wrap page labo c-emerald");
+  var main = el("main", "wrap page labo c-" + COUL);
   document.body.appendChild(main);
   main.innerHTML =
-    '<nav class="crumbs"><a href="../../index.html">Accueil</a><span>›</span><a href="index.html">SISR</a><span>›</span><span>Labo terminal</span></nav>' +
-    '<div class="page-head c-emerald"><div class="ico">&gt;_</div><div><h1>Labo terminal</h1>' +
-    '<div class="sub">Tape de vraies commandes Linux sur un système de fichiers virtuel — rien ne peut casser.</div></div></div>' +
+    '<nav class="crumbs"><a href="../../index.html">Accueil</a><span>›</span><a href="index.html">' + esc(MODNOM) + '</a><span>›</span><span>' + esc(TITRE) + '</span></nav>' +
+    '<div class="page-head c-' + COUL + '"><div class="ico">&gt;_</div><div><h1>' + esc(TITRE) + '</h1>' +
+    '<div class="sub">' + esc(LAB.sousTitre || "Tape de vraies commandes Linux sur un système de fichiers virtuel — rien ne peut casser.") + '</div></div></div>' +
     '<div class="labo-mode chips" role="tablist">' +
     '<button class="chip" data-mode="guide" role="tab">' + I("book-open") + ' Parcours guidé</button>' +
     '<button class="chip" data-mode="libre" role="tab">' + I("pencil-line") + ' Bac à sable</button>' +
@@ -227,7 +229,7 @@
     var ctx = EF.examBlancCtx(MID), nEx = ctx ? ctx.n : 3, dureeEx = ctx ? Math.max(1, (ctx.fin - Date.now()) / 1000) : 900;
     var lecons = LAB.lecons.slice().sort(function () { return Math.random() - 0.5; }).slice(0, nEx);
     E = { ctx: ctx, list: lecons.map(function (l) { return hasard(l.missions); }), i: 0, ok: [], fini: false };
-    E.chrono = EF.examChrono(ctx ? "Examen blanc · partie pratique" : "Labo terminal", dureeEx, function () { finExamen(); });
+    E.chrono = EF.examChrono(ctx ? "Examen blanc · partie pratique" : TITRE, dureeEx, function () { finExamen(); });
     main.querySelector(".labo-grid").insertAdjacentElement("beforebegin", E.chrono.el);
     examOpen(0);
   }
@@ -279,7 +281,7 @@
       return;
     }
     EF.examResultat(box, {
-      mid: MID, titre: "Labo terminal", couleur: "emerald", racine: "../../", duree: 900, coef: 150, restant: rest,
+      mid: LAB.mid || MID, titre: TITRE, couleur: COUL, racine: "../../", duree: 900, coef: 150, restant: rest,
       retour: location.pathname.split("/").pop(),
       missions: E.list.map(function (m, i) { return { titre: m.titre, ok: !!E.ok[i], solution: m.solution.join("\n") }; }),
       rejouer: function () { location.hash = "#examen"; location.reload(); }

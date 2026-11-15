@@ -176,7 +176,9 @@ window.EF_MODULES = [
     option: "BONUS",
     couleur: "js",
     description: "Le langage du web : variables, fonctions, tableaux et objets, classes et modules, DOM et événements, asynchrone et API REST, puis des jeux en canvas.",
-    labos: [{ href: "labo-js.html", ico: "JS", titre: "Labo JavaScript", court: "JavaScript", texte: "40 missions : bases, fonctions, tableaux et objets (map, filter, reduce, JSON, classes), chaînes, puis des jeux (dessin, clavier, souris, gravité, tirs). Plus un bac à sable." }],
+    labos: [
+      { href: "labo-js.html", ico: "JS", titre: "Labo JavaScript", court: "JavaScript", texte: "40 missions : bases, fonctions, tableaux et objets (map, filter, reduce, JSON, classes), chaînes, puis des jeux (dessin, clavier, souris, gravité, tirs). Plus un bac à sable." }
+    ],
     chapitres: [
       { id: "js-bases", titre: "JavaScript : variables, types et opérateurs", niveau: "facile" },
       { id: "js-conditions-boucles", titre: "JavaScript : conditions et boucles", niveau: "facile" },
@@ -196,7 +198,9 @@ window.EF_MODULES = [
     option: "BONUS",
     couleur: "lua",
     description: "Le cours complet du langage de Roblox, LÖVE et des scripts de jeux : bases, tables, chaînes, closures, métatables, objets, coroutines, puis des jeux.",
-    labos: [{ href: "labo-lua.html", ico: "Lua", titre: "Labo Lua", court: "Lua", texte: "44 missions avec du vrai Lua 5.4 : bases, chaînes, tables, closures, métatables, objets, coroutines, puis des jeux dans le navigateur. Plus un bac à sable." }],
+    labos: [
+      { href: "labo-lua.html", ico: "Lua", titre: "Labo Lua", court: "Lua", texte: "44 missions avec du vrai Lua 5.4 : bases, chaînes, tables, closures, métatables, objets, coroutines, puis des jeux dans le navigateur. Plus un bac à sable." }
+    ],
     chapitres: [
       { id: "lua-bases", titre: "Lua : variables, types et affichage", niveau: "facile" },
       { id: "lua-conditions-boucles", titre: "Lua : conditions et boucles", niveau: "facile" },
@@ -220,7 +224,9 @@ window.EF_MODULES = [
     option: "BONUS",
     couleur: "cpp",
     description: "Le cours complet : compilation, types, fonctions et références, vector et string, pointeurs, classes, héritage, mémoire moderne, STL, templates, puis de vrais jeux compilés en WebAssembly.",
-    labos: [{ href: "labo-cpp.html", ico: "C++", titre: "Labo C++", court: "C++", texte: "45 missions avec du vrai C++20 compilé par clang dans le navigateur : bases, fonctions, vector, pointeurs, classes, héritage, STL, templates, puis des jeux en temps réel. Plus un bac à sable." }],
+    labos: [
+      { href: "labo-cpp.html", ico: "C++", titre: "Labo C++", court: "C++", texte: "45 missions avec du vrai C++20 compilé par clang dans le navigateur : bases, fonctions, vector, pointeurs, classes, héritage, STL, templates, puis des jeux en temps réel. Plus un bac à sable." }
+    ],
     chapitres: [
       { id: "cpp-bases", titre: "C++ : compiler, afficher, lire", niveau: "facile" },
       { id: "cpp-conditions-boucles", titre: "C++ : conditions et boucles", niveau: "facile" },
@@ -244,7 +250,9 @@ window.EF_MODULES = [
     option: "BONUS",
     couleur: "java",
     description: "Le cours complet : types, méthodes, tableaux, chaînes, programmation objet, héritage et interfaces, collections, exceptions, lambdas et streams, puis des jeux avec la classe Jeu.",
-    labos: [{ href: "labo-java.html", ico: "J", titre: "Labo Java", court: "Java", texte: "45 missions avec du vrai Java (javac + TeaVM) dans le navigateur : bases, méthodes, chaînes, objets, héritage, collections, exceptions, streams, puis des jeux. Plus un bac à sable." }],
+    labos: [
+      { href: "labo-java.html", ico: "J", titre: "Labo Java", court: "Java", texte: "45 missions avec du vrai Java (javac + TeaVM) dans le navigateur : bases, méthodes, chaînes, objets, héritage, collections, exceptions, streams, puis des jeux. Plus un bac à sable." }
+    ],
     chapitres: [
       { id: "java-bases", titre: "Java : la classe Main, types et Scanner", niveau: "facile" },
       { id: "java-conditions-boucles", titre: "Java : conditions et boucles", niveau: "facile" },
@@ -330,16 +338,34 @@ window.EF_MODULES = [
     ]
   },
   {
-    id: "securite-web", bonus: true,
-    titre: "Sécurité web",
-    sousTitre: "Bonus · SLAM et bloc 3 · OWASP",
+    id: "securite-web", bonus: true, evalTextuel: true,
+    titre: "Cybersécurité",
+    sousTitre: "Bonus · SLAM, SISR et bloc 3 · attaquer pour mieux défendre",
     icone: "Sec",
     option: "BONUS",
     couleur: "secu",
-    description: "Comprendre et corriger les failles classiques : injection SQL, XSS, CSRF, stockage des mots de passe, sessions, contrôle d'accès et HTTPS.",
+    description: "Le cours complet : attaques et protections, hameçonnage, failles web, cryptographie, réseau, durcissement, failles de mémoire, rétro-ingénierie, réponse à incident, test d'intrusion. Avec trois labos, dont un duel attaque / défense à jouer contre un autre élève.",
+    labos: [
+      { href: "labo-cyber.html", ico: "Sec", titre: "Labo cybersécurité", court: "Code", texte: "21 missions de code : protéger une application, cryptographie, rétro-ingénierie (crackme, hexadécimal, désobfuscation), analyse de journaux. Vérifiées automatiquement." },
+      { href: "labo-defense.html", ico: ">_", titre: "Labo terminal : enquêter et durcir", court: "Terminal", cle: "securite-web-terminal", examTexte: "3 missions au terminal · 15 min", texte: "Dans un terminal Linux simulé : fouiller les journaux après une attaque, repérer un compte suspect, corriger des droits dangereux, protéger des secrets." },
+      { href: "duel.html", ico: "VS", titre: "Duel attaque / défense", court: "Duel", sansExamen: true, bouton: "Lancer un duel", texte: "Un élève compose une attaque, un autre défend le réseau d'une entreprise : choisis tes protections, identifie les incidents, réagis. Seul contre l'ordinateur, à deux sur le même appareil, ou par lien envoyé à un ami." }
+    ],
     chapitres: [
+      { id: "cyber-panorama", titre: "Cybersécurité : les bases, le vocabulaire et la loi", niveau: "facile" },
+      { id: "cyber-attaques", titre: "Cybersécurité : les grandes familles d'attaques", niveau: "moyen" },
+      { id: "cyber-social", titre: "Cybersécurité : hameçonnage et ingénierie sociale", niveau: "facile" },
+      { id: "cyber-protections", titre: "Cybersécurité : les types de protection", niveau: "moyen" },
       { id: "secu-injections", titre: "Sécurité web : injection SQL, XSS et CSRF", niveau: "moyen" },
-      { id: "secu-authentification", titre: "Sécurité web : mots de passe, sessions et HTTPS", niveau: "moyen" }
+      { id: "secu-authentification", titre: "Sécurité web : mots de passe, sessions et HTTPS", niveau: "moyen" },
+      { id: "cyber-crypto", titre: "Cybersécurité : cryptographie, du code de César à TLS", niveau: "moyen" },
+      { id: "cyber-reseau", titre: "Cybersécurité : sécuriser un réseau", niveau: "moyen" },
+      { id: "cyber-systeme", titre: "Cybersécurité : durcir un système", niveau: "moyen" },
+      { id: "cyber-memoire", titre: "Cybersécurité : les failles de mémoire et leurs protections", niveau: "difficile" },
+      { id: "cyber-reverse-bases", titre: "Rétro-ingénierie : comprendre un programme sans son code source", niveau: "moyen" },
+      { id: "cyber-reverse-asm", titre: "Rétro-ingénierie : lire de l'assembleur", niveau: "difficile" },
+      { id: "cyber-reverse-pratique", titre: "Rétro-ingénierie : mener une analyse", niveau: "difficile" },
+      { id: "cyber-forensique", titre: "Cybersécurité : détecter, enquêter et répondre à un incident", niveau: "moyen" },
+      { id: "cyber-pentest", titre: "Cybersécurité : le test d'intrusion et les CTF", niveau: "moyen" }
     ]
   }
 ];

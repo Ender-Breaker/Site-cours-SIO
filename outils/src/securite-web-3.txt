@@ -1,0 +1,596 @@
+=== cyber-crypto | Cybersécurité : cryptographie, du code de César à TLS | m
+La **cryptographie** rend une information illisible pour ceux qui n'ont pas la clé, prouve qu'elle n'a pas été modifiée, et prouve qui l'a écrite. Elle est derrière HTTPS, les mots de passe, les signatures, les cartes bancaires.
+
+## 1. Encoder, chiffrer, hacher : trois choses différentes
+
+| Opération | Réversible ? | Besoin d'une clé ? | Sert à |
+| **Encoder** (Base64, hexadécimal, URL) | oui, par tout le monde | non | transporter des données |
+| **Chiffrer** (AES, RSA) | oui, **avec la clé** | oui | la confidentialité |
+| **Hacher** (SHA-256, bcrypt) | **non** | non | l'intégrité, les mots de passe |
+
+```run
+// Base64 n'est PAS un chiffrement : n'importe qui le décode.
+const secret = "motdepasse=Azerty123";
+const encode = btoa(secret);
+console.log(encode);
+console.log(atob(encode));
+```
+
+!attention Encoder n'est pas protéger | Un mot de passe « caché » en Base64 dans un fichier de configuration ou un cookie est en clair pour quiconque sait lire. C'est une erreur classique, et le premier réflexe en rétro-ingénierie.
+
+## 2. Les chiffres historiques, et pourquoi ils sont cassés
+
+Le **chiffre de César** décale chaque lettre. Il n'a que 25 clés possibles : on les essaie toutes.
+
+```run
+function cesar(texte, cle) {
+  return texte.replace(/[a-z]/g, c => String.fromCharCode((c.charCodeAt(0) - 97 + cle + 26) % 26 + 97));
+}
+const message = cesar("rendez vous a midi", 3);
+console.log(message);
+for (let cle = 1; cle <= 5; cle++) console.log(cle, cesar(message, -cle));   // attaque par force brute
+```
+
+La **substitution** (chaque lettre remplacée par une autre) a des milliards de milliards de clés, et tombe pourtant à l'**analyse de fréquences** : en français, la lettre la plus fréquente est le `e`.
+
+```run
+function frequences(texte) {
+  const f = {};
+  for (const c of texte.replace(/[^a-z]/g, "")) f[c] = (f[c] || 0) + 1;
+  return Object.entries(f).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([l, n]) => l + ":" + n).join(" ");
+}
+console.log(frequences("la securite est l affaire de tous et de chaque instant"));
+```
+
+Leçon : la solidité ne vient pas du secret de la méthode. **Principe de Kerckhoffs** : un système doit rester sûr même si tout est public, sauf la clé.
+
+## 3. Le XOR, brique de base
+
+`a XOR b` vaut 1 si les bits sont différents. Appliquer deux fois la même clé redonne le message : c'est la base de nombreux chiffrements… et de beaucoup d'obfuscations que l'on rencontre en analyse de programmes.
+
+```run
+function xor(octets, cle) { return octets.map((o, i) => o ^ cle.charCodeAt(i % cle.length)); }
+const clair = [..."attaque a l aube"].map(c => c.charCodeAt(0));
+const chiffre = xor(clair, "cle");
+console.log(chiffre.map(o => o.toString(16).padStart(2, "0")).join(" "));
+console.log(String.fromCharCode(...xor(chiffre, "cle")));       // la même opération déchiffre
+```
+
+Avec une clé courte et répétée, le XOR se casse facilement. Avec une clé aléatoire aussi longue que le message et jamais réutilisée (*masque jetable*), il est théoriquement incassable, mais impraticable.
+
+## 4. Le chiffrement symétrique
+
+**Une seule clé** chiffre et déchiffre. Rapide, il protège les gros volumes : disques, fichiers, flux réseau.
+
+| Algorithme | État |
+| **AES** (128 ou 256 bits) | le standard actuel |
+| ChaCha20 | moderne, répandu sur mobile |
+| DES, 3DES, RC4 | **obsolètes**, à bannir |
+
+Son problème : comment transmettre la clé à l'autre personne sans qu'on l'intercepte ?
+
+## 5. Le chiffrement asymétrique
+
+Chacun possède une **paire de clés** : une **publique**, que tout le monde peut connaître, et une **privée**, gardée secrète. Ce que l'une chiffre, seule l'autre le déchiffre.
+
+| Je veux… | J'utilise |
+| envoyer un secret à Léa | la clé **publique de Léa** (elle seule pourra déchiffrer) |
+| prouver que j'ai écrit un message | ma clé **privée** : c'est une **signature** |
+| vérifier la signature de Léa | la clé **publique de Léa** |
+
+Algorithmes : **RSA**, courbes elliptiques (**ECDSA**, **Ed25519**). Ils sont lents : en pratique on s'en sert pour échanger une clé symétrique, puis on chiffre tout le reste en AES. C'est exactement ce que fait TLS, et ce que font tes clés SSH.
+
+## 6. Les fonctions de hachage
+
+Une fonction de hachage transforme n'importe quelle donnée en une **empreinte** de taille fixe.
+
+| Propriété | Signifie |
+| Déterministe | la même entrée donne toujours la même empreinte |
+| À sens unique | impossible de remonter de l'empreinte à l'entrée |
+| Effet d'avalanche | un seul caractère changé bouleverse toute l'empreinte |
+| Résistance aux collisions | impossible en pratique de trouver deux entrées de même empreinte |
+
+```run
+// Un hachage jouet (djb2) pour voir les propriétés. En vrai : SHA-256.
+function empreinte(texte) {
+  let h = 5381;
+  for (const c of texte) h = ((h * 33) ^ c.charCodeAt(0)) >>> 0;
+  return h.toString(16).padStart(8, "0");
+}
+console.log(empreinte("virement de 100 euros a Lea"));
+console.log(empreinte("virement de 900 euros a Lea"));     // un caractère change, tout change
+console.log(empreinte("virement de 100 euros a Lea"));     // identique à la première
+```
+
+| Algorithme | Usage |
+| **SHA-256**, SHA-3 | intégrité de fichiers, signatures |
+| MD5, SHA-1 | **cassés** (collisions) : plus pour la sécurité |
+| **bcrypt**, **Argon2** | mots de passe : volontairement lents, avec sel |
+
+Vérifier un téléchargement : `sha256sum fichier.iso` (Linux) ou `Get-FileHash fichier.iso` (PowerShell), puis comparer avec l'empreinte publiée par l'éditeur.
+
+## 7. Certificats et TLS
+
+Un **certificat** associe une clé publique à une identité (un nom de domaine). Il est **signé** par une **autorité de certification** (AC) à laquelle ton navigateur fait confiance. L'ensemble forme une infrastructure à clés publiques (**PKI**).
+
+La poignée de main TLS, en résumé :
+
+1. Le navigateur annonce les algorithmes qu'il connaît.
+2. Le serveur envoie son **certificat**.
+3. Le navigateur vérifie la signature de l'AC, le nom de domaine et les dates de validité.
+4. Les deux s'accordent sur une **clé de session** symétrique, grâce à un échange asymétrique.
+5. Toute la suite est chiffrée en AES avec cette clé.
+
+!tuto Casser un chiffre de César par les fréquences
+# Compter les lettres
+La lettre la plus fréquente du message chiffré est probablement un `e`.
+```run
+const chiffre = "ohv hohyhv gh vlr dssuhqqhqw od vhfxulwh hq fkhufkdqw ohv idloohv";
+const f = {};
+for (const c of chiffre.replace(/[^a-z]/g, "")) f[c] = (f[c] || 0) + 1;
+const plusFrequente = Object.entries(f).sort((a, b) => b[1] - a[1])[0][0];
+console.log(plusFrequente);
+```
+# En déduire la clé
+L'écart entre cette lettre et `e` donne le décalage.
+```run
+const plusFrequente = "h";
+const cle = (plusFrequente.charCodeAt(0) - "e".charCodeAt(0) + 26) % 26;
+console.log("clé probable :", cle);
+```
+# Déchiffrer
+```run
+const chiffre = "ohv hohyhv gh vlr dssuhqqhqw od vhfxulwh hq fkhufkdqw ohv idloohv";
+const clair = chiffre.replace(/[a-z]/g, c => String.fromCharCode((c.charCodeAt(0) - 97 - 3 + 26) % 26 + 97));
+console.log(clair);
+```
+!fin
+
+!defi Défi : déchiffrer César | Avec la clé. | cy-cesar
+!defi Défi : César sans la clé | Essaie les 25 décalages. | cy-cesar-force
+!defi Défi : le XOR | Déchiffre des octets avec une clé répétée. | cy-xor
+
+!retenir À retenir | Encoder ≠ chiffrer ≠ hacher. ¶ Symétrique (AES) : une clé, rapide. Asymétrique (RSA, Ed25519) : clé publique / clé privée, pour échanger une clé et signer. ¶ Hachage : empreinte à sens unique (SHA-256 pour l'intégrité, bcrypt / Argon2 pour les mots de passe). ¶ Certificat = clé publique + identité, signé par une autorité. ¶ Kerckhoffs : seule la clé doit être secrète.
+--- exos
+Q¤m¤Base64 est…¤un encodage, réversible par tout le monde;;un chiffrement;;un hachage;;une signature¤
+Q¤m¤Quelle opération est irréversible ?¤Le hachage;;L'encodage;;Le chiffrement symétrique;;Le chiffrement asymétrique¤
+Q¤m¤Combien de clés utilise un chiffrement symétrique ?¤Une seule, partagée;;Deux, une publique et une privée;;Aucune;;Une par message¤
+Q¤m¤Quel est le standard actuel du chiffrement symétrique ?¤AES;;DES;;MD5;;RC4¤
+Q¤m¤Pour envoyer un message confidentiel à Léa, quelle clé utilises-tu ?¤La clé publique de Léa;;Ta clé privée;;La clé privée de Léa;;Ta clé publique¤
+Q¤m¤Avec quelle clé signes-tu un message ?¤Ta clé privée;;Ta clé publique;;La clé publique du destinataire;;Une clé symétrique¤
+Q¤m¤Pourquoi le chiffre de César est-il faible ?¤Il n'a que 25 clés possibles;;Il est trop lent;;Il utilise des nombres;;Il est secret¤
+Q¤m¤Quelle technique casse un chiffre de substitution ?¤L'analyse de fréquences;;La force brute sur 25 clés;;Le déni de service;;L'injection¤
+Q¤m¤Que dit le principe de Kerckhoffs ?¤La sécurité doit reposer sur le secret de la clé, pas de la méthode;;Il faut garder l'algorithme secret;;Une clé doit être courte;;Le chiffrement est inutile¤
+Q¤m¤Quelle propriété d'un hachage fait qu'un caractère modifié change toute l'empreinte ?¤L'effet d'avalanche;;La réversibilité;;La compression;;Le sel¤
+Q¤m¤Quels algorithmes de hachage ne doivent plus servir à la sécurité ?¤MD5 et SHA-1;;SHA-256 et SHA-3;;bcrypt et Argon2;;AES et RSA¤
+Q¤m¤Que contient un certificat TLS ?¤Une clé publique et une identité, signées par une autorité;;La clé privée du serveur;;Le mot de passe du site;;L'historique du site¤
+Q¤d¤Pourquoi TLS utilise-t-il de l'asymétrique puis du symétrique ?¤L'asymétrique sert à échanger une clé, le symétrique (rapide) chiffre le reste;;Pour chiffrer deux fois;;Parce que l'un des deux est cassé;;Par compatibilité avec les vieux navigateurs¤
+Q¤m¤Que vaut `x XOR cle XOR cle` ?¤x;;0;;cle;;1¤Appliquer deux fois la même clé annule l'opération.
+Q¤m¤Quelle commande Linux calcule l'empreinte SHA-256 d'un fichier ?¤`sha256sum`;;`hash256`;;`md5`;;`checkfile`¤
+V¤m¤Un mot de passe stocké en Base64 est protégé.¤F¤Base64 se décode sans clé.
+A¤m¤Associe chaque outil à son usage.¤AES=>chiffrer un disque;;RSA=>échanger une clé, signer;;SHA-256=>vérifier l'intégrité;;bcrypt=>stocker un mot de passe¤
+
+=== cyber-reseau | Cybersécurité : sécuriser un réseau | m
+Ce chapitre s'appuie sur les cours de réseau de SISR : il montre ce qu'un attaquant voit d'un réseau, et comment l'administrateur le ferme.
+
+## 1. Ports et services : la surface d'attaque
+
+Chaque service qui écoute sur un port est une porte. Moins il y en a, moins il y a à défendre.
+
+| Port | Service | Remarque de sécurité |
+| 22 | SSH | clés plutôt que mots de passe, pas de root direct |
+| 23 | Telnet | **en clair** : à supprimer, remplacer par SSH |
+| 21 | FTP | en clair : préférer SFTP |
+| 25 / 587 | SMTP | relais ouvert à proscrire |
+| 53 | DNS | |
+| 80 / 443 | HTTP / HTTPS | rediriger le 80 vers le 443 |
+| 445 | SMB (partages Windows) | jamais exposé à Internet |
+| 3306 / 5432 | MySQL / PostgreSQL | jamais exposé à Internet |
+| 3389 | RDP (bureau à distance) | cible favorite : derrière un VPN, avec MFA |
+
+Sur **ta** machine, tu vérifies ce qui écoute :
+
+```
+ss -tulpn                    # Linux : ports en écoute et programme associé
+sudo ufw status              # règles du pare-feu
+Get-NetTCPConnection -State Listen      # PowerShell
+```
+
+Un administrateur **audite son propre réseau** avec un scanner de ports (comme `nmap`) et un scanner de vulnérabilités, pour voir ce qu'un attaquant verrait. Scanner un réseau qui n'est pas le sien, sans autorisation écrite, est interdit.
+
+## 2. Ce qui circule en clair peut être lu
+
+Sur un réseau local ou un Wi-Fi public, un attaquant peut capturer le trafic. Un analyseur comme **Wireshark** montre le contenu exact des paquets : c'est l'outil de diagnostic de l'administrateur, et la preuve de l'intérêt du chiffrement.
+
+| En clair | Remplacer par |
+| HTTP | HTTPS |
+| Telnet | SSH |
+| FTP | SFTP / FTPS |
+| POP3 / IMAP / SMTP simples | leurs versions TLS |
+| DNS classique | DNS sur TLS ou HTTPS |
+
+## 3. Les attaques du réseau local
+
+| Attaque | Principe | Parade sur le commutateur |
+| Empoisonnement ARP | faire croire aux machines que l'attaquant est la passerelle (homme du milieu) | *Dynamic ARP Inspection* |
+| Faux serveur DHCP | distribuer une fausse passerelle et un faux DNS | *DHCP snooping* |
+| Saturation de la table MAC | forcer le commutateur à diffuser à tous | *port security* |
+| Saut de VLAN | sortir de son VLAN | désactiver le trunk automatique, VLAN natif dédié |
+| Branchement sauvage | une machine inconnue sur une prise libre | 802.1X, ports inutilisés désactivés |
+
+## 4. Le Wi-Fi
+
+| Protocole | État |
+| WEP | cassé en quelques minutes : interdit |
+| WPA / WPA2-TKIP | obsolètes |
+| **WPA2-AES** | correct avec une longue phrase de passe |
+| **WPA3** | le standard actuel |
+| WPA2/3-**Entreprise** (802.1X, RADIUS) | chaque utilisateur a ses propres identifiants |
+
+Bonnes pratiques : désactiver **WPS**, séparer un réseau **invités**, changer le mot de passe d'administration de la borne, mettre à jour son micrologiciel. Masquer le nom du réseau (SSID) n'apporte aucune sécurité.
+
+## 5. L'architecture : cloisonner
+
+```
+Internet ── pare-feu ──┬── DMZ : serveur web, relais de messagerie
+                       ├── VLAN serveurs : fichiers, base de données, annuaire
+                       ├── VLAN postes : administration, comptabilité
+                       ├── VLAN pédagogique / invités
+                       └── VLAN d'administration : accès par le bastion
+```
+
+Les flux entre zones passent par le pare-feu et ne sont autorisés qu'au cas par cas : le serveur web de la DMZ peut interroger la base de données sur son port, et rien d'autre. Si le serveur web est compromis, l'attaquant est enfermé dans la DMZ : on a limité le **déplacement latéral**.
+
+## 6. Durcir un serveur exposé
+
+```
+# /etc/ssh/sshd_config
+PermitRootLogin no
+PasswordAuthentication no        # clés uniquement
+AllowUsers lea admin
+MaxAuthTries 3
+```
+
+```
+sudo apt install fail2ban        # bannit les adresses qui échouent trop souvent
+sudo fail2ban-client status sshd
+sudo apt install unattended-upgrades      # correctifs de sécurité automatiques
+```
+
+Un **VPN** (WireGuard, OpenVPN, IPsec) crée un tunnel chiffré : l'administration à distance et les partages de fichiers ne sont jamais exposés directement à Internet.
+
+## 7. Les règles de pare-feu se lisent de haut en bas
+
+| N° | Source | Destination | Port | Action |
+| 1 | Internet | DMZ : serveur web | 443/tcp | autoriser |
+| 2 | DMZ : serveur web | serveurs : base de données | 3306/tcp | autoriser |
+| 3 | VLAN administration | tous | 22/tcp | autoriser |
+| 4 | VLAN invités | réseaux internes | tous | **refuser** |
+| 5 | tous | tous | tous | **refuser** (règle par défaut) |
+
+La première règle qui correspond s'applique. Une règle trop large placée trop haut annule toutes celles qui suivent.
+
+```run
+// Simulation : quelle règle s'applique à un paquet ?
+const regles = [
+  { src: "internet", dst: "dmz-web", port: 443, action: "autoriser" },
+  { src: "dmz-web", dst: "bdd", port: 3306, action: "autoriser" },
+  { src: "admin", dst: "*", port: 22, action: "autoriser" },
+  { src: "*", dst: "*", port: "*", action: "refuser" },
+];
+function filtrer(p) {
+  const ok = (r, v) => r === "*" || r === v;
+  const i = regles.findIndex(r => ok(r.src, p.src) && ok(r.dst, p.dst) && ok(r.port, p.port));
+  return `règle ${i + 1} : ${regles[i].action}`;
+}
+console.log(filtrer({ src: "internet", dst: "dmz-web", port: 443 }));
+console.log(filtrer({ src: "internet", dst: "bdd", port: 3306 }));
+console.log(filtrer({ src: "invites", dst: "bdd", port: 22 }));
+```
+
+!defi Défi : détecter un balayage de ports | Repère dans un journal l'adresse qui frappe à toutes les portes. | cy-scan
+
+!retenir À retenir | Fermer tout service inutile ; jamais de base de données, de SMB ou de RDP exposés à Internet. ¶ Remplacer les protocoles en clair (Telnet, FTP, HTTP) par leurs versions chiffrées. ¶ Cloisonner : DMZ, VLAN, pare-feu entre les zones. ¶ Wi-Fi : WPA3 ou WPA2-AES, WPS désactivé, réseau invités séparé. ¶ SSH par clés, fail2ban, mises à jour automatiques, VPN pour l'administration.
+--- exos
+Q¤f¤Quel est le port par défaut de SSH ?¤22;;23;;80;;443¤
+Q¤m¤Pourquoi faut-il remplacer Telnet par SSH ?¤Telnet transmet tout en clair, y compris le mot de passe;;Telnet est plus lent;;Telnet est payant;;SSH utilise moins de ports¤
+Q¤m¤Quel service ne doit jamais être exposé directement à Internet ?¤Une base de données (port 3306);;Un serveur web (port 443);;Un serveur DNS public;;Un relais de messagerie¤
+Q¤m¤Quelle commande Linux liste les ports en écoute sur ta machine ?¤`ss -tulpn`;;`ls -ports`;;`ping -a`;;`df -h`¤
+Q¤m¤Que montre un analyseur de trafic comme Wireshark ?¤Le contenu des paquets qui circulent;;Les mots de passe chiffrés en clair;;Les fichiers du disque;;La liste des virus¤
+Q¤m¤Que permet un empoisonnement ARP ?¤De se placer en homme du milieu sur le réseau local;;De saturer un site web;;De casser un mot de passe;;De chiffrer un disque¤
+Q¤m¤Quelle protection de commutateur bloque les faux serveurs DHCP ?¤DHCP snooping;;Port mirroring;;Spanning tree;;QoS¤
+Q¤m¤Quel protocole Wi-Fi est totalement cassé et interdit ?¤WEP;;WPA3;;WPA2-AES;;802.1X¤
+Q¤m¤Quelle fonction Wi-Fi faut-il désactiver sur une borne ?¤WPS;;WPA3;;Le chiffrement AES;;Le DHCP¤
+Q¤m¤Masquer le nom du réseau Wi-Fi (SSID)…¤n'apporte aucune sécurité réelle;;empêche toute attaque;;remplace le mot de passe;;chiffre le trafic¤
+Q¤m¤Que limite le cloisonnement du réseau en zones ?¤Le déplacement latéral d'un attaquant;;Le débit;;Le nombre d'utilisateurs;;La taille des fichiers¤
+Q¤m¤Que fait fail2ban ?¤Il bannit les adresses qui multiplient les échecs de connexion;;Il chiffre le disque;;Il sauvegarde les journaux;;Il met à jour le système¤
+Q¤m¤Dans un pare-feu, quelle règle s'applique à un paquet ?¤La première qui correspond, de haut en bas;;La dernière;;La plus précise;;Toutes à la fois¤
+Q¤d¤Pourquoi administrer ses serveurs à travers un VPN ?¤Les ports d'administration ne sont plus exposés à Internet;;C'est plus rapide;;Le VPN remplace le mot de passe;;Pour économiser des adresses IP¤
+Q¤m¤Scanner les ports d'un réseau qui ne t'appartient pas, sans autorisation, est…¤interdit;;autorisé si on ne se connecte pas;;autorisé pour les étudiants;;sans conséquence¤
+V¤m¤Dans une architecture cloisonnée, le serveur web de la DMZ peut accéder librement à tout le réseau interne.¤F¤Seuls les flux strictement nécessaires sont autorisés.
+A¤m¤Associe chaque protocole en clair à son remplaçant chiffré.¤HTTP=>HTTPS;;Telnet=>SSH;;FTP=>SFTP¤
+
+=== cyber-systeme | Cybersécurité : durcir un système | m
+**Durcir** (*hardening*) un système, c'est réduire tout ce qu'un attaquant pourrait utiliser : comptes, services, droits, logiciels. Un système fraîchement installé est configuré pour être pratique, pas pour être sûr.
+
+## 1. Les comptes
+
+| Règle | Sous Linux | Sous Windows |
+| Pas de travail quotidien en administrateur | `sudo` ponctuel | compte standard + élévation UAC |
+| Pas de compte partagé | un compte par personne | idem, dans l'annuaire |
+| Désactiver les comptes inutiles | `sudo usermod -L invite` | `Disable-ADAccount` |
+| Mots de passe robustes, verrouillage après échecs | PAM, `faillock` | stratégie de groupe (GPO) |
+| Qui est administrateur ? | `getent group sudo` | `Get-LocalGroupMember Administrateurs` |
+
+Le compte `root` (UID 0) peut tout. Un attaquant qui obtient un compte ordinaire cherche à devenir root : c'est l'**élévation de privilèges**.
+
+## 2. Les droits sur les fichiers
+
+```
+ls -l /etc/shadow                # -rw-r----- root shadow : les empreintes des mots de passe
+chmod 600 ~/.ssh/id_ed25519      # une clé privée n'est lisible que par son propriétaire
+chmod 640 /var/www/site/.env     # un fichier de secrets n'est jamais lisible par « les autres »
+chmod o-w script.sh              # retirer l'écriture pour tous
+```
+
+| Erreur fréquente | Risque |
+| Fichier en `777` | n'importe qui peut le modifier : si root l'exécute, c'est gagné pour l'attaquant |
+| Script lancé par root (cron) mais modifiable par un utilisateur | élévation de privilèges |
+| Fichier de configuration avec mot de passe, lisible par tous | fuite de secret |
+| Bit **SUID** sur un programme inutile | le programme s'exécute avec les droits de son propriétaire (souvent root) |
+| Dossier personnel lisible par tous | fuite de données |
+
+```
+find / -perm -4000 -type f 2>/dev/null       # liste les programmes SUID : à passer en revue
+find /var/www -perm -o+w -type f             # fichiers modifiables par tout le monde
+```
+
+## 3. Réduire la surface
+
+```
+systemctl list-units --type=service --state=running     # ce qui tourne
+sudo systemctl disable --now cups                       # arrêter et désactiver l'inutile
+ss -tulpn                                               # ce qui écoute
+apt list --installed | wc -l                            # moins de paquets = moins de failles
+```
+
+Règle : **ce qui n'est pas installé ne peut pas être attaqué**. Un serveur de base de données n'a besoin ni d'interface graphique, ni de compilateur, ni de serveur d'impression.
+
+## 4. Mettre à jour
+
+La majorité des intrusions exploitent une faille pour laquelle un correctif existait depuis des semaines.
+
+```
+sudo apt update && sudo apt upgrade              # Debian / Ubuntu
+sudo apt install unattended-upgrades             # correctifs de sécurité automatiques
+```
+
+Sous Windows : Windows Update, et WSUS ou Intune pour gérer un parc. On tient un **inventaire** : on ne peut pas mettre à jour ce qu'on ne sait pas posséder.
+
+## 5. Journaliser
+
+| Journal | Contient |
+| `/var/log/auth.log` (ou `journalctl -u ssh`) | connexions, échecs, `sudo` |
+| `/var/log/syslog` | événements système |
+| `/var/log/nginx/access.log` | requêtes web |
+| Observateur d'événements Windows, journal Sécurité | 4624 connexion réussie, **4625** échec, 4720 création de compte |
+
+```
+grep "Failed password" /var/log/auth.log | wc -l
+last -n 10                       # dernières connexions réussies
+lastb -n 10                      # dernières connexions échouées
+sudo journalctl -p err -b        # erreurs depuis le démarrage
+```
+
+Les journaux sont **envoyés vers un autre serveur** : un attaquant devenu root efface ses traces sur la machine compromise.
+
+## 6. Spécificités Windows
+
+| Mesure | Rôle |
+| Stratégies de groupe (GPO) | imposer la configuration à tout le parc |
+| BitLocker | chiffrement du disque |
+| Microsoft Defender, SmartScreen | antimalware intégré |
+| AppLocker / WDAC | liste blanche d'applications |
+| LAPS | un mot de passe administrateur local différent sur chaque poste |
+| Désactiver SMBv1, les macros Office venant d'Internet | fermer des vecteurs historiques |
+| Niveaux d'administration (*tiering*) | un administrateur du domaine ne se connecte jamais sur un simple poste |
+
+## 7. Les référentiels
+
+On ne durcit pas au hasard : on suit une liste. Les **guides de l'ANSSI** (GNU/Linux, Active Directory, hygiène informatique) et les **CIS Benchmarks** donnent, système par système, les réglages recommandés. Des outils comme **Lynis** (Linux) contrôlent automatiquement l'écart avec ces recommandations.
+
+!tuto Auditer un serveur Linux en dix minutes
+# Qui peut se connecter et qui est administrateur ?
+```
+grep -v "nologin\|false" /etc/passwd | cut -d: -f1
+getent group sudo
+```
+# Qu'est-ce qui est exposé ?
+```
+ss -tulpn
+sudo ufw status verbose
+```
+# Les secrets sont-ils protégés ?
+```
+find /var/www /home -name ".env" -o -name "*.key" | xargs ls -l
+```
+# Quelqu'un a-t-il essayé d'entrer ?
+```
+grep "Failed password" /var/log/auth.log | grep -oE "[0-9]+(\.[0-9]+){3}" | sort | uniq -c | sort -rn | head
+```
+# À toi
+Toutes ces vérifications se pratiquent dans le [labo terminal : enquêter et durcir](labo-defense.html).
+!fin
+
+!retenir À retenir | Pas d'administrateur au quotidien, pas de compte partagé, comptes inutiles désactivés. ¶ Droits minimaux : clé privée et secrets en `600` / `640`, jamais de `777`. ¶ Désinstaller et arrêter l'inutile. ¶ Mettre à jour automatiquement. ¶ Journaux conservés sur une autre machine. ¶ S'appuyer sur les guides ANSSI et CIS.
+--- exos
+Q¤m¤Que signifie durcir un système ?¤Réduire tout ce qu'un attaquant pourrait utiliser;;Le rendre plus rapide;;Installer plus de logiciels;;Changer de matériel¤
+Q¤m¤Qu'est-ce qu'une élévation de privilèges ?¤Passer d'un compte limité à un compte administrateur;;Augmenter la mémoire d'un serveur;;Changer de mot de passe;;Créer un nouveau compte¤
+Q¤m¤Quels droits donner à une clé privée SSH ?¤600;;644;;755;;777¤Lisible par son seul propriétaire.
+Q¤m¤Pourquoi un fichier en 777 est-il dangereux ?¤N'importe quel utilisateur peut le modifier;;Il est trop gros;;Il ne peut plus être lu;;Il est chiffré¤
+Q¤m¤Que fait le bit SUID sur un programme ?¤Il s'exécute avec les droits de son propriétaire;;Il devient invisible;;Il ne peut plus être supprimé;;Il s'exécute au démarrage¤
+Q¤m¤Quel fichier Linux contient les empreintes des mots de passe ?¤`/etc/shadow`;;`/etc/passwd`;;`/etc/hosts`;;`/var/log/auth.log`¤
+Q¤m¤Quelle commande arrête et désactive un service inutile ?¤`sudo systemctl disable --now service`;;`sudo rm service`;;`kill service`;;`sudo apt stop service`¤
+Q¤m¤Dans quel journal Linux trouve-t-on les échecs de connexion SSH ?¤`/var/log/auth.log`;;`/etc/passwd`;;`/var/log/nginx/access.log`;;`/tmp/log`¤
+Q¤m¤Quel numéro d'événement Windows correspond à un échec de connexion ?¤4625;;4624;;1000;;404¤
+Q¤m¤Pourquoi envoyer les journaux vers un autre serveur ?¤Un attaquant devenu administrateur pourrait les effacer;;Pour gagner de la place;;Pour les lire plus vite;;C'est une obligation de l'antivirus¤
+Q¤m¤Quelle mesure est la plus rentable contre les intrusions ?¤Appliquer les mises à jour de sécurité;;Changer de fournisseur d'accès;;Masquer le nom du serveur;;Acheter un second écran¤
+Q¤m¤Quel outil Windows chiffre le disque ?¤BitLocker;;AppLocker;;LAPS;;WSUS¤
+Q¤m¤À quoi sert LAPS ?¤À donner un mot de passe administrateur local différent à chaque poste;;À chiffrer les courriels;;À bloquer les clés USB;;À installer les mises à jour¤
+Q¤d¤Pourquoi un script modifiable par tous et exécuté par root via cron est-il critique ?¤Un utilisateur y écrit ses commandes, qui s'exécutent avec les droits root;;Il ralentit le serveur;;Il remplit le disque;;Il empêche les mises à jour¤
+Q¤m¤Où trouver des listes de réglages de durcissement reconnues ?¤Guides de l'ANSSI et CIS Benchmarks;;Sur les forums de jeux;;Dans le manuel de la carte mère;;Dans le RGPD¤
+V¤m¤Ce qui n'est pas installé ne peut pas être attaqué.¤V¤C'est le principe de réduction de la surface d'attaque.
+A¤m¤Associe chaque commande à ce qu'elle montre.¤`ss -tulpn`=>ports en écoute;;`last`=>connexions réussies;;`getent group sudo`=>administrateurs;;`find / -perm -4000`=>programmes SUID¤
+
+=== cyber-memoire | Cybersécurité : les failles de mémoire et leurs protections | d
+En C et en C++, le programmeur gère lui-même la mémoire. Une erreur d'un octet peut suffire à faire planter un programme, ou à en donner le contrôle à quelqu'un d'autre. Ces failles restent parmi les plus graves : elles touchent les systèmes d'exploitation, les navigateurs, les équipements réseau. Ce chapitre explique **pourquoi** elles existent et **comment on s'en protège** ; il suppose connus les pointeurs (cours C++).
+
+## 1. La pile d'une fonction
+
+À chaque appel de fonction, le programme réserve sur la **pile** une zone qui contient ses variables locales et l'**adresse de retour** : l'endroit où reprendre quand la fonction se termine.
+
+```
+adresses hautes
+┌──────────────────────────┐
+│ adresse de retour        │  ← où le programme reprendra
+│ ancien pointeur de pile  │
+│ char nom[8]              │  ← les variables locales, juste en dessous
+└──────────────────────────┘
+adresses basses
+```
+
+## 2. Le dépassement de tampon
+
+Un **tampon** (*buffer*) est un tableau de taille fixe. Si le programme y écrit plus de données qu'il ne peut en contenir, le surplus **écrase ce qui se trouve à côté**.
+
+```
+// VULNÉRABLE
+void saluer() {
+    char nom[8];
+    gets(nom);                 // lit sans aucune limite : supprimée du langage depuis 2011
+    printf("Bonjour %s\n", nom);
+}
+```
+
+Avec une saisie de 8 caractères ou plus, les octets en trop débordent sur les données voisines, jusqu'à l'adresse de retour. Le plus souvent le programme plante (*segmentation fault*). Dans le pire des cas, un attaquant choisit soigneusement ce qui est écrit et **détourne l'exécution** du programme.
+
+```
+// CORRECT
+void saluer() {
+    char nom[8];
+    if (fgets(nom, sizeof(nom), stdin)) {      // au plus 7 caractères + le zéro final
+        printf("Bonjour %s\n", nom);
+    }
+}
+```
+
+| Fonction dangereuse | Remplacement |
+| `gets` | `fgets(tampon, taille, stdin)` |
+| `strcpy`, `strcat` | `strncpy` / `strlcpy`, `snprintf` |
+| `sprintf` | `snprintf(tampon, taille, …)` |
+| `scanf("%s", …)` | `scanf("%7s", …)` avec une largeur |
+
+En C++, `std::string` et `std::vector` gèrent leur taille eux-mêmes : c'est une raison de plus de les préférer aux tableaux du C.
+
+## 3. Les autres erreurs de mémoire
+
+| Faille | Ce qui se passe |
+| Lecture hors limites | lire au-delà d'un tableau : fuite de données voisines (c'était la faille **Heartbleed**) |
+| *Use-after-free* | utiliser une zone déjà libérée, que le programme a peut-être réattribuée |
+| Double libération | deux `free` / `delete` sur la même adresse |
+| Dépassement d'entier | `taille + 1` qui repasse à 0 : le tampon réservé est trop petit |
+| Chaîne de format | `printf(saisie)` au lieu de `printf("%s", saisie)` : la saisie est interprétée comme un format |
+| Pointeur nul | déréférencement de `nullptr` : plantage, donc déni de service |
+
+Une démonstration sans danger du dépassement d'entier : sur 8 bits, 255 + 1 vaut 0.
+
+```run
+const sur8bits = n => n & 0xFF;                 // ne garde que 8 bits, comme un unsigned char
+console.log(sur8bits(200 + 55), sur8bits(255 + 1), sur8bits(250 + 10));
+const longueurAnnoncee = 255;
+const tailleReservee = sur8bits(longueurAnnoncee + 1);    // +1 pour le zéro final…
+console.log("octets réservés :", tailleReservee, "pour", longueurAnnoncee, "octets à copier");
+```
+
+## 4. Les protections du système et du compilateur
+
+Elles ne corrigent pas le bug : elles rendent son exploitation très difficile.
+
+| Protection | Principe |
+| **Canari de pile** (*stack protector*) | une valeur aléatoire placée avant l'adresse de retour ; si elle a changé au retour de la fonction, le programme s'arrête |
+| **NX / DEP** | la pile et le tas sont **non exécutables** : des données ne peuvent pas être lancées comme du code |
+| **ASLR** | les adresses de la pile, du tas et des bibliothèques changent à chaque exécution |
+| **PIE** | le programme lui-même est chargé à une adresse aléatoire |
+| **RELRO** | certaines tables internes passent en lecture seule après le chargement |
+| `_FORTIFY_SOURCE` | vérifications ajoutées aux fonctions comme `strcpy` |
+
+```
+gcc -Wall -Wextra -O2 -D_FORTIFY_SOURCE=2 -fstack-protector-strong -fPIE -pie programme.c
+```
+
+Elles sont activées par défaut sur les systèmes modernes ; l'outil `checksec` montre lesquelles protègent un binaire.
+
+## 5. La vraie solution : ne pas pouvoir se tromper
+
+| Approche | Exemple |
+| Langages à mémoire sûre | **Rust**, Java, C#, Go, Python : pas d'écriture hors d'un tableau |
+| C++ moderne | `std::vector::at()`, `std::string`, pointeurs intelligents, pas de `new` / `delete` manuels |
+| Analyse statique | le compilateur (`-Wall -Wextra`) et des outils signalent les fonctions dangereuses |
+| Assainisseurs (*sanitizers*) | `-fsanitize=address` détecte les débordements pendant les tests |
+| *Fuzzing* | bombarder le programme d'entrées aléatoires pour trouver les plantages |
+| Revue de code | un second regard sur tout ce qui manipule des tailles |
+
+C'est pour cela que les agences de sécurité recommandent les langages à mémoire sûre pour les nouveaux projets, et que Linux, Windows et Android accueillent du Rust.
+
+!tuto Lire un rapport de plantage
+# Le programme
+```
+#include <stdio.h>
+#include <string.h>
+int main(int argc, char** argv) {
+    char code[8];
+    strcpy(code, argv[1]);         // aucune vérification de taille
+    printf("Code : %s\n", code);
+}
+```
+# Le symptôme
+Avec un argument court, tout va bien. Avec un argument long, le canari détecte l'écrasement et arrête le programme :
+```
+$ ./programme 1234
+Code : 1234
+$ ./programme AAAAAAAAAAAAAAAAAAAAAAAA
+*** stack smashing detected ***: terminated
+Abandon (core dumped)
+```
+# Le diagnostic avec l'assainisseur
+Compilé avec `-fsanitize=address -g`, le programme indique la ligne fautive et la taille du tampon :
+```
+ERROR: AddressSanitizer: stack-buffer-overflow
+WRITE of size 25 at … in main programme.c:5
+[32, 40) 'code' <== Memory access at offset 40 overflows this variable
+```
+# La correction
+```
+snprintf(code, sizeof(code), "%s", argv[1]);     // tronque au lieu de déborder
+```
+!fin
+
+!retenir À retenir | Un dépassement de tampon écrit au-delà d'un tableau et écrase les données voisines, jusqu'à l'adresse de retour. ¶ Bannir `gets`, `strcpy`, `sprintf` ; toujours passer la **taille** du tampon. ¶ Protections : canari, NX / DEP, ASLR, PIE. ¶ Elles compliquent l'exploitation mais ne corrigent pas le bug. ¶ La meilleure défense : conteneurs sûrs, langages à mémoire sûre, tests avec assainisseurs.
+--- exos
+Q¤m¤Qu'est-ce qu'un dépassement de tampon ?¤Écrire plus de données que le tableau ne peut en contenir;;Un disque plein;;Un réseau saturé;;Une fuite de mots de passe¤
+Q¤m¤Que contient la pile en plus des variables locales ?¤L'adresse de retour de la fonction;;Le code du programme;;Les fichiers ouverts;;Les mots de passe¤
+Q¤m¤Pourquoi `gets` a-t-elle été supprimée du langage C ?¤Elle lit sans aucune limite de taille;;Elle est trop lente;;Elle ne lit que des nombres;;Elle est payante¤
+Q¤m¤Par quoi remplacer `gets(nom)` ?¤`fgets(nom, sizeof(nom), stdin)`;;`scanf("%s", nom)`;;`strcpy(nom, stdin)`;;`read(nom)`¤
+Q¤m¤Par quoi remplacer `sprintf(t, …)` ?¤`snprintf(t, taille, …)`;;`strcat(t, …)`;;`printf(t, …)`;;`gets(t)`¤
+Q¤m¤Que fait un canari de pile ?¤Il détecte l'écrasement de la pile avant le retour de la fonction;;Il chiffre la pile;;Il agrandit les tampons;;Il supprime les variables¤
+Q¤m¤Que fait la protection NX / DEP ?¤Elle interdit d'exécuter des données comme du code;;Elle chiffre le disque;;Elle bloque le réseau;;Elle masque les mots de passe¤
+Q¤m¤Que fait ASLR ?¤Il rend aléatoires les adresses mémoire à chaque exécution;;Il accélère le programme;;Il supprime les pointeurs;;Il vérifie les mots de passe¤
+Q¤m¤Qu'est-ce qu'un use-after-free ?¤Utiliser une zone mémoire déjà libérée;;Libérer deux fois une zone;;Oublier de libérer;;Lire un fichier fermé¤
+Q¤m¤Sur un octet non signé, que vaut 255 + 1 ?¤0;;256;;255;;-1¤C'est un dépassement d'entier.
+Q¤d¤Pourquoi `printf(saisie)` est-il dangereux ?¤La saisie est interprétée comme une chaîne de format;;printf est obsolète;;La saisie est trop longue;;Il manque un point-virgule¤On écrit `printf("%s", saisie)`.
+Q¤m¤Quel langage système garantit la sûreté de la mémoire à la compilation ?¤Rust;;C;;Assembleur;;C++ avec new et delete¤
+Q¤m¤Quelle option de compilation détecte les débordements pendant les tests ?¤`-fsanitize=address`;;`-O3`;;`-s`;;`-w`¤
+Q¤m¤Qu'est-ce que le fuzzing ?¤Envoyer au programme une masse d'entrées aléatoires pour le faire planter;;Chiffrer le code;;Compiler plus vite;;Mesurer la mémoire¤
+Q¤d¤Les protections comme ASLR et les canaris…¤compliquent l'exploitation mais ne corrigent pas le bug;;corrigent le bug;;rendent le C aussi sûr que Java;;ralentissent trop pour être utilisées¤
+V¤m¤En C++, std::string et std::vector évitent une grande partie des dépassements de tampon.¤V¤Ils gèrent eux-mêmes leur taille.
+A¤m¤Associe chaque protection à son principe.¤canari=>valeur témoin avant l'adresse de retour;;NX=>pile non exécutable;;ASLR=>adresses aléatoires;;sanitizer=>détection pendant les tests¤

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Cybersécurité : les bases, le vocabulaire et la loi — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="securite-web" data-chapter="cyber-panorama">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/securite-web.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>La <b>cybersécurité</b> protège les systèmes, les réseaux et les données contre les accès non autorisés, les pannes provoquées et les vols. C'est le bloc 3 du BTS SIO, commun aux deux options, et l'un des secteurs qui recrutent le plus. Pour bien défendre, il faut comprendre comment on attaque : c'est le fil de ce cours.</p>
+<div class="box attention"><b>Le cadre légal d'abord</b><p>En France, accéder ou se maintenir <b>sans autorisation</b> dans un système est un délit, même sans rien casser et même « pour aider » : jusqu'à 3 ans de prison et 100 000 € d'amende (article 323-1 du Code pénal), davantage si des données sont modifiées ou si le système appartient à l'État. Tout ce que tu apprends ici se pratique <b>uniquement</b> sur tes propres machines, dans les labos de ce site, ou sur des plateformes prévues pour cela (Root-Me, TryHackMe, Hack The Box, les CTF).</p></div>
+<h2>1. Les trois piliers : D, I, C</h2>
+<table><tr><th>Pilier</th><th>Question</th><th>Exemple d'atteinte</th></tr><tr><td><b>D</b>isponibilité</td><td>le service répond-il quand on en a besoin ?</td><td>site saturé par un déni de service, fichiers chiffrés par un rançongiciel</td></tr><tr><td><b>I</b>ntégrité</td><td>les données sont-elles exactes, non modifiées ?</td><td>une note changée dans la base, un virement détourné</td></tr><tr><td><b>C</b>onfidentialité</td><td>seules les bonnes personnes y ont-elles accès ?</td><td>fuite d'une base de clients</td></tr></table>
+<p>On ajoute souvent la <b>traçabilité</b> (ou preuve) : savoir qui a fait quoi, et quand. En anglais, on parle de la triade <b>CIA</b> (*Confidentiality, Integrity, Availability*).</p>
+<h2>2. Vulnérabilité, menace, risque</h2>
+<table><tr><th>Terme</th><th>Définition</th><th>Exemple</th></tr><tr><td><b>Actif</b></td><td>ce qui a de la valeur</td><td>la base des clients</td></tr><tr><td><b>Vulnérabilité</b></td><td>une faiblesse</td><td>un serveur pas mis à jour</td></tr><tr><td><b>Menace</b></td><td>ce qui peut exploiter la faiblesse</td><td>un groupe de rançongiciel</td></tr><tr><td><b>Risque</b></td><td>probabilité × impact</td><td>forte chance d'être chiffré, arrêt de l'activité</td></tr><tr><td><b>Exploit</b></td><td>le moyen technique d'utiliser une vulnérabilité</td><td></td></tr><tr><td><b>Correctif</b> (*patch*)</td><td>la mise à jour qui supprime la vulnérabilité</td><td></td></tr></table>
+<p>On ne peut pas supprimer tous les risques : on les <b>réduit</b> (protections), on les <b>transfère</b> (assurance), on les <b>évite</b> (ne pas proposer le service), ou on les <b>accepte</b> en connaissance de cause.</p>
+<p>Les vulnérabilités connues portent un identifiant <b>CVE</b> (par exemple CVE-2021-44228, « Log4Shell ») et une note de gravité <b>CVSS</b> de 0 à 10.</p>
+<div class="essai" data-langue="js"><pre><code>// Un calcul de risque simplifié, comme dans une analyse de risques
+const risques = [
+  { nom: "Rançongiciel sur le serveur de fichiers", probabilite: 3, impact: 4 },
+  { nom: "Vol d'un ordinateur portable non chiffré", probabilite: 2, impact: 3 },
+  { nom: "Panne de courant", probabilite: 1, impact: 2 },
+];
+for (const r of risques.sort((a, b) =&gt; b.probabilite * b.impact - a.probabilite * a.impact)) {
+  console.log(`${r.probabilite * r.impact}  ${r.nom}`);
+}</code></pre></div>
+<h2>3. Qui attaque, et pourquoi ?</h2>
+<table><tr><th>Acteur</th><th>Motivation</th></tr><tr><td>Cybercriminels</td><td>l'argent : rançons, revente de données, fraude</td></tr><tr><td>États et groupes soutenus par des États</td><td>espionnage, sabotage</td></tr><tr><td>Hacktivistes</td><td>une cause politique</td></tr><tr><td>Concurrents</td><td>espionnage industriel</td></tr><tr><td>Menace interne</td><td>vengeance, négligence, erreur d'un employé</td></tr><tr><td>Curieux (*script kiddies*)</td><td>le défi, avec des outils tout faits</td></tr></table>
+<p>La plupart des attaques ne visent personne en particulier : des robots balaient Internet à la recherche de la moindre machine vulnérable. « Je n'intéresse personne » n'est pas une protection.</p>
+<h2>4. Les « chapeaux » et les équipes</h2>
+<table><tr><th>Nom</th><th>Rôle</th></tr><tr><td>*White hat* (hacker éthique)</td><td>cherche des failles <b>avec autorisation</b>, pour les faire corriger</td></tr><tr><td>*Black hat*</td><td>attaque sans autorisation, à des fins malveillantes</td></tr><tr><td>*Grey hat*</td><td>sans autorisation mais sans intention de nuire : <b>illégal quand même</b></td></tr><tr><td>*Red team*</td><td>l'équipe qui joue l'attaquant lors d'un exercice</td></tr><tr><td>*Blue team*</td><td>l'équipe qui défend et détecte</td></tr><tr><td>*Purple team*</td><td>les deux équipes qui travaillent ensemble</td></tr></table>
+<h2>5. Le déroulement d'une attaque</h2>
+<p>Une attaque sérieuse suit des étapes, que décrivent des modèles comme la *Cyber Kill Chain* ou la matrice <b>MITRE ATT&amp;CK</b> :</p>
+<ol><li><b>Reconnaissance</b> : collecter des informations sur la cible (site, employés, technologies).</li><li><b>Accès initial</b> : hameçonnage, mot de passe faible, faille d'un service exposé.</li><li><b>Exécution et persistance</b> : installer de quoi revenir.</li><li><b>Élévation de privilèges</b> : passer d'un compte ordinaire à un compte administrateur.</li><li><b>Déplacement latéral</b> : rebondir de machine en machine.</li><li><b>Action finale</b> : vol de données, chiffrement, sabotage.</li></ol>
+<p>Chaque étape est une occasion de <b>détecter et de bloquer</b> : c'est le principe de la défense en profondeur. Tu peux t'y exercer dans le <a href="duel.html">duel attaque / défense</a>.</p>
+<h2>6. Les textes à connaître</h2>
+<table><tr><th>Texte</th><th>Ce qu'il impose</th></tr><tr><td>Code pénal, art. 323-1 à 323-8</td><td>interdit l'intrusion, l'entrave, la modification de données, et la détention d'outils sans motif légitime</td></tr><tr><td><b>RGPD</b></td><td>protéger les données personnelles ; notifier la <b>CNIL sous 72 heures</b> en cas de violation</td></tr><tr><td>Directive <b>NIS 2</b></td><td>obligations de sécurité pour les entités essentielles et importantes</td></tr><tr><td>Charte informatique</td><td>les règles d'usage dans l'entreprise ou le lycée</td></tr></table>
+<p>Les organismes de référence : l'<b>ANSSI</b> (agence nationale, guides et certifications), la <b>CNIL</b> (données personnelles), <b>cybermalveillance.gouv.fr</b> (assistance aux victimes), le <b>CERT-FR</b> (alertes).</p>
+<h2>7. Les métiers</h2>
+<table><tr><th>Métier</th><th>Mission</th></tr><tr><td>Analyste SOC</td><td>surveiller les alertes et qualifier les incidents</td></tr><tr><td>Pentesteur (auditeur)</td><td>tester la sécurité avec autorisation et rédiger un rapport</td></tr><tr><td>Administrateur sécurité</td><td>pare-feu, sauvegardes, durcissement, correctifs</td></tr><tr><td>Analyste en réponse à incident (CSIRT)</td><td>enquêter et remettre en état après une attaque</td></tr><tr><td>Développeur sécurité (DevSecOps)</td><td>intégrer la sécurité dans le code et le déploiement</td></tr><tr><td>RSSI</td><td>piloter la sécurité de l'organisation</td></tr><tr><td>DPO</td><td>veiller au respect du RGPD</td></tr></table>
+<div class="box retenir"><b>À retenir</b><p>Sécurité = <b>D</b>isponibilité, <b>I</b>ntégrité, <b>C</b>onfidentialité (+ traçabilité). </p><p> Risque = probabilité × impact ; une vulnérabilité exploitée par une menace. </p><p> Sans <b>autorisation écrite</b>, tester un système est un délit (art. 323-1). </p><p> Une attaque suit des étapes : chacune peut être détectée. </p><p> RGPD : notification à la CNIL sous 72 h.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cyber.html">labo cybersécurité</a> te fait écrire des protections, casser des chiffres faibles et analyser des programmes. Le <a href="labo-defense.html">labo terminal</a> te fait enquêter et durcir un serveur. Et le <a href="duel.html">duel attaque / défense</a> t'oppose à un autre élève.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "facile",
+  "q": "Que signifient les lettres D, I, C ?",
+  "type": "qcm",
+  "options": [
+   "Défense, Intrusion, Contrôle",
+   "Données, Internet, Chiffrement",
+   "Disponibilité, Intégrité, Confidentialité",
+   "Détection, Identification, Correction"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Un rançongiciel chiffre les fichiers d'un hôpital. Quel pilier est d'abord touché ?",
+  "type": "qcm",
+  "options": [
+   "La traçabilité",
+   "La confidentialité",
+   "Aucun",
+   "La disponibilité"
+  ],
+  "answer": 3,
+  "explication": "Les données ne sont plus utilisables."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Une base de clients est publiée sur Internet. Quel pilier est touché ?",
+  "type": "qcm",
+  "options": [
+   "La confidentialité",
+   "L'intégrité",
+   "La disponibilité",
+   "Aucun"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Un élève modifie sa note dans la base. Quel pilier est touché ?",
+  "type": "qcm",
+  "options": [
+   "L'intégrité",
+   "La confidentialité",
+   "Aucun",
+   "La disponibilité"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'une vulnérabilité ?",
+  "type": "qcm",
+  "options": [
+   "Une mise à jour",
+   "Une faiblesse d'un système",
+   "Un antivirus",
+   "Un attaquant"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment calcule-t-on un risque ?",
+  "type": "qcm",
+  "options": [
+   "Probabilité × impact",
+   "Coût × durée",
+   "Nombre de failles × nombre de serveurs",
+   "Menace + correctif"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'un identifiant CVE ?",
+  "type": "qcm",
+  "options": [
+   "Un type de virus",
+   "Le numéro d'une vulnérabilité connue",
+   "Une clé de chiffrement",
+   "Un certificat de sécurité"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que mesure le score CVSS ?",
+  "type": "qcm",
+  "options": [
+   "La gravité d'une vulnérabilité, de 0 à 10",
+   "La force d'un mot de passe",
+   "Le nombre d'attaques",
+   "La vitesse d'un réseau"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Tester la sécurité du site de ton lycée sans autorisation, « pour aider », est…",
+  "type": "qcm",
+  "options": [
+   "légal si tu ne casses rien",
+   "un délit",
+   "légal pour un étudiant en informatique",
+   "légal si tu préviens ensuite"
+  ],
+  "answer": 1,
+  "explication": "Article 323-1 du Code pénal."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'un hacker éthique (white hat) ?",
+  "type": "qcm",
+  "options": [
+   "Un pirate repenti",
+   "Quelqu'un qui cherche des failles avec autorisation pour les faire corriger",
+   "Un pirate qui ne vole que les riches",
+   "Un antivirus"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Dans un exercice, que fait la blue team ?",
+  "type": "qcm",
+  "options": [
+   "Elle attaque",
+   "Elle rédige les contrats",
+   "Elle arbitre",
+   "Elle défend et détecte"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Sous quel délai faut-il notifier la CNIL d'une violation de données personnelles ?",
+  "type": "qcm",
+  "options": [
+   "24 heures",
+   "Aucun délai",
+   "72 heures",
+   "Un mois"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle agence publie les guides de sécurité de référence en France ?",
+  "type": "qcm",
+  "options": [
+   "L'ARCEP",
+   "L'ANSSI",
+   "L'INSEE",
+   "La CNIL"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi « je n'intéresse personne » n'est-il pas une protection ?",
+  "type": "qcm",
+  "options": [
+   "La plupart des attaques sont automatisées et visent toute machine vulnérable",
+   "C'en est une",
+   "Les pirates visent surtout les particuliers",
+   "Les antivirus ne protègent que les entreprises"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle est la première étape habituelle d'une attaque ciblée ?",
+  "type": "qcm",
+  "options": [
+   "La demande de rançon",
+   "L'élévation de privilèges",
+   "La reconnaissance",
+   "Le chiffrement des données"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Un grey hat, qui s'introduit sans autorisation mais sans intention de nuire, agit légalement.",
+  "type": "vf",
+  "answer": false,
+  "explication": "L'intrusion est illégale quelle que soit l'intention."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque métier à sa mission.",
+  "type": "associer",
+  "paires": [
+   [
+    "Analyste SOC",
+    "surveiller les alertes"
+   ],
+   [
+    "Pentesteur",
+    "tester avec autorisation"
+   ],
+   [
+    "RSSI",
+    "piloter la sécurité"
+   ],
+   [
+    "DPO",
+    "veiller au RGPD"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

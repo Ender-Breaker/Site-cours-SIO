@@ -1,0 +1,270 @@
+=== secu-injections | Sécurité web : injection SQL, XSS et CSRF | m
+Un site web reçoit des données de n'importe qui. Les trois attaques de ce chapitre exploitent toutes la même erreur : **faire confiance à ce que l'utilisateur envoie**. Elles figurent dans le classement **OWASP Top 10**, la référence des risques web, et relèvent du bloc 3 (cybersécurité) du BTS.
+
+!attention Cadre légal | S'introduire dans un système sans autorisation est un délit (articles 323-1 et suivants du Code pénal), même « pour tester ». Ne t'entraîne que sur tes propres applications ou sur des environnements prévus pour cela (DVWA, Root-Me, TryHackMe, OWASP Juice Shop).
+
+## 1. L'injection SQL
+
+Le code vulnérable **colle** une saisie dans une requête :
+
+```
+// VULNÉRABLE
+$sql = "SELECT * FROM utilisateurs WHERE login = '" . $_POST["login"] . "' AND mdp = '" . $_POST["mdp"] . "'";
+```
+
+Si l'attaquant saisit le login `admin' -- ` (avec n'importe quel mot de passe), la requête devient :
+
+```
+SELECT * FROM utilisateurs WHERE login = 'admin' -- ' AND mdp = '…'
+```
+
+Tout ce qui suit `--` est un commentaire : le mot de passe n'est plus vérifié. Avec d'autres saisies, l'attaquant peut lire toute la base, la modifier ou la détruire.
+
+### La parade : les requêtes préparées
+
+```
+// CORRECT (PHP avec PDO)
+$requete = $pdo->prepare("SELECT * FROM utilisateurs WHERE login = ?");
+$requete->execute([$_POST["login"]]);
+$utilisateur = $requete->fetch();
+```
+
+La requête et les données voyagent **séparément** : la saisie est toujours traitée comme une valeur, jamais comme du SQL. Compléments : un compte de base de données aux **droits minimaux** (pas de `DROP` pour l'application) et aucun message d'erreur SQL affiché au visiteur.
+
+## 2. Le XSS (*Cross-Site Scripting*)
+
+L'attaquant fait exécuter **son JavaScript** dans le navigateur des autres visiteurs. Il suffit qu'une page réaffiche une saisie sans précaution :
+
+```
+// VULNÉRABLE
+echo "<p>Bonjour " . $_GET["nom"] . "</p>";
+```
+
+Avec l'adresse `page.php?nom=<script>…</script>`, le script s'exécute chez la victime : vol du cookie de session, fausse page de connexion, actions réalisées à sa place.
+
+| Type | Où est le code malveillant |
+| XSS **stocké** | enregistré en base (commentaire, pseudo) : toutes les visites sont piégées |
+| XSS **réfléchi** | dans le lien envoyé à la victime |
+| XSS **DOM** | injecté par le JavaScript de la page (`innerHTML`) |
+
+### La parade : échapper à l'affichage
+
+```
+// CORRECT
+echo "<p>Bonjour " . htmlspecialchars($_GET["nom"], ENT_QUOTES, "UTF-8") . "</p>";
+```
+
+`htmlspecialchars` transforme `<` en `&lt;` : le texte est affiché, pas interprété. En JavaScript, on utilise `textContent` et jamais `innerHTML` avec une saisie. Les moteurs de gabarits (Twig, Blade, React) échappent par défaut. En renfort : l'en-tête **Content-Security-Policy** et des cookies `HttpOnly`.
+
+## 3. Le CSRF (*Cross-Site Request Forgery*)
+
+La victime est connectée à son site. Elle visite une page piégée qui déclenche, **à son insu**, une requête vers ce site ; le navigateur y joint automatiquement son cookie de session.
+
+```
+<!-- sur le site de l'attaquant -->
+<form action="https://banque.exemple/virement" method="post">
+  <input type="hidden" name="vers" value="compte-attaquant">
+  <input type="hidden" name="montant" value="1000">
+</form>
+<script>document.forms[0].submit()</script>
+```
+
+### La parade : le jeton CSRF
+
+Le serveur place dans chaque formulaire un **jeton aléatoire** lié à la session, et refuse toute requête qui ne le renvoie pas. Le site de l'attaquant ne peut pas le deviner.
+
+```
+<input type="hidden" name="csrf" value="<?= $_SESSION["csrf"] ?>">
+```
+
+```
+if (!hash_equals($_SESSION["csrf"], $_POST["csrf"] ?? "")) { http_response_code(403); exit; }
+```
+
+En complément : cookies avec l'attribut `SameSite=Lax` ou `Strict`, et jamais d'action modifiante en `GET`.
+
+## 4. Valider côté serveur
+
+La validation en HTML (`required`, `type="email"`) et en JavaScript améliore le confort, mais **ne protège de rien** : il suffit d'envoyer la requête sans passer par le formulaire. Toute donnée reçue est validée **côté serveur** : type, longueur, format, valeurs autorisées.
+
+| Attaque | Cause | Parade principale |
+| Injection SQL | saisie collée dans une requête | requêtes préparées |
+| XSS | saisie réaffichée sans échappement | `htmlspecialchars`, `textContent` |
+| CSRF | requête forgée depuis un autre site | jeton CSRF, cookies `SameSite` |
+
+!tuto Auditer un formulaire de recherche
+# Repérer la faille
+```
+$q = $_GET["q"];
+$resultats = $pdo->query("SELECT * FROM produits WHERE nom LIKE '%$q%'");
+echo "<h2>Résultats pour $q</h2>";
+```
+Deux failles : la saisie est collée dans le SQL (injection) et réaffichée telle quelle (XSS).
+# Corriger l'injection
+```
+$requete = $pdo->prepare("SELECT * FROM produits WHERE nom LIKE ?");
+$requete->execute(["%" . $q . "%"]);
+```
+# Corriger le XSS et valider
+```
+$q = trim($_GET["q"] ?? "");
+if (mb_strlen($q) > 50) { $q = mb_substr($q, 0, 50); }
+echo "<h2>Résultats pour " . htmlspecialchars($q, ENT_QUOTES, "UTF-8") . "</h2>";
+```
+!fin
+
+!retenir À retenir | Ne jamais faire confiance à une donnée venue du client. ¶ Injection SQL → requêtes préparées. ¶ XSS → échapper à l'affichage (`htmlspecialchars`, `textContent`). ¶ CSRF → jeton aléatoire dans les formulaires, cookies `SameSite`. ¶ La validation se fait toujours côté serveur.
+--- exos
+Q¤m¤Quelle erreur de programmation permet une injection SQL ?¤Coller une saisie de l'utilisateur dans le texte d'une requête;;Utiliser une base de données;;Oublier un index;;Utiliser SELECT *¤
+Q¤m¤Quelle est la parade principale contre l'injection SQL ?¤Les requêtes préparées;;Un mot de passe long;;Le chiffrement HTTPS;;Un pare-feu¤
+Q¤m¤Que permet une faille XSS ?¤Exécuter du JavaScript dans le navigateur d'un autre visiteur;;Lire les fichiers du serveur;;Saturer le réseau;;Deviner un mot de passe¤
+Q¤m¤Quelle fonction PHP neutralise le HTML avant affichage ?¤`htmlspecialchars`;;`strip`;;`mysql_escape`;;`md5`¤
+Q¤m¤En JavaScript, quelle propriété affiche une saisie sans risque de XSS ?¤`textContent`;;`innerHTML`;;`outerHTML`;;`document.write`¤
+Q¤m¤Qu'est-ce qu'un XSS stocké ?¤Le script est enregistré en base et servi à tous les visiteurs;;Le script est dans un lien;;Le script est dans un cookie;;Le script est sur le poste de la victime¤
+Q¤m¤Que fait une attaque CSRF ?¤Elle fait envoyer à la victime connectée une requête qu'elle n'a pas voulue;;Elle vole un mot de passe par force brute;;Elle injecte du SQL;;Elle écoute le réseau¤
+Q¤m¤Quelle est la parade principale contre le CSRF ?¤Un jeton aléatoire dans chaque formulaire;;Une requête préparée;;htmlspecialchars;;Un mot de passe long¤
+Q¤m¤Pourquoi la validation en JavaScript ne suffit-elle pas ?¤On peut envoyer la requête sans passer par le formulaire;;JavaScript est trop lent;;Les navigateurs la désactivent;;Elle suffit¤
+Q¤m¤Qu'est-ce que l'OWASP Top 10 ?¤Le classement de référence des risques de sécurité web;;Une liste de mots de passe;;Un antivirus;;Une norme réseau¤
+Q¤d¤Avec le login `admin' -- `, pourquoi le mot de passe n'est-il plus vérifié ?¤Le reste de la requête devient un commentaire SQL;;Le mot de passe est vide;;admin n'a pas de mot de passe;;La base plante¤
+Q¤d¤Quel attribut de cookie empêche JavaScript de le lire ?¤`HttpOnly`;;`Secure`;;`Path`;;`Expires`¤
+Q¤m¤Quel attribut de cookie limite son envoi depuis un autre site ?¤`SameSite`;;`HttpOnly`;;`Domain`;;`Max-Age`¤
+V¤m¤Tester une faille sur un site qui ne t'appartient pas, sans autorisation, est légal si tu ne fais pas de dégâts.¤F¤L'accès frauduleux est un délit en lui-même.
+V¤m¤Une action qui modifie des données ne doit pas être déclenchée par une requête GET.¤V¤
+A¤m¤Associe chaque attaque à sa parade.¤injection SQL=>requêtes préparées;;XSS=>échappement à l'affichage;;CSRF=>jeton dans le formulaire¤
+
+=== secu-authentification | Sécurité web : mots de passe, sessions et HTTPS | m
+## 1. Ne jamais stocker un mot de passe en clair
+
+Si la base de données fuit, tous les comptes sont compromis, y compris sur les autres sites où les utilisateurs ont réutilisé leur mot de passe. On stocke une **empreinte** (*hash*) : le résultat d'une fonction à sens unique.
+
+| Méthode | Verdict |
+| En clair | inacceptable |
+| MD5, SHA-1, SHA-256 simples | trop **rapides** : des milliards d'essais par seconde |
+| bcrypt, Argon2 | conçus pour être **lents** et salés : la bonne réponse |
+
+```
+// À l'inscription
+$empreinte = password_hash($motDePasse, PASSWORD_DEFAULT);     // bcrypt, sel aléatoire inclus
+// … enregistrer $empreinte en base …
+
+// À la connexion
+if (password_verify($saisie, $empreinteEnBase)) {
+    // mot de passe correct
+}
+```
+
+Le **sel** est une valeur aléatoire ajoutée à chaque mot de passe avant le hachage : deux utilisateurs avec le même mot de passe ont des empreintes différentes, et les tables d'empreintes précalculées (*rainbow tables*) deviennent inutiles. `password_hash` s'en charge tout seul.
+
+!attention Hacher n'est pas chiffrer | Un **chiffrement** est réversible avec la clé ; un **hachage** ne l'est pas. Un mot de passe se hache : personne, pas même l'administrateur, ne doit pouvoir le retrouver. Un site qui te renvoie ton mot de passe par e-mail le stocke mal.
+
+## 2. Des mots de passe solides
+
+La CNIL et l'ANSSI recommandent de privilégier la **longueur** : une phrase de passe de quatre ou cinq mots résiste mieux qu'un mot court bourré de symboles. Côté application :
+
+- longueur minimale (12 caractères), sans plafond ridicule ;
+- limiter les tentatives (blocage temporaire, délai croissant) ;
+- proposer la **double authentification** (code TOTP, clé de sécurité) ;
+- un message unique « identifiant ou mot de passe incorrect », pour ne pas révéler quels comptes existent.
+
+## 3. Les sessions
+
+HTTP est **sans état** : le serveur ne se souvient pas de toi d'une requête à l'autre. Après la connexion, il crée une **session** et envoie son identifiant dans un **cookie** que le navigateur renverra à chaque requête.
+
+```
+session_start();
+// après un password_verify réussi :
+session_regenerate_id(true);             // nouvel identifiant : contre la fixation de session
+$_SESSION["utilisateur_id"] = $utilisateur["id"];
+
+// sur chaque page protégée :
+if (!isset($_SESSION["utilisateur_id"])) { header("Location: connexion.php"); exit; }
+```
+
+| Attribut du cookie | Protège contre |
+| `HttpOnly` | la lecture par JavaScript (vol par XSS) |
+| `Secure` | l'envoi en clair sur HTTP |
+| `SameSite=Lax` | l'envoi depuis un autre site (CSRF) |
+
+## 4. Authentifier n'est pas autoriser
+
+**Authentification** : qui es-tu ? **Autorisation** : as-tu le droit de faire cela ? L'oubli de la seconde est la faille numéro 1 de l'OWASP (*Broken Access Control*).
+
+```
+// VULNÉRABLE : facture.php?id=1042 affiche n'importe quelle facture
+$requete = $pdo->prepare("SELECT * FROM factures WHERE id = ?");
+
+// CORRECT : on vérifie que la facture appartient à l'utilisateur connecté
+$requete = $pdo->prepare("SELECT * FROM factures WHERE id = ? AND client_id = ?");
+$requete->execute([$_GET["id"], $_SESSION["utilisateur_id"]]);
+```
+
+Cacher un bouton ne suffit pas : chaque page et chaque action vérifie les droits **côté serveur**. On applique le principe du **moindre privilège** : chacun n'a que les droits nécessaires à son rôle.
+
+## 5. HTTPS
+
+HTTPS = HTTP dans un tunnel **TLS**. Il apporte trois garanties :
+
+| Garantie | Signifie |
+| Confidentialité | personne sur le réseau ne lit les échanges |
+| Intégrité | personne ne les modifie en route |
+| Authenticité | le **certificat** prouve que tu parles au bon serveur |
+
+Le certificat est délivré par une **autorité de certification** ; Let's Encrypt en fournit gratuitement (outil `certbot`). Sans HTTPS, mots de passe et cookies de session circulent en clair sur le Wi-Fi public. On force HTTPS avec une redirection et l'en-tête `Strict-Transport-Security` (HSTS).
+
+## 6. Les autres réflexes
+
+- **Mettre à jour** : serveur, CMS, bibliothèques. La plupart des piratages exploitent une faille déjà corrigée.
+- Pas de **secret dans le code** ni dans Git : fichier `.env`, hors du dossier public.
+- **Envoi de fichiers** : vérifier le type réel et la taille, renommer, stocker hors de la racine web.
+- **Journaliser** les connexions et les erreurs, sans jamais y écrire de mot de passe.
+- **Sauvegarder** et tester la restauration.
+- Messages d'erreur neutres pour le visiteur, détaillés dans les journaux.
+
+!tuto Une inscription et une connexion correctes
+# L'inscription
+```
+$login = trim($_POST["login"] ?? "");
+$mdp = $_POST["mdp"] ?? "";
+if (mb_strlen($mdp) < 12) { exit("Mot de passe trop court"); }
+$requete = $pdo->prepare("INSERT INTO utilisateurs (login, empreinte) VALUES (?, ?)");
+$requete->execute([$login, password_hash($mdp, PASSWORD_DEFAULT)]);
+```
+# La connexion
+Le même message dans les deux cas d'échec.
+```
+$requete = $pdo->prepare("SELECT id, empreinte FROM utilisateurs WHERE login = ?");
+$requete->execute([$login]);
+$u = $requete->fetch();
+if (!$u || !password_verify($mdp, $u["empreinte"])) {
+    exit("Identifiant ou mot de passe incorrect");
+}
+session_regenerate_id(true);
+$_SESSION["utilisateur_id"] = $u["id"];
+```
+# La déconnexion
+```
+session_start();
+$_SESSION = [];
+session_destroy();
+header("Location: index.php");
+```
+!fin
+
+!retenir À retenir | Un mot de passe se **hache** avec `password_hash` (bcrypt, sel inclus) et se vérifie avec `password_verify`. ¶ Session : identifiant dans un cookie `HttpOnly`, `Secure`, `SameSite` ; `session_regenerate_id` après la connexion. ¶ Authentifier (qui ?) puis autoriser (a-t-il le droit ?), côté serveur, à chaque action. ¶ HTTPS : confidentialité, intégrité, authenticité. ¶ Mises à jour, moindre privilège, aucun secret dans le code.
+--- exos
+Q¤m¤Comment doit-on stocker un mot de passe ?¤Sous forme d'empreinte calculée avec bcrypt ou Argon2;;En clair;;Chiffré avec une clé connue de l'administrateur;;Haché en MD5¤
+Q¤m¤Quelle fonction PHP crée l'empreinte d'un mot de passe ?¤`password_hash`;;`md5`;;`crypt_password`;;`base64_encode`¤
+Q¤m¤Quelle fonction PHP vérifie un mot de passe saisi ?¤`password_verify`;;`password_check`;;`hash_equals_password`;;`strcmp`¤
+Q¤m¤Pourquoi MD5 et SHA-256 seuls sont-ils inadaptés aux mots de passe ?¤Ils sont trop rapides : on peut tester des milliards de mots de passe;;Ils sont réversibles;;Ils sont payants;;Ils sont trop lents¤
+Q¤m¤À quoi sert le sel ?¤À donner des empreintes différentes à deux mots de passe identiques;;À chiffrer la base;;À raccourcir le mot de passe;;À accélérer le calcul¤
+Q¤m¤Quelle différence entre hacher et chiffrer ?¤Le hachage est à sens unique, le chiffrement est réversible avec la clé;;Aucune;;Le chiffrement est à sens unique;;Le hachage utilise une clé¤
+Q¤m¤Que privilégier pour un mot de passe solide ?¤La longueur (une phrase de passe);;Un mot court avec des symboles;;Sa date de naissance;;Le même partout¤
+Q¤m¤Où l'identifiant de session est-il conservé côté navigateur ?¤Dans un cookie;;Dans l'URL;;Dans le code HTML;;Dans la base de données¤
+Q¤m¤Quelle différence entre authentification et autorisation ?¤Qui es-tu ? / As-tu le droit de faire cela ?;;Aucune;;Côté client / côté serveur;;Mot de passe / cookie¤
+Q¤m¤Que garantit HTTPS ?¤Confidentialité, intégrité et authenticité du serveur;;L'absence de virus sur le site;;La rapidité du site;;L'honnêteté du commerçant¤
+Q¤m¤Qui délivre un certificat TLS ?¤Une autorité de certification;;Le navigateur;;Le fournisseur d'accès;;N'importe quel site¤
+Q¤d¤Pourquoi afficher « identifiant ou mot de passe incorrect » plutôt que « identifiant inconnu » ?¤Pour ne pas révéler quels comptes existent;;C'est plus court;;C'est une obligation du RGPD;;Pour ralentir le site¤
+Q¤d¤Pourquoi appeler `session_regenerate_id` après la connexion ?¤Contre la fixation de session;;Pour accélérer le site;;Pour hacher le mot de passe;;Pour prolonger la session¤
+Q¤m¤Que dit le principe du moindre privilège ?¤Chacun n'a que les droits nécessaires à son rôle;;Tout le monde est administrateur;;Seul root a des droits;;Les droits sont accordés à la demande de l'utilisateur¤
+V¤m¤Cacher un bouton dans l'interface suffit à empêcher une action.¤F¤Le serveur doit vérifier les droits à chaque requête.
+A¤m¤Associe chaque attribut de cookie à sa protection.¤`HttpOnly`=>pas de lecture par JavaScript;;`Secure`=>envoi en HTTPS uniquement;;`SameSite`=>pas d'envoi depuis un autre site¤

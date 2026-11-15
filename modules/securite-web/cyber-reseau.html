@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Cybersécurité : sécuriser un réseau — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="securite-web" data-chapter="cyber-reseau">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/securite-web.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>Ce chapitre s'appuie sur les cours de réseau de SISR : il montre ce qu'un attaquant voit d'un réseau, et comment l'administrateur le ferme.</p>
+<h2>1. Ports et services : la surface d'attaque</h2>
+<p>Chaque service qui écoute sur un port est une porte. Moins il y en a, moins il y a à défendre.</p>
+<table><tr><th>Port</th><th>Service</th><th>Remarque de sécurité</th></tr><tr><td>22</td><td>SSH</td><td>clés plutôt que mots de passe, pas de root direct</td></tr><tr><td>23</td><td>Telnet</td><td><b>en clair</b> : à supprimer, remplacer par SSH</td></tr><tr><td>21</td><td>FTP</td><td>en clair : préférer SFTP</td></tr><tr><td>25 / 587</td><td>SMTP</td><td>relais ouvert à proscrire</td></tr><tr><td>53</td><td>DNS</td><td></td></tr><tr><td>80 / 443</td><td>HTTP / HTTPS</td><td>rediriger le 80 vers le 443</td></tr><tr><td>445</td><td>SMB (partages Windows)</td><td>jamais exposé à Internet</td></tr><tr><td>3306 / 5432</td><td>MySQL / PostgreSQL</td><td>jamais exposé à Internet</td></tr><tr><td>3389</td><td>RDP (bureau à distance)</td><td>cible favorite : derrière un VPN, avec MFA</td></tr></table>
+<p>Sur <b>ta</b> machine, tu vérifies ce qui écoute :</p>
+<pre><code>ss -tulpn                    # Linux : ports en écoute et programme associé
+sudo ufw status              # règles du pare-feu
+Get-NetTCPConnection -State Listen      # PowerShell</code></pre>
+<p>Un administrateur <b>audite son propre réseau</b> avec un scanner de ports (comme <code>nmap</code>) et un scanner de vulnérabilités, pour voir ce qu'un attaquant verrait. Scanner un réseau qui n'est pas le sien, sans autorisation écrite, est interdit.</p>
+<h2>2. Ce qui circule en clair peut être lu</h2>
+<p>Sur un réseau local ou un Wi-Fi public, un attaquant peut capturer le trafic. Un analyseur comme <b>Wireshark</b> montre le contenu exact des paquets : c'est l'outil de diagnostic de l'administrateur, et la preuve de l'intérêt du chiffrement.</p>
+<table><tr><th>En clair</th><th>Remplacer par</th></tr><tr><td>HTTP</td><td>HTTPS</td></tr><tr><td>Telnet</td><td>SSH</td></tr><tr><td>FTP</td><td>SFTP / FTPS</td></tr><tr><td>POP3 / IMAP / SMTP simples</td><td>leurs versions TLS</td></tr><tr><td>DNS classique</td><td>DNS sur TLS ou HTTPS</td></tr></table>
+<h2>3. Les attaques du réseau local</h2>
+<table><tr><th>Attaque</th><th>Principe</th><th>Parade sur le commutateur</th></tr><tr><td>Empoisonnement ARP</td><td>faire croire aux machines que l'attaquant est la passerelle (homme du milieu)</td><td>*Dynamic ARP Inspection*</td></tr><tr><td>Faux serveur DHCP</td><td>distribuer une fausse passerelle et un faux DNS</td><td>*DHCP snooping*</td></tr><tr><td>Saturation de la table MAC</td><td>forcer le commutateur à diffuser à tous</td><td>*port security*</td></tr><tr><td>Saut de VLAN</td><td>sortir de son VLAN</td><td>désactiver le trunk automatique, VLAN natif dédié</td></tr><tr><td>Branchement sauvage</td><td>une machine inconnue sur une prise libre</td><td>802.1X, ports inutilisés désactivés</td></tr></table>
+<h2>4. Le Wi-Fi</h2>
+<table><tr><th>Protocole</th><th>État</th></tr><tr><td>WEP</td><td>cassé en quelques minutes : interdit</td></tr><tr><td>WPA / WPA2-TKIP</td><td>obsolètes</td></tr><tr><td><b>WPA2-AES</b></td><td>correct avec une longue phrase de passe</td></tr><tr><td><b>WPA3</b></td><td>le standard actuel</td></tr><tr><td>WPA2/3-<b>Entreprise</b> (802.1X, RADIUS)</td><td>chaque utilisateur a ses propres identifiants</td></tr></table>
+<p>Bonnes pratiques : désactiver <b>WPS</b>, séparer un réseau <b>invités</b>, changer le mot de passe d'administration de la borne, mettre à jour son micrologiciel. Masquer le nom du réseau (SSID) n'apporte aucune sécurité.</p>
+<h2>5. L'architecture : cloisonner</h2>
+<pre><code>Internet ── pare-feu ──┬── DMZ : serveur web, relais de messagerie
+                       ├── VLAN serveurs : fichiers, base de données, annuaire
+                       ├── VLAN postes : administration, comptabilité
+                       ├── VLAN pédagogique / invités
+                       └── VLAN d'administration : accès par le bastion</code></pre>
+<p>Les flux entre zones passent par le pare-feu et ne sont autorisés qu'au cas par cas : le serveur web de la DMZ peut interroger la base de données sur son port, et rien d'autre. Si le serveur web est compromis, l'attaquant est enfermé dans la DMZ : on a limité le <b>déplacement latéral</b>.</p>
+<h2>6. Durcir un serveur exposé</h2>
+<pre><code># /etc/ssh/sshd_config
+PermitRootLogin no
+PasswordAuthentication no        # clés uniquement
+AllowUsers lea admin
+MaxAuthTries 3</code></pre>
+<pre><code>sudo apt install fail2ban        # bannit les adresses qui échouent trop souvent
+sudo fail2ban-client status sshd
+sudo apt install unattended-upgrades      # correctifs de sécurité automatiques</code></pre>
+<p>Un <b>VPN</b> (WireGuard, OpenVPN, IPsec) crée un tunnel chiffré : l'administration à distance et les partages de fichiers ne sont jamais exposés directement à Internet.</p>
+<h2>7. Les règles de pare-feu se lisent de haut en bas</h2>
+<table><tr><th>N°</th><th>Source</th><th>Destination</th><th>Port</th><th>Action</th></tr><tr><td>1</td><td>Internet</td><td>DMZ : serveur web</td><td>443/tcp</td><td>autoriser</td></tr><tr><td>2</td><td>DMZ : serveur web</td><td>serveurs : base de données</td><td>3306/tcp</td><td>autoriser</td></tr><tr><td>3</td><td>VLAN administration</td><td>tous</td><td>22/tcp</td><td>autoriser</td></tr><tr><td>4</td><td>VLAN invités</td><td>réseaux internes</td><td>tous</td><td><b>refuser</b></td></tr><tr><td>5</td><td>tous</td><td>tous</td><td>tous</td><td><b>refuser</b> (règle par défaut)</td></tr></table>
+<p>La première règle qui correspond s'applique. Une règle trop large placée trop haut annule toutes celles qui suivent.</p>
+<div class="essai" data-langue="js"><pre><code>// Simulation : quelle règle s'applique à un paquet ?
+const regles = [
+  { src: "internet", dst: "dmz-web", port: 443, action: "autoriser" },
+  { src: "dmz-web", dst: "bdd", port: 3306, action: "autoriser" },
+  { src: "admin", dst: "*", port: 22, action: "autoriser" },
+  { src: "*", dst: "*", port: "*", action: "refuser" },
+];
+function filtrer(p) {
+  const ok = (r, v) =&gt; r === "*" || r === v;
+  const i = regles.findIndex(r =&gt; ok(r.src, p.src) &amp;&amp; ok(r.dst, p.dst) &amp;&amp; ok(r.port, p.port));
+  return `règle ${i + 1} : ${regles[i].action}`;
+}
+console.log(filtrer({ src: "internet", dst: "dmz-web", port: 443 }));
+console.log(filtrer({ src: "internet", dst: "bdd", port: 3306 }));
+console.log(filtrer({ src: "invites", dst: "bdd", port: 22 }));</code></pre></div>
+<div class="box defi"><b>Défi : détecter un balayage de ports</b><p>Repère dans un journal l'adresse qui frappe à toutes les portes.</p><a class="defi-go" href="labo-cyber.html#m=cy-scan">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p>Fermer tout service inutile ; jamais de base de données, de SMB ou de RDP exposés à Internet. </p><p> Remplacer les protocoles en clair (Telnet, FTP, HTTP) par leurs versions chiffrées. </p><p> Cloisonner : DMZ, VLAN, pare-feu entre les zones. </p><p> Wi-Fi : WPA3 ou WPA2-AES, WPS désactivé, réseau invités séparé. </p><p> SSH par clés, fail2ban, mises à jour automatiques, VPN pour l'administration.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cyber.html">labo cybersécurité</a> te fait écrire des protections, casser des chiffres faibles et analyser des programmes. Le <a href="labo-defense.html">labo terminal</a> te fait enquêter et durcir un serveur. Et le <a href="duel.html">duel attaque / défense</a> t'oppose à un autre élève.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "facile",
+  "q": "Quel est le port par défaut de SSH ?",
+  "type": "qcm",
+  "options": [
+   "443",
+   "80",
+   "22",
+   "23"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Pourquoi faut-il remplacer Telnet par SSH ?",
+  "type": "qcm",
+  "options": [
+   "Telnet est plus lent",
+   "SSH utilise moins de ports",
+   "Telnet est payant",
+   "Telnet transmet tout en clair, y compris le mot de passe"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel service ne doit jamais être exposé directement à Internet ?",
+  "type": "qcm",
+  "options": [
+   "Un serveur DNS public",
+   "Un serveur web (port 443)",
+   "Un relais de messagerie",
+   "Une base de données (port 3306)"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande Linux liste les ports en écoute sur ta machine ?",
+  "type": "qcm",
+  "options": [
+   "`ping -a`",
+   "`ls -ports`",
+   "`ss -tulpn`",
+   "`df -h`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que montre un analyseur de trafic comme Wireshark ?",
+  "type": "qcm",
+  "options": [
+   "Les mots de passe chiffrés en clair",
+   "Les fichiers du disque",
+   "Le contenu des paquets qui circulent",
+   "La liste des virus"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que permet un empoisonnement ARP ?",
+  "type": "qcm",
+  "options": [
+   "De saturer un site web",
+   "De chiffrer un disque",
+   "De se placer en homme du milieu sur le réseau local",
+   "De casser un mot de passe"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle protection de commutateur bloque les faux serveurs DHCP ?",
+  "type": "qcm",
+  "options": [
+   "DHCP snooping",
+   "QoS",
+   "Port mirroring",
+   "Spanning tree"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel protocole Wi-Fi est totalement cassé et interdit ?",
+  "type": "qcm",
+  "options": [
+   "WEP",
+   "WPA3",
+   "WPA2-AES",
+   "802.1X"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle fonction Wi-Fi faut-il désactiver sur une borne ?",
+  "type": "qcm",
+  "options": [
+   "Le chiffrement AES",
+   "WPS",
+   "Le DHCP",
+   "WPA3"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Masquer le nom du réseau Wi-Fi (SSID)…",
+  "type": "qcm",
+  "options": [
+   "n'apporte aucune sécurité réelle",
+   "empêche toute attaque",
+   "remplace le mot de passe",
+   "chiffre le trafic"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que limite le cloisonnement du réseau en zones ?",
+  "type": "qcm",
+  "options": [
+   "Le débit",
+   "Le déplacement latéral d'un attaquant",
+   "Le nombre d'utilisateurs",
+   "La taille des fichiers"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait fail2ban ?",
+  "type": "qcm",
+  "options": [
+   "Il chiffre le disque",
+   "Il met à jour le système",
+   "Il bannit les adresses qui multiplient les échecs de connexion",
+   "Il sauvegarde les journaux"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Dans un pare-feu, quelle règle s'applique à un paquet ?",
+  "type": "qcm",
+  "options": [
+   "Toutes à la fois",
+   "La dernière",
+   "La première qui correspond, de haut en bas",
+   "La plus précise"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi administrer ses serveurs à travers un VPN ?",
+  "type": "qcm",
+  "options": [
+   "Pour économiser des adresses IP",
+   "Le VPN remplace le mot de passe",
+   "C'est plus rapide",
+   "Les ports d'administration ne sont plus exposés à Internet"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Scanner les ports d'un réseau qui ne t'appartient pas, sans autorisation, est…",
+  "type": "qcm",
+  "options": [
+   "autorisé pour les étudiants",
+   "autorisé si on ne se connecte pas",
+   "sans conséquence",
+   "interdit"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Dans une architecture cloisonnée, le serveur web de la DMZ peut accéder librement à tout le réseau interne.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Seuls les flux strictement nécessaires sont autorisés."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque protocole en clair à son remplaçant chiffré.",
+  "type": "associer",
+  "paires": [
+   [
+    "HTTP",
+    "HTTPS"
+   ],
+   [
+    "Telnet",
+    "SSH"
+   ],
+   [
+    "FTP",
+    "SFTP"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

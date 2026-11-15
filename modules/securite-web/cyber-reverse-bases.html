@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Rétro-ingénierie : comprendre un programme sans son code source — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="securite-web" data-chapter="cyber-reverse-bases">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/securite-web.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>La <b>rétro-ingénierie</b> (*reverse engineering*) consiste à étudier un programme déjà compilé pour comprendre ce qu'il fait. C'est le quotidien des analystes qui dissèquent les logiciels malveillants, des auditeurs qui cherchent des failles dans un produit, et une épreuve reine des compétitions de sécurité (CTF).</p>
+<h2>1. À quoi ça sert, et ce que dit la loi</h2>
+<table><tr><th>Usage</th><th>Exemple</th></tr><tr><td><b>Analyse de malware</b></td><td>comprendre ce que fait un rançongiciel, trouver comment le détecter</td></tr><tr><td><b>Recherche de vulnérabilités</b></td><td>auditer un logiciel ou un objet connecté, avec l'accord de son propriétaire</td></tr><tr><td><b>Interopérabilité</b></td><td>faire dialoguer son logiciel avec un format ou un protocole non documenté</td></tr><tr><td><b>Maintenance</b></td><td>reprendre un vieux programme dont le code source est perdu</td></tr><tr><td><b>CTF</b></td><td>résoudre des « crackme » conçus pour l'entraînement</td></tr></table>
+<div class="box attention"><b>Le cadre légal</b><p>Un logiciel est protégé par le droit d'auteur. Le Code de la propriété intellectuelle (article L122-6-1) n'autorise la décompilation que dans des cas précis, notamment pour l'<b>interopérabilité</b>. Contourner une protection pour utiliser un logiciel sans licence est de la <b>contrefaçon</b>. Tu t'entraînes donc sur tes propres programmes, sur des crackme faits pour cela (crackmes.one, Root-Me, picoCTF) et dans le labo de ce site.</p></div>
+<h2>2. Du code source au binaire</h2>
+<pre><code>source (.c)  ──compilation──▶  code machine (.exe, ELF)  ──▶  exécution par le processeur
+source (.java, .cs)  ──▶  bytecode (.class, .dll)  ──▶  exécution par une machine virtuelle
+source (.js, .py)  ──▶  interprété tel quel (parfois minifié ou obfusqué)</code></pre>
+<p>À la compilation, les <b>noms de variables et les commentaires disparaissent</b>. Il reste des instructions pour le processeur. La rétro-ingénierie remonte le courant :</p>
+<table><tr><th>Outil</th><th>Remonte vers</th></tr><tr><td><b>Désassembleur</b></td><td>l'assembleur : une ligne par instruction machine</td></tr><tr><td><b>Décompilateur</b></td><td>un pseudo-code proche du C, à relire avec esprit critique</td></tr><tr><td><b>Débogueur</b></td><td>l'exécution pas à pas, avec le contenu des registres et de la mémoire</td></tr></table>
+<h2>3. Deux approches complémentaires</h2>
+<table><tr><th>Analyse <b>statique</b></th><th>Analyse <b>dynamique</b></th></tr><tr><td>on lit le programme sans l'exécuter</td><td>on l'exécute en l'observant</td></tr><tr><td>sans risque, voit tout le code</td><td>voit les vraies valeurs, déjoue l'obfuscation</td></tr><tr><td>lente si le code est brouillé</td><td>ne voit que les chemins réellement empruntés</td></tr><tr><td><code>file</code>, <code>strings</code>, Ghidra, IDA, radare2</td><td>gdb, x64dbg, <code>strace</code>, bac à sable</td></tr></table>
+<div class="box attention"><b>Un malware ne s'exécute jamais sur sa machine</b><p>L'analyse dynamique d'un programme suspect se fait dans une <b>machine virtuelle isolée</b>, sans accès au réseau de l'entreprise, que l'on restaure ensuite à un état sain.</p></div>
+<h2>4. La première demi-heure : les outils simples</h2>
+<pre><code>file suspect.bin             # quel type de fichier est-ce vraiment ?
+sha256sum suspect.bin        # son empreinte : est-il déjà connu (VirusTotal) ?
+strings -n 6 suspect.bin     # les suites de caractères lisibles
+xxd suspect.bin | head       # les premiers octets, en hexadécimal
+readelf -h programme         # en-tête d'un exécutable Linux (objdump -d pour désassembler)</code></pre>
+<p><code>strings</code> révèle souvent l'essentiel : messages d'erreur, adresses de serveurs, noms de fichiers, parfois un mot de passe laissé en clair.</p>
+<h2>5. L'hexadécimal et les octets magiques</h2>
+<p>Un fichier est une suite d'<b>octets</b>, notés en hexadécimal (<code>00</code> à <code>FF</code>). L'extension ne prouve rien : le vrai type se lit dans les premiers octets, la <b>signature</b> ou *magic number*.</p>
+<table><tr><th>Premiers octets</th><th>En ASCII</th><th>Format</th></tr><tr><td><code>7F 45 4C 46</code></td><td><code>.ELF</code></td><td>exécutable Linux</td></tr><tr><td><code>4D 5A</code></td><td><code>MZ</code></td><td>exécutable Windows (PE)</td></tr><tr><td><code>89 50 4E 47</code></td><td><code>.PNG</code></td><td>image PNG</td></tr><tr><td><code>FF D8 FF</code></td><td></td><td>image JPEG</td></tr><tr><td><code>25 50 44 46</code></td><td><code>%PDF</code></td><td>document PDF</td></tr><tr><td><code>50 4B 03 04</code></td><td><code>PK..</code></td><td>archive ZIP (et donc docx, xlsx, apk, jar)</td></tr><tr><td><code>CA FE BA BE</code></td><td></td><td>classe Java</td></tr></table>
+<div class="essai" data-langue="js"><pre><code>// Un mini « file » : reconnaître un format par sa signature
+const signatures = { "7f454c46": "exécutable Linux (ELF)", "4d5a": "exécutable Windows (PE)", "89504e47": "image PNG", "25504446": "document PDF", "504b0304": "archive ZIP" };
+function identifier(hex) {
+  const h = hex.replace(/\s+/g, "").toLowerCase();
+  for (const [sig, nom] of Object.entries(signatures)) if (h.startsWith(sig)) return nom;
+  return "inconnu";
+}
+console.log(identifier("89 50 4E 47 0D 0A 1A 0A"));
+console.log(identifier("4D 5A 90 00 03 00"));        // une « facture.pdf » qui commence ainsi est un programme
+console.log(identifier("25 50 44 46 2D 31 2E 37"));</code></pre></div>
+<h2>6. Lire un vidage hexadécimal</h2>
+<div class="essai" data-langue="js"><pre><code>// Un mini « xxd » : adresse, octets en hexadécimal, puis caractères affichables
+function vidage(octets) {
+  for (let i = 0; i &lt; octets.length; i += 8) {
+    const ligne = octets.slice(i, i + 8);
+    const hex = ligne.map(o =&gt; o.toString(16).padStart(2, "0")).join(" ").padEnd(23);
+    const texte = ligne.map(o =&gt; o &gt;= 32 &amp;&amp; o &lt; 127 ? String.fromCharCode(o) : ".").join("");
+    console.log(i.toString(16).padStart(4, "0") + "  " + hex + "  " + texte);
+  }
+}
+vidage([0x7f, 0x45, 0x4c, 0x46, 0x02, 0x01, 0x01, 0x00, 0x6d, 0x64, 0x70, 0x3d, 0x73, 0x69, 0x6f, 0x32, 0x30, 0x32, 0x36, 0x00]);</code></pre></div>
+<p>Et l'équivalent de <code>strings</code> : ne garder que les suites d'au moins 4 caractères affichables.</p>
+<div class="essai" data-langue="js"><pre><code>function chaines(octets, mini = 4) {
+  const res = []; let cur = "";
+  for (const o of [...octets, 0]) {
+    if (o &gt;= 32 &amp;&amp; o &lt; 127) cur += String.fromCharCode(o);
+    else { if (cur.length &gt;= mini) res.push(cur); cur = ""; }
+  }
+  return res;
+}
+console.log(chaines([0x01, 0x02, 0x41, 0x42, 0x00, 0x68, 0x74, 0x74, 0x70, 0x3a, 0x2f, 0x2f, 0x63, 0x32, 0x2e, 0x74, 0x65, 0x73, 0x74, 0x00, 0xff]));</code></pre></div>
+<h2>7. Petit-boutiste, gros-boutiste</h2>
+<p>Un entier sur plusieurs octets peut être rangé dans deux ordres. Les processeurs x86 sont <b>petit-boutistes</b> (*little-endian*) : l'octet de poids faible vient en premier.</p>
+<table><tr><th>Valeur</th><th>En mémoire sur x86</th><th>Dans un paquet réseau (gros-boutiste)</th></tr><tr><td><code>0x12345678</code></td><td><code>78 56 34 12</code></td><td><code>12 34 56 78</code></td></tr></table>
+<div class="essai" data-langue="js"><pre><code>const octets = [0x78, 0x56, 0x34, 0x12];
+const petit = octets.reduce((v, o, i) =&gt; v + o * 256 ** i, 0);
+const gros = octets.reduce((v, o) =&gt; v * 256 + o, 0);
+console.log(petit.toString(16), gros.toString(16));</code></pre></div>
+<div class="box defi"><b>Défi : de l'hexadécimal au texte</b><p>Convertis des octets en caractères.</p><a class="defi-go" href="labo-cyber.html#m=cy-hexa">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : les octets magiques</b><p>Reconnais le vrai format d'un fichier.</p><a class="defi-go" href="labo-cyber.html#m=cy-magic">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : écrire strings</b><p>Extrais les chaînes lisibles d'un binaire.</p><a class="defi-go" href="labo-cyber.html#m=cy-strings">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p>La rétro-ingénierie remonte du binaire vers la compréhension : désassembleur, décompilateur, débogueur. </p><p> Statique (lire) et dynamique (exécuter en observant), dans une machine isolée. </p><p> Premiers réflexes : <code>file</code>, <code>sha256sum</code>, <code>strings</code>, <code>xxd</code>. </p><p> Le type d'un fichier se lit dans ses premiers octets, pas dans son extension. </p><p> Cadre légal : ses propres programmes, des crackme d'entraînement, ou une autorisation.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cyber.html">labo cybersécurité</a> te fait écrire des protections, casser des chiffres faibles et analyser des programmes. Le <a href="labo-defense.html">labo terminal</a> te fait enquêter et durcir un serveur. Et le <a href="duel.html">duel attaque / défense</a> t'oppose à un autre élève.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce que la rétro-ingénierie logicielle ?",
+  "type": "qcm",
+  "options": [
+   "Compiler plus vite",
+   "Supprimer les bugs d'un programme",
+   "Étudier un programme compilé pour comprendre son fonctionnement",
+   "Réécrire un programme dans un autre langage"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel usage est un métier à part entière de la cybersécurité ?",
+  "type": "qcm",
+  "options": [
+   "Le piratage de jeux",
+   "La suppression de publicités",
+   "La copie de logiciels",
+   "L'analyse de logiciels malveillants"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que disparaît-il à la compilation d'un programme C ?",
+  "type": "qcm",
+  "options": [
+   "Les chaînes de caractères",
+   "Les instructions",
+   "Les constantes",
+   "Les noms de variables et les commentaires"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que produit un désassembleur ?",
+  "type": "qcm",
+  "options": [
+   "Le code source d'origine",
+   "Un rapport de bugs",
+   "Un fichier exécutable",
+   "De l'assembleur : une ligne par instruction machine"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que produit un décompilateur ?",
+  "type": "qcm",
+  "options": [
+   "Le code source exact avec les commentaires",
+   "De l'hexadécimal",
+   "Un certificat",
+   "Un pseudo-code proche du C"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce que l'analyse statique ?",
+  "type": "qcm",
+  "options": [
+   "L'exécuter pas à pas",
+   "Étudier le programme sans l'exécuter",
+   "Le lancer sur un serveur",
+   "Mesurer sa vitesse"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce que l'analyse dynamique ?",
+  "type": "qcm",
+  "options": [
+   "Calculer son empreinte",
+   "Lire son code source",
+   "Le compresser",
+   "Observer le programme pendant son exécution"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Où exécute-t-on un programme suspect pour l'analyser ?",
+  "type": "qcm",
+  "options": [
+   "Sur le serveur de l'entreprise",
+   "Sur le poste d'un collègue",
+   "Sur son poste de travail",
+   "Dans une machine virtuelle isolée"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait la commande `strings` ?",
+  "type": "qcm",
+  "options": [
+   "Elle affiche les suites de caractères lisibles d'un fichier",
+   "Elle compile",
+   "Elle chiffre un fichier",
+   "Elle compte les lignes"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait la commande `file` ?",
+  "type": "qcm",
+  "options": [
+   "Elle l'ouvre",
+   "Elle identifie le vrai type d'un fichier",
+   "Elle le supprime",
+   "Elle crée un fichier"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Un fichier « facture.pdf » commence par les octets `4D 5A`. Qu'est-ce en réalité ?",
+  "type": "qcm",
+  "options": [
+   "Une archive ZIP",
+   "Une image",
+   "Un PDF",
+   "Un exécutable Windows"
+  ],
+  "answer": 3,
+  "explication": "L'extension ne prouve rien."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quels octets ouvrent un exécutable Linux ?",
+  "type": "qcm",
+  "options": [
+   "`7F 45 4C 46` (.ELF)",
+   "`50 4B 03 04`",
+   "`25 50 44 46`",
+   "`4D 5A` (MZ)"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Sur un processeur x86, comment est rangé l'entier 0x12345678 ?",
+  "type": "qcm",
+  "options": [
+   "`87 65 43 21`",
+   "`12 34 56 78`",
+   "`78 56 34 12` (petit-boutiste)",
+   "`56 78 12 34`"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Pourquoi calculer l'empreinte SHA-256 d'un fichier suspect ?",
+  "type": "qcm",
+  "options": [
+   "Pour vérifier s'il est déjà connu et l'identifier de façon unique",
+   "Pour le supprimer",
+   "Pour le chiffrer",
+   "Pour le réparer"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Que permet légalement l'article L122-6-1 du Code de la propriété intellectuelle ?",
+  "type": "qcm",
+  "options": [
+   "La décompilation dans des cas précis, notamment l'interopérabilité",
+   "De supprimer les protections de licence",
+   "Rien du tout",
+   "De copier librement tout logiciel"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Contourner la protection d'un logiciel pour l'utiliser sans licence est légal si c'est pour apprendre.",
+  "type": "vf",
+  "answer": false,
+  "explication": "C'est de la contrefaçon."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque outil à son rôle.",
+  "type": "associer",
+  "paires": [
+   [
+    "`file`",
+    "identifier le type"
+   ],
+   [
+    "`strings`",
+    "extraire le texte lisible"
+   ],
+   [
+    "`xxd`",
+    "vidage hexadécimal"
+   ],
+   [
+    "débogueur",
+    "exécution pas à pas"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

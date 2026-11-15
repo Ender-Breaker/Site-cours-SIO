@@ -82,6 +82,7 @@ header("Location: index.php");</code></pre>
 </div>
 </section>
 <div class="box retenir"><b>À retenir</b><p>Un mot de passe se <b>hache</b> avec <code>password_hash</code> (bcrypt, sel inclus) et se vérifie avec <code>password_verify</code>. </p><p> Session : identifiant dans un cookie <code>HttpOnly</code>, <code>Secure</code>, <code>SameSite</code> ; <code>session_regenerate_id</code> après la connexion. </p><p> Authentifier (qui ?) puis autoriser (a-t-il le droit ?), côté serveur, à chaque action. </p><p> HTTPS : confidentialité, intégrité, authenticité. </p><p> Mises à jour, moindre privilège, aucun secret dans le code.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cyber.html">labo cybersécurité</a> te fait écrire des protections, casser des chiffres faibles et analyser des programmes. Le <a href="labo-defense.html">labo terminal</a> te fait enquêter et durcir un serveur. Et le <a href="duel.html">duel attaque / défense</a> t'oppose à un autre élève.</p></div>
 </article>
 
 <!-- ============ EXERCICES ============ -->
@@ -301,6 +302,8 @@ window.EF_EXERCICES = [
 <script src="../../data/modules.js"></script>
 <script src="../../assets/app.js"></script>
 <script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
 <script src="../../assets/chapter.js"></script>
 </body>
 </html>

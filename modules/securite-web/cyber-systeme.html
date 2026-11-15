@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Cybersécurité : durcir un système — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="securite-web" data-chapter="cyber-systeme">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/securite-web.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p><b>Durcir</b> (*hardening*) un système, c'est réduire tout ce qu'un attaquant pourrait utiliser : comptes, services, droits, logiciels. Un système fraîchement installé est configuré pour être pratique, pas pour être sûr.</p>
+<h2>1. Les comptes</h2>
+<table><tr><th>Règle</th><th>Sous Linux</th><th>Sous Windows</th></tr><tr><td>Pas de travail quotidien en administrateur</td><td><code>sudo</code> ponctuel</td><td>compte standard + élévation UAC</td></tr><tr><td>Pas de compte partagé</td><td>un compte par personne</td><td>idem, dans l'annuaire</td></tr><tr><td>Désactiver les comptes inutiles</td><td><code>sudo usermod -L invite</code></td><td><code>Disable-ADAccount</code></td></tr><tr><td>Mots de passe robustes, verrouillage après échecs</td><td>PAM, <code>faillock</code></td><td>stratégie de groupe (GPO)</td></tr><tr><td>Qui est administrateur ?</td><td><code>getent group sudo</code></td><td><code>Get-LocalGroupMember Administrateurs</code></td></tr></table>
+<p>Le compte <code>root</code> (UID 0) peut tout. Un attaquant qui obtient un compte ordinaire cherche à devenir root : c'est l'<b>élévation de privilèges</b>.</p>
+<h2>2. Les droits sur les fichiers</h2>
+<pre><code>ls -l /etc/shadow                # -rw-r----- root shadow : les empreintes des mots de passe
+chmod 600 ~/.ssh/id_ed25519      # une clé privée n'est lisible que par son propriétaire
+chmod 640 /var/www/site/.env     # un fichier de secrets n'est jamais lisible par « les autres »
+chmod o-w script.sh              # retirer l'écriture pour tous</code></pre>
+<table><tr><th>Erreur fréquente</th><th>Risque</th></tr><tr><td>Fichier en <code>777</code></td><td>n'importe qui peut le modifier : si root l'exécute, c'est gagné pour l'attaquant</td></tr><tr><td>Script lancé par root (cron) mais modifiable par un utilisateur</td><td>élévation de privilèges</td></tr><tr><td>Fichier de configuration avec mot de passe, lisible par tous</td><td>fuite de secret</td></tr><tr><td>Bit <b>SUID</b> sur un programme inutile</td><td>le programme s'exécute avec les droits de son propriétaire (souvent root)</td></tr><tr><td>Dossier personnel lisible par tous</td><td>fuite de données</td></tr></table>
+<pre><code>find / -perm -4000 -type f 2&gt;/dev/null       # liste les programmes SUID : à passer en revue
+find /var/www -perm -o+w -type f             # fichiers modifiables par tout le monde</code></pre>
+<h2>3. Réduire la surface</h2>
+<pre><code>systemctl list-units --type=service --state=running     # ce qui tourne
+sudo systemctl disable --now cups                       # arrêter et désactiver l'inutile
+ss -tulpn                                               # ce qui écoute
+apt list --installed | wc -l                            # moins de paquets = moins de failles</code></pre>
+<p>Règle : <b>ce qui n'est pas installé ne peut pas être attaqué</b>. Un serveur de base de données n'a besoin ni d'interface graphique, ni de compilateur, ni de serveur d'impression.</p>
+<h2>4. Mettre à jour</h2>
+<p>La majorité des intrusions exploitent une faille pour laquelle un correctif existait depuis des semaines.</p>
+<pre><code>sudo apt update &amp;&amp; sudo apt upgrade              # Debian / Ubuntu
+sudo apt install unattended-upgrades             # correctifs de sécurité automatiques</code></pre>
+<p>Sous Windows : Windows Update, et WSUS ou Intune pour gérer un parc. On tient un <b>inventaire</b> : on ne peut pas mettre à jour ce qu'on ne sait pas posséder.</p>
+<h2>5. Journaliser</h2>
+<table><tr><th>Journal</th><th>Contient</th></tr><tr><td><code>/var/log/auth.log</code> (ou <code>journalctl -u ssh</code>)</td><td>connexions, échecs, <code>sudo</code></td></tr><tr><td><code>/var/log/syslog</code></td><td>événements système</td></tr><tr><td><code>/var/log/nginx/access.log</code></td><td>requêtes web</td></tr><tr><td>Observateur d'événements Windows, journal Sécurité</td><td>4624 connexion réussie, <b>4625</b> échec, 4720 création de compte</td></tr></table>
+<pre><code>grep "Failed password" /var/log/auth.log | wc -l
+last -n 10                       # dernières connexions réussies
+lastb -n 10                      # dernières connexions échouées
+sudo journalctl -p err -b        # erreurs depuis le démarrage</code></pre>
+<p>Les journaux sont <b>envoyés vers un autre serveur</b> : un attaquant devenu root efface ses traces sur la machine compromise.</p>
+<h2>6. Spécificités Windows</h2>
+<table><tr><th>Mesure</th><th>Rôle</th></tr><tr><td>Stratégies de groupe (GPO)</td><td>imposer la configuration à tout le parc</td></tr><tr><td>BitLocker</td><td>chiffrement du disque</td></tr><tr><td>Microsoft Defender, SmartScreen</td><td>antimalware intégré</td></tr><tr><td>AppLocker / WDAC</td><td>liste blanche d'applications</td></tr><tr><td>LAPS</td><td>un mot de passe administrateur local différent sur chaque poste</td></tr><tr><td>Désactiver SMBv1, les macros Office venant d'Internet</td><td>fermer des vecteurs historiques</td></tr><tr><td>Niveaux d'administration (*tiering*)</td><td>un administrateur du domaine ne se connecte jamais sur un simple poste</td></tr></table>
+<h2>7. Les référentiels</h2>
+<p>On ne durcit pas au hasard : on suit une liste. Les <b>guides de l'ANSSI</b> (GNU/Linux, Active Directory, hygiène informatique) et les <b>CIS Benchmarks</b> donnent, système par système, les réglages recommandés. Des outils comme <b>Lynis</b> (Linux) contrôlent automatiquement l'écart avec ces recommandations.</p>
+<section class="tuto"><h3><small>Tutoriel</small>Auditer un serveur Linux en dix minutes</h3>
+<div class="etape"><h4>Qui peut se connecter et qui est administrateur ?</h4>
+<pre><code>grep -v "nologin\|false" /etc/passwd | cut -d: -f1
+getent group sudo</code></pre>
+</div>
+<div class="etape"><h4>Qu'est-ce qui est exposé ?</h4>
+<pre><code>ss -tulpn
+sudo ufw status verbose</code></pre>
+</div>
+<div class="etape"><h4>Les secrets sont-ils protégés ?</h4>
+<pre><code>find /var/www /home -name ".env" -o -name "*.key" | xargs ls -l</code></pre>
+</div>
+<div class="etape"><h4>Quelqu'un a-t-il essayé d'entrer ?</h4>
+<pre><code>grep "Failed password" /var/log/auth.log | grep -oE "[0-9]+(\.[0-9]+){3}" | sort | uniq -c | sort -rn | head</code></pre>
+</div>
+<div class="etape"><h4>À toi</h4>
+<p>Toutes ces vérifications se pratiquent dans le <a href="labo-defense.html">labo terminal : enquêter et durcir</a>.</p>
+</div>
+</section>
+<div class="box retenir"><b>À retenir</b><p>Pas d'administrateur au quotidien, pas de compte partagé, comptes inutiles désactivés. </p><p> Droits minimaux : clé privée et secrets en <code>600</code> / <code>640</code>, jamais de <code>777</code>. </p><p> Désinstaller et arrêter l'inutile. </p><p> Mettre à jour automatiquement. </p><p> Journaux conservés sur une autre machine. </p><p> S'appuyer sur les guides ANSSI et CIS.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cyber.html">labo cybersécurité</a> te fait écrire des protections, casser des chiffres faibles et analyser des programmes. Le <a href="labo-defense.html">labo terminal</a> te fait enquêter et durcir un serveur. Et le <a href="duel.html">duel attaque / défense</a> t'oppose à un autre élève.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "Que signifie durcir un système ?",
+  "type": "qcm",
+  "options": [
+   "Réduire tout ce qu'un attaquant pourrait utiliser",
+   "Le rendre plus rapide",
+   "Changer de matériel",
+   "Installer plus de logiciels"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'une élévation de privilèges ?",
+  "type": "qcm",
+  "options": [
+   "Augmenter la mémoire d'un serveur",
+   "Changer de mot de passe",
+   "Créer un nouveau compte",
+   "Passer d'un compte limité à un compte administrateur"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quels droits donner à une clé privée SSH ?",
+  "type": "qcm",
+  "options": [
+   "777",
+   "755",
+   "644",
+   "600"
+  ],
+  "answer": 3,
+  "explication": "Lisible par son seul propriétaire."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Pourquoi un fichier en 777 est-il dangereux ?",
+  "type": "qcm",
+  "options": [
+   "Il ne peut plus être lu",
+   "Il est trop gros",
+   "Il est chiffré",
+   "N'importe quel utilisateur peut le modifier"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait le bit SUID sur un programme ?",
+  "type": "qcm",
+  "options": [
+   "Il ne peut plus être supprimé",
+   "Il s'exécute avec les droits de son propriétaire",
+   "Il s'exécute au démarrage",
+   "Il devient invisible"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel fichier Linux contient les empreintes des mots de passe ?",
+  "type": "qcm",
+  "options": [
+   "`/etc/shadow`",
+   "`/etc/passwd`",
+   "`/etc/hosts`",
+   "`/var/log/auth.log`"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande arrête et désactive un service inutile ?",
+  "type": "qcm",
+  "options": [
+   "`kill service`",
+   "`sudo rm service`",
+   "`sudo apt stop service`",
+   "`sudo systemctl disable --now service`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Dans quel journal Linux trouve-t-on les échecs de connexion SSH ?",
+  "type": "qcm",
+  "options": [
+   "`/var/log/nginx/access.log`",
+   "`/var/log/auth.log`",
+   "`/tmp/log`",
+   "`/etc/passwd`"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel numéro d'événement Windows correspond à un échec de connexion ?",
+  "type": "qcm",
+  "options": [
+   "1000",
+   "404",
+   "4624",
+   "4625"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Pourquoi envoyer les journaux vers un autre serveur ?",
+  "type": "qcm",
+  "options": [
+   "Pour gagner de la place",
+   "Pour les lire plus vite",
+   "Un attaquant devenu administrateur pourrait les effacer",
+   "C'est une obligation de l'antivirus"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle mesure est la plus rentable contre les intrusions ?",
+  "type": "qcm",
+  "options": [
+   "Masquer le nom du serveur",
+   "Acheter un second écran",
+   "Changer de fournisseur d'accès",
+   "Appliquer les mises à jour de sécurité"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quel outil Windows chiffre le disque ?",
+  "type": "qcm",
+  "options": [
+   "WSUS",
+   "AppLocker",
+   "BitLocker",
+   "LAPS"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "À quoi sert LAPS ?",
+  "type": "qcm",
+  "options": [
+   "À donner un mot de passe administrateur local différent à chaque poste",
+   "À installer les mises à jour",
+   "À chiffrer les courriels",
+   "À bloquer les clés USB"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Pourquoi un script modifiable par tous et exécuté par root via cron est-il critique ?",
+  "type": "qcm",
+  "options": [
+   "Il ralentit le serveur",
+   "Un utilisateur y écrit ses commandes, qui s'exécutent avec les droits root",
+   "Il remplit le disque",
+   "Il empêche les mises à jour"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Où trouver des listes de réglages de durcissement reconnues ?",
+  "type": "qcm",
+  "options": [
+   "Guides de l'ANSSI et CIS Benchmarks",
+   "Dans le manuel de la carte mère",
+   "Sur les forums de jeux",
+   "Dans le RGPD"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Ce qui n'est pas installé ne peut pas être attaqué.",
+  "type": "vf",
+  "answer": true,
+  "explication": "C'est le principe de réduction de la surface d'attaque."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque commande à ce qu'elle montre.",
+  "type": "associer",
+  "paires": [
+   [
+    "`ss -tulpn`",
+    "ports en écoute"
+   ],
+   [
+    "`last`",
+    "connexions réussies"
+   ],
+   [
+    "`getent group sudo`",
+    "administrateurs"
+   ],
+   [
+    "`find / -perm -4000`",
+    "programmes SUID"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

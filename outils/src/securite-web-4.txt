@@ -1,0 +1,717 @@
+=== cyber-reverse-bases | Rétro-ingénierie : comprendre un programme sans son code source | m
+La **rétro-ingénierie** (*reverse engineering*) consiste à étudier un programme déjà compilé pour comprendre ce qu'il fait. C'est le quotidien des analystes qui dissèquent les logiciels malveillants, des auditeurs qui cherchent des failles dans un produit, et une épreuve reine des compétitions de sécurité (CTF).
+
+## 1. À quoi ça sert, et ce que dit la loi
+
+| Usage | Exemple |
+| **Analyse de malware** | comprendre ce que fait un rançongiciel, trouver comment le détecter |
+| **Recherche de vulnérabilités** | auditer un logiciel ou un objet connecté, avec l'accord de son propriétaire |
+| **Interopérabilité** | faire dialoguer son logiciel avec un format ou un protocole non documenté |
+| **Maintenance** | reprendre un vieux programme dont le code source est perdu |
+| **CTF** | résoudre des « crackme » conçus pour l'entraînement |
+
+!attention Le cadre légal | Un logiciel est protégé par le droit d'auteur. Le Code de la propriété intellectuelle (article L122-6-1) n'autorise la décompilation que dans des cas précis, notamment pour l'**interopérabilité**. Contourner une protection pour utiliser un logiciel sans licence est de la **contrefaçon**. Tu t'entraînes donc sur tes propres programmes, sur des crackme faits pour cela (crackmes.one, Root-Me, picoCTF) et dans le labo de ce site.
+
+## 2. Du code source au binaire
+
+```
+source (.c)  ──compilation──▶  code machine (.exe, ELF)  ──▶  exécution par le processeur
+source (.java, .cs)  ──▶  bytecode (.class, .dll)  ──▶  exécution par une machine virtuelle
+source (.js, .py)  ──▶  interprété tel quel (parfois minifié ou obfusqué)
+```
+
+À la compilation, les **noms de variables et les commentaires disparaissent**. Il reste des instructions pour le processeur. La rétro-ingénierie remonte le courant :
+
+| Outil | Remonte vers |
+| **Désassembleur** | l'assembleur : une ligne par instruction machine |
+| **Décompilateur** | un pseudo-code proche du C, à relire avec esprit critique |
+| **Débogueur** | l'exécution pas à pas, avec le contenu des registres et de la mémoire |
+
+## 3. Deux approches complémentaires
+
+| Analyse **statique** | Analyse **dynamique** |
+| on lit le programme sans l'exécuter | on l'exécute en l'observant |
+| sans risque, voit tout le code | voit les vraies valeurs, déjoue l'obfuscation |
+| lente si le code est brouillé | ne voit que les chemins réellement empruntés |
+| `file`, `strings`, Ghidra, IDA, radare2 | gdb, x64dbg, `strace`, bac à sable |
+
+!attention Un malware ne s'exécute jamais sur sa machine | L'analyse dynamique d'un programme suspect se fait dans une **machine virtuelle isolée**, sans accès au réseau de l'entreprise, que l'on restaure ensuite à un état sain.
+
+## 4. La première demi-heure : les outils simples
+
+```
+file suspect.bin             # quel type de fichier est-ce vraiment ?
+sha256sum suspect.bin        # son empreinte : est-il déjà connu (VirusTotal) ?
+strings -n 6 suspect.bin     # les suites de caractères lisibles
+xxd suspect.bin | head       # les premiers octets, en hexadécimal
+readelf -h programme         # en-tête d'un exécutable Linux (objdump -d pour désassembler)
+```
+
+`strings` révèle souvent l'essentiel : messages d'erreur, adresses de serveurs, noms de fichiers, parfois un mot de passe laissé en clair.
+
+## 5. L'hexadécimal et les octets magiques
+
+Un fichier est une suite d'**octets**, notés en hexadécimal (`00` à `FF`). L'extension ne prouve rien : le vrai type se lit dans les premiers octets, la **signature** ou *magic number*.
+
+| Premiers octets | En ASCII | Format |
+| `7F 45 4C 46` | `.ELF` | exécutable Linux |
+| `4D 5A` | `MZ` | exécutable Windows (PE) |
+| `89 50 4E 47` | `.PNG` | image PNG |
+| `FF D8 FF` | | image JPEG |
+| `25 50 44 46` | `%PDF` | document PDF |
+| `50 4B 03 04` | `PK..` | archive ZIP (et donc docx, xlsx, apk, jar) |
+| `CA FE BA BE` | | classe Java |
+
+```run
+// Un mini « file » : reconnaître un format par sa signature
+const signatures = { "7f454c46": "exécutable Linux (ELF)", "4d5a": "exécutable Windows (PE)", "89504e47": "image PNG", "25504446": "document PDF", "504b0304": "archive ZIP" };
+function identifier(hex) {
+  const h = hex.replace(/\s+/g, "").toLowerCase();
+  for (const [sig, nom] of Object.entries(signatures)) if (h.startsWith(sig)) return nom;
+  return "inconnu";
+}
+console.log(identifier("89 50 4E 47 0D 0A 1A 0A"));
+console.log(identifier("4D 5A 90 00 03 00"));        // une « facture.pdf » qui commence ainsi est un programme
+console.log(identifier("25 50 44 46 2D 31 2E 37"));
+```
+
+## 6. Lire un vidage hexadécimal
+
+```run
+// Un mini « xxd » : adresse, octets en hexadécimal, puis caractères affichables
+function vidage(octets) {
+  for (let i = 0; i < octets.length; i += 8) {
+    const ligne = octets.slice(i, i + 8);
+    const hex = ligne.map(o => o.toString(16).padStart(2, "0")).join(" ").padEnd(23);
+    const texte = ligne.map(o => o >= 32 && o < 127 ? String.fromCharCode(o) : ".").join("");
+    console.log(i.toString(16).padStart(4, "0") + "  " + hex + "  " + texte);
+  }
+}
+vidage([0x7f, 0x45, 0x4c, 0x46, 0x02, 0x01, 0x01, 0x00, 0x6d, 0x64, 0x70, 0x3d, 0x73, 0x69, 0x6f, 0x32, 0x30, 0x32, 0x36, 0x00]);
+```
+
+Et l'équivalent de `strings` : ne garder que les suites d'au moins 4 caractères affichables.
+
+```run
+function chaines(octets, mini = 4) {
+  const res = []; let cur = "";
+  for (const o of [...octets, 0]) {
+    if (o >= 32 && o < 127) cur += String.fromCharCode(o);
+    else { if (cur.length >= mini) res.push(cur); cur = ""; }
+  }
+  return res;
+}
+console.log(chaines([0x01, 0x02, 0x41, 0x42, 0x00, 0x68, 0x74, 0x74, 0x70, 0x3a, 0x2f, 0x2f, 0x63, 0x32, 0x2e, 0x74, 0x65, 0x73, 0x74, 0x00, 0xff]));
+```
+
+## 7. Petit-boutiste, gros-boutiste
+
+Un entier sur plusieurs octets peut être rangé dans deux ordres. Les processeurs x86 sont **petit-boutistes** (*little-endian*) : l'octet de poids faible vient en premier.
+
+| Valeur | En mémoire sur x86 | Dans un paquet réseau (gros-boutiste) |
+| `0x12345678` | `78 56 34 12` | `12 34 56 78` |
+
+```run
+const octets = [0x78, 0x56, 0x34, 0x12];
+const petit = octets.reduce((v, o, i) => v + o * 256 ** i, 0);
+const gros = octets.reduce((v, o) => v * 256 + o, 0);
+console.log(petit.toString(16), gros.toString(16));
+```
+
+!defi Défi : de l'hexadécimal au texte | Convertis des octets en caractères. | cy-hexa
+!defi Défi : les octets magiques | Reconnais le vrai format d'un fichier. | cy-magic
+!defi Défi : écrire strings | Extrais les chaînes lisibles d'un binaire. | cy-strings
+
+!retenir À retenir | La rétro-ingénierie remonte du binaire vers la compréhension : désassembleur, décompilateur, débogueur. ¶ Statique (lire) et dynamique (exécuter en observant), dans une machine isolée. ¶ Premiers réflexes : `file`, `sha256sum`, `strings`, `xxd`. ¶ Le type d'un fichier se lit dans ses premiers octets, pas dans son extension. ¶ Cadre légal : ses propres programmes, des crackme d'entraînement, ou une autorisation.
+--- exos
+Q¤m¤Qu'est-ce que la rétro-ingénierie logicielle ?¤Étudier un programme compilé pour comprendre son fonctionnement;;Réécrire un programme dans un autre langage;;Supprimer les bugs d'un programme;;Compiler plus vite¤
+Q¤m¤Quel usage est un métier à part entière de la cybersécurité ?¤L'analyse de logiciels malveillants;;Le piratage de jeux;;La copie de logiciels;;La suppression de publicités¤
+Q¤m¤Que disparaît-il à la compilation d'un programme C ?¤Les noms de variables et les commentaires;;Les instructions;;Les chaînes de caractères;;Les constantes¤
+Q¤m¤Que produit un désassembleur ?¤De l'assembleur : une ligne par instruction machine;;Le code source d'origine;;Un fichier exécutable;;Un rapport de bugs¤
+Q¤m¤Que produit un décompilateur ?¤Un pseudo-code proche du C;;Le code source exact avec les commentaires;;De l'hexadécimal;;Un certificat¤
+Q¤m¤Qu'est-ce que l'analyse statique ?¤Étudier le programme sans l'exécuter;;L'exécuter pas à pas;;Le lancer sur un serveur;;Mesurer sa vitesse¤
+Q¤m¤Qu'est-ce que l'analyse dynamique ?¤Observer le programme pendant son exécution;;Lire son code source;;Calculer son empreinte;;Le compresser¤
+Q¤m¤Où exécute-t-on un programme suspect pour l'analyser ?¤Dans une machine virtuelle isolée;;Sur son poste de travail;;Sur le serveur de l'entreprise;;Sur le poste d'un collègue¤
+Q¤m¤Que fait la commande `strings` ?¤Elle affiche les suites de caractères lisibles d'un fichier;;Elle chiffre un fichier;;Elle compte les lignes;;Elle compile¤
+Q¤m¤Que fait la commande `file` ?¤Elle identifie le vrai type d'un fichier;;Elle crée un fichier;;Elle l'ouvre;;Elle le supprime¤
+Q¤m¤Un fichier « facture.pdf » commence par les octets `4D 5A`. Qu'est-ce en réalité ?¤Un exécutable Windows;;Un PDF;;Une image;;Une archive ZIP¤L'extension ne prouve rien.
+Q¤m¤Quels octets ouvrent un exécutable Linux ?¤`7F 45 4C 46` (.ELF);;`4D 5A` (MZ);;`25 50 44 46`;;`50 4B 03 04`¤
+Q¤m¤Sur un processeur x86, comment est rangé l'entier 0x12345678 ?¤`78 56 34 12` (petit-boutiste);;`12 34 56 78`;;`87 65 43 21`;;`56 78 12 34`¤
+Q¤m¤Pourquoi calculer l'empreinte SHA-256 d'un fichier suspect ?¤Pour vérifier s'il est déjà connu et l'identifier de façon unique;;Pour le chiffrer;;Pour le supprimer;;Pour le réparer¤
+Q¤d¤Que permet légalement l'article L122-6-1 du Code de la propriété intellectuelle ?¤La décompilation dans des cas précis, notamment l'interopérabilité;;De copier librement tout logiciel;;De supprimer les protections de licence;;Rien du tout¤
+V¤m¤Contourner la protection d'un logiciel pour l'utiliser sans licence est légal si c'est pour apprendre.¤F¤C'est de la contrefaçon.
+A¤m¤Associe chaque outil à son rôle.¤`file`=>identifier le type;;`strings`=>extraire le texte lisible;;`xxd`=>vidage hexadécimal;;débogueur=>exécution pas à pas¤
+
+=== cyber-reverse-asm | Rétro-ingénierie : lire de l'assembleur | d
+L'**assembleur** est la forme lisible du code machine : une ligne par instruction du processeur. On n'a pas besoin de savoir en écrire pour faire de la rétro-ingénierie, mais il faut savoir en **lire**. Ce chapitre couvre le x86-64 (PC), en syntaxe Intel : `instruction destination, source`.
+
+## 1. Les registres
+
+Un **registre** est une minuscule case mémoire à l'intérieur du processeur.
+
+| Registre | Rôle habituel |
+| `rax` | résultat des calculs et **valeur de retour** d'une fonction |
+| `rdi`, `rsi`, `rdx`, `rcx` | les quatre premiers **arguments** d'une fonction (Linux) |
+| `rbx`, `r8` … `r15` | usage général |
+| `rsp` | pointeur de pile : le sommet de la pile |
+| `rbp` | pointeur de base : le repère des variables locales |
+| `rip` | l'adresse de la prochaine instruction |
+
+`eax` désigne les 32 bits bas de `rax`, `ax` les 16 bits bas, `al` les 8 bits bas : c'est le même registre vu par une fenêtre plus étroite.
+
+## 2. Les instructions essentielles
+
+| Instruction | Effet |
+| `mov a, b` | a = b |
+| `add a, b` / `sub a, b` | a = a + b / a = a − b |
+| `inc a` / `dec a` | a++ / a-- |
+| `imul a, b` | a = a × b |
+| `xor a, b` | a = a XOR b ; `xor eax, eax` met eax à zéro |
+| `and`, `or`, `shl`, `shr` | opérations sur les bits, décalages |
+| `lea a, [b + c*4]` | calcule une **adresse** (ou fait une addition rapide) |
+| `cmp a, b` | compare en calculant a − b, sans garder le résultat : positionne les **drapeaux** |
+| `test a, a` | a est-il nul ? |
+| `jmp cible` | saut inconditionnel |
+| `je` / `jne` | saut si égal / si différent |
+| `jl`, `jle`, `jg`, `jge` | saut si inférieur, inférieur ou égal, supérieur, supérieur ou égal |
+| `call fonction` | appelle une fonction (empile l'adresse de retour) |
+| `ret` | revient à l'appelant |
+| `push a` / `pop a` | empile / dépile |
+
+Les crochets désignent la **mémoire** : `mov eax, [rbp-4]` lit la variable locale rangée 4 octets sous `rbp`.
+
+## 3. Un simulateur pour s'entraîner
+
+Ce mini-processeur exécute quelques instructions et affiche les registres après chaque ligne. Modifie le programme et relance.
+
+```run
+function executer(programme) {
+  const r = { eax: 0, ebx: 0, ecx: 0 };
+  const val = x => (x in r ? r[x] : Number(x));
+  const lignes = programme.trim().split("\n").map(l => l.trim());
+  let egal = false, n = 0;
+  for (let i = 0; i < lignes.length && n++ < 100; i++) {
+    const [op, a, b] = lignes[i].replace(",", "").split(/\s+/);
+    if (op === "mov") r[a] = val(b);
+    else if (op === "add") r[a] += val(b);
+    else if (op === "sub") r[a] -= val(b);
+    else if (op === "imul") r[a] *= val(b);
+    else if (op === "xor") r[a] ^= val(b);
+    else if (op === "cmp") egal = val(a) === val(b);
+    else if (op === "jne" && !egal) i = lignes.indexOf(a + ":");
+    else if (op === "jmp") i = lignes.indexOf(a + ":");
+    if (!op.endsWith(":")) console.log(lignes[i].padEnd(14), JSON.stringify(r));
+  }
+}
+executer(`
+mov eax, 5
+mov ebx, 3
+add eax, ebx
+imul eax, 2
+xor ebx, ebx
+`);
+```
+
+## 4. Reconnaître une condition
+
+```
+    cmp   eax, 18            if (age >= 18) {
+    jl    .sinon                 majeur();
+    call  majeur             } else {
+    jmp   .fin                   mineur();
+.sinon:                      }
+    call  mineur
+.fin:
+```
+
+Le saut est l'**inverse** de la condition du code source : `jl` (« saute si inférieur ») saute par-dessus le bloc du `if`. Un `cmp` suivi d'un saut conditionnel, c'est un `if`.
+
+## 5. Reconnaître une boucle
+
+```
+    mov   ecx, 0             for (int i = 0; i < 10; i++) {
+.boucle:                         total += i;
+    cmp   ecx, 10            }
+    jge   .fin
+    add   eax, ecx
+    inc   ecx
+    jmp   .boucle
+.fin:
+```
+
+Un saut **vers l'arrière** signale une boucle. Essaie dans le simulateur : la somme de 1 à 4.
+
+```run
+function executer(programme) {
+  const r = { eax: 0, ecx: 0 };
+  const val = x => (x in r ? r[x] : Number(x));
+  const lignes = programme.trim().split("\n").map(l => l.trim());
+  let egal = false, n = 0;
+  for (let i = 0; i < lignes.length && n++ < 200; i++) {
+    const [op, a, b] = lignes[i].replace(",", "").split(/\s+/);
+    if (op === "mov") r[a] = val(b);
+    else if (op === "add") r[a] += val(b);
+    else if (op === "cmp") egal = val(a) === val(b);
+    else if (op === "jne" && !egal) i = lignes.indexOf(a + ":");
+  }
+  console.log(JSON.stringify(r));
+}
+executer(`
+mov eax, 0
+mov ecx, 1
+boucle:
+add eax, ecx
+add ecx, 1
+cmp ecx, 5
+jne boucle
+`);
+```
+
+## 6. Un appel de fonction
+
+```
+    mov   edi, 3             ; 1er argument
+    mov   esi, 4             ; 2e argument
+    call  addition           ; résultat dans eax
+    ...
+addition:
+    push  rbp                ; prologue : sauvegarde le repère de l'appelant
+    mov   rbp, rsp
+    mov   eax, edi
+    add   eax, esi
+    pop   rbp                ; épilogue
+    ret
+```
+
+Quand tu vois `push rbp` / `mov rbp, rsp`, une fonction commence. Ce qui est dans `rdi`, `rsi`, `rdx` juste avant un `call` ce sont ses arguments ; ce qui est dans `rax` juste après, son résultat. C'est la **convention d'appel** (ici System V, celle de Linux ; Windows utilise `rcx`, `rdx`, `r8`, `r9`).
+
+## 7. Du C à l'assembleur, et retour
+
+Le meilleur exercice : écrire trois lignes de C, regarder ce que le compilateur en fait (`gcc -S -O0 -masm=intel fichier.c`, ou le site Compiler Explorer), puis recommencer avec `-O2`. Un décompilateur comme **Ghidra** fait le chemin inverse et propose :
+
+```
+bool verifier(char *saisie) {
+    return strcmp(saisie, "sio2026") == 0;
+}
+```
+
+Les noms (`verifier`, `saisie`) sont ceux que **l'analyste** a donnés : renommer les fonctions et les variables au fur et à mesure qu'on les comprend, c'est le cœur du travail.
+
+!tuto Lire une fonction inconnue
+# Le désassemblage
+```
+mystere:
+    mov   eax, edi
+    imul  eax, edi
+    add   eax, 1
+    ret
+```
+# Ligne par ligne
+`edi` est le premier argument, appelons-le `x`. `eax = x`, puis `eax = eax × x`, puis `eax = eax + 1`, puis retour avec le résultat dans `eax`.
+# La réponse
+`int mystere(int x) { return x * x + 1; }`. Vérifie avec le simulateur : remplace `edi` par une valeur.
+```run
+let eax = 0; const edi = 6;
+eax = edi;
+eax = eax * edi;
+eax = eax + 1;
+console.log(eax);
+```
+!fin
+
+!retenir À retenir | Syntaxe Intel : `instruction destination, source`. ¶ `rax` : résultat ; `rdi`, `rsi`, `rdx` : arguments ; `rsp` / `rbp` : la pile ; `rip` : l'instruction suivante. ¶ `cmp` + saut conditionnel = un `if` ; un saut vers l'arrière = une boucle ; `call` / `ret` = une fonction. ¶ `[…]` = un accès à la mémoire. ¶ On comprend en renommant petit à petit.
+--- exos
+Q¤m¤En syntaxe Intel, que fait `mov eax, 5` ?¤Il met 5 dans eax;;Il met eax dans 5;;Il compare eax à 5;;Il ajoute 5 à eax¤
+Q¤m¤Dans quel registre une fonction renvoie-t-elle son résultat ?¤`rax`;;`rsp`;;`rip`;;`rdi`¤
+Q¤m¤Sous Linux, quel registre contient le premier argument d'une fonction ?¤`rdi`;;`rax`;;`rbp`;;`rip`¤
+Q¤m¤Que contient le registre `rip` ?¤L'adresse de la prochaine instruction;;Le résultat du dernier calcul;;Le sommet de la pile;;Le premier argument¤
+Q¤m¤Que contient le registre `rsp` ?¤L'adresse du sommet de la pile;;La valeur de retour;;L'instruction suivante;;Un compteur de boucle¤
+Q¤m¤Quel est le lien entre `eax` et `rax` ?¤eax désigne les 32 bits bas de rax;;Ce sont deux registres distincts;;eax est deux fois plus grand;;eax est la copie de sauvegarde de rax¤
+Q¤m¤Que fait `xor eax, eax` ?¤Il met eax à zéro;;Il double eax;;Il inverse eax;;Rien¤
+Q¤m¤Que fait `cmp eax, 18` ?¤Il compare et positionne les drapeaux, sans modifier eax;;Il met 18 dans eax;;Il soustrait 18 à eax;;Il saute à la ligne 18¤
+Q¤m¤Que fait `jne cible` ?¤Il saute si la comparaison précédente a donné « différent »;;Il saute toujours;;Il saute si égal;;Il appelle une fonction¤
+Q¤m¤Que signalent un `cmp` suivi d'un saut conditionnel ?¤Une condition (if);;Un appel de fonction;;Une déclaration de variable;;La fin du programme¤
+Q¤m¤Que signale un saut vers une adresse située plus haut dans le code ?¤Une boucle;;Une erreur;;Un commentaire;;Un retour de fonction¤
+Q¤m¤Que fait `call` ?¤Il appelle une fonction en empilant l'adresse de retour;;Il termine le programme;;Il compare deux valeurs;;Il lit la mémoire¤
+Q¤m¤Que désignent les crochets dans `mov eax, [rbp-4]` ?¤Une lecture en mémoire à cette adresse;;Un tableau;;Un commentaire;;Une valeur facultative¤
+Q¤m¤Que marquent `push rbp` puis `mov rbp, rsp` ?¤Le début d'une fonction (prologue);;Une boucle;;Une comparaison;;La fin du programme¤
+Q¤d¤Avec `mov eax, edi` / `imul eax, edi` / `add eax, 1` / `ret`, que calcule la fonction pour x ?¤x × x + 1;;2x + 1;;x + 1;;x × (x + 1)¤
+Q¤d¤Pourquoi le saut d'un `if (a >= 18)` est-il souvent `jl` ?¤Le saut contourne le bloc quand la condition est fausse;;C'est une erreur du compilateur;;jl signifie « supérieur »;;Pour aller plus vite¤
+V¤m¤Dans un décompilateur, les noms de variables affichés sont ceux du programmeur d'origine.¤F¤Ils ont disparu à la compilation : c'est l'analyste qui renomme.
+A¤m¤Associe chaque instruction à son effet.¤`mov`=>copier une valeur;;`add`=>additionner;;`cmp`=>comparer;;`jmp`=>sauter;;`ret`=>revenir à l'appelant¤
+
+=== cyber-reverse-pratique | Rétro-ingénierie : mener une analyse | d
+Ce chapitre déroule la méthode sur des exemples écrits pour l'entraînement, comme ceux des CTF : un petit programme vérifie un mot de passe, et il faut comprendre **comment**.
+
+## 1. La démarche
+
+1. **Identifier** : type de fichier, architecture, empreinte (`file`, `sha256sum`).
+2. **Regarder sans exécuter** : chaînes, fonctions importées, structure (`strings`, puis un désassembleur).
+3. **Repérer le point d'intérêt** : le message « Mot de passe incorrect » mène à la fonction qui décide.
+4. **Comprendre la vérification** : remonter les calculs faits sur la saisie.
+5. **Vérifier son hypothèse** : exécuter dans un environnement isolé, avec un débogueur si besoin.
+6. **Documenter** : ce que fait le programme, comment on le sait.
+
+## 2. Niveau 1 : le secret en clair
+
+```run
+// Ce que « strings » montrerait immédiatement
+function verifier(saisie) {
+  return saisie === "sio2026";
+}
+console.log(verifier("test"), verifier("sio2026"));
+```
+
+Leçon pour le développeur : **un secret écrit dans un programme distribué n'est pas un secret**. Clé d'API, mot de passe de base de données, clé de licence : tout ce qui est dans le client finit par être lu.
+
+## 3. Niveau 2 : le secret transformé
+
+La comparaison se fait sur une version transformée. On lit la transformation, et on l'**inverse**.
+
+```run
+// Le programme : chaque caractère de la saisie est décalé de 1 puis comparé
+const attendu = [116, 106, 112, 51, 49, 51, 55];
+function verifier(saisie) {
+  if (saisie.length !== attendu.length) return false;
+  for (let i = 0; i < saisie.length; i++) {
+    if (saisie.charCodeAt(i) + 1 !== attendu[i]) return false;
+  }
+  return true;
+}
+// L'analyse : code + 1 = attendu  →  code = attendu − 1
+const solution = attendu.map(c => String.fromCharCode(c - 1)).join("");
+console.log(solution, verifier(solution));
+```
+
+## 4. Niveau 3 : chaînes masquées par XOR
+
+Pour échapper à `strings`, beaucoup de programmes (et la plupart des malwares) stockent leurs chaînes **chiffrées par XOR** et ne les déchiffrent qu'au moment de s'en servir. Comme le XOR est sa propre opération inverse, il suffit de retrouver la clé dans le code.
+
+```run
+const masque = [0x39, 0x25, 0x25, 0x21, 0x6b, 0x7e, 0x7e, 0x32, 0x63, 0x7f, 0x34, 0x29, 0x34, 0x3c, 0x21, 0x3d, 0x34];
+const cle = 0x51;
+console.log(masque.map(o => String.fromCharCode(o ^ cle)).join(""));
+```
+
+C'est ainsi qu'un analyste extrait d'un logiciel malveillant l'adresse de son serveur de commande : un **indicateur de compromission** que l'on peut ensuite bloquer sur le pare-feu.
+
+## 5. JavaScript minifié et obfusqué
+
+Le JavaScript d'une page est livré au navigateur : il est toujours lisible. La **minification** le compacte (noms d'une lettre) ; l'**obfuscation** le brouille volontairement. Les outils de développement du navigateur (bouton « Pretty print ») et un peu de patience suffisent.
+
+```run
+// Un script brouillé typique : que construit-il ?
+var _0 = [104, 116, 116, 112, 115, 58, 47, 47].map(function (c) { return String.fromCharCode(c); }).join("");
+var _1 = "rf.elpmexe".split("").reverse().join("");
+var _2 = ["/", "api", "/", "v1"].join("");
+console.log(_0 + _1 + _2);
+```
+
+Méthode : indenter, **exécuter les morceaux inoffensifs** pour voir ce qu'ils valent, renommer les variables, recommencer. Ne jamais lancer en entier un script inconnu hors d'un environnement isolé.
+
+## 6. Les langages à bytecode se décompilent très bien
+
+| Technologie | Outil | Résultat |
+| Java (`.class`, `.jar`), Android (`.apk`) | JADX, CFR | code Java presque d'origine |
+| .NET (C#) | ILSpy, dnSpy | code C# presque d'origine |
+| Python (`.pyc`) | décompilateurs dédiés | code Python |
+| C / C++ compilé | Ghidra, IDA | pseudo-C, sans les noms |
+
+Conséquence directe pour un développeur SLAM : une application Java, C# ou Android livre pratiquement son code source. Aucune règle métier sensible, aucun secret, aucune vérification de droits ne doit reposer sur le client.
+
+## 7. Les protections, et leurs limites
+
+| Protection | Effet | Limite |
+| Suppression des symboles (*strip*) | plus de noms de fonctions | le code reste lisible |
+| Obfuscation | code volontairement confus | ralentit l'analyse, ne l'empêche pas |
+| Empaquetage (*packer*) | le vrai code est compressé ou chiffré, déballé en mémoire à l'exécution | l'analyse dynamique le récupère en mémoire |
+| Anti-débogage, détection de machine virtuelle | le programme change de comportement s'il se sent observé | contournable ; fréquent dans les malwares |
+| **Vérification côté serveur** | la décision n'est pas dans le client | la seule protection réelle |
+
+!info Ce que la rétro-ingénierie apprend aux développeurs | On ne protège pas un secret en le cachant dans le client : on ne l'y met pas. La licence, les droits, les prix, les scores se vérifient **sur le serveur**. Le client n'est qu'un affichage que l'utilisateur contrôle entièrement.
+
+## 8. Côté défense : l'analyse de malware
+
+Un analyste répond à quatre questions : **que fait-il** (chiffre, vole, espionne) ? **comment arrive-t-il et se maintient-il** (clé de registre, tâche planifiée) ? **avec qui communique-t-il** (domaines, adresses) ? **comment le reconnaître** ? Les réponses deviennent des **indicateurs de compromission** (empreintes, noms de fichiers, domaines) et des règles de détection (YARA, signatures) partagées avec la communauté. Des bacs à sable en ligne automatisent la première passe.
+
+!tuto Résoudre un crackme pas à pas
+# Lire la vérification
+```run
+const attendu = [0x2e, 0x39, 0x3e, 0x28, 0x2e, 0x38];
+function verifier(saisie) {
+  const t = [...saisie].reverse().map(c => c.charCodeAt(0) ^ 0x4b);
+  return t.length === attendu.length && t.every((v, i) => v === attendu[i]);
+}
+console.log(verifier("devine"));
+```
+# Décrire ce qu'elle fait
+La saisie est **retournée**, puis chaque caractère subit un **XOR avec 0x4b**, et le résultat est comparé au tableau.
+# Inverser, dans l'ordre inverse
+On défait le XOR (même opération), puis on retourne.
+```run
+const attendu = [0x2e, 0x39, 0x3e, 0x28, 0x2e, 0x38];
+const solution = attendu.map(v => String.fromCharCode(v ^ 0x4b)).reverse().join("");
+console.log(solution);
+```
+!fin
+
+!defi Défi : crackme 1 | Un décalage à inverser. | cy-crackme1
+!defi Défi : crackme 2 | Un XOR et un retournement. | cy-crackme2
+!defi Défi : désobfusquer un script | Retrouve l'adresse que construit un script brouillé. | cy-desobfusquer
+
+!retenir À retenir | Méthode : identifier, lire sans exécuter, trouver la fonction qui décide, inverser la transformation, vérifier. ¶ Un secret placé dans un programme distribué sera lu. ¶ Le XOR masque les chaînes mais s'inverse avec la même clé. ¶ Java, C#, Android et JavaScript se relisent presque en clair. ¶ La seule vraie protection est la vérification côté serveur.
+--- exos
+Q¤m¤Quelle est la première étape de l'analyse d'un binaire inconnu ?¤L'identifier : type, architecture, empreinte;;L'exécuter sur son poste;;Le modifier;;Le supprimer¤
+Q¤m¤Dans un crackme, comment trouve-t-on la fonction qui vérifie le mot de passe ?¤En partant du message d'erreur affiché;;En lisant tout le programme dans l'ordre;;En devinant;;En supprimant des octets au hasard¤
+Q¤m¤Pourquoi un mot de passe écrit en clair dans un programme n'est-il pas protégé ?¤Il apparaît avec un simple strings;;Il est trop court;;Le compilateur le supprime;;Il est chiffré automatiquement¤
+Q¤m¤Le programme compare `code + 1` à la valeur attendue 116. Quel est le code du caractère cherché ?¤115;;117;;116;;58¤On inverse l'opération.
+Q¤m¤Pourquoi le XOR est-il simple à inverser quand on a la clé ?¤Appliquer deux fois la même clé redonne l'original;;Il n'utilise pas de clé;;Il est à sens unique;;Il ne change rien¤
+Q¤m¤Pourquoi les malwares masquent-ils leurs chaînes par XOR ?¤Pour ne pas apparaître avec strings;;Pour s'exécuter plus vite;;Pour être plus petits;;Par obligation légale¤
+Q¤m¤Qu'est-ce que l'obfuscation ?¤Rendre un code volontairement difficile à lire;;Chiffrer un disque;;Compresser un fichier;;Signer un programme¤
+Q¤m¤Quelle différence entre minification et obfuscation ?¤La minification réduit la taille, l'obfuscation cherche à brouiller;;Aucune;;La minification chiffre le code;;L'obfuscation accélère le code¤
+Q¤m¤Que peut-on dire d'une application Java ou C# distribuée ?¤Elle se décompile en un code proche de l'original;;Elle est illisible;;Elle est chiffrée par défaut;;Elle ne contient pas de code¤
+Q¤m¤Qu'est-ce qu'un packer ?¤Un outil qui compresse ou chiffre le code, déballé en mémoire à l'exécution;;Un antivirus;;Un compilateur;;Un gestionnaire de paquets¤
+Q¤m¤Où doit se faire la vérification d'une licence ou d'un droit d'accès ?¤Sur le serveur;;Dans le JavaScript de la page;;Dans l'application mobile;;Dans un fichier de configuration du client¤
+Q¤m¤Qu'est-ce qu'un indicateur de compromission ?¤Une trace permettant de reconnaître une attaque : empreinte, domaine, nom de fichier;;Un mot de passe volé;;Un type de pare-feu;;Une note de gravité¤
+Q¤m¤Que ne faut-il jamais faire avec un script inconnu ?¤Le lancer en entier hors d'un environnement isolé;;Le lire;;L'indenter;;Renommer ses variables¤
+Q¤d¤La saisie est retournée puis XORée. Dans quel ordre inverse-t-on ?¤D'abord le XOR, ensuite le retournement;;D'abord le retournement, ensuite le XOR;;Peu importe dans tous les cas;;On ne peut pas inverser¤On défait les opérations en partant de la dernière.
+Q¤m¤À quoi sert une règle YARA ?¤À détecter un malware par ses caractéristiques;;À chiffrer un fichier;;À configurer un pare-feu;;À compiler un programme¤
+V¤m¤L'obfuscation rend un programme impossible à analyser.¤F¤Elle ralentit l'analyse, sans l'empêcher.
+A¤m¤Associe chaque technologie à son outil de décompilation.¤Java / Android=>JADX;;.NET (C#)=>ILSpy;;C compilé=>Ghidra;;JavaScript=>outils du navigateur¤
+
+=== cyber-forensique | Cybersécurité : détecter, enquêter et répondre à un incident | m
+Aucune défense n'est infaillible : la question n'est pas « si » mais « quand ». Ce qui distingue une organisation préparée, c'est la vitesse à laquelle elle **détecte**, **contient** et **se relève**.
+
+## 1. Les six étapes de la réponse à incident
+
+| Étape | Contenu |
+| 1. **Préparation** | procédures, contacts, sauvegardes testées, journaux centralisés |
+| 2. **Détection et analyse** | qualifier l'alerte : vrai incident ? quelle étendue ? |
+| 3. **Confinement** | empêcher la propagation : isoler les machines, bloquer des comptes |
+| 4. **Éradication** | supprimer la cause : malware, compte créé par l'attaquant, faille |
+| 5. **Restauration** | remettre en service depuis un état sain, surveiller de près |
+| 6. **Retour d'expérience** | que s'est-il passé, qu'améliore-t-on ? |
+
+!attention Les réflexes qui sauvent | Isoler du réseau **sans éteindre** (la mémoire vive contient des preuves). Ne pas « nettoyer » à la hâte : on détruirait les traces. Noter tout ce que l'on fait, avec l'heure. Prévenir la personne désignée, et communiquer par un canal qui n'est pas compromis.
+
+## 2. Où chercher les traces
+
+| Source | Ce qu'on y trouve |
+| Journaux d'authentification | connexions réussies et échouées, heures, adresses |
+| Journaux du serveur web | requêtes anormales, tentatives d'injection |
+| Journaux du pare-feu et du proxy | flux sortants vers des adresses inconnues |
+| Historique des commandes, tâches planifiées | ce que l'attaquant a lancé et installé |
+| Liste des comptes et des groupes | comptes créés, droits ajoutés |
+| Fichiers récemment modifiés | `find / -mtime -2 -type f` |
+| Processus et connexions en cours | `ps aux`, `ss -tulpn` |
+| Mémoire vive | malware sans fichier, clés, mots de passe |
+
+```
+grep "Accepted" /var/log/auth.log | tail            # qui s'est connecté ?
+grep "sudo:" /var/log/auth.log | tail               # qui est passé administrateur ?
+find /var/www -name "*.php" -mtime -3               # fichiers web modifiés depuis 3 jours
+crontab -l ; ls -la /etc/cron.d                     # une tâche planifiée ajoutée ?
+grep -v "nologin\|false" /etc/passwd                # un compte en trop ?
+```
+
+## 3. Reconstituer la chronologie
+
+L'enquête consiste à ranger les événements dans l'ordre : c'est la **frise chronologique** (*timeline*).
+
+```run
+const journal = [
+  "03:12:01 Failed password for admin from 203.0.113.7",
+  "03:12:02 Failed password for admin from 203.0.113.7",
+  "03:12:04 Failed password for admin from 203.0.113.7",
+  "03:14:40 Accepted password for admin from 203.0.113.7",
+  "03:15:02 sudo: admin : COMMAND=/usr/sbin/useradd support2",
+  "03:16:30 Accepted password for support2 from 203.0.113.7",
+];
+const echecs = journal.filter(l => l.includes("Failed")).length;
+const entree = journal.find(l => l.includes("Accepted"));
+console.log(`${echecs} échecs puis : ${entree}`);
+console.log("Comptes créés :", journal.filter(l => l.includes("useradd")).map(l => l.split(" ").pop()));
+```
+
+Lecture : force brute, réussite à 03:14, création d'un compte de secours à 03:15 (la **persistance**), retour par ce compte à 03:16. Supprimer seulement le malware ne suffirait pas : il faut aussi retirer `support2` et changer le mot de passe d'`admin`.
+
+## 4. Les indicateurs de compromission
+
+Un **IoC** est une trace qui permet de reconnaître la même attaque ailleurs.
+
+| Type | Exemple |
+| Empreinte de fichier | SHA-256 du malware |
+| Réseau | adresse IP ou domaine du serveur de commande |
+| Système | nom de fichier, clé de registre, tâche planifiée, compte créé |
+| Comportement | un traitement de texte qui lance un interpréteur de commandes |
+
+On les recherche sur tout le parc, on les bloque (pare-feu, EDR), et on les partage.
+
+## 5. Préserver les preuves
+
+Pour qu'une preuve soit recevable, on doit montrer qu'elle n'a pas été modifiée.
+
+- On travaille sur une **copie** du disque, jamais sur l'original.
+- On calcule l'**empreinte** (SHA-256) de la copie et de l'original : elles doivent être identiques.
+- On tient une **chaîne de traçabilité** : qui a eu la preuve entre les mains, quand, pour quoi faire.
+- On respecte l'ordre de **volatilité** : mémoire vive d'abord, puis disque, puis sauvegardes.
+
+```
+sudo dd if=/dev/sdb of=preuve.img bs=4M status=progress     # copie bit à bit
+sha256sum /dev/sdb preuve.img                               # les deux empreintes doivent correspondre
+```
+
+## 6. Les obligations
+
+| Qui prévenir | Quand |
+| La **CNIL** | sous **72 heures** si des données personnelles sont touchées |
+| Les **personnes concernées** | si le risque pour elles est élevé |
+| La police ou la gendarmerie (plainte) | pour toute attaque ; nécessaire pour l'assurance |
+| L'ANSSI | pour les opérateurs soumis à NIS 2 |
+| `cybermalveillance.gouv.fr` | diagnostic et mise en relation, pour les particuliers et les petites structures |
+
+## 7. Après l'incident
+
+Le **retour d'expérience** n'est pas la recherche d'un coupable. Il répond à : comment sont-ils entrés ? combien de temps avant qu'on le voie ? qu'est-ce qui a bien fonctionné ? quelles mesures empêcheraient que cela se reproduise ? Deux chiffres résument la maturité : le délai moyen de **détection** et le délai moyen de **rétablissement**.
+
+!defi Défi : un compte a-t-il été compromis ? | Des échecs puis une réussite depuis la même adresse. | cy-compromis
+!defi Défi : vérifier l'intégrité | Compare les empreintes de fichiers. | cy-empreinte
+
+!retenir À retenir | Préparation, détection, confinement, éradication, restauration, retour d'expérience. ¶ Isoler sans éteindre, ne rien effacer, tout noter. ¶ Les journaux racontent l'histoire : échecs, réussite, élévation, persistance. ¶ Travailler sur une copie, prouver l'intégrité par une empreinte. ¶ CNIL sous 72 h si des données personnelles sont touchées ; porter plainte.
+--- exos
+Q¤m¤Quelle est la première étape de la réponse à incident ?¤La préparation;;Le confinement;;La restauration;;L'éradication¤Elle se fait avant tout incident.
+Q¤m¤Que signifie confiner un incident ?¤Empêcher sa propagation;;Le cacher à la direction;;Supprimer les journaux;;Éteindre tous les serveurs¤
+Q¤m¤Pourquoi isoler une machine compromise sans l'éteindre ?¤La mémoire vive contient des preuves qui disparaîtraient;;Pour économiser du temps;;Parce qu'elle ne redémarrerait pas;;Pour que l'attaquant continue¤
+Q¤m¤Pourquoi ne pas « nettoyer » immédiatement la machine ?¤On détruirait les traces nécessaires à l'enquête;;C'est trop long;;L'antivirus s'en charge;;C'est interdit par le RGPD¤
+Q¤m¤Dans un journal, des échecs suivis d'un « Accepted » depuis la même adresse indiquent…¤une force brute qui a réussi;;une erreur de frappe;;une panne réseau;;une mise à jour¤
+Q¤m¤Un compte « support2 » créé juste après l'intrusion sert à…¤la persistance : revenir même si le mot de passe change;;aider le support;;sauvegarder les données;;rien¤
+Q¤m¤Qu'est-ce qu'un IoC ?¤Un indicateur de compromission;;Un type de pare-feu;;Une norme de chiffrement;;Un contrat d'assurance¤
+Q¤m¤Sur quoi l'enquêteur travaille-t-il ?¤Sur une copie du disque;;Sur le disque d'origine;;Sur une sauvegarde ancienne;;Sur le poste d'un collègue¤
+Q¤m¤Comment prouve-t-on qu'une copie est identique à l'original ?¤En comparant leurs empreintes (SHA-256);;En comparant leur taille;;En comparant leur date;;En les ouvrant¤
+Q¤m¤Dans quel ordre collecte-t-on les preuves ?¤Du plus volatile au moins volatile : la mémoire d'abord;;Le disque d'abord;;Les sauvegardes d'abord;;Peu importe¤
+Q¤m¤Sous quel délai prévenir la CNIL si des données personnelles sont touchées ?¤72 heures;;24 heures;;30 jours;;Aucun¤
+Q¤m¤Quelle commande liste les fichiers modifiés depuis moins de 3 jours ?¤`find /var/www -mtime -3`;;`ls -3 /var/www`;;`grep -3 /var/www`;;`date -3`¤
+Q¤m¤À quoi sert le retour d'expérience ?¤À comprendre et à améliorer, pas à chercher un coupable;;À sanctionner;;À rédiger la plainte;;À choisir un antivirus¤
+Q¤d¤Après une intrusion par un compte volé avec création d'un second compte, que faut-il faire au minimum ?¤Changer le mot de passe volé ET supprimer le compte créé;;Redémarrer le serveur;;Supprimer les journaux;;Seulement changer le mot de passe¤
+Q¤m¤Qu'est-ce que la chaîne de traçabilité ?¤Le registre de qui a manipulé la preuve, et quand;;La liste des pare-feu;;L'ordre des sauvegardes;;Le câblage du réseau¤
+V¤m¤Porter plainte est utile même si l'attaquant est à l'étranger.¤V¤C'est nécessaire pour l'enquête et pour l'assurance.
+A¤m¤Associe chaque étape à son action.¤confinement=>isoler les machines;;éradication=>supprimer la cause;;restauration=>remettre en service;;retour d'expérience=>améliorer¤
+
+=== cyber-pentest | Cybersécurité : le test d'intrusion et les CTF | m
+Un **test d'intrusion** (*pentest*) est un audit : une entreprise paie des spécialistes pour attaquer son système **avec son accord**, afin de trouver les failles avant les vrais attaquants. C'est le métier qui fait rêver ; c'est surtout un travail de méthode et de rédaction.
+
+## 1. Ce qui le rend légal
+
+| Document | Contenu |
+| **Convention d'audit** | autorisation signée du propriétaire du système |
+| **Périmètre** | exactement quelles adresses, quels sites, quelles applications |
+| **Règles d'engagement** | dates et horaires, techniques interdites (déni de service), contacts d'urgence |
+| **Clause de confidentialité** | ce que l'auditeur voit reste secret |
+
+Sans ces documents, les mêmes gestes sont un délit. Attention à l'hébergeur : auditer un site, c'est aussi toucher la machine d'un tiers, qui doit être prévenu.
+
+| Type de test | L'auditeur connaît |
+| Boîte **noire** | rien : la position d'un attaquant extérieur |
+| Boîte **grise** | un compte utilisateur, un peu de documentation |
+| Boîte **blanche** | tout : code source, schémas, comptes d'administration |
+
+## 2. Les phases
+
+| Phase | Objectif |
+| 1. Cadrage | périmètre, autorisations, objectifs |
+| 2. **Reconnaissance** | collecter l'information publique (OSINT) : domaines, technologies, adresses |
+| 3. **Cartographie** | quels services, quelles versions, quelles pages |
+| 4. **Recherche de vulnérabilités** | comparer aux failles connues (CVE), tester la configuration et le code |
+| 5. **Exploitation** | démontrer qu'une faille est réelle, sans rien casser |
+| 6. Post-exploitation | montrer jusqu'où un attaquant irait (élévation, rebond) |
+| 7. **Rapport** et restitution | le livrable : c'est lui que le client achète |
+
+L'**OSINT** (renseignement en sources ouvertes) montre ce qu'une entreprise expose sans le savoir : noms d'employés sur les réseaux professionnels, sous-domaines oubliés, documents publiés avec leurs métadonnées, identifiants présents dans d'anciennes fuites.
+
+## 3. Le rapport
+
+| Rubrique | Contenu |
+| Synthèse pour la direction | niveau de risque global, en langage non technique |
+| Pour chaque faille | description, **preuve**, gravité (CVSS), **recommandation** |
+| Plan d'action | corrections classées par priorité |
+
+Une faille non expliquée et non corrigée ne sert à rien : la qualité d'un auditeur se juge à ses recommandations.
+
+| Gravité CVSS | Score |
+| Critique | 9,0 à 10 |
+| Élevée | 7,0 à 8,9 |
+| Moyenne | 4,0 à 6,9 |
+| Faible | 0,1 à 3,9 |
+
+```run
+// Classer les constats d'un audit par priorité
+const constats = [
+  { titre: "Version de PHP obsolète", cvss: 7.5 },
+  { titre: "Injection SQL sur le formulaire de recherche", cvss: 9.8 },
+  { titre: "En-têtes de sécurité manquants", cvss: 3.1 },
+  { titre: "Mot de passe par défaut sur l'imprimante", cvss: 6.5 },
+];
+const niveau = s => s >= 9 ? "CRITIQUE" : s >= 7 ? "ÉLEVÉE" : s >= 4 ? "MOYENNE" : "FAIBLE";
+for (const c of constats.sort((a, b) => b.cvss - a.cvss)) console.log(niveau(c.cvss).padEnd(9), c.cvss.toFixed(1), c.titre);
+```
+
+## 4. Les référentiels
+
+| Référentiel | Sert à |
+| **OWASP Top 10** | les dix risques majeurs des applications web |
+| OWASP Testing Guide, ASVS | la liste de ce qu'il faut tester |
+| **MITRE ATT&CK** | le catalogue des techniques d'attaque observées |
+| **CVE / CVSS** | identifier et noter les vulnérabilités |
+| PTES, PASSI (ANSSI) | le déroulement et la qualification des audits |
+
+## 5. Bug bounty et divulgation responsable
+
+Des entreprises invitent les chercheurs à leur signaler des failles contre récompense, sur un périmètre et avec des règles publiés : c'est le **bug bounty** (plateformes YesWeHack, HackerOne). Hors programme, on pratique la **divulgation coordonnée** : prévenir discrètement l'éditeur, lui laisser le temps de corriger, publier ensuite. En France, l'ANSSI peut recevoir le signalement d'une faille découverte de bonne foi (article L2321-4 du Code de la défense).
+
+## 6. Les CTF : s'entraîner légalement
+
+Un **CTF** (*Capture The Flag*) est une compétition où l'on résout des épreuves pour trouver un **drapeau** (une chaîne comme `FLAG{…}`).
+
+| Catégorie | On y pratique |
+| Web | injections, authentification, logique applicative |
+| Crypto | chiffrements faibles ou mal utilisés |
+| *Reverse* | comprendre un programme compilé |
+| *Pwn* | failles de mémoire |
+| Forensique | journaux, captures réseau, images disque |
+| Stéganographie | données cachées dans une image ou un son |
+| OSINT | retrouver une information publique |
+| Réseau | analyse de trafic |
+
+| Plateforme | Particularité |
+| **Root-Me** | française, des centaines d'épreuves par catégorie |
+| **TryHackMe** | parcours guidés pour débutants |
+| Hack The Box | machines complètes à compromettre |
+| picoCTF, OverTheWire | idéals pour commencer |
+| Hackropole (ANSSI) | les épreuves des anciens FCSC |
+| DVWA, Juice Shop | applications volontairement vulnérables à installer chez soi |
+
+Une épreuve en mode **attaque / défense** oppose des équipes qui doivent à la fois protéger leurs services et attaquer ceux des autres : c'est l'esprit du [duel attaque / défense](duel.html) de ce site.
+
+## 7. Monter son propre laboratoire
+
+Deux machines virtuelles sur un **réseau interne** isolé (VirtualBox) : une machine d'audit et une cible volontairement vulnérable. Rien ne sort, rien n'est illégal, et on peut tout casser puis restaurer un instantané. C'est aussi un excellent projet à présenter dans ton portfolio.
+
+!retenir À retenir | Un pentest est légal parce qu'il est **autorisé par écrit** sur un périmètre défini. ¶ Boîte noire, grise, blanche. ¶ Reconnaissance, cartographie, recherche de failles, exploitation maîtrisée, **rapport**. ¶ Chaque faille : preuve, gravité CVSS, recommandation. ¶ Pour s'entraîner : CTF, Root-Me, TryHackMe, et un laboratoire isolé.
+--- exos
+Q¤m¤Qu'est-ce qui rend un test d'intrusion légal ?¤L'autorisation écrite du propriétaire, sur un périmètre défini;;Le fait de ne rien casser;;Le diplôme de l'auditeur;;L'utilisation d'outils gratuits¤
+Q¤m¤Que connaît l'auditeur lors d'un test en boîte noire ?¤Rien : il est dans la position d'un attaquant extérieur;;Tout le code source;;Un compte utilisateur;;Les mots de passe administrateur¤
+Q¤m¤Que connaît l'auditeur lors d'un test en boîte blanche ?¤Tout : code source, schémas, comptes;;Rien;;Seulement l'adresse du site;;Seulement un compte utilisateur¤
+Q¤m¤Que définissent les règles d'engagement ?¤Les dates, les techniques interdites et les contacts d'urgence;;Le prix de l'audit;;Le nom des pirates;;La marque du pare-feu¤
+Q¤m¤Qu'est-ce que l'OSINT ?¤Le renseignement à partir de sources publiques;;Un outil de chiffrement;;Un type de malware;;Une norme réseau¤
+Q¤m¤Quel est le livrable principal d'un test d'intrusion ?¤Le rapport, avec preuves et recommandations;;La liste des mots de passe;;Un antivirus;;Une facture¤
+Q¤m¤Que doit contenir la fiche de chaque faille ?¤Description, preuve, gravité et recommandation;;Seulement son nom;;Le nom du développeur fautif;;Le code d'exploitation prêt à l'emploi¤
+Q¤m¤Quelle gravité correspond à un score CVSS de 9,8 ?¤Critique;;Élevée;;Moyenne;;Faible¤
+Q¤m¤Qu'est-ce que l'OWASP Top 10 ?¤Les dix risques majeurs des applications web;;Les dix meilleurs antivirus;;Les dix pirates les plus recherchés;;Les dix ports les plus utilisés¤
+Q¤m¤Qu'est-ce qu'un bug bounty ?¤Un programme qui récompense le signalement de failles, sur un périmètre publié;;Un concours de vitesse;;Un logiciel de test;;Une amende¤
+Q¤m¤Qu'est-ce que la divulgation coordonnée ?¤Prévenir l'éditeur et lui laisser le temps de corriger avant de publier;;Publier la faille immédiatement;;Vendre la faille;;Ne jamais en parler¤
+Q¤m¤Que cherche-t-on dans une épreuve de CTF ?¤Un drapeau (flag) prouvant qu'on a résolu l'épreuve;;Un mot de passe réel;;Un numéro de carte;;Un virus¤
+Q¤m¤Quelle catégorie de CTF porte sur l'analyse de programmes compilés ?¤Reverse;;Web;;OSINT;;Stéganographie¤
+Q¤m¤Quelle plateforme française propose des centaines d'épreuves d'entraînement ?¤Root-Me;;GitHub;;Stack Overflow;;Wikipédia¤
+Q¤d¤Comment s'entraîner chez soi sans risque légal ?¤Avec des machines virtuelles sur un réseau interne isolé;;En testant le Wi-Fi des voisins;;En scannant des sites au hasard;;En testant le réseau du lycée le week-end¤
+V¤m¤Pendant un test d'intrusion autorisé, un déni de service est toujours permis.¤F¤Il est en général exclu par les règles d'engagement.
+A¤m¤Associe chaque phase à son objectif.¤reconnaissance=>collecter l'information publique;;cartographie=>recenser services et versions;;exploitation=>démontrer la faille;;rapport=>recommander les corrections¤

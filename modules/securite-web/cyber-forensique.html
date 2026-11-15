@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Cybersécurité : détecter, enquêter et répondre à un incident — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="securite-web" data-chapter="cyber-forensique">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/securite-web.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>Aucune défense n'est infaillible : la question n'est pas « si » mais « quand ». Ce qui distingue une organisation préparée, c'est la vitesse à laquelle elle <b>détecte</b>, <b>contient</b> et <b>se relève</b>.</p>
+<h2>1. Les six étapes de la réponse à incident</h2>
+<table><tr><th>Étape</th><th>Contenu</th></tr><tr><td>1. <b>Préparation</b></td><td>procédures, contacts, sauvegardes testées, journaux centralisés</td></tr><tr><td>2. <b>Détection et analyse</b></td><td>qualifier l'alerte : vrai incident ? quelle étendue ?</td></tr><tr><td>3. <b>Confinement</b></td><td>empêcher la propagation : isoler les machines, bloquer des comptes</td></tr><tr><td>4. <b>Éradication</b></td><td>supprimer la cause : malware, compte créé par l'attaquant, faille</td></tr><tr><td>5. <b>Restauration</b></td><td>remettre en service depuis un état sain, surveiller de près</td></tr><tr><td>6. <b>Retour d'expérience</b></td><td>que s'est-il passé, qu'améliore-t-on ?</td></tr></table>
+<div class="box attention"><b>Les réflexes qui sauvent</b><p>Isoler du réseau <b>sans éteindre</b> (la mémoire vive contient des preuves). Ne pas « nettoyer » à la hâte : on détruirait les traces. Noter tout ce que l'on fait, avec l'heure. Prévenir la personne désignée, et communiquer par un canal qui n'est pas compromis.</p></div>
+<h2>2. Où chercher les traces</h2>
+<table><tr><th>Source</th><th>Ce qu'on y trouve</th></tr><tr><td>Journaux d'authentification</td><td>connexions réussies et échouées, heures, adresses</td></tr><tr><td>Journaux du serveur web</td><td>requêtes anormales, tentatives d'injection</td></tr><tr><td>Journaux du pare-feu et du proxy</td><td>flux sortants vers des adresses inconnues</td></tr><tr><td>Historique des commandes, tâches planifiées</td><td>ce que l'attaquant a lancé et installé</td></tr><tr><td>Liste des comptes et des groupes</td><td>comptes créés, droits ajoutés</td></tr><tr><td>Fichiers récemment modifiés</td><td><code>find / -mtime -2 -type f</code></td></tr><tr><td>Processus et connexions en cours</td><td><code>ps aux</code>, <code>ss -tulpn</code></td></tr><tr><td>Mémoire vive</td><td>malware sans fichier, clés, mots de passe</td></tr></table>
+<pre><code>grep "Accepted" /var/log/auth.log | tail            # qui s'est connecté ?
+grep "sudo:" /var/log/auth.log | tail               # qui est passé administrateur ?
+find /var/www -name "*.php" -mtime -3               # fichiers web modifiés depuis 3 jours
+crontab -l ; ls -la /etc/cron.d                     # une tâche planifiée ajoutée ?
+grep -v "nologin\|false" /etc/passwd                # un compte en trop ?</code></pre>
+<h2>3. Reconstituer la chronologie</h2>
+<p>L'enquête consiste à ranger les événements dans l'ordre : c'est la <b>frise chronologique</b> (*timeline*).</p>
+<div class="essai" data-langue="js"><pre><code>const journal = [
+  "03:12:01 Failed password for admin from 203.0.113.7",
+  "03:12:02 Failed password for admin from 203.0.113.7",
+  "03:12:04 Failed password for admin from 203.0.113.7",
+  "03:14:40 Accepted password for admin from 203.0.113.7",
+  "03:15:02 sudo: admin : COMMAND=/usr/sbin/useradd support2",
+  "03:16:30 Accepted password for support2 from 203.0.113.7",
+];
+const echecs = journal.filter(l =&gt; l.includes("Failed")).length;
+const entree = journal.find(l =&gt; l.includes("Accepted"));
+console.log(`${echecs} échecs puis : ${entree}`);
+console.log("Comptes créés :", journal.filter(l =&gt; l.includes("useradd")).map(l =&gt; l.split(" ").pop()));</code></pre></div>
+<p>Lecture : force brute, réussite à 03:14, création d'un compte de secours à 03:15 (la <b>persistance</b>), retour par ce compte à 03:16. Supprimer seulement le malware ne suffirait pas : il faut aussi retirer <code>support2</code> et changer le mot de passe d'<code>admin</code>.</p>
+<h2>4. Les indicateurs de compromission</h2>
+<p>Un <b>IoC</b> est une trace qui permet de reconnaître la même attaque ailleurs.</p>
+<table><tr><th>Type</th><th>Exemple</th></tr><tr><td>Empreinte de fichier</td><td>SHA-256 du malware</td></tr><tr><td>Réseau</td><td>adresse IP ou domaine du serveur de commande</td></tr><tr><td>Système</td><td>nom de fichier, clé de registre, tâche planifiée, compte créé</td></tr><tr><td>Comportement</td><td>un traitement de texte qui lance un interpréteur de commandes</td></tr></table>
+<p>On les recherche sur tout le parc, on les bloque (pare-feu, EDR), et on les partage.</p>
+<h2>5. Préserver les preuves</h2>
+<p>Pour qu'une preuve soit recevable, on doit montrer qu'elle n'a pas été modifiée.</p>
+<ul><li>On travaille sur une <b>copie</b> du disque, jamais sur l'original.</li><li>On calcule l'<b>empreinte</b> (SHA-256) de la copie et de l'original : elles doivent être identiques.</li><li>On tient une <b>chaîne de traçabilité</b> : qui a eu la preuve entre les mains, quand, pour quoi faire.</li><li>On respecte l'ordre de <b>volatilité</b> : mémoire vive d'abord, puis disque, puis sauvegardes.</li></ul>
+<pre><code>sudo dd if=/dev/sdb of=preuve.img bs=4M status=progress     # copie bit à bit
+sha256sum /dev/sdb preuve.img                               # les deux empreintes doivent correspondre</code></pre>
+<h2>6. Les obligations</h2>
+<table><tr><th>Qui prévenir</th><th>Quand</th></tr><tr><td>La <b>CNIL</b></td><td>sous <b>72 heures</b> si des données personnelles sont touchées</td></tr><tr><td>Les <b>personnes concernées</b></td><td>si le risque pour elles est élevé</td></tr><tr><td>La police ou la gendarmerie (plainte)</td><td>pour toute attaque ; nécessaire pour l'assurance</td></tr><tr><td>L'ANSSI</td><td>pour les opérateurs soumis à NIS 2</td></tr><tr><td><code>cybermalveillance.gouv.fr</code></td><td>diagnostic et mise en relation, pour les particuliers et les petites structures</td></tr></table>
+<h2>7. Après l'incident</h2>
+<p>Le <b>retour d'expérience</b> n'est pas la recherche d'un coupable. Il répond à : comment sont-ils entrés ? combien de temps avant qu'on le voie ? qu'est-ce qui a bien fonctionné ? quelles mesures empêcheraient que cela se reproduise ? Deux chiffres résument la maturité : le délai moyen de <b>détection</b> et le délai moyen de <b>rétablissement</b>.</p>
+<div class="box defi"><b>Défi : un compte a-t-il été compromis ?</b><p>Des échecs puis une réussite depuis la même adresse.</p><a class="defi-go" href="labo-cyber.html#m=cy-compromis">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : vérifier l'intégrité</b><p>Compare les empreintes de fichiers.</p><a class="defi-go" href="labo-cyber.html#m=cy-empreinte">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p>Préparation, détection, confinement, éradication, restauration, retour d'expérience. </p><p> Isoler sans éteindre, ne rien effacer, tout noter. </p><p> Les journaux racontent l'histoire : échecs, réussite, élévation, persistance. </p><p> Travailler sur une copie, prouver l'intégrité par une empreinte. </p><p> CNIL sous 72 h si des données personnelles sont touchées ; porter plainte.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cyber.html">labo cybersécurité</a> te fait écrire des protections, casser des chiffres faibles et analyser des programmes. Le <a href="labo-defense.html">labo terminal</a> te fait enquêter et durcir un serveur. Et le <a href="duel.html">duel attaque / défense</a> t'oppose à un autre élève.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "moyen",
+  "q": "Quelle est la première étape de la réponse à incident ?",
+  "type": "qcm",
+  "options": [
+   "Le confinement",
+   "La restauration",
+   "L'éradication",
+   "La préparation"
+  ],
+  "answer": 3,
+  "explication": "Elle se fait avant tout incident."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que signifie confiner un incident ?",
+  "type": "qcm",
+  "options": [
+   "Le cacher à la direction",
+   "Empêcher sa propagation",
+   "Supprimer les journaux",
+   "Éteindre tous les serveurs"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Pourquoi isoler une machine compromise sans l'éteindre ?",
+  "type": "qcm",
+  "options": [
+   "Parce qu'elle ne redémarrerait pas",
+   "Pour économiser du temps",
+   "Pour que l'attaquant continue",
+   "La mémoire vive contient des preuves qui disparaîtraient"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Pourquoi ne pas « nettoyer » immédiatement la machine ?",
+  "type": "qcm",
+  "options": [
+   "C'est interdit par le RGPD",
+   "L'antivirus s'en charge",
+   "On détruirait les traces nécessaires à l'enquête",
+   "C'est trop long"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Dans un journal, des échecs suivis d'un « Accepted » depuis la même adresse indiquent…",
+  "type": "qcm",
+  "options": [
+   "une force brute qui a réussi",
+   "une panne réseau",
+   "une mise à jour",
+   "une erreur de frappe"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Un compte « support2 » créé juste après l'intrusion sert à…",
+  "type": "qcm",
+  "options": [
+   "sauvegarder les données",
+   "aider le support",
+   "la persistance : revenir même si le mot de passe change",
+   "rien"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'un IoC ?",
+  "type": "qcm",
+  "options": [
+   "Une norme de chiffrement",
+   "Un indicateur de compromission",
+   "Un type de pare-feu",
+   "Un contrat d'assurance"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Sur quoi l'enquêteur travaille-t-il ?",
+  "type": "qcm",
+  "options": [
+   "Sur une sauvegarde ancienne",
+   "Sur le poste d'un collègue",
+   "Sur le disque d'origine",
+   "Sur une copie du disque"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment prouve-t-on qu'une copie est identique à l'original ?",
+  "type": "qcm",
+  "options": [
+   "En comparant leur date",
+   "En comparant leurs empreintes (SHA-256)",
+   "En comparant leur taille",
+   "En les ouvrant"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Dans quel ordre collecte-t-on les preuves ?",
+  "type": "qcm",
+  "options": [
+   "Les sauvegardes d'abord",
+   "Du plus volatile au moins volatile : la mémoire d'abord",
+   "Peu importe",
+   "Le disque d'abord"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Sous quel délai prévenir la CNIL si des données personnelles sont touchées ?",
+  "type": "qcm",
+  "options": [
+   "72 heures",
+   "24 heures",
+   "30 jours",
+   "Aucun"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle commande liste les fichiers modifiés depuis moins de 3 jours ?",
+  "type": "qcm",
+  "options": [
+   "`grep -3 /var/www`",
+   "`ls -3 /var/www`",
+   "`date -3`",
+   "`find /var/www -mtime -3`"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "À quoi sert le retour d'expérience ?",
+  "type": "qcm",
+  "options": [
+   "À choisir un antivirus",
+   "À comprendre et à améliorer, pas à chercher un coupable",
+   "À sanctionner",
+   "À rédiger la plainte"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Après une intrusion par un compte volé avec création d'un second compte, que faut-il faire au minimum ?",
+  "type": "qcm",
+  "options": [
+   "Changer le mot de passe volé ET supprimer le compte créé",
+   "Supprimer les journaux",
+   "Redémarrer le serveur",
+   "Seulement changer le mot de passe"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce que la chaîne de traçabilité ?",
+  "type": "qcm",
+  "options": [
+   "La liste des pare-feu",
+   "Le registre de qui a manipulé la preuve, et quand",
+   "Le câblage du réseau",
+   "L'ordre des sauvegardes"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Porter plainte est utile même si l'attaquant est à l'étranger.",
+  "type": "vf",
+  "answer": true,
+  "explication": "C'est nécessaire pour l'enquête et pour l'assurance."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque étape à son action.",
+  "type": "associer",
+  "paires": [
+   [
+    "confinement",
+    "isoler les machines"
+   ],
+   [
+    "éradication",
+    "supprimer la cause"
+   ],
+   [
+    "restauration",
+    "remettre en service"
+   ],
+   [
+    "retour d'expérience",
+    "améliorer"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>
