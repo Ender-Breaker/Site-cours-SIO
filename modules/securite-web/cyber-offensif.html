@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Rouge : penser comme un attaquant — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="securite-web" data-chapter="cyber-offensif">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/securite-web.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>Pour défendre une application, il faut savoir comment on l'attaque. C'est le rôle de l'<b>équipe rouge</b> (*red team*) : se mettre à la place de l'adversaire, chercher les failles avant lui, et prouver qu'elles sont exploitables. Ce chapitre regarde cinq failles classiques du web <b>du côté de l'attaquant</b> ; le chapitre suivant les corrige. Tu les mettras en pratique dans <a href="atelier.html">l'atelier de code attaque / défense</a>, où tu écris toi-même l'exploit.</p>
+<div class="box attention"><b>On s'exerce, on n'attaque pas</b><p>Tout ce qui suit se pratique <b>uniquement</b> sur tes propres machines, dans les labos et l'atelier de ce site, ou sur des plateformes prévues pour cela (Root-Me, TryHackMe, les CTF). Reproduire une de ces attaques sur un système qui ne t'appartient pas, sans autorisation écrite, est un délit (article 323-1 du Code pénal), même « pour tester » et même sans rien casser.</p></div>
+<h2>1. L'état d'esprit : toute entrée est hostile</h2>
+<p>Un attaquant ne voit pas un formulaire comme l'utilisateur. Là où tu lis « champ identifiant », il lit « endroit où je peux glisser ce que je veux ». La question qu'il se pose en permanence : *que se passe-t-il si j'envoie autre chose que ce qui est prévu ?* Un nom qui contient une apostrophe, un prix négatif, un fichier <code>.php</code> déguisé en image, un paramètre <code>role=admin</code> ajouté à la main.</p>
+<p>La <b>règle d'or</b> qui en découle, et qui guide toute la défense : <b>aucune donnée venue du client n'est digne de confiance</b>. Ni les champs d'un formulaire, ni l'adresse, ni les en-têtes, ni ce que « seul le JavaScript de la page » est censé envoyer.</p>
+<h2>2. La démarche d'une attaque ciblée</h2>
+<p>Une attaque sérieuse suit des étapes, qu'on retrouve dans un test d'intrusion :</p>
+<table><tr><th>Étape</th><th>Ce que fait l'attaquant</th></tr><tr><td><b>Reconnaissance</b></td><td>rassembler l'information publique (OSINT), repérer les technologies, les versions, les points d'entrée</td></tr><tr><td><b>Cartographie</b></td><td>lister les pages, les paramètres, les formulaires, les API</td></tr><tr><td><b>Recherche de failles</b></td><td>tester chaque entrée : injection, droits mal vérifiés, fichiers accessibles</td></tr><tr><td><b>Exploitation</b></td><td>transformer une faille en accès réel (lire une base, prendre un compte)</td></tr><tr><td><b>Post-exploitation</b></td><td>élever ses privilèges, se maintenir (persistance), atteindre d'autres machines (rebond)</td></tr></table>
+<p>Le défenseur casse cette chaîne le plus tôt possible : moins d'information exposée, moins de surface, des entrées contrôlées.</p>
+<h2>3. Injecter du code dans une requête</h2>
+<p>La faille la plus connue. Quand une application <b>colle</b> une saisie dans une requête (SQL, mais aussi une commande système), l'attaquant y glisse non pas une donnée, mais de la syntaxe.</p>
+<div class="essai" data-langue="js"><pre><code>// Côté serveur, la requête est fabriquée par concaténation :
+function requete(identifiant, motdepasse) {
+  return "SELECT * FROM membres WHERE id='" + identifiant + "' AND mdp='" + motdepasse + "'";
+}
+// Un identifiant normal :
+console.log(requete("lea", "secret"));
+// Une entrée piégée : l'apostrophe ferme la chaîne, -- met la fin en commentaire
+console.log(requete("admin' --", "peu importe"));</code></pre></div>
+<p>La seconde requête devient <code>... WHERE id='admin' --' AND mdp='...'</code> : tout ce qui suit <code>--</code> est ignoré, le mot de passe n'est plus vérifié. La même idée vaut pour une <b>commande système</b> construite par concaténation : un <code>;</code> et une seconde commande s'exécute. Tu écriras ces deux exploits dans l'atelier (manches *Injection SQL* et *Injection de commande*).</p>
+<h2>4. Faire exécuter son code chez les autres : le XSS</h2>
+<p>Si une application réaffiche une saisie <b>sans la nettoyer</b>, un attaquant y place une balise <code>&lt;script&gt;</code> ou un gestionnaire d'événement. Le code s'exécute alors dans le navigateur de <b>chaque visiteur</b> de la page : vol de session, redirection, actions à leur place.</p>
+<div class="essai" data-langue="js"><pre><code>// La page insère le commentaire tel quel :
+function afficher(commentaire) {
+  return "&lt;article&gt;" + commentaire + "&lt;/article&gt;";
+}
+console.log(afficher("Super article, merci !"));
+console.log(afficher("&lt;img src=x onerror='volerLaSession()'&gt;"));</code></pre></div>
+<p>Le second commentaire introduit une image volontairement invalide : son <code>onerror</code> s'exécute. Dans l'atelier (manche *XSS*), tu composes la charge ; le chapitre suivant montre comment l'échappement la neutralise.</p>
+<h2>5. Contourner, deviner, remonter</h2>
+<p>Trois familles d'attaques que tu pratiqueras aussi, sans « casser » quoi que ce soit — juste en envoyant ce qui n'était pas prévu :</p>
+<ul><li><b>Contrôle d'accès cassé</b> : l'application fait confiance à un paramètre fourni par le client (<code>role=admin</code>, un identifiant de document deviné). L'attaquant le modifie et accède aux données d'autrui. C'est le premier risque de l'<b>OWASP Top 10</b>.</li><li><b>Traversée de répertoire</b> : un nom de fichier contenant <code>../</code> fait sortir du dossier prévu et lire des fichiers système (<code>../../etc/passwd</code>).</li><li><b>Énumération</b> : des identifiants séquentiels (<code>facture?id=1001</code>, <code>1002</code>…) se parcourent en boucle. Si rien ne vérifie le propriétaire, toute la base défile.</li></ul>
+<div class="box"><b>À toi de jouer</b><p>L'<a href="atelier.html">atelier de code attaque / défense</a> propose ces cinq failles. Pour chacune, tu <b>écris l'exploit</b> contre une fonction-jouet vulnérable, puis tu <b>réécris la fonction</b> pour qu'elle résiste. Seul, à deux sur le même appareil, ou en envoyant un défi à un ami.</p></div>
+<div class="box retenir"><b>À retenir</b><p>Pour défendre, il faut penser comme l'attaquant : toute entrée venue du client est hostile. </p><p> Démarche : reconnaissance, cartographie, recherche de failles, exploitation, post-exploitation. </p><p> Cinq failles web à connaître : injection (SQL, commande), XSS, contrôle d'accès cassé, traversée de répertoire, énumération. </p><p> S'entraîner est légal sur ses machines, les labos, les CTF ; attaquer un vrai système sans autorisation est un délit.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cyber.html">labo cybersécurité</a> te fait écrire des protections, casser des chiffres faibles et analyser des programmes. Le <a href="labo-defense.html">labo terminal</a> te fait enquêter et durcir un serveur. Et le <a href="duel.html">duel attaque / défense</a> t'oppose à un autre élève.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "facile",
+  "q": "Quelle est la règle d'or de la sécurité des entrées ?",
+  "type": "qcm",
+  "options": [
+   "Seuls les champs cachés sont sûrs",
+   "Aucune donnée venue du client n'est digne de confiance",
+   "Il faut chiffrer toutes les entrées",
+   "Le JavaScript de la page protège les données"
+  ],
+  "answer": 1,
+  "explication": "Tout ce que le client envoie peut être modifié par un attaquant."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Pourquoi apprendre les techniques d'attaque quand on veut défendre ?",
+  "type": "qcm",
+  "options": [
+   "Ce n'est pas utile à un défenseur",
+   "Pour pirater plus vite",
+   "Pour comprendre comment on sera attaqué et s'en protéger",
+   "Pour gagner de l'argent"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle est la première étape d'une attaque ciblée ?",
+  "type": "qcm",
+  "options": [
+   "Le chiffrement",
+   "La reconnaissance",
+   "L'exploitation",
+   "La post-exploitation"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Dans `id='admin' --`, à quoi sert le `--` en SQL ?",
+  "type": "qcm",
+  "options": [
+   "À fermer la base",
+   "À mettre en commentaire la fin de la requête",
+   "À décrémenter l'identifiant",
+   "À additionner"
+  ],
+  "answer": 1,
+  "explication": "Le reste de la condition, dont le mot de passe, est ignoré."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Pourquoi une injection est-elle possible ?",
+  "type": "qcm",
+  "options": [
+   "La base n'est pas chiffrée",
+   "Le serveur est lent",
+   "Une saisie est collée dans une requête et interprétée comme du code",
+   "Le mot de passe est trop court"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que permet un XSS ?",
+  "type": "qcm",
+  "options": [
+   "Chiffrer les fichiers",
+   "Faire exécuter du code dans le navigateur des visiteurs",
+   "Lire la mémoire du processeur",
+   "Saturer le serveur"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Qu'est-ce qu'un contrôle d'accès cassé ?",
+  "type": "qcm",
+  "options": [
+   "L'application fait confiance à un paramètre (rôle, identifiant) fourni par le client",
+   "Un mot de passe trop faible",
+   "Un certificat expiré",
+   "Un pare-feu mal réglé"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que fait `../` dans un nom de fichier lors d'une traversée de répertoire ?",
+  "type": "qcm",
+  "options": [
+   "Il compresse le fichier",
+   "Il crée un dossier",
+   "Il commente la ligne",
+   "Il remonte d'un dossier et fait sortir du dossier prévu"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Un site affiche `facture?id=1001`. Que tente un attaquant ?",
+  "type": "qcm",
+  "options": [
+   "Saturer la page",
+   "Rien, c'est sûr",
+   "Changer l'identifiant pour voir les factures d'autrui (énumération)",
+   "Chiffrer la facture"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Pourquoi « seul mon JavaScript envoie cette valeur » n'est-il pas une protection ?",
+  "type": "qcm",
+  "options": [
+   "Le JavaScript est chiffré",
+   "L'attaquant envoie ce qu'il veut sans passer par la page",
+   "C'est une protection suffisante",
+   "Le serveur revérifie toujours"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Quel risque arrive en tête de l'OWASP Top 10 des dernières années ?",
+  "type": "qcm",
+  "options": [
+   "Le déni de service",
+   "Le vol de matériel",
+   "Le contrôle d'accès cassé",
+   "Le hameçonnage"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Où est-il légal de s'entraîner à ces attaques ?",
+  "type": "qcm",
+  "options": [
+   "Sur n'importe quel site public",
+   "Sur le site de son lycée",
+   "Sur le Wi-Fi des voisins",
+   "Sur ses propres machines, les labos, les plateformes de CTF"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Trouver une faille sur un vrai site « pour aider » le propriétaire est légal si on le prévient ensuite.",
+  "type": "vf",
+  "answer": false,
+  "explication": "L'accès non autorisé est un délit, même sans intention de nuire et même signalé après."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque faille à l'entrée piégée.",
+  "type": "associer",
+  "paires": [
+   [
+    "injection SQL",
+    "une apostrophe et du SQL"
+   ],
+   [
+    "XSS",
+    "une balise script"
+   ],
+   [
+    "traversée de répertoire",
+    "../../"
+   ],
+   [
+    "contrôle d'accès",
+    "role=admin ajouté"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

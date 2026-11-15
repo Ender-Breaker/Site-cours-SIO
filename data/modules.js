@@ -344,11 +344,12 @@ window.EF_MODULES = [
     icone: "Sec",
     option: "BONUS",
     couleur: "secu",
-    description: "Le cours complet : attaques et protections, hameçonnage, failles web, cryptographie, réseau, durcissement, failles de mémoire, rétro-ingénierie, réponse à incident, test d'intrusion. Avec trois labos, dont un duel attaque / défense à jouer contre un autre élève.",
+    description: "Le cours complet : attaques et protections, hameçonnage, failles web, cryptographie, réseau, durcissement, failles de mémoire, rétro-ingénierie, réponse à incident, test d'intrusion. Avec les équipes rouge et bleue, et quatre labos dont un duel et un atelier de code attaque / défense à jouer à deux.",
     labos: [
       { href: "labo-cyber.html", ico: "Sec", titre: "Labo cybersécurité", court: "Code", texte: "21 missions de code : protéger une application, cryptographie, rétro-ingénierie (crackme, hexadécimal, désobfuscation), analyse de journaux. Vérifiées automatiquement." },
       { href: "labo-defense.html", ico: ">_", titre: "Labo terminal : enquêter et durcir", court: "Terminal", cle: "securite-web-terminal", examTexte: "3 missions au terminal · 15 min", texte: "Dans un terminal Linux simulé : fouiller les journaux après une attaque, repérer un compte suspect, corriger des droits dangereux, protéger des secrets." },
-      { href: "duel.html", ico: "VS", titre: "Duel attaque / défense", court: "Duel", sansExamen: true, bouton: "Lancer un duel", texte: "Un élève compose une attaque, un autre défend le réseau d'une entreprise : choisis tes protections, identifie les incidents, réagis. Seul contre l'ordinateur, à deux sur le même appareil, ou par lien envoyé à un ami." }
+      { href: "duel.html", ico: "VS", titre: "Duel attaque / défense", court: "Duel", sansExamen: true, bouton: "Lancer un duel", texte: "Un élève compose une attaque, un autre défend le réseau d'une entreprise : choisis tes protections, identifie les incidents, réagis. Seul contre l'ordinateur, à deux sur le même appareil, ou par lien envoyé à un ami." },
+      { href: "atelier.html", ico: "</>", titre: "Atelier de code : attaque / défense", court: "Atelier", sansExamen: true, bouton: "Ouvrir l'atelier", texte: "Écris toi-même l'exploit contre un code volontairement vulnérable, puis corrige-le : injection SQL, XSS, contrôle d'accès, traversée de répertoire, injection de commande. En bac à sable, seul ou à deux." }
     ],
     chapitres: [
       { id: "cyber-panorama", titre: "Cybersécurité : les bases, le vocabulaire et la loi", niveau: "facile" },
@@ -365,7 +366,9 @@ window.EF_MODULES = [
       { id: "cyber-reverse-asm", titre: "Rétro-ingénierie : lire de l'assembleur", niveau: "difficile" },
       { id: "cyber-reverse-pratique", titre: "Rétro-ingénierie : mener une analyse", niveau: "difficile" },
       { id: "cyber-forensique", titre: "Cybersécurité : détecter, enquêter et répondre à un incident", niveau: "moyen" },
-      { id: "cyber-pentest", titre: "Cybersécurité : le test d'intrusion et les CTF", niveau: "moyen" }
+      { id: "cyber-pentest", titre: "Cybersécurité : le test d'intrusion et les CTF", niveau: "moyen" },
+      { id: "cyber-offensif", titre: "Rouge : penser comme un attaquant", niveau: "moyen" },
+      { id: "cyber-defensif", titre: "Bleue : coder et défendre", niveau: "moyen" }
     ]
   }
 ];

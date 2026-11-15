@@ -46,6 +46,7 @@ node outils/verif.js essais modules/cpp/cpp-stl.html         # exécute tous les
 node outils/verif.js page modules/git/index.html             # erreurs de script et débordement à 390 px
 node outils/verif-terminal.js modules/securite-web/labo-defense.html   # labo terminal : la solution remplit tous les objectifs, l'état de départ non
 node outils/verif-duel.js                                    # joue le duel dans tous les modes (liens de défi, liens trafiqués, chrono expiré)
+node outils/verif-atelier.js                                 # atelier de code : exploit de référence valide, correctif qui tient et reste utilisable, liens
 ```
 
 Règle : l'identifiant d'une mission ou d'un chapitre existant ne change jamais (la progression des élèves y est attachée).
@@ -55,3 +56,5 @@ Règle : l'identifiant d'une mission ou d'un chapitre existant ne change jamais 
 Dans `modules.py`, `labo=dict(...)` décrit le labo de code généré depuis `labos/<module>.py` (avec `cfg` pour créer la page si elle n'existe pas, `fin` pour l'encadré « Passe à la pratique » des chapitres). `autres_labos=[dict(...)]` ajoute d'autres entrées à la fiche : `href`, `ico`, `titre`, `court`, `texte`, et au besoin `cle` (clé d'évaluation), `examTexte`, `sansExamen=True` (pas d'évaluation pratique), `bouton` (libellé du bouton), `source` (labo terminal à générer). `langue="js"` sur la fiche rend exécutables les blocs ```` ```run ```` des chapitres d'un module qui n'est pas un langage.
 
 Le duel (`modules/securite-web/duel.html`, `assets/duel.js`) est écrit à la main : il n'est pas régénéré.
+
+L'atelier de code (`modules/securite-web/atelier.html`, `assets/atelier.js`) est aussi écrit à la main. Ses manches sont dans le tableau `MANCHES` de `assets/atelier.js` : chaque manche a une source-jouet vulnérable (`cible`), le corps du vérificateur d'attaque (`att`) et d'usage (`use`), une liste d'exploits canoniques, et un correctif d'exemple. Les sources contenant des expressions régulières sont écrites en `String.raw` pour préserver les antislashs.

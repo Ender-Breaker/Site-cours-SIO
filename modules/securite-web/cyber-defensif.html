@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Bleue : coder et défendre — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="securite-web" data-chapter="cyber-defensif">
+
+<!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/securite-web.txt) -->
+<article id="cours">
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<p>L'<b>équipe bleue</b> (*blue team*) construit et défend. Face aux cinq failles du chapitre précédent, elle n'ajoute pas un gadget de sécurité par-dessus : elle <b>écrit le code autrement</b>. Ce chapitre donne les cinq correctifs, puis les principes qui les dépassent. Tu les écriras toi-même dans <a href="atelier.html">l'atelier de code</a>, côté défense.</p>
+<h2>1. La défense en profondeur</h2>
+<p>Aucune protection n'est parfaite : on en <b>empile</b> plusieurs, indépendantes, pour que la chute de l'une n'ouvre pas tout. Autour d'un formulaire : le client aide l'utilisateur (confort), mais <b>le serveur revérifie tout</b> (sécurité) ; la base n'a que les droits utiles ; les secrets sont dans un coffre ; les accès sont journalisés. Si le filtre d'entrée est contourné, la requête préparée tient encore ; si elle tombe, les droits limités réduisent les dégâts.</p>
+<h2>2. Les cinq correctifs</h2>
+<p><b>Injection SQL → la requête préparée.</b> On ne fabrique plus de texte de requête. On envoie une requête à trous et les valeurs <b>à part</b> : elles ne peuvent plus être prises pour du code.</p>
+<div class="essai" data-langue="js"><pre><code>// Au lieu de coller les valeurs, on les compare (idée de la requête préparée)
+var MEMBRES = [{ id: "admin", mdp: "secret-admin" }, { id: "lea", mdp: "lea2026" }];
+function connexion(identifiant, motdepasse) {
+  for (var i = 0; i &lt; MEMBRES.length; i++)
+    if (identifiant === MEMBRES[i].id &amp;&amp; motdepasse === MEMBRES[i].mdp) return MEMBRES[i].id;
+  return null;
+}
+console.log(connexion("lea", "lea2026"));        // lea
+console.log(connexion("admin' --", "x"));        // null : l'injection ne veut plus rien dire</code></pre></div>
+<p><b>XSS → l'encodage de sortie.</b> On échappe les caractères spéciaux <b>au moment de l'affichage</b> : <code>&lt;</code> devient <code>&amp;lt;</code>, etc. La balise devient du texte inoffensif.</p>
+<div class="essai" data-langue="js"><pre><code>function echapper(s) {
+  return String(s)
+    .replace(/&amp;/g, "&amp;amp;").replace(/&lt;/g, "&amp;lt;").replace(/&gt;/g, "&amp;gt;")
+    .replace(/"/g, "&amp;quot;").replace(/'/g, "&amp;#39;");
+}
+console.log(echapper("&lt;img src=x onerror=alert(1)&gt;"));
+console.log(echapper("Bonjour Léa"));</code></pre></div>
+<p><b>Contrôle d'accès → la vérification côté serveur.</b> On ne croit jamais un rôle ou un identifiant envoyé par le client. L'identité vient du <b>jeton de session</b> ; le rôle, d'une table <b>côté serveur</b> ; et on vérifie que la ressource demandée appartient bien à l'utilisateur.</p>
+<p><b>Traversée de répertoire → la liste blanche.</b> On refuse tout nom contenant <code>/</code>, <code>\</code> ou <code>..</code>, ou mieux, on n'accepte qu'une liste de noms connus.</p>
+<div class="essai" data-langue="js"><pre><code>function nomSur(nom) {
+  if (/[\/\\]/.test(nom) || nom.indexOf("..") &gt;= 0) return null;
+  return nom;
+}
+console.log(nomSur("photo.png"));            // photo.png
+console.log(nomSur("../../etc/passwd"));     // null</code></pre></div>
+<p><b>Injection de commande → ne pas construire de commande.</b> On évite le shell ; si c'est impossible, on n'accepte qu'une liste blanche de caractères et on passe les arguments séparément, jamais dans une chaîne concaténée.</p>
+<h2>3. Valider : liste blanche, pas liste noire</h2>
+<p>Interdire « les mauvais caractères » (liste noire) échoue toujours : on en oublie, l'attaquant trouve l'oubli. <b>N'autoriser que ce qui est prévu</b> (liste blanche) est bien plus sûr : un entier est un entier, un nom de fichier ne contient que des lettres et des chiffres, un tri ne peut valoir que <code>nom</code>, <code>prix</code> ou <code>date</code>.</p>
+<div class="essai" data-langue="js"><pre><code>function triValide(tri) {
+  var autorises = ["nom", "prix", "date"];
+  return autorises.indexOf(tri) &gt;= 0 ? tri : "nom";   // sinon, valeur par défaut
+}
+console.log(triValide("prix"));                 // prix
+console.log(triValide("prix; DROP TABLE t"));   // nom : tout ce qui n'est pas prévu est rejeté</code></pre></div>
+<h2>4. Détecter et se préparer</h2>
+<p>Empêcher ne suffit pas : il faut <b>voir</b> quand ça rate. On <b>journalise</b> les événements de sécurité (connexions, échecs, accès refusés), on centralise et on alerte (SIEM), on surveille les comportements anormaux. Et on se prépare à l'incident <b>avant</b> qu'il arrive : sauvegardes hors ligne testées, procédure de réponse écrite, rôles connus. Une faille finira par passer ; ce qui distingue une entreprise, c'est la vitesse à laquelle elle la détecte et y répond.</p>
+<div class="box"><b>À toi de défendre</b><p>Dans l'<a href="atelier.html">atelier de code</a>, tu reçois une attaque qui marche, et tu dois <b>réécrire la fonction</b> pour qu'elle la bloque — ainsi que ses variantes — sans casser l'usage normal. C'est exactement le geste du développeur sécurisé.</p></div>
+<div class="box defi"><b>Défi : échapper le HTML</b><p>Neutralise une saisie avant de l'afficher.</p><a class="defi-go" href="labo-cyber.html#m=cy-echapper">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : une liste blanche</b><p>N'accepter que les valeurs prévues.</p><a class="defi-go" href="labo-cyber.html#m=cy-liste-blanche">Relever le défi dans le labo →</a></div>
+<div class="box defi"><b>Défi : nettoyer un nom de fichier</b><p>Empêche la traversée de répertoire.</p><a class="defi-go" href="labo-cyber.html#m=cy-nomfichier">Relever le défi dans le labo →</a></div>
+<div class="box retenir"><b>À retenir</b><p>Défense en profondeur : plusieurs couches indépendantes ; le serveur revérifie toujours. </p><p> Cinq correctifs : requête préparée (SQL), encodage de sortie (XSS), vérification côté serveur (accès), liste blanche (chemins, caractères), pas de commande concaténée (shell). </p><p> Valider par <b>liste blanche</b>, pas par liste noire. </p><p> Journaliser, détecter, se préparer à l'incident.</p></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="labo-cyber.html">labo cybersécurité</a> te fait écrire des protections, casser des chiffres faibles et analyser des programmes. Le <a href="labo-defense.html">labo terminal</a> te fait enquêter et durcir un serveur. Et le <a href="duel.html">duel attaque / défense</a> t'oppose à un autre élève.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "niveau": "facile",
+  "q": "Qu'est-ce que la défense en profondeur ?",
+  "type": "qcm",
+  "options": [
+   "Chiffrer le disque",
+   "Empiler plusieurs protections indépendantes",
+   "Cacher le serveur",
+   "Choisir le meilleur antivirus"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Quelle est la vraie protection contre l'injection SQL ?",
+  "type": "qcm",
+  "options": [
+   "Un mot de passe plus long",
+   "Un pare-feu",
+   "La requête préparée (valeurs envoyées séparément)",
+   "Interdire le mot « SELECT »"
+  ],
+  "answer": 2,
+  "explication": "Filtrer des mots se contourne ; la requête préparée empêche l'interprétation."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment se protège-t-on du XSS ?",
+  "type": "qcm",
+  "options": [
+   "En échappant les caractères spéciaux à l'affichage",
+   "En changeant de navigateur",
+   "En chiffrant la page",
+   "En interdisant les commentaires"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Où doit se décider le rôle d'un utilisateur ?",
+  "type": "qcm",
+  "options": [
+   "Dans un cookie non signé",
+   "Dans le JavaScript de la page",
+   "Côté serveur, à partir de la session",
+   "Dans un paramètre envoyé par le client"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment empêche-t-on une traversée de répertoire ?",
+  "type": "qcm",
+  "options": [
+   "En compressant le fichier",
+   "En renommant le fichier en .jpg",
+   "En refusant les noms contenant / \\ ou ..",
+   "En cachant le dossier"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Pourquoi une liste blanche vaut-elle mieux qu'une liste noire ?",
+  "type": "qcm",
+  "options": [
+   "Elle chiffre les données",
+   "Elle est plus rapide",
+   "Elle est plus courte à écrire",
+   "On n'autorise que le prévu, impossible d'oublier un cas"
+  ],
+  "answer": 3,
+  "explication": "Une liste noire oublie toujours un cas que l'attaquant trouvera."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que faut-il faire des entrées validées par le JavaScript de la page ?",
+  "type": "qcm",
+  "options": [
+   "Les revalider côté serveur",
+   "Les chiffrer",
+   "Les journaliser seulement",
+   "Leur faire confiance"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Comment éviter une injection de commande ?",
+  "type": "qcm",
+  "options": [
+   "Chiffrer la sortie",
+   "Ne pas construire de commande par concaténation, filtrer par liste blanche",
+   "Interdire le mot « rm »",
+   "Lancer la commande en root"
+  ],
+  "answer": 1,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "À quoi sert la journalisation des événements de sécurité ?",
+  "type": "qcm",
+  "options": [
+   "À chiffrer les accès",
+   "À remplacer les sauvegardes",
+   "À accélérer le site",
+   "À détecter et enquêter quand une attaque passe"
+  ],
+  "answer": 3,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Que centralise un SIEM ?",
+  "type": "qcm",
+  "options": [
+   "Les sauvegardes",
+   "Les mots de passe",
+   "Les journaux, pour les corréler et alerter",
+   "Les certificats"
+  ],
+  "answer": 2,
+  "explication": ""
+ },
+ {
+  "niveau": "moyen",
+  "q": "Pourquoi le client peut-il aider sans sécuriser ?",
+  "type": "qcm",
+  "options": [
+   "Il améliore le confort, mais l'attaquant le contourne : le serveur décide",
+   "Il bloque les pirates",
+   "Il est toujours à jour",
+   "Il chiffre tout"
+  ],
+  "answer": 0,
+  "explication": ""
+ },
+ {
+  "niveau": "difficile",
+  "q": "Une fonction d'affichage échappe `<` et `>` mais pas les guillemets. Est-ce sûr ?",
+  "type": "qcm",
+  "options": [
+   "Non, il faut chiffrer la page",
+   "Non : une valeur dans un attribut peut encore être détournée",
+   "Oui, c'est suffisant",
+   "Oui, les guillemets sont inoffensifs"
+  ],
+  "answer": 1,
+  "explication": "Il faut aussi échapper \" et ' selon le contexte d'insertion."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Bloquer précisément la chaîne d'attaque reçue suffit à corriger une faille.",
+  "type": "vf",
+  "answer": false,
+  "explication": "Il faut bloquer la classe d'attaque, pas une seule chaîne : l'attaquant en trouve une variante."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Le serveur doit revérifier les données même si la page les a déjà validées.",
+  "type": "vf",
+  "answer": true,
+  "explication": "Le contrôle côté client est pour le confort ; seul le serveur protège."
+ },
+ {
+  "niveau": "moyen",
+  "q": "Associe chaque faille à son correctif.",
+  "type": "associer",
+  "paires": [
+   [
+    "injection SQL",
+    "requête préparée"
+   ],
+   [
+    "XSS",
+    "encodage de sortie"
+   ],
+   [
+    "contrôle d'accès",
+    "vérification côté serveur"
+   ],
+   [
+    "traversée de répertoire",
+    "liste blanche de noms"
+   ]
+  ],
+  "explication": ""
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/jeu.js"></script>
+<script src="../../assets/essai.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

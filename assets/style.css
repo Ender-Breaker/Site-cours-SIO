@@ -970,3 +970,38 @@ html.compte-ouvert { overflow: hidden; }
 .duel-choix .btn { flex-wrap: wrap; }
 .duel-choix .btn.ok::after { flex-basis: 100%; margin-left: 0; padding-left: 0; }
 .duel-verdict a, .duel-ligne a, .duel .lb-small a { font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
+
+/* ============ Atelier de code : attaque / défense (module Cybersécurité) ============ */
+.atelier { --rouge: var(--ko); --rouge-clair: var(--ko-clair); --bleu: var(--cobalt); --bleu-clair: #dfe3fb; }
+.at-h { font-size: clamp(1.953rem, 7vw, 3.052rem); line-height: 1; margin: var(--s2) 0; outline: none; }
+.atelier .page-head .ico { font-family: var(--mono); font-weight: 700; font-size: 1.5rem; }
+.at-manches { display: grid; grid-template-columns: 1fr; gap: var(--s3); margin: var(--s4) 0 var(--s3); }
+.at-manche { padding: var(--s3); border: var(--trait); border-radius: var(--r2); background: var(--surface); box-shadow: var(--ombre-2); }
+.at-manche.faite { background: var(--ok-clair); }
+.at-mtete { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--s1); }
+.at-mtete h2 { font-size: var(--t2); line-height: 1.05; }
+.at-manche p { margin: var(--s1) 0 var(--s2); max-width: 60ch; }
+.at-manche .btns { padding-left: 0; }
+.at-ok-petit { margin: var(--s1) 0 0; font-size: .85rem; font-weight: 700; color: var(--ok); }
+.at-bandeau { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s1) var(--s2); margin: var(--s2) 0 var(--s3); padding: var(--s2) var(--s3); border: var(--trait); border-radius: var(--r1); box-shadow: var(--ombre-1); }
+.at-bandeau p { margin: 0; max-width: 64ch; }
+.at-bandeau.rouge { background: var(--rouge-clair); }
+.at-bandeau.bleu { background: var(--bleu-clair); }
+.at-label { margin: var(--s3) 0 6px; font-weight: 700; font-size: .95rem; }
+.at-cible { margin: 0 0 var(--s2); padding: var(--s2); border: var(--trait); border-radius: var(--r1); background: var(--encre); color: #f1ede2; font: .82rem/1.55 var(--mono); overflow-x: auto; box-shadow: var(--ombre-1); white-space: pre; }
+.at-cible.rouge { background: #3a1420; color: #ffd9e0; }
+.at-cible code { font: inherit; color: inherit; background: none; padding: 0; }
+.at-ed { margin: 0 0 var(--s2); }
+.at-code { display: block; width: 100%; min-height: 230px; padding: 12px 14px; border: var(--trait); border-radius: var(--r1); resize: vertical; background: #16182b; color: #f1ede2; font: .85rem/1.6 var(--mono); tab-size: 2; box-shadow: var(--ombre-1); }
+.at-code:focus { outline: 3px solid var(--safran); outline-offset: 1px; }
+.at-code::selection { background: #3d4380; }
+.at-rapport { margin: var(--s2) 0; }
+.at-verdict { margin: var(--s2) 0 var(--s6); }
+.at-note { padding: var(--s2) var(--s3); border: var(--trait); border-radius: var(--r1); box-shadow: var(--ombre-1); font-weight: 500; }
+.at-note .btns { margin-top: var(--s2); padding-left: 0; }
+.at-note.ok { background: var(--ok-clair); }
+.at-note.ko { background: var(--ko-clair); }
+.at-note.attente { background: var(--surface-2); }
+.atelier .btns { padding-left: 0; }
+@media (min-width: 720px) { .at-manches { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 480px) { .at-cible { font-size: 12px; } .at-code { font-size: 15px; } }

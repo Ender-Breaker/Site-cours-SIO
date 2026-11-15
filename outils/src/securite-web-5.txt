@@ -1,0 +1,175 @@
+=== cyber-offensif | Rouge : penser comme un attaquant | m
+Pour défendre une application, il faut savoir comment on l'attaque. C'est le rôle de l'**équipe rouge** (*red team*) : se mettre à la place de l'adversaire, chercher les failles avant lui, et prouver qu'elles sont exploitables. Ce chapitre regarde cinq failles classiques du web **du côté de l'attaquant** ; le chapitre suivant les corrige. Tu les mettras en pratique dans [l'atelier de code attaque / défense](atelier.html), où tu écris toi-même l'exploit.
+
+!attention On s'exerce, on n'attaque pas | Tout ce qui suit se pratique **uniquement** sur tes propres machines, dans les labos et l'atelier de ce site, ou sur des plateformes prévues pour cela (Root-Me, TryHackMe, les CTF). Reproduire une de ces attaques sur un système qui ne t'appartient pas, sans autorisation écrite, est un délit (article 323-1 du Code pénal), même « pour tester » et même sans rien casser.
+
+## 1. L'état d'esprit : toute entrée est hostile
+
+Un attaquant ne voit pas un formulaire comme l'utilisateur. Là où tu lis « champ identifiant », il lit « endroit où je peux glisser ce que je veux ». La question qu'il se pose en permanence : *que se passe-t-il si j'envoie autre chose que ce qui est prévu ?* Un nom qui contient une apostrophe, un prix négatif, un fichier `.php` déguisé en image, un paramètre `role=admin` ajouté à la main.
+
+La **règle d'or** qui en découle, et qui guide toute la défense : **aucune donnée venue du client n'est digne de confiance**. Ni les champs d'un formulaire, ni l'adresse, ni les en-têtes, ni ce que « seul le JavaScript de la page » est censé envoyer.
+
+## 2. La démarche d'une attaque ciblée
+
+Une attaque sérieuse suit des étapes, qu'on retrouve dans un test d'intrusion :
+
+| Étape | Ce que fait l'attaquant |
+| **Reconnaissance** | rassembler l'information publique (OSINT), repérer les technologies, les versions, les points d'entrée |
+| **Cartographie** | lister les pages, les paramètres, les formulaires, les API |
+| **Recherche de failles** | tester chaque entrée : injection, droits mal vérifiés, fichiers accessibles |
+| **Exploitation** | transformer une faille en accès réel (lire une base, prendre un compte) |
+| **Post-exploitation** | élever ses privilèges, se maintenir (persistance), atteindre d'autres machines (rebond) |
+
+Le défenseur casse cette chaîne le plus tôt possible : moins d'information exposée, moins de surface, des entrées contrôlées.
+
+## 3. Injecter du code dans une requête
+
+La faille la plus connue. Quand une application **colle** une saisie dans une requête (SQL, mais aussi une commande système), l'attaquant y glisse non pas une donnée, mais de la syntaxe.
+
+```run
+// Côté serveur, la requête est fabriquée par concaténation :
+function requete(identifiant, motdepasse) {
+  return "SELECT * FROM membres WHERE id='" + identifiant + "' AND mdp='" + motdepasse + "'";
+}
+// Un identifiant normal :
+console.log(requete("lea", "secret"));
+// Une entrée piégée : l'apostrophe ferme la chaîne, -- met la fin en commentaire
+console.log(requete("admin' --", "peu importe"));
+```
+
+La seconde requête devient `... WHERE id='admin' --' AND mdp='...'` : tout ce qui suit `--` est ignoré, le mot de passe n'est plus vérifié. La même idée vaut pour une **commande système** construite par concaténation : un `;` et une seconde commande s'exécute. Tu écriras ces deux exploits dans l'atelier (manches *Injection SQL* et *Injection de commande*).
+
+## 4. Faire exécuter son code chez les autres : le XSS
+
+Si une application réaffiche une saisie **sans la nettoyer**, un attaquant y place une balise `<script>` ou un gestionnaire d'événement. Le code s'exécute alors dans le navigateur de **chaque visiteur** de la page : vol de session, redirection, actions à leur place.
+
+```run
+// La page insère le commentaire tel quel :
+function afficher(commentaire) {
+  return "<article>" + commentaire + "</article>";
+}
+console.log(afficher("Super article, merci !"));
+console.log(afficher("<img src=x onerror='volerLaSession()'>"));
+```
+
+Le second commentaire introduit une image volontairement invalide : son `onerror` s'exécute. Dans l'atelier (manche *XSS*), tu composes la charge ; le chapitre suivant montre comment l'échappement la neutralise.
+
+## 5. Contourner, deviner, remonter
+
+Trois familles d'attaques que tu pratiqueras aussi, sans « casser » quoi que ce soit — juste en envoyant ce qui n'était pas prévu :
+
+- **Contrôle d'accès cassé** : l'application fait confiance à un paramètre fourni par le client (`role=admin`, un identifiant de document deviné). L'attaquant le modifie et accède aux données d'autrui. C'est le premier risque de l'**OWASP Top 10**.
+- **Traversée de répertoire** : un nom de fichier contenant `../` fait sortir du dossier prévu et lire des fichiers système (`../../etc/passwd`).
+- **Énumération** : des identifiants séquentiels (`facture?id=1001`, `1002`…) se parcourent en boucle. Si rien ne vérifie le propriétaire, toute la base défile.
+
+!info À toi de jouer | L'[atelier de code attaque / défense](atelier.html) propose ces cinq failles. Pour chacune, tu **écris l'exploit** contre une fonction-jouet vulnérable, puis tu **réécris la fonction** pour qu'elle résiste. Seul, à deux sur le même appareil, ou en envoyant un défi à un ami.
+
+!retenir À retenir | Pour défendre, il faut penser comme l'attaquant : toute entrée venue du client est hostile. ¶ Démarche : reconnaissance, cartographie, recherche de failles, exploitation, post-exploitation. ¶ Cinq failles web à connaître : injection (SQL, commande), XSS, contrôle d'accès cassé, traversée de répertoire, énumération. ¶ S'entraîner est légal sur ses machines, les labos, les CTF ; attaquer un vrai système sans autorisation est un délit.
+
+--- exos
+Q¤f¤Quelle est la règle d'or de la sécurité des entrées ?¤Aucune donnée venue du client n'est digne de confiance;;Il faut chiffrer toutes les entrées;;Seuls les champs cachés sont sûrs;;Le JavaScript de la page protège les données¤Tout ce que le client envoie peut être modifié par un attaquant.
+Q¤m¤Pourquoi apprendre les techniques d'attaque quand on veut défendre ?¤Pour comprendre comment on sera attaqué et s'en protéger;;Pour pirater plus vite;;Ce n'est pas utile à un défenseur;;Pour gagner de l'argent¤
+Q¤m¤Quelle est la première étape d'une attaque ciblée ?¤La reconnaissance;;L'exploitation;;La post-exploitation;;Le chiffrement¤
+Q¤m¤Dans `id='admin' --`, à quoi sert le `--` en SQL ?¤À mettre en commentaire la fin de la requête;;À additionner;;À fermer la base;;À décrémenter l'identifiant¤Le reste de la condition, dont le mot de passe, est ignoré.
+Q¤m¤Pourquoi une injection est-elle possible ?¤Une saisie est collée dans une requête et interprétée comme du code;;Le mot de passe est trop court;;Le serveur est lent;;La base n'est pas chiffrée¤
+Q¤m¤Que permet un XSS ?¤Faire exécuter du code dans le navigateur des visiteurs;;Saturer le serveur;;Chiffrer les fichiers;;Lire la mémoire du processeur¤
+Q¤m¤Qu'est-ce qu'un contrôle d'accès cassé ?¤L'application fait confiance à un paramètre (rôle, identifiant) fourni par le client;;Un mot de passe trop faible;;Un pare-feu mal réglé;;Un certificat expiré¤
+Q¤m¤Que fait `../` dans un nom de fichier lors d'une traversée de répertoire ?¤Il remonte d'un dossier et fait sortir du dossier prévu;;Il crée un dossier;;Il compresse le fichier;;Il commente la ligne¤
+Q¤m¤Un site affiche `facture?id=1001`. Que tente un attaquant ?¤Changer l'identifiant pour voir les factures d'autrui (énumération);;Rien, c'est sûr;;Saturer la page;;Chiffrer la facture¤
+Q¤m¤Pourquoi « seul mon JavaScript envoie cette valeur » n'est-il pas une protection ?¤L'attaquant envoie ce qu'il veut sans passer par la page;;Le JavaScript est chiffré;;Le serveur revérifie toujours;;C'est une protection suffisante¤
+Q¤d¤Quel risque arrive en tête de l'OWASP Top 10 des dernières années ?¤Le contrôle d'accès cassé;;Le déni de service;;Le vol de matériel;;Le hameçonnage¤
+Q¤m¤Où est-il légal de s'entraîner à ces attaques ?¤Sur ses propres machines, les labos, les plateformes de CTF;;Sur le site de son lycée;;Sur n'importe quel site public;;Sur le Wi-Fi des voisins¤
+V¤m¤Trouver une faille sur un vrai site « pour aider » le propriétaire est légal si on le prévient ensuite.¤F¤L'accès non autorisé est un délit, même sans intention de nuire et même signalé après.
+A¤m¤Associe chaque faille à l'entrée piégée.¤injection SQL=>une apostrophe et du SQL;;XSS=>une balise script;;traversée de répertoire=>../../;;contrôle d'accès=>role=admin ajouté¤
+
+=== cyber-defensif | Bleue : coder et défendre | m
+L'**équipe bleue** (*blue team*) construit et défend. Face aux cinq failles du chapitre précédent, elle n'ajoute pas un gadget de sécurité par-dessus : elle **écrit le code autrement**. Ce chapitre donne les cinq correctifs, puis les principes qui les dépassent. Tu les écriras toi-même dans [l'atelier de code](atelier.html), côté défense.
+
+## 1. La défense en profondeur
+
+Aucune protection n'est parfaite : on en **empile** plusieurs, indépendantes, pour que la chute de l'une n'ouvre pas tout. Autour d'un formulaire : le client aide l'utilisateur (confort), mais **le serveur revérifie tout** (sécurité) ; la base n'a que les droits utiles ; les secrets sont dans un coffre ; les accès sont journalisés. Si le filtre d'entrée est contourné, la requête préparée tient encore ; si elle tombe, les droits limités réduisent les dégâts.
+
+## 2. Les cinq correctifs
+
+**Injection SQL → la requête préparée.** On ne fabrique plus de texte de requête. On envoie une requête à trous et les valeurs **à part** : elles ne peuvent plus être prises pour du code.
+
+```run
+// Au lieu de coller les valeurs, on les compare (idée de la requête préparée)
+var MEMBRES = [{ id: "admin", mdp: "secret-admin" }, { id: "lea", mdp: "lea2026" }];
+function connexion(identifiant, motdepasse) {
+  for (var i = 0; i < MEMBRES.length; i++)
+    if (identifiant === MEMBRES[i].id && motdepasse === MEMBRES[i].mdp) return MEMBRES[i].id;
+  return null;
+}
+console.log(connexion("lea", "lea2026"));        // lea
+console.log(connexion("admin' --", "x"));        // null : l'injection ne veut plus rien dire
+```
+
+**XSS → l'encodage de sortie.** On échappe les caractères spéciaux **au moment de l'affichage** : `<` devient `&lt;`, etc. La balise devient du texte inoffensif.
+
+```run
+function echapper(s) {
+  return String(s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+console.log(echapper("<img src=x onerror=alert(1)>"));
+console.log(echapper("Bonjour Léa"));
+```
+
+**Contrôle d'accès → la vérification côté serveur.** On ne croit jamais un rôle ou un identifiant envoyé par le client. L'identité vient du **jeton de session** ; le rôle, d'une table **côté serveur** ; et on vérifie que la ressource demandée appartient bien à l'utilisateur.
+
+**Traversée de répertoire → la liste blanche.** On refuse tout nom contenant `/`, `\` ou `..`, ou mieux, on n'accepte qu'une liste de noms connus.
+
+```run
+function nomSur(nom) {
+  if (/[\/\\]/.test(nom) || nom.indexOf("..") >= 0) return null;
+  return nom;
+}
+console.log(nomSur("photo.png"));            // photo.png
+console.log(nomSur("../../etc/passwd"));     // null
+```
+
+**Injection de commande → ne pas construire de commande.** On évite le shell ; si c'est impossible, on n'accepte qu'une liste blanche de caractères et on passe les arguments séparément, jamais dans une chaîne concaténée.
+
+## 3. Valider : liste blanche, pas liste noire
+
+Interdire « les mauvais caractères » (liste noire) échoue toujours : on en oublie, l'attaquant trouve l'oubli. **N'autoriser que ce qui est prévu** (liste blanche) est bien plus sûr : un entier est un entier, un nom de fichier ne contient que des lettres et des chiffres, un tri ne peut valoir que `nom`, `prix` ou `date`.
+
+```run
+function triValide(tri) {
+  var autorises = ["nom", "prix", "date"];
+  return autorises.indexOf(tri) >= 0 ? tri : "nom";   // sinon, valeur par défaut
+}
+console.log(triValide("prix"));                 // prix
+console.log(triValide("prix; DROP TABLE t"));   // nom : tout ce qui n'est pas prévu est rejeté
+```
+
+## 4. Détecter et se préparer
+
+Empêcher ne suffit pas : il faut **voir** quand ça rate. On **journalise** les événements de sécurité (connexions, échecs, accès refusés), on centralise et on alerte (SIEM), on surveille les comportements anormaux. Et on se prépare à l'incident **avant** qu'il arrive : sauvegardes hors ligne testées, procédure de réponse écrite, rôles connus. Une faille finira par passer ; ce qui distingue une entreprise, c'est la vitesse à laquelle elle la détecte et y répond.
+
+!info À toi de défendre | Dans l'[atelier de code](atelier.html), tu reçois une attaque qui marche, et tu dois **réécrire la fonction** pour qu'elle la bloque — ainsi que ses variantes — sans casser l'usage normal. C'est exactement le geste du développeur sécurisé.
+
+!defi Défi : échapper le HTML | Neutralise une saisie avant de l'afficher. | cy-echapper
+!defi Défi : une liste blanche | N'accepter que les valeurs prévues. | cy-liste-blanche
+!defi Défi : nettoyer un nom de fichier | Empêche la traversée de répertoire. | cy-nomfichier
+
+!retenir À retenir | Défense en profondeur : plusieurs couches indépendantes ; le serveur revérifie toujours. ¶ Cinq correctifs : requête préparée (SQL), encodage de sortie (XSS), vérification côté serveur (accès), liste blanche (chemins, caractères), pas de commande concaténée (shell). ¶ Valider par **liste blanche**, pas par liste noire. ¶ Journaliser, détecter, se préparer à l'incident.
+
+--- exos
+Q¤f¤Qu'est-ce que la défense en profondeur ?¤Empiler plusieurs protections indépendantes;;Choisir le meilleur antivirus;;Chiffrer le disque;;Cacher le serveur¤
+Q¤m¤Quelle est la vraie protection contre l'injection SQL ?¤La requête préparée (valeurs envoyées séparément);;Interdire le mot « SELECT »;;Un mot de passe plus long;;Un pare-feu¤Filtrer des mots se contourne ; la requête préparée empêche l'interprétation.
+Q¤m¤Comment se protège-t-on du XSS ?¤En échappant les caractères spéciaux à l'affichage;;En interdisant les commentaires;;En chiffrant la page;;En changeant de navigateur¤
+Q¤m¤Où doit se décider le rôle d'un utilisateur ?¤Côté serveur, à partir de la session;;Dans un paramètre envoyé par le client;;Dans le JavaScript de la page;;Dans un cookie non signé¤
+Q¤m¤Comment empêche-t-on une traversée de répertoire ?¤En refusant les noms contenant / \ ou ..;;En renommant le fichier en .jpg;;En cachant le dossier;;En compressant le fichier¤
+Q¤m¤Pourquoi une liste blanche vaut-elle mieux qu'une liste noire ?¤On n'autorise que le prévu, impossible d'oublier un cas;;Elle est plus rapide;;Elle est plus courte à écrire;;Elle chiffre les données¤Une liste noire oublie toujours un cas que l'attaquant trouvera.
+Q¤m¤Que faut-il faire des entrées validées par le JavaScript de la page ?¤Les revalider côté serveur;;Leur faire confiance;;Les chiffrer;;Les journaliser seulement¤
+Q¤m¤Comment éviter une injection de commande ?¤Ne pas construire de commande par concaténation, filtrer par liste blanche;;Interdire le mot « rm »;;Lancer la commande en root;;Chiffrer la sortie¤
+Q¤m¤À quoi sert la journalisation des événements de sécurité ?¤À détecter et enquêter quand une attaque passe;;À accélérer le site;;À remplacer les sauvegardes;;À chiffrer les accès¤
+Q¤m¤Que centralise un SIEM ?¤Les journaux, pour les corréler et alerter;;Les mots de passe;;Les sauvegardes;;Les certificats¤
+Q¤m¤Pourquoi le client peut-il aider sans sécuriser ?¤Il améliore le confort, mais l'attaquant le contourne : le serveur décide;;Il chiffre tout;;Il est toujours à jour;;Il bloque les pirates¤
+Q¤d¤Une fonction d'affichage échappe `<` et `>` mais pas les guillemets. Est-ce sûr ?¤Non : une valeur dans un attribut peut encore être détournée;;Oui, c'est suffisant;;Oui, les guillemets sont inoffensifs;;Non, il faut chiffrer la page¤Il faut aussi échapper " et ' selon le contexte d'insertion.
+V¤m¤Bloquer précisément la chaîne d'attaque reçue suffit à corriger une faille.¤F¤Il faut bloquer la classe d'attaque, pas une seule chaîne : l'attaquant en trouve une variante.
+V¤m¤Le serveur doit revérifier les données même si la page les a déjà validées.¤V¤Le contrôle côté client est pour le confort ; seul le serveur protège.
+A¤m¤Associe chaque faille à son correctif.¤injection SQL=>requête préparée;;XSS=>encodage de sortie;;contrôle d'accès=>vérification côté serveur;;traversée de répertoire=>liste blanche de noms¤

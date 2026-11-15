@@ -41,7 +41,7 @@ MODULES = {
         description="Emballer et déployer une application : images, conteneurs, volumes, Dockerfile, et une pile web complète avec Docker Compose."),
     "securite-web": dict(
         titre="Cybersécurité", sousTitre="Bonus · SLAM, SISR et bloc 3 · attaquer pour mieux défendre", icone="Sec", couleur="secu", textuel=True, langue="js",
-        description="Le cours complet : attaques et protections, hameçonnage, failles web, cryptographie, réseau, durcissement, failles de mémoire, rétro-ingénierie, réponse à incident, test d'intrusion. Avec trois labos, dont un duel attaque / défense à jouer contre un autre élève.",
+        description="Le cours complet : attaques et protections, hameçonnage, failles web, cryptographie, réseau, durcissement, failles de mémoire, rétro-ingénierie, réponse à incident, test d'intrusion. Avec les équipes rouge et bleue, et quatre labos dont un duel et un atelier de code attaque / défense à jouer à deux.",
         labo=dict(href="labo-cyber.html", titre="Labo cybersécurité", court="Code",
                   fin='Le <a href="labo-cyber.html">labo cybersécurité</a> te fait écrire des protections, casser des chiffres faibles et analyser des programmes. Le <a href="labo-defense.html">labo terminal</a> te fait enquêter et durcir un serveur. Et le <a href="duel.html">duel attaque / défense</a> t\'oppose à un autre élève.',
                   texte="{n} missions de code : protéger une application, cryptographie, rétro-ingénierie (crackme, hexadécimal, désobfuscation), analyse de journaux. Vérifiées automatiquement.",
@@ -55,5 +55,7 @@ MODULES = {
                  texte="Dans un terminal Linux simulé : fouiller les journaux après une attaque, repérer un compte suspect, corriger des droits dangereux, protéger des secrets."),
             dict(href="duel.html", ico="VS", titre="Duel attaque / défense", court="Duel", sansExamen=True, bouton="Lancer un duel",
                  texte="Un élève compose une attaque, un autre défend le réseau d'une entreprise : choisis tes protections, identifie les incidents, réagis. Seul contre l'ordinateur, à deux sur le même appareil, ou par lien envoyé à un ami."),
+            dict(href="atelier.html", ico="</>", titre="Atelier de code : attaque / défense", court="Atelier", sansExamen=True, bouton="Ouvrir l'atelier",
+                 texte="Écris toi-même l'exploit contre un code volontairement vulnérable, puis corrige-le : injection SQL, XSS, contrôle d'accès, traversée de répertoire, injection de commande. En bac à sable, seul ou à deux."),
         ]),
 }
