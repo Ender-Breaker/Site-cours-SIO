@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>TP SQL : table des calories — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+<style>
+#cours .tp-corr { padding: var(--s2) var(--s3) var(--s3); }
+#cours .tp-n { font-size: .85rem; color: var(--discret); margin-top: 4px; }
+</style>
+</head>
+<body data-module="bloc1" data-chapter="sql-tp-calories">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+
+<p>Le site tabledescalories.com propose une table des calories collaborative : chacun peut consulter les fiches, ajouter des aliments ou corriger une valeur fausse. Ce TP en reprend un extrait de 66 aliments pour s'entraîner aux requêtes de recherche et de modification.</p>
+<div class="box retenir"><b>Pour pratiquer</b><p>Les 17 questions sont des missions du <a href="labo-sql-tp.html">labo TP SQL</a>, vérifiées automatiquement. Pour MySQL : <a href="fichiers/CreCalorie.sql" download>CreCalorie.sql</a> (accents réparés : le script d'origine les avait perdus).</p></div>
+
+<h2>1. La table CALORIE</h2>
+<p><code>CALORIE(CatAl, <u>NomAl</u>, Cal, Prot, Glu, Lip)</code></p>
+<ul><li><b>CatAl</b> : catégorie d'aliment, champ <b>facultatif</b> (peut être <code>NULL</code>) ;</li>
+<li><b>NomAl</b> : nom de l'aliment, <b>clé primaire</b> ;</li>
+<li><b>Cal</b> : nombre de kilocalories ;</li>
+<li><b>Prot</b>, <b>Glu</b>, <b>Lip</b> : quantités de protides, glucides et lipides (g).</li></ul>
+<p>Le script crée la table et insère <b>66 lignes</b>. Début de la table :</p>
+<div class="tab-defil"><table><tr><th>CatAl</th><th>NomAl</th><th>Cal</th><th>Prot</th><th>Glu</th><th>Lip</th></tr><tr><td>Abat</td><td>Abats en sauce (100g)</td><td>290</td><td>17</td><td>0</td><td>19</td></tr><tr><td>Poisson</td><td>Ablette (100g)</td><td>144</td><td>18</td><td>0</td><td>8</td></tr><tr><td>Fromage</td><td>Abondance (tomme) (100g)</td><td>402</td><td>25</td><td>0</td><td>33</td></tr><tr><td>Conserve</td><td>Abricot (au sirop) (100g)</td><td>63</td><td>0</td><td>16</td><td>0</td></tr><tr><td>Compote</td><td>Abricot (compote sucrée) (100g)</td><td>165</td><td>0</td><td>40</td><td>0</td></tr><tr><td>Compote</td><td>Abricot (non sucrée) (100g)</td><td>119</td><td>0</td><td>29</td><td>0</td></tr></table></div><p class="tp-n">6 lignes</p>
+<div class="box attention"><b>Deux détails du script</b><ul>
+<li>Les colonnes chiffrées sont de type <code>INTEGER</code> alors que le script insère des décimales (25.1, 0.5…). MySQL les <b>arrondit</b> à l'entier le plus proche : 25.1 devient 25, 0.5 devient 1, 0.2 devient 0. Ça change le résultat de la question 8.</li>
+<li>Certains noms contiennent des guillemets doubles (<code>Actifidus "délisse"…</code>). Entre apostrophes, ce sont des caractères comme les autres.</li></ul></div>
+
+<h2>2. Aide-mémoire</h2>
+<div class="tab-defil"><table><tr><th>But</th><th>Syntaxe</th></tr>
+<tr><td>Tout afficher</td><td><code>SELECT * FROM table;</code></td></tr>
+<tr><td>Certaines colonnes</td><td><code>SELECT col1, col2 FROM table;</code></td></tr>
+<tr><td>Sans doublon</td><td><code>SELECT DISTINCT col FROM table;</code></td></tr>
+<tr><td>Filtrer</td><td><code>… WHERE condition;</code> avec <code>= &lt;&gt; &lt; &gt; &lt;= &gt;=</code>, <code>AND</code>, <code>OR</code>, <code>IN (…)</code>, <code>LIKE '…%'</code>, <code>IS NULL</code></td></tr>
+<tr><td>Ajouter</td><td><code>INSERT INTO table (col1, col2) VALUES (v1, v2);</code></td></tr>
+<tr><td>Modifier</td><td><code>UPDATE table SET col = valeur WHERE condition;</code></td></tr>
+<tr><td>Supprimer</td><td><code>DELETE FROM table WHERE condition;</code></td></tr></table></div>
+<p>En plus : <code>LIKE</code> cherche un motif (<code>%</code> = n'importe quelle suite de caractères, <code>_</code> (tiret bas) = un seul caractère) ; <code>IN ('a', 'b')</code> remplace <code>= 'a' OR = 'b'</code> ; <code>IS NULL</code> teste une case vide.</p>
+
+<h2>3. Rechercher (corrigé)</h2>
+<details><summary>1. Quelles sont les catégories d'aliment ?</summary><div class="tp-corr"><pre>SELECT DISTINCT CatAl FROM CALORIE;</pre><p><code>DISTINCT</code> supprime les doublons. La catégorie vide (<code>NULL</code>) compte comme une valeur.</p><div class="tab-defil"><table><tr><th>CatAl</th></tr><tr><td>Abat</td></tr><tr><td>Poisson</td></tr><tr><td>Fromage</td></tr><tr><td>Conserve</td></tr><tr><td>Compote</td></tr><tr><td>Boisson</td></tr><tr><td>Fruit sec</td></tr><tr><td>Fruit</td></tr><tr><td>Confiserie</td></tr><tr><td>Plat cuisiné</td></tr><tr><td>Yaourt</td></tr><tr><td>Pain/Baguette</td></tr><tr><td>Légume</td></tr><tr><td>Céréale</td></tr><tr><td><i>NULL</i></td></tr><tr><td>Viande</td></tr></table></div><p class="tp-n">16 lignes</p></div></details>
+<details><summary>2. Quels sont les aliments de la catégorie Céréale ?</summary><div class="tp-corr"><pre>SELECT NomAl FROM CALORIE
+WHERE CatAl = &#x27;Céréale&#x27;;</pre><p>Le texte doit être écrit comme dans la table.</p><div class="tab-defil"><table><tr><th>NomAl</th></tr><tr><td>All bran mini breaks cannelle (une portion)</td></tr><tr><td>All bran chocolat (100g)</td></tr><tr><td>All bran fique et pomme kelloggs (100g)</td></tr><tr><td>All-bran chocolat Kelloggs (100g)</td></tr><tr><td>All-bran fibre + Kelloggs (100g)</td></tr><tr><td>All-bran fibre plus Kelloggs (100g)</td></tr><tr><td>All-bran figue et pomme Kelloggs (100g)</td></tr><tr><td>All-bran fruit n fibre Kelloggs (100g)</td></tr><tr><td>All-bran fruits et fibres Kelloggs (100g)</td></tr><tr><td>All-bran pétales Kelloggs (100g)</td></tr><tr><td>All-bran pétales Kelloggs (une portion)</td></tr><tr><td>All-bran snack bites Kelloggs (une portion)</td></tr></table></div><p class="tp-n">12 lignes</p></div></details>
+<details><summary>3. Combien de calories pour 100 g d'abricots secs ?</summary><div class="tp-corr"><pre>SELECT NomAl, Cal FROM CALORIE
+WHERE NomAl LIKE &#x27;Abricot%sec%&#x27;;</pre><p>Plusieurs fiches correspondent (« Abricot sec », « Abricots secs ») : <code>LIKE</code> avec <code>%</code> les attrape toutes. On affiche le nom pour savoir à quoi correspond chaque valeur.</p><div class="tab-defil"><table><tr><th>NomAl</th><th>Cal</th></tr><tr><td>Abricot sec (monoprix gourmet) (100g)</td><td>294</td></tr><tr><td>Abricot sec Maître prunille (100g)</td><td>172</td></tr><tr><td>Abricot secs (sunny glade chez lidl) (100g)</td><td>158</td></tr><tr><td>Abricots secs Maître prunille (100g)</td><td>172</td></tr></table></div><p class="tp-n">4 lignes</p></div></details>
+<details><summary>4. Quels sont les aliments de catégorie Yaourt ?</summary><div class="tp-corr"><pre>SELECT NomAl FROM CALORIE
+WHERE CatAl = &#x27;Yaourt&#x27;;</pre><p>Même principe que la question 2.</p><div class="tab-defil"><table><tr><th>NomAl</th></tr><tr><td>Actifidus &quot;délisse&quot; saveur vanille (100g)</td></tr><tr><td>Actifidus &quot;délisse&quot; saveur vanille (un pot)</td></tr><tr><td>Actifidus nature Leclerc marque repère (un pot)</td></tr><tr><td>Actiform (boisson fruits mixés) champion (100g)</td></tr><tr><td>Actiform fruits mixés &quot;ananas coco&quot; (champion) (100g)</td></tr><tr><td>Actiform fruits mixés &quot;pêche mangue&quot; (champion) (100g)</td></tr></table></div><p class="tp-n">20 lignes (les 6 premières affichées)</p></div></details>
+<details><summary>5. Les aliments de catégorie Yaourt ou Fromage</summary><div class="tp-corr"><pre>SELECT NomAl FROM CALORIE
+WHERE CatAl = &#x27;Yaourt&#x27; OR CatAl = &#x27;Fromage&#x27;;
+-- ou : WHERE CatAl IN (&#x27;Yaourt&#x27;, &#x27;Fromage&#x27;);</pre><p>Chaque côté du <code>OR</code> est une condition complète.</p><div class="tab-defil"><table><tr><th>NomAl</th></tr><tr><td>Abondance (tomme) (100g)</td></tr><tr><td>Actifidus &quot;délisse&quot; saveur vanille (100g)</td></tr><tr><td>Actifidus &quot;délisse&quot; saveur vanille (un pot)</td></tr><tr><td>Actifidus nature Leclerc marque repère (un pot)</td></tr><tr><td>Actiform (boisson fruits mixés) champion (100g)</td></tr><tr><td>Actiform fruits mixés &quot;ananas coco&quot; (champion) (100g)</td></tr></table></div><p class="tp-n">23 lignes (les 6 premières affichées)</p></div></details>
+<details><summary>6. La quantité de glucides dans les viandes</summary><div class="tp-corr"><pre>SELECT NomAl, Glu FROM CALORIE
+WHERE CatAl = &#x27;Viande&#x27;;</pre><p>On affiche l'aliment et la quantité demandée.</p><div class="tab-defil"><table><tr><th>NomAl</th><th>Glu</th></tr><tr><td>Aloyau de boeuf (100g)</td><td>0</td></tr><tr><td>Aloyau de veau (100g)</td><td>0</td></tr></table></div><p class="tp-n">2 lignes</p></div></details>
+<details><summary>7. Les produits avec plus de glucides que de protides</summary><div class="tp-corr"><pre>SELECT NomAl FROM CALORIE
+WHERE Glu &gt; Prot;</pre><p>La condition compare deux colonnes de la même ligne.</p><div class="tab-defil"><table><tr><th>NomAl</th></tr><tr><td>Abricot (au sirop) (100g)</td></tr><tr><td>Abricot (compote sucrée) (100g)</td></tr><tr><td>Abricot (non sucrée) (100g)</td></tr><tr><td>Abricot jus (100g)</td></tr><tr><td>Abricot sec (monoprix gourmet) (100g)</td></tr><tr><td>Abricot sec Maître prunille (100g)</td></tr></table></div><p class="tp-n">44 lignes (les 6 premières affichées)</p></div></details>
+<details><summary>8. Les produits à moins de 1 g de lipides</summary><div class="tp-corr"><pre>SELECT CatAl, NomAl, Lip FROM CALORIE
+WHERE Lip &lt; 1;</pre><p>Avec l'arrondi des <code>INTEGER</code>, un produit à 0,5 g est stocké à 1 et n'apparaît pas.</p><div class="tab-defil"><table><tr><th>CatAl</th><th>NomAl</th><th>Lip</th></tr><tr><td>Conserve</td><td>Abricot (au sirop) (100g)</td><td>0</td></tr><tr><td>Compote</td><td>Abricot (compote sucrée) (100g)</td><td>0</td></tr><tr><td>Compote</td><td>Abricot (non sucrée) (100g)</td><td>0</td></tr><tr><td>Boisson</td><td>Abricot jus (100g)</td><td>0</td></tr><tr><td>Fruit sec</td><td>Abricot sec (monoprix gourmet) (100g)</td><td>0</td></tr><tr><td>Fruit</td><td>Abricot, cru (100g)</td><td>0</td></tr></table></div><p class="tp-n">18 lignes (les 6 premières affichées)</p></div></details>
+<details><summary>9. Les aliments à plus de 100 kcal</summary><div class="tp-corr"><pre>SELECT NomAl, Cal FROM CALORIE
+WHERE Cal &gt; 100;</pre><p>Pour s'en tenir aux fiches exprimées « pour 100 g », on peut ajouter <code>AND NomAl LIKE '%(100g)%'</code> : certaines fiches donnent les valeurs pour un pot ou une portion.</p><div class="tab-defil"><table><tr><th>NomAl</th><th>Cal</th></tr><tr><td>Abats en sauce (100g)</td><td>290</td></tr><tr><td>Ablette (100g)</td><td>144</td></tr><tr><td>Abondance (tomme) (100g)</td><td>402</td></tr><tr><td>Abricot (compote sucrée) (100g)</td><td>165</td></tr><tr><td>Abricot (non sucrée) (100g)</td><td>119</td></tr><tr><td>Abricot sec (monoprix gourmet) (100g)</td><td>294</td></tr></table></div><p class="tp-n">38 lignes (les 6 premières affichées)</p></div></details>
+<details><summary>10. Les aliments dont la catégorie n'est pas renseignée</summary><div class="tp-corr"><pre>SELECT NomAl FROM CALORIE
+WHERE CatAl IS NULL;</pre><p><code>= NULL</code> ne marche jamais : <code>NULL</code> n'est égal à rien, pas même à lui-même.</p><div class="tab-defil"><table><tr><th>NomAl</th></tr><tr><td>Allumettes de Canard CARREFOUR 2x80Grs (100g)</td></tr><tr><td>Allumettes de jambon fleury michon (100g)</td></tr><tr><td>Allumettes de lardons fumés Ondilège - 25 % de sel (100g)</td></tr><tr><td>Allumettes de lardons fumés Ondilège - 25 % de sel, une portion de 50 g (100g)</td></tr><tr><td>Allumettes de volaille 2x75g fleury michon (100g)</td></tr><tr><td>Allumettes lardons Auchan (un paquet)</td></tr></table></div><p class="tp-n">6 lignes</p></div></details>
+
+<h2>4. Modifier (corrigé)</h2>
+<details><summary>11. Ajouter le Mac do big mac (100g) : 1500 kcal, 50 g de protides, 50 g de glucides, 0 lipide</summary><div class="tp-corr"><pre>INSERT INTO CALORIE (NomAl, Cal, Prot, Glu, Lip)
+VALUES (&#x27;Mac do big mac (100g)&#x27;, 1500, 50, 50, 0);</pre><p>La catégorie n'est pas donnée : on ne liste que les colonnes renseignées, <code>CatAl</code> vaut <code>NULL</code>.</p></div></details>
+<details><summary>12. Corriger : 246 kcal, 12 g de protides, 21 g de glucides, 12 g de lipides</summary><div class="tp-corr"><pre>UPDATE CALORIE SET Cal = 246, Prot = 12, Glu = 21, Lip = 12
+WHERE NomAl = &#x27;Mac do big mac (100g)&#x27;;</pre><p>Un seul <code>UPDATE</code> modifie plusieurs colonnes, séparées par des virgules.</p></div></details>
+<details><summary>13. Il y a 2 fois plus de glucides que de lipides</summary><div class="tp-corr"><pre>UPDATE CALORIE SET Glu = 2 * Lip
+WHERE NomAl = &#x27;Mac do big mac (100g)&#x27;;</pre><p>La nouvelle valeur est calculée à partir d'une autre colonne : Glu passe à 24.</p></div></details>
+<details><summary>14. Placer les Abats en sauce dans la catégorie Plat cuisiné</summary><div class="tp-corr"><pre>UPDATE CALORIE SET CatAl = &#x27;Plat cuisiné&#x27;
+WHERE NomAl = &#x27;Abats en sauce (100g)&#x27;;</pre><p>On cible la ligne par sa clé primaire, le nom exact.</p></div></details>
+<details><summary>15. Supprimer les plats cuisinés</summary><div class="tp-corr"><pre>DELETE FROM CALORIE
+WHERE CatAl = &#x27;Plat cuisiné&#x27;;</pre><p>Après la question 14, les Abats en sauce font partie des plats cuisinés : 5 lignes sont supprimées.</p></div></details>
+<details><summary>16. Supprimer les aliments de catégorie Fruit ou Confiserie</summary><div class="tp-corr"><pre>DELETE FROM CALORIE
+WHERE CatAl IN (&#x27;Fruit&#x27;, &#x27;Confiserie&#x27;);</pre><p>Équivalent : <code>WHERE CatAl = 'Fruit' OR CatAl = 'Confiserie'</code>.</p></div></details>
+
+<div class="box attention"><b>Erreurs fréquentes</b><ul>
+<li><code>WHERE CatAl = NULL</code> ne renvoie <b>jamais</b> rien : il faut <code>IS NULL</code>.</li>
+<li><code>WHERE CatAl = 'Fruit' OR 'Confiserie'</code> : la 2e partie n'est pas une condition complète. Écrire <code>CatAl = 'Fruit' OR CatAl = 'Confiserie'</code>, ou <code>CatAl IN ('Fruit', 'Confiserie')</code>.</li>
+<li>Oublier les accents (<code>'Cereale'</code>) : MySQL est souvent tolérant (collation <code>utf8_general_ci</code>), mais pas tous les SGBD. Le labo, lui, exige l'orthographe exacte.</li>
+<li>Recopier les valeurs à la main dans la question 13 (<code>SET Glu = 24</code>) : le résultat est juste, mais la consigne demande de le <b>calculer</b> à partir des lipides.</li>
+<li>Faire un <code>DELETE</code> sans avoir testé le <code>WHERE</code> avec un <code>SELECT</code> avant.</li></ul></div>
+
+</article>
+
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle requête affiche la liste des catégories sans doublon ?",
+  "options": [
+   "SELECT DISTINCT CatAl FROM CALORIE;",
+   "SELECT CatAl FROM CALORIE;",
+   "SELECT UNIQUE CatAl;",
+   "SELECT CatAl FROM CALORIE GROUP;"
+  ],
+  "answer": 0,
+  "explication": "`DISTINCT` supprime les doublons."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Combien de lignes renvoie `SELECT DISTINCT CatAl FROM CALORIE;` (la valeur NULL comprise) ?",
+  "answers": [
+   "16"
+  ],
+  "explication": "16 catégories différentes, dont NULL."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Comment trouver les aliments sans catégorie ?",
+  "options": [
+   "WHERE CatAl IS NULL",
+   "WHERE CatAl = NULL",
+   "WHERE CatAl = ''",
+   "WHERE CatAl = 0"
+  ],
+  "answer": 0,
+  "explication": "`NULL` se teste avec `IS NULL`."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Combien d'aliments n'ont pas de catégorie ?",
+  "answers": [
+   "6"
+  ],
+  "explication": "Les 6 « Allumettes » (canard, jambon, lardons, volaille)."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle condition trouve « Abricot sec » et « Abricots secs » ?",
+  "options": [
+   "NomAl LIKE 'Abricot%sec%'",
+   "NomAl = 'Abricot sec'",
+   "NomAl LIKE 'Abricot sec'",
+   "NomAl IN ('Abricot')"
+  ],
+  "answer": 0,
+  "explication": "`%` remplace n'importe quelle suite de caractères (le « s » d'Abricots, la marque…)."
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "`WHERE CatAl = 'Fruit' OR 'Confiserie'` sélectionne les fruits et les confiseries.",
+  "answer": false,
+  "explication": "La 2e partie n'est pas une condition. Écrire `CatAl = 'Fruit' OR CatAl = 'Confiserie'` ou `CatAl IN ('Fruit', 'Confiserie')`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle condition sélectionne les produits avec plus de glucides que de protides ?",
+  "options": [
+   "WHERE Glu > Prot",
+   "WHERE Glu > 'Prot'",
+   "WHERE Glu AND Prot",
+   "WHERE MAX(Glu, Prot)"
+  ],
+  "answer": 0,
+  "explication": "On compare deux colonnes de la même ligne ; `'Prot'` entre apostrophes serait un texte."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Le script insère `402, 25.1, 0, 33` dans des colonnes INTEGER. Que stocke MySQL pour les protides ?",
+  "options": [
+   "25",
+   "25.1",
+   "26",
+   "Une erreur"
+  ],
+  "answer": 0,
+  "explication": "MySQL arrondit à l'entier le plus proche : 25.1 → 25 (et 0.5 → 1)."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Complète : `UPDATE CALORIE SET Glu = ___ WHERE NomAl = 'Mac do big mac (100g)';` pour mettre 2 fois plus de glucides que de lipides.",
+  "answers": [
+   "2 * Lip",
+   "2*Lip",
+   "Lip * 2",
+   "Lip*2"
+  ],
+  "explication": "On calcule à partir de la colonne Lip."
+ },
+ {
+  "type": "associer",
+  "niveau": "moyen",
+  "q": "Associe chaque question du TP à son instruction.",
+  "paires": [
+   [
+    "Ajouter le big mac",
+    "INSERT INTO"
+   ],
+   [
+    "Corriger ses calories",
+    "UPDATE … SET"
+   ],
+   [
+    "Retirer les plats cuisinés",
+    "DELETE FROM"
+   ],
+   [
+    "Lister les catégories",
+    "SELECT DISTINCT"
+   ]
+  ],
+  "explication": "INSERT ajoute, UPDATE modifie, DELETE supprime, SELECT lit."
+ },
+ {
+  "type": "vf",
+  "niveau": "difficile",
+  "q": "Si on fait la question 14 (Abats → Plat cuisiné) avant la question 15, les Abats en sauce sont supprimés avec les plats cuisinés.",
+  "answer": true,
+  "explication": "Le DELETE porte sur la catégorie au moment où il s'exécute."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Pourquoi peut-on insérer le big mac sans donner de catégorie ?",
+  "options": [
+   "CatAl est déclarée NULL (facultative)",
+   "MySQL invente une catégorie",
+   "Parce que NomAl est la clé primaire",
+   "On ne peut pas"
+  ],
+  "answer": 0,
+  "explication": "Seules les colonnes NOT NULL doivent recevoir une valeur."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

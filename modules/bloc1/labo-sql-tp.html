@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Labo TP SQL — Étude Facile</title>
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="bloc1">
+<script>
+window.EF_CODE = {
+ "langue": "sql",
+ "key": "ef-labo-sqltp",
+ "mid": "bloc1-sqltp",
+ "titre": "Labo TP SQL",
+ "sousTitre": "Les TP Pluviométrie et Table des calories, question par question, sur les mêmes données que les scripts du cours. Chaque requête est vérifiée sur son résultat.",
+ "ico": "TP",
+ "couleur": "violet",
+ "fichier": "requete.sql",
+ "module": {
+  "titre": "Bloc 1",
+  "href": "index.html"
+ },
+ "lecons": [
+  {
+   "titre": "TP Pluviométrie",
+   "missions": [
+    {
+     "id": "p-voir",
+     "titre": "Afficher la table",
+     "texte": "<p>La table <code>Pluvio(ISM, NomStation, altitude, precipitation)<\/code> contient 9 stations de MétéoSuisse : numéro ISM (clé primaire), nom, altitude en mètres et lame d'eau moyenne en mm/an.<\/p><p><code>*<\/code> signifie « toutes les colonnes ».<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Affiche tout le contenu de la table <code>Pluvio<\/code>",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT * FROM Pluvio;",
+          "ordre": false
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>SELECT * FROM Pluvio;<\/code>",
+     "solution": "SELECT * FROM Pluvio;\n"
+    },
+    {
+     "id": "p-insert",
+     "titre": "Ajouter une station",
+     "texte": "<p>On ajoute la station <b>8060 · Tour de Gourze · 915 m · 1266 mm/an<\/b>.<\/p><p>Les textes sont entre apostrophes, les nombres sans. Nommer les colonnes après le nom de la table rend la requête plus lisible et plus sûre.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Ajoute la station Tour de Gourze",
+       "r": [
+        {
+         "etat": {
+          "ref": "INSERT INTO Pluvio (ISM, NomStation, altitude, precipitation) VALUES (8060, 'Tour de Gourze', 915, 1266);",
+          "q": "SELECT * FROM Pluvio ORDER BY ISM;"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>INSERT INTO Pluvio (ISM, NomStation, altitude, precipitation) VALUES (8060, 'Tour de Gourze', 915, 1266);<\/code>",
+     "solution": "-- Écris ta requête ici\nINSERT INTO Pluvio (ISM, NomStation, altitude, precipitation) VALUES (8060, 'Tour de Gourze', 915, 1266);\n"
+    },
+    {
+     "id": "p-update",
+     "titre": "Modifier l'altitude",
+     "texte": "<p>La nouvelle altitude de la station 8060 est de <b>920 m<\/b>. On cible la ligne par sa clé primaire <code>ISM<\/code> : c'est la façon la plus sûre de ne modifier qu'elle.<\/p><p>Sans <code>WHERE<\/code>, <b>toutes<\/b> les stations passeraient à 920 m.<\/p>",
+     "depart": "-- Déjà fait aux questions précédentes :\nINSERT INTO Pluvio (ISM, NomStation, altitude, precipitation) VALUES (8060, 'Tour de Gourze', 915, 1266);\n\n-- Ta requête :\n",
+     "objectifs": [
+      {
+       "txt": "Passe l'altitude de la station 8060 à 920",
+       "r": [
+        {
+         "etat": {
+          "ref": "INSERT INTO Pluvio (ISM, NomStation, altitude, precipitation) VALUES (8060, 'Tour de Gourze', 915, 1266);\nUPDATE Pluvio SET altitude = 920 WHERE ISM = 8060;",
+          "q": "SELECT * FROM Pluvio ORDER BY ISM;"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>UPDATE Pluvio SET altitude = 920 WHERE ISM = 8060;<\/code>",
+     "solution": "-- Déjà fait aux questions précédentes :\nINSERT INTO Pluvio (ISM, NomStation, altitude, precipitation) VALUES (8060, 'Tour de Gourze', 915, 1266);\n\n-- Ta requête :\nUPDATE Pluvio SET altitude = 920 WHERE ISM = 8060;\n"
+    },
+    {
+     "id": "p-delete",
+     "titre": "Supprimer la station",
+     "texte": "<p>On supprime maintenant la station 8060. Garde la ligne <code>INSERT<\/code> du départ : elle recrée la station à chaque exécution (la base repart de zéro), et ta requête doit la supprimer.<\/p>",
+     "depart": "-- Déjà fait aux questions précédentes :\nINSERT INTO Pluvio (ISM, NomStation, altitude, precipitation) VALUES (8060, 'Tour de Gourze', 915, 1266);\nUPDATE Pluvio SET altitude = 920 WHERE ISM = 8060;\n\n-- Ta requête :\n",
+     "objectifs": [
+      {
+       "txt": "Supprime la station 8060 (en gardant l'INSERT du départ)",
+       "r": [
+        {
+         "etat": {
+          "ref": "INSERT INTO Pluvio (ISM, NomStation, altitude, precipitation) VALUES (8060, 'Tour de Gourze', 915, 1266);\nUPDATE Pluvio SET altitude = 920 WHERE ISM = 8060;\nDELETE FROM Pluvio WHERE ISM = 8060;",
+          "q": "SELECT * FROM Pluvio ORDER BY ISM;"
+         }
+        },
+        {
+         "codei": "DELETE\\s+FROM\\s+Pluvio\\s+WHERE"
+        },
+        {
+         "codei": "INSERT\\s+INTO\\s+Pluvio"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>DELETE FROM Pluvio WHERE ISM = 8060;<\/code>",
+     "solution": "-- Déjà fait aux questions précédentes :\nINSERT INTO Pluvio (ISM, NomStation, altitude, precipitation) VALUES (8060, 'Tour de Gourze', 915, 1266);\nUPDATE Pluvio SET altitude = 920 WHERE ISM = 8060;\n\n-- Ta requête :\nDELETE FROM Pluvio WHERE ISM = 8060;\n"
+    },
+    {
+     "id": "p-800",
+     "titre": "Les stations de plus de 800 m",
+     "texte": "<p><code>WHERE<\/code> ne garde que les lignes qui vérifient la condition. « Plus de 800 m » : <code>altitude &gt; 800<\/code>.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Affiche toutes les colonnes des stations de plus de 800 m",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT * FROM Pluvio WHERE altitude > 800;",
+          "ordre": false
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>SELECT * FROM Pluvio WHERE altitude &gt; 800;<\/code>",
+     "solution": "SELECT * FROM Pluvio WHERE altitude > 800;\n"
+    },
+    {
+     "id": "p-800-noms",
+     "titre": "Seulement le nom et l'altitude",
+     "texte": "<p>À la place de <code>*<\/code>, on liste les colonnes voulues, séparées par des virgules, dans l'ordre d'affichage.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Affiche le nom et l'altitude des stations de plus de 800 m",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT NomStation, altitude FROM Pluvio WHERE altitude > 800;",
+          "ordre": false
+         }
+        },
+        {
+         "cols": [
+          "NomStation",
+          "altitude"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>SELECT NomStation, altitude FROM Pluvio WHERE altitude &gt; 800;<\/code>",
+     "solution": "SELECT NomStation, altitude FROM Pluvio WHERE altitude > 800;\n"
+    },
+    {
+     "id": "p-semsales",
+     "titre": "Le numéro de Semsales",
+     "texte": "<p>Une condition sur un texte : la valeur se met entre apostrophes, <code>NomStation = 'Semsales'<\/code>.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Affiche le numéro ISM de la station Semsales",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT ISM FROM Pluvio WHERE NomStation = 'Semsales';",
+          "ordre": false
+         }
+        },
+        {
+         "cols": [
+          "ISM"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>SELECT ISM FROM Pluvio WHERE NomStation = 'Semsales';<\/code>",
+     "solution": "SELECT ISM FROM Pluvio WHERE NomStation = 'Semsales';\n"
+    },
+    {
+     "id": "p-1000mm",
+     "titre": "Plus de 1000 mm/an",
+     "texte": "<p>Même principe, sur la colonne <code>precipitation<\/code>.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Affiche toutes les colonnes des stations de plus de 1000 mm/an",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT * FROM Pluvio WHERE precipitation > 1000;",
+          "ordre": false
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>SELECT * FROM Pluvio WHERE precipitation &gt; 1000;<\/code>",
+     "solution": "SELECT * FROM Pluvio WHERE precipitation > 1000;\n"
+    },
+    {
+     "id": "p-and",
+     "titre": "Deux conditions à la fois",
+     "texte": "<p><code>AND<\/code> : les deux conditions doivent être vraies. Ici, moins de 500 m <b>et<\/b> moins de 1000 mm/an.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Affiche toutes les colonnes des stations de moins de 500 m avec moins de 1000 mm/an",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT * FROM Pluvio WHERE altitude < 500 AND precipitation < 1000;",
+          "ordre": false
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>SELECT * FROM Pluvio WHERE altitude &lt; 500 AND precipitation &lt; 1000;<\/code>",
+     "solution": "SELECT * FROM Pluvio WHERE altitude < 500 AND precipitation < 1000;\n"
+    }
+   ]
+  },
+  {
+   "titre": "Calories : rechercher",
+   "missions": [
+    {
+     "id": "c-voir",
+     "titre": "Afficher la table",
+     "texte": "<p>La table <code>CALORIE(CatAl, NomAl, Cal, Prot, Glu, Lip)<\/code> contient 66 aliments : catégorie (facultative), nom (clé primaire), calories en kcal, protides, glucides et lipides en grammes.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Affiche tout le contenu de la table <code>CALORIE<\/code>",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT * FROM CALORIE;",
+          "ordre": false
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>SELECT * FROM CALORIE;<\/code>",
+     "solution": "SELECT * FROM CALORIE;\n"
+    },
+    {
+     "id": "c-categories",
+     "titre": "Les catégories",
+     "texte": "<p><code>DISTINCT<\/code> supprime les doublons : chaque catégorie n'apparaît qu'une fois. La catégorie vide (<code>NULL<\/code>) apparaît aussi.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Affiche la liste des catégories, sans doublon",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT DISTINCT CatAl FROM CALORIE;",
+          "ordre": false
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>SELECT DISTINCT CatAl FROM CALORIE;<\/code>",
+     "solution": "SELECT DISTINCT CatAl FROM CALORIE;\n"
+    },
+    {
+     "id": "c-cereales",
+     "titre": "Les céréales",
+     "texte": "<p>Écris la catégorie exactement comme dans la table, accents compris : <code>'Céréale'<\/code>.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Affiche le nom des aliments de la catégorie Céréale",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT NomAl FROM CALORIE WHERE CatAl = 'Céréale';",
+          "ordre": false
+         }
+        },
+        {
+         "cols": [
+          "NomAl"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>SELECT NomAl FROM CALORIE WHERE CatAl = 'Céréale';<\/code>",
+     "solution": "SELECT NomAl FROM CALORIE WHERE CatAl = 'Céréale';\n"
+    },
+    {
+     "id": "c-abricots",
+     "titre": "Les abricots secs",
+     "texte": "<p>Plusieurs produits correspondent : « Abricot sec… », « Abricots secs… ». <code>LIKE<\/code> cherche un motif : <code>%<\/code> remplace n'importe quelle suite de caractères.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Affiche le nom et les calories des abricots secs",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT NomAl, Cal FROM CALORIE WHERE NomAl LIKE 'Abricot%sec%';",
+          "ordre": false
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>SELECT NomAl, Cal FROM CALORIE WHERE NomAl LIKE 'Abricot%sec%';<\/code>",
+     "solution": "SELECT NomAl, Cal FROM CALORIE WHERE NomAl LIKE 'Abricot%sec%';\n"
+    },
+    {
+     "id": "c-yaourt",
+     "titre": "Les yaourts",
+     "texte": "<p>Même principe que pour les céréales.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Affiche le nom des aliments de la catégorie Yaourt",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT NomAl FROM CALORIE WHERE CatAl = 'Yaourt';",
+          "ordre": false
+         }
+        },
+        {
+         "cols": [
+          "NomAl"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>SELECT NomAl FROM CALORIE WHERE CatAl = 'Yaourt';<\/code>",
+     "solution": "SELECT NomAl FROM CALORIE WHERE CatAl = 'Yaourt';\n"
+    },
+    {
+     "id": "c-yaourt-fromage",
+     "titre": "Yaourt ou fromage",
+     "texte": "<p><code>OR<\/code> : au moins une des conditions est vraie. Attention, chaque condition doit être complète : <code>CatAl = 'Yaourt' OR CatAl = 'Fromage'<\/code>. Raccourci : <code>CatAl IN ('Yaourt', 'Fromage')<\/code>.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Affiche le nom des aliments de catégorie Yaourt ou Fromage",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT NomAl FROM CALORIE WHERE CatAl = 'Yaourt' OR CatAl = 'Fromage';",
+          "ordre": false
+         }
+        },
+        {
+         "cols": [
+          "NomAl"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>SELECT NomAl FROM CALORIE WHERE CatAl = 'Yaourt' OR CatAl = 'Fromage';<\/code>",
+     "solution": "SELECT NomAl FROM CALORIE WHERE CatAl = 'Yaourt' OR CatAl = 'Fromage';\n"
+    },
+    {
+     "id": "c-viandes",
+     "titre": "Les glucides des viandes",
+     "texte": "<p>On affiche deux colonnes : l'aliment et sa quantité de glucides.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Affiche le nom et les glucides des aliments de catégorie Viande",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT NomAl, Glu FROM CALORIE WHERE CatAl = 'Viande';",
+          "ordre": false
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>SELECT NomAl, Glu FROM CALORIE WHERE CatAl = 'Viande';<\/code>",
+     "solution": "SELECT NomAl, Glu FROM CALORIE WHERE CatAl = 'Viande';\n"
+    },
+    {
+     "id": "c-glu-prot",
+     "titre": "Plus de glucides que de protides",
+     "texte": "<p>Une condition peut comparer <b>deux colonnes<\/b> de la même ligne : <code>Glu &gt; Prot<\/code>.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Affiche le nom des produits qui apportent plus de glucides que de protides",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT NomAl FROM CALORIE WHERE Glu > Prot;",
+          "ordre": false
+         }
+        },
+        {
+         "cols": [
+          "NomAl"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>SELECT NomAl FROM CALORIE WHERE Glu &gt; Prot;<\/code>",
+     "solution": "SELECT NomAl FROM CALORIE WHERE Glu > Prot;\n"
+    },
+    {
+     "id": "c-lipides",
+     "titre": "Moins de 1 g de lipides",
+     "texte": "<p>Les colonnes sont de type <code>INTEGER<\/code> : à l'import, MySQL a arrondi les valeurs (0,2 → 0 ; 0,5 → 1). La base du labo fait pareil.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Affiche la catégorie, le nom et les lipides des produits à moins de 1 g de lipides",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT CatAl, NomAl, Lip FROM CALORIE WHERE Lip < 1;",
+          "ordre": false
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>SELECT CatAl, NomAl, Lip FROM CALORIE WHERE Lip &lt; 1;<\/code>",
+     "solution": "SELECT CatAl, NomAl, Lip FROM CALORIE WHERE Lip < 1;\n"
+    },
+    {
+     "id": "c-100kcal",
+     "titre": "Plus de 100 kcal",
+     "texte": "<p>« Plus de 100 kcal » se traduit par <code>Cal &gt; 100<\/code> (strictement plus : 100 exactement n'est pas pris).<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Affiche le nom et les calories des aliments à plus de 100 kcal",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT NomAl, Cal FROM CALORIE WHERE Cal > 100;",
+          "ordre": false
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>SELECT NomAl, Cal FROM CALORIE WHERE Cal &gt; 100;<\/code>",
+     "solution": "SELECT NomAl, Cal FROM CALORIE WHERE Cal > 100;\n"
+    },
+    {
+     "id": "c-null",
+     "titre": "Catégorie non renseignée",
+     "texte": "<p>Une case vide contient <code>NULL<\/code>. On ne la teste <b>jamais<\/b> avec <code>= NULL<\/code> (toujours faux), mais avec <code>IS NULL<\/code>.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Affiche le nom des aliments dont la catégorie n'est pas renseignée",
+       "r": [
+        {
+         "res": {
+          "ref": "SELECT NomAl FROM CALORIE WHERE CatAl IS NULL;",
+          "ordre": false
+         }
+        },
+        {
+         "cols": [
+          "NomAl"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>SELECT NomAl FROM CALORIE WHERE CatAl IS NULL;<\/code>",
+     "solution": "SELECT NomAl FROM CALORIE WHERE CatAl IS NULL;\n"
+    }
+   ]
+  },
+  {
+   "titre": "Calories : modifier",
+   "missions": [
+    {
+     "id": "c-insert",
+     "titre": "Ajouter le big mac",
+     "texte": "<p>On ajoute <b>Mac do big mac (100g)<\/b> : 1500 kcal, 50 g de protides, 50 g de glucides, 0 g de lipides. Sa catégorie n'est pas donnée : on liste les colonnes renseignées, <code>CatAl<\/code> restera à <code>NULL<\/code>.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Ajoute le Mac do big mac (100g)",
+       "r": [
+        {
+         "etat": {
+          "ref": "INSERT INTO CALORIE (NomAl, Cal, Prot, Glu, Lip) VALUES ('Mac do big mac (100g)', 1500, 50, 50, 0);",
+          "q": "SELECT * FROM CALORIE ORDER BY NomAl;"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>INSERT INTO CALORIE (NomAl, Cal, Prot, Glu, Lip) VALUES (&#x27;Mac do big mac (100g)&#x27;, 1500, 50, 50, 0);<\/code>",
+     "solution": "-- Écris ta requête ici\nINSERT INTO CALORIE (NomAl, Cal, Prot, Glu, Lip) VALUES ('Mac do big mac (100g)', 1500, 50, 50, 0);\n"
+    },
+    {
+     "id": "c-update",
+     "titre": "Corriger le big mac",
+     "texte": "<p>Erreur : le big mac apporte en réalité 246 kcal, 12 g de protides, 21 g de glucides et 12 g de lipides. Un seul <code>UPDATE<\/code> peut modifier plusieurs colonnes, séparées par des virgules.<\/p>",
+     "depart": "-- Déjà fait aux questions précédentes :\nINSERT INTO CALORIE (NomAl, Cal, Prot, Glu, Lip) VALUES ('Mac do big mac (100g)', 1500, 50, 50, 0);\n\n-- Ta requête :\n",
+     "objectifs": [
+      {
+       "txt": "Corrige les quatre valeurs du big mac",
+       "r": [
+        {
+         "etat": {
+          "ref": "INSERT INTO CALORIE (NomAl, Cal, Prot, Glu, Lip) VALUES ('Mac do big mac (100g)', 1500, 50, 50, 0);\nUPDATE CALORIE SET Cal = 246, Prot = 12, Glu = 21, Lip = 12 WHERE NomAl = 'Mac do big mac (100g)';",
+          "q": "SELECT * FROM CALORIE ORDER BY NomAl;"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>UPDATE CALORIE SET Cal = 246, Prot = 12, Glu = 21, Lip = 12 WHERE NomAl = &#x27;Mac do big mac (100g)&#x27;;<\/code>",
+     "solution": "-- Déjà fait aux questions précédentes :\nINSERT INTO CALORIE (NomAl, Cal, Prot, Glu, Lip) VALUES ('Mac do big mac (100g)', 1500, 50, 50, 0);\n\n-- Ta requête :\nUPDATE CALORIE SET Cal = 246, Prot = 12, Glu = 21, Lip = 12 WHERE NomAl = 'Mac do big mac (100g)';\n"
+    },
+    {
+     "id": "c-update-calc",
+     "titre": "Un calcul dans SET",
+     "texte": "<p>Finalement, le big mac contient <b>2 fois plus de glucides que de lipides<\/b>. On peut calculer la nouvelle valeur à partir d'une autre colonne : <code>SET Glu = 2 * Lip<\/code>.<\/p>",
+     "depart": "-- Déjà fait aux questions précédentes :\nINSERT INTO CALORIE (NomAl, Cal, Prot, Glu, Lip) VALUES ('Mac do big mac (100g)', 1500, 50, 50, 0);\nUPDATE CALORIE SET Cal = 246, Prot = 12, Glu = 21, Lip = 12 WHERE NomAl = 'Mac do big mac (100g)';\n\n-- Ta requête :\n",
+     "objectifs": [
+      {
+       "txt": "Mets les glucides du big mac au double de ses lipides, par un calcul",
+       "r": [
+        {
+         "etat": {
+          "ref": "INSERT INTO CALORIE (NomAl, Cal, Prot, Glu, Lip) VALUES ('Mac do big mac (100g)', 1500, 50, 50, 0);\nUPDATE CALORIE SET Cal = 246, Prot = 12, Glu = 21, Lip = 12 WHERE NomAl = 'Mac do big mac (100g)';\nUPDATE CALORIE SET Glu = 2 * Lip WHERE NomAl = 'Mac do big mac (100g)';",
+          "q": "SELECT * FROM CALORIE ORDER BY NomAl;"
+         }
+        },
+        {
+         "codei": "SET\\s+Glu\\s*=\\s*(2\\s*\\*\\s*Lip|Lip\\s*\\*\\s*2)"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>UPDATE CALORIE SET Glu = 2 * Lip WHERE NomAl = &#x27;Mac do big mac (100g)&#x27;;<\/code>",
+     "solution": "-- Déjà fait aux questions précédentes :\nINSERT INTO CALORIE (NomAl, Cal, Prot, Glu, Lip) VALUES ('Mac do big mac (100g)', 1500, 50, 50, 0);\nUPDATE CALORIE SET Cal = 246, Prot = 12, Glu = 21, Lip = 12 WHERE NomAl = 'Mac do big mac (100g)';\n\n-- Ta requête :\nUPDATE CALORIE SET Glu = 2 * Lip WHERE NomAl = 'Mac do big mac (100g)';\n"
+    },
+    {
+     "id": "c-abats",
+     "titre": "Changer de catégorie",
+     "texte": "<p>Les Abats en sauce doivent passer dans la catégorie <b>Plat cuisiné<\/b>. On cible la ligne par sa clé primaire, le nom exact de l'aliment.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Place les Abats en sauce dans la catégorie Plat cuisiné",
+       "r": [
+        {
+         "etat": {
+          "ref": "UPDATE CALORIE SET CatAl = 'Plat cuisiné' WHERE NomAl = 'Abats en sauce (100g)';",
+          "q": "SELECT * FROM CALORIE ORDER BY NomAl;"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>UPDATE CALORIE SET CatAl = &#x27;Plat cuisiné&#x27; WHERE NomAl = &#x27;Abats en sauce (100g)&#x27;;<\/code>",
+     "solution": "-- Écris ta requête ici\nUPDATE CALORIE SET CatAl = 'Plat cuisiné' WHERE NomAl = 'Abats en sauce (100g)';\n"
+    },
+    {
+     "id": "c-del-plats",
+     "titre": "Supprimer les plats cuisinés",
+     "texte": "<p>Les Abats en sauce sont maintenant un plat cuisiné : ils seront supprimés eux aussi. Vérifie avant avec un <code>SELECT<\/code> qui utilise le même <code>WHERE<\/code> : c'est le réflexe à prendre avant tout <code>DELETE<\/code>.<\/p>",
+     "depart": "-- Déjà fait aux questions précédentes :\nUPDATE CALORIE SET CatAl = 'Plat cuisiné' WHERE NomAl = 'Abats en sauce (100g)';\n\n-- Ta requête :\n",
+     "objectifs": [
+      {
+       "txt": "Supprime tous les plats cuisinés",
+       "r": [
+        {
+         "etat": {
+          "ref": "UPDATE CALORIE SET CatAl = 'Plat cuisiné' WHERE NomAl = 'Abats en sauce (100g)';\nDELETE FROM CALORIE WHERE CatAl = 'Plat cuisiné';",
+          "q": "SELECT * FROM CALORIE ORDER BY NomAl;"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>DELETE FROM CALORIE WHERE CatAl = 'Plat cuisiné';<\/code>",
+     "solution": "-- Déjà fait aux questions précédentes :\nUPDATE CALORIE SET CatAl = 'Plat cuisiné' WHERE NomAl = 'Abats en sauce (100g)';\n\n-- Ta requête :\nDELETE FROM CALORIE WHERE CatAl = 'Plat cuisiné';\n"
+    },
+    {
+     "id": "c-del-or",
+     "titre": "Fruits ou confiseries",
+     "texte": "<p>Piège classique : <code>WHERE CatAl = 'Fruit' OR 'Confiserie'<\/code> ne fait pas ce qu'on croit (<code>'Confiserie'<\/code> seul n'est pas une condition). Répète la colonne, ou utilise <code>IN<\/code>.<\/p>",
+     "depart": "-- Écris ta requête ici\n",
+     "objectifs": [
+      {
+       "txt": "Supprime les aliments de catégorie Fruit ou Confiserie",
+       "r": [
+        {
+         "etat": {
+          "ref": "DELETE FROM CALORIE WHERE CatAl IN ('Fruit', 'Confiserie');",
+          "q": "SELECT * FROM CALORIE ORDER BY NomAl;"
+         }
+        }
+       ]
+      }
+     ],
+     "indice": "<code>DELETE FROM CALORIE WHERE CatAl IN ('Fruit', 'Confiserie');<\/code>",
+     "solution": "-- Écris ta requête ici\nDELETE FROM CALORIE WHERE CatAl IN ('Fruit', 'Confiserie');\n"
+    }
+   ]
+  }
+ ],
+ "base": "CREATE TABLE Pluvio (ISM INTEGER PRIMARY KEY, NomStation VARCHAR(50) NOT NULL COLLATE NOCASE, altitude INTEGER NOT NULL, precipitation INTEGER NOT NULL);\nINSERT INTO Pluvio VALUES (5720, 'Romont', 688, 1128);\nINSERT INTO Pluvio VALUES (5830, 'Semsales', 873, 1511);\nINSERT INTO Pluvio VALUES (5870, 'Moudon-Ville', 525, 1102);\nINSERT INTO Pluvio VALUES (5900, 'Payerne-Ville', 450, 900);\nINSERT INTO Pluvio VALUES (6137, 'Villars-Tiercellin', 850, 1343);\nINSERT INTO Pluvio VALUES (6150, 'Thierrens', 770, 1061);\nINSERT INTO Pluvio VALUES (6160, 'Chanéaz', 758, 1005);\nINSERT INTO Pluvio VALUES (6170, 'Châbles (FR)', 589, 1014);\nINSERT INTO Pluvio VALUES (8025, 'Fruence', 830, 1656);\nCREATE TABLE CALORIE (CatAl VARCHAR(60) NULL COLLATE NOCASE, NomAl VARCHAR(120) NOT NULL COLLATE NOCASE PRIMARY KEY, Cal INTEGER NOT NULL, Prot INTEGER NOT NULL, Glu INTEGER NOT NULL, Lip INTEGER NOT NULL);\nINSERT INTO CALORIE VALUES ('Abat', 'Abats en sauce (100g)', 290, 17, 0, 19);\nINSERT INTO CALORIE VALUES ('Poisson', 'Ablette (100g)', 144, 18, 0, 8);\nINSERT INTO CALORIE VALUES ('Fromage', 'Abondance (tomme) (100g)', 402, 25, 0, 33);\nINSERT INTO CALORIE VALUES ('Conserve', 'Abricot (au sirop) (100g)', 63, 0, 16, 0);\nINSERT INTO CALORIE VALUES ('Compote', 'Abricot (compote sucrée) (100g)', 165, 0, 40, 0);\nINSERT INTO CALORIE VALUES ('Compote', 'Abricot (non sucrée) (100g)', 119, 0, 29, 0);\nINSERT INTO CALORIE VALUES ('Boisson', 'Abricot jus (100g)', 60, 0, 15, 0);\nINSERT INTO CALORIE VALUES ('Fruit sec', 'Abricot sec (monoprix gourmet) (100g)', 294, 5, 68, 0);\nINSERT INTO CALORIE VALUES ('Fruit sec', 'Abricot sec Maître prunille (100g)', 172, 3, 34, 1);\nINSERT INTO CALORIE VALUES ('Fruit sec', 'Abricot secs (sunny glade chez lidl) (100g)', 158, 4, 37, 1);\nINSERT INTO CALORIE VALUES ('Fruit', 'Abricot, cru (100g)', 45, 1, 10, 0);\nINSERT INTO CALORIE VALUES ('Conserve', 'Abricots au sirop, douceur du verger Leclerc marque repère (100g)', 69, 0, 17, 0);\nINSERT INTO CALORIE VALUES ('Fruit sec', 'Abricots secs Maître prunille (100g)', 172, 3, 34, 1);\nINSERT INTO CALORIE VALUES ('Boisson', 'Ace-the Carrefour light (un verre)', 100, 45, 25, 1);\nINSERT INTO CALORIE VALUES ('Conserve', 'Achards de légumes le coq noir pot de 340gr (100g)', 291, 1, 8, 28);\nINSERT INTO CALORIE VALUES ('Confiserie', 'Acidulés fruits, confiserie du domaine Leclerc marque repère (100g)', 382, 0, 93, 0);\nINSERT INTO CALORIE VALUES ('Plat cuisiné', 'Acras de morue (moyenne) (100g)', 228, 11, 19, 12);\nINSERT INTO CALORIE VALUES ('Yaourt', 'Actifidus \"délisse\" saveur vanille (100g)', 90, 4, 12, 3);\nINSERT INTO CALORIE VALUES ('Yaourt', 'Actifidus \"délisse\" saveur vanille (un pot)', 111, 5, 15, 4);\nINSERT INTO CALORIE VALUES ('Yaourt', 'Actifidus nature Leclerc marque repère (un pot)', 78, 5, 5, 4);\nINSERT INTO CALORIE VALUES ('Yaourt', 'Actiform (boisson fruits mixés) champion (100g)', 55, 1, 13, 0);\nINSERT INTO CALORIE VALUES ('Yaourt', 'Actiform fruits mixés \"ananas coco\" (champion) (100g)', 55, 1, 13, 0);\nINSERT INTO CALORIE VALUES ('Yaourt', 'Actiform fruits mixés \"pêche mangue\" (champion) (100g)', 51, 1, 12, 0);\nINSERT INTO CALORIE VALUES ('Yaourt', 'Actimel (0% fruits rouges) Danone (100g)', 29, 3, 4, 0);\nINSERT INTO CALORIE VALUES ('Yaourt', 'Actimel (0% nature) Danone (100g)', 28, 3, 3, 0);\nINSERT INTO CALORIE VALUES ('Yaourt', 'Actimel 0 % saveur fruits rouges Danone (100g)', 29, 3, 4, 0);\nINSERT INTO CALORIE VALUES ('Yaourt', 'Actimel 0% ananas Danone (100g)', 32, 2, 4, 0);\nINSERT INTO CALORIE VALUES ('Yaourt', 'Actimel fraise Danone (100g)', 85, 2, 13, 1);\nINSERT INTO CALORIE VALUES ('Yaourt', 'Actimel multrifruits Danone (100g)', 76, 3, 12, 2);\nINSERT INTO CALORIE VALUES ('Yaourt', 'Actimel nature Danone (100g)', 80, 3, 15, 2);\nINSERT INTO CALORIE VALUES ('Yaourt', 'Actimel orange Danone (100g)', 80, 2, 13, 1);\nINSERT INTO CALORIE VALUES ('Yaourt', 'Actimel pêche gelée royale Danone (100g)', 76, 3, 12, 2);\nINSERT INTO CALORIE VALUES ('Yaourt', 'Actimel Saveur pêche-gelée royale (100g)', 76, 3, 12, 2);\nINSERT INTO CALORIE VALUES ('Yaourt', 'Actimel vanille Danone (100g)', 88, 2, 15, 1);\nINSERT INTO CALORIE VALUES ('Yaourt', 'Actimle multifruits (100g)', 85, 2, 14, 1);\nINSERT INTO CALORIE VALUES ('Pain/Baguette', 'Active sandwich Lidl (100g)', 264, 8, 46, 6);\nINSERT INTO CALORIE VALUES ('Yaourt', 'Activia 0% ananas Danone (un pot)', 64, 6, 10, 0);\nINSERT INTO CALORIE VALUES ('Yaourt', 'Activia 0% fraises Activia (125g)', 64, 6, 10, 0);\nINSERT INTO CALORIE VALUES ('Plat cuisiné', 'Aiguillettes de poulet marinées au citron Picard (un paquet)', 142, 0, 2, 3);\nINSERT INTO CALORIE VALUES ('Plat cuisiné', 'Aiguillettes de poulet marinées thym-citron père dodu (100g)', 118, 22, 1, 3);\nINSERT INTO CALORIE VALUES ('Plat cuisiné', 'Aiguillettes de poulet père dodu (100g)', 102, 23, 1, 1);\nINSERT INTO CALORIE VALUES ('Légume', 'Ail (100g)', 138, 6, 28, 0);\nINSERT INTO CALORIE VALUES ('Fromage', 'Ail et fines herbes Boursin (100g)', 405, 7, 2, 41);\nINSERT INTO CALORIE VALUES ('Poisson', 'Aile de raie \"poisson\" (100g)', 91, 21, 0, 1);\nINSERT INTO CALORIE VALUES ('Fromage', 'Ailladou 7% mg Casino (100g)', 134, 14, 4, 7);\nINSERT INTO CALORIE VALUES ('Céréale', 'All bran mini breaks cannelle (une portion)', 96, 17, 8, 7);\nINSERT INTO CALORIE VALUES ('Céréale', 'All bran chocolat (100g)', 382, 9, 64, 10);\nINSERT INTO CALORIE VALUES ('Céréale', 'All bran fique et pomme kelloggs (100g)', 318, 9, 66, 2);\nINSERT INTO CALORIE VALUES ('Céréale', 'All-bran chocolat Kelloggs (100g)', 354, 10, 65, 6);\nINSERT INTO CALORIE VALUES ('Céréale', 'All-bran fibre + Kelloggs (100g)', 280, 14, 48, 4);\nINSERT INTO CALORIE VALUES ('Céréale', 'All-bran fibre plus Kelloggs (100g)', 280, 14, 48, 4);\nINSERT INTO CALORIE VALUES ('Céréale', 'All-bran figue et pomme Kelloggs (100g)', 327, 9, 67, 3);\nINSERT INTO CALORIE VALUES ('Céréale', 'All-bran fruit n fibre Kelloggs (100g)', 358, 8, 68, 6);\nINSERT INTO CALORIE VALUES ('Céréale', 'All-bran fruits et fibres Kelloggs (100g)', 358, 8, 68, 6);\nINSERT INTO CALORIE VALUES ('Céréale', 'All-bran pétales Kelloggs (100g)', 326, 10, 67, 2);\nINSERT INTO CALORIE VALUES ('Céréale', 'All-bran pétales Kelloggs (une portion)', 79, 4, 4, 1);\nINSERT INTO CALORIE VALUES ('Céréale', 'All-bran snack bites Kelloggs (une portion)', 100, 2, 21, 5);\nINSERT INTO CALORIE VALUES (NULL, 'Allumettes de Canard CARREFOUR 2x80Grs (100g)', 104, 18, 2, 3);\nINSERT INTO CALORIE VALUES (NULL, 'Allumettes de jambon fleury michon (100g)', 114, 17, 3, 4);\nINSERT INTO CALORIE VALUES (NULL, 'Allumettes de lardons fumés Ondilège - 25 % de sel (100g)', 276, 17, 0, 23);\nINSERT INTO CALORIE VALUES (NULL, 'Allumettes de lardons fumés Ondilège - 25 % de sel, une portion de 50 g (100g)', 138, 9, 0, 12);\nINSERT INTO CALORIE VALUES (NULL, 'Allumettes de volaille 2x75g fleury michon (100g)', 118, 19, 2, 4);\nINSERT INTO CALORIE VALUES (NULL, 'Allumettes lardons Auchan (un paquet)', 287, 17, 1, 24);\nINSERT INTO CALORIE VALUES ('Poisson', 'Alose (100g)', 170, 20, 0, 10);\nINSERT INTO CALORIE VALUES ('Viande', 'Aloyau de boeuf (100g)', 266, 17, 0, 22);\nINSERT INTO CALORIE VALUES ('Viande', 'Aloyau de veau (100g)', 175, 19, 0, 11);\n",
+ "baseNom": "BDPLUVIO + BDCALORIE",
+ "schemaTexte": "Les deux tables des TP. La base est remise à neuf à chaque exécution : tu ne peux rien casser.",
+ "libre": "-- Essaie ce que tu veux : la base est recréée à chaque exécution.\nSELECT CatAl, COUNT(*) AS nombre, ROUND(AVG(Cal)) AS kcal_moyennes\nFROM CALORIE\nWHERE CatAl IS NOT NULL\nGROUP BY CatAl\nORDER BY nombre DESC;\n",
+ "libreTexte": "<p>Écris les requêtes que tu veux sur les tables <code>Pluvio<\/code> et <code>CALORIE<\/code>, puis <b>Exécuter<\/b> (Ctrl + Entrée). La base repart de zéro à chaque exécution.<\/p>"
+};
+</script>
+  <script src="../../data/modules.js"></script>
+  <script src="../../assets/app.js"></script>
+  <script src="../../assets/labo-code.js"></script>
+</body>
+</html>

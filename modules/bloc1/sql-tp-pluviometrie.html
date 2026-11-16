@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>TP SQL : stations pluviométriques — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+<style>
+#cours .tp-corr { padding: var(--s2) var(--s3) var(--s3); }
+#cours .tp-n { font-size: .85rem; color: var(--discret); margin-top: 4px; }
+</style>
+</head>
+<body data-module="bloc1" data-chapter="sql-tp-pluviometrie">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+
+<p>MétéoSuisse publie les données de plus de 600 stations météorologiques et pluviométriques, utiles par exemple aux entreprises de l'énergie et aux assureurs. Ce TP en isole 9 dans une table pour pratiquer les requêtes de base : ajouter, modifier, supprimer et rechercher des lignes.</p>
+<div class="box retenir"><b>Pour pratiquer</b><p>Chaque question est une mission du <a href="labo-sql-tp.html">labo TP SQL</a>, avec la même table et une vérification automatique. Pour MySQL (phpMyAdmin, MySQL Workbench…), télécharge le script <a href="fichiers/CrePluviometrie.sql" download>CrePluviometrie.sql</a>.</p></div>
+
+<h2>1. La table Pluvio</h2>
+<p><code>Pluvio(<u>ISM</u>, NomStation, altitude, precipitation)</code></p>
+<ul><li><b>ISM</b> : numéro de la station, <b>clé primaire</b> (deux stations ne peuvent pas avoir le même) ;</li>
+<li><b>NomStation</b> : nom de la station ;</li>
+<li><b>altitude</b> : altitude en mètres ;</li>
+<li><b>precipitation</b> : lame d'eau moyenne tombée, en mm par an.</li></ul>
+<div class="tab-defil"><table><tr><th>ISM</th><th>NomStation</th><th>altitude</th><th>precipitation</th></tr><tr><td>5720</td><td>Romont</td><td>688</td><td>1128</td></tr><tr><td>5830</td><td>Semsales</td><td>873</td><td>1511</td></tr><tr><td>5870</td><td>Moudon-Ville</td><td>525</td><td>1102</td></tr><tr><td>5900</td><td>Payerne-Ville</td><td>450</td><td>900</td></tr><tr><td>6137</td><td>Villars-Tiercellin</td><td>850</td><td>1343</td></tr><tr><td>6150</td><td>Thierrens</td><td>770</td><td>1061</td></tr><tr><td>6160</td><td>Chanéaz</td><td>758</td><td>1005</td></tr><tr><td>6170</td><td>Châbles (FR)</td><td>589</td><td>1014</td></tr><tr><td>8025</td><td>Fruence</td><td>830</td><td>1656</td></tr></table></div><p class="tp-n">9 lignes</p>
+<h3>Installer la table sur MySQL</h3>
+<ol><li>Sélectionne ta base de données personnelle.</li>
+<li>Dans le requêteur (onglet SQL), colle le contenu de <code>CrePluviometrie.sql</code> et exécute-le.</li>
+<li>Vérifie avec <code>SELECT * FROM Pluvio;</code> : 9 lignes.</li></ol>
+<p>Le script crée la table (<code>CREATE TABLE</code>), déclare la clé primaire (<code>ALTER TABLE … ADD CONSTRAINT … PRIMARY KEY</code>) puis insère les lignes (<code>INSERT INTO</code>).</p>
+
+<h2>2. Aide-mémoire</h2>
+<div class="tab-defil"><table><tr><th>But</th><th>Syntaxe</th></tr>
+<tr><td>Tout afficher</td><td><code>SELECT * FROM table;</code></td></tr>
+<tr><td>Certaines colonnes</td><td><code>SELECT col1, col2 FROM table;</code></td></tr>
+<tr><td>Sans doublon</td><td><code>SELECT DISTINCT col FROM table;</code></td></tr>
+<tr><td>Filtrer</td><td><code>… WHERE condition;</code> avec <code>= &lt;&gt; &lt; &gt; &lt;= &gt;=</code>, <code>AND</code>, <code>OR</code>, <code>IN (…)</code>, <code>LIKE '…%'</code>, <code>IS NULL</code></td></tr>
+<tr><td>Ajouter</td><td><code>INSERT INTO table (col1, col2) VALUES (v1, v2);</code></td></tr>
+<tr><td>Modifier</td><td><code>UPDATE table SET col = valeur WHERE condition;</code></td></tr>
+<tr><td>Supprimer</td><td><code>DELETE FROM table WHERE condition;</code></td></tr></table></div>
+
+<h2>3. Manipulation de données (corrigé)</h2>
+<p>Ouvre chaque question pour voir la requête, l'explication et le résultat obtenu sur la table.</p>
+<details><summary>1. Ajouter la station 8060 · Tour de Gourze · 915 m · 1266 mm/an</summary><div class="tp-corr"><pre>INSERT INTO Pluvio (ISM, NomStation, altitude, precipitation)
+VALUES (8060, &#x27;Tour de Gourze&#x27;, 915, 1266);</pre><p>Les textes vont entre apostrophes, les nombres sans. Lister les colonnes rend la requête lisible et indépendante de l'ordre des colonnes dans la table.</p></div></details>
+<details><summary>2. Passer l'altitude de la station 8060 à 920 m</summary><div class="tp-corr"><pre>UPDATE Pluvio SET altitude = 920
+WHERE ISM = 8060;</pre><p>Le <code>WHERE</code> sur la clé primaire limite la modification à une seule ligne.</p></div></details>
+<details><summary>3. Supprimer la station 8060</summary><div class="tp-corr"><pre>DELETE FROM Pluvio WHERE ISM = 8060;</pre><p>Après cette requête, la table retrouve ses 9 lignes de départ.</p></div></details>
+
+<div class="box attention"><b>À ne pas oublier</b><ul>
+<li>Un <code>UPDATE</code> ou un <code>DELETE</code> sans <code>WHERE</code> s'applique à <b>toutes</b> les lignes.</li>
+<li>Cibler la ligne par sa <b>clé primaire</b> (<code>WHERE ISM = 8060</code>) garantit de ne toucher qu'elle.</li>
+<li>Insérer deux fois la station 8060 provoque une erreur de clé primaire en double (<i>Duplicate entry</i>).</li></ul></div>
+
+<h2>4. Recherche de données (corrigé)</h2>
+<details><summary>4. Quelles sont les stations de plus de 800 m ?</summary><div class="tp-corr"><pre>SELECT * FROM Pluvio
+WHERE altitude &gt; 800;</pre><p><code>*</code> affiche toutes les colonnes des lignes retenues.</p><div class="tab-defil"><table><tr><th>ISM</th><th>NomStation</th><th>altitude</th><th>precipitation</th></tr><tr><td>5830</td><td>Semsales</td><td>873</td><td>1511</td></tr><tr><td>6137</td><td>Villars-Tiercellin</td><td>850</td><td>1343</td></tr><tr><td>8025</td><td>Fruence</td><td>830</td><td>1656</td></tr></table></div><p class="tp-n">3 lignes</p></div></details>
+<details><summary>5. Le nom et l'altitude des stations de plus de 800 m</summary><div class="tp-corr"><pre>SELECT NomStation, altitude FROM Pluvio
+WHERE altitude &gt; 800;</pre><p>On remplace <code>*</code> par la liste des colonnes à afficher.</p><div class="tab-defil"><table><tr><th>NomStation</th><th>altitude</th></tr><tr><td>Semsales</td><td>873</td></tr><tr><td>Villars-Tiercellin</td><td>850</td></tr><tr><td>Fruence</td><td>830</td></tr></table></div><p class="tp-n">3 lignes</p></div></details>
+<details><summary>6. Quel est le numéro ISM de Semsales ?</summary><div class="tp-corr"><pre>SELECT ISM FROM Pluvio
+WHERE NomStation = &#x27;Semsales&#x27;;</pre><p>Condition sur un texte : la valeur est entre apostrophes.</p><div class="tab-defil"><table><tr><th>ISM</th></tr><tr><td>5830</td></tr></table></div><p class="tp-n">1 ligne</p></div></details>
+<details><summary>7. Les stations de plus de 1000 mm/an</summary><div class="tp-corr"><pre>SELECT * FROM Pluvio
+WHERE precipitation &gt; 1000;</pre><p>Seule Payerne-Ville (900 mm/an) n'est pas retenue.</p><div class="tab-defil"><table><tr><th>ISM</th><th>NomStation</th><th>altitude</th><th>precipitation</th></tr><tr><td>5720</td><td>Romont</td><td>688</td><td>1128</td></tr><tr><td>5830</td><td>Semsales</td><td>873</td><td>1511</td></tr><tr><td>5870</td><td>Moudon-Ville</td><td>525</td><td>1102</td></tr><tr><td>6137</td><td>Villars-Tiercellin</td><td>850</td><td>1343</td></tr><tr><td>6150</td><td>Thierrens</td><td>770</td><td>1061</td></tr><tr><td>6160</td><td>Chanéaz</td><td>758</td><td>1005</td></tr><tr><td>6170</td><td>Châbles (FR)</td><td>589</td><td>1014</td></tr><tr><td>8025</td><td>Fruence</td><td>830</td><td>1656</td></tr></table></div><p class="tp-n">8 lignes</p></div></details>
+<details><summary>8. Les stations de moins de 500 m avec moins de 1000 mm/an</summary><div class="tp-corr"><pre>SELECT * FROM Pluvio
+WHERE altitude &lt; 500 AND precipitation &lt; 1000;</pre><p><code>AND</code> exige les deux conditions à la fois.</p><div class="tab-defil"><table><tr><th>ISM</th><th>NomStation</th><th>altitude</th><th>precipitation</th></tr><tr><td>5900</td><td>Payerne-Ville</td><td>450</td><td>900</td></tr></table></div><p class="tp-n">1 ligne</p></div></details>
+
+<div class="box attention"><b>Erreurs fréquentes</b><ul>
+<li>Oublier les apostrophes autour d'un texte : <code>WHERE NomStation = Semsales</code> fait chercher une colonne nommée Semsales.</li>
+<li>Mettre des apostrophes autour d'un nombre : ça marche en MySQL, mais la comparaison devient alors une comparaison de textes dans d'autres bases.</li>
+<li>Confondre <code>AND</code> (les deux conditions) et <code>OR</code> (au moins une).</li>
+<li>« Plus de 800 m » : <code>&gt; 800</code> ; « 800 m ou plus » : <code>&gt;= 800</code>.</li></ul></div>
+
+</article>
+
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Dans `Pluvio(ISM, NomStation, altitude, precipitation)`, quelle colonne est la clé primaire ?",
+  "options": [
+   "ISM",
+   "NomStation",
+   "altitude",
+   "precipitation"
+  ],
+  "answer": 0,
+  "explication": "Le script déclare `PRIMARY KEY (ISM)` : chaque station a un numéro unique."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle requête affiche les stations de plus de 800 m ?",
+  "options": [
+   "SELECT * FROM Pluvio WHERE altitude > 800;",
+   "SELECT * FROM Pluvio WHERE altitude >= 800;",
+   "SELECT altitude > 800 FROM Pluvio;",
+   "SELECT * FROM Pluvio HAVING 800;"
+  ],
+  "answer": 0,
+  "explication": "« Plus de 800 » se traduit par `> 800`."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Combien de stations la requête `SELECT * FROM Pluvio WHERE altitude > 800;` renvoie-t-elle ?",
+  "answers": [
+   "3"
+  ],
+  "explication": "Semsales (873 m), Villars-Tiercellin (850 m) et Fruence (830 m) : 3 stations."
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "`UPDATE Pluvio SET altitude = 920;` modifie seulement la station 8060.",
+  "answer": false,
+  "explication": "Sans `WHERE`, toutes les lignes passent à 920 m."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quelle requête affiche le numéro ISM de Semsales ?",
+  "options": [
+   "SELECT ISM FROM Pluvio WHERE NomStation = 'Semsales';",
+   "SELECT ISM FROM Pluvio WHERE NomStation = Semsales;",
+   "SELECT 'Semsales' FROM Pluvio;",
+   "SELECT ISM WHERE NomStation = 'Semsales';"
+  ],
+  "answer": 0,
+  "explication": "Le texte est entre apostrophes, et `FROM` est obligatoire."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quel mot relie deux conditions qui doivent être vraies toutes les deux ?",
+  "answers": [
+   "AND"
+  ],
+  "explication": "`AND` : les deux ; `OR` : au moins une."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Combien de stations ont moins de 500 m d'altitude et moins de 1000 mm/an ?",
+  "answers": [
+   "1"
+  ],
+  "explication": "Seule Payerne-Ville (450 m, 900 mm/an)."
+ },
+ {
+  "type": "associer",
+  "niveau": "moyen",
+  "q": "Associe chaque besoin à son instruction.",
+  "paires": [
+   [
+    "Ajouter une station",
+    "INSERT INTO"
+   ],
+   [
+    "Changer une altitude",
+    "UPDATE … SET"
+   ],
+   [
+    "Retirer une station",
+    "DELETE FROM"
+   ],
+   [
+    "Rechercher des stations",
+    "SELECT … WHERE"
+   ]
+  ],
+  "explication": "Ce sont les quatre instructions de manipulation de données (LMD)."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Que se passe-t-il si on exécute deux fois l'INSERT de la station 8060 ?",
+  "options": [
+   "La 2e exécution échoue : clé primaire en double",
+   "La station est ajoutée deux fois",
+   "La 1re ligne est remplacée",
+   "MySQL renumérote la station"
+  ],
+  "answer": 0,
+  "explication": "Une clé primaire est unique : MySQL refuse avec une erreur « Duplicate entry »."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Laquelle de ces requêtes supprime uniquement la station 8060 ?",
+  "options": [
+   "DELETE FROM Pluvio WHERE ISM = 8060;",
+   "DELETE * FROM Pluvio WHERE ISM = 8060;",
+   "DELETE FROM Pluvio;",
+   "DROP TABLE Pluvio WHERE ISM = 8060;"
+  ],
+  "answer": 0,
+  "explication": "`DELETE FROM table WHERE …` ; pas d'étoile ; `DROP TABLE` supprimerait toute la table."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

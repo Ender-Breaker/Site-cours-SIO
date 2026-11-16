@@ -31,6 +31,7 @@ Site de révision pour le BTS SIO (1re année, option SLAM). Chaque matière est
 | SQL | Bloc 1 | 26 missions sur une vraie base SQLite (sql.js) : SELECT, WHERE, agrégats, GROUP BY/HAVING, jointures, INSERT/UPDATE/DELETE, CREATE/ALTER TABLE ; requêtes vérifiées sur leur résultat |
 | Sous-réseaux | SISR | 24 missions de calcul IPv4 générées au hasard (masque, réseau, broadcast, plage, même réseau, découpage, VLSM), correction pas à pas + calculateur (`assets/labo-ipv4.js`) |
 | Devoir Linux A | SISR | Le devoir Linux A rejoué en 21 missions (arborescence, utilisateurs et droits, CSV avec `cut`, script de sauvegarde avec `tar`), même `employes.csv` et `projet_web` que le sujet ; épreuve `sisr-devoir_pratique`. Généré par un script hors dépôt |
+| TP SQL | Bloc 1 | Les TP Pluviométrie (9 missions) et Table des calories (17 missions) question par question, sur les tables `Pluvio` et `CALORIE` ; épreuve `bloc1-sqltp_pratique`. Chapitres corrigés `sql-tp-pluviometrie` et `sql-tp-calories`, scripts MySQL nettoyés dans `modules/bloc1/fichiers/`. Généré par un script hors dépôt |
 | La bonne terminaison | Culture générale | Conjugaison de 754 verbes à 6 temps avec diagnostic des erreurs ; 25 bonnes réponses = 1 mission ; épreuve de 20 verbes en 6 min |
 
 Les labos de code partagent le moteur `assets/labo-code.js` ; les missions sont générées dans les pages `modules/*/labo-*.html`.

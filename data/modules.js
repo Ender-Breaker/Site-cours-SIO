@@ -83,7 +83,8 @@ window.EF_MODULES = [
     labos: [{ href: "labo-php.html", ico: "<?", titre: "Labo PHP", court: "PHP", texte: "18 missions avec du vrai PHP 8.4 dans le navigateur : variables, conditions, formulaires GET/POST testés automatiquement." },
       { href: "labo-html.html", ico: "</>", titre: "Labo HTML", court: "HTML", cle: "bloc1-html", texte: "12 missions sur la structure et la sémantique : zones HTML5, titres, articles, figures, tableaux, médias, formulaire accessible." },
       { href: "labo-css.html", ico: "{ }", titre: "Labo CSS", court: "CSS", cle: "bloc1-css", texte: "13 missions vérifiées sur le rendu : sélecteurs et spécificité, modèle de boîte, Flexbox, grille, media queries." },
-      { href: "labo-sql.html", ico: "SQL", titre: "Labo SQL", court: "SQL", cle: "bloc1-sql", texte: "26 missions sur une vraie base SQLite (parc informatique) : SELECT, WHERE, GROUP BY, jointures, INSERT, UPDATE, DELETE, CREATE TABLE." }],
+      { href: "labo-sql.html", ico: "SQL", titre: "Labo SQL", court: "SQL", cle: "bloc1-sql", texte: "26 missions sur une vraie base SQLite (parc informatique) : SELECT, WHERE, GROUP BY, jointures, INSERT, UPDATE, DELETE, CREATE TABLE." },
+      { href: "labo-sql-tp.html", ico: "TP", titre: "Labo TP SQL", court: "TP SQL", cle: "bloc1-sqltp", texte: "Les TP Pluviométrie et Table des calories question par question (26 missions) : SELECT, WHERE, AND / OR, LIKE, IS NULL, INSERT, UPDATE, DELETE." }],
     chapitres: [
       { id: "html-semantique", titre: "HTML : structure et sémantique d'une page", niveau: "facile" },
       { id: "html-tableaux-medias", titre: "HTML : tableaux, médias et accessibilité", niveau: "moyen" },
@@ -94,7 +95,9 @@ window.EF_MODULES = [
       { id: "php-formulaires", titre: "PHP : formulaires et traitement des données", niveau: "moyen" },
       { id: "sql-select", titre: "SQL : interroger une base de données", niveau: "facile" },
       { id: "sql-jointures", titre: "SQL : jointures et regroupements", niveau: "moyen" },
-      { id: "sql-ldd-lmd", titre: "SQL : créer et modifier les données", niveau: "moyen" }
+      { id: "sql-ldd-lmd", titre: "SQL : créer et modifier les données", niveau: "moyen" },
+      { id: "sql-tp-pluviometrie", titre: "TP SQL : stations pluviométriques", niveau: "facile" },
+      { id: "sql-tp-calories", titre: "TP SQL : table des calories", niveau: "moyen" }
     ]
   },
   {
