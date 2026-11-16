@@ -39,7 +39,8 @@ service cloud.firestore {
         && exists(/databases/$(db)/documents/config/moderation)
         && request.auth.token.email in get(/databases/$(db)/documents/config/moderation).data.emails;
     }
-    function matiereOk(m) { return m in ['algo', 'slam', 'sisr', 'bloc1', 'bloc3', 'maths', 'culture-generale', 'cejm', 'anglais', 'general']; }
+    // identifiant de matière (programme, cours bonus ou « general ») : minuscules, chiffres et tirets
+    function matiereOk(m) { return m is string && m.matches('^[a-z0-9-]{2,30}$'); }
 
     match /posts/{post} {
       allow read: if true;

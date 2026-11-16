@@ -410,7 +410,7 @@ async function synchroniser() {
   CLES.forEach((k) => {
     let n = {}; try { n = JSON.parse(nuage[k] || "{}") || {}; } catch (e) { /* ignoré */ }
     const avant = localStorage.getItem(k), loc = lit(k);
-    const res = JSON.stringify(fusion(k, loc, n));
+    const res = JSON.stringify(EF.migre ? EF.migre(k, fusion(k, loc, n)) : fusion(k, loc, n));
     if (res !== "{}" && res !== avant) { setItemOrig.call(localStorage, k, res); if (res !== JSON.stringify(loc)) change = true; }
   });
   synchroPrete = true;

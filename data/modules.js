@@ -101,21 +101,6 @@ window.EF_MODULES = [
     ]
   },
   {
-    id: "bloc3",
-    evalTextuel: true,
-    titre: "Bloc 3",
-    sousTitre: "Cybersécurité des services informatiques",
-    icone: "§",
-    option: "COMMUN",
-    couleur: "rose",
-    description: "Protection des données personnelles : RGPD, anonymisation, analyse d'impact (PIA).",
-    chapitres: [
-      { id: "rgpd-essentiel", titre: "Le RGPD : l'essentiel à connaître", niveau: "facile" },
-      { id: "anonymisation", titre: "Anonymisation et pseudonymisation", niveau: "moyen" },
-      { id: "pia-methode", titre: "Le PIA : analyse d'impact (méthode CNIL)", niveau: "moyen" }
-    ]
-  },
-  {
     id: "maths",
     evalTextuel: true,
     titre: "Maths",
@@ -160,6 +145,21 @@ window.EF_MODULES = [
     chapitres: [
       { id: "agents-economiques", titre: "Les acteurs de l'économie numérique", niveau: "facile" },
       { id: "marche-offre-demande", titre: "Le marché : offre, demande et prix", niveau: "facile" }
+    ]
+  },
+  {
+    id: "cejm-appliquee",
+    evalTextuel: true,
+    titre: "CEJM appliquée",
+    sousTitre: "Culture économique, juridique et managériale appliquée",
+    icone: "§",
+    option: "COMMUN",
+    couleur: "rose",
+    description: "Le droit appliqué à l'informatique : protection des données personnelles (RGPD), anonymisation, analyse d'impact (PIA).",
+    chapitres: [
+      { id: "rgpd-essentiel", titre: "Le RGPD : l'essentiel à connaître", niveau: "facile" },
+      { id: "anonymisation", titre: "Anonymisation et pseudonymisation", niveau: "moyen" },
+      { id: "pia-methode", titre: "Le PIA : analyse d'impact (méthode CNIL)", niveau: "moyen" }
     ]
   },
   {

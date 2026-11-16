@@ -59,6 +59,33 @@
   function write(key, v) {
     try { localStorage.setItem(key, JSON.stringify(v)); } catch (e) {}
   }
+  /* matières renommées : la progression, les meilleurs scores et les évaluations suivent (ancien id → nouvel id) */
+  var RENOMMEES = { bloc3: "cejm-appliquee" };
+  function migre(k, o) {
+    if (!o || typeof o !== "object") return o;
+    Object.keys(RENOMMEES).forEach(function (a) {
+      var n = RENOMMEES[a];
+      if (k === KEY && o[a]) {
+        o[n] = (o[n] || []).concat(o[a].filter(function (c) { return (o[n] || []).indexOf(c) < 0; }));
+        delete o[a];
+      } else if (k === BEST || k === EVALS) {
+        var sep = k === BEST ? "/" : "_";
+        Object.keys(o).forEach(function (c) {
+          if (c.indexOf(a + sep) !== 0) return;
+          var nc = n + c.slice(a.length), v = o[c], w = o[nc];
+          var mieux = w === undefined || (k === BEST ? v > w : (v && v.points || 0) > (w && w.points || 0));
+          if (mieux) o[nc] = v;
+          delete o[c];
+        });
+      }
+    });
+    return o;
+  }
+  [KEY, BEST, EVALS].forEach(function (k) {
+    var avant = localStorage.getItem(k); if (!avant) return;
+    var apres = JSON.stringify(migre(k, read(k)));
+    if (apres !== avant) write(k, JSON.parse(apres));
+  });
   function estBonus(mid) { return (window.EF_MODULES || []).some(function (m) { return m.bonus && m.id === mid; }); }
   function esc(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
@@ -235,6 +262,7 @@
     },
     /* Série de jours (streak) : au moins un défi par jour (question de quiz, mission de labo, évaluation…),
        réussi ou non. Un jour sans défi remet la série à zéro. localStorage « ef-streak » { jours, dernier, record } */
+    migre: migre,
     jour: jour,
     serie: serie,
     activite: function () {

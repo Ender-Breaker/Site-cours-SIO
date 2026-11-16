@@ -11,10 +11,10 @@ Site de révision pour le BTS SIO (1re année, option SLAM). Chaque matière est
 | Algorithmique / Python | Types et opérations, plus 6 chapitres bonus (variables, affichage, conditions, boucles, listes et chaînes, fonctions) |
 | SLAM | HTML, CSS, formulaires, HTTP et URL |
 | SISR | Présentation des blocs, shell Linux, droits, archives et processus, adressage IPv4 et services réseau, WordPress / Nginx, corrigé commenté du devoir Linux A |
-| Bloc 1 | HTML (structure et sémantique ; tableaux, médias, accessibilité), CSS (sélecteurs et cascade ; Flexbox, Grid, responsive), PHP (variables, conditions, formulaires), SQL (SELECT ; jointures et regroupements ; LDD/LMD) |
-| Bloc 3 | RGPD, PIA, anonymisation |
+| Bloc 1 | HTML (structure et sémantique ; tableaux, médias, accessibilité), CSS (sélecteurs et cascade ; Flexbox, Grid, responsive), PHP (variables, conditions, formulaires), SQL (SELECT ; jointures et regroupements ; LDD/LMD ; TP Pluviométrie et Table des calories) |
 | Mathématiques | Numération, divisibilité et PGCD, congruences, suites, statistiques |
 | CEJM | Agents économiques, marché, offre et demande |
+| CEJM appliquée | RGPD, anonymisation et pseudonymisation, PIA (anciennement dans « Bloc 3 » : les anciennes adresses `modules/bloc3/*.html` redirigent, et la progression, les meilleurs scores et les évaluations `bloc3_*` sont migrés automatiquement vers `cejm-appliquee` par `EtudeFacile.migre`) |
 | Culture générale | Les terminaisons verbales (cours + exercices) |
 | Anglais | À venir |
 

@@ -166,7 +166,7 @@ window.EF_EVAL_TEXTES = {
         { n: "garantit la cohérence (intégrité référentielle)", rx: "coheren|integrit|exist|interdit|empeche|refuse" }],
       corrige: "<p>Une clé étrangère est une colonne qui contient la <b>clé primaire d'une ligne d'une autre table</b> (ex. <code>employe.service_id</code> → <code>service.id</code>). Elle <b>relie</b> les tables, ce qui permet les jointures, et le SGBD garantit l'<b>intégrité référentielle</b> : impossible d'y mettre une valeur qui n'existe pas dans la table référencée.</p>" }
   ],
-  bloc3: [
+  "cejm-appliquee": [
     { q: "Qu'est-ce qu'une donnée à caractère personnel au sens du RGPD ? Donne des exemples.",
       notions: [
         { n: "information sur une personne physique identifiée ou identifiable", rx: "personne physique|identifi|individu|une personne" },

@@ -8,7 +8,8 @@
   var EF = window.EtudeFacile, esc = EF.esc, el = EF.el, I = EF.icon;
   var MODS = window.EF_MODULES || [];
   var MATIERES = [{ id: "general", titre: "Général", couleur: "" }].concat(MODS.map(function (m) { return { id: m.id, titre: m.titre, couleur: m.couleur }; }));
-  function mat(id) { return MATIERES.filter(function (m) { return m.id === id; })[0] || MATIERES[0]; }
+  var ANCIENS = { bloc3: "cejm-appliquee" }; /* matières renommées : les anciens messages suivent */
+  function mat(id) { id = ANCIENS[id] || id; return MATIERES.filter(function (m) { return m.id === id; })[0] || MATIERES[0]; }
 
   document.body.appendChild(EF.header(""));
   var navA = document.querySelector('.top-nav a[href="forum.html"]'); if (navA) navA.setAttribute("aria-current", "page");
@@ -135,7 +136,7 @@
     var box = document.getElementById("fo-liste"); if (!box || !cache) return;
     var r = recherche.trim().toLowerCase();
     var l = cache.filter(function (p) {
-      return (!filtre || p.matiere === filtre) && (!r || (p.titre + " " + p.texte + " " + p.pseudo).toLowerCase().indexOf(r) >= 0) && (tri !== "sans" || !p.nbRep);
+      return (!filtre || (ANCIENS[p.matiere] || p.matiere) === filtre) && (!r || (p.titre + " " + p.texte + " " + p.pseudo).toLowerCase().indexOf(r) >= 0) && (tri !== "sans" || !p.nbRep);
     });
     if (tri === "populaires") l.sort(function (a, b) { return chaud(b) - chaud(a); });
     else if (tri === "top") l.sort(function (a, b) { return b.score - a.score || ms(b.cree) - ms(a.cree); });
