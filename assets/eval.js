@@ -70,7 +70,7 @@
       '<h2 class="ev-h2">Choisis une matière</h2><div class="ev-grid">';
     var bonusVu = false;
     MODS.filter(function (m) { return !m.bonus; }).concat(MODS.filter(function (m) { return m.bonus; })).forEach(function (m) {
-      if (m.bonus && !bonusVu) { bonusVu = true; h += '</div><h2 class="ev-h2">Cours bonus <small class="lb-small">· hors classement</small></h2><div class="ev-grid">'; }
+      if (m.bonus && !bonusVu) { bonusVu = true; h += '</div><h2 class="ev-h2">Cours bonus <small class="lb-small">· classement bonus à part</small></h2><div class="ev-grid">'; }
       var types = ["questionnaire"];
       if (TEXTES[m.id]) types.push("textuel");
       (m.labos || []).forEach(function (x, i) { if (!x.sansExamen) types.push("pratique:" + i); });
@@ -366,10 +366,10 @@
       '<span>' + I("timer") + ' ' + mmss(dureeFaite) + (rest <= 0 ? " (temps écoulé)" : "") + '</span>' +
       (sv.record ? '<span class="ev-record">Nouveau record !</span>' : '<span>Record : ' + sv.best.points + ' pts</span>') + '</div></div>' +
       (R.type === "chapitre" ? '<p class="lb-small">Évaluation d\'entraînement : elle ne compte pas au classement.</p>' :
-        (window.EF_FIREBASE_CONFIG && !connecte ? '<p class="ev-login">Connecte-toi pour que ce résultat compte dans le classement. <button type="button" class="btn" id="ev-login">Se connecter</button></p>' : '')) +
+        (window.EF_FIREBASE_CONFIG && !connecte ? '<p class="ev-login">Connecte-toi pour que ce résultat compte dans le classement' + (R.m.bonus ? ' bonus' : '') + '. <button type="button" class="btn" id="ev-login">Se connecter</button></p>' : '')) +
       '<div class="btns"><button type="button" class="btn primary" id="ev-again">' + I("rotate-ccw") + ' Recommencer</button>' +
       (ch ? '<a class="btn" href="modules/' + R.m.id + '/' + R.cid + '.html">Revoir le cours</a>' : '') +
-      '<button type="button" class="btn" id="ev-home">Autre évaluation</button><a class="btn" href="classement.html">' + I("trophy") + ' Classement</a></div></div>' +
+      '<button type="button" class="btn" id="ev-home">Autre évaluation</button><a class="btn" href="classement.html' + (R.m.bonus ? '#bonus' : '') + '">' + I("trophy") + ' Classement</a></div></div>' +
       '<h2 class="ev-h2">Correction</h2><div class="ev-detail">' + detail + '</div>';
     document.getElementById("ev-again").onclick = function () { lancer(R.m, R.type, R.cid); };
     document.getElementById("ev-home").onclick = accueil;

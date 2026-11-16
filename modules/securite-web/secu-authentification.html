@@ -13,7 +13,7 @@
 
 <!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/securite-web.txt) -->
 <article id="cours">
-<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte pas dans ta progression ni au classement du programme, mais il a son <a href="../../classement.html#bonus">propre classement bonus</a>. Il est là pour aller plus loin.</p></div>
 <h2>1. Ne jamais stocker un mot de passe en clair</h2>
 <p>Si la base de données fuit, tous les comptes sont compromis, y compris sur les autres sites où les utilisateurs ont réutilisé leur mot de passe. On stocke une <b>empreinte</b> (*hash*) : le résultat d'une fonction à sens unique.</p>
 <table><tr><th>Méthode</th><th>Verdict</th></tr><tr><td>En clair</td><td>inacceptable</td></tr><tr><td>MD5, SHA-1, SHA-256 simples</td><td>trop <b>rapides</b> : des milliards d'essais par seconde</td></tr><tr><td>bcrypt, Argon2</td><td>conçus pour être <b>lents</b> et salés : la bonne réponse</td></tr></table>

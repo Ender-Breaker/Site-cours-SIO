@@ -13,7 +13,7 @@
 
 <!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/securite-web.txt) -->
 <article id="cours">
-<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte pas dans ta progression ni au classement du programme, mais il a son <a href="../../classement.html#bonus">propre classement bonus</a>. Il est là pour aller plus loin.</p></div>
 <p><b>Durcir</b> (*hardening*) un système, c'est réduire tout ce qu'un attaquant pourrait utiliser : comptes, services, droits, logiciels. Un système fraîchement installé est configuré pour être pratique, pas pour être sûr.</p>
 <h2>1. Les comptes</h2>
 <table><tr><th>Règle</th><th>Sous Linux</th><th>Sous Windows</th></tr><tr><td>Pas de travail quotidien en administrateur</td><td><code>sudo</code> ponctuel</td><td>compte standard + élévation UAC</td></tr><tr><td>Pas de compte partagé</td><td>un compte par personne</td><td>idem, dans l'annuaire</td></tr><tr><td>Désactiver les comptes inutiles</td><td><code>sudo usermod -L invite</code></td><td><code>Disable-ADAccount</code></td></tr><tr><td>Mots de passe robustes, verrouillage après échecs</td><td>PAM, <code>faillock</code></td><td>stratégie de groupe (GPO)</td></tr><tr><td>Qui est administrateur ?</td><td><code>getent group sudo</code></td><td><code>Get-LocalGroupMember Administrateurs</code></td></tr></table>

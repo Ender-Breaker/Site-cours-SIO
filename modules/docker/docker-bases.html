@@ -13,7 +13,7 @@
 
 <!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/docker.txt) -->
 <article id="cours">
-<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte pas dans ta progression ni au classement du programme, mais il a son <a href="../../classement.html#bonus">propre classement bonus</a>. Il est là pour aller plus loin.</p></div>
 <p>« Ça marche sur ma machine » : <b>Docker</b> supprime ce problème. Il emballe une application <b>avec tout ce dont elle a besoin</b> (bibliothèques, configuration, version exacte de PHP ou de MariaDB) dans un <b>conteneur</b> qui tourne à l'identique partout. Côté SLAM, il donne un environnement de développement en une commande ; côté SISR, il déploie et isole des services.</p>
 <h2>1. Conteneur ou machine virtuelle ?</h2>
 <table><tr><th></th><th>Machine virtuelle</th><th>Conteneur</th></tr><tr><td>Contient</td><td>un système d'exploitation complet</td><td>l'application et ses dépendances</td></tr><tr><td>Noyau</td><td>le sien</td><td>celui de la machine hôte, partagé</td></tr><tr><td>Démarrage</td><td>dizaines de secondes</td><td>moins d'une seconde</td></tr><tr><td>Taille</td><td>plusieurs Go</td><td>quelques dizaines de Mo</td></tr><tr><td>Isolation</td><td>très forte</td><td>bonne, mais plus légère</td></tr></table>

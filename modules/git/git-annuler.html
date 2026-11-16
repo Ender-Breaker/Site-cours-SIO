@@ -13,7 +13,7 @@
 
 <!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/git.txt) -->
 <article id="cours">
-<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte pas dans ta progression ni au classement du programme, mais il a son <a href="../../classement.html#bonus">propre classement bonus</a>. Il est là pour aller plus loin.</p></div>
 <p>Git ne perd presque jamais rien : il existe une commande pour chaque situation. L'important est de savoir <b>où</b> se trouve ce qu'on veut annuler.</p>
 <h2>1. Quelle commande pour quelle situation ?</h2>
 <table><tr><th>Situation</th><th>Commande</th></tr><tr><td>J'ai modifié un fichier et je veux retrouver la version du dernier commit</td><td><code>git restore fichier</code></td></tr><tr><td>J'ai fait <code>git add</code> par erreur</td><td><code>git restore --staged fichier</code></td></tr><tr><td>Mon dernier message de commit est faux</td><td><code>git commit --amend -m "Nouveau message"</code></td></tr><tr><td>J'ai oublié un fichier dans le dernier commit</td><td><code>git add fichier</code> puis <code>git commit --amend --no-edit</code></td></tr><tr><td>Je veux annuler un commit déjà poussé</td><td><code>git revert a1b2c3d</code></td></tr><tr><td>Je veux défaire mes derniers commits <b>locaux</b></td><td><code>git reset</code></td></tr></table>

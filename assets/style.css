@@ -475,7 +475,7 @@ pre .cm { color: #9aa0b8; font-style: italic; }
 .cm-tete { display: grid; padding: 6px 8px 8px; border-bottom: 1.5px dashed #b9b2a2; }
 .cm-tete span { font-size: .78rem; color: var(--discret); overflow: hidden; text-overflow: ellipsis; }
 .cm-etat { font-size: .78rem; font-weight: 700; color: var(--ok); padding: 4px 8px; }
-.cm-stats { display: flex; gap: 10px; padding: 2px 8px 6px; font-size: .78rem; }
+.cm-stats { display: flex; flex-wrap: wrap; gap: 4px 10px; padding: 2px 8px 6px; font-size: .78rem; }
 .compte-menu button { text-align: left; background: none; border: 0; padding: 8px; border-radius: var(--r1); font-weight: 700; cursor: pointer; color: var(--encre); }
 .compte-menu button:hover { background: var(--safran-clair); }
 .compte-voile { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 16px; background: rgba(22, 24, 43, .55); overflow-y: auto; }
@@ -584,9 +584,14 @@ html.compte-ouvert { overflow: hidden; }
 .labo-resultat { display: block; }
 
 /* ===================== Classement ===================== */
+.cl-onglets { display: flex; flex-wrap: wrap; gap: var(--s2); margin: var(--s3) 0 0; }
+.cl-onglets a { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border: var(--trait); border-radius: var(--r1); background: var(--surface); color: var(--encre); font-weight: 800; text-decoration: none; box-shadow: var(--ombre-1); }
+.cl-onglets a svg { width: 18px; height: 18px; }
+.cl-onglets a[aria-selected="true"] { background: var(--cobalt); color: #fff; }
+.cl-onglets a:hover { transform: translate(-1px, -1px); }
 .cl-outils { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; justify-content: space-between; margin: var(--s3) 0 var(--s2); }
-.cl-outils label { display: flex; align-items: center; gap: 8px; font-weight: 700; }
-.cl-outils select { font: inherit; font-weight: 600; padding: 8px 12px; border: var(--trait); border-radius: var(--r1); background: var(--surface); }
+.cl-outils label { display: flex; align-items: center; gap: 8px; font-weight: 700; min-width: 0; max-width: 100%; }
+.cl-outils select { min-width: 0; max-width: 100%; font: inherit; font-weight: 600; padding: 8px 12px; border: var(--trait); border-radius: var(--r1); background: var(--surface); }
 .cl-table { border: var(--trait); border-radius: var(--r2); background: var(--surface); box-shadow: var(--ombre-2); overflow-x: auto; }
 .cl-table table { width: 100%; border-collapse: collapse; display: table; margin: 0; }
 .cl-table th { text-align: left; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; padding: 10px 14px; background: var(--encre); color: #fff; }

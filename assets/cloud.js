@@ -49,7 +49,7 @@ function rendu() {
     <div class="compte-menu" hidden>
       <div class="cm-tete"><b>${esc(nom)}</b><span>${esc(user.email || "")}</span></div>
       <div class="cm-etat">${esc(etat || "Progression synchronisée")}</div>
-      ${profil && profil.stats ? `<div class="cm-stats"><span><b>${profil.stats.chapitres}</b> chapitres</span><span><b>${profil.stats.missions}</b> missions</span><span><b>${profil.stats.score}</b> pts</span></div>` : ""}
+      ${profil && profil.stats ? `<div class="cm-stats"><span><b>${profil.stats.chapitres}</b> chapitres</span><span><b>${profil.stats.missions}</b> missions</span><span><b>${profil.stats.score}</b> pts</span>${profil.stats.bonus && profil.stats.bonus.score ? `<span><b>${profil.stats.bonus.score}</b> pts bonus</span>` : ""}</div>` : ""}
       <a class="cm-lien" href="${racine}classement.html">Voir le classement</a>
       <button type="button" data-a="pseudo">Changer de pseudo</button>
       <button type="button" data-a="donnees">Mes données</button>
@@ -314,19 +314,29 @@ async function choisirPseudo(p) {
 
 /* ---------- statistiques (pour le classement) ---------- */
 function lit(k) { try { return JSON.parse(localStorage.getItem(k)) || {}; } catch (e) { return {}; } }
-/* les cours bonus ne comptent pas au classement */
+/* les cours bonus ne comptent pas au classement du programme : ils ont leur propre classement (stats.bonus) */
 const BONUS = new Set((window.EF_MODULES || []).filter((m) => m.bonus).map((m) => m.id));
-const compte = (k) => PUBLIQUE.test(k) && !BONUS.has(k.split("_")[0]);
-function stats() {
+/* clés d'épreuve des cours bonus : « <module>_… » et clés « cle » de leurs labos supplémentaires */
+const CLES_EVAL_BONUS = new Set((window.EF_MODULES || []).filter((m) => m.bonus).reduce((t, m) => t.concat([m.id], (m.labos || []).map((l) => l.cle).filter(Boolean)), []));
+const LABOS_BONUS = CLES.filter((k) => /^ef-labo-/.test(k) && !LABOS.includes(k));
+const estBonusEval = (k) => CLES_EVAL_BONUS.has(k.split("_")[0]);
+const compte = (k) => PUBLIQUE.test(k) && !estBonusEval(k);
+const compteBonus = (k) => PUBLIQUE.test(k) && estBonusEval(k);
+function calcul(modules, labos, filtre) {
   const prog = lit("ef-progress");
-  const chapitres = Object.keys(prog).filter((m) => !BONUS.has(m)).reduce((n, m) => n + (prog[m] || []).length, 0);
-  const missions = LABOS.reduce((n, k) => n + Object.keys(lit(k).done || {}).length, 0);
-  const ev = lit("ef-evals"), evals = Object.keys(ev).filter(compte).reduce((n, k) => n + (ev[k].points || 0), 0);
+  const chapitres = Object.keys(prog).filter(modules).reduce((n, m) => n + (prog[m] || []).length, 0);
+  const missions = labos.reduce((n, k) => n + Object.keys(lit(k).done || {}).length, 0);
+  const ev = lit("ef-evals"), evals = Object.keys(ev).filter(filtre).reduce((n, k) => n + (ev[k].points || 0), 0);
   return { chapitres, missions, evals, score: chapitres * 100 + missions * 20 + evals };
+}
+function stats() {
+  const st = calcul((m) => !BONUS.has(m), LABOS, compte);
+  st.bonus = calcul((m) => BONUS.has(m), LABOS_BONUS, compteBonus);
+  return st;
 }
 function evalsPubliques() {
   const ev = lit("ef-evals"), r = {};
-  Object.keys(ev).forEach((k) => { if (compte(k)) r[k] = { points: ev[k].points, pct: ev[k].pct, duree: ev[k].duree, date: ev[k].date }; });
+  Object.keys(ev).forEach((k) => { if (PUBLIQUE.test(k)) r[k] = { points: ev[k].points, pct: ev[k].pct, duree: ev[k].duree, date: ev[k].date }; });
   return r;
 }
 

@@ -142,9 +142,9 @@
         '<div class="ev-score"><b>' + reussies + '<small>/' + o.missions.length + '</small></b><div><span class="ev-pts">' + pts + ' pts</span>' +
         '<span>' + icon("timer") + ' ' + Math.floor(duree / 60) + ':' + ("0" + (duree % 60)).slice(-2) + (o.restant <= 0 ? " (temps écoulé)" : "") + '</span>' +
         (sv.record ? '<span class="ev-record">Nouveau record !</span>' : '<span>Record : ' + sv.best.points + ' pts</span>') + '</div></div>' +
-        (window.EF_FIREBASE_CONFIG && !connecte && !estBonus(o.mid || (o.ctx && o.ctx.mid)) ? '<p class="ev-login">Connecte-toi pour que ce résultat compte dans le classement. <button type="button" class="btn" data-ex="login">Se connecter</button></p>' : '') +
+        (window.EF_FIREBASE_CONFIG && !connecte ? '<p class="ev-login">Connecte-toi pour que ce résultat compte dans le classement' + (estBonus(o.mid || (o.ctx && o.ctx.mid)) ? ' bonus' : '') + '. <button type="button" class="btn" data-ex="login">Se connecter</button></p>' : '') +
         '<div class="btns"><button type="button" class="btn primary" data-ex="rejouer">' + icon("rotate-ccw") + ' Recommencer</button>' +
-        '<a class="btn" href="' + o.racine + 'evaluation.html">Autre évaluation</a><a class="btn" href="' + o.racine + 'classement.html">' + icon("trophy") + ' Classement</a>' +
+        '<a class="btn" href="' + o.racine + 'evaluation.html">Autre évaluation</a><a class="btn" href="' + o.racine + 'classement.html' + (estBonus(o.mid || (o.ctx && o.ctx.mid)) ? '#bonus' : '') + '">' + icon("trophy") + ' Classement</a>' +
         '<a class="btn" href="' + (o.retour || "#") + '">Retour au labo</a></div></div>' +
         '<h2 class="ev-h2">Correction</h2><div class="ev-detail">' + o.missions.map(function (m) {
           return '<details class="ev-corr ' + (m.ok ? "ok" : "ko") + '"' + (m.ok ? "" : " open") + '><summary><span class="ck">' + (m.ok ? "✓" : "✗") + '</span>' + esc(m.titre) + '</summary>' +
@@ -175,9 +175,9 @@
         '<span>' + icon("timer") + ' ' + Math.floor(duree / 60) + ':' + ("0" + (duree % 60)).slice(-2) + (o.restant <= 0 ? " (temps écoulé)" : "") + '</span>' +
         (sv.record ? '<span class="ev-record">Nouveau record !</span>' : '<span>Record : ' + sv.best.points + ' pts</span>') + '</div></div>' +
         '<div class="ev-parts">' + c.parties.map(function (p) { return '<span><b>' + Math.round((p.pct || 0) * 100) + ' %</b> ' + esc(p.titre) + '</span>'; }).join("") + '</div>' +
-        (window.EF_FIREBASE_CONFIG && !connecte && !estBonus(o.mid || (o.ctx && o.ctx.mid)) ? '<p class="ev-login">Connecte-toi pour que ce résultat compte dans le classement. <button type="button" class="btn" data-ex="login">Se connecter</button></p>' : '') +
+        (window.EF_FIREBASE_CONFIG && !connecte ? '<p class="ev-login">Connecte-toi pour que ce résultat compte dans le classement' + (estBonus(o.mid || (o.ctx && o.ctx.mid)) ? ' bonus' : '') + '. <button type="button" class="btn" data-ex="login">Se connecter</button></p>' : '') +
         '<div class="btns"><a class="btn primary" href="' + o.racine + 'evaluation.html#m=' + c.mid + '&t=examen">' + icon("rotate-ccw") + ' Recommencer</a>' +
-        '<a class="btn" href="' + o.racine + 'evaluation.html">Autre évaluation</a><a class="btn" href="' + o.racine + 'classement.html">' + icon("trophy") + ' Classement</a></div></div>' +
+        '<a class="btn" href="' + o.racine + 'evaluation.html">Autre évaluation</a><a class="btn" href="' + o.racine + 'classement.html' + (estBonus(o.mid || (o.ctx && o.ctx.mid)) ? '#bonus' : '') + '">' + icon("trophy") + ' Classement</a></div></div>' +
         '<h2 class="ev-h2">Correction</h2>' + c.parties.map(function (p, i) {
           return '<h3 class="ev-partie">Partie ' + (i + 1) + ' · ' + esc(p.titre) + ' <span>' + Math.round((p.pct || 0) * 100) + ' %</span></h3><div class="ev-detail">' + (p.detail || "") + '</div>';
         }).join("");

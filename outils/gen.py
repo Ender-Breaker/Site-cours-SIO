@@ -218,7 +218,7 @@ PAGE = """<!DOCTYPE html>
 
 <!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/%(mid)s.txt) -->
 <article id="cours">
-<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte pas dans ta progression ni au classement du programme, mais il a son <a href="../../classement.html#bonus">propre classement bonus</a>. Il est là pour aller plus loin.</p></div>
 %(cours)s%(fin)s
 </article>
 

@@ -13,7 +13,7 @@
 
 <!-- ============ COURS ============ (page générée par outils/gen.py depuis outils/src/securite-web.txt) -->
 <article id="cours">
-<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte ni dans ta progression ni au classement. Il est là pour aller plus loin.</p></div>
+<div class="box"><b>Cours bonus</b><p>Ce cours est hors programme du BTS : il ne compte pas dans ta progression ni au classement du programme, mais il a son <a href="../../classement.html#bonus">propre classement bonus</a>. Il est là pour aller plus loin.</p></div>
 <p>Ce chapitre déroule la méthode sur des exemples écrits pour l'entraînement, comme ceux des CTF : un petit programme vérifie un mot de passe, et il faut comprendre <b>comment</b>.</p>
 <h2>1. La démarche</h2>
 <ol><li><b>Identifier</b> : type de fichier, architecture, empreinte (<code>file</code>, <code>sha256sum</code>).</li><li><b>Regarder sans exécuter</b> : chaînes, fonctions importées, structure (<code>strings</code>, puis un désassembleur).</li><li><b>Repérer le point d'intérêt</b> : le message « Mot de passe incorrect » mène à la fonction qui décide.</li><li><b>Comprendre la vérification</b> : remonter les calculs faits sur la saisie.</li><li><b>Vérifier son hypothèse</b> : exécuter dans un environnement isolé, avec un débogueur si besoin.</li><li><b>Documenter</b> : ce que fait le programme, comment on le sait.</li></ol>

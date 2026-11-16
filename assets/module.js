@@ -38,7 +38,7 @@
         if (l.sansExamen) return;
         epr.push(["pratique" + (i ? "&l=" + i : ""), mod.labos.filter(function (x) { return !x.sansExamen; }).length > 1 ? "Pratique · " + (l.court || l.titre) : "Pratique", l.examTexte || "3 missions de labo · 15 min", i && l.cle ? l.cle + "_pratique" : mod.id + "_pratique"]);
       });
-      html += '<section class="mod-evals"><div class="mod-evals-t"><h2>' + I("timer") + ' Évaluations</h2>' + (mod.bonus ? '<span class="lb-small">Hors classement</span>' : '<a href="../../classement.html">' + I("trophy") + ' Classement</a>') + '</div><div class="mod-evals-l">' +
+      html += '<section class="mod-evals"><div class="mod-evals-t"><h2>' + I("timer") + ' Évaluations</h2>' + '<a href="../../classement.html' + (mod.bonus ? '#bonus' : '') + '">' + I("trophy") + (mod.bonus ? ' Classement bonus' : ' Classement') + '</a>' + '</div><div class="mod-evals-l">' +
         epr.map(function (e) {
           var b = ev[e[3] || mod.id + "_" + e[0]];
           return '<a class="mod-eval' + (e[0] === "examen" ? " examen" : "") + '" href="' + E + e[0] + '"><b>' + e[1] + '</b><span>' + e[2] + '</span><small>' +

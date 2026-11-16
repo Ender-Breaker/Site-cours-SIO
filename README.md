@@ -49,7 +49,7 @@ PHP, Python et SQLite (sql.js) sont embarqués dans `assets/vendor/` (aucun CDN 
   - Accès direct : `evaluation.html#m=<matière>&t=<type>[&c=<chapitre>]`, liens sur chaque page de matière.
   - Points = coefficient × réussite + bonus de rapidité (si ≥ 50 %). Le meilleur résultat de chaque épreuve est conservé.
 - **Forum** (`forum.html`) : questions par matière, réponses en fil, votes ▲/▼, meilleure réponse, tri (populaires, récentes, mieux notées, sans réponse) et recherche. Firestore : `posts`, `posts/{id}/reponses`, `votes/{uid}`.
-- **Classement** (`classement.html`) : général (100 pts par chapitre, 20 par mission, + meilleurs points d'évaluation) ou par épreuve.
+- **Classement** (`classement.html`) : général (100 pts par chapitre, 20 par mission, + meilleurs points d'évaluation) ou par épreuve. Deux onglets séparés : **Programme BTS** (`stats.score`) et **Cours bonus** (`classement.html#bonus`, `stats.bonus.score` : chapitres bonus, missions des labos bonus, évaluations bonus), chacun avec ses classements par épreuve.
 
 ## RGPD
 
@@ -72,7 +72,7 @@ Le site est utilisable sur téléphone : barre du haut compacte, pastilles et le
 
 ## Cours bonus (hors programme)
 
-Page `bonus.html` (lien « Bonus » dans la barre du haut et bandeau sur l'accueil). Les matières marquées `bonus: true` dans `data/modules.js` ne comptent ni dans la progression générale ni au classement.
+Page `bonus.html` (lien « Bonus » dans la barre du haut et bandeau sur l'accueil). Les matières marquées `bonus: true` dans `data/modules.js` ne comptent ni dans la progression générale ni au classement du programme : ils ont leur propre classement (onglet « Cours bonus » de `classement.html`).
 
 | Module | Chapitres | Labo |
 |---|---|---|
