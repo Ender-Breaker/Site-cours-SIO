@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Labo Devoir Linux A — SISR — Étude Facile</title>
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="sisr">
+<script>
+window.EF_LABO = {
+ "key": "ef-labo-devoir-linux",
+ "mid": "sisr-devoir",
+ "titre": "Labo Devoir Linux A",
+ "couleur": "emerald",
+ "moduleTitre": "SISR",
+ "sousTitre": "Refais le devoir Linux A dans un terminal simulé : chaque exercice du sujet devient une série de missions vérifiées automatiquement.",
+ "fs": {
+  "/home/etu/": null,
+  "/home/etu/ex1/": null,
+  "/home/etu/ex2/": null,
+  "/home/etu/ex3/": null,
+  "/home/etu/ex4/": null,
+  "/home/etu/ex4/sauvegarde.sh": "#!/bin/bash\n# Usage : ./sauvegarde.sh projet_web   ($1 vaut alors \"projet_web\")\nmkdir -p ~/ex4/sauvegardes\ntar -czf ~/ex4/sauvegardes/backup_$(date +%Y%m%d).tar.gz \"$1\"\ntar -tzf ~/ex4/sauvegardes/backup_$(date +%Y%m%d).tar.gz > ~/ex4/sauvegardes/contenu.txt\nwc -l < ~/ex4/sauvegardes/contenu.txt > ~/ex4/sauvegardes/nb_elements.txt\necho \"Sauvegarde de $1 terminee le $(date)\"\n",
+  "/mnt/DevoirLinux-2026/": null,
+  "/mnt/DevoirLinux-2026/employes.csv": "id;nom;prenom;service;ville;date_embauche;salaire;email\n1;Martin;Lucas;Direction;Paris;2014-03-01;5200;lucas.martin@agence.fr\n2;Bernard;Margot;Informatique;Lyon;2019-09-02;3100;margot.bernard@agence.fr\n3;Dubois;Hugo;Commercial;Lille;2021-01-11;2600;hugo.dubois@agence.fr\n4;Thomas;Lea;Compta;Nantes;2016-06-15;2900;lea.thomas@agence.fr\n5;Robert;Louis;Informatique;Paris;2018-04-03;3400;louis.robert@agence.fr\n6;Richard;Chloe;RH;Bordeaux;2020-10-05;2700;chloe.richard@agence.fr\n7;Petit;Jules;Commercial;Paris;2022-02-14;2500;jules.petit@agence.fr\n8;Durand;Manon;Informatique;Lille;2017-11-20;3300;manon.durand@agence.fr\n9;Leroy;Nathan;Compta;Lyon;2015-05-04;3000;nathan.leroy@agence.fr\n10;Moreau;Ines;Informatique;Nantes;2023-03-13;2800;ines.moreau@agence.fr\n11;Simon;Gabriel;Commercial;Bordeaux;2019-07-01;2650;gabriel.simon@agence.fr\n12;Laurent;Lucie;Direction;Lyon;2016-01-04;4800;lucie.laurent@agence.fr\n13;Lefebvre;Adam;Informatique;Paris;2024-09-02;2700;adam.lefebvre@agence.fr\n14;Michel;Sarah;RH;Lille;2018-02-12;2750;sarah.michel@agence.fr\n15;Garcia;Raphael;Commercial;Nantes;2025-01-06;2400;raphael.garcia@agence.fr\n16;David;Jade;Informatique;Bordeaux;2020-06-08;3150;jade.david@agence.fr\n17;Bertrand;Ethan;Commercial;Lyon;2021-09-13;2550;ethan.bertrand@agence.fr\n18;Roux;Louise;Compta;Paris;2017-03-06;2950;louise.roux@agence.fr\n19;Vincent;Paul;Informatique;Lyon;2022-10-03;2900;paul.vincent@agence.fr\n20;Fournier;Alice;RH;Nantes;2019-01-07;2800;alice.fournier@agence.fr\n21;Morel;Leo;Commercial;Paris;2023-05-15;2450;leo.morel@agence.fr\n22;Girard;Lina;Informatique;Lille;2016-09-05;3500;lina.girard@agence.fr\n23;Andre;Tom;Compta;Lyon;2024-02-05;2600;tom.andre@agence.fr\n24;Mercier;Rose;Direction;Bordeaux;2015-11-02;4500;rose.mercier@agence.fr\n25;Dupont;Noah;Informatique;Paris;2021-04-12;3050;noah.dupont@agence.fr\n26;Lambert;Zoe;Commercial;Lille;2020-03-02;2700;zoe.lambert@agence.fr\n27;Bonnet;Paul;Compta;Bordeaux;2018-08-27;2850;paul.bonnet@agence.fr\n28;Francois;Eva;RH;Paris;2022-06-20;2650;eva.francois@agence.fr\n29;Martinez;Sacha;Informatique;Nantes;2017-02-13;3250;sacha.martinez@agence.fr\n30;Legrand;Mila;Compta;Lyon;2025-03-03;2500;mila.legrand@agence.fr\n",
+  "/mnt/DevoirLinux-2026/projet_web/index.html": "<h1>Agence</h1>\n",
+  "/mnt/DevoirLinux-2026/projet_web/css/style.css": "body { margin: 0; }\n",
+  "/mnt/DevoirLinux-2026/projet_web/js/app.js": "console.log('ok');\n",
+  "/mnt/DevoirLinux-2026/projet_web/config/app.conf": "port=8080\n",
+  "/mnt/DevoirLinux-2026/projet_web/config/db.conf": "host=localhost\nbase=agence\n",
+  "/mnt/DevoirLinux-2026/projet_web/logs/acces.log": "10:02 GET /index.html 200\n",
+  "/mnt/DevoirLinux-2026/projet_web/logs/erreur.log": "10:05 GET /admin 404\n",
+  "/srv/": null,
+  "/tmp/": null
+ },
+ "lecons": [
+  {
+   "id": "ex1",
+   "titre": "Ex. 1 · Arborescence",
+   "missions": [
+    {
+     "id": "d1-arbo",
+     "titre": "Construire l'arborescence",
+     "cwd": "/home/etu/ex1",
+     "texte": "<p>L'agence a besoin de cette arborescence dans <code>~/ex1</code> :</p><pre>Agence/\n├── Direction/\n├── Compta/\n├── Informatique/\n│   ├── Serveurs/\n│   └── Postes/\n└── Temp/</pre><p>Avec <code>-p</code>, <code>mkdir</code> crée les dossiers parents qui manquent et ne râle pas si un dossier existe déjà. Tu peux tout créer en <b>une seule commande</b>.</p>",
+     "syntaxe": [
+      "mkdir -p a/b a/c/d",
+      "mkdir -p a/{b,c/{d,e}}"
+     ],
+     "objectifs": [
+      {
+       "txt": "Crée <code>Agence/Direction</code>, <code>Agence/Compta</code> et <code>Agence/Temp</code>",
+       "r": [
+        {
+         "isdir": "/home/etu/ex1/Agence/Direction"
+        },
+        {
+         "isdir": "/home/etu/ex1/Agence/Compta"
+        },
+        {
+         "isdir": "/home/etu/ex1/Agence/Temp"
+        }
+       ]
+      },
+      {
+       "txt": "Crée <code>Agence/Informatique/Serveurs</code> et <code>Agence/Informatique/Postes</code>",
+       "r": [
+        {
+         "isdir": "/home/etu/ex1/Agence/Informatique/Serveurs"
+        },
+        {
+         "isdir": "/home/etu/ex1/Agence/Informatique/Postes"
+        }
+       ]
+      }
+     ],
+     "indice": "Une seule commande : <code>mkdir -p</code> suivi des cinq chemins les plus profonds. Variante avec accolades : <code>mkdir -p Agence/{Direction,Compta,Temp,Informatique/{Serveurs,Postes}}</code>.",
+     "solution": [
+      "mkdir -p Agence/Direction Agence/Compta Agence/Informatique/Serveurs Agence/Informatique/Postes Agence/Temp"
+     ],
+     "bravo": "Sans <code>-p</code>, <code>mkdir Agence/Informatique/Serveurs</code> échoue tant que <code>Agence/Informatique</code> n'existe pas."
+    },
+    {
+     "id": "d1-fichiers",
+     "titre": "Créer les fichiers",
+     "cwd": "/home/etu/ex1",
+     "prep": [
+      "mkdir -p Agence/Direction Agence/Compta Agence/Informatique/Serveurs Agence/Informatique/Postes Agence/Temp"
+     ],
+     "texte": "<p><code>touch</code> crée un fichier <b>vide</b>. Pour créer un fichier <b>avec du texte</b>, on redirige la sortie d'<code>echo</code> avec <code>&gt;</code> (le fichier est créé, ou écrasé s'il existe).</p>",
+     "syntaxe": [
+      "touch f1 f2",
+      "echo \"texte\" > fichier"
+     ],
+     "objectifs": [
+      {
+       "txt": "Crée les fichiers vides <code>Agence/Direction/notes.txt</code> et <code>Agence/Compta/factures.txt</code>",
+       "r": [
+        {
+         "equals": [
+          "/home/etu/ex1/Agence/Direction/notes.txt",
+          ""
+         ]
+        },
+        {
+         "equals": [
+          "/home/etu/ex1/Agence/Compta/factures.txt",
+          ""
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Écris <code>Serveur web principal</code> dans <code>Agence/Informatique/Serveurs/web01.txt</code>",
+       "r": [
+        {
+         "equals": [
+          "/home/etu/ex1/Agence/Informatique/Serveurs/web01.txt",
+          "Serveur web principal\n"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Écris <code>Poste a installer</code> dans <code>Agence/brouillon.txt</code>",
+       "r": [
+        {
+         "equals": [
+          "/home/etu/ex1/Agence/brouillon.txt",
+          "Poste a installer\n"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>touch Agence/Direction/notes.txt Agence/Compta/factures.txt</code>, puis <code>echo \"Serveur web principal\" &gt; Agence/Informatique/Serveurs/web01.txt</code>.",
+     "solution": [
+      "touch Agence/Direction/notes.txt Agence/Compta/factures.txt",
+      "echo \"Serveur web principal\" > Agence/Informatique/Serveurs/web01.txt",
+      "echo \"Poste a installer\" > Agence/brouillon.txt"
+     ],
+     "bravo": "<code>echo</code> ajoute un retour à la ligne à la fin : <code>web01.txt</code> fait 21 caractères + 1 = 22 octets."
+    },
+    {
+     "id": "d1-deplacer",
+     "titre": "Copier, renommer, déplacer",
+     "cwd": "/home/etu/ex1",
+     "prep": [
+      "mkdir -p Agence/Direction Agence/Compta Agence/Informatique/Serveurs Agence/Informatique/Postes Agence/Temp",
+      "touch Agence/Direction/notes.txt Agence/Compta/factures.txt",
+      "echo \"Serveur web principal\" > Agence/Informatique/Serveurs/web01.txt",
+      "echo \"Poste a installer\" > Agence/brouillon.txt"
+     ],
+     "texte": "<p><code>cp</code> copie (l'original reste en place). <code>mv</code> déplace <b>et</b> renomme : renommer, c'est déplacer vers un nouveau nom dans le même dossier.</p><p>Attention, la consigne impose de déplacer et renommer <code>brouillon.txt</code> en <b>une seule commande</b> : pas de <code>cp</code> puis <code>rm</code>.</p>",
+     "syntaxe": [
+      "cp fichier dossier/",
+      "mv ancien nouveau",
+      "mv source dossier/nouveau_nom"
+     ],
+     "objectifs": [
+      {
+       "txt": "Copie <code>factures.txt</code> de Compta vers Direction (il doit rester dans Compta)",
+       "r": [
+        {
+         "exists": "/home/etu/ex1/Agence/Direction/factures.txt"
+        },
+        {
+         "exists": "/home/etu/ex1/Agence/Compta/factures.txt"
+        }
+       ]
+      },
+      {
+       "txt": "Renomme <code>Direction/notes.txt</code> en <code>compte_rendu.txt</code>",
+       "r": [
+        {
+         "exists": "/home/etu/ex1/Agence/Direction/compte_rendu.txt"
+        },
+        {
+         "absent": "/home/etu/ex1/Agence/Direction/notes.txt"
+        }
+       ]
+      },
+      {
+       "txt": "En une commande, déplace <code>Agence/brouillon.txt</code> vers <code>Informatique/Postes/poste01.txt</code>",
+       "r": [
+        {
+         "equals": [
+          "/home/etu/ex1/Agence/Informatique/Postes/poste01.txt",
+          "Poste a installer\n"
+         ]
+        },
+        {
+         "absent": "/home/etu/ex1/Agence/brouillon.txt"
+        },
+        {
+         "cmd": "^mv\\s+\\S*brouillon\\.txt\\s+\\S*Postes/poste01\\.txt\\s*$"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>cp Agence/Compta/factures.txt Agence/Direction/</code> · <code>mv Agence/Direction/notes.txt Agence/Direction/compte_rendu.txt</code> · <code>mv Agence/brouillon.txt Agence/Informatique/Postes/poste01.txt</code>",
+     "solution": [
+      "cp Agence/Compta/factures.txt Agence/Direction/",
+      "mv Agence/Direction/notes.txt Agence/Direction/compte_rendu.txt",
+      "mv Agence/brouillon.txt Agence/Informatique/Postes/poste01.txt"
+     ],
+     "bravo": "Un seul <code>mv</code> suffit pour changer à la fois de dossier et de nom."
+    },
+    {
+     "id": "d1-nettoyer",
+     "titre": "Supprimer et dater",
+     "cwd": "/home/etu/ex1",
+     "prep": [
+      "mkdir -p Agence/Direction Agence/Compta Agence/Informatique/Serveurs Agence/Informatique/Postes Agence/Temp",
+      "touch Agence/Direction/notes.txt Agence/Compta/factures.txt",
+      "echo \"Serveur web principal\" > Agence/Informatique/Serveurs/web01.txt",
+      "echo \"Poste a installer\" > Agence/brouillon.txt",
+      "cp Agence/Compta/factures.txt Agence/Direction/",
+      "mv Agence/Direction/notes.txt Agence/Direction/compte_rendu.txt",
+      "mv Agence/brouillon.txt Agence/Informatique/Postes/poste01.txt"
+     ],
+     "texte": "<p><code>rmdir</code> supprime un dossier <b>vide</b> (c'est une sécurité : il refuse un dossier qui contient quelque chose).</p><p><code>touch -t AAAAMMJJhhmm fichier</code> change la date de modification. Le 15 janvier 2026 à 9 h 00 s'écrit <code>202601150900</code>. Vérifie avec <code>ls -l</code>.</p>",
+     "syntaxe": [
+      "rmdir dossier",
+      "touch -t 202601150900 fichier",
+      "ls -l dossier"
+     ],
+     "objectifs": [
+      {
+       "txt": "Supprime le dossier vide <code>Agence/Temp</code>",
+       "r": [
+        {
+         "absent": "/home/etu/ex1/Agence/Temp"
+        }
+       ]
+      },
+      {
+       "txt": "Date <code>Agence/Compta/factures.txt</code> au 15 janvier 2026, 9 h 00",
+       "r": [
+        {
+         "date": [
+          "/home/etu/ex1/Agence/Compta/factures.txt",
+          "202601150900"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>rmdir Agence/Temp</code> puis <code>touch -t 202601150900 Agence/Compta/factures.txt</code>.",
+     "solution": [
+      "rmdir Agence/Temp",
+      "touch -t 202601150900 Agence/Compta/factures.txt"
+     ],
+     "bravo": "Dans <code>ls -l</code>, une date de plus de six mois affiche l'année à la place de l'heure."
+    },
+    {
+     "id": "d1-compter",
+     "titre": "Compter les fichiers",
+     "cwd": "/home/etu/ex1",
+     "prep": [
+      "mkdir -p Agence/Direction Agence/Compta Agence/Informatique/Serveurs Agence/Informatique/Postes Agence/Temp",
+      "touch Agence/Direction/notes.txt Agence/Compta/factures.txt",
+      "echo \"Serveur web principal\" > Agence/Informatique/Serveurs/web01.txt",
+      "echo \"Poste a installer\" > Agence/brouillon.txt",
+      "cp Agence/Compta/factures.txt Agence/Direction/",
+      "mv Agence/Direction/notes.txt Agence/Direction/compte_rendu.txt",
+      "mv Agence/brouillon.txt Agence/Informatique/Postes/poste01.txt",
+      "rmdir Agence/Temp",
+      "touch -t 202601150900 Agence/Compta/factures.txt"
+     ],
+     "texte": "<p><code>find Agence -type f</code> liste uniquement les <b>fichiers</b> (pas les dossiers), un par ligne. Envoyé dans <code>wc -l</code>, on obtient le nombre seul.</p><p>Piège : <code>ls -R Agence | wc -l</code> compte aussi les dossiers, les titres et les lignes vides.</p>",
+     "syntaxe": [
+      "find dossier -type f | wc -l > fichier",
+      "ls -lR dossier",
+      "wc -c < fichier"
+     ],
+     "objectifs": [
+      {
+       "txt": "Écris le nombre de fichiers de <code>Agence</code> (le nombre seul) dans <code>nb_fichiers.txt</code>",
+       "r": [
+        {
+         "equals": [
+          "/home/etu/ex1/nb_fichiers.txt",
+          "5\n"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Affiche toute l'arborescence en détaillé et récursif",
+       "r": [
+        {
+         "cmd": "^ls\\s+(-lR|-Rl|-l\\s+-R|-R\\s+-l)\\s+Agence"
+        }
+       ]
+      },
+      {
+       "txt": "Bonus : affiche la taille en octets de <code>web01.txt</code>, nombre seul",
+       "r": [
+        {
+         "anyout": "^22$"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>find Agence -type f | wc -l &gt; nb_fichiers.txt</code>, <code>ls -lR Agence</code>, puis <code>wc -c &lt; Agence/Informatique/Serveurs/web01.txt</code>.",
+     "solution": [
+      "find Agence -type f | wc -l > nb_fichiers.txt",
+      "ls -lR Agence",
+      "wc -c < Agence/Informatique/Serveurs/web01.txt"
+     ],
+     "bravo": "Avec <code>&lt;</code>, <code>wc</code> lit l'entrée standard et ne connaît pas le nom du fichier : il affiche le nombre seul."
+    }
+   ]
+  },
+  {
+   "id": "ex2",
+   "titre": "Ex. 2 · Utilisateurs et droits",
+   "missions": [
+    {
+     "id": "d2-comptes",
+     "titre": "Groupes et utilisateurs",
+     "cwd": "/home/etu/ex2",
+     "texte": "<p>Créer des groupes et des utilisateurs demande les droits administrateur : préfixe chaque commande par <code>sudo</code> (ou passe root avec <code>sudo -i</code>, puis <code>exit</code>).</p><ul><li><code>groupadd -f</code> : pas d'erreur si le groupe existe déjà ;</li><li><code>useradd -m</code> crée le dossier <code>/home/nom</code>, <code>-s /bin/bash</code> choisit le shell.</li></ul>",
+     "syntaxe": [
+      "sudo groupadd -f groupe",
+      "sudo useradd -m -s /bin/bash nom",
+      "grep nom /etc/passwd"
+     ],
+     "objectifs": [
+      {
+       "txt": "Crée les groupes <code>compta</code> et <code>rh</code>",
+       "r": [
+        {
+         "contains": [
+          "/etc/group",
+          "\ncompta:x:"
+         ]
+        },
+        {
+         "contains": [
+          "/etc/group",
+          "\nrh:x:"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Crée <code>alice</code>, <code>bob</code> et <code>chloe</code> avec un dossier personnel et le shell <code>/bin/bash</code>",
+       "r": [
+        {
+         "exists": "/home/alice"
+        },
+        {
+         "exists": "/home/bob"
+        },
+        {
+         "exists": "/home/chloe"
+        },
+        {
+         "passwd": [
+          "alice",
+          6,
+          "/bin/bash"
+         ]
+        },
+        {
+         "passwd": [
+          "bob",
+          6,
+          "/bin/bash"
+         ]
+        },
+        {
+         "passwd": [
+          "chloe",
+          6,
+          "/bin/bash"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>sudo groupadd -f compta</code>, <code>sudo groupadd -f rh</code>, puis <code>sudo useradd -m -s /bin/bash alice</code> (idem pour bob et chloe).",
+     "solution": [
+      "sudo groupadd -f compta",
+      "sudo groupadd -f rh",
+      "sudo useradd -m -s /bin/bash alice",
+      "sudo useradd -m -s /bin/bash bob",
+      "sudo useradd -m -s /bin/bash chloe"
+     ],
+     "bravo": "Sans <code>-m</code>, l'utilisateur existerait mais sans dossier personnel."
+    },
+    {
+     "id": "d2-groupes",
+     "titre": "Ajouter aux groupes",
+     "cwd": "/home/etu/ex2",
+     "prep": [
+      "sudo groupadd -f compta",
+      "sudo groupadd -f rh",
+      "sudo useradd -m -s /bin/bash alice",
+      "sudo useradd -m -s /bin/bash bob",
+      "sudo useradd -m -s /bin/bash chloe"
+     ],
+     "texte": "<p><code>usermod -aG groupe nom</code> <b>ajoute</b> l'utilisateur à un groupe secondaire. Le <code>-a</code> (<i>append</i>) est indispensable : sans lui, <code>-G</code> <b>remplace</b> tous les groupes secondaires.</p><p>Plusieurs groupes d'un coup : <code>-aG compta,rh</code> (virgule, sans espace). <code>-c</code> change le commentaire (5e champ de <code>/etc/passwd</code>).</p>",
+     "syntaxe": [
+      "sudo usermod -aG g1,g2 nom",
+      "sudo usermod -c \"texte\" nom",
+      "id nom"
+     ],
+     "objectifs": [
+      {
+       "txt": "Mets <code>alice</code> dans <code>compta</code> et <code>bob</code> dans <code>rh</code>",
+       "r": [
+        {
+         "ingroup": [
+          "alice",
+          "compta"
+         ]
+        },
+        {
+         "ingroup": [
+          "bob",
+          "rh"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Mets <code>chloe</code> dans <code>compta</code> <b>et</b> dans <code>rh</code>",
+       "r": [
+        {
+         "ingroup": [
+          "chloe",
+          "compta"
+         ]
+        },
+        {
+         "ingroup": [
+          "chloe",
+          "rh"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Donne à <code>alice</code> le commentaire <code>Service comptabilite</code>",
+       "r": [
+        {
+         "passwd": [
+          "alice",
+          4,
+          "Service comptabilite"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>sudo usermod -aG compta alice</code>, <code>sudo usermod -aG rh bob</code>, <code>sudo usermod -aG compta,rh chloe</code>, <code>sudo usermod -c \"Service comptabilite\" alice</code>.",
+     "solution": [
+      "sudo usermod -aG compta alice",
+      "sudo usermod -aG rh bob",
+      "sudo usermod -aG compta,rh chloe",
+      "sudo usermod -c \"Service comptabilite\" alice"
+     ],
+     "bravo": "Vérifie toujours avec <code>id nom</code> : tous les groupes de l'utilisateur s'affichent."
+    },
+    {
+     "id": "d2-piege",
+     "titre": "Le piège du -a",
+     "cwd": "/home/etu/ex2",
+     "prep": [
+      "sudo groupadd -f compta",
+      "sudo groupadd -f rh",
+      "sudo useradd -m -s /bin/bash alice",
+      "sudo useradd -m -s /bin/bash bob",
+      "sudo useradd -m -s /bin/bash chloe",
+      "sudo usermod -aG compta chloe"
+     ],
+     "texte": "<p><code>chloe</code> est déjà dans <code>compta</code> (vérifie avec <code>id chloe</code>). Il faut l'ajouter à <code>rh</code> <b>sans</b> qu'elle perde <code>compta</code>.</p><p>Si tu tapes <code>usermod -G rh chloe</code>, elle ne sera plus que dans <code>rh</code>. Essaie si tu veux voir le problème, puis répare.</p>",
+     "syntaxe": [
+      "id chloe",
+      "sudo usermod -aG rh chloe"
+     ],
+     "objectifs": [
+      {
+       "txt": "<code>chloe</code> est dans <code>rh</code> et toujours dans <code>compta</code>",
+       "r": [
+        {
+         "ingroup": [
+          "chloe",
+          "rh"
+         ]
+        },
+        {
+         "ingroup": [
+          "chloe",
+          "compta"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Vérifie avec <code>id chloe</code>",
+       "r": [
+        {
+         "cmd": "^id\\s+chloe"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>sudo usermod -aG rh chloe</code> puis <code>id chloe</code>.",
+     "solution": [
+      "sudo usermod -aG rh chloe",
+      "id chloe"
+     ],
+     "bravo": "Retiens : <b>-aG</b>, jamais <b>-G</b> seul pour ajouter un groupe."
+    },
+    {
+     "id": "d2-dossiers",
+     "titre": "Dossiers de service",
+     "cwd": "/home/etu/ex2",
+     "prep": [
+      "sudo groupadd -f compta",
+      "sudo groupadd -f rh",
+      "sudo useradd -m -s /bin/bash alice",
+      "sudo useradd -m -s /bin/bash bob",
+      "sudo useradd -m -s /bin/bash chloe",
+      "sudo usermod -aG compta alice",
+      "sudo usermod -aG rh bob",
+      "sudo usermod -aG compta,rh chloe",
+      "sudo usermod -c \"Service comptabilite\" alice"
+     ],
+     "texte": "<p>Chaque chiffre octal additionne <b>r = 4</b>, <b>w = 2</b>, <b>x = 1</b>, dans l'ordre propriétaire, groupe, autres :</p><table><tr><th>Dossier</th><th>Propriétaire:groupe</th><th>Droits</th></tr><tr><td><code>/srv/agence/compta</code></td><td>alice:compta</td><td>770 (rwxrwx---)</td></tr><tr><td><code>/srv/agence/rh</code></td><td>bob:rh</td><td>770</td></tr><tr><td><code>/srv/agence/commun</code></td><td>root (inchangé)</td><td>755 (rwxr-xr-x)</td></tr></table>",
+     "syntaxe": [
+      "sudo mkdir -p d1 d2 d3",
+      "sudo chown user:groupe dossier",
+      "sudo chmod 770 d1 d2"
+     ],
+     "objectifs": [
+      {
+       "txt": "Crée <code>/srv/agence/compta</code>, <code>rh</code> et <code>commun</code>",
+       "r": [
+        {
+         "isdir": "/srv/agence/compta"
+        },
+        {
+         "isdir": "/srv/agence/rh"
+        },
+        {
+         "isdir": "/srv/agence/commun"
+        }
+       ]
+      },
+      {
+       "txt": "Propriétaires : <code>alice:compta</code> et <code>bob:rh</code>",
+       "r": [
+        {
+         "owner": [
+          "/srv/agence/compta",
+          "alice"
+         ]
+        },
+        {
+         "group": [
+          "/srv/agence/compta",
+          "compta"
+         ]
+        },
+        {
+         "owner": [
+          "/srv/agence/rh",
+          "bob"
+         ]
+        },
+        {
+         "group": [
+          "/srv/agence/rh",
+          "rh"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Droits : 770 pour compta et rh, 755 pour commun",
+       "r": [
+        {
+         "mode": [
+          "/srv/agence/compta",
+          "770"
+         ]
+        },
+        {
+         "mode": [
+          "/srv/agence/rh",
+          "770"
+         ]
+        },
+        {
+         "mode": [
+          "/srv/agence/commun",
+          "755"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>sudo mkdir -p /srv/agence/compta /srv/agence/rh /srv/agence/commun</code>, deux <code>sudo chown</code>, puis <code>sudo chmod 770 …</code> et <code>sudo chmod 755 /srv/agence/commun</code>.",
+     "solution": [
+      "sudo mkdir -p /srv/agence/compta /srv/agence/rh /srv/agence/commun",
+      "sudo chown alice:compta /srv/agence/compta",
+      "sudo chown bob:rh /srv/agence/rh",
+      "sudo chmod 770 /srv/agence/compta /srv/agence/rh",
+      "sudo chmod 755 /srv/agence/commun"
+     ],
+     "bravo": "770 : le service a tous les droits, les autres n'ont rien, pas même le droit d'entrer."
+    },
+    {
+     "id": "d2-budget",
+     "titre": "Le fichier budget",
+     "cwd": "/home/etu/ex2",
+     "prep": [
+      "sudo groupadd -f compta",
+      "sudo groupadd -f rh",
+      "sudo useradd -m -s /bin/bash alice",
+      "sudo useradd -m -s /bin/bash bob",
+      "sudo useradd -m -s /bin/bash chloe",
+      "sudo usermod -aG compta alice",
+      "sudo usermod -aG rh bob",
+      "sudo usermod -aG compta,rh chloe",
+      "sudo usermod -c \"Service comptabilite\" alice",
+      "sudo mkdir -p /srv/agence/compta /srv/agence/rh /srv/agence/commun",
+      "sudo chown alice:compta /srv/agence/compta",
+      "sudo chown bob:rh /srv/agence/rh",
+      "sudo chmod 770 /srv/agence/compta /srv/agence/rh",
+      "sudo chmod 755 /srv/agence/commun"
+     ],
+     "texte": "<p>Tu n'as pas le droit d'écrire dans <code>/srv/agence/compta</code>. Deux solutions : passer root (<code>sudo -i</code>) ou faire écrire <code>tee</code> en root : <code>echo \"…\" | sudo tee fichier</code>.</p><p>(<code>sudo echo … &gt; fichier</code> ne marche pas : la redirection est faite par <b>ton</b> shell, pas par sudo.)</p><p>Les droits doivent être donnés en <b>notation symbolique</b> : propriétaire lecture-écriture, groupe lecture, autres rien.</p>",
+     "syntaxe": [
+      "echo \"texte\" | sudo tee fichier",
+      "sudo chown user:groupe fichier",
+      "sudo chmod u=rw,g=r,o= fichier"
+     ],
+     "objectifs": [
+      {
+       "txt": "Crée <code>/srv/agence/compta/budget.txt</code> contenant <code>Budget 2027 : 150000 euros</code>",
+       "r": [
+        {
+         "equals": [
+          "/srv/agence/compta/budget.txt",
+          "Budget 2027 : 150000 euros\n"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Il appartient à <code>alice:compta</code>",
+       "r": [
+        {
+         "owner": [
+          "/srv/agence/compta/budget.txt",
+          "alice"
+         ]
+        },
+        {
+         "group": [
+          "/srv/agence/compta/budget.txt",
+          "compta"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Droits <code>rw-r-----</code> donnés en notation symbolique",
+       "r": [
+        {
+         "mode": [
+          "/srv/agence/compta/budget.txt",
+          "640"
+         ]
+        },
+        {
+         "cmd": "chmod\\s+[ugo=rw,]*u=rw"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>echo \"Budget 2027 : 150000 euros\" | sudo tee /srv/agence/compta/budget.txt</code>, <code>sudo chown alice:compta …</code>, <code>sudo chmod u=rw,g=r,o= …</code>.",
+     "solution": [
+      "echo \"Budget 2027 : 150000 euros\" | sudo tee /srv/agence/compta/budget.txt",
+      "sudo chown alice:compta /srv/agence/compta/budget.txt",
+      "sudo chmod u=rw,g=r,o= /srv/agence/compta/budget.txt"
+     ],
+     "bravo": "Sans le <code>chown</code>, le fichier créé par sudo appartiendrait à root."
+    },
+    {
+     "id": "d2-verif",
+     "titre": "Vérifier les accès",
+     "cwd": "/home/etu/ex2",
+     "prep": [
+      "sudo groupadd -f compta",
+      "sudo groupadd -f rh",
+      "sudo useradd -m -s /bin/bash alice",
+      "sudo useradd -m -s /bin/bash bob",
+      "sudo useradd -m -s /bin/bash chloe",
+      "sudo usermod -aG compta alice",
+      "sudo usermod -aG rh bob",
+      "sudo usermod -aG compta,rh chloe",
+      "sudo usermod -c \"Service comptabilite\" alice",
+      "sudo mkdir -p /srv/agence/compta /srv/agence/rh /srv/agence/commun",
+      "sudo chown alice:compta /srv/agence/compta",
+      "sudo chown bob:rh /srv/agence/rh",
+      "sudo chmod 770 /srv/agence/compta /srv/agence/rh",
+      "sudo chmod 755 /srv/agence/commun",
+      "echo \"Budget 2027 : 150000 euros\" | sudo tee /srv/agence/compta/budget.txt",
+      "sudo chown alice:compta /srv/agence/compta/budget.txt",
+      "sudo chmod u=rw,g=r,o= /srv/agence/compta/budget.txt"
+     ],
+     "texte": "<p><code>sudo -u bob commande</code> lance la commande <b>en tant que bob</b>. Idéal pour tester des droits.</p><p>bob n'est ni le propriétaire de <code>compta</code>, ni membre du groupe : il fait partie des « autres », qui n'ont aucun droit (770). Il ne peut même pas entrer dans le dossier.</p>",
+     "syntaxe": [
+      "sudo ls -l dossier",
+      "id nom",
+      "sudo -u nom cat fichier"
+     ],
+     "objectifs": [
+      {
+       "txt": "Affiche en détaillé <code>/srv/agence</code> et <code>/srv/agence/compta</code>",
+       "r": [
+        {
+         "cmd": "ls\\s+-l.*/srv/agence"
+        }
+       ]
+      },
+      {
+       "txt": "Affiche les groupes de <code>chloe</code>",
+       "r": [
+        {
+         "anyout": "^uid=\\d+\\(chloe\\).*compta.*rh"
+        }
+       ]
+      },
+      {
+       "txt": "Montre que bob ne peut pas lire le budget",
+       "r": [
+        {
+         "cmd": "sudo\\s+-u\\s+bob\\s+cat\\s+\\S*budget\\.txt"
+        },
+        {
+         "anyout": "Permission non accordée"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>sudo ls -l /srv/agence /srv/agence/compta</code>, <code>id chloe</code>, <code>sudo -u bob cat /srv/agence/compta/budget.txt</code>.",
+     "solution": [
+      "sudo ls -l /srv/agence /srv/agence/compta",
+      "id chloe",
+      "sudo -u bob cat /srv/agence/compta/budget.txt"
+     ],
+     "bravo": "Essaie aussi avec chloe : elle est dans <code>compta</code>, elle peut lire."
+    }
+   ]
+  },
+  {
+   "id": "ex3",
+   "titre": "Ex. 3 · CSV et cut",
+   "missions": [
+    {
+     "id": "d3-prep",
+     "titre": "Préparer et explorer",
+     "cwd": "/home/etu/ex3",
+     "texte": "<p>Le fichier <code>/mnt/DevoirLinux-2026/employes.csv</code> contient un employé par ligne, champs séparés par <code>;</code> :</p><pre>id;nom;prenom;service;ville;date_embauche;salaire;email</pre><p>Chaque réponse va dans <code>resultats/qN.txt</code>. Pour obtenir un nombre <b>seul</b>, utilise <code>wc -l &lt; fichier</code>.</p>",
+     "syntaxe": [
+      "cp source .",
+      "wc -l < fichier > res.txt",
+      "head -n 1 fichier"
+     ],
+     "objectifs": [
+      {
+       "txt": "Copie <code>employes.csv</code> ici et crée le dossier <code>resultats</code>",
+       "r": [
+        {
+         "exists": "/home/etu/ex3/employes.csv"
+        },
+        {
+         "isdir": "/home/etu/ex3/resultats"
+        }
+       ]
+      },
+      {
+       "txt": "<code>q1.txt</code> : le nombre de lignes du fichier (nombre seul)",
+       "r": [
+        {
+         "equals": [
+          "/home/etu/ex3/resultats/q1.txt",
+          "31\n"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "<code>q2.txt</code> : la ligne d'en-tête",
+       "r": [
+        {
+         "equals": [
+          "/home/etu/ex3/resultats/q2.txt",
+          "id;nom;prenom;service;ville;date_embauche;salaire;email\n"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>cp /mnt/DevoirLinux-2026/employes.csv .</code>, <code>mkdir -p resultats</code>, <code>wc -l &lt; employes.csv &gt; resultats/q1.txt</code>, <code>head -n 1 employes.csv &gt; resultats/q2.txt</code>.",
+     "solution": [
+      "cp /mnt/DevoirLinux-2026/employes.csv .",
+      "mkdir -p resultats",
+      "wc -l < employes.csv > resultats/q1.txt",
+      "head -n 1 employes.csv > resultats/q2.txt"
+     ],
+     "bravo": "31 lignes : 30 employés + l'en-tête."
+    },
+    {
+     "id": "d3-colonnes",
+     "titre": "Extraire des colonnes",
+     "cwd": "/home/etu/ex3",
+     "prep": [
+      "cp /mnt/DevoirLinux-2026/employes.csv .",
+      "mkdir -p resultats",
+      "wc -l < employes.csv > resultats/q1.txt",
+      "head -n 1 employes.csv > resultats/q2.txt"
+     ],
+     "texte": "<p><code>cut -d';' -f2</code> découpe chaque ligne à chaque <code>;</code> et garde le 2e morceau. <code>tail -n +2</code> affiche à partir de la ligne 2, donc <b>sans l'en-tête</b>.</p><ul><li>plusieurs colonnes : <code>-f2,3</code></li><li>une plage : <code>-f1-4</code></li><li>tout sauf la 7 : <code>-f1-6,8</code> (ou <code>--complement -f7</code>)</li></ul>",
+     "syntaxe": [
+      "tail -n +2 f | cut -d';' -f2",
+      "cut -d';' -f1-4 f",
+      "cut -d';' -f1-6,8 f"
+     ],
+     "objectifs": [
+      {
+       "txt": "<code>q3.txt</code> : les noms, sans l'en-tête",
+       "r": [
+        {
+         "equals": [
+          "/home/etu/ex3/resultats/q3.txt",
+          "Martin\nBernard\nDubois\nThomas\nRobert\nRichard\nPetit\nDurand\nLeroy\nMoreau\nSimon\nLaurent\nLefebvre\nMichel\nGarcia\nDavid\nBertrand\nRoux\nVincent\nFournier\nMorel\nGirard\nAndre\nMercier\nDupont\nLambert\nBonnet\nFrancois\nMartinez\nLegrand\n"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "<code>q4.txt</code> : nom et prénom, sans l'en-tête",
+       "r": [
+        {
+         "equals": [
+          "/home/etu/ex3/resultats/q4.txt",
+          "Martin;Lucas\nBernard;Margot\nDubois;Hugo\nThomas;Lea\nRobert;Louis\nRichard;Chloe\nPetit;Jules\nDurand;Manon\nLeroy;Nathan\nMoreau;Ines\nSimon;Gabriel\nLaurent;Lucie\nLefebvre;Adam\nMichel;Sarah\nGarcia;Raphael\nDavid;Jade\nBertrand;Ethan\nRoux;Louise\nVincent;Paul\nFournier;Alice\nMorel;Leo\nGirard;Lina\nAndre;Tom\nMercier;Rose\nDupont;Noah\nLambert;Zoe\nBonnet;Paul\nFrancois;Eva\nMartinez;Sacha\nLegrand;Mila\n"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "<code>q5.txt</code> : les 4 premières colonnes (en-tête compris)",
+       "r": [
+        {
+         "equals": [
+          "/home/etu/ex3/resultats/q5.txt",
+          "id;nom;prenom;service\n1;Martin;Lucas;Direction\n2;Bernard;Margot;Informatique\n3;Dubois;Hugo;Commercial\n4;Thomas;Lea;Compta\n5;Robert;Louis;Informatique\n6;Richard;Chloe;RH\n7;Petit;Jules;Commercial\n8;Durand;Manon;Informatique\n9;Leroy;Nathan;Compta\n10;Moreau;Ines;Informatique\n11;Simon;Gabriel;Commercial\n12;Laurent;Lucie;Direction\n13;Lefebvre;Adam;Informatique\n14;Michel;Sarah;RH\n15;Garcia;Raphael;Commercial\n16;David;Jade;Informatique\n17;Bertrand;Ethan;Commercial\n18;Roux;Louise;Compta\n19;Vincent;Paul;Informatique\n20;Fournier;Alice;RH\n21;Morel;Leo;Commercial\n22;Girard;Lina;Informatique\n23;Andre;Tom;Compta\n24;Mercier;Rose;Direction\n25;Dupont;Noah;Informatique\n26;Lambert;Zoe;Commercial\n27;Bonnet;Paul;Compta\n28;Francois;Eva;RH\n29;Martinez;Sacha;Informatique\n30;Legrand;Mila;Compta\n"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "<code>q6.txt</code> : toutes les colonnes sauf le salaire (en-tête compris)",
+       "r": [
+        {
+         "equals": [
+          "/home/etu/ex3/resultats/q6.txt",
+          "id;nom;prenom;service;ville;date_embauche;email\n1;Martin;Lucas;Direction;Paris;2014-03-01;lucas.martin@agence.fr\n2;Bernard;Margot;Informatique;Lyon;2019-09-02;margot.bernard@agence.fr\n3;Dubois;Hugo;Commercial;Lille;2021-01-11;hugo.dubois@agence.fr\n4;Thomas;Lea;Compta;Nantes;2016-06-15;lea.thomas@agence.fr\n5;Robert;Louis;Informatique;Paris;2018-04-03;louis.robert@agence.fr\n6;Richard;Chloe;RH;Bordeaux;2020-10-05;chloe.richard@agence.fr\n7;Petit;Jules;Commercial;Paris;2022-02-14;jules.petit@agence.fr\n8;Durand;Manon;Informatique;Lille;2017-11-20;manon.durand@agence.fr\n9;Leroy;Nathan;Compta;Lyon;2015-05-04;nathan.leroy@agence.fr\n10;Moreau;Ines;Informatique;Nantes;2023-03-13;ines.moreau@agence.fr\n11;Simon;Gabriel;Commercial;Bordeaux;2019-07-01;gabriel.simon@agence.fr\n12;Laurent;Lucie;Direction;Lyon;2016-01-04;lucie.laurent@agence.fr\n13;Lefebvre;Adam;Informatique;Paris;2024-09-02;adam.lefebvre@agence.fr\n14;Michel;Sarah;RH;Lille;2018-02-12;sarah.michel@agence.fr\n15;Garcia;Raphael;Commercial;Nantes;2025-01-06;raphael.garcia@agence.fr\n16;David;Jade;Informatique;Bordeaux;2020-06-08;jade.david@agence.fr\n17;Bertrand;Ethan;Commercial;Lyon;2021-09-13;ethan.bertrand@agence.fr\n18;Roux;Louise;Compta;Paris;2017-03-06;louise.roux@agence.fr\n19;Vincent;Paul;Informatique;Lyon;2022-10-03;paul.vincent@agence.fr\n20;Fournier;Alice;RH;Nantes;2019-01-07;alice.fournier@agence.fr\n21;Morel;Leo;Commercial;Paris;2023-05-15;leo.morel@agence.fr\n22;Girard;Lina;Informatique;Lille;2016-09-05;lina.girard@agence.fr\n23;Andre;Tom;Compta;Lyon;2024-02-05;tom.andre@agence.fr\n24;Mercier;Rose;Direction;Bordeaux;2015-11-02;rose.mercier@agence.fr\n25;Dupont;Noah;Informatique;Paris;2021-04-12;noah.dupont@agence.fr\n26;Lambert;Zoe;Commercial;Lille;2020-03-02;zoe.lambert@agence.fr\n27;Bonnet;Paul;Compta;Bordeaux;2018-08-27;paul.bonnet@agence.fr\n28;Francois;Eva;RH;Paris;2022-06-20;eva.francois@agence.fr\n29;Martinez;Sacha;Informatique;Nantes;2017-02-13;sacha.martinez@agence.fr\n30;Legrand;Mila;Compta;Lyon;2025-03-03;mila.legrand@agence.fr\n"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>tail -n +2 employes.csv | cut -d';' -f2 &gt; resultats/q3.txt</code> ; <code>-f2,3</code> pour q4 ; <code>cut -d';' -f1-4 employes.csv</code> pour q5 ; <code>-f1-6,8</code> pour q6.",
+     "solution": [
+      "tail -n +2 employes.csv | cut -d';' -f2 > resultats/q3.txt",
+      "tail -n +2 employes.csv | cut -d';' -f2,3 > resultats/q4.txt",
+      "cut -d';' -f1-4 employes.csv > resultats/q5.txt",
+      "cut -d';' -f1-6,8 employes.csv > resultats/q6.txt"
+     ],
+     "bravo": "Sans <code>-d</code>, cut découpe sur la tabulation et renvoie la ligne entière."
+    },
+    {
+     "id": "d3-trier",
+     "titre": "Trier, filtrer, compter",
+     "cwd": "/home/etu/ex3",
+     "prep": [
+      "cp /mnt/DevoirLinux-2026/employes.csv .",
+      "mkdir -p resultats",
+      "wc -l < employes.csv > resultats/q1.txt",
+      "head -n 1 employes.csv > resultats/q2.txt",
+      "tail -n +2 employes.csv | cut -d';' -f2 > resultats/q3.txt",
+      "tail -n +2 employes.csv | cut -d';' -f2,3 > resultats/q4.txt",
+      "cut -d';' -f1-4 employes.csv > resultats/q5.txt",
+      "cut -d';' -f1-6,8 employes.csv > resultats/q6.txt"
+     ],
+     "texte": "<ul><li><code>sort -u</code> trie et supprime les doublons ;</li><li><code>grep -x motif</code> : la ligne <b>entière</b> doit correspondre ;</li><li><code>cut -c1-4</code> garde les 4 premiers <b>caractères</b> (l'année d'une date <code>AAAA-MM-JJ</code>).</li></ul>",
+     "syntaxe": [
+      "… | sort -u",
+      "… | grep -x \"mot\" | wc -l",
+      "… | cut -c1-4"
+     ],
+     "objectifs": [
+      {
+       "txt": "<code>q7.txt</code> : la liste des services, sans doublon",
+       "r": [
+        {
+         "equals": [
+          "/home/etu/ex3/resultats/q7.txt",
+          "Commercial\nCompta\nDirection\nInformatique\nRH\n"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "<code>q8.txt</code> : le nombre d'employés du service Informatique",
+       "r": [
+        {
+         "equals": [
+          "/home/etu/ex3/resultats/q8.txt",
+          "10\n"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "<code>q9.txt</code> : les années d'embauche, sans doublon",
+       "r": [
+        {
+         "equals": [
+          "/home/etu/ex3/resultats/q9.txt",
+          "2014\n2015\n2016\n2017\n2018\n2019\n2020\n2021\n2022\n2023\n2024\n2025\n"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "Pars toujours de <code>tail -n +2 employes.csv | cut -d';' -fN</code>, puis <code>sort -u</code> (q7, q9 avec <code>cut -c1-4</code>) ou <code>grep -x \"Informatique\" | wc -l</code> (q8).",
+     "solution": [
+      "tail -n +2 employes.csv | cut -d';' -f4 | sort -u > resultats/q7.txt",
+      "tail -n +2 employes.csv | cut -d';' -f4 | grep -x \"Informatique\" | wc -l > resultats/q8.txt",
+      "tail -n +2 employes.csv | cut -d';' -f6 | cut -c1-4 | sort -u > resultats/q9.txt"
+     ],
+     "bravo": "Écrire <code>echo 10 &gt; q8.txt</code> donne le bon fichier, mais pas la bonne méthode : l'exercice demande de calculer."
+    },
+    {
+     "id": "d3-regrouper",
+     "titre": "Regrouper et enchaîner",
+     "cwd": "/home/etu/ex3",
+     "prep": [
+      "cp /mnt/DevoirLinux-2026/employes.csv .",
+      "mkdir -p resultats",
+      "wc -l < employes.csv > resultats/q1.txt",
+      "head -n 1 employes.csv > resultats/q2.txt",
+      "tail -n +2 employes.csv | cut -d';' -f2 > resultats/q3.txt",
+      "tail -n +2 employes.csv | cut -d';' -f2,3 > resultats/q4.txt",
+      "cut -d';' -f1-4 employes.csv > resultats/q5.txt",
+      "cut -d';' -f1-6,8 employes.csv > resultats/q6.txt",
+      "tail -n +2 employes.csv | cut -d';' -f4 | sort -u > resultats/q7.txt",
+      "tail -n +2 employes.csv | cut -d';' -f4 | grep -x \"Informatique\" | wc -l > resultats/q8.txt",
+      "tail -n +2 employes.csv | cut -d';' -f6 | cut -c1-4 | sort -u > resultats/q9.txt"
+     ],
+     "texte": "<ul><li><code>uniq -c</code> compte les répétitions, mais seulement des lignes <b>qui se suivent</b> : il faut trier avant ;</li><li>deux <code>cut</code> à la suite : d'abord sur <code>;</code>, puis sur <code>@</code> ;</li><li><code>/etc/passwd</code> utilise <code>:</code> comme séparateur.</li></ul><p>Pour Lyon, cherche <code>\";Lyon;\"</code> avec les points-virgules : sinon un nom ou un e-mail contenant « Lyon » serait aussi attrapé.</p>",
+     "syntaxe": [
+      "… | sort | uniq -c",
+      "grep \";Lyon;\" f | cut -d';' -f8 | cut -d'@' -f1",
+      "cut -d: -f1,7 /etc/passwd"
+     ],
+     "objectifs": [
+      {
+       "txt": "<code>q10.txt</code> : le nombre d'employés par ville",
+       "r": [
+        {
+         "equals": [
+          "/home/etu/ex3/resultats/q10.txt",
+          "      5 Bordeaux\n      5 Lille\n      7 Lyon\n      5 Nantes\n      8 Paris\n"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "<code>q11.txt</code> : les identifiants (avant le @) des employés de Lyon, triés",
+       "r": [
+        {
+         "equals": [
+          "/home/etu/ex3/resultats/q11.txt",
+          "ethan.bertrand\nlucie.laurent\nmargot.bernard\nmila.legrand\nnathan.leroy\npaul.vincent\ntom.andre\n"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "<code>q12.txt</code> : nom et shell de chaque compte de <code>/etc/passwd</code>",
+       "r": [
+        {
+         "equals": [
+          "/home/etu/ex3/resultats/q12.txt",
+          "root:/bin/bash\nwww-data:/usr/sbin/nologin\netu:/bin/bash\n"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>tail -n +2 employes.csv | cut -d';' -f5 | sort | uniq -c &gt; resultats/q10.txt</code> ; <code>grep \";Lyon;\" employes.csv | cut -d';' -f8 | cut -d'@' -f1 | sort</code> ; <code>cut -d: -f1,7 /etc/passwd</code>.",
+     "solution": [
+      "tail -n +2 employes.csv | cut -d';' -f5 | sort | uniq -c > resultats/q10.txt",
+      "grep \";Lyon;\" employes.csv | cut -d';' -f8 | cut -d'@' -f1 | sort > resultats/q11.txt",
+      "cut -d: -f1,7 /etc/passwd > resultats/q12.txt"
+     ],
+     "bravo": "Sans le <code>sort</code> avant <code>uniq -c</code>, une même ville apparaîtrait plusieurs fois."
+    },
+    {
+     "id": "d3-bonus",
+     "titre": "Bonus : le plus gros salaire",
+     "cwd": "/home/etu/ex3",
+     "prep": [
+      "cp /mnt/DevoirLinux-2026/employes.csv .",
+      "mkdir -p resultats",
+      "wc -l < employes.csv > resultats/q1.txt",
+      "head -n 1 employes.csv > resultats/q2.txt"
+     ],
+     "texte": "<p><code>sort -t';' -k7 -n</code> trie numériquement (<code>-n</code>) sur la 7e colonne (<code>-k7</code>), avec <code>;</code> comme séparateur (<code>-t</code>). La dernière ligne est alors le plus gros salaire.</p>",
+     "syntaxe": [
+      "sort -t';' -k7 -n",
+      "tail -n 1"
+     ],
+     "objectifs": [
+      {
+       "txt": "<code>q13.txt</code> : le nom et le salaire de l'employé le mieux payé (<code>nom;salaire</code>)",
+       "r": [
+        {
+         "equals": [
+          "/home/etu/ex3/resultats/q13.txt",
+          "Martin;5200\n"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>tail -n +2 employes.csv | sort -t';' -k7 -n | tail -n 1 | cut -d';' -f2,7 &gt; resultats/q13.txt</code>",
+     "solution": [
+      "tail -n +2 employes.csv | sort -t';' -k7 -n | tail -n 1 | cut -d';' -f2,7 > resultats/q13.txt"
+     ],
+     "bravo": "Sans <code>-n</code>, le tri serait alphabétique : « 900 » passerait après « 5200 »."
+    }
+   ]
+  },
+  {
+   "id": "ex4",
+   "titre": "Ex. 4 · Sauvegarde",
+   "missions": [
+    {
+     "id": "d4-sauvegarde",
+     "titre": "Lancer le script de sauvegarde",
+     "cwd": "/home/etu/ex4",
+     "texte": "<p>Le script <code>sauvegarde.sh</code> est déjà écrit (<code>cat sauvegarde.sh</code>). Il reçoit le dossier à sauvegarder en paramètre : <code>$1</code>. <code>$(date +%Y%m%d)</code> est remplacé par la date du jour, ici <code>20261110</code>.</p><p>Options de <code>tar</code> : <b>c</b> créer, <b>t</b> lister, <b>x</b> extraire, <b>z</b> gzip, <b>f</b> nom de l'archive.</p><p>Pense aux deux étapes avant de lancer un script : le rendre exécutable, puis l'appeler avec <code>./</code>.</p>",
+     "syntaxe": [
+      "cp -r source .",
+      "chmod +x script.sh",
+      "./script.sh parametre"
+     ],
+     "objectifs": [
+      {
+       "txt": "Copie le dossier <code>/mnt/DevoirLinux-2026/projet_web</code> ici",
+       "r": [
+        {
+         "exists": "/home/etu/ex4/projet_web/config/app.conf"
+        }
+       ]
+      },
+      {
+       "txt": "Rends <code>sauvegarde.sh</code> exécutable",
+       "r": [
+        {
+         "mode": [
+          "/home/etu/ex4/sauvegarde.sh",
+          "755"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Sauvegarde <code>projet_web</code> : <code>nb_elements.txt</code> doit contenir 12",
+       "r": [
+        {
+         "equals": [
+          "/home/etu/ex4/sauvegardes/nb_elements.txt",
+          "12\n"
+         ]
+        },
+        {
+         "exists": "/home/etu/ex4/sauvegardes/backup_20261110.tar.gz"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>cp -r /mnt/DevoirLinux-2026/projet_web .</code>, <code>chmod +x sauvegarde.sh</code>, <code>./sauvegarde.sh projet_web</code>.",
+     "solution": [
+      "cp -r /mnt/DevoirLinux-2026/projet_web .",
+      "chmod +x sauvegarde.sh",
+      "./sauvegarde.sh projet_web"
+     ],
+     "bravo": "Donne un chemin <b>relatif</b> (<code>projet_web</code>) : avec un chemin absolu, l'archive contiendrait <code>home/etu/ex4/projet_web/…</code>."
+    },
+    {
+     "id": "d4-exclure",
+     "titre": "Archiver sans les logs",
+     "cwd": "/home/etu/ex4",
+     "prep": [
+      "cp -r /mnt/DevoirLinux-2026/projet_web .",
+      "chmod +x sauvegarde.sh",
+      "./sauvegarde.sh projet_web"
+     ],
+     "texte": "<p><code>--exclude='*.log'</code> écarte les fichiers qui correspondent au motif. Il doit être placé <b>avant</b> le nom du dossier : placé après, tar l'ignore sans prévenir et les <code>.log</code> restent dans l'archive.</p>",
+     "syntaxe": [
+      "tar --exclude='*.log' -czf archive.tar.gz dossier",
+      "tar -tzf archive.tar.gz"
+     ],
+     "objectifs": [
+      {
+       "txt": "Crée <code>sauvegardes/backup_sans_logs.tar.gz</code> sans aucun fichier <code>.log</code>",
+       "r": [
+        {
+         "arc": [
+          "/home/etu/ex4/sauvegardes/backup_sans_logs.tar.gz",
+          [
+           "projet_web/config/app\\.conf",
+           "!\\.log$"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Vérifie son contenu avec <code>tar -tzf</code>",
+       "r": [
+        {
+         "cmd": "^tar\\s+-?tz?f\\s+\\S*backup_sans_logs"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>tar --exclude='*.log' -czf sauvegardes/backup_sans_logs.tar.gz projet_web</code> puis <code>tar -tzf sauvegardes/backup_sans_logs.tar.gz</code>.",
+     "solution": [
+      "tar --exclude='*.log' -czf sauvegardes/backup_sans_logs.tar.gz projet_web",
+      "tar -tzf sauvegardes/backup_sans_logs.tar.gz"
+     ],
+     "bravo": "Toujours vérifier une archive avec <code>tar -tzf</code> : une option mal placée ne donne aucune erreur."
+    },
+    {
+     "id": "d4-restaurer",
+     "titre": "Restaurer un dossier",
+     "cwd": "/home/etu/ex4",
+     "prep": [
+      "cp -r /mnt/DevoirLinux-2026/projet_web .",
+      "chmod +x sauvegarde.sh",
+      "./sauvegarde.sh projet_web"
+     ],
+     "texte": "<p>On simule une perte : supprime <code>projet_web/config</code>, puis restaure-le <b>seul</b> depuis <code>sauvegardes/backup_20261110.tar.gz</code>. Pour extraire un seul élément, on donne son chemin (tel que listé par <code>tar -tzf</code>) à la fin de la commande.</p>",
+     "syntaxe": [
+      "rm -r dossier",
+      "tar -xzf archive.tar.gz chemin/dans/archive"
+     ],
+     "objectifs": [
+      {
+       "txt": "Supprime le dossier <code>projet_web/config</code>",
+       "r": [
+        {
+         "cmd": "^rm\\s+-r\\S*\\s+\\S*projet_web/config"
+        }
+       ]
+      },
+      {
+       "txt": "Restaure uniquement <code>projet_web/config</code> depuis la sauvegarde",
+       "r": [
+        {
+         "equals": [
+          "/home/etu/ex4/projet_web/config/db.conf",
+          "host=localhost\nbase=agence\n"
+         ]
+        },
+        {
+         "cmd": "^tar\\s+-?xz?f\\s+\\S*backup_20261110\\.tar\\.gz\\s+projet_web/config"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>rm -r projet_web/config</code> puis <code>tar -xzf sauvegardes/backup_20261110.tar.gz projet_web/config</code>.",
+     "solution": [
+      "rm -r projet_web/config",
+      "tar -xzf sauvegardes/backup_20261110.tar.gz projet_web/config",
+      "ls projet_web/config"
+     ],
+     "bravo": "Une sauvegarde n'est fiable que si on a déjà testé la restauration."
+    },
+    {
+     "id": "d4-services",
+     "titre": "Un dossier par service",
+     "cwd": "/home/etu/ex4",
+     "texte": "<p><code>$(commande)</code> est remplacé par le <b>résultat</b> de la commande. Ici, la liste des services du CSV (sans doublon) devient la liste des dossiers à créer : <code>mkdir $(…)</code>.</p><p><code>cmd1 &amp;&amp; cmd2</code> lance <code>cmd2</code> seulement si <code>cmd1</code> a réussi.</p>",
+     "syntaxe": [
+      "mkdir services && cd services",
+      "mkdir $(commande)",
+      "chmod 700 dossier"
+     ],
+     "objectifs": [
+      {
+       "txt": "Crée le dossier <code>services</code> et entre dedans",
+       "r": [
+        {
+         "cwd": "/home/etu/ex4/services"
+        }
+       ]
+      },
+      {
+       "txt": "Crée un dossier par service, en extrayant les noms du CSV avec <code>$( )</code>",
+       "r": [
+        {
+         "isdir": "/home/etu/ex4/services/Commercial"
+        },
+        {
+         "isdir": "/home/etu/ex4/services/Compta"
+        },
+        {
+         "isdir": "/home/etu/ex4/services/Direction"
+        },
+        {
+         "isdir": "/home/etu/ex4/services/Informatique"
+        },
+        {
+         "isdir": "/home/etu/ex4/services/RH"
+        },
+        {
+         "cmd": "^mkdir\\s+.*\\$\\("
+        }
+       ]
+      },
+      {
+       "txt": "Bonus : <code>Direction</code> réservé à son propriétaire (rwx------)",
+       "r": [
+        {
+         "mode": [
+          "/home/etu/ex4/services/Direction",
+          "700"
+         ]
+        }
+       ]
+      }
+     ],
+     "indice": "<code>mkdir services &amp;&amp; cd services</code>, puis <code>mkdir $(tail -n +2 /mnt/DevoirLinux-2026/employes.csv | cut -d';' -f4 | sort -u)</code>, puis <code>chmod 700 Direction</code>.",
+     "solution": [
+      "mkdir services && cd services",
+      "mkdir $(tail -n +2 /mnt/DevoirLinux-2026/employes.csv | cut -d';' -f4 | sort -u)",
+      "chmod 700 Direction"
+     ],
+     "bravo": "Taper les cinq noms à la main marcherait, mais la consigne demandait de les extraire du CSV."
+    },
+    {
+     "id": "d4-script",
+     "titre": "Écrire son propre script",
+     "cwd": "/home/etu/ex4",
+     "texte": "<p>À toi d'écrire un script. <code>nb.sh</code> doit afficher le nombre de lignes du fichier donné en paramètre.</p><p>Écris-le ligne par ligne avec <code>echo '…' &gt;&gt; nb.sh</code> (les guillemets simples empêchent le shell de remplacer <code>$1</code> tout de suite). Rappel : <code>#!/bin/bash</code> en première ligne, <code>chmod +x</code>, puis <code>./nb.sh</code>.</p>",
+     "syntaxe": [
+      "echo '#!/bin/bash' > nb.sh",
+      "echo 'wc -l < \"$1\"' >> nb.sh",
+      "chmod +x nb.sh",
+      "./nb.sh fichier"
+     ],
+     "objectifs": [
+      {
+       "txt": "<code>nb.sh</code> commence par <code>#!/bin/bash</code> et utilise <code>$1</code>",
+       "r": [
+        {
+         "contains": [
+          "/home/etu/ex4/nb.sh",
+          "#!/bin/bash\n"
+         ]
+        },
+        {
+         "contains": [
+          "/home/etu/ex4/nb.sh",
+          "$1"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "Il est exécutable",
+       "r": [
+        {
+         "mode": [
+          "/home/etu/ex4/nb.sh",
+          "755"
+         ]
+        }
+       ]
+      },
+      {
+       "txt": "<code>./nb.sh /mnt/DevoirLinux-2026/employes.csv</code> affiche 31",
+       "r": [
+        {
+         "cmd": "^\\./nb\\.sh\\s+\\S*employes\\.csv"
+        },
+        {
+         "out": "^31$"
+        }
+       ]
+      }
+     ],
+     "indice": "<code>echo '#!/bin/bash' &gt; nb.sh</code>, <code>echo 'wc -l &lt; \"$1\"' &gt;&gt; nb.sh</code>, <code>chmod +x nb.sh</code>, <code>./nb.sh /mnt/DevoirLinux-2026/employes.csv</code>.",
+     "solution": [
+      "echo '#!/bin/bash' > nb.sh",
+      "echo 'wc -l < \"$1\"' >> nb.sh",
+      "chmod +x nb.sh",
+      "./nb.sh /mnt/DevoirLinux-2026/employes.csv"
+     ],
+     "bravo": "Tu sais maintenant écrire, rendre exécutable et lancer un script avec un paramètre."
+    }
+   ]
+  }
+ ],
+ "aide": [
+  {
+   "titre": "Fichiers",
+   "cmds": [
+    [
+     "mkdir -p a/b",
+     "dossiers imbriqués"
+    ],
+    [
+     "touch -t 202601150900 f",
+     "changer la date"
+    ],
+    [
+     "cp f d/",
+     "copier"
+    ],
+    [
+     "mv src d/nom",
+     "déplacer + renommer"
+    ],
+    [
+     "rmdir d",
+     "supprimer un dossier vide"
+    ],
+    [
+     "find d -type f | wc -l",
+     "compter les fichiers"
+    ]
+   ]
+  },
+  {
+   "titre": "Utilisateurs",
+   "cmds": [
+    [
+     "sudo groupadd -f g",
+     "créer un groupe"
+    ],
+    [
+     "sudo useradd -m -s /bin/bash u",
+     "créer un utilisateur"
+    ],
+    [
+     "sudo usermod -aG g1,g2 u",
+     "ajouter à des groupes"
+    ],
+    [
+     "id u",
+     "groupes de u"
+    ],
+    [
+     "sudo -u u cmd",
+     "agir en tant que u"
+    ],
+    [
+     "sudo -i / exit",
+     "devenir root / revenir"
+    ]
+   ]
+  },
+  {
+   "titre": "Droits",
+   "cmds": [
+    [
+     "sudo chown u:g f",
+     "propriétaire et groupe"
+    ],
+    [
+     "chmod 770 d",
+     "droits en octal"
+    ],
+    [
+     "chmod u=rw,g=r,o= f",
+     "droits en symbolique"
+    ],
+    [
+     "echo txt | sudo tee f",
+     "écrire en root"
+    ]
+   ]
+  },
+  {
+   "titre": "Texte et CSV",
+   "cmds": [
+    [
+     "tail -n +2 f",
+     "sans l'en-tête"
+    ],
+    [
+     "cut -d';' -f2,3",
+     "colonnes"
+    ],
+    [
+     "cut -c1-4",
+     "caractères"
+    ],
+    [
+     "sort -u",
+     "trier sans doublon"
+    ],
+    [
+     "sort | uniq -c",
+     "compter les répétitions"
+    ],
+    [
+     "sort -t';' -k7 -n",
+     "tri numérique sur une colonne"
+    ]
+   ]
+  },
+  {
+   "titre": "Archives et scripts",
+   "cmds": [
+    [
+     "tar -czf a.tar.gz d",
+     "archiver"
+    ],
+    [
+     "tar --exclude='*.log' -czf a.tar.gz d",
+     "archiver sans les .log"
+    ],
+    [
+     "tar -tzf a.tar.gz",
+     "lister"
+    ],
+    [
+     "tar -xzf a.tar.gz d/sous",
+     "extraire une partie"
+    ],
+    [
+     "chmod +x s.sh && ./s.sh x",
+     "lancer un script"
+    ],
+    [
+     "mkdir $(cmd)",
+     "utiliser un résultat"
+    ]
+   ]
+  }
+ ]
+};
+</script>
+  <script src="../../data/modules.js"></script>
+  <script src="../../assets/app.js"></script>
+  <script src="../../assets/terminal.js"></script>
+  <script src="../../assets/labo.js"></script>
+</body>
+</html>

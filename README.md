@@ -10,7 +10,7 @@ Site de révision pour le BTS SIO (1re année, option SLAM). Chaque matière est
 |---|---|
 | Algorithmique / Python | Types et opérations, plus 6 chapitres bonus (variables, affichage, conditions, boucles, listes et chaînes, fonctions) |
 | SLAM | HTML, CSS, formulaires, HTTP et URL |
-| SISR | Présentation des blocs, shell Linux, droits, archives et processus, adressage IPv4 et services réseau, WordPress / Nginx |
+| SISR | Présentation des blocs, shell Linux, droits, archives et processus, adressage IPv4 et services réseau, WordPress / Nginx, corrigé commenté du devoir Linux A |
 | Bloc 1 | HTML (structure et sémantique ; tableaux, médias, accessibilité), CSS (sélecteurs et cascade ; Flexbox, Grid, responsive), PHP (variables, conditions, formulaires), SQL (SELECT ; jointures et regroupements ; LDD/LMD) |
 | Bloc 3 | RGPD, PIA, anonymisation |
 | Mathématiques | Numération, divisibilité et PGCD, congruences, suites, statistiques |
@@ -30,6 +30,7 @@ Site de révision pour le BTS SIO (1re année, option SLAM). Chaque matière est
 | CSS | Bloc 1 | 13 missions vérifiées sur le rendu : sélecteurs et spécificité, modèle de boîte, Flexbox, grille, media query, sticky |
 | SQL | Bloc 1 | 26 missions sur une vraie base SQLite (sql.js) : SELECT, WHERE, agrégats, GROUP BY/HAVING, jointures, INSERT/UPDATE/DELETE, CREATE/ALTER TABLE ; requêtes vérifiées sur leur résultat |
 | Sous-réseaux | SISR | 24 missions de calcul IPv4 générées au hasard (masque, réseau, broadcast, plage, même réseau, découpage, VLSM), correction pas à pas + calculateur (`assets/labo-ipv4.js`) |
+| Devoir Linux A | SISR | Le devoir Linux A rejoué en 21 missions (arborescence, utilisateurs et droits, CSV avec `cut`, script de sauvegarde avec `tar`), même `employes.csv` et `projet_web` que le sujet ; épreuve `sisr-devoir_pratique`. Généré par un script hors dépôt |
 | La bonne terminaison | Culture générale | Conjugaison de 754 verbes à 6 temps avec diagnostic des erreurs ; 25 bonnes réponses = 1 mission ; épreuve de 20 verbes en 6 min |
 
 Les labos de code partagent le moteur `assets/labo-code.js` ; les missions sont générées dans les pages `modules/*/labo-*.html`.
@@ -55,6 +56,10 @@ PHP, Python et SQLite (sql.js) sont embarqués dans `assets/vendor/` (aucun CDN 
 - Aucun traceur non nécessaire : simple bandeau d'information (pas de consentement requis pour les stockages strictement nécessaires).
 - Aucune ressource tierce au chargement : polices (`assets/fonts/`) et SDK Firebase (`assets/vendor/firebase/`) hébergés sur le site.
 - Inscription : acceptation des conditions (date et version enregistrées). Menu du compte › « Mes données » : export JSON et suppression du compte.
+
+## Terminal simulé (`assets/terminal.js`)
+
+En plus des commandes de base : `&&` / `||`, substitution `$(…)`, accolades `{a,b}`, scripts exécutables (`./script.sh arg`, `bash script.sh`, avec `$1`…`$9`, `$#`, `$@`), `touch -t`, `find -type f|d`, `tail -n +N`, `cut -c` / `--complement`, `sort -t -k -n`, `grep -x`, `tee`, `date +%Y%m%d`, `tar --exclude` (ignoré s'il est placé après le dossier, comme GNU tar), `groupadd -f`, `useradd -s -c`, `usermod -aG/-G/-c`, `sudo -u` et `sudo -i`. Règles de vérification ajoutées : `date`, `passwd`, `isdir`, `files`, `arc`, `notingroup`.
 
 ## Téléphone
 

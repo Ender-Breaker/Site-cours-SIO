@@ -111,7 +111,7 @@
   });
   // Terminaux d'essai dans le cours : <div data-terminal></div>
   Array.prototype.forEach.call(coursEl.querySelectorAll("[data-terminal]"), function (d) {
-    if (window.EFTerm) window.EFTerm.mount(d, { banner: d.getAttribute("data-banner") || undefined });
+    if (window.EFTerm) window.EFTerm.mount(d, { banner: d.getAttribute("data-banner") || undefined, fs: (d.getAttribute("data-fs") && window[d.getAttribute("data-fs")]) || undefined });
   });
   // Infobulles : focusables au clavier / au toucher
   Array.prototype.forEach.call(coursEl.querySelectorAll(".tip"), function (t) { t.tabIndex = 0; });

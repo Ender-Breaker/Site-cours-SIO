@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Devoir Linux A : corrigé commenté — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body data-module="sisr" data-chapter="devoir-linux-a">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<p>Ce chapitre reprend le <b>devoir Linux A</b> (novembre 2026) avec une solution commentée pour chacun des quatre exercices, les erreurs qui ont coûté le plus de points et un récapitulatif. D'autres solutions étaient acceptées si elles donnaient exactement le même résultat avec les commandes demandées.</p>
+<div class="box retenir"><b>Pour s'entraîner</b><p>Le <a href="labo-devoir-linux.html">labo Devoir Linux A</a> rejoue tout le sujet dans un terminal simulé, avec le même fichier <code>employes.csv</code> et le même dossier <code>projet_web</code> : chaque consigne est vérifiée automatiquement.</p></div>
+
+<h2>1. Arborescence et fichiers</h2>
+<p>Le script travaille dans <code>~/ex1</code>. Une solution possible :</p>
+<pre>
+#!/bin/bash
+cd ~/ex1
+
+# 1. Arborescence : -p crée les dossiers parents manquants
+mkdir -p Agence/Direction Agence/Compta Agence/Informatique/Serveurs Agence/Informatique/Postes Agence/Temp
+
+# 2. Fichiers vides
+touch Agence/Direction/notes.txt Agence/Compta/factures.txt
+
+# 3. et 4. Fichiers avec contenu : &gt; crée le fichier et écrit dedans
+echo "Serveur web principal" &gt; Agence/Informatique/Serveurs/web01.txt
+echo "Poste a installer" &gt; Agence/brouillon.txt
+
+# 5. Copie : le fichier reste aussi dans Compta
+cp Agence/Compta/factures.txt Agence/Direction/
+
+# 6. Renommer = déplacer vers un nouveau nom dans le même dossier
+mv Agence/Direction/notes.txt Agence/Direction/compte_rendu.txt
+
+# 7. Déplacer ET renommer en une seule commande
+mv Agence/brouillon.txt Agence/Informatique/Postes/poste01.txt
+
+# 8. Supprimer un dossier vide
+rmdir Agence/Temp
+
+# 9. Date de modification au format AAAAMMJJhhmm
+touch -t 202601150900 Agence/Compta/factures.txt
+
+# 10. Compter les fichiers seulement (-type f), écrire le nombre seul
+find Agence -type f | wc -l &gt; nb_fichiers.txt
+
+# 11. Affichage détaillé (-l) et récursif (-R)
+ls -lR Agence
+
+# Bonus : taille en octets, nombre seul
+wc -c &lt; Agence/Informatique/Serveurs/web01.txt
+</pre>
+<p><b>Résultats attendus :</b> <code>nb_fichiers.txt</code> contient <b>5</b> et le bonus affiche <b>22</b> (21 caractères plus le retour à la ligne ajouté par <code>echo</code>).</p>
+<p>L'étape 1 peut tenir en une ligne grâce aux accolades :</p>
+<pre>mkdir -p Agence/{Direction,Compta,Temp,Informatique/{Serveurs,Postes}}</pre>
+<div class="box attention"><b>Erreurs fréquentes</b><ul>
+<li><code>ls -R Agence | wc -l</code> compte aussi les dossiers, les titres de section et les lignes vides.</li>
+<li><code>wc -l fichier</code> affiche le nombre <b>suivi du nom</b> du fichier ; <code>wc -l &lt; fichier</code> ou <code>… | wc -l</code> donne le nombre seul.</li>
+<li>Oublier <code>-p</code> : <code>mkdir Agence/Informatique/Serveurs</code> échoue tant que <code>Agence/Informatique</code> n'existe pas.</li>
+<li><code>cp</code> puis <code>rm</code> à l'étape 7 : même résultat, mais la consigne demandait une seule commande, c'est le rôle de <code>mv</code>.</li>
+<li>Oublier <code>#!/bin/bash</code> en première ligne, ou <code>chmod +x ex1.sh</code> avant de lancer le script.</li></ul></div>
+
+<h2>2. Utilisateurs, groupes et droits</h2>
+<p>Ce script se lance avec <code>sudo ./ex2.sh</code> : toutes ses commandes tournent en root.</p>
+<pre>
+#!/bin/bash
+# 1. Groupes (-f : pas d'erreur si le groupe existe déjà)
+groupadd -f compta
+groupadd -f rh
+
+# 2. Utilisateurs : -m crée /home/nom, -s choisit le shell
+useradd -m -s /bin/bash alice
+useradd -m -s /bin/bash bob
+useradd -m -s /bin/bash chloe
+
+# 3. Ajout aux groupes : -a (append) est indispensable
+usermod -aG compta alice
+usermod -aG rh bob
+usermod -aG compta,rh chloe
+
+# 4. Commentaire
+usermod -c "Service comptabilite" alice
+
+# 5. Dossiers, propriétaires, droits
+mkdir -p /srv/agence/compta /srv/agence/rh /srv/agence/commun
+chown alice:compta /srv/agence/compta
+chown bob:rh /srv/agence/rh
+chmod 770 /srv/agence/compta /srv/agence/rh
+chmod 755 /srv/agence/commun
+
+# 6. Fichier protégé, notation symbolique
+echo "Budget 2027 : 150000 euros" &gt; /srv/agence/compta/budget.txt
+chown alice:compta /srv/agence/compta/budget.txt
+chmod u=rw,g=r,o= /srv/agence/compta/budget.txt
+
+# 7. Vérification
+ls -l /srv/agence /srv/agence/compta
+id alice
+id bob
+id chloe
+</pre>
+<p>Chaque chiffre octal est la somme <b>r = 4</b>, <b>w = 2</b>, <b>x = 1</b>, dans l'ordre propriétaire, groupe, autres.</p>
+<div class="tab-defil"><table><tr><th>Notation</th><th>Propriétaire</th><th>Groupe</th><th>Autres</th><th>Usage</th></tr>
+<tr><td><code>770</code></td><td>rwx</td><td>rwx</td><td>---</td><td>dossiers compta et rh, réservés au service</td></tr>
+<tr><td><code>755</code></td><td>rwx</td><td>r-x</td><td>r-x</td><td>dossier commun, lisible par tous</td></tr>
+<tr><td><code>640</code> = <code>u=rw,g=r,o=</code></td><td>rw-</td><td>r--</td><td>---</td><td>budget.txt</td></tr></table></div>
+<p><b>Bonus :</b> <code>sudo -u bob cat /srv/agence/compta/budget.txt</code> est refusé (« Permission denied »). bob n'est ni le propriétaire ni membre de <code>compta</code> : il fait partie des « autres », qui n'ont aucun droit sur le dossier (770). Il ne peut même pas y entrer.</p>
+<div class="box attention"><b>Erreurs fréquentes</b><ul>
+<li><code>usermod -G</code> sans <code>-a</code> <b>remplace</b> tous les groupes secondaires : après <code>usermod -G compta chloe</code> puis <code>usermod -G rh chloe</code>, chloe n'est plus que dans <code>rh</code>.</li>
+<li>Oublier <code>-m</code> : l'utilisateur est créé sans dossier personnel.</li>
+<li><code>chmod 640</code> au lieu de la notation symbolique demandée : même résultat, consigne non respectée.</li>
+<li>Oublier le <code>chown</code> de <code>budget.txt</code> : créé par sudo, il appartient alors à root.</li></ul></div>
+
+<h2>3. Exploiter un CSV avec cut</h2>
+<p><code>cut -d';' -f2</code> découpe chaque ligne à chaque <code>;</code> et garde le 2<sup>e</sup> morceau. <code>tail -n +2</code> retire la ligne d'en-tête. Le pipe <code>|</code> passe le résultat d'une commande à la suivante.</p>
+<p>Colonnes du fichier :</p>
+<pre>id;nom;prenom;service;ville;date_embauche;salaire;email</pre>
+<pre>
+#!/bin/bash
+cd ~/ex3
+cp /mnt/DevoirLinux-2026/employes.csv .
+mkdir -p resultats
+
+wc -l &lt; employes.csv &gt; resultats/q1.txt
+head -n 1 employes.csv &gt; resultats/q2.txt
+tail -n +2 employes.csv | cut -d';' -f2 &gt; resultats/q3.txt
+tail -n +2 employes.csv | cut -d';' -f2,3 &gt; resultats/q4.txt
+cut -d';' -f1-4 employes.csv &gt; resultats/q5.txt
+cut -d';' -f1-6,8 employes.csv &gt; resultats/q6.txt
+tail -n +2 employes.csv | cut -d';' -f4 | sort -u &gt; resultats/q7.txt
+tail -n +2 employes.csv | cut -d';' -f4 | grep -x "Informatique" | wc -l &gt; resultats/q8.txt
+tail -n +2 employes.csv | cut -d';' -f6 | cut -c1-4 | sort -u &gt; resultats/q9.txt
+tail -n +2 employes.csv | cut -d';' -f5 | sort | uniq -c &gt; resultats/q10.txt
+grep ";Lyon;" employes.csv | cut -d';' -f8 | cut -d'@' -f1 | sort &gt; resultats/q11.txt
+cut -d: -f1,7 /etc/passwd &gt; resultats/q12.txt
+tail -n +2 employes.csv | sort -t';' -k7 -n | tail -n 1 | cut -d';' -f2,7 &gt; resultats/q13.txt
+</pre>
+<div class="tab-defil"><table><tr><th>Q</th><th>Ce qu'il fallait comprendre</th><th>Résultat</th></tr>
+<tr><td>1</td><td><code>wc -l &lt; fichier</code> donne le nombre seul</td><td>31 (30 employés + l'en-tête)</td></tr>
+<tr><td>2</td><td><code>head -n 1</code> garde la 1<sup>re</sup> ligne</td><td>la ligne d'en-tête</td></tr>
+<tr><td>3</td><td>retirer l'en-tête avant de découper</td><td>Martin, Bernard, Dubois…</td></tr>
+<tr><td>4</td><td>plusieurs colonnes : <code>-f2,3</code></td><td>Martin;Lucas…</td></tr>
+<tr><td>5</td><td>une plage de colonnes : <code>-f1-4</code></td><td>id;nom;prenom;service puis 30 lignes</td></tr>
+<tr><td>6</td><td>« tout sauf la 7 » : <code>-f1-6,8</code> (ou <code>--complement -f7</code>)</td><td>7 colonnes, sans salaire</td></tr>
+<tr><td>7</td><td><code>sort -u</code> trie et supprime les doublons</td><td>Commercial, Compta, Direction, Informatique, RH</td></tr>
+<tr><td>8</td><td><code>grep -x</code> : la ligne entière doit correspondre</td><td>10</td></tr>
+<tr><td>9</td><td><code>cut -c1-4</code> : les 4 premiers caractères de la date</td><td>2014 à 2025</td></tr>
+<tr><td>10</td><td><code>uniq -c</code> compte, mais seulement des lignes triées</td><td>5 Bordeaux, 5 Lille, 7 Lyon, 5 Nantes, 8 Paris</td></tr>
+<tr><td>11</td><td>deux <code>cut</code> enchaînés : <code>;</code> puis <code>@</code></td><td>7 identifiants, de ethan.bertrand à tom.andre</td></tr>
+<tr><td>12</td><td><code>/etc/passwd</code> utilise <code>:</code> comme séparateur</td><td>root:/bin/bash…</td></tr>
+<tr><td>Bonus</td><td>tri numérique (<code>-n</code>) sur la colonne 7 (<code>-k7</code>)</td><td>Martin;5200</td></tr></table></div>
+<div class="box attention"><b>Erreurs fréquentes</b><ul>
+<li>Oublier l'en-tête : « nom » ou « service » apparaît dans la liste.</li>
+<li><code>uniq -c</code> sans <code>sort</code> avant : <code>uniq</code> ne regroupe que les lignes identiques <b>qui se suivent</b>, donc une ville apparaît plusieurs fois.</li>
+<li>Oublier <code>-d</code> : sans séparateur, <code>cut</code> utilise la tabulation et renvoie la ligne entière.</li>
+<li>Écrire la réponse à la main (<code>echo 10 &gt; q8.txt</code>) : le résultat est juste, mais il fallait le calculer avec les commandes.</li>
+<li><code>grep "Lyon"</code> sans les <code>;</code> attraperait aussi un nom ou un e-mail contenant « Lyon ».</li></ul></div>
+
+<h2>4. Script de sauvegarde et archivage</h2>
+<h3>Le script sauvegarde.sh</h3>
+<pre>
+#!/bin/bash
+# Usage : ./sauvegarde.sh projet_web    ($1 vaut alors "projet_web")
+mkdir -p ~/ex4/sauvegardes
+tar -czf ~/ex4/sauvegardes/backup_$(date +%Y%m%d).tar.gz "$1"
+tar -tzf ~/ex4/sauvegardes/backup_$(date +%Y%m%d).tar.gz &gt; ~/ex4/sauvegardes/contenu.txt
+wc -l &lt; ~/ex4/sauvegardes/contenu.txt &gt; ~/ex4/sauvegardes/nb_elements.txt
+echo "Sauvegarde de $1 terminee le $(date)"
+</pre>
+<ul><li><code>$1</code> est le premier paramètre donné au script.</li>
+<li><code>$(date +%Y%m%d)</code> est remplacé par le résultat de la commande, par exemple <code>20261110</code>.</li>
+<li>Options de <code>tar</code> : <b>c</b> créer, <b>t</b> lister, <b>x</b> extraire, <b>z</b> compresser avec gzip, <b>f</b> nom du fichier archive.</li></ul>
+<h3>Les commandes tapées au terminal (depuis ~/ex4)</h3>
+<pre>
+# Étape 1 : -r copie le dossier et tout son contenu
+cp -r /mnt/DevoirLinux-2026/projet_web .
+
+# Étape 2
+chmod +x sauvegarde.sh
+./sauvegarde.sh projet_web                 # nb_elements.txt contient 12
+
+# Étape 3 : --exclude se place AVANT le nom du dossier
+tar --exclude='*.log' -czf sauvegardes/backup_sans_logs.tar.gz projet_web
+tar -tzf sauvegardes/backup_sans_logs.tar.gz       # vérification : aucun .log
+
+# Étape 4 : on extrait un seul dossier en le nommant à la fin
+rm -r projet_web/config
+tar -xzf sauvegardes/backup_20261110.tar.gz projet_web/config
+
+# Étape 5 : $( ) fournit la liste des services à mkdir
+mkdir services &amp;&amp; cd services
+mkdir $(tail -n +2 /mnt/DevoirLinux-2026/employes.csv | cut -d';' -f4 | sort -u)
+
+# Bonus : 7 = rwx pour le propriétaire, 0 pour les autres
+chmod 700 Direction
+</pre>
+<div class="box attention"><b>Erreurs fréquentes</b><ul>
+<li><code>--exclude</code> après le nom du dossier : tar l'ignore sans erreur, et les <code>.log</code> restent dans l'archive.</li>
+<li>Chemin absolu (<code>./sauvegarde.sh ~/ex4/projet_web</code>) : l'archive contient <code>home/nom/ex4/projet_web/…</code> et <code>tar -xzf … projet_web/config</code> ne trouve plus rien.</li>
+<li><code>wc -l contenu.txt</code> ajoute le nom du fichier après le nombre.</li>
+<li>Ne pas supprimer <code>config</code> avant de le restaurer : on n'a alors jamais vérifié que la restauration fonctionne.</li>
+<li>Taper les noms des services à la main à l'étape 5 : il fallait les extraire du CSV.</li></ul></div>
+
+<h2>5. À retenir</h2>
+<div class="tab-defil"><table><tr><th>Besoin</th><th>Commande</th><th>Piège</th></tr>
+<tr><td>Créer des dossiers imbriqués</td><td><code>mkdir -p</code></td><td>sans <code>-p</code>, échec si le parent n'existe pas</td></tr>
+<tr><td>Obtenir un nombre seul</td><td><code>wc -l &lt; fichier</code> ou <code>… | wc -l</code></td><td><code>wc -l fichier</code> ajoute le nom</td></tr>
+<tr><td>Déplacer et renommer</td><td><code>mv source destination/nouveau_nom</code></td><td>une seule commande</td></tr>
+<tr><td>Ajouter un utilisateur à un groupe</td><td><code>usermod -aG groupe user</code></td><td>sans <code>-a</code>, les autres groupes sont perdus</td></tr>
+<tr><td>Découper une colonne</td><td><code>cut -d'sep' -fN</code></td><td>toujours préciser <code>-d</code></td></tr>
+<tr><td>Liste sans doublon</td><td><code>sort -u</code></td><td><code>uniq</code> seul ne suffit pas</td></tr>
+<tr><td>Compter les répétitions</td><td><code>sort | uniq -c</code></td><td>trier avant <code>uniq</code></td></tr>
+<tr><td>Archiver sans certains fichiers</td><td><code>tar --exclude='*.log' -czf archive.tar.gz dossier</code></td><td><code>--exclude</code> avant le dossier</td></tr>
+<tr><td>Utiliser le résultat d'une commande</td><td><code>$(commande)</code></td><td>–</td></tr></table></div>
+<div class="box retenir"><b>Dans un script</b><p>Toujours <code>#!/bin/bash</code> en première ligne, <code>chmod +x script.sh</code>, puis <code>./script.sh</code>.</p></div>
+<p>Essaie les commandes du cours ici (le fichier <code>employes.csv</code> est dans ton dossier) :</p>
+<div data-terminal data-fs="EF_FS_DEVOIR" data-banner="Terminal d'essai · employes.csv est dans ~ (essaie : tail -n +2 employes.csv | cut -d';' -f5 | sort | uniq -c)"></div>
+</article>
+
+<script>
+window.EF_FS_DEVOIR = {"/home/etu/":null,"/home/etu/employes.csv":"id;nom;prenom;service;ville;date_embauche;salaire;email\n1;Martin;Lucas;Direction;Paris;2014-03-01;5200;lucas.martin@agence.fr\n2;Bernard;Margot;Informatique;Lyon;2019-09-02;3100;margot.bernard@agence.fr\n3;Dubois;Hugo;Commercial;Lille;2021-01-11;2600;hugo.dubois@agence.fr\n4;Thomas;Lea;Compta;Nantes;2016-06-15;2900;lea.thomas@agence.fr\n5;Robert;Louis;Informatique;Paris;2018-04-03;3400;louis.robert@agence.fr\n6;Richard;Chloe;RH;Bordeaux;2020-10-05;2700;chloe.richard@agence.fr\n7;Petit;Jules;Commercial;Paris;2022-02-14;2500;jules.petit@agence.fr\n8;Durand;Manon;Informatique;Lille;2017-11-20;3300;manon.durand@agence.fr\n9;Leroy;Nathan;Compta;Lyon;2015-05-04;3000;nathan.leroy@agence.fr\n10;Moreau;Ines;Informatique;Nantes;2023-03-13;2800;ines.moreau@agence.fr\n11;Simon;Gabriel;Commercial;Bordeaux;2019-07-01;2650;gabriel.simon@agence.fr\n12;Laurent;Lucie;Direction;Lyon;2016-01-04;4800;lucie.laurent@agence.fr\n13;Lefebvre;Adam;Informatique;Paris;2024-09-02;2700;adam.lefebvre@agence.fr\n14;Michel;Sarah;RH;Lille;2018-02-12;2750;sarah.michel@agence.fr\n15;Garcia;Raphael;Commercial;Nantes;2025-01-06;2400;raphael.garcia@agence.fr\n16;David;Jade;Informatique;Bordeaux;2020-06-08;3150;jade.david@agence.fr\n17;Bertrand;Ethan;Commercial;Lyon;2021-09-13;2550;ethan.bertrand@agence.fr\n18;Roux;Louise;Compta;Paris;2017-03-06;2950;louise.roux@agence.fr\n19;Vincent;Paul;Informatique;Lyon;2022-10-03;2900;paul.vincent@agence.fr\n20;Fournier;Alice;RH;Nantes;2019-01-07;2800;alice.fournier@agence.fr\n21;Morel;Leo;Commercial;Paris;2023-05-15;2450;leo.morel@agence.fr\n22;Girard;Lina;Informatique;Lille;2016-09-05;3500;lina.girard@agence.fr\n23;Andre;Tom;Compta;Lyon;2024-02-05;2600;tom.andre@agence.fr\n24;Mercier;Rose;Direction;Bordeaux;2015-11-02;4500;rose.mercier@agence.fr\n25;Dupont;Noah;Informatique;Paris;2021-04-12;3050;noah.dupont@agence.fr\n26;Lambert;Zoe;Commercial;Lille;2020-03-02;2700;zoe.lambert@agence.fr\n27;Bonnet;Paul;Compta;Bordeaux;2018-08-27;2850;paul.bonnet@agence.fr\n28;Francois;Eva;RH;Paris;2022-06-20;2650;eva.francois@agence.fr\n29;Martinez;Sacha;Informatique;Nantes;2017-02-13;3250;sacha.martinez@agence.fr\n30;Legrand;Mila;Compta;Lyon;2025-03-03;2500;mila.legrand@agence.fr\n","/tmp/":null};
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle commande crée `Agence/Informatique/Serveurs` même si `Agence` n'existe pas encore ?",
+  "options": [
+   "mkdir -p Agence/Informatique/Serveurs",
+   "mkdir Agence/Informatique/Serveurs",
+   "mkdir -r Agence/Informatique/Serveurs",
+   "touch Agence/Informatique/Serveurs"
+  ],
+  "answer": 0,
+  "explication": "`-p` crée les dossiers parents qui manquent."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quelle commande affiche le nombre de lignes de `f.txt`, **sans** le nom du fichier ?",
+  "options": [
+   "wc -l f.txt",
+   "wc -l < f.txt",
+   "wc f.txt",
+   "cat -n f.txt"
+  ],
+  "answer": 1,
+  "explication": "Avec `<`, wc lit l'entrée standard et ne connaît pas le nom du fichier."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "`mv Agence/brouillon.txt Agence/Informatique/Postes/poste01.txt` déplace et renomme le fichier en une seule commande.",
+  "answer": true,
+  "explication": "`mv` déplace vers le chemin donné, nom compris."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quel argument de `touch -t` date un fichier au 15 janvier 2026 à 9 h 00 ? (format AAAAMMJJhhmm)",
+  "answers": [
+   "202601150900"
+  ],
+  "explication": "Année 2026, mois 01, jour 15, heure 09, minutes 00."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Pourquoi `ls -R Agence | wc -l` ne donne-t-il pas le nombre de fichiers ?",
+  "options": [
+   "ls -R n'affiche pas les sous-dossiers",
+   "Il compte aussi les dossiers, les titres et les lignes vides",
+   "wc -l compte les mots",
+   "Il faut ls -a"
+  ],
+  "answer": 1,
+  "explication": "Il faut `find Agence -type f | wc -l`."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "chloe est dans `compta`. Après `usermod -G rh chloe`, dans quels groupes secondaires est-elle ?",
+  "options": [
+   "compta et rh",
+   "rh seulement",
+   "compta seulement",
+   "aucun"
+  ],
+  "answer": 1,
+  "explication": "Sans `-a`, `-G` remplace la liste des groupes secondaires."
+ },
+ {
+  "type": "associer",
+  "niveau": "moyen",
+  "q": "Associe chaque notation à ses droits.",
+  "paires": [
+   [
+    "770",
+    "rwxrwx---"
+   ],
+   [
+    "755",
+    "rwxr-xr-x"
+   ],
+   [
+    "640",
+    "rw-r-----"
+   ],
+   [
+    "700",
+    "rwx------"
+   ]
+  ],
+  "explication": "r = 4, w = 2, x = 1, dans l'ordre propriétaire, groupe, autres."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quelle notation symbolique équivaut à `chmod 640` ? (forme u=…,g=…,o=)",
+  "answers": [
+   "u=rw,g=r,o=",
+   "u=rw,g=r,o-rwx"
+  ],
+  "explication": "`u=rw,g=r,o=` : rw pour le propriétaire, r pour le groupe, rien pour les autres."
+ },
+ {
+  "type": "vf",
+  "niveau": "difficile",
+  "q": "bob n'est pas dans `compta`. Il peut lire `/srv/agence/compta/budget.txt` si le fichier est en 644 mais le dossier en 770.",
+  "answer": false,
+  "explication": "Sans le droit x sur le dossier (770 = rien pour les autres), bob ne peut pas y entrer, quels que soient les droits du fichier."
+ },
+ {
+  "type": "terminal",
+  "niveau": "moyen",
+  "q": "Écris dans `services.txt` la liste des services de `employes.csv`, sans l'en-tête et sans doublon (colonne 4).",
+  "fs": {
+   "/home/etu/": null,
+   "/home/etu/employes.csv": "id;nom;prenom;service;ville;date_embauche;salaire;email\n1;Martin;Lucas;Direction;Paris;2014-03-01;5200;lucas.martin@agence.fr\n2;Bernard;Margot;Informatique;Lyon;2019-09-02;3100;margot.bernard@agence.fr\n3;Dubois;Hugo;Commercial;Lille;2021-01-11;2600;hugo.dubois@agence.fr\n4;Thomas;Lea;Compta;Nantes;2016-06-15;2900;lea.thomas@agence.fr\n5;Robert;Louis;Informatique;Paris;2018-04-03;3400;louis.robert@agence.fr\n6;Richard;Chloe;RH;Bordeaux;2020-10-05;2700;chloe.richard@agence.fr\n7;Petit;Jules;Commercial;Paris;2022-02-14;2500;jules.petit@agence.fr\n8;Durand;Manon;Informatique;Lille;2017-11-20;3300;manon.durand@agence.fr\n9;Leroy;Nathan;Compta;Lyon;2015-05-04;3000;nathan.leroy@agence.fr\n10;Moreau;Ines;Informatique;Nantes;2023-03-13;2800;ines.moreau@agence.fr\n11;Simon;Gabriel;Commercial;Bordeaux;2019-07-01;2650;gabriel.simon@agence.fr\n12;Laurent;Lucie;Direction;Lyon;2016-01-04;4800;lucie.laurent@agence.fr\n13;Lefebvre;Adam;Informatique;Paris;2024-09-02;2700;adam.lefebvre@agence.fr\n14;Michel;Sarah;RH;Lille;2018-02-12;2750;sarah.michel@agence.fr\n15;Garcia;Raphael;Commercial;Nantes;2025-01-06;2400;raphael.garcia@agence.fr\n16;David;Jade;Informatique;Bordeaux;2020-06-08;3150;jade.david@agence.fr\n17;Bertrand;Ethan;Commercial;Lyon;2021-09-13;2550;ethan.bertrand@agence.fr\n18;Roux;Louise;Compta;Paris;2017-03-06;2950;louise.roux@agence.fr\n19;Vincent;Paul;Informatique;Lyon;2022-10-03;2900;paul.vincent@agence.fr\n20;Fournier;Alice;RH;Nantes;2019-01-07;2800;alice.fournier@agence.fr\n21;Morel;Leo;Commercial;Paris;2023-05-15;2450;leo.morel@agence.fr\n22;Girard;Lina;Informatique;Lille;2016-09-05;3500;lina.girard@agence.fr\n23;Andre;Tom;Compta;Lyon;2024-02-05;2600;tom.andre@agence.fr\n24;Mercier;Rose;Direction;Bordeaux;2015-11-02;4500;rose.mercier@agence.fr\n25;Dupont;Noah;Informatique;Paris;2021-04-12;3050;noah.dupont@agence.fr\n26;Lambert;Zoe;Commercial;Lille;2020-03-02;2700;zoe.lambert@agence.fr\n27;Bonnet;Paul;Compta;Bordeaux;2018-08-27;2850;paul.bonnet@agence.fr\n28;Francois;Eva;RH;Paris;2022-06-20;2650;eva.francois@agence.fr\n29;Martinez;Sacha;Informatique;Nantes;2017-02-13;3250;sacha.martinez@agence.fr\n30;Legrand;Mila;Compta;Lyon;2025-03-03;2500;mila.legrand@agence.fr\n",
+   "/tmp/": null
+  },
+  "checks": [
+   {
+    "equals": [
+     "/home/etu/services.txt",
+     "Commercial\nCompta\nDirection\nInformatique\nRH\n"
+    ]
+   }
+  ],
+  "solution": "tail -n +2 employes.csv | cut -d';' -f4 | sort -u > services.txt",
+  "explication": "`tail -n +2` retire l'en-tête, `cut` garde la colonne, `sort -u` trie sans doublon."
+ },
+ {
+  "type": "terminal",
+  "niveau": "moyen",
+  "q": "Écris dans `info.txt` le nombre d'employés du service Informatique (nombre seul).",
+  "fs": {
+   "/home/etu/": null,
+   "/home/etu/employes.csv": "id;nom;prenom;service;ville;date_embauche;salaire;email\n1;Martin;Lucas;Direction;Paris;2014-03-01;5200;lucas.martin@agence.fr\n2;Bernard;Margot;Informatique;Lyon;2019-09-02;3100;margot.bernard@agence.fr\n3;Dubois;Hugo;Commercial;Lille;2021-01-11;2600;hugo.dubois@agence.fr\n4;Thomas;Lea;Compta;Nantes;2016-06-15;2900;lea.thomas@agence.fr\n5;Robert;Louis;Informatique;Paris;2018-04-03;3400;louis.robert@agence.fr\n6;Richard;Chloe;RH;Bordeaux;2020-10-05;2700;chloe.richard@agence.fr\n7;Petit;Jules;Commercial;Paris;2022-02-14;2500;jules.petit@agence.fr\n8;Durand;Manon;Informatique;Lille;2017-11-20;3300;manon.durand@agence.fr\n9;Leroy;Nathan;Compta;Lyon;2015-05-04;3000;nathan.leroy@agence.fr\n10;Moreau;Ines;Informatique;Nantes;2023-03-13;2800;ines.moreau@agence.fr\n11;Simon;Gabriel;Commercial;Bordeaux;2019-07-01;2650;gabriel.simon@agence.fr\n12;Laurent;Lucie;Direction;Lyon;2016-01-04;4800;lucie.laurent@agence.fr\n13;Lefebvre;Adam;Informatique;Paris;2024-09-02;2700;adam.lefebvre@agence.fr\n14;Michel;Sarah;RH;Lille;2018-02-12;2750;sarah.michel@agence.fr\n15;Garcia;Raphael;Commercial;Nantes;2025-01-06;2400;raphael.garcia@agence.fr\n16;David;Jade;Informatique;Bordeaux;2020-06-08;3150;jade.david@agence.fr\n17;Bertrand;Ethan;Commercial;Lyon;2021-09-13;2550;ethan.bertrand@agence.fr\n18;Roux;Louise;Compta;Paris;2017-03-06;2950;louise.roux@agence.fr\n19;Vincent;Paul;Informatique;Lyon;2022-10-03;2900;paul.vincent@agence.fr\n20;Fournier;Alice;RH;Nantes;2019-01-07;2800;alice.fournier@agence.fr\n21;Morel;Leo;Commercial;Paris;2023-05-15;2450;leo.morel@agence.fr\n22;Girard;Lina;Informatique;Lille;2016-09-05;3500;lina.girard@agence.fr\n23;Andre;Tom;Compta;Lyon;2024-02-05;2600;tom.andre@agence.fr\n24;Mercier;Rose;Direction;Bordeaux;2015-11-02;4500;rose.mercier@agence.fr\n25;Dupont;Noah;Informatique;Paris;2021-04-12;3050;noah.dupont@agence.fr\n26;Lambert;Zoe;Commercial;Lille;2020-03-02;2700;zoe.lambert@agence.fr\n27;Bonnet;Paul;Compta;Bordeaux;2018-08-27;2850;paul.bonnet@agence.fr\n28;Francois;Eva;RH;Paris;2022-06-20;2650;eva.francois@agence.fr\n29;Martinez;Sacha;Informatique;Nantes;2017-02-13;3250;sacha.martinez@agence.fr\n30;Legrand;Mila;Compta;Lyon;2025-03-03;2500;mila.legrand@agence.fr\n",
+   "/tmp/": null
+  },
+  "checks": [
+   {
+    "equals": [
+     "/home/etu/info.txt",
+     "10\n"
+    ]
+   },
+   {
+    "cmd": "\\|\\s*wc -l"
+   }
+  ],
+  "solution": "tail -n +2 employes.csv | cut -d';' -f4 | grep -x \"Informatique\" | wc -l > info.txt",
+  "explication": "`grep -x` exige que la ligne entière corresponde."
+ },
+ {
+  "type": "terminal",
+  "niveau": "difficile",
+  "q": "Écris dans `villes.txt` le nombre d'employés par ville (colonne 5), avec `uniq -c`.",
+  "fs": {
+   "/home/etu/": null,
+   "/home/etu/employes.csv": "id;nom;prenom;service;ville;date_embauche;salaire;email\n1;Martin;Lucas;Direction;Paris;2014-03-01;5200;lucas.martin@agence.fr\n2;Bernard;Margot;Informatique;Lyon;2019-09-02;3100;margot.bernard@agence.fr\n3;Dubois;Hugo;Commercial;Lille;2021-01-11;2600;hugo.dubois@agence.fr\n4;Thomas;Lea;Compta;Nantes;2016-06-15;2900;lea.thomas@agence.fr\n5;Robert;Louis;Informatique;Paris;2018-04-03;3400;louis.robert@agence.fr\n6;Richard;Chloe;RH;Bordeaux;2020-10-05;2700;chloe.richard@agence.fr\n7;Petit;Jules;Commercial;Paris;2022-02-14;2500;jules.petit@agence.fr\n8;Durand;Manon;Informatique;Lille;2017-11-20;3300;manon.durand@agence.fr\n9;Leroy;Nathan;Compta;Lyon;2015-05-04;3000;nathan.leroy@agence.fr\n10;Moreau;Ines;Informatique;Nantes;2023-03-13;2800;ines.moreau@agence.fr\n11;Simon;Gabriel;Commercial;Bordeaux;2019-07-01;2650;gabriel.simon@agence.fr\n12;Laurent;Lucie;Direction;Lyon;2016-01-04;4800;lucie.laurent@agence.fr\n13;Lefebvre;Adam;Informatique;Paris;2024-09-02;2700;adam.lefebvre@agence.fr\n14;Michel;Sarah;RH;Lille;2018-02-12;2750;sarah.michel@agence.fr\n15;Garcia;Raphael;Commercial;Nantes;2025-01-06;2400;raphael.garcia@agence.fr\n16;David;Jade;Informatique;Bordeaux;2020-06-08;3150;jade.david@agence.fr\n17;Bertrand;Ethan;Commercial;Lyon;2021-09-13;2550;ethan.bertrand@agence.fr\n18;Roux;Louise;Compta;Paris;2017-03-06;2950;louise.roux@agence.fr\n19;Vincent;Paul;Informatique;Lyon;2022-10-03;2900;paul.vincent@agence.fr\n20;Fournier;Alice;RH;Nantes;2019-01-07;2800;alice.fournier@agence.fr\n21;Morel;Leo;Commercial;Paris;2023-05-15;2450;leo.morel@agence.fr\n22;Girard;Lina;Informatique;Lille;2016-09-05;3500;lina.girard@agence.fr\n23;Andre;Tom;Compta;Lyon;2024-02-05;2600;tom.andre@agence.fr\n24;Mercier;Rose;Direction;Bordeaux;2015-11-02;4500;rose.mercier@agence.fr\n25;Dupont;Noah;Informatique;Paris;2021-04-12;3050;noah.dupont@agence.fr\n26;Lambert;Zoe;Commercial;Lille;2020-03-02;2700;zoe.lambert@agence.fr\n27;Bonnet;Paul;Compta;Bordeaux;2018-08-27;2850;paul.bonnet@agence.fr\n28;Francois;Eva;RH;Paris;2022-06-20;2650;eva.francois@agence.fr\n29;Martinez;Sacha;Informatique;Nantes;2017-02-13;3250;sacha.martinez@agence.fr\n30;Legrand;Mila;Compta;Lyon;2025-03-03;2500;mila.legrand@agence.fr\n",
+   "/tmp/": null
+  },
+  "checks": [
+   {
+    "equals": [
+     "/home/etu/villes.txt",
+     "      5 Bordeaux\n      5 Lille\n      7 Lyon\n      5 Nantes\n      8 Paris\n"
+    ]
+   }
+  ],
+  "solution": "tail -n +2 employes.csv | cut -d';' -f5 | sort | uniq -c > villes.txt",
+  "explication": "Il faut trier avant `uniq -c`, qui ne regroupe que les lignes consécutives."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Laquelle de ces commandes exclut vraiment les `.log` de l'archive ?",
+  "options": [
+   "tar -czf a.tar.gz projet_web --exclude='*.log'",
+   "tar --exclude='*.log' -czf a.tar.gz projet_web",
+   "tar -czf a.tar.gz projet_web | grep -v .log",
+   "tar -czf a.tar.gz projet_web/*.log"
+  ],
+  "answer": 1,
+  "explication": "`--exclude` doit être placé avant le dossier à archiver."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Dans un script lancé par `./sauvegarde.sh projet_web`, que vaut `$1` ?",
+  "options": [
+   "./sauvegarde.sh",
+   "projet_web",
+   "le nombre de paramètres",
+   "rien"
+  ],
+  "answer": 1,
+  "explication": "`$1` est le premier paramètre ; `$0` est le nom du script."
+ },
+ {
+  "type": "terminal",
+  "niveau": "difficile",
+  "q": "Crée dans `~` un dossier par service, en extrayant les noms de `employes.csv` avec `$( )`.",
+  "fs": {
+   "/home/etu/": null,
+   "/home/etu/employes.csv": "id;nom;prenom;service;ville;date_embauche;salaire;email\n1;Martin;Lucas;Direction;Paris;2014-03-01;5200;lucas.martin@agence.fr\n2;Bernard;Margot;Informatique;Lyon;2019-09-02;3100;margot.bernard@agence.fr\n3;Dubois;Hugo;Commercial;Lille;2021-01-11;2600;hugo.dubois@agence.fr\n4;Thomas;Lea;Compta;Nantes;2016-06-15;2900;lea.thomas@agence.fr\n5;Robert;Louis;Informatique;Paris;2018-04-03;3400;louis.robert@agence.fr\n6;Richard;Chloe;RH;Bordeaux;2020-10-05;2700;chloe.richard@agence.fr\n7;Petit;Jules;Commercial;Paris;2022-02-14;2500;jules.petit@agence.fr\n8;Durand;Manon;Informatique;Lille;2017-11-20;3300;manon.durand@agence.fr\n9;Leroy;Nathan;Compta;Lyon;2015-05-04;3000;nathan.leroy@agence.fr\n10;Moreau;Ines;Informatique;Nantes;2023-03-13;2800;ines.moreau@agence.fr\n11;Simon;Gabriel;Commercial;Bordeaux;2019-07-01;2650;gabriel.simon@agence.fr\n12;Laurent;Lucie;Direction;Lyon;2016-01-04;4800;lucie.laurent@agence.fr\n13;Lefebvre;Adam;Informatique;Paris;2024-09-02;2700;adam.lefebvre@agence.fr\n14;Michel;Sarah;RH;Lille;2018-02-12;2750;sarah.michel@agence.fr\n15;Garcia;Raphael;Commercial;Nantes;2025-01-06;2400;raphael.garcia@agence.fr\n16;David;Jade;Informatique;Bordeaux;2020-06-08;3150;jade.david@agence.fr\n17;Bertrand;Ethan;Commercial;Lyon;2021-09-13;2550;ethan.bertrand@agence.fr\n18;Roux;Louise;Compta;Paris;2017-03-06;2950;louise.roux@agence.fr\n19;Vincent;Paul;Informatique;Lyon;2022-10-03;2900;paul.vincent@agence.fr\n20;Fournier;Alice;RH;Nantes;2019-01-07;2800;alice.fournier@agence.fr\n21;Morel;Leo;Commercial;Paris;2023-05-15;2450;leo.morel@agence.fr\n22;Girard;Lina;Informatique;Lille;2016-09-05;3500;lina.girard@agence.fr\n23;Andre;Tom;Compta;Lyon;2024-02-05;2600;tom.andre@agence.fr\n24;Mercier;Rose;Direction;Bordeaux;2015-11-02;4500;rose.mercier@agence.fr\n25;Dupont;Noah;Informatique;Paris;2021-04-12;3050;noah.dupont@agence.fr\n26;Lambert;Zoe;Commercial;Lille;2020-03-02;2700;zoe.lambert@agence.fr\n27;Bonnet;Paul;Compta;Bordeaux;2018-08-27;2850;paul.bonnet@agence.fr\n28;Francois;Eva;RH;Paris;2022-06-20;2650;eva.francois@agence.fr\n29;Martinez;Sacha;Informatique;Nantes;2017-02-13;3250;sacha.martinez@agence.fr\n30;Legrand;Mila;Compta;Lyon;2025-03-03;2500;mila.legrand@agence.fr\n",
+   "/tmp/": null
+  },
+  "checks": [
+   {
+    "exists": "/home/etu/Commercial"
+   },
+   {
+    "exists": "/home/etu/Compta"
+   },
+   {
+    "exists": "/home/etu/Direction"
+   },
+   {
+    "exists": "/home/etu/Informatique"
+   },
+   {
+    "exists": "/home/etu/RH"
+   },
+   {
+    "cmd": "\\$\\("
+   }
+  ],
+  "solution": "mkdir $(tail -n +2 employes.csv | cut -d';' -f4 | sort -u)",
+  "explication": "`$(…)` est remplacé par la sortie de la commande : cinq noms donnés à `mkdir`."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/terminal.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

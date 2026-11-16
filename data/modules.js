@@ -57,7 +57,9 @@ window.EF_MODULES = [
     description: "Réseaux, Linux, Windows Server, virtualisation, services : administrer une infrastructure.",
     labos: [{ href: "labo-terminal.html", ico: ">_", titre: "Labo terminal Linux", court: "Terminal", texte: "40 missions guidées sur un vrai faux système de fichiers : ls, cd, grep, chmod, pipes, sudo, tar… plus un bac à sable." },
       { href: "labo-ipv4.html", ico: "/24", titre: "Labo sous-réseaux", court: "Sous-réseaux", cle: "sisr-ipv4", texte: "24 missions de calcul IPv4 toujours renouvelées : masque, adresse réseau, broadcast, plage, découpage et VLSM. Plus un calculateur.",
-        examDuree: 720, examCoef: 150, examTexte: "6 calculs · 12 min", examDesc: "6 calculs d'adressage tirés au hasard (réseau, broadcast, plage, découpage, VLSM…), sans correction pendant l'épreuve." }],
+        examDuree: 720, examCoef: 150, examTexte: "6 calculs · 12 min", examDesc: "6 calculs d'adressage tirés au hasard (réseau, broadcast, plage, découpage, VLSM…), sans correction pendant l'épreuve." },
+      { href: "labo-devoir-linux.html", ico: "A", titre: "Labo Devoir Linux A", court: "Devoir A", cle: "sisr-devoir", texte: "Le devoir Linux A rejoué en 21 missions : arborescence, utilisateurs et droits, CSV avec cut, script de sauvegarde avec tar.",
+        examDuree: 900, examCoef: 150, examTexte: "3 missions · 15 min", examDesc: "3 missions tirées dans trois exercices différents du devoir, sans indice ni solution." }],
     chapitres: [
       { id: "presentation-blocs", titre: "Présentation des Blocs 1 et 3", niveau: "facile" },
       { id: "linux-shell-bases", titre: "Linux : le shell et l'arborescence", niveau: "facile" },
@@ -65,7 +67,8 @@ window.EF_MODULES = [
       { id: "linux-droits-utilisateurs", titre: "Linux : droits, propriétaires et utilisateurs", niveau: "moyen" },
       { id: "linux-archives-processus", titre: "Linux : archives, processus et variables", niveau: "moyen" },
       { id: "adressage-ipv4", titre: "Adressage IPv4 et services réseau", niveau: "moyen" },
-      { id: "wordpress-nginx", titre: "WordPress sur un serveur LEMP (Nginx)", niveau: "difficile" }
+      { id: "wordpress-nginx", titre: "WordPress sur un serveur LEMP (Nginx)", niveau: "difficile" },
+      { id: "devoir-linux-a", titre: "Devoir Linux A : corrigé commenté", niveau: "moyen" }
     ]
   },
   {
