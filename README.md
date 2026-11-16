@@ -50,6 +50,7 @@ PHP, Python et SQLite (sql.js) sont embarqués dans `assets/vendor/` (aucun CDN 
   - Points = coefficient × réussite + bonus de rapidité (si ≥ 50 %). Le meilleur résultat de chaque épreuve est conservé.
 - **Forum** (`forum.html`) : questions par matière, réponses en fil, votes ▲/▼, meilleure réponse, tri (populaires, récentes, mieux notées, sans réponse) et recherche. Firestore : `posts`, `posts/{id}/reponses`, `votes/{uid}`.
 - **Classement** (`classement.html`) : général (100 pts par chapitre, 20 par mission, + meilleurs points d'évaluation) ou par épreuve. Deux onglets séparés : **Programme BTS** (`stats.score`) et **Cours bonus** (`classement.html#bonus`, `stats.bonus.score` : chapitres bonus, missions des labos bonus, évaluations bonus), chacun avec ses classements par épreuve.
+- **Séries (streak)** : au moins un défi par jour (question de quiz, vérification d'une mission de labo, évaluation, duel, atelier), réussi ou non ; un jour manqué remet la série à zéro (le record reste). `EtudeFacile.activite()` / `serie()` dans `assets/app.js`, clé `ef-streak` { jours, dernier, record } synchronisée, copiée dans `profils.stats.serie`. Pastille flamme dans la barre du haut, colonne « Série » dans les classements et onglet dédié `classement.html#series` (série effective recalculée à l'affichage).
 
 ## RGPD
 

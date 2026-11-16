@@ -18,7 +18,7 @@ const EF = window.EtudeFacile;
 const esc = EF.esc;
 const racine = new URL("../", import.meta.url).href;
 
-const CLES = ["ef-progress", "ef-best", "ef-labo-terminal", "ef-labo-html", "ef-labo-php", "ef-labo-python", "ef-labo-conjugaison", "ef-labo-ipv4", "ef-labo-b1html", "ef-labo-b1css", "ef-labo-sql", "ef-labo-devoir-linux", "ef-labo-sqltp", "ef-labo-js", "ef-labo-lua", "ef-labo-cpp", "ef-labo-java", "ef-labo-cyber", "ef-labo-defense", "ef-duel", "ef-atelier", "ef-evals"];
+const CLES = ["ef-progress", "ef-best", "ef-labo-terminal", "ef-labo-html", "ef-labo-php", "ef-labo-python", "ef-labo-conjugaison", "ef-labo-ipv4", "ef-labo-b1html", "ef-labo-b1css", "ef-labo-sql", "ef-labo-devoir-linux", "ef-labo-sqltp", "ef-labo-js", "ef-labo-lua", "ef-labo-cpp", "ef-labo-java", "ef-labo-cyber", "ef-labo-defense", "ef-duel", "ef-atelier", "ef-evals", "ef-streak"];
 /* évaluations qui comptent au classement (les évaluations de chapitre « <matière>_chap_<id> » restent privées) */
 const VERSION_CGU = "2026-11-10";
 const PUBLIQUE = /^[a-z0-9-]+_(questionnaire|textuel|pratique|examen)$/;
@@ -49,7 +49,7 @@ function rendu() {
     <div class="compte-menu" hidden>
       <div class="cm-tete"><b>${esc(nom)}</b><span>${esc(user.email || "")}</span></div>
       <div class="cm-etat">${esc(etat || "Progression synchronisée")}</div>
-      ${profil && profil.stats ? `<div class="cm-stats"><span><b>${profil.stats.chapitres}</b> chapitres</span><span><b>${profil.stats.missions}</b> missions</span><span><b>${profil.stats.score}</b> pts</span>${profil.stats.bonus && profil.stats.bonus.score ? `<span><b>${profil.stats.bonus.score}</b> pts bonus</span>` : ""}</div>` : ""}
+      ${profil && profil.stats ? `<div class="cm-stats"><span><b>${profil.stats.chapitres}</b> chapitres</span><span><b>${profil.stats.missions}</b> missions</span><span><b>${profil.stats.score}</b> pts</span>${profil.stats.bonus && profil.stats.bonus.score ? `<span><b>${profil.stats.bonus.score}</b> pts bonus</span>` : ""}${EF.serie ? `<span><b>${EF.serie().jours}</b> j de série</span>` : ""}</div>` : ""}
       <a class="cm-lien" href="${racine}classement.html">Voir le classement</a>
       <button type="button" data-a="pseudo">Changer de pseudo</button>
       <button type="button" data-a="donnees">Mes données</button>
@@ -332,6 +332,9 @@ function calcul(modules, labos, filtre) {
 function stats() {
   const st = calcul((m) => !BONUS.has(m), LABOS, compte);
   st.bonus = calcul((m) => BONUS.has(m), LABOS_BONUS, compteBonus);
+  /* série de jours : valeurs brutes, la série effective (remise à 0 après un jour manqué) est recalculée à l'affichage */
+  const sr = lit("ef-streak");
+  st.serie = { jours: sr.jours || 0, dernier: sr.dernier || "", record: sr.record || 0 };
   return st;
 }
 function evalsPubliques() {
@@ -352,6 +355,12 @@ function fusion(k, loc, nuage) {
   if (k === "ef-best") {
     const r = Object.assign({}, nuage);
     Object.keys(loc).forEach((c) => { if (typeof r[c] !== "number" || loc[c] > r[c]) r[c] = loc[c]; });
+    return r;
+  }
+  if (k === "ef-streak") {
+    const a = loc.dernier || "", b = nuage.dernier || "";
+    const r = a > b ? Object.assign({}, loc) : b > a ? Object.assign({}, nuage) : Object.assign({}, nuage, loc, { jours: Math.max(loc.jours || 0, nuage.jours || 0) });
+    r.record = Math.max(loc.record || 0, nuage.record || 0, r.jours || 0);
     return r;
   }
   if (k === "ef-evals") {

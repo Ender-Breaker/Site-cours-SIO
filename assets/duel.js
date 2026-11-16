@@ -178,6 +178,7 @@
     try {
       var s = stats(); s[role] = s[role] || { j: 0, v: 0 }; s[role].j++; if (gagne) s[role].v++;
       localStorage.setItem(KEY, JSON.stringify(s));
+      if (window.EtudeFacile && window.EtudeFacile.activite) window.EtudeFacile.activite();
     } catch (e) { /* stockage indisponible : le duel reste jouable */ }
   }
 

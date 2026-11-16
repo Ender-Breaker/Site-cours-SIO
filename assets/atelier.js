@@ -328,6 +328,7 @@ function executer(commande){   // mini-shell-jouet : retient le premier mot de c
     var payload = null;
     clic("[data-test]", function (b) {
       b.disabled = true; montrer("Exécution…", "attente");
+      if (window.EtudeFacile && window.EtudeFacile.activite) window.EtudeFacile.activite();
       verifierAttaque(m, ed.value).then(function (res) {
         b.disabled = false;
         if (res.err) return montrer("Erreur : " + res.err, "ko");
@@ -392,6 +393,7 @@ function executer(commande){   // mini-shell-jouet : retient le premier mot de c
     var ed = editeur(m.cible); main.querySelector(".at-ed").appendChild(ed);
     clic("[data-test]", function (b) {
       b.disabled = true; montrer("Exécution…", "attente");
+      if (window.EtudeFacile && window.EtudeFacile.activite) window.EtudeFacile.activite();
       verifierDefense(m, payload, ed.value).then(function (res) {
         b.disabled = false;
         if (res.err) return montrer("Erreur : " + res.err, "ko");

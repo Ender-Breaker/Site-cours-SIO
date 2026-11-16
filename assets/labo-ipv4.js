@@ -206,6 +206,7 @@
     $("li-encore").onclick = function () { ouvrir(cur); };
   }
   function verifier() {
+    if (window.EtudeFacile.activite) window.EtudeFacile.activite();
     var res = corriger($("li-form"), Q), tout = res.every(function (x) { return x.ok; });
     essais++;
     $("li-res").innerHTML = res.map(function (x) {

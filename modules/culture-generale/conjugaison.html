@@ -1081,6 +1081,7 @@
 
   function check(){
     if(answered || !current) return;
+    if(window.EtudeFacile && window.EtudeFacile.activite) window.EtudeFacile.activite();
     var raw = elField.value;
     var d = diagnose(raw, current);
     var ok = d.kind === "juste";

@@ -75,6 +75,30 @@
   var ICONS = {"arrow-up": "<path d=\"M9 18v-6H5l7-7 7 7h-4v6H9z\" />", "arrow-down": "<path d=\"M15 6v6h4l-7 7-7-7h4V6h6z\" />", "message": "<path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\" />", "check": "<path d=\"M20 6 9 17l-5-5\" />", "plus": "<path d=\"M5 12h14\" /><path d=\"M12 5v14\" />", "timer": "<line x1=\"10\" x2=\"14\" y1=\"2\" y2=\"2\" /><line x1=\"12\" x2=\"15\" y1=\"14\" y2=\"11\" /><circle cx=\"12\" cy=\"14\" r=\"8\" />", "user": "<path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\" /><circle cx=\"12\" cy=\"7\" r=\"4\" />", "play": "<polygon points=\"6 3 20 12 6 21 6 3\" />", "code": "<polyline points=\"16 18 22 12 16 6\" /><polyline points=\"8 6 2 12 8 18\" />", "book-open": "<path d=\"M12 5v16\" /><path d=\"M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z\" />", "pencil-line": "<path d=\"M13 21h8\" /><path d=\"m15 5 4 4\" /><path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\" />", "zap": "<path d=\"M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z\" />", "flame": "<path d=\"M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4\" />", "trophy": "<path d=\"M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2\" /><path d=\"M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2\" /><path d=\"M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3\" /><path d=\"M4 22h16\" /><path d=\"M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z\" /><path d=\"M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3\" />", "sprout": "<path d=\"M14 9.536V7a4 4 0 0 1 4-4h1.5a.5.5 0 0 1 .5.5V5a4 4 0 0 1-4 4 4 4 0 0 0-4 4c0 2 1 3 1 5a5 5 0 0 1-1 3\" /><path d=\"M4 9a5 5 0 0 1 8 4 5 5 0 0 1-8-4\" /><path d=\"M5 21h14\" />", "check": "<path d=\"M20 6 9 17l-5-5\" />", "lightbulb": "<path d=\"M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5\" /><path d=\"M9 18h6\" /><path d=\"M10 22h4\" />", "rotate-ccw": "<path d=\"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\" /><path d=\"M3 3v5h5\" />"};
   function icon(n) { return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true">' + ICONS[n] + '</svg>'; }
 
+  var SERIE = "ef-streak";
+  /* date locale AAAA-MM-JJ, décalée de d jours */
+  function jour(d) { var t = new Date(); t.setDate(t.getDate() + (d || 0)); return t.getFullYear() + "-" + ("0" + (t.getMonth() + 1)).slice(-2) + "-" + ("0" + t.getDate()).slice(-2); }
+  /* série effective : elle n'est plus valable si le dernier défi date d'avant-hier ou plus */
+  function serie(s) {
+    s = s || read(SERIE);
+    var vivante = s.dernier === jour(0) || s.dernier === jour(-1);
+    return { jours: vivante ? (s.jours || 0) : 0, record: s.record || 0, dernier: s.dernier || null, aujourdhui: s.dernier === jour(0) };
+  }
+  function pastilleSerie() {
+    var st = serie();
+    return '<a class="top-serie' + (st.aujourdhui ? " ok" : st.jours ? " attente" : "") + '" href="' + RACINE + 'classement.html#series" title="' +
+      (st.aujourdhui ? "Série de " + st.jours + " jour" + (st.jours > 1 ? "s" : "") + " : défi du jour fait" : st.jours ? "Série de " + st.jours + " jour" + (st.jours > 1 ? "s" : "") + " : fais un défi aujourd'hui pour la garder" : "Fais un défi (quiz, mission, évaluation) pour lancer ta série") +
+      '">' + icon("flame") + '<b>' + st.jours + '</b><span class="ts-txt"> jour' + (st.jours > 1 ? "s" : "") + '</span></a>';
+  }
+  function majPastilles() {
+    document.querySelectorAll(".topbar .wrap").forEach(function (w) {
+      var a = w.querySelector(".top-serie"), html = pastilleSerie();
+      if (a) a.outerHTML = html;
+      else { var st = w.querySelector(".top-stat"); if (st) st.insertAdjacentHTML("beforebegin", html); }
+    });
+  }
+  window.addEventListener("pageshow", majPastilles);
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", majPastilles); else setTimeout(majPastilles, 0);
   var EF = window.EtudeFacile = {
     icon: icon,
     esc: esc,
@@ -104,6 +128,7 @@
     racine: RACINE,
     getEvals: function () { return read(EVALS); },
     saveEval: function (cle, r) {
+      EF.activite();
       var e = read(EVALS), cur = e[cle];
       r.date = r.date || new Date().toISOString().slice(0, 10);
       var hist = (cur && cur.hist) || [];
@@ -205,8 +230,22 @@
         '<a href="' + prefix + 'classement.html">' + icon("trophy") + '<span>Classement</span></a>' +
         '<a href="' + prefix + 'forum.html">' + icon("message") + '<span>Forum</span></a>' +
         '<a href="' + prefix + 'bonus.html" class="nav-bonus">' + icon("zap") + '<span>Bonus</span></a></nav>' +
-        '<div class="top-stat"><b>' + total().done + '</b> chapitres validés</div></div>';
+        pastilleSerie() + '<div class="top-stat"><b>' + total().done + '</b> chapitres validés</div></div>';
       return h;
+    },
+    /* Série de jours (streak) : au moins un défi par jour (question de quiz, mission de labo, évaluation…),
+       réussi ou non. Un jour sans défi remet la série à zéro. localStorage « ef-streak » { jours, dernier, record } */
+    jour: jour,
+    serie: serie,
+    activite: function () {
+      var s = read(SERIE), auj = jour(0);
+      if (s.dernier === auj) return serie();
+      s.jours = s.dernier === jour(-1) ? (s.jours || 0) + 1 : 1;
+      s.dernier = auj;
+      s.record = Math.max(s.record || 0, s.jours);
+      write(SERIE, s);
+      majPastilles();
+      return serie();
     },
     stats: stats
   };

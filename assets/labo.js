@@ -59,7 +59,7 @@
       fs: fs, modes: modes, owners: owners, cwd: (m && m.cwd) || HOME,
       banner: m ? "Mission : " + m.titre + " — tape tes commandes ici (help = liste des commandes)." :
         "Bac à sable : expérimente librement. help liste les commandes, tree montre l'arborescence.",
-      onCommand: function () { renderTree(); if (mode !== "libre") evaluate(); }
+      onCommand: function () { renderTree(); if (mode !== "libre") { if (EF.activite) EF.activite(); evaluate(); } }
     });
     (m && m.prep || []).forEach(function (c) { term.sh.run(c); });
     ["hist", "cmds", "outs"].forEach(function (k) { term.sh.S[k].length = 0; });

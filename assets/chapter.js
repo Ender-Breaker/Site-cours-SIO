@@ -177,6 +177,7 @@
       if (answered) return;
       answered = true;
       var gain = 0;
+      if (window.EtudeFacile.activite) window.EtudeFacile.activite();
       if (correct) {
         S.ok++; S.streak++; S.best = Math.max(S.best, S.streak);
         gain = 10 + (S.streak >= 3 ? 5 : 0);

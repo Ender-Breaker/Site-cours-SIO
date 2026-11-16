@@ -526,6 +526,7 @@
   function runAndCheck() {
     if (running) return;
     running = true;
+    if (cur && window.EtudeFacile.activite) window.EtudeFacile.activite();
     var btn = $("lc-run"), code = src.value, req = CONS ? { stdin: stdinLines(), live: true } : cur ? { method: cur.post ? "post" : "get", get: cur.get || {}, post: cur.post || {} } : {};
     btn.disabled = true; notice("");
     if (EXT) arreteJeu();
