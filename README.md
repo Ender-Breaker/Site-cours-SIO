@@ -22,7 +22,7 @@ Site de révision pour le BTS SIO (1re année, option SLAM). Chaque matière est
 
 | Labo | Module | Contenu |
 |---|---|---|
-| Terminal Linux | SISR | 40 missions guidées sur un système de fichiers virtuel (ls, cd, grep, chmod, pipes, sudo, tar…) + bac à sable |
+| Terminal Linux | SISR | 41 missions guidées sur un système de fichiers virtuel (ls, cd, grep, chmod, pipes, sudo, useradd, groupadd / addgroup, tar…) + bac à sable |
 | HTML / CSS | SLAM | 19 missions avec aperçu en direct, objectifs vérifiés sur le rendu (DOM, styles calculés) |
 | PHP | Bloc 1 | 18 missions avec du vrai PHP 8.4 (php-wasm) ; formulaires GET/POST simulés et tests automatiques |
 | Python | Algo Python | 21 missions avec du vrai Python 3 (Pyodide, dans un Web Worker) ; saisies `input()` et tests automatiques |
@@ -61,7 +61,7 @@ PHP, Python et SQLite (sql.js) sont embarqués dans `assets/vendor/` (aucun CDN 
 
 ## Terminal simulé (`assets/terminal.js`)
 
-En plus des commandes de base : `&&` / `||`, substitution `$(…)`, accolades `{a,b}`, scripts exécutables (`./script.sh arg`, `bash script.sh`, avec `$1`…`$9`, `$#`, `$@`), `touch -t`, `find -type f|d`, `tail -n +N`, `cut -c` / `--complement`, `sort -t -k -n`, `grep -x`, `tee`, `date +%Y%m%d`, `tar --exclude` (ignoré s'il est placé après le dossier, comme GNU tar), `groupadd -f`, `useradd -s -c`, `usermod -aG/-G/-c`, `sudo -u` et `sudo -i`. Règles de vérification ajoutées : `date`, `passwd`, `isdir`, `files`, `arc`, `notingroup`.
+En plus des commandes de base : `&&` / `||`, substitution `$(…)`, accolades `{a,b}`, scripts exécutables (`./script.sh arg`, `bash script.sh`, avec `$1`…`$9`, `$#`, `$@`), `touch -t`, `find -type f|d`, `tail -n +N`, `cut -c` / `--complement`, `sort -t -k -n`, `grep -x`, `tee`, `date +%Y%m%d`, `tar --exclude` (ignoré s'il est placé après le dossier, comme GNU tar), `groupadd -f`, `addgroup groupe` et `addgroup utilisateur groupe` (Debian), `adduser utilisateur groupe`, `useradd -s -c`, `usermod -aG/-G/-c`, `sudo -u` et `sudo -i`. Règles de vérification ajoutées : `date`, `passwd`, `isdir`, `files`, `arc`, `notingroup`.
 
 ## Téléphone
 

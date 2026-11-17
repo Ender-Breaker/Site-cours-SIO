@@ -479,8 +479,32 @@
     }
     function setPw(n, fn) { var f = get("/etc/passwd"); f.c = f.c.split("\n").map(function (l) { var p = l.split(":"); if (p[0] !== n) return l; fn(p); return p.join(":"); }).join("\n"); }
     function needRoot(c) { if (S.user !== "root") throw c + " : Permission non accordée (essaie avec sudo)"; }
+    function groupeExiste(g) { return get("/etc/group").c.split("\n").some(function (l) { return l.split(":")[0] === g; }); }
+    /* addgroup (Debian/Ubuntu) : « addgroup groupe » crée un groupe, « addgroup utilisateur groupe » ajoute l'utilisateur au groupe */
+    C.addgroup = function (a) {
+      needRoot("addgroup");
+      var r = opts(a.filter(function (x) { return x !== "--system" && x !== "--quiet"; }), { gid: 1 }), quiet = a.indexOf("--quiet") >= 0;
+      if (!r.a.length) throw "addgroup : indiquez un nom de groupe (addgroup groupe) ou un utilisateur et un groupe (addgroup utilisateur groupe)";
+      if (r.a.length > 2) throw "addgroup : trop d'arguments";
+      if (r.a.length === 2) {
+        var u = r.a[0], g = r.a[1];
+        if (!uid(u)) throw "addgroup : l'utilisateur « " + u + " » n'existe pas.";
+        if (!groupeExiste(g)) throw "addgroup : le groupe « " + g + " » n'existe pas.";
+        if (groupsOf(u).indexOf(g) >= 0) return "addgroup : l'utilisateur « " + u + " » appartient déjà au groupe « " + g + " ».\n";
+        addToGroup(g, u);
+        return quiet ? "" : "Ajout de l'utilisateur « " + u + " » au groupe « " + g + " »...\nFait.\n";
+      }
+      var n = r.a[0];
+      if (!/^[a-z_][a-z0-9_-]*$/.test(n)) throw "addgroup : « " + n + " » n'est pas un nom de groupe valide (minuscules, chiffres, - et _).";
+      if (groupeExiste(n)) throw "addgroup : le groupe « " + n + " » existe déjà.";
+      C.groupadd([n]);
+      var gl = get("/etc/group").c.split("\n").filter(function (l) { return l.split(":")[0] === n; })[0];
+      return quiet ? "" : "Ajout du groupe « " + n + " » (GID " + gl.split(":")[2] + ")...\nFait.\n";
+    };
     C.adduser = function (a) {
       needRoot("adduser"); var n = a[0]; if (!n) throw "adduser : nom d'utilisateur manquant";
+      if (a.length === 2 && uid(n)) return C.addgroup([n, a[1]]).replace(/^addgroup/, "adduser");
+      if (uid(n)) throw "adduser : l'utilisateur « " + n + " » existe déjà.";
       makeUser(n, true); return "Ajout de l'utilisateur « " + n + " » ...\nAjout du nouveau groupe « " + n + " »\nCréation du répertoire personnel « /home/" + n + " »\nL'utilisateur « " + n + " » a été ajouté.\n";
     };
     C.useradd = function (a) {
@@ -656,7 +680,7 @@
       tail: "affiche la fin d'un fichier", cut: "extrait des champs", tar: "crée ou extrait des archives", echo: "affiche un texte", ps: "liste les processus", kill: "termine un processus",
       ping: "teste la connexion avec une machine", ip: "affiche ou configure le réseau", sudo: "exécute une commande en administrateur", man: "affiche le manuel", find: "cherche des fichiers",
       touch: "crée un fichier vide ou change sa date (-t AAAAMMJJhhmm)", tee: "écrit l'entrée dans un fichier et l'affiche", uniq: "supprime ou compte (-c) les lignes répétées consécutives",
-      useradd: "crée un utilisateur (-m dossier perso, -s shell)", usermod: "modifie un utilisateur (-aG groupes, -c commentaire)", groupadd: "crée un groupe", id: "affiche l'identité et les groupes",
+      useradd: "crée un utilisateur (-m dossier perso, -s shell)", addgroup: "crée un groupe (addgroup g) ou y ajoute un utilisateur (addgroup user g)", usermod: "modifie un utilisateur (-aG groupes, -c commentaire)", groupadd: "crée un groupe", id: "affiche l'identité et les groupes",
       date: "affiche la date (+%Y%m%d pour un format)", bash: "exécute un script shell"
     };
     C.whatis = function (a) { return a.map(function (c) { return MAN[c] ? c + " (1) - " + MAN[c] + "\n" : c + ": rien de pertinent\n"; }).join(""); };

@@ -286,11 +286,20 @@ window.EF_LABO = {
       texte: "<p><code>groupadd</code> crée un groupe ; <code>usermod -aG groupe utilisateur</code> ajoute (<code>-a</code>, <i>append</i>) l'utilisateur au groupe sans le retirer des autres. <code>id</code> ou <code>groups</code> affichent les groupes.</p>",
       syntaxe: ["sudo groupadd nom", "sudo usermod -aG groupe user", "groups user"],
       objectifs: [
-        { txt: "Crée le groupe <code>sio</code>", r: [{ cmd: "groupadd\\s+sio" }, { anyout: "^$" }] },
+        { txt: "Crée le groupe <code>sio</code>", r: [{ cmd: "(groupadd|addgroup)\\s+sio\\s*$" }, { contains: ["/etc/group", "\nsio:x:"] }] },
         { txt: "Ajoute l'utilisateur <code>etu</code> au groupe <code>sio</code>", r: [{ ingroup: ["etu", "sio"] }] },
         { txt: "Vérifie avec <code>groups etu</code> ou <code>id etu</code>", r: [{ anyout: "sio" }, { cmd: "^(groups|id)" }] }],
       indice: "<code>sudo groupadd sio</code>, <code>sudo usermod -aG sio etu</code>, puis <code>groups etu</code>.",
       solution: ["sudo groupadd sio", "sudo usermod -aG sio etu", "groups etu"] },
+    { id: "addgroup", titre: "addgroup, la version Debian",
+      texte: "<p>Sur Debian et Ubuntu, <code>addgroup</code> fait la même chose que <code>groupadd</code> en plus bavard, et sait aussi <b>ajouter un utilisateur à un groupe</b> :</p><ul><li><code>addgroup nom</code> crée le groupe <code>nom</code> ;</li><li><code>addgroup utilisateur groupe</code> (deux arguments) ajoute l'utilisateur au groupe, sans le retirer de ses autres groupes, comme <code>usermod -aG</code>.</li></ul><p>Attention à l'ordre : l'utilisateur d'abord, le groupe ensuite.</p>",
+      syntaxe: ["sudo addgroup nom", "sudo addgroup utilisateur groupe", "id utilisateur"],
+      objectifs: [
+        { txt: "Crée le groupe <code>reseau</code> avec <code>addgroup</code>", r: [{ cmd: "addgroup\\s+reseau\\s*$" }, { contains: ["/etc/group", "\nreseau:x:"] }] },
+        { txt: "Ajoute <code>etu</code> au groupe <code>reseau</code>, toujours avec <code>addgroup</code>", r: [{ ingroup: ["etu", "reseau"] }, { cmd: "addgroup\\s+etu\\s+reseau" }] },
+        { txt: "Vérifie que <code>etu</code> est toujours dans <code>sudo</code> et maintenant dans <code>reseau</code>", r: [{ anyout: "sudo.*reseau|reseau.*sudo" }, { cmd: "^(groups|id)" }] }],
+      indice: "<code>sudo addgroup reseau</code>, puis <code>sudo addgroup etu reseau</code>, puis <code>id etu</code>.",
+      solution: ["sudo addgroup reseau", "sudo addgroup etu reseau", "id etu"] },
     { id: "tar-c", titre: "Archiver et compresser",
       texte: "<p><code>tar</code> regroupe des fichiers dans une archive. Options à retenir : <code>c</code> créer, <code>x</code> extraire, <code>t</code> lister, <code>z</code> compresser en gzip, <code>v</code> verbeux, <code>f</code> nom du fichier (toujours en dernier).</p>",
       syntaxe: ["tar -czf archive.tar.gz dossier", "tar -tzf archive.tar.gz"],
@@ -329,7 +338,7 @@ window.EF_LABO = {
     { titre: "Fichiers et dossiers", cmds: [["mkdir -p a/b", "créer des dossiers"], ["touch f.txt", "créer un fichier vide"], ["cp src dest", "copier (-r pour un dossier)"], ["mv src dest", "déplacer ou renommer"], ["rm fichier", "supprimer (-r pour un dossier)"], ["rmdir dossier", "supprimer un dossier vide"]] },
     { titre: "Lire et chercher", cmds: [["cat fichier", "afficher"], ["head -n 5 fichier", "début"], ["tail -n 5 fichier", "fin"], ["wc -l fichier", "nombre de lignes"], ["grep -in motif fichier", "chercher"], ["find . -name \"*.txt\"", "trouver des fichiers"]] },
     { titre: "Redirections et pipes", cmds: [["echo texte > f", "écrire (écrase)"], ["echo texte >> f", "ajouter à la fin"], ["sort f | uniq -c", "trier et compter"], ["cut -d\";\" -f2 f", "extraire une colonne"]] },
-    { titre: "Droits et utilisateurs", cmds: [["chmod u+x f", "ajouter un droit"], ["chmod 640 f", "droits en octal"], ["sudo chown user:grp f", "changer le propriétaire"], ["sudo useradd -m nom", "créer un utilisateur"], ["sudo usermod -aG grp nom", "ajouter à un groupe"], ["id", "mes identifiants et groupes"]] },
+    { titre: "Droits et utilisateurs", cmds: [["chmod u+x f", "ajouter un droit"], ["chmod 640 f", "droits en octal"], ["sudo chown user:grp f", "changer le propriétaire"], ["sudo useradd -m nom", "créer un utilisateur"], ["sudo usermod -aG grp nom", "ajouter à un groupe"], ["sudo addgroup grp", "créer un groupe (Debian)"], ["sudo addgroup nom grp", "ajouter à un groupe (Debian)"], ["id", "mes identifiants et groupes"]] },
     { titre: "Système", cmds: [["tar -czf a.tar.gz dossier", "archiver"], ["tar -xzf a.tar.gz", "extraire"], ["ps", "processus"], ["kill PID", "arrêter un processus"], ["export X=1", "variable d'environnement"], ["history", "commandes tapées"]] }
   ]
 };
