@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<title>Sponsors — Overlay URC</title>
+<link rel="stylesheet" href="css/overlay.css">
+<style>
+  :root { --h: 58px; --col: #fff; --dur: 6s; }
+  .band {
+    position: absolute; display: flex; align-items: center; gap: 28px;
+    color: var(--col);
+  }
+  .band.pos-original   { left: 455px; top: 40px; height: 80px; }
+  .band.pos-haut-centre { left: 50%; top: 40px; height: 80px; transform: translateX(-50%); }
+  .band.pos-bas-centre  { left: 50%; bottom: 40px; height: 80px; transform: translateX(-50%); }
+  .band.pos-bas-gauche  { left: 60px; bottom: 40px; height: 80px; }
+  .band.pos-bas-droite  { right: 60px; bottom: 40px; height: 80px; }
+
+  .label {
+    font: 600 20px/1 'Montserrat', sans-serif; letter-spacing: .075em; text-transform: uppercase;
+    white-space: nowrap; text-shadow: 0 2px 10px rgba(0,0,0,.25);
+  }
+  .sep { width: 2px; align-self: stretch; margin: 16px 0; background: var(--col); opacity: .75; border-radius: 1px; }
+  .no-label .label, .no-label .sep { display: none; }
+
+  .slider {
+    position: relative; height: calc(var(--h) + 16px);
+    transition: width .6s cubic-bezier(.6, 0, .2, 1);
+    perspective: 600px;
+  }
+  .slide {
+    position: absolute; left: 0; top: 0; height: 100%;
+    display: flex; align-items: center; gap: 44px;
+    opacity: 0; visibility: hidden;
+  }
+  .slide img { height: var(--h); width: auto; display: block; filter: drop-shadow(0 2px 8px rgba(0,0,0,.25)); }
+  .slide.on { opacity: 1; visibility: visible; }
+
+  /* Transitions */
+  .t-glisse .slide.in  { visibility: visible; animation: slideIn .7s cubic-bezier(.2, .8, .2, 1) both; }
+  .t-glisse .slide.out { visibility: visible; animation: slideOut .5s cubic-bezier(.6, 0, .8, .2) both; }
+  @keyframes slideIn  { from { opacity: 0; transform: translate3d(0, 60%, 0); } to { opacity: 1; transform: none; } }
+  @keyframes slideOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: translate3d(0, -60%, 0); } }
+
+  .t-fondu .slide.in  { visibility: visible; animation: fadeIn .8s ease both .15s; }
+  .t-fondu .slide.out { visibility: visible; animation: fadeOut .6s ease both; }
+  @keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+  .t-flip .slide { transform-origin: 50% 50%; backface-visibility: hidden; }
+  .t-flip .slide.in  { visibility: visible; animation: flipIn .55s cubic-bezier(.2, .8, .2, 1) both .3s; }
+  .t-flip .slide.out { visibility: visible; animation: flipOut .3s ease-in both; }
+  @keyframes flipIn  { from { opacity: 0; transform: rotateX(-90deg); } to { opacity: 1; transform: none; } }
+  @keyframes flipOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: rotateX(90deg); } }
+
+  .progress {
+    position: absolute; left: 0; bottom: -12px; height: 2px; width: 100%;
+    background: rgba(255,255,255,.14); overflow: hidden; border-radius: 2px; opacity: .8;
+  }
+  .progress i { display: block; height: 100%; width: 100%; background: var(--col); transform-origin: 0 50%; transform: scaleX(0); }
+  .progress i.run { animation: prog var(--dur) linear both; }
+  @keyframes prog { to { transform: scaleX(1); } }
+  .no-progress .progress { display: none; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="band pos-original" id="band">
+    <div class="label" id="label"></div>
+    <div class="sep"></div>
+    <div class="slider" id="slider">
+      <div class="progress"><i id="prog"></i></div>
+    </div>
+  </div>
+</div>
+<script src="js/core.js"></script>
+<script src="js/sponsors.js"></script>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Config — Overlay URC</title>
+<link rel="stylesheet" href="css/config.css">
+</head>
+<body>
+<header class="top">
+  <h1>Overlay URC · <span>Config en direct</span></h1>
+  <div class="pills">
+    <span class="pill ok" id="pillLocal" title="Les aperçus et les onglets de ce navigateur reçoivent les réglages"><i></i>Navigateur</span>
+    <span class="pill" id="pillObs" title="Connexion au serveur WebSocket d'OBS"><i></i>OBS : déconnecté</span>
+    <button class="sm" id="btnReloadAll" title="Recharge tous les calques (navigateur et OBS)">↻ Recharger les calques</button>
+  </div>
+</header>
+
+<main class="grid">
+
+  <!-- APERÇU -->
+  <section class="card span">
+    <h2><span class="n">◉</span>Aperçu</h2>
+    <p class="hint">Composition des calques telle qu'elle apparaîtra dans OBS (1920 × 1080). Tout réglage modifié ici s'applique immédiatement.</p>
+    <div class="preview" id="preview">
+      <iframe class="lay" data-lay="fond" title="Fond"></iframe>
+      <iframe class="lay" data-lay="champions" title="Champions"></iframe>
+      <iframe class="lay" data-lay="timer" title="Timer"></iframe>
+      <iframe class="lay" data-lay="sponsors" title="Sponsors"></iframe>
+      <img class="lay" data-lay="logo" src="assets/calques/calque-logo-B.png" alt="">
+      <div class="off-msg" id="previewOff" hidden>Aperçu en pause</div>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <div class="toggles" id="layerToggles">
+        <label class="tg"><input type="checkbox" data-lay-tg="fond" checked>Fond</label>
+        <label class="tg"><input type="checkbox" data-lay-tg="champions" checked>Champions</label>
+        <label class="tg"><input type="checkbox" data-lay-tg="timer" checked>Timer</label>
+        <label class="tg"><input type="checkbox" data-lay-tg="sponsors" checked>Sponsors</label>
+        <label class="tg"><input type="checkbox" data-lay-tg="logo" checked>Logo B (image)</label>
+      </div>
+      <label class="tg" style="margin-left:auto"><input type="checkbox" id="previewOn" checked>Aperçu actif</label>
+    </div>
+  </section>
+
+  <!-- TIMER -->
+  <section class="card">
+    <h2><span class="n">1</span>Timer</h2>
+    <p class="hint">Compte à rebours synchronisé sur l'horloge : tous les calques affichent la même valeur.</p>
+    <div class="readout"><b id="tRead">10:00</b><span id="tState">En pause</span></div>
+    <div class="row">
+      <button class="primary" id="tStart">▶ Démarrer</button>
+      <button id="tPause">❚❚ Pause</button>
+      <button id="tReset">↺ Réinitialiser</button>
+    </div>
+    <div class="row">
+      <button class="sm" data-tadd="-60">−1 min</button>
+      <button class="sm" data-tadd="-10">−10 s</button>
+      <button class="sm" data-tadd="10">+10 s</button>
+      <button class="sm" data-tadd="30">+30 s</button>
+      <button class="sm" data-tadd="60">+1 min</button>
+      <button class="sm" data-tadd="300">+5 min</button>
+    </div>
+    <div class="fields">
+      <label class="f">Durée (mm:ss)<input type="text" id="tDur" placeholder="10:00" inputmode="numeric"></label>
+      <label class="f">Viser une heure<span class="row" style="margin:0;flex-wrap:nowrap"><input type="time" id="tAt"><button class="sm" id="tAtGo">OK</button></span></label>
+      <label class="f wide">Texte sous le timer<input type="text" data-k="timer.label"></label>
+      <label class="f wide">Deuxième ligne (optionnelle)<input type="text" data-k="timer.sublabel" placeholder="ex. PHASE DE GROUPES"></label>
+      <label class="f wide">Texte à zéro<input type="text" data-k="timer.endText"></label>
+      <label class="f">Position
+        <select data-k="timer.position">
+          <option value="original">Haut gauche (original)</option>
+          <option value="haut-droite">Haut droite</option>
+          <option value="bas-gauche">Bas gauche</option>
+          <option value="centre">Centre</option>
+        </select>
+      </label>
+      <label class="f">Taille<span class="range"><input type="range" min="0.5" max="2" step="0.05" data-k="timer.size"><output></output></span></label>
+      <label class="f">Couleur<input type="color" data-k="timer.color"></label>
+      <label class="f">Accent<input type="color" data-k="timer.accent"></label>
+    </div>
+    <div class="toggles" style="margin-top:12px">
+      <label class="tg"><input type="checkbox" data-k="timer.gradient">Chiffres en dégradé</label>
+      <label class="tg"><input type="checkbox" data-k="timer.pulse">Pulsation 10 dernières s</label>
+    </div>
+  </section>
+
+  <!-- SPONSORS -->
+  <section class="card">
+    <h2><span class="n">2</span>Sponsors</h2>
+    <p class="hint">Les logos défilent par groupes. Chemin relatif (<code>assets/logos/…</code>), URL complète, ou fichier choisi depuis ton PC.</p>
+    <div class="sp-list" id="spList"></div>
+    <div class="row">
+      <button class="sm" id="spAdd">＋ Ajouter un sponsor</button>
+      <button class="sm" id="spNext">⏭ Logo suivant</button>
+    </div>
+    <div class="fields">
+      <label class="f wide">Texte du bandeau<input type="text" data-k="sponsors.label"></label>
+      <label class="f">Logos par passage<span class="range"><input type="range" min="1" max="4" step="1" data-k="sponsors.perSlide"><output></output></span></label>
+      <label class="f">Rotation (s)<span class="range"><input type="range" min="2" max="60" step="1" data-k="sponsors.interval"><output></output></span></label>
+      <label class="f">Transition
+        <select data-k="sponsors.transition">
+          <option value="glisse">Glissement</option>
+          <option value="fondu">Fondu</option>
+          <option value="flip">Bascule 3D</option>
+        </select>
+      </label>
+      <label class="f">Position
+        <select data-k="sponsors.position">
+          <option value="original">Haut (original)</option>
+          <option value="haut-centre">Haut centré</option>
+          <option value="bas-centre">Bas centré</option>
+          <option value="bas-gauche">Bas gauche</option>
+          <option value="bas-droite">Bas droite</option>
+        </select>
+      </label>
+      <label class="f">Hauteur des logos<span class="range"><input type="range" min="30" max="110" step="1" data-k="sponsors.height"><output></output></span></label>
+      <label class="f">Couleur texte / trait<input type="color" data-k="sponsors.color"></label>
+    </div>
+    <div class="toggles" style="margin-top:12px">
+      <label class="tg"><input type="checkbox" data-k="sponsors.showLabel">Afficher le texte</label>
+      <label class="tg"><input type="checkbox" data-k="sponsors.progress">Barre de progression</label>
+      <label class="tg"><input type="checkbox" data-k="sponsors.paused">Pause</label>
+    </div>
+  </section>
+
+  <!-- CHAMPIONS -->
+  <section class="card">
+    <h2><span class="n">3</span>Champions</h2>
+    <p class="hint">Illustrations officielles Riot. Tape n'importe quel champion (ex. <code>Garen</code>, <code>Wukong</code>) ; ajoute <code>:numéro</code> pour un skin (ex. <code>Ahri:1</code>).</p>
+    <div class="chips" id="chList"></div>
+    <div class="row">
+      <input type="text" id="chAdd" list="chNames" placeholder="Ajouter un champion…" style="flex:1;min-width:160px">
+      <datalist id="chNames"></datalist>
+      <button class="sm" id="chAddBtn">＋ Ajouter</button>
+    </div>
+    <div class="row">
+      <button class="sm" id="chNext">⏭ Suivant</button>
+      <button class="sm" id="chShuffle">🔀 Mélanger</button>
+      <button class="sm" id="chUnforce">Libérer (rotation auto)</button>
+    </div>
+    <div class="fields">
+      <label class="f wide">Champions forcés (séparés par des virgules, vide = rotation)<input type="text" data-k="champions.forced" placeholder="ex. Ahri,Jinx"></label>
+      <label class="f">Nombre de cartes
+        <select data-k="champions.count" data-num>
+          <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+        </select>
+      </label>
+      <label class="f">Changement (s)<span class="range"><input type="range" min="3" max="60" step="1" data-k="champions.interval"><output></output></span></label>
+      <label class="f">Position
+        <select data-k="champions.position">
+          <option value="droite">Droite (original)</option>
+          <option value="centre">Centre</option>
+          <option value="gauche">Gauche</option>
+        </select>
+      </label>
+      <label class="f">Taille<span class="range"><input type="range" min="0.5" max="1.3" step="0.05" data-k="champions.scale"><output></output></span></label>
+      <label class="f">Accent 1<input type="color" data-k="champions.accent"></label>
+      <label class="f">Accent 2<input type="color" data-k="champions.accent2"></label>
+    </div>
+    <div class="toggles" style="margin-top:12px">
+      <label class="tg"><input type="checkbox" data-k="champions.paused">Pause</label>
+      <label class="tg"><input type="checkbox" data-k="champions.shuffle">Ordre aléatoire</label>
+      <label class="tg"><input type="checkbox" data-k="champions.showName">Nom</label>
+      <label class="tg"><input type="checkbox" data-k="champions.showTitle">Titre</label>
+      <label class="tg"><input type="checkbox" data-k="champions.showRoles">Rôles</label>
+      <label class="tg"><input type="checkbox" data-k="champions.tilt">Inclinaison 3D</label>
+      <label class="tg"><input type="checkbox" data-k="champions.embers">Braises</label>
+    </div>
+  </section>
+
+  <!-- OBS -->
+  <section class="card">
+    <h2><span class="n">4</span>Connexion OBS</h2>
+    <p class="hint">Pour piloter OBS en direct depuis cette page : dans OBS, <b>Outils → Paramètres du serveur WebSocket</b> → coche « Activer », note le port et le mot de passe.</p>
+    <div class="fields">
+      <label class="f">Hôte<input type="text" id="obsHost" value="127.0.0.1"></label>
+      <label class="f">Port<input type="number" id="obsPort" value="4455"></label>
+      <label class="f wide">Mot de passe<input type="password" id="obsPass" autocomplete="off"></label>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <button class="primary" id="obsConnect">Se connecter</button>
+      <button id="obsDisconnect" disabled>Déconnecter</button>
+      <button id="obsRefresh" disabled title="Actualise sans cache toutes les sources navigateur d'OBS">Actualiser les sources OBS</button>
+    </div>
+    <label class="tg"><input type="checkbox" id="obsAuto">Se reconnecter automatiquement</label>
+    <p class="msg" id="obsMsg"></p>
+    <h3>Astuce : la config dans OBS</h3>
+    <ol class="steps">
+      <li>OBS → <b>Docks → Docks de navigateur personnalisés</b>.</li>
+      <li>Nom : <code>Config overlay</code>, URL : celle de cette page.</li>
+      <li>Connecte-toi une fois ici ; tu pilotes ensuite tout sans quitter OBS.</li>
+    </ol>
+  </section>
+
+  <!-- FOND -->
+  <section class="card span">
+    <h2><span class="n">5</span>Fond animé</h2>
+    <p class="hint">Choisis une ambiance puis ajuste chaque couleur. Les particules dorées restent volontairement discrètes.</p>
+    <div class="swatches" id="presets"></div>
+    <div class="fields">
+      <label class="f">Haut du ciel<input type="color" data-k="fond.c1"></label>
+      <label class="f">Milieu<input type="color" data-k="fond.c2"></label>
+      <label class="f">Rose néon<input type="color" data-k="fond.c3"></label>
+      <label class="f">Horizon<input type="color" data-k="fond.c4"></label>
+      <label class="f">Halo du soleil<input type="color" data-k="fond.glow"></label>
+      <label class="f">Néon / traînées<input type="color" data-k="fond.accent"></label>
+      <label class="f">Couleur particules<input type="color" data-k="fond.particleColor"></label>
+      <label class="f">Nombre de particules<span class="range"><input type="range" min="0" max="150" step="1" data-k="fond.particles"><output></output></span></label>
+      <label class="f">Intensité particules<span class="range"><input type="range" min="0" max="1" step="0.05" data-k="fond.particleOpacity"><output></output></span></label>
+      <label class="f">Vitesse animations<span class="range"><input type="range" min="0.2" max="3" step="0.1" data-k="fond.speed"><output></output></span></label>
+    </div>
+    <div class="toggles" style="margin-top:12px">
+      <label class="tg"><input type="checkbox" data-k="fond.sun">Soleil</label>
+      <label class="tg"><input type="checkbox" data-k="fond.palms">Palmiers</label>
+      <label class="tg"><input type="checkbox" data-k="fond.haze">Lueurs / brume</label>
+      <label class="tg"><input type="checkbox" data-k="fond.lines">Traînées lumineuses</label>
+      <label class="tg"><input type="checkbox" data-k="fond.grain">Grain</label>
+      <label class="tg"><input type="checkbox" data-k="fond.vignette">Vignettage</label>
+    </div>
+  </section>
+
+  <!-- URL OBS -->
+  <section class="card span">
+    <h2><span class="n">6</span>Ajouter les calques dans OBS</h2>
+    <p class="hint">Sources HTML : <b>Source navigateur</b>, largeur 1920, hauteur 1080. Images : <b>Source image</b> (même taille, à placer en 0,0). Ordre conseillé, de bas en haut : fond, champions, timer, sponsors, logo B.</p>
+    <div class="urls" id="urls"></div>
+    <p class="hint" style="margin-top:12px"><b>URL simple</b> : suit les réglages de cette page en direct. <b>URL avec réglages</b> : contient les réglages actuels du calque (utile si OBS n'est pas connecté), ils restent prioritaires à chaque rechargement.</p>
+  </section>
+
+  <!-- SAUVEGARDE -->
+  <section class="card">
+    <h2><span class="n">7</span>Sauvegarde</h2>
+    <p class="hint">Les réglages sont gardés dans ce navigateur. Exporte-les pour les retrouver ailleurs.</p>
+    <div class="row">
+      <button id="btnExport">⬇ Exporter (JSON)</button>
+      <label class="btn">⬆ Importer<input type="file" id="fileImport" accept="application/json,.json" hidden></label>
+      <button class="danger" id="btnReset">Tout réinitialiser</button>
+    </div>
+    <p class="msg" id="saveMsg"></p>
+  </section>
+
+</main>
+<div class="toast" id="toast"></div>
+
+<input type="file" id="spFile" accept="image/*" hidden>
+<script src="js/core.js"></script>
+<script src="js/champions-data.js"></script>
+<script src="js/obs-ws.js"></script>
+<script src="js/config.js"></script>
+</body>
+</html>

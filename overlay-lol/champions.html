@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<title>Cartes champions — Overlay URC</title>
+<link rel="stylesheet" href="css/overlay.css">
+<style>
+  :root { --acc: #ff3e8a; --acc2: #ffb347; --cw: 440px; --ch: 800px; }
+
+  #cards { position: absolute; inset: 0; perspective: 1800px; }
+
+  .slot {
+    position: absolute; width: var(--cw); height: var(--ch);
+    transform-style: preserve-3d;
+    animation: float 6.5s ease-in-out infinite alternate;
+    will-change: transform;
+  }
+  .slot:nth-child(2) { animation-delay: -2.2s; animation-duration: 7.3s; }
+  .slot:nth-child(3) { animation-delay: -4.1s; animation-duration: 6.9s; }
+  @keyframes float { from { transform: translate3d(0, 6px, 0); } to { transform: translate3d(0, -8px, 0); } }
+
+  .tilt { position: absolute; inset: 0; transform-style: preserve-3d; will-change: transform; }
+  .tilts .tilt { animation: tilt 11s ease-in-out infinite alternate; }
+  .slot:nth-child(2) .tilt { animation-delay: -5s; }
+  .slot:nth-child(3) .tilt { animation-delay: -8s; }
+  @keyframes tilt { from { transform: rotateY(-3deg) rotateX(1deg); } to { transform: rotateY(3deg) rotateX(-1deg); } }
+
+  /* Forme : coins coupés en biais */
+  .shape { clip-path: polygon(34px 0, 100% 0, 100% calc(100% - 34px), calc(100% - 34px) 100%, 0 100%, 0 34px); }
+
+  .glow {
+    position: absolute; inset: -6px;
+    background: linear-gradient(160deg, var(--acc), var(--acc2) 55%, var(--acc));
+    filter: blur(22px); opacity: .45;
+    animation: glow 4.8s ease-in-out infinite alternate;
+    will-change: opacity;
+  }
+  @keyframes glow { from { opacity: .28; } to { opacity: .62; } }
+
+  .frame {
+    position: absolute; inset: 0; padding: 3px;
+    background: linear-gradient(160deg, var(--acc) 0%, var(--acc2) 50%, var(--acc) 100%);
+  }
+  .inner { position: relative; width: 100%; height: 100%; overflow: hidden; background: #120a1e; }
+  .inner.shape { clip-path: polygon(32px 0, 100% 0, 100% calc(100% - 32px), calc(100% - 32px) 100%, 0 100%, 0 32px); }
+
+  /* Illustrations : deux couches pour les transitions */
+  .art { position: absolute; inset: 0; overflow: hidden; visibility: hidden; }
+  .art.front { visibility: visible; z-index: 1; }
+  .art.enter { visibility: visible; z-index: 2; animation: wipe .95s cubic-bezier(.7, 0, .2, 1) both; }
+  .art img {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; object-position: 50% 30%;
+    transform-origin: 50% 35%;
+    animation: kenburns 18s ease-in-out infinite alternate;
+    will-change: transform;
+  }
+  @keyframes kenburns {
+    0%   { transform: scale(1.08) translate3d(0, 0, 0); }
+    50%  { transform: scale(1.13) translate3d(-1.2%, -0.8%, 0); }
+    100% { transform: scale(1.1) translate3d(1.2%, 0.6%, 0); }
+  }
+  @keyframes wipe {
+    from { clip-path: polygon(100% 0, 140% 0, 140% 100%, 120% 100%); }
+    to   { clip-path: polygon(-40% 0, 140% 0, 140% 100%, -60% 100%); }
+  }
+
+  /* Barre lumineuse qui accompagne la transition */
+  .bar {
+    position: absolute; top: -10%; bottom: -10%; width: 70px; left: 0; z-index: 3;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.85), var(--acc2), transparent);
+    transform: translate3d(520px, 0, 0) skewX(-12deg); opacity: 0; pointer-events: none;
+  }
+  .bar.go { animation: bar .95s cubic-bezier(.7, 0, .2, 1) both; }
+  @keyframes bar {
+    0% { transform: translate3d(calc(var(--cw) + 40px), 0, 0) skewX(-12deg); opacity: 0; }
+    15% { opacity: .9; }
+    85% { opacity: .9; }
+    100% { transform: translate3d(-160px, 0, 0) skewX(-12deg); opacity: 0; }
+  }
+
+  .shade {
+    position: absolute; inset: 0; z-index: 4; pointer-events: none;
+    background:
+      linear-gradient(180deg, rgba(10,4,20,.0) 45%, rgba(10,4,20,.55) 70%, rgba(10,4,20,.92) 100%),
+      linear-gradient(0deg, rgba(0,0,0,0) 80%, rgba(10,4,20,.35) 100%);
+  }
+  .tint { position: absolute; inset: 0; z-index: 4; pointer-events: none; opacity: .18;
+          background: linear-gradient(200deg, var(--acc) 0%, transparent 45%, var(--acc2) 100%); }
+  .lines { position: absolute; inset: 14px; z-index: 5; pointer-events: none;
+           border: 1px solid rgba(255,255,255,.18); }
+  .lines.shape { clip-path: none; }
+
+  /* Reflet qui balaie la carte de temps en temps */
+  .shine {
+    position: absolute; top: -20%; bottom: -20%; width: 45%; left: 0; z-index: 6; pointer-events: none;
+    background: linear-gradient(100deg, transparent 0%, rgba(255,255,255,.0) 30%, rgba(255,255,255,.16) 50%, rgba(255,255,255,0) 70%, transparent 100%);
+    transform: translate3d(-120%, 0, 0) skewX(-8deg);
+    animation: shine 9s ease-in-out infinite;
+    will-change: transform;
+  }
+  .slot:nth-child(2) .shine { animation-delay: -4.5s; }
+  .slot:nth-child(3) .shine { animation-delay: -2s; }
+  @keyframes shine { 0%, 62% { transform: translate3d(-120%, 0, 0) skewX(-8deg); } 100% { transform: translate3d(330%, 0, 0) skewX(-8deg); } }
+
+  .info { position: absolute; left: 34px; right: 30px; bottom: 34px; z-index: 7; }
+  .roles {
+    display: flex; gap: 10px; margin-bottom: 10px;
+    font: 700 13px/1 'Montserrat', sans-serif; letter-spacing: .28em; text-transform: uppercase;
+    color: var(--acc2);
+  }
+  .roles span + span::before { content: '·'; margin-right: 10px; color: rgba(255,255,255,.5); }
+  .name {
+    font: 400 84px/0.92 'Anton', 'Impact', sans-serif; text-transform: uppercase; letter-spacing: .01em;
+    background: linear-gradient(180deg, #fff 0%, #fff 45%, var(--acc2) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 4px 18px rgba(0,0,0,.45));
+  }
+  .title {
+    margin-top: 10px; font: italic 500 21px/1.2 'Montserrat', sans-serif; color: rgba(255,255,255,.88);
+    text-shadow: 0 2px 12px rgba(0,0,0,.6);
+  }
+  .title::first-letter { text-transform: uppercase; }
+  .accent-line { width: 64px; height: 4px; margin: 14px 0 0; background: linear-gradient(90deg, var(--acc), var(--acc2)); }
+
+  .info > * { transition: transform .45s cubic-bezier(.2, .8, .2, 1), opacity .45s; }
+  .info.out > * { opacity: 0; transform: translate3d(0, 18px, 0); transition-duration: .3s; }
+  .info .name { transition-delay: .06s; }
+  .info .title { transition-delay: .12s; }
+  .info .accent-line { transition-delay: .18s; }
+  .info.out .name, .info.out .title, .info.out .accent-line { transition-delay: 0s; }
+
+  .no-name .name, .no-title .title, .no-roles .roles { display: none; }
+
+  canvas#embers { position: absolute; inset: 0; pointer-events: none; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div id="cards"></div>
+  <canvas id="embers" width="1920" height="1080"></canvas>
+</div>
+
+<template id="tpl-card">
+  <div class="slot">
+    <div class="tilt">
+      <div class="glow"></div>
+      <div class="frame shape">
+        <div class="inner shape">
+          <div class="art front"><img alt=""></div>
+          <div class="art"><img alt=""></div>
+          <div class="bar"></div>
+          <div class="tint"></div>
+          <div class="shade"></div>
+          <div class="lines"></div>
+          <div class="shine"></div>
+          <div class="info">
+            <div class="roles"></div>
+            <div class="name"></div>
+            <div class="title"></div>
+            <div class="accent-line"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script src="js/core.js"></script>
+<script src="js/champions-data.js"></script>
+<script src="js/champions.js"></script>
+</body>
+</html>

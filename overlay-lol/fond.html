@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<title>Fond animé — Overlay URC</title>
+<link rel="stylesheet" href="css/overlay.css">
+<style>
+  :root {
+    --c1: #0d0623; --c2: #3b1460; --c3: #d6336c; --c4: #ff8a3d;
+    --glow: #ffc36b; --accent: #2de2e6; --spd: 1;
+  }
+  .layer { position: absolute; inset: 0; pointer-events: none; }
+
+  /* Ciel : dégradé principal + variante teintée qui respire lentement */
+  .sky { background: linear-gradient(172deg, var(--c1) 0%, var(--c2) 36%, var(--c3) 70%, var(--c4) 100%); }
+  .sky-shift {
+    background: linear-gradient(196deg, var(--s1) 0%, var(--s2) 40%, var(--s3) 74%, var(--s4) 100%);
+    opacity: 0;
+    animation: breathe calc(22s / var(--spd)) ease-in-out infinite alternate;
+    will-change: opacity;
+  }
+  @keyframes breathe { from { opacity: 0; } to { opacity: .55; } }
+
+  /* Bande de brume sur l'horizon */
+  .horizon {
+    background: linear-gradient(180deg, transparent 52%, var(--h1) 72%, transparent 92%);
+  }
+
+  /* Grandes lueurs qui dérivent (dégradés radiaux pré-flous, pas de filtre coûteux) */
+  .blob {
+    position: absolute; border-radius: 50%;
+    will-change: transform;
+  }
+  .b1 { width: 1300px; height: 1300px; left: -380px; top: -520px;
+        background: radial-gradient(circle, var(--b1) 0%, transparent 68%);
+        animation: drift1 calc(46s / var(--spd)) ease-in-out infinite alternate; }
+  .b2 { width: 1100px; height: 1100px; right: -300px; top: 120px;
+        background: radial-gradient(circle, var(--b2) 0%, transparent 66%);
+        animation: drift2 calc(58s / var(--spd)) ease-in-out infinite alternate; }
+  .b3 { width: 900px; height: 900px; left: 30%; bottom: -520px;
+        background: radial-gradient(circle, var(--b3) 0%, transparent 70%);
+        animation: drift3 calc(38s / var(--spd)) ease-in-out infinite alternate; }
+  @keyframes drift1 { to { transform: translate3d(260px, 140px, 0) scale(1.08); } }
+  @keyframes drift2 { to { transform: translate3d(-240px, -90px, 0) scale(.94); } }
+  @keyframes drift3 { to { transform: translate3d(180px, -70px, 0) scale(1.12); } }
+
+  /* Soleil couchant */
+  .sun {
+    position: absolute; width: 900px; height: 900px; left: 1080px; top: 690px;
+    margin: -450px 0 0 -450px; border-radius: 50%;
+    background: radial-gradient(circle, var(--g1) 0%, var(--g2) 22%, var(--g3) 46%, transparent 68%);
+    animation: pulse calc(9s / var(--spd)) ease-in-out infinite alternate;
+    will-change: transform, opacity;
+  }
+  .sun-disc {
+    position: absolute; width: 230px; height: 230px; left: 1080px; top: 700px;
+    margin: -115px 0 0 -115px; border-radius: 50%;
+    background: radial-gradient(circle at 50% 40%, var(--d1) 0%, var(--d2) 55%, transparent 72%);
+    opacity: .55;
+  }
+  @keyframes pulse { from { transform: scale(1); opacity: .82; } to { transform: scale(1.06); opacity: 1; } }
+
+  /* Traînées lumineuses (néons, phares) */
+  .streak {
+    position: absolute; left: 0; height: 2px; border-radius: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), #fff, var(--accent), transparent);
+    opacity: .16; will-change: transform;
+    animation: streak linear infinite;
+  }
+  @keyframes streak { from { transform: translate3d(-1100px, 0, 0); } to { transform: translate3d(2300px, 0, 0); } }
+
+  /* Palmiers : tronc et palmes sur deux couches composées séparément */
+  .palm { position: absolute; bottom: -30px; will-change: transform; }
+  .palm img { position: absolute; display: block; }
+  .palm .crown { will-change: transform; animation: sway calc(7s / var(--spd)) ease-in-out infinite alternate; }
+  .palm.p2 .crown { animation-duration: calc(8.6s / var(--spd)); animation-delay: -3s; }
+  .palm.p3 .crown { animation-duration: calc(6.2s / var(--spd)); animation-delay: -1.4s; }
+  @keyframes sway { from { transform: rotate(-1.6deg); } to { transform: rotate(1.8deg); } }
+
+  canvas.sparkles { position: absolute; inset: 0; }
+
+  .grain {
+    opacity: .06;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .vignette { background: radial-gradient(ellipse 75% 70% at 55% 50%, transparent 55%, rgba(0,0,0,.5) 100%); }
+
+  .off { display: none !important; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="layer sky"></div>
+  <div class="layer sky-shift"></div>
+  <div class="layer" id="blobs" aria-hidden="true">
+    <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+  </div>
+  <div class="sun" id="sun"></div>
+  <div class="sun-disc" id="sunDisc"></div>
+  <div class="layer horizon" id="horizon"></div>
+  <div class="layer" id="lines" aria-hidden="true"></div>
+  <div class="layer" id="palms" aria-hidden="true"></div>
+  <canvas class="sparkles" id="sparkles" width="1920" height="1080"></canvas>
+  <div class="layer grain" id="grain"></div>
+  <div class="layer vignette" id="vignette"></div>
+</div>
+<script src="js/core.js"></script>
+<script src="js/fond.js"></script>
+</body>
+</html>

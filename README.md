@@ -115,3 +115,9 @@ Le moteur du labo terminal accepte maintenant `key`, `titre`, `sousTitre`, `coul
 `assets/jeu.js` fournit une même API de jeu aux quatre langages (`effacer`, `rect`, `cercle`, `ligne`, `texte`, `touche`, `toucheAppuyee`, `clic`, `sourisX/Y`, `hasard`, 480 × 320, `update(dt)` / `draw()` à 60 images/s). En C++ : `#include "jeu.h"` ; en Java : `public class Main extends Jeu` puis `lancer(new Main())`.
 
 **Ces pages sont générées.** Sources et générateur dans `outils/` (voir `outils/README.md`) : `python3 outils/gen.py` régénère les chapitres, les labos, la partie bonus de `data/modules.js` et de `data/eval-textes.js`. Chaque solution de labo et chaque bloc exécutable est vérifié automatiquement (`outils/verif.js`).
+
+## Overlay OBS League of Legends (`overlay-lol/`, hors cours)
+
+Écran d'attente pour un stream LoL, indépendant du reste du site (aucun lien depuis les pages de cours, pages en `noindex`) : fond animé façon « Vice City », cartes de champions animées, timer et sponsors en rotation, chacun dans sa propre source navigateur OBS, plus le logo B et un bandeau sponsors fixe en PNG. Tout se règle en direct depuis `overlay-lol/config.html` (synchro par obs-websocket et BroadcastChannel). Détails et paramètres d'URL : `overlay-lol/README.md`.
+
+Exception au point RGPD ci-dessus : ces pages chargent les illustrations de champions depuis Riot (Data Dragon) et CommunityDragon.

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Overlay URC — League of Legends</title>
+<link rel="stylesheet" href="css/config.css">
+<style>
+  .hero { max-width: 1100px; margin: 0 auto; padding: 40px 22px 10px; }
+  .hero h1 { margin: 0; font: 400 54px/1 'Anton', sans-serif; text-transform: uppercase; }
+  .hero h1 span { background: linear-gradient(90deg, var(--acc), var(--acc2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .hero p { color: var(--mut); max-width: 720px; font-size: 15px; }
+  .tiles { max-width: 1100px; margin: 0 auto; padding: 10px 22px 60px; display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .tile { display: block; padding: 18px; border-radius: 14px; background: linear-gradient(180deg, var(--card2), var(--card)); border: 1px solid var(--line); color: var(--txt); text-decoration: none; }
+  .tile:hover { border-color: rgba(255,62,138,.5); }
+  .tile b { display: block; font: 400 22px/1.1 'Anton', sans-serif; text-transform: uppercase; margin-bottom: 6px; }
+  .tile span { color: var(--mut); font-size: 13px; }
+  .tile.main { grid-column: 1 / -1; background: linear-gradient(135deg, rgba(255,62,138,.22), rgba(255,179,71,.14)), var(--card); }
+</style>
+</head>
+<body>
+  <div class="hero">
+    <h1>Overlay <span>URC</span></h1>
+    <p>Écran d'attente League of Legends pour OBS, découpé en calques indépendants : fond animé, cartes de champions, timer, sponsors et logo. Tout se règle en direct depuis la page de configuration.</p>
+  </div>
+  <div class="tiles">
+    <a class="tile main" href="config.html"><b>⚙ Configuration en direct</b><span>Couleurs, timer, sponsors, champions, connexion OBS et URL des calques.</span></a>
+    <a class="tile" href="fond.html"><b>Fond animé</b><span>Source navigateur 1920 × 1080</span></a>
+    <a class="tile" href="champions.html"><b>Cartes champions</b><span>Source navigateur 1920 × 1080 (transparent)</span></a>
+    <a class="tile" href="timer.html"><b>Timer</b><span>Source navigateur 1920 × 1080 (transparent)</span></a>
+    <a class="tile" href="sponsors.html"><b>Sponsors</b><span>Source navigateur 1920 × 1080 (transparent)</span></a>
+    <a class="tile" href="assets/calques/calque-logo-B.png"><b>Logo B blanc</b><span>Source image (PNG transparent)</span></a>
+    <a class="tile" href="assets/calques/calque-sponsors-statique.png"><b>Sponsors fixes</b><span>Source image (PNG transparent)</span></a>
+  </div>
+</body>
+</html>

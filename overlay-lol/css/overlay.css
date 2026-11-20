@@ -1,0 +1,33 @@
+/* URC Overlay — base commune des calques OBS (1920 × 1080, fond transparent) */
+@font-face {
+  font-family: 'Anton';
+  src: url('../fonts/anton.woff2') format('woff2');
+  font-weight: 400;
+  font-display: block;
+}
+@font-face {
+  font-family: 'Montserrat';
+  src: url('../fonts/montserrat.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: block;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  background: transparent;
+  font-family: 'Montserrat', system-ui, sans-serif;
+  color: #fff;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+.stage {
+  position: relative;
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+}

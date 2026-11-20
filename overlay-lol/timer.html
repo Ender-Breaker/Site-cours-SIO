@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<title>Timer — Overlay URC</title>
+<link rel="stylesheet" href="css/overlay.css">
+<style>
+  :root { --col: #fff; --acc: #ff3e8a; --size: 1; }
+  .timer { position: absolute; color: var(--col); transform: scale(var(--size)); }
+  .timer.pos-original   { left: 40px; top: 38px; transform-origin: 0 0; }
+  .timer.pos-haut-droite { right: 60px; top: 38px; transform-origin: 100% 0; text-align: right; }
+  .timer.pos-bas-gauche  { left: 60px; bottom: 50px; transform-origin: 0 100%; }
+  .timer.pos-centre      { left: 50%; top: 50%; transform: translate(-50%, -50%) scale(var(--size)); transform-origin: 50% 50%; text-align: center; }
+
+  .digits {
+    display: inline-block;
+    font: 800 96px/0.95 'Montserrat', sans-serif; letter-spacing: .01em;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 4px 22px rgba(0,0,0,.18);
+  }
+  .grad .digits {
+    background: linear-gradient(180deg, var(--col) 0%, var(--col) 40%, var(--acc) 120%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    text-shadow: none; filter: drop-shadow(0 4px 18px rgba(0,0,0,.22));
+  }
+  .digits.end { font-size: 72px; letter-spacing: .02em; }
+  .label { margin-top: 6px; font: 700 27px/1.15 'Montserrat', sans-serif; text-transform: uppercase; letter-spacing: .01em; }
+  .sub { margin-top: 4px; font: 500 22px/1.2 'Montserrat', sans-serif; text-transform: uppercase; opacity: .9; }
+  .sub:empty { display: none; }
+
+  .hot .digits { animation: tick 1s ease-out infinite; }
+  @keyframes tick { 0% { transform: scale(1.06); } 35% { transform: scale(1); } 100% { transform: scale(1); } }
+  .done .digits { animation: done 1.6s ease-in-out infinite alternate; }
+  @keyframes done { from { opacity: 1; } to { opacity: .72; } }
+  .paused .digits { opacity: .78; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="timer pos-original" id="timer">
+    <div class="digits" id="digits">10:00</div>
+    <div class="label" id="label"></div>
+    <div class="sub" id="sub"></div>
+  </div>
+</div>
+<script src="js/core.js"></script>
+<script>
+(function () {
+  'use strict';
+  var el = document.getElementById('timer');
+  var digits = document.getElementById('digits');
+  var cfg = null, lastTxt = '';
+
+  function fmt(sec) {
+    var s = Math.ceil(sec), h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), r = s % 60;
+    var pad = function (n) { return String(n).padStart(2, '0'); };
+    return h ? h + ':' + pad(m) + ':' + pad(r) : pad(m) + ':' + pad(r);
+  }
+
+  function render() {
+    if (!cfg) return;
+    var rem = URC.timerRemaining(cfg);
+    var finished = cfg.running && rem <= 0;
+    var txt = finished ? cfg.endText : fmt(rem);
+    if (txt !== lastTxt) { digits.textContent = txt; lastTxt = txt; }
+    digits.classList.toggle('end', finished);
+    el.classList.toggle('done', finished);
+    el.classList.toggle('hot', !!cfg.pulse && cfg.running && rem > 0 && rem <= 10);
+    el.classList.toggle('paused', !cfg.running && rem > 0 && rem < cfg.duration);
+  }
+
+  URC.init({
+    section: 'timer',
+    aliases: { duree: 'duration', titre: 'label', fin: 'endText' },
+    onChange: function (c) {
+      // ?start=1 dans l'URL : démarre le compte à rebours au chargement s'il ne tourne pas déjà
+      if (!cfg && new URLSearchParams(location.search).get('start') === '1' && !c.running) {
+        c.running = true; c.endAt = Date.now() + c.duration * 1000;
+      }
+      cfg = c;
+      var root = document.documentElement.style;
+      root.setProperty('--col', c.color);
+      root.setProperty('--acc', c.accent);
+      root.setProperty('--size', c.size || 1);
+      el.className = 'timer pos-' + (c.position || 'original') + (c.gradient ? ' grad' : '');
+      document.getElementById('label').textContent = c.label;
+      document.getElementById('sub').textContent = c.sublabel || '';
+      lastTxt = '';
+      render();
+    }
+  });
+  setInterval(render, 100);
+})();
+</script>
+</body>
+</html>
