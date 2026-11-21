@@ -65,6 +65,18 @@ Illustrations officielles Riot chargées à la volée : splash centré via Commu
 N'importe quel champion fonctionne (`Garen`, `Wukong`, `Kai'Sa`…), avec un skin précis via `Nom:numéro` (`Ahri:1`).
 Les 10 champions par défaut sont définis dans `js/champions-data.js`.
 
+## Caméras anti-triche (`cameras.html`)
+
+Page à part (pas un calque OBS) : les 10 caméras joueurs en direct, Blue en haut et Red en bas, à partir des pages
+`montournoiesport.fr/twitch/role-player/<match>/<rôle>/<équipe>?channel=<n>` (ID du match et channel réglables).
+
+- **Activer l'enregistrement** puis choisir « Cet onglet » : la page se filme elle-même, découpe chaque caméra et garde
+  en mémoire ses 15 dernières secondes (durée réglable de 5 à 60 s), encodées en continu (WebCodecs, H.264).
+- Choisir une caméra (clic, liste ou touches `1`…`0`) puis **Enregistrer** (ou `Entrée`) : le MP4 est créé
+  instantanément et téléchargé (`preuve_match256_BLUE-MID_<date>.mp4`). « Tout enregistrer » fait un clip par caméra.
+- Chrome ou Edge récents. Garder la page visible, sans fenêtre par-dessus les caméras. Pas de son.
+- Fichiers : `cameras.html`, `js/cameras.js`, `js/cameras-worker.js`, `vendor/mp4-muxer.js` (licence MIT).
+
 ## Fichiers
 
 - `js/core.js` — config par défaut, URL, sauvegarde, synchro (commun à tous les calques)
