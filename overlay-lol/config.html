@@ -28,7 +28,7 @@
       <iframe class="lay" data-lay="champions" title="Champions"></iframe>
       <iframe class="lay" data-lay="timer" title="Timer"></iframe>
       <iframe class="lay" data-lay="sponsors" title="Sponsors"></iframe>
-      <img class="lay" data-lay="logo" src="assets/calques/calque-logo-B.png" alt="">
+      <iframe class="lay" data-lay="logo" title="Logo"></iframe>
       <div class="off-msg" id="previewOff" hidden>Aperçu en pause</div>
     </div>
     <div class="row" style="margin-top:12px">
@@ -37,7 +37,7 @@
         <label class="tg"><input type="checkbox" data-lay-tg="champions" checked>Champions</label>
         <label class="tg"><input type="checkbox" data-lay-tg="timer" checked>Timer</label>
         <label class="tg"><input type="checkbox" data-lay-tg="sponsors" checked>Sponsors</label>
-        <label class="tg"><input type="checkbox" data-lay-tg="logo" checked>Logo B (image)</label>
+        <label class="tg"><input type="checkbox" data-lay-tg="logo" checked>Logo B</label>
       </div>
       <label class="tg" style="margin-left:auto"><input type="checkbox" id="previewOn" checked>Aperçu actif</label>
     </div>
@@ -124,6 +124,37 @@
     </div>
   </section>
 
+  <!-- LOGO -->
+  <section class="card">
+    <h2><span class="n">B</span>Logo</h2>
+    <p class="hint">Calque <code>logo.html</code> au fond transparent : à mettre dans une <b>source navigateur</b> (une source image d'OBS n'accepte qu'un fichier sur ton PC).</p>
+    <div class="row">
+      <button class="sm" data-logocol="#ffffff">⬜ Blanc</button>
+      <button class="sm" data-logocol="#d0221b">🟥 Rouge d'origine</button>
+    </div>
+    <div class="fields">
+      <label class="f">Couleur<input type="color" data-k="logo.color"></label>
+      <label class="f">Position
+        <select data-k="logo.position">
+          <option value="original">Haut droite (original)</option>
+          <option value="haut-gauche">Haut gauche</option>
+          <option value="bas-droite">Bas droite</option>
+          <option value="bas-gauche">Bas gauche</option>
+          <option value="centre">Centre</option>
+        </select>
+      </label>
+      <label class="f">Hauteur<span class="range"><input type="range" min="30" max="300" step="2" data-k="logo.height"><output></output></span></label>
+      <label class="f">Opacité<span class="range"><input type="range" min="0.1" max="1" step="0.05" data-k="logo.opacity"><output></output></span></label>
+      <label class="f wide">Image du logo<input type="text" data-k="logo.src"></label>
+    </div>
+    <div class="toggles" style="margin-top:12px">
+      <label class="tg"><input type="checkbox" data-k="logo.show">Afficher</label>
+      <label class="tg"><input type="checkbox" data-k="logo.tint">Recolorer</label>
+      <label class="tg"><input type="checkbox" data-k="logo.glow">Halo lumineux</label>
+      <label class="tg"><input type="checkbox" data-k="logo.box">Carré sombre</label>
+    </div>
+  </section>
+
   <!-- CHAMPIONS -->
   <section class="card">
     <h2><span class="n">3</span>Champions</h2>
@@ -198,6 +229,25 @@
     <h2><span class="n">5</span>Fond animé</h2>
     <p class="hint">Choisis une ambiance puis ajuste chaque couleur. Les particules dorées restent volontairement discrètes.</p>
     <div class="swatches" id="presets"></div>
+    <h3>Décor (à la place des palmiers)</h3>
+    <div class="row">
+      <button class="sm" data-decor="palmier,palmier,palmier">🌴 Palmiers</button>
+      <button class="sm" data-decor="tour,tour,tour">🗼 Tours</button>
+      <button class="sm" data-decor="nexus,aucun,tour">💎 Nexus + tour</button>
+      <button class="sm" data-decor="tour,palmier,palmier">Mélange</button>
+    </div>
+    <div class="fields" style="margin-bottom:6px">
+      <label class="f">Gauche
+        <select data-k="fond.decor1"><option value="palmier">Palmier</option><option value="tour">Tour</option><option value="nexus">Nexus</option><option value="aucun">Aucun</option></select>
+      </label>
+      <label class="f">Arrière-plan
+        <select data-k="fond.decor2"><option value="palmier">Palmier</option><option value="tour">Tour</option><option value="nexus">Nexus</option><option value="aucun">Aucun</option></select>
+      </label>
+      <label class="f">Droite
+        <select data-k="fond.decor3"><option value="palmier">Palmier</option><option value="tour">Tour</option><option value="nexus">Nexus</option><option value="aucun">Aucun</option></select>
+      </label>
+    </div>
+    <h3>Couleurs</h3>
     <div class="fields">
       <label class="f">Haut du ciel<input type="color" data-k="fond.c1"></label>
       <label class="f">Milieu<input type="color" data-k="fond.c2"></label>
@@ -212,7 +262,7 @@
     </div>
     <div class="toggles" style="margin-top:12px">
       <label class="tg"><input type="checkbox" data-k="fond.sun">Soleil</label>
-      <label class="tg"><input type="checkbox" data-k="fond.palms">Palmiers</label>
+      <label class="tg"><input type="checkbox" data-k="fond.palms">Décor</label>
       <label class="tg"><input type="checkbox" data-k="fond.haze">Lueurs / brume</label>
       <label class="tg"><input type="checkbox" data-k="fond.lines">Traînées lumineuses</label>
       <label class="tg"><input type="checkbox" data-k="fond.grain">Grain</label>
@@ -223,7 +273,7 @@
   <!-- URL OBS -->
   <section class="card span">
     <h2><span class="n">6</span>Ajouter les calques dans OBS</h2>
-    <p class="hint">Sources HTML : <b>Source navigateur</b>, largeur 1920, hauteur 1080. Images : <b>Source image</b> (même taille, à placer en 0,0). Ordre conseillé, de bas en haut : fond, champions, timer, sponsors, logo B.</p>
+    <p class="hint">Sources HTML : <b>Source navigateur</b>, largeur 1920, hauteur 1080. Les PNG sont pour une <b>Source image</b> : télécharge-les d'abord sur ton PC (OBS n'accepte pas d'URL pour une image). Ordre conseillé, de bas en haut : fond, champions, timer, sponsors, logo.</p>
     <div class="urls" id="urls"></div>
     <p class="hint" style="margin-top:12px"><b>URL simple</b> : suit les réglages de cette page en direct. <b>URL avec réglages</b> : contient les réglages actuels du calque (utile si OBS n'est pas connecté), ils restent prioritaires à chaque rechargement.</p>
   </section>

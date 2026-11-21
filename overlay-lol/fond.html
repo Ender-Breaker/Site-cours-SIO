@@ -78,6 +78,30 @@
   .palm.p3 .crown { animation-duration: calc(6.2s / var(--spd)); animation-delay: -1.4s; }
   @keyframes sway { from { transform: rotate(-1.6deg); } to { transform: rotate(1.8deg); } }
 
+  /* Tours et nexus : cristal lumineux qui flotte, halo qui respire, éclats en orbite */
+  .palm .cr { position: absolute; }
+  .palm .cr.float { animation: crfloat calc(4.6s / var(--spd)) ease-in-out infinite alternate; will-change: transform; }
+  .palm .cr .halo {
+    position: absolute; border-radius: 50%;
+    background: radial-gradient(circle, var(--crh1) 0%, var(--crh2) 38%, transparent 70%);
+    animation: crpulse calc(5.2s / var(--spd)) ease-in-out infinite alternate; will-change: transform, opacity;
+  }
+  .palm .cr .gem { position: absolute; inset: 0; filter: drop-shadow(0 0 14px var(--crh1)); }
+  .palm .cr svg { width: 100%; height: 100%; display: block; opacity: .86; }
+  .palm .conduit {
+    position: absolute; width: 4px; border-radius: 2px;
+    background: linear-gradient(180deg, var(--cr2), var(--cr3) 60%, transparent);
+    animation: conduit calc(3.2s / var(--spd)) ease-in-out infinite alternate; will-change: opacity;
+  }
+  .palm .orb-x { position: absolute; left: 50%; top: 50%; width: 0; height: 0; animation: orbx calc(4.8s / var(--spd)) ease-in-out infinite alternate; will-change: transform; }
+  .palm .orb-y { animation: orby calc(4.8s / var(--spd)) ease-in-out infinite alternate; will-change: transform; }
+  .palm .shard { position: absolute; width: 18px; height: 32px; margin: -16px 0 0 -9px; filter: drop-shadow(0 0 6px var(--crh1)); }
+  @keyframes crfloat { from { transform: translate3d(0, 6px, 0); } to { transform: translate3d(0, -10px, 0); } }
+  @keyframes crpulse { from { transform: scale(.9); opacity: .7; } to { transform: scale(1.08); opacity: 1; } }
+  @keyframes conduit { from { opacity: .14; } to { opacity: .5; } }
+  @keyframes orbx { from { transform: translate3d(-150px, 0, 0); } to { transform: translate3d(150px, 0, 0); } }
+  @keyframes orby { from { transform: translate3d(0, -36px, 0); } to { transform: translate3d(0, 36px, 0); } }
+
   canvas.sparkles { position: absolute; inset: 0; }
 
   .grain {

@@ -26,7 +26,10 @@
       glow: '#ffc36b',        // halo du soleil
       accent: '#2de2e6',      // néon cyan
       sun: true,
-      palms: true,
+      palms: true,            // afficher le décor (palmiers, tours, nexus)
+      decor1: 'palmier',      // décor de gauche : palmier | tour | nexus | aucun
+      decor2: 'palmier',      // décor en arrière-plan
+      decor3: 'palmier',      // décor de droite
       haze: true,
       lines: true,
       grain: true,
@@ -69,6 +72,17 @@
       height: 58,             // hauteur des logos en px
       color: '#ffffff',
       progress: true          // fine barre de progression sous les logos
+    },
+    logo: {
+      show: true,
+      src: 'assets/logos/urc-b-blanc.png',
+      tint: true,             // recolorer le logo avec « color » (désactiver pour garder ses couleurs)
+      color: '#ffffff',       // couleur appliquée au logo (rouge d'origine : #d0221b)
+      height: 80,             // hauteur en px
+      position: 'original',   // original (haut droite) | haut-gauche | bas-droite | bas-gauche | centre
+      opacity: 1,
+      glow: false,            // halo lumineux
+      box: false              // carré sombre derrière (comme l'écran d'origine)
     },
     timer: {
       label: 'LA PARTIE COMMENCE DANS',

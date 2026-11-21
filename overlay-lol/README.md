@@ -9,19 +9,22 @@ En ligne : `https://sitecoursio.vercel.app/overlay-lol/`
 
 | Calque | Fichier | Source OBS |
 |---|---|---|
-| Fond animé (couleurs modifiables) | `fond.html` | Source navigateur |
+| Fond animé (couleurs et décor modifiables) | `fond.html` | Source navigateur |
 | Cartes champions (rotation auto) | `champions.html` | Source navigateur |
 | Timer (compte à rebours) | `timer.html` | Source navigateur |
 | Sponsors (rotation des logos) | `sponsors.html` | Source navigateur |
-| Logo B blanc | `assets/calques/calque-logo-B.png` | Source image |
-| Sponsors fixes (sans animation) | `assets/calques/calque-sponsors-statique.png` | Source image |
+| Logo B (transparent, couleur réglable) | `logo.html` | Source navigateur |
+| Logo B blanc en PNG | `assets/calques/calque-logo-B.png` | Source image (fichier téléchargé) |
+| Sponsors fixes (sans animation) | `assets/calques/calque-sponsors-statique.png` | Source image (fichier téléchargé) |
 
-Ordre conseillé dans la scène, de bas en haut : fond → champions → timer → sponsors → logo B.
+Ordre conseillé dans la scène, de bas en haut : fond → champions → timer → sponsors → logo.
+
+> Une **source image** d'OBS n'accepte qu'un fichier sur le PC : télécharge les PNG d'abord. Coller l'URL d'un PNG dans une source navigateur l'affiche sur une page gris clair ; pour le logo, utilise `logo.html`.
 
 ## Mise en place dans OBS
 
 1. **Source navigateur** pour chaque page HTML : largeur `1920`, hauteur `1080`, laisser le CSS personnalisé vide.
-2. **Source image** pour les PNG (ils font déjà 1920 × 1080, à placer en 0,0).
+2. **Source image** pour les PNG, après les avoir téléchargés (ils font déjà 1920 × 1080, à placer en 0,0).
 3. **Config dans OBS** : Docks → Docks de navigateur personnalisés → URL de `config.html`.
 4. **Pilotage en direct** : OBS → Outils → Paramètres du serveur WebSocket → Activer. Dans `config.html`, saisir le port (4455) et le mot de passe puis « Se connecter ». Si le navigateur demande l'accès au réseau local, l'accepter.
 
@@ -43,9 +46,15 @@ Forme générale : `section.cle=valeur`, par ex. `champions.html?champions.inter
 | `champions.html` | `champ=Ahri,Jinx` (forcer), `liste=…`, `pause=1`, `vitesse=10` (s), `cartes=1..3`, `echelle=0.8` |
 | `sponsors.html` | `intervalle=6`, `parslide=2`, `pause=1`, `transition=glisse\|fondu\|flip` |
 | `timer.html` | `duree=10:00`, `start=1`, `titre=…`, `fin=…` |
-| `fond.html` | `preset=vice\|sunset\|miami\|neon\|lagon`, `c1..c4`, `glow`, `accent` (hex sans #), `particules=40`, `vitesse=1` |
+| `fond.html` | `preset=vice\|sunset\|miami\|neon\|lagon`, `decor=palmier\|tour\|nexus` (les 3 emplacements) ou `fond.decor1..3`, `c1..c4`, `glow`, `accent` (hex sans #), `particules=40`, `vitesse=1` |
+| `logo.html` | `couleur=d0221b`, `taille=120`, `logo.box=1`, `logo.glow=1`, `logo.position=bas-droite` |
 
 `?cfg=…` contient un état encodé (bouton « Avec réglages » de la config). `?live=0` coupe la synchro.
+
+## Décor du fond
+
+Trois emplacements (gauche, arrière-plan, droite), chacun au choix : palmier, tour, nexus ou rien.
+Tours et nexus sont des silhouettes originales dans le même style que les palmiers, avec un cristal lumineux animé aux couleurs du fond (halo et néon).
 
 ## Champions
 

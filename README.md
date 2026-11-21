@@ -118,6 +118,6 @@ Le moteur du labo terminal accepte maintenant `key`, `titre`, `sousTitre`, `coul
 
 ## Overlay OBS League of Legends (`overlay-lol/`, hors cours)
 
-Écran d'attente pour un stream LoL, indépendant du reste du site (aucun lien depuis les pages de cours, pages en `noindex`) : fond animé façon « Vice City », cartes de champions animées, timer et sponsors en rotation, chacun dans sa propre source navigateur OBS, plus le logo B et un bandeau sponsors fixe en PNG. Tout se règle en direct depuis `overlay-lol/config.html` (synchro par obs-websocket et BroadcastChannel). Détails et paramètres d'URL : `overlay-lol/README.md`.
+Écran d'attente pour un stream LoL, indépendant du reste du site (aucun lien depuis les pages de cours, pages en `noindex`) : fond animé façon « Vice City » (décor : palmiers, tours ou nexus), cartes de champions animées, timer, sponsors en rotation et logo B, chacun dans sa propre source navigateur OBS, plus le logo et un bandeau sponsors fixe en PNG. Tout se règle en direct depuis `overlay-lol/config.html` (synchro par obs-websocket et BroadcastChannel). Détails et paramètres d'URL : `overlay-lol/README.md`.
 
 Exception au point RGPD ci-dessus : ces pages chargent les illustrations de champions depuis Riot (Data Dragon) et CommunityDragon.

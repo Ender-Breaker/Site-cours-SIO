@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<title>Logo — Overlay URC</title>
+<link rel="stylesheet" href="css/overlay.css">
+<style>
+  :root { --h: 80px; --col: #fff; --ratio: 1.534; }
+  .logo { position: absolute; display: flex; align-items: center; justify-content: center; }
+  .logo.pos-original    { right: 40px; top: 40px; }
+  .logo.pos-haut-gauche { left: 40px; top: 40px; }
+  .logo.pos-bas-droite  { right: 40px; bottom: 40px; }
+  .logo.pos-bas-gauche  { left: 40px; bottom: 40px; }
+  .logo.pos-centre      { left: 50%; top: 50%; transform: translate(-50%, -50%); }
+  .logo.box { padding: 14px 20px; background: rgba(12, 8, 22, .88); }
+
+  .mark { height: var(--h); width: calc(var(--h) * var(--ratio)); }
+  .mark.tint {
+    background: var(--col);
+    -webkit-mask: var(--src) center / contain no-repeat;
+            mask: var(--src) center / contain no-repeat;
+  }
+  .mark img { height: 100%; width: 100%; object-fit: contain; display: block; }
+  .glow .mark { filter: drop-shadow(0 0 10px var(--col)) drop-shadow(0 0 24px var(--col)); }
+  .glow .mark.tint { filter: drop-shadow(0 0 12px var(--col)); }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="logo pos-original" id="logo"><div class="mark tint" id="mark"></div></div>
+</div>
+<script src="js/core.js"></script>
+<script>
+(function () {
+  'use strict';
+  var logo = document.getElementById('logo'), mark = document.getElementById('mark');
+  var lastSrc = '';
+  URC.init({
+    section: 'logo',
+    aliases: { couleur: 'color', taille: 'height' },
+    onChange: function (c) {
+      var root = document.documentElement.style;
+      root.setProperty('--h', (+c.height || 80) + 'px');
+      root.setProperty('--col', c.color || '#fff');
+      logo.className = 'logo pos-' + (c.position || 'original') + (c.box ? ' box' : '') + (c.glow ? ' glow' : '') + (c.show ? '' : ' hidden');
+      logo.style.opacity = c.opacity;
+      var tint = c.tint !== false;
+      mark.classList.toggle('tint', tint);
+      if (c.src !== lastSrc || mark.dataset.tint !== String(tint)) {
+        lastSrc = c.src; mark.dataset.tint = String(tint);
+        var probe = new Image();
+        probe.onload = function () { if (probe.naturalHeight) root.setProperty('--ratio', probe.naturalWidth / probe.naturalHeight); };
+        probe.src = c.src;
+        root.setProperty('--src', 'url("' + String(c.src).replace(/"/g, '%22') + '")');
+        mark.innerHTML = tint ? '' : '<img alt="" src="' + String(c.src).replace(/"/g, '&quot;') + '">';
+      }
+    }
+  });
+})();
+</script>
+</body>
+</html>

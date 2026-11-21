@@ -301,6 +301,17 @@
     });
   }
 
+  $$('[data-decor]').forEach(function (b) {
+    b.onclick = function () {
+      var d = b.dataset.decor.split(',');
+      state.fond.decor1 = d[0]; state.fond.decor2 = d[1]; state.fond.decor3 = d[2]; state.fond.palms = true;
+      populate(); commit();
+    };
+  });
+  $$('[data-logocol]').forEach(function (b) {
+    b.onclick = function () { state.logo.color = b.dataset.logocol; state.logo.tint = true; populate(); commit(); };
+  });
+
   /* ---------- Aperçu ---------- */
   var preview = $('preview');
   var lays = $$('.lay', preview);
@@ -336,8 +347,9 @@
     { id: 'champions', nom: 'Cartes champions', type: 'Source navigateur', file: 'champions.html', sec: 'champions' },
     { id: 'timer', nom: 'Timer', type: 'Source navigateur', file: 'timer.html', sec: 'timer' },
     { id: 'sponsors', nom: 'Sponsors (rotation)', type: 'Source navigateur', file: 'sponsors.html', sec: 'sponsors' },
-    { id: 'logo', nom: 'Logo B blanc', type: 'Source image', file: 'assets/calques/calque-logo-B.png' },
-    { id: 'spimg', nom: 'Sponsors (image fixe)', type: 'Source image', file: 'assets/calques/calque-sponsors-statique.png' }
+    { id: 'logo', nom: 'Logo B', type: 'Source navigateur', file: 'logo.html', sec: 'logo' },
+    { id: 'logopng', nom: 'Logo B blanc (PNG)', type: 'Source image : fichier', file: 'assets/calques/calque-logo-B.png', dl: 'logo-B-blanc-1920x1080.png' },
+    { id: 'spimg', nom: 'Sponsors fixes (PNG)', type: 'Source image : fichier', file: 'assets/calques/calque-sponsors-statique.png', dl: 'sponsors-fixes-1920x1080.png' }
   ];
   function frozenUrl(L) {
     var o = {}; o[L.sec] = state[L.sec];
@@ -348,13 +360,14 @@
     var host = $('urls'); host.innerHTML = '';
     LAYERS.forEach(function (L) {
       var row = document.createElement('div'); row.className = 'url-row';
-      row.innerHTML = '<b></b><input type="text" readonly><button class="sm">Copier</button>' +
-        (L.sec ? '<button class="sm frz" title="URL contenant les réglages actuels de ce calque">Avec réglages</button>' : '<span class="frz"></span>');
+      row.innerHTML = '<b></b><input type="text" readonly>' +
+        (L.dl ? '<a class="btn sm" download="' + L.dl + '" href="' + L.file + '">⬇ Télécharger</a><span class="frz"></span>'
+              : '<button class="sm">Copier</button><button class="sm frz" title="URL contenant les réglages actuels de ce calque">Avec réglages</button>');
       row.querySelector('b').innerHTML = L.nom + '<small>' + L.type + '</small>';
       var inp = row.querySelector('input'); inp.value = base + L.file;
       inp.onfocus = function () { inp.select(); };
       var btns = row.querySelectorAll('button');
-      btns[0].onclick = function () { copy(base + L.file); };
+      if (btns[0]) btns[0].onclick = function () { copy(base + L.file); };
       if (btns[1]) btns[1].onclick = function () { copy(frozenUrl(L)); };
       host.appendChild(row);
     });
