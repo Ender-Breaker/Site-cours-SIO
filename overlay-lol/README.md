@@ -54,7 +54,7 @@ Forme générale : `section.cle=valeur`, par ex. `champions.html?champions.inter
 ## Décor du fond
 
 Trois emplacements (gauche, arrière-plan, droite), chacun au choix : palmier, tour, nexus, image perso ou rien.
-Tours et nexus sont des silhouettes originales dans le même style que les palmiers, avec un cristal lumineux animé aux couleurs du fond (halo et néon).
+Tours et nexus sont des dessins originaux en silhouette éclairée par le couchant : tour-lanterne avec énergie qui monte dans le fût et cristal en cage, nexus en lotus de pierre avec grand cristal flottant, faisceaux, anneau de runes et éclats en orbite. Les cristaux prennent les couleurs du fond (halo et néon).
 
 **Image perso** : un PNG à fond transparent par emplacement (URL, ou fichier importé depuis la config, 700 Ko max), par exemple les visuels officiels de tour et de nexus du tournoi. « En silhouette » le teinte comme le reste du décor ; décoché, il garde ses couleurs. Taille réglable.
 Pour une image lourde, mieux vaut la placer dans `assets/` du dépôt et coller son URL : une image importée voyage dans chaque envoi de la config.

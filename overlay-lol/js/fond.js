@@ -63,91 +63,147 @@
     return '<svg xmlns="http://www.w3.org/2000/svg" width="' + S + '" height="' + S + '" viewBox="0 0 ' + S + ' ' + S + '">' + out + '</svg>';
   }
 
-  /* ---------- Tours et nexus : même style de silhouette, avec un cristal lumineux ---------- */
+  /* ---------- Tours et nexus (dessins originaux) : volume éclairé par le couchant, cristal animé ---------- */
   function mirror(d, W) {
-    // Retourne horizontalement un chemin « M x,y L x,y Q x,y x,y Z » (coordonnées absolues)
+    // Retourne horizontalement un chemin en coordonnées absolues « x,y »
     return d.replace(/(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/g, function (m, x, y) { return (W - parseFloat(x)) + ',' + y; });
   }
 
-  var TOWER = { W: 320, H: 1000, crystal: { x: 160, y: 182, w: 62, h: 112 }, line: { x: 160, y1: 352, y2: 880 } };
-  function towerSvg(fill) {
-    var W = TOWER.W, half = [
-      'M160,1000 L14,1000 L24,955 L48,948 L52,905 L160,905 Z',                 // socle (moitié)
-      'M160,905 L78,905 C92,760 100,560 106,336 L160,336 Z',                    // fût
-      'M160,712 L84,712 L88,690 L160,690 Z',                                    // bague basse
-      'M160,490 L94,490 L98,470 L160,470 Z',                                    // bague haute
-      'M160,340 L96,340 L66,286 L160,286 Z',                                    // couronne
-      'M68,290 Q34,186 106,88 Q80,190 106,290 Z',                               // griffe extérieure
-      'M110,290 Q96,212 134,148 Q124,214 134,290 Z',                            // griffe intérieure
-      'M160,290 L140,290 L148,262 L160,262 Z'                                   // support du cristal
-    ];
-    var paths = half.map(function (d) { return '<path d="' + d + '"/><path d="' + mirror(d, W) + '"/>'; }).join('');
-    return '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + TOWER.H + '" viewBox="0 0 ' + W + ' ' + TOWER.H + '" fill="' + fill + '">' + paths + '</svg>';
+  // Silhouette ombrée : chaque pièce reçoit un dégradé (côté soleil plus clair) et un liseré lumineux
+  function shadedSvg(W, H, halves, singles, fill, rim, rimLeft, details) {
+    var x1 = rimLeft ? 1 : 0, x2 = rimLeft ? 0 : 1;
+    var defs = '<defs><linearGradient id="sh" x1="' + x1 + '" y1="0" x2="' + x2 + '" y2="0">' +
+      '<stop offset="0" stop-color="' + fill + '"/><stop offset=".62" stop-color="' + fill + '"/>' +
+      '<stop offset=".92" stop-color="' + C.mix(fill, rim, 0.45) + '"/><stop offset="1" stop-color="' + C.mix(fill, rim, 0.85) + '"/></linearGradient>' +
+      '<linearGradient id="fade" gradientUnits="userSpaceOnUse" x1="0" y1="' + (H * 0.5) + '" x2="0" y2="' + H + '">' +
+      '<stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".4"/></linearGradient></defs>';
+    var body = '';
+    halves.forEach(function (d) {
+      // Pièce centrale : une seule forme (le dégradé couvre toute sa largeur) ; pièce latérale : deux formes
+      if (d.indexOf((W / 2) + ',') !== -1) body += '<path d="' + d + ' ' + mirror(d, W) + '"/>';
+      else body += '<path d="' + d + '"/><path d="' + mirror(d, W) + '"/>';
+    });
+    (singles || []).forEach(function (d) { body += '<path d="' + d + '"/>'; });
+    return '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">' + defs +
+      '<g fill="url(#sh)">' + body + '</g>' +
+      '<g fill="none" stroke="' + C.rgba(rim, 0.3) + '" stroke-width="2" stroke-linecap="round">' + (details || '') + '</g>' +
+      '<g fill="url(#fade)">' + body + '</g></svg>';
   }
 
-  var NEXUS = { W: 720, H: 600, crystal: { x: 360, y: 246, w: 124, h: 224 } };
-  function nexusSvg(fill) {
-    var W = NEXUS.W, half = [
-      'M360,600 L30,600 L48,560 L100,552 L112,516 L180,510 L192,480 L360,480 Z', // socle à gradins
-      'M96,556 L150,556 L156,400 L128,326 L104,400 Z',                            // pylône extérieur
-      'M168,512 L232,512 L246,300 L210,186 L182,300 Z',                           // pylône intérieur
-      'M360,484 L252,484 L274,418 L312,390 L360,410 Z',                           // berceau
-      'M258,432 Q168,282 302,126 Q222,282 298,420 Z',                             // bras courbe
-      'M196,560 L232,560 L236,520 L214,500 L198,520 Z'                            // petite flèche avant
+  var TOWER = { W: 360, H: 1000, cx: 180, crystal: { x: 180, y: 206, w: 60, h: 112 }, ring: { x: 180, y: 214, r: 78 },
+                channel: { x: 180, y1: 404, y2: 800, w: 10 }, rune: { x: 180, y: 858, w: 104 } };
+  function towerSvg(fill, rim, rimLeft) {
+    var halves = [
+      'M180,1000 L30,1000 L30,976 L42,960 L180,960 Z',                          // marche basse
+      'M180,960 L62,960 L62,940 L74,926 L180,926 Z',                            // marche moyenne
+      'M180,926 L92,926 L92,896 L180,896 Z',                                    // marche haute
+      'M180,896 L104,896 L104,832 L112,820 L180,820 Z',                         // socle
+      'M180,820 L121,820 C127,700 133,540 138,384 L180,384 Z',                  // fût (galbe)
+      'M180,652 L110,652 L114,638 L180,638 Z',                                  // bague basse
+      'M180,482 L124,482 L127,470 L180,470 Z',                                  // bague haute
+      'M180,384 L136,384 L112,352 L106,332 L180,332 Z',                         // chapiteau évasé
+      'M106,334 C66,262 74,150 176,76 C98,158 94,262 124,334 Z',                // nervure extérieure de la lanterne
+      'M146,334 C128,272 138,174 178,94 C152,178 150,272 160,334 Z',            // nervure intérieure
+      'M180,96 L172,96 L180,16 Z',                                              // flèche
+      'M180,302 L156,302 L166,284 L180,284 Z'                                   // support du cristal
     ];
-    var paths = half.map(function (d) { return '<path d="' + d + '"/><path d="' + mirror(d, W) + '"/>'; }).join('');
-    return '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + NEXUS.H + '" viewBox="0 0 ' + W + ' ' + NEXUS.H + '" fill="' + fill + '">' + paths + '</svg>';
+    var details = '<path d="M150,1000 L150,962 M210,1000 L210,962 M120,926 L120,898 M240,926 L240,898"/>' +
+      '<path d="M128,620 L232,620 M134,500 L226,500"/>' +
+      '<circle cx="180" cy="44" r="7"/>';
+    return shadedSvg(TOWER.W, TOWER.H, halves, [], fill, rim, rimLeft, details);
   }
 
-  // Cristal en SVG inline : ses couleurs suivent les variables CSS (--cr1…--cr4), sans reconstruction
+  var NEXUS = { W: 760, H: 620, cx: 380, crystal: { x: 380, y: 248, w: 128, h: 232 }, ring: { x: 380, y: 262, r: 150 },
+                pool: { x: 380, y: 472, w: 330, h: 70 }, tips: [[262, 212], [318, 270], [498, 212], [442, 270]] };
+  function nexusSvg(fill, rim, rimLeft) {
+    var halves = [
+      'M380,620 L20,620 L20,600 L34,586 L380,586 Z',                            // dalle basse
+      'M380,586 L70,586 L70,568 L84,556 L380,556 Z',                            // dalle moyenne
+      'M380,556 L130,556 L130,540 L142,528 L380,528 Z',                         // dalle haute
+      'M380,528 L252,528 L252,486 L266,472 L380,472 Z',                         // piédestal
+      'M140,556 C108,430 150,300 262,212 C200,322 196,440 232,556 Z',           // pétale extérieur
+      'M262,528 C238,440 262,342 318,270 C292,350 292,450 312,528 Z',           // pétale intérieur
+      'M40,586 L72,586 L64,498 L56,462 L48,498 Z',                              // obélisque
+      'M92,556 L116,556 L110,500 L104,478 L98,500 Z'                            // petit obélisque
+    ];
+    var details = '<path d="M200,620 L200,588 M300,620 L300,588 M460,620 L460,588 M560,620 L560,588"/>' +
+      '<path d="M290,500 L470,500"/>';
+    return shadedSvg(NEXUS.W, NEXUS.H, halves, [], fill, rim, rimLeft, details);
+  }
+
+  // Cristal à facettes (SVG inline : couleurs pilotées par --cr1…--cr4)
   var CRYSTAL = '<svg viewBox="0 0 100 180" preserveAspectRatio="none" aria-hidden="true">' +
-    '<polygon points="50,0 0,70 50,84" style="fill:var(--cr1)"/>' +
-    '<polygon points="50,0 100,70 50,84" style="fill:var(--cr2)"/>' +
-    '<polygon points="0,70 50,180 50,84" style="fill:var(--cr3)"/>' +
-    '<polygon points="100,70 50,180 50,84" style="fill:var(--cr4)"/>' +
-    '<polygon points="50,0 100,70 50,180 0,70" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.5"/></svg>';
+    '<polygon points="50,0 4,62 28,72" style="fill:var(--cr1)"/>' +
+    '<polygon points="50,0 28,72 50,78" style="fill:var(--cr1)"/><polygon points="50,0 28,72 50,78" fill="#fff" opacity=".35"/>' +
+    '<polygon points="50,0 50,78 72,72" style="fill:var(--cr2)"/>' +
+    '<polygon points="50,0 72,72 96,62" style="fill:var(--cr2)"/><polygon points="50,0 72,72 96,62" fill="#000" opacity=".18"/>' +
+    '<polygon points="4,62 28,72 50,180" style="fill:var(--cr3)"/><polygon points="4,62 28,72 50,180" fill="#fff" opacity=".12"/>' +
+    '<polygon points="28,72 50,78 50,180" style="fill:var(--cr3)"/>' +
+    '<polygon points="50,78 72,72 50,180" style="fill:var(--cr4)"/>' +
+    '<polygon points="72,72 96,62 50,180" style="fill:var(--cr4)"/><polygon points="72,72 96,62 50,180" fill="#000" opacity=".2"/>' +
+    '<ellipse cx="44" cy="70" rx="16" ry="34" fill="#fff" opacity=".22"/>' +
+    '<polygon points="50,0 96,62 50,180 4,62" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.4"/>' +
+    '<path d="M4,62 L28,72 L50,78 L72,72 L96,62" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1"/></svg>';
+  var SPARK = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10,0 L11.4,8.6 L20,10 L11.4,11.4 L10,20 L8.6,11.4 L0,10 L8.6,8.6 Z" fill="#fff"/></svg>';
 
-  function crystalEl(spec, cls, haloSize) {
-    var wrap = document.createElement('div');
-    wrap.className = 'cr ' + (cls || '');
-    wrap.style.left = (spec.x - spec.w / 2) + 'px';
-    wrap.style.top = (spec.y - spec.h / 2) + 'px';
-    wrap.style.width = spec.w + 'px';
-    wrap.style.height = spec.h + 'px';
-    var halo = document.createElement('div');
-    halo.className = 'halo';
-    halo.style.width = halo.style.height = haloSize + 'px';
-    halo.style.left = (spec.w - haloSize) / 2 + 'px';
-    halo.style.top = (spec.h - haloSize) / 2 + 'px';
-    var gem = document.createElement('div');
-    gem.className = 'gem';
-    gem.innerHTML = CRYSTAL;
-    wrap.appendChild(halo); wrap.appendChild(gem);
+  function div(cls, styles) {
+    var d = document.createElement('div'); d.className = cls;
+    if (styles) Object.keys(styles).forEach(function (k) { d.style[k] = styles[k]; });
+    return d;
+  }
+
+  function crystalEl(spec, haloSize) {
+    var wrap = div('cr float', { left: (spec.x - spec.w / 2) + 'px', top: (spec.y - spec.h / 2) + 'px', width: spec.w + 'px', height: spec.h + 'px' });
+    wrap.appendChild(div('halo', { width: haloSize + 'px', height: haloSize + 'px', left: (spec.w - haloSize) / 2 + 'px', top: (spec.h - haloSize) / 2 + 'px' }));
+    var gem = div('gem'); gem.innerHTML = CRYSTAL;
+    wrap.appendChild(gem);
+    var sp = div('spark', { left: (spec.w * 0.18) + 'px', top: (spec.h * 0.2) + 'px' }); sp.innerHTML = SPARK;
+    wrap.appendChild(sp);
     return wrap;
   }
 
-  function buildTower(el, fill) {
-    var img = new Image(); img.src = svgUrl(towerSvg(fill));
-    var line = document.createElement('div');
-    line.className = 'conduit';
-    line.style.left = (TOWER.line.x - 2) + 'px'; line.style.top = TOWER.line.y1 + 'px';
-    line.style.height = (TOWER.line.y2 - TOWER.line.y1) + 'px';
-    el.appendChild(img); el.appendChild(line);
-    el.appendChild(crystalEl(TOWER.crystal, 'float', 300));
+  function ringEl(spec, speed) {
+    var r = spec.r;
+    var ring = div('ring', { left: (spec.x - r) + 'px', top: (spec.y - r) + 'px', width: 2 * r + 'px', height: 2 * r + 'px' });
+    var a = div('ring-in'); a.style.animationDuration = 'calc(' + speed + 's / var(--spd))';
+    var b = div('ring-in two'); b.style.animationDuration = 'calc(' + (speed * 1.6) + 's / var(--spd))';
+    ring.appendChild(a); ring.appendChild(b);
+    return ring;
+  }
+
+  function buildTower(el, fill, rim, rimLeft) {
+    var img = new Image(); img.src = svgUrl(towerSvg(fill, rim, rimLeft));
+    el.appendChild(img);
+    var ch = TOWER.channel;
+    var chan = div('channel', { left: (ch.x - ch.w / 2) + 'px', top: ch.y1 + 'px', width: ch.w + 'px', height: (ch.y2 - ch.y1) + 'px' });
+    chan.appendChild(div('flow'));
+    el.appendChild(chan);
+    el.appendChild(div('rune', { left: (TOWER.rune.x - TOWER.rune.w / 2) + 'px', top: TOWER.rune.y + 'px', width: TOWER.rune.w + 'px' }));
+    el.appendChild(ringEl(TOWER.ring, 10));
+    el.appendChild(crystalEl(TOWER.crystal, 320));
     return { W: TOWER.W, H: TOWER.H };
   }
 
-  function buildNexus(el, fill) {
-    var img = new Image(); img.src = svgUrl(nexusSvg(fill));
+  function buildNexus(el, fill, rim, rimLeft) {
+    var img = new Image(); img.src = svgUrl(nexusSvg(fill, rim, rimLeft));
+    var P = NEXUS.pool;
+    el.appendChild(div('pool', { left: (P.x - P.w / 2) + 'px', top: (P.y - P.h / 2) + 'px', width: P.w + 'px', height: P.h + 'px' }));
     el.appendChild(img);
-    var cr = crystalEl(NEXUS.crystal, 'float big', 560);
-    // Éclats en orbite autour du cristal
+    // Faisceaux des pointes des pétales vers le cristal
+    var c = NEXUS.crystal;
+    NEXUS.tips.forEach(function (t, i) {
+      var dx = c.x - t[0], dy = c.y + 20 - t[1], len = Math.hypot(dx, dy), ang = Math.atan2(dy, dx) * 180 / Math.PI;
+      var bm = div('beam', { left: t[0] + 'px', top: t[1] + 'px', width: len + 'px', transform: 'rotate(' + ang + 'deg)' });
+      bm.style.animationDelay = (-i * 0.7) + 's';
+      el.appendChild(bm);
+    });
+    el.appendChild(ringEl(NEXUS.ring, 14));
+    var cr = crystalEl(c, 600);
+    cr.classList.add('big');
     for (var i = 0; i < 3; i++) {
-      var ox = document.createElement('div'); ox.className = 'orb-x';
-      ox.style.animationDelay = (-i * 3.2) + 's';
-      var oy = document.createElement('div'); oy.className = 'orb-y';
-      oy.style.animationDelay = (-i * 3.2 - 2.4) + 's';
-      var sh = document.createElement('div'); sh.className = 'shard'; sh.innerHTML = CRYSTAL;
+      var ox = div('orb-x'); ox.style.animationDelay = (-i * 3.2) + 's';
+      var oy = div('orb-y'); oy.style.animationDelay = (-i * 3.2 - 2.4) + 's';
+      var sh = div('shard'); sh.innerHTML = CRYSTAL;
       oy.appendChild(sh); ox.appendChild(oy); cr.appendChild(ox);
     }
     el.appendChild(cr);
@@ -227,7 +283,8 @@
       if (type === 'palmier') { buildPalm(el, fill, slot.palm); host.appendChild(el); return; }
       if (type === 'image') { buildImage(el, fill, slot, c['img' + (i + 1)], c); host.appendChild(el); return; }
       var spec = slot[type];
-      var size = type === 'tour' ? buildTower(el, fill) : buildNexus(el, fill);
+      var rim = C.mix(c.glow, c.c4, 0.35), rimLeft = i === 2; // le soleil éclaire le côté tourné vers le centre
+      var size = type === 'tour' ? buildTower(el, fill, rim, rimLeft) : buildNexus(el, fill, rim, rimLeft);
       var s = spec.h / size.H;
       el.style.width = size.W + 'px'; el.style.height = size.H + 'px';
       el.style.left = (spec.cx - size.W / 2) + 'px';
@@ -344,7 +401,7 @@
     $('vignette').classList.toggle('off', !c.vignette);
 
     buildLines();
-    var decorKey = [c.c1, c.decor1, c.decor2, c.decor3, c.img1, c.img2, c.img3, c.imgSilhouette, c.imgScale].join('|');
+    var decorKey = [c.c1, c.glow, c.c4, c.decor1, c.decor2, c.decor3, c.img1, c.img2, c.img3, c.imgSilhouette, c.imgScale].join('|');
     if (decorKey !== lastDecor) { lastDecor = decorKey; buildDecor(c); }
     if (!prev || prev.particleColor !== c.particleColor) makeSprite(c.particleColor);
     sparkCfg.opacity = Math.max(0, Math.min(1, +c.particleOpacity));
