@@ -238,15 +238,23 @@
     </div>
     <div class="fields" style="margin-bottom:6px">
       <label class="f">Gauche
-        <select data-k="fond.decor1"><option value="palmier">Palmier</option><option value="tour">Tour</option><option value="nexus">Nexus</option><option value="aucun">Aucun</option></select>
+        <select data-k="fond.decor1"><option value="palmier">Palmier</option><option value="tour">Tour</option><option value="nexus">Nexus</option><option value="image">Image perso</option><option value="aucun">Aucun</option></select>
       </label>
       <label class="f">Arrière-plan
-        <select data-k="fond.decor2"><option value="palmier">Palmier</option><option value="tour">Tour</option><option value="nexus">Nexus</option><option value="aucun">Aucun</option></select>
+        <select data-k="fond.decor2"><option value="palmier">Palmier</option><option value="tour">Tour</option><option value="nexus">Nexus</option><option value="image">Image perso</option><option value="aucun">Aucun</option></select>
       </label>
       <label class="f">Droite
-        <select data-k="fond.decor3"><option value="palmier">Palmier</option><option value="tour">Tour</option><option value="nexus">Nexus</option><option value="aucun">Aucun</option></select>
+        <select data-k="fond.decor3"><option value="palmier">Palmier</option><option value="tour">Tour</option><option value="nexus">Nexus</option><option value="image">Image perso</option><option value="aucun">Aucun</option></select>
       </label>
     </div>
+    <div class="fields" style="margin:4px 0 6px">
+      <label class="f wide">Image perso : gauche<span class="row" style="margin:0;flex-wrap:nowrap"><input type="text" data-k="fond.img1" placeholder="URL d'un PNG transparent, ou 📁"><button class="sm" data-imgpick="1" title="Choisir une image sur ce PC">📁</button><button class="sm ghost" data-imgclear="1" title="Retirer">✕</button></span></label>
+      <label class="f wide">Image perso : arrière-plan<span class="row" style="margin:0;flex-wrap:nowrap"><input type="text" data-k="fond.img2" placeholder="URL d'un PNG transparent, ou 📁"><button class="sm" data-imgpick="2" title="Choisir une image sur ce PC">📁</button><button class="sm ghost" data-imgclear="2" title="Retirer">✕</button></span></label>
+      <label class="f wide">Image perso : droite<span class="row" style="margin:0;flex-wrap:nowrap"><input type="text" data-k="fond.img3" placeholder="URL d'un PNG transparent, ou 📁"><button class="sm" data-imgpick="3" title="Choisir une image sur ce PC">📁</button><button class="sm ghost" data-imgclear="3" title="Retirer">✕</button></span></label>
+      <label class="f">Taille des images<span class="range"><input type="range" min="0.3" max="2" step="0.05" data-k="fond.imgScale"><output></output></span></label>
+      <label class="f" style="justify-content:flex-end"><span class="toggles"><label class="tg"><input type="checkbox" data-k="fond.imgSilhouette">En silhouette</label></span></label>
+    </div>
+    <p class="hint">Image perso : PNG à fond transparent (ex. vos visuels officiels de tour et de nexus). « En silhouette » la teinte comme les palmiers ; décoche pour garder ses couleurs.</p>
     <h3>Couleurs</h3>
     <div class="fields">
       <label class="f">Haut du ciel<input type="color" data-k="fond.c1"></label>
@@ -294,6 +302,7 @@
 <div class="toast" id="toast"></div>
 
 <input type="file" id="spFile" accept="image/*" hidden>
+<input type="file" id="decorFile" accept="image/*" hidden>
 <script src="js/core.js"></script>
 <script src="js/champions-data.js"></script>
 <script src="js/obs-ws.js"></script>

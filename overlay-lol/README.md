@@ -46,15 +46,18 @@ Forme générale : `section.cle=valeur`, par ex. `champions.html?champions.inter
 | `champions.html` | `champ=Ahri,Jinx` (forcer), `liste=…`, `pause=1`, `vitesse=10` (s), `cartes=1..3`, `echelle=0.8` |
 | `sponsors.html` | `intervalle=6`, `parslide=2`, `pause=1`, `transition=glisse\|fondu\|flip` |
 | `timer.html` | `duree=10:00`, `start=1`, `titre=…`, `fin=…` |
-| `fond.html` | `preset=vice\|sunset\|miami\|neon\|lagon`, `decor=palmier\|tour\|nexus` (les 3 emplacements) ou `fond.decor1..3`, `c1..c4`, `glow`, `accent` (hex sans #), `particules=40`, `vitesse=1` |
+| `fond.html` | `preset=vice\|sunset\|miami\|neon\|lagon`, `decor=palmier\|tour\|nexus\|image` (les 3 emplacements) ou `fond.decor1..3`, `fond.img1..3=<url>`, `c1..c4`, `glow`, `accent` (hex sans #), `particules=40`, `vitesse=1` |
 | `logo.html` | `couleur=d0221b`, `taille=120`, `logo.box=1`, `logo.glow=1`, `logo.position=bas-droite` |
 
 `?cfg=…` contient un état encodé (bouton « Avec réglages » de la config). `?live=0` coupe la synchro.
 
 ## Décor du fond
 
-Trois emplacements (gauche, arrière-plan, droite), chacun au choix : palmier, tour, nexus ou rien.
+Trois emplacements (gauche, arrière-plan, droite), chacun au choix : palmier, tour, nexus, image perso ou rien.
 Tours et nexus sont des silhouettes originales dans le même style que les palmiers, avec un cristal lumineux animé aux couleurs du fond (halo et néon).
+
+**Image perso** : un PNG à fond transparent par emplacement (URL, ou fichier importé depuis la config, 700 Ko max), par exemple les visuels officiels de tour et de nexus du tournoi. « En silhouette » le teinte comme le reste du décor ; décoché, il garde ses couleurs. Taille réglable.
+Pour une image lourde, mieux vaut la placer dans `assets/` du dépôt et coller son URL : une image importée voyage dans chaque envoi de la config.
 
 ## Champions
 

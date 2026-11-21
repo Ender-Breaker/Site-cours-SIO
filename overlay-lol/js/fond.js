@@ -179,11 +179,38 @@
     el.style.transform = 'scale(' + (p.flip ? -p.scale : p.scale) + ',' + p.scale + ')';
   }
 
+  // Image perso (PNG transparent conseillé), posée au sol ; en silhouette elle prend la teinte du décor
+  function buildImage(el, fill, slot, src, c) {
+    if (!src) return;
+    var h = slot.tour.h * Math.max(0.2, Math.min(3, +c.imgScale || 1)) * 0.75;
+    var place = function (ratio) {
+      var w = h * ratio;
+      el.style.width = w + 'px'; el.style.height = h + 'px';
+      el.style.left = (slot.tour.cx - w / 2) + 'px';
+      el.style.bottom = '-6px';
+    };
+    place(1);
+    var probe = new Image();
+    probe.onload = function () { if (probe.naturalHeight) place(probe.naturalWidth / probe.naturalHeight); };
+    probe.src = src;
+    var url = 'url("' + String(src).replace(/"/g, '%22') + '")';
+    var inner = document.createElement('div');
+    inner.className = 'custom';
+    if (c.imgSilhouette) {
+      inner.style.background = fill;
+      inner.style.webkitMaskImage = inner.style.maskImage = url;
+    } else {
+      inner.style.backgroundImage = url;
+    }
+    el.appendChild(inner);
+  }
+
   function normDecor(v) {
     v = String(v || '').toLowerCase();
     if (/^tour|^tower|^turret/.test(v)) return 'tour';
     if (/^nex/.test(v)) return 'nexus';
     if (/^(aucun|none|vide|rien)/.test(v)) return 'aucun';
+    if (/^(image|img|perso)/.test(v)) return 'image';
     return 'palmier';
   }
 
@@ -198,6 +225,7 @@
       el.className = 'palm ' + slot.cls + ' deco-' + type;
       el.style.opacity = slot.opacity;
       if (type === 'palmier') { buildPalm(el, fill, slot.palm); host.appendChild(el); return; }
+      if (type === 'image') { buildImage(el, fill, slot, c['img' + (i + 1)], c); host.appendChild(el); return; }
       var spec = slot[type];
       var size = type === 'tour' ? buildTower(el, fill) : buildNexus(el, fill);
       var s = spec.h / size.H;
@@ -316,7 +344,7 @@
     $('vignette').classList.toggle('off', !c.vignette);
 
     buildLines();
-    var decorKey = [c.c1, c.decor1, c.decor2, c.decor3].join('|');
+    var decorKey = [c.c1, c.decor1, c.decor2, c.decor3, c.img1, c.img2, c.img3, c.imgSilhouette, c.imgScale].join('|');
     if (decorKey !== lastDecor) { lastDecor = decorKey; buildDecor(c); }
     if (!prev || prev.particleColor !== c.particleColor) makeSprite(c.particleColor);
     sparkCfg.opacity = Math.max(0, Math.min(1, +c.particleOpacity));

@@ -74,7 +74,8 @@
     $$('[data-k]').forEach(function (el) {
       var v = getPath(el.dataset.k);
       if (el.type === 'checkbox') el.checked = !!v;
-      else el.value = (v === undefined || v === null) ? '' : v;
+      else if (typeof v === 'string' && /^data:/.test(v)) { el.value = '(image importée depuis le PC)'; el.readOnly = true; return; }
+      else { el.value = (v === undefined || v === null) ? '' : v; el.readOnly = false; }
       showOut(el);
     });
     $('tDur').value = fmtTime(state.timer.duration);
@@ -89,6 +90,8 @@
       setPath(k, v); showOut(el);
       if (/^fond\.(c[1-4]|glow|accent)$/.test(k)) { state.fond.preset = 'perso'; renderPresets(); }
       if (k === 'champions.forced') renderChips();
+      var im = /^fond\.img(\d)$/.exec(k);
+      if (im && v) { state.fond['decor' + im[1]] = 'image'; populateOne('fond.decor' + im[1]); }
       commit();
     });
   });
@@ -308,6 +311,31 @@
       populate(); commit();
     };
   });
+  // Images perso du décor
+  var decorTarget = 0;
+  $$('[data-imgpick]').forEach(function (b) {
+    b.onclick = function () { decorTarget = +b.dataset.imgpick; $('decorFile').value = ''; $('decorFile').click(); };
+  });
+  $$('[data-imgclear]').forEach(function (b) {
+    b.onclick = function () {
+      var n = b.dataset.imgclear;
+      state.fond['img' + n] = '';
+      if (state.fond['decor' + n] === 'image') state.fond['decor' + n] = 'aucun';
+      populate(); commit();
+    };
+  });
+  $('decorFile').onchange = function () {
+    var f = this.files && this.files[0]; if (!f || !decorTarget) return;
+    if (f.size > 700 * 1024) { toast('Image trop lourde (700 Ko max). Réduis-la ou mets-la dans assets/ du dépôt et colle son URL.'); return; }
+    var rd = new FileReader();
+    rd.onload = function () {
+      state.fond['img' + decorTarget] = rd.result;
+      state.fond['decor' + decorTarget] = 'image';
+      state.fond.palms = true;
+      populate(); commit();
+    };
+    rd.readAsDataURL(f);
+  };
   $$('[data-logocol]').forEach(function (b) {
     b.onclick = function () { state.logo.color = b.dataset.logocol; state.logo.tint = true; populate(); commit(); };
   });

@@ -102,6 +102,14 @@
   @keyframes orbx { from { transform: translate3d(-150px, 0, 0); } to { transform: translate3d(150px, 0, 0); } }
   @keyframes orby { from { transform: translate3d(0, -36px, 0); } to { transform: translate3d(0, 36px, 0); } }
 
+  .palm .custom {
+    position: absolute; inset: 0;
+    background-position: center bottom; background-size: contain; background-repeat: no-repeat;
+    -webkit-mask-position: center bottom; mask-position: center bottom;
+    -webkit-mask-size: contain; mask-size: contain;
+    -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  }
+
   canvas.sparkles { position: absolute; inset: 0; }
 
   .grain {

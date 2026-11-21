@@ -27,9 +27,14 @@
       accent: '#2de2e6',      // néon cyan
       sun: true,
       palms: true,            // afficher le décor (palmiers, tours, nexus)
-      decor1: 'palmier',      // décor de gauche : palmier | tour | nexus | aucun
+      decor1: 'palmier',      // décor de gauche : palmier | tour | nexus | image | aucun
       decor2: 'palmier',      // décor en arrière-plan
       decor3: 'palmier',      // décor de droite
+      img1: '',               // image perso (emplacement gauche) : URL ou image importée
+      img2: '',               // image perso (arrière-plan)
+      img3: '',               // image perso (droite)
+      imgSilhouette: true,    // afficher les images perso en silhouette, comme le reste du décor
+      imgScale: 1,            // taille des images perso
       haze: true,
       lines: true,
       grain: true,
