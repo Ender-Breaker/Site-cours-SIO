@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>TCP et UDP — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+<style>
+#cours .schema { margin: var(--s3) 0; overflow-x: auto; }
+#cours .schema svg { display: block; width: 100%; height: auto; min-width: 520px; max-width: 760px; margin: 0 auto; font-family: var(--mono, monospace); }
+#cours .schema figcaption { font-size: .85rem; color: var(--discret); text-align: center; margin-top: 6px; }
+#cours .tp-corr { padding: var(--s2) var(--s3) var(--s3); }
+</style>
+</head>
+<body data-module="reseau" data-chapter="reseau-tcp-udp">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<p>La couche <b>transport</b> fait le lien entre le réseau et les applications. Ses deux protocoles, <b>TCP</b> et <b>UDP</b>, n'ont pas du tout le même caractère : TCP est fiable mais plus lourd, UDP est rapide mais sans garantie. Ce chapitre suit une connexion TCP pendant la consultation d'un site web, montre comment rendre joignable depuis Internet un serveur hébergé dans un LAN privé, puis compare TCP et UDP. Il reprend le TP Packet Tracer du cours (entreprise « Lamartin &amp; Duch », FAI Orange et Free, serveurs Google).</p>
+
+<h2>1. Les ports</h2>
+<p>Un port (nombre de 0 à 65 535) désigne une application dans une machine. Une connexion est identifiée par le quadruplet <b>IP source, port source, IP destination, port destination</b>.</p>
+<ul><li>Côté <b>serveur</b> : un port <b>connu</b> et fixe (inférieur à 1024), sur lequel il écoute.</li>
+<li>Côté <b>client</b> : un port <b>éphémère</b> choisi au hasard par le système (au-dessus de 1024 ; Packet Tracer commence à 1025, Windows utilise 49152 à 65535).</li></ul>
+<div class="tab-defil"><table><tr><th>Port</th><th>Protocole</th><th>Transport</th><th>Service</th></tr><tr><td>20 / 21</td><td>FTP</td><td>TCP</td><td>Transfert de fichiers</td></tr><tr><td>22</td><td>SSH</td><td>TCP</td><td>Administration à distance chiffrée</td></tr><tr><td>23</td><td>Telnet</td><td>TCP</td><td>Administration à distance (non chiffrée)</td></tr><tr><td>25</td><td>SMTP</td><td>TCP</td><td>Envoi d'e-mails</td></tr><tr><td>53</td><td>DNS</td><td>UDP (TCP pour les gros transferts)</td><td>Résolution de noms</td></tr><tr><td>67 / 68</td><td>DHCP</td><td>UDP</td><td>Configuration IP automatique (serveur / client)</td></tr><tr><td>69</td><td>TFTP</td><td>UDP</td><td>Transfert de fichiers simplifié</td></tr><tr><td>80</td><td>HTTP</td><td>TCP</td><td>Web</td></tr><tr><td>110 / 143</td><td>POP3 / IMAP</td><td>TCP</td><td>Lecture des e-mails</td></tr><tr><td>123</td><td>NTP</td><td>UDP</td><td>Heure</td></tr><tr><td>443</td><td>HTTPS</td><td>TCP</td><td>Web chiffré</td></tr><tr><td>3306</td><td>MySQL</td><td>TCP</td><td>Base de données</td></tr></table></div>
+
+<h2>2. Les échanges TCP</h2>
+<h3>2.1 Les trois phases</h3>
+<p>TCP est <b>orienté connexion</b> : avant d'échanger la moindre donnée, le client et le serveur se mettent d'accord. Un échange TCP enchaîne trois phases :</p>
+<ol><li><b>Établissement de la connexion</b>, la « poignée de main en trois temps » (<i>3-way handshake</i>) ;</li>
+<li><b>Échanges</b> : requêtes et réponses, chaque envoi étant acquitté (ACK) ;</li>
+<li><b>Clôture</b> propre de la connexion, à l'initiative du client ou du serveur.</li></ol>
+<figure class="schema"><svg viewBox="0 0 720 440" xmlns="http://www.w3.org/2000/svg" role="img"><defs><marker id="pt" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--encre)"/></marker></defs><rect x="40" y="10" width="160" height="34" rx="6" fill="#e3f5e1" stroke="var(--encre)" stroke-width="2"/><text x="120" y="27" text-anchor="middle" dominant-baseline="middle" font-size="13" fill="var(--encre)" font-weight="700">Client (PC1 :1025)</text><rect x="520" y="10" width="160" height="34" rx="6" fill="#dfe6ff" stroke="var(--encre)" stroke-width="2"/><text x="600" y="27" text-anchor="middle" dominant-baseline="middle" font-size="13" fill="var(--encre)" font-weight="700">Serveur web :80</text><line x1="120" y1="44" x2="120" y2="430" stroke="var(--encre)" stroke-dasharray="4 4"/><line x1="600" y1="44" x2="600" y2="430" stroke="var(--encre)" stroke-dasharray="4 4"/><line x1="124" y1="66" x2="596" y2="80" stroke="#2b3fe0" stroke-width="2" marker-end="url(#pt)"/><text x="360" y="69" text-anchor="middle" font-size="12" fill="#2b3fe0">SYN</text><line x1="596" y1="100" x2="124" y2="114" stroke="#2b3fe0" stroke-width="2" marker-end="url(#pt)"/><text x="360" y="103" text-anchor="middle" font-size="12" fill="#2b3fe0">SYN, ACK</text><line x1="124" y1="134" x2="596" y2="148" stroke="#2b3fe0" stroke-width="2" marker-end="url(#pt)"/><text x="360" y="137" text-anchor="middle" font-size="12" fill="#2b3fe0">ACK</text><line x1="124" y1="182" x2="596" y2="196" stroke="var(--encre)" stroke-width="2" marker-end="url(#pt)"/><text x="360" y="185" text-anchor="middle" font-size="12" fill="var(--encre)">PSH, ACK · requête HTTP GET</text><line x1="596" y1="216" x2="124" y2="230" stroke="var(--encre)" stroke-width="2" marker-end="url(#pt)"/><text x="360" y="219" text-anchor="middle" font-size="12" fill="var(--encre)">ACK</text><line x1="596" y1="250" x2="124" y2="264" stroke="var(--encre)" stroke-width="2" marker-end="url(#pt)"/><text x="360" y="253" text-anchor="middle" font-size="12" fill="var(--encre)">PSH, ACK · réponse HTTP 200</text><line x1="124" y1="284" x2="596" y2="298" stroke="var(--encre)" stroke-width="2" marker-end="url(#pt)"/><text x="360" y="287" text-anchor="middle" font-size="12" fill="var(--encre)">ACK</text><line x1="124" y1="332" x2="596" y2="346" stroke="#c2410c" stroke-width="2" marker-end="url(#pt)"/><text x="360" y="335" text-anchor="middle" font-size="12" fill="#c2410c">FIN, ACK</text><line x1="596" y1="366" x2="124" y2="380" stroke="#c2410c" stroke-width="2" marker-end="url(#pt)"/><text x="360" y="369" text-anchor="middle" font-size="12" fill="#c2410c">FIN, ACK</text><line x1="124" y1="400" x2="596" y2="414" stroke="#c2410c" stroke-width="2" marker-end="url(#pt)"/><text x="360" y="403" text-anchor="middle" font-size="12" fill="#c2410c">ACK</text><text x="20" y="100" font-size="12" font-weight="700" fill="#2b3fe0" transform="rotate(-90 20 100)">Connexion</text><text x="20" y="270" font-size="12" font-weight="700" fill="var(--encre)" transform="rotate(-90 20 270)">Échanges</text><text x="20" y="410" font-size="12" font-weight="700" fill="#c2410c" transform="rotate(-90 20 410)">Clôture</text></svg><figcaption>Consultation d'une page web : connexion, échange HTTP acquitté, clôture.</figcaption></figure>
+<h3>2.2 Le 3-way handshake</h3>
+<p>Le champ <b>drapeaux</b> (<i>flags</i>) de l'en-tête TCP indique à quelle étape appartient chaque segment :</p>
+<ol><li>le client demande l'ouverture : drapeau <b>SYN</b> (synchronisation) ;</li>
+<li>le serveur accepte : drapeaux <b>SYN, ACK</b> (synchronisation et accusé de réception) ;</li>
+<li>le client confirme : drapeau <b>ACK</b>. La connexion est établie.</li></ol>
+<p>Le champ drapeaux compte 8 bits ; chacun a un poids, et on les additionne quand plusieurs sont levés :</p>
+<div class="tab-defil"><table><tr><th>Bit</th><th>CWR</th><th>ECE</th><th>URG</th><th>ACK</th><th>PSH</th><th>RST</th><th>SYN</th><th>FIN</th></tr><tr><td>Poids</td><td>128</td><td>64</td><td>32</td><td><b>16</b></td><td><b>8</b></td><td>4</td><td><b>2</b></td><td><b>1</b></td></tr><tr><td>Rôle</td><td>Congestion</td><td>Congestion</td><td>Données urgentes</td><td>Accusé de réception</td><td>Données à remettre tout de suite</td><td>Connexion refusée / coupée</td><td>Ouverture</td><td>Fermeture</td></tr></table></div>
+<div class="tab-defil"><table><tr><th>Phase</th><th>Sens</th><th>Drapeaux</th><th>Valeur</th></tr><tr><td>Connexion</td><td>PC1 → Orange.com</td><td>SYN</td><td>2 (0x02)</td></tr><tr><td>Connexion</td><td>Orange.com → PC1</td><td>SYN, ACK</td><td>2 + 16 = 18 (0x12)</td></tr><tr><td>Connexion</td><td>PC1 → Orange.com</td><td>ACK</td><td>16 (0x10)</td></tr><tr><td>Échanges</td><td>PC1 → Orange.com</td><td>PSH, ACK (requête HTTP)</td><td>8 + 16 = 24 (0x18)</td></tr><tr><td>Échanges</td><td>Orange.com → PC1</td><td>PSH, ACK (réponse HTTP)</td><td>24 (0x18)</td></tr><tr><td>Échanges</td><td>PC1 → Orange.com</td><td>ACK</td><td>16 (0x10)</td></tr><tr><td>Clôture</td><td>PC1 → Orange.com</td><td>FIN, ACK</td><td>1 + 16 = 17 (0x11)</td></tr><tr><td>Clôture</td><td>Orange.com → PC1</td><td>FIN, ACK</td><td>17 (0x11)</td></tr><tr><td>Clôture</td><td>PC1 → Orange.com</td><td>ACK</td><td>16 (0x10)</td></tr></table></div>
+<p>Les segments TCP de connexion et de clôture ne transportent aucune donnée applicative ; ceux de la phase d'échanges encapsulent les <b>messages HTTP</b> (requête GET, réponse 200 OK). Dans la consultation du TP, le client utilise un port éphémère (1025) et le serveur le port <b>80</b>. Juste avant, une requête <b>DNS</b> a traduit le nom orange.com en adresse IP.</p>
+<h3>2.3 La fiabilité de TCP</h3>
+<p>Chaque segment porte un <b>numéro de séquence</b> ; le destinataire renvoie un <b>acquittement</b> qui indique ce qu'il a bien reçu. Sans acquittement au bout d'un certain délai, l'émetteur <b>retransmet</b> le segment. C'est ce qu'on observe dans Packet Tracer en supprimant un segment HTTP : il est réémis et la page finit par s'afficher correctement. TCP remet aussi les données dans l'ordre et adapte son débit (contrôle de flux et de congestion).</p>
+<h3>2.4 Voir les connexions : netstat</h3>
+<p>Sur votre ordinateur, <code>netstat -a</code> (ou <code>netstat -an</code>) liste les connexions TCP et leur état :</p>
+<div class="tab-defil"><table><tr><th>État</th><th>Signification</th></tr><tr><td>LISTENING (ÉCOUTE)</td><td>Un serveur attend des connexions sur ce port</td></tr><tr><td>ESTABLISHED (ÉTABLI)</td><td>Connexion ouverte, échanges en cours</td></tr><tr><td>SYN_SENT</td><td>SYN envoyé, en attente du SYN, ACK</td></tr><tr><td>TIME_WAIT</td><td>Connexion fermée, le système attend un peu avant de libérer le port</td></tr><tr><td>CLOSE_WAIT</td><td>L'autre côté a fermé, l'application locale doit encore fermer</td></tr></table></div>
+
+<h2>3. Rendre joignable un serveur privé : le port mapping</h2>
+<p>L'entreprise Lamartin &amp; Duch héberge son site web sur son propre serveur, d'adresse privée <b>192.168.1.200</b>. Depuis le LAN, on y accède en tapant cette adresse dans le navigateur. Depuis Internet, impossible : <b>une adresse privée n'est pas routée sur Internet</b>, et l'entreprise n'y est connue que par l'adresse publique de son routeur, <b>193.252.148.100</b>.</p>
+<p>On crée donc sur le routeur une règle de <b>redirection de port</b> (port forwarding, port mapping, NAT statique) : tout ce qui arrive sur l'adresse publique, port 80, est traduit vers 192.168.1.200, port 80.</p>
+<pre><code>Router&gt; enable
+Router# configure terminal
+Router(config)# ip nat inside source static tcp 192.168.1.200 80 193.252.148.100 80</code></pre>
+<p>Un internaute (le PC MIO chez Free) peut alors afficher le site en tapant <b>193.252.148.100</b>. Pour qu'il puisse utiliser le nom <b>www.lamartinandduch.com</b>, on ajoute sur le serveur DNS (8.8.8.8 dans la maquette) un enregistrement qui associe ce nom à l'adresse <b>publique</b> 193.252.148.100.</p>
+<div class="box attention"><b>Piège</b><p>Le DNS public doit renvoyer l'adresse <b>publique</b> du routeur, jamais l'adresse privée du serveur : un internaute ne peut rien faire de 192.168.1.200.</p></div>
+
+<h2>4. TCP ou UDP ?</h2>
+<h3>4.1 Comparaison</h3>
+<div class="tab-defil"><table><tr><th>Caractéristique</th><th>TCP</th><th>UDP</th></tr><tr><td>Type de connexion</td><td>Orienté connexion (3-way handshake)</td><td>Sans connexion</td></tr><tr><td>Fiabilité</td><td>Acquittements, numéros de séquence, retransmission des pertes, remise dans l'ordre</td><td>Aucune garantie : un datagramme perdu est perdu</td></tr><tr><td>Contrôle de flux et de congestion</td><td>Oui</td><td>Non</td></tr><tr><td>Mode de transmission</td><td>Flux de données continu (stream)</td><td>Datagrammes indépendants</td></tr><tr><td>Surcharge</td><td>En-tête de 20 octets minimum + segments d'acquittement</td><td>En-tête de 8 octets, rien d'autre</td></tr><tr><td>Temps de mise en route</td><td>Plus long (connexion à établir)</td><td>Immédiat</td></tr><tr><td>Services typiques</td><td>Web (HTTP/HTTPS), e-mail, FTP, SSH</td><td>DNS, DHCP, TFTP, voix et vidéo en direct, jeux en ligne</td></tr></table></div>
+<h3>4.2 Une requête DNS passe par UDP</h3>
+<p>En filtrant sur DNS dans Packet Tracer : la requête part d'un <b>port source éphémère</b> du client vers le <b>port 53</b> du serveur DNS, et la réponse revient directement. <b>Pas de 3-way handshake</b> : une question, une réponse. Si elle se perd, c'est le client DNS qui renverra sa question.</p>
+<h3>4.3 Quel transport pour quelle application ?</h3>
+<div class="tab-defil"><table><tr><th>Application</th><th>Transport</th><th>Pourquoi</th></tr><tr><td>Consultation d'un site web</td><td>TCP</td><td>La page doit arriver complète et dans l'ordre</td></tr><tr><td>Appel vocal ou vidéo en direct</td><td>UDP</td><td>Mieux vaut perdre une image que la recevoir en retard ; une retransmission arriverait trop tard</td></tr><tr><td>Transfert d'un fichier volumineux</td><td>TCP</td><td>Le moindre octet perdu corromprait le fichier</td></tr><tr><td>Requête DNS</td><td>UDP</td><td>Échange très court ; ouvrir une connexion coûterait plus cher que la question elle-même</td></tr></table></div>
+<div class="tab-defil"><table><tr><th>Protocole</th><th>Avantages</th><th>Inconvénients</th></tr><tr><td>TCP</td><td>Fiable, ordonné, contrôle de débit</td><td>Plus lent à démarrer, plus de trafic (acquittements), plus lourd pour les machines</td></tr><tr><td>UDP</td><td>Rapide, léger, adapté au temps réel et au broadcast</td><td>Pas de garantie de livraison ni d'ordre : l'application doit s'en charger si besoin</td></tr></table></div>
+<h3>4.4 TFTP : de la fiabilité au-dessus d'UDP</h3>
+<p><b>TFTP</b> (<i>Trivial File Transfer Protocol</i>, port <b>69/UDP</b>) est un transfert de fichiers très simple, sans authentification. On l'utilise pour sauvegarder ou charger la configuration et le système de routeurs et de switchs, ou pour démarrer des postes par le réseau (PXE).</p>
+<p>Le client envoie une requête de lecture ; le serveur envoie le fichier en <b>blocs numérotés</b> de 512 octets ; le client <b>acquitte chaque bloc</b>. Si un datagramme se perd, l'acquittement n'arrive pas : au bout d'un délai, le bloc est <b>renvoyé</b>. La fiabilité est donc assurée par l'<b>application</b> TFTP elle-même, et non par UDP.</p>
+<div class="box retenir"><b>À retenir</b><ul>
+<li>Port serveur connu (80, 443, 53…) ; port client éphémère.</li>
+<li>TCP : SYN → SYN, ACK → ACK, puis échanges acquittés, puis FIN, ACK → FIN, ACK → ACK.</li>
+<li>Valeurs des drapeaux : FIN 1, SYN 2, RST 4, PSH 8, ACK 16 (SYN, ACK = 18).</li>
+<li>Port mapping : adresse publique:port → adresse privée:port sur le routeur, et le DNS pointe vers l'adresse publique.</li>
+<li>TCP = fiable (web, fichiers, e-mail). UDP = rapide (DNS, DHCP, TFTP, voix, vidéo, jeux).</li></ul></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Drapeaux TCP, ports, choix TCP/UDP et port mapping : missions du <a href="labo-reseau.html#m=L5-1">labo réseau</a>, avec des valeurs nouvelles à chaque essai et une correction pas à pas.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel est l'ordre du 3-way handshake TCP ?",
+  "options": [
+   "SYN → SYN, ACK → ACK",
+   "ACK → SYN → FIN",
+   "SYN → ACK → SYN, ACK",
+   "FIN → ACK → SYN"
+  ],
+  "answer": 0,
+  "explication": "Le client demande (SYN), le serveur accepte (SYN, ACK), le client confirme (ACK)."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Sur quel port écoute un serveur web en HTTP ?",
+  "answers": [
+   "80"
+  ],
+  "explication": "HTTP : 80 ; HTTPS : 443."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Sur quel port écoute un serveur DNS ?",
+  "answers": [
+   "53"
+  ],
+  "explication": "DNS utilise le port 53, en UDP pour les requêtes simples."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel protocole de transport utilise une requête DNS simple ?",
+  "options": [
+   "UDP",
+   "TCP",
+   "ICMP",
+   "ARP"
+  ],
+  "answer": 0,
+  "explication": "Une question, une réponse, sans connexion : UDP."
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "UDP établit une connexion avec un 3-way handshake avant d'envoyer des données.",
+  "answer": false,
+  "explication": "UDP est sans connexion : il envoie directement des datagrammes indépendants."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quelle est la valeur décimale du champ drapeaux pour SYN, ACK ?",
+  "answers": [
+   "18"
+  ],
+  "explication": "SYN vaut 2 et ACK vaut 16 : 2 + 16 = 18 (0x12)."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quelle est la valeur décimale du champ drapeaux pour FIN, ACK ?",
+  "answers": [
+   "17"
+  ],
+  "explication": "FIN vaut 1 et ACK 16 : 17 (0x11)."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que se passe-t-il quand un segment TCP contenant des données HTTP est perdu ?",
+  "options": [
+   "Faute d'acquittement, il est retransmis et la page s'affiche quand même",
+   "La page ne s'affiche jamais",
+   "Le serveur envoie un FIN",
+   "UDP prend le relais"
+  ],
+  "answer": 0,
+  "explication": "Numéros de séquence, acquittements et retransmission : c'est la fiabilité de TCP."
+ },
+ {
+  "type": "associer",
+  "niveau": "moyen",
+  "q": "Associe chaque application au transport le plus adapté.",
+  "paires": [
+   [
+    "Site web",
+    "TCP"
+   ],
+   [
+    "Appel vidéo en direct",
+    "UDP"
+   ],
+   [
+    "Gros fichier à télécharger",
+    "TCP"
+   ],
+   [
+    "Requête DNS",
+    "UDP"
+   ]
+  ],
+  "explication": "TCP quand tout doit arriver ; UDP quand la rapidité compte plus qu'une perte occasionnelle."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Pourquoi un internaute ne peut-il pas joindre le serveur 192.168.1.200 de l'entreprise ?",
+  "options": [
+   "C'est une adresse privée, non routée sur Internet",
+   "Le port 80 est interdit sur Internet",
+   "Le serveur n'a pas de masque",
+   "Il faut utiliser UDP"
+  ],
+  "answer": 0,
+  "explication": "Il faut une redirection de port sur le routeur, depuis l'adresse publique."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Quelle commande Cisco redirige le port 80 de l'adresse publique 193.252.148.100 vers le serveur 192.168.1.200 ?",
+  "options": [
+   "ip nat inside source static tcp 192.168.1.200 80 193.252.148.100 80",
+   "ip route 192.168.1.200 255.255.255.255 193.252.148.100",
+   "ip nat outside 193.252.148.100 80",
+   "access-list 80 permit 192.168.1.200"
+  ],
+  "answer": 0,
+  "explication": "NAT statique de port : adresse et port internes, puis adresse et port publics."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Vers quelle adresse l'enregistrement DNS www.lamartinandduch.com doit-il pointer ?",
+  "options": [
+   "193.252.148.100 (adresse publique du routeur)",
+   "192.168.1.200 (adresse privée du serveur)",
+   "8.8.8.8",
+   "127.0.0.1"
+  ],
+  "answer": 0,
+  "explication": "Les internautes doivent joindre l'adresse publique ; le routeur redirige ensuite vers le serveur interne."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Comment TFTP assure-t-il la réception complète d'un fichier alors qu'il utilise UDP ?",
+  "options": [
+   "Il acquitte chaque bloc et renvoie un bloc non acquitté après un délai",
+   "UDP retransmet automatiquement",
+   "Il ouvre une connexion TCP en parallèle",
+   "Il ne le garantit pas"
+  ],
+  "answer": 0,
+  "explication": "La fiabilité est gérée par l'application TFTP elle-même (blocs numérotés + ACK)."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que signifie l'état LISTENING dans netstat -a ?",
+  "options": [
+   "Un serveur attend des connexions sur ce port",
+   "La connexion est en train de se fermer",
+   "Le paquet est perdu",
+   "Le port est bloqué par le pare-feu"
+  ],
+  "answer": 0,
+  "explication": "ESTABLISHED = connexion ouverte ; TIME_WAIT = connexion fermée récemment."
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "Côté client, le port source d'une connexion web est en général un port éphémère choisi par le système.",
+  "answer": true,
+  "explication": "Le serveur écoute sur un port connu (80) ; le client prend un port libre au-dessus de 1024."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

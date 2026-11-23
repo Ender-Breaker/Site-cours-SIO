@@ -72,6 +72,25 @@ window.EF_MODULES = [
     ]
   },
   {
+    id: "reseau",
+    evalTextuel: true,
+    titre: "Réseau",
+    sousTitre: "Bloc 1 · Bases des réseaux",
+    icone: "⇄",
+    option: "COMMUN",
+    couleur: "navy",
+    description: "Matériels réseau, modèles OSI et TCP/IP, adressage IPv4, routage statique, TCP et UDP.",
+    labos: [{ href: "labo-reseau.html", ico: "⇄", titre: "Labo réseau", court: "Réseau", texte: "30 missions toujours renouvelées : équipements et couches, trames de routeur en routeur, tables de routage, écriture de routes, drapeaux et ports TCP/UDP, port mapping.",
+      examDuree: 900, examCoef: 150, examTexte: "8 questions · 15 min", examDesc: "8 questions tirées au hasard dans tout le labo (équipements, encapsulation, tables de routage, routes, TCP/UDP, NAT), sans correction pendant l'épreuve." }],
+    chapitres: [
+      { id: "reseau-intro-materiels", titre: "Systèmes et matériels réseau", niveau: "facile" },
+      { id: "reseau-modeles-couches", titre: "Modèles en couches, encapsulation et protocoles", niveau: "facile" },
+      { id: "reseau-adressage-ipv4", titre: "Adressage IPv4", niveau: "moyen" },
+      { id: "reseau-routage", titre: "Routage IPv4", niveau: "moyen" },
+      { id: "reseau-tcp-udp", titre: "TCP et UDP", niveau: "moyen" }
+    ]
+  },
+  {
     id: "bloc1",
     evalTextuel: true,
     titre: "Bloc 1",

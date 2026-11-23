@@ -36,6 +36,7 @@
   --matiere-culture: #e0a11a;  --matiere-culture-clair: #f9ecd1;  --matiere-culture-fonce: #5f4925;  --matiere-culture-sur: #16182b;
   --matiere-cejm: #0f7c86;     --matiere-cejm-clair: #cfe5e7;     --matiere-cejm-fonce: #124e5c;     --matiere-cejm-sur: #ffffff;
   --matiere-anglais: #e65fa6;  --matiere-anglais-clair: #fadfed;  --matiere-anglais-fonce: #6d365f;  --matiere-anglais-sur: #16182b;
+  --matiere-reseau: #2a4fc9;   --matiere-reseau-clair: #dbe3fa;   --matiere-reseau-fonce: #1f357a;   --matiere-reseau-sur: #ffffff;
 
   /* Alias utilisés par le JS en ligne */
   --text: var(--encre);
@@ -76,6 +77,7 @@ h1, h2, h3 { font-family: var(--titre); font-weight: 800; letter-spacing: -.035e
 .c-amber   { --m: var(--matiere-culture); --m-clair: var(--matiere-culture-clair); --m-fonce: var(--matiere-culture-fonce); --m-sur: var(--matiere-culture-sur); }
 .c-cyan    { --m: var(--matiere-cejm);    --m-clair: var(--matiere-cejm-clair);    --m-fonce: var(--matiere-cejm-fonce);    --m-sur: var(--matiere-cejm-sur); }
 .c-sky     { --m: var(--matiere-anglais); --m-clair: var(--matiere-anglais-clair); --m-fonce: var(--matiere-anglais-fonce); --m-sur: var(--matiere-anglais-sur); }
+.c-navy    { --m: var(--matiere-reseau);  --m-clair: var(--matiere-reseau-clair);  --m-fonce: var(--matiere-reseau-fonce);  --m-sur: var(--matiere-reseau-sur); }
 
 /* ---------- En-tête : barre cobalt ---------- */
 .topbar { position: sticky; top: 0; z-index: 10; background: var(--cobalt); color: var(--sur-cobalt); border-bottom: var(--trait); }

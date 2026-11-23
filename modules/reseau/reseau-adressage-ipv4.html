@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Adressage IPv4 — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+<style>
+#cours .schema { margin: var(--s3) 0; overflow-x: auto; }
+#cours .schema svg { display: block; width: 100%; height: auto; min-width: 520px; max-width: 760px; margin: 0 auto; font-family: var(--mono, monospace); }
+#cours .schema figcaption { font-size: .85rem; color: var(--discret); text-align: center; margin-top: 6px; }
+#cours .tp-corr { padding: var(--s2) var(--s3) var(--s3); }
+</style>
+</head>
+<body data-module="reseau" data-chapter="reseau-adressage-ipv4">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<p>Toute machine qui communique en IP a besoin d'une adresse. Ce chapitre explique comment est construite une adresse IPv4, à quoi sert le masque, quelles adresses sont réservées, la différence entre adresses publiques et privées, et comment découper un réseau en sous-réseaux.</p>
+<div class="box"><b>Pour aller plus loin</b><p>Le chapitre <a href="../sisr/adressage-ipv4.html">Adressage IPv4 de SISR</a> détaille toutes les méthodes de calcul avec des outils interactifs, et le <a href="../sisr/labo-ipv4.html">labo sous-réseaux</a> propose des calculs corrigés à l'infini.</p></div>
+
+<h2>Introduction : IPv4 et IPv6</h2>
+<p>Une adresse IP identifie un ordinateur ou un appareil sur un réseau IP. IPv4, quatrième version du protocole IP, est la première déployée à grande échelle et transporte encore l'essentiel du trafic. IPv6 lui succède.</p>
+<div class="tab-defil"><table><tr><th></th><th>IPv4</th><th>IPv6</th></tr><tr><td>Taille</td><td><b>32 bits</b></td><td><b>128 bits</b></td></tr><tr><td>Écriture</td><td><b>4</b> nombres décimaux de <b>0 à 255</b> séparés par des points</td><td><b>8</b> groupes de 4 chiffres hexadécimaux (de <b>0000 à ffff</b>) séparés par des « : »</td></tr><tr><td>Exemple</td><td>11000000.10101000.00001010.00000011 = <b>192.168.10.3</b></td><td>2001:0db8:0000:0000:0000:ff00:0042:8329 (abrégé 2001:db8::ff00:42:8329)</td></tr><tr><td>Nombre d'adresses</td><td>2<sup>32</sup> ≈ 4,3 milliards</td><td>2<sup>128</sup> ≈ 3,4 × 10<sup>38</sup></td></tr></table></div>
+<p>Dans la suite, on ne parle que d'IPv4.</p>
+
+<h2>1. Format d'une adresse IPv4</h2>
+<p>Une adresse IPv4 est un nombre binaire de 32 bits (4 octets), écrit en <b>décimal pointé</b> pour être lisible. Elle contient deux parties :</p>
+<ul><li>l'identifiant du <b>réseau</b> (NetID), commun à toutes les machines du même réseau ;</li>
+<li>l'identifiant de l'<b>hôte</b> (HostID), propre à chaque machine.</li></ul>
+<p>Plus la partie hôte a de bits, plus le réseau peut accueillir de machines.</p>
+<details><summary>Le réseau 172.16.0.0 a une partie réseau sur 16 bits : combien de combinaisons pour la partie hôte ? Combien d'hôtes ?</summary><div class="tp-corr"><p>Il reste 32 − 16 = 16 bits d'hôte : 2<sup>16</sup> = <b>65 536</b> combinaisons, dont 2 réservées (réseau et broadcast), soit <b>65 534 hôtes</b>.</p></div></details>
+<div class="box retenir"><b>À retenir</b><p>La frontière entre partie réseau et partie hôte est fixée par le <b>masque</b>. Une adresse IP sans son masque ne veut rien dire : impossible de savoir à quel réseau elle appartient, donc quelles machines elle peut joindre directement.</p></div>
+
+<h2>2. Masque de réseau</h2>
+<p>Le masque est lui aussi une suite de 32 bits :</p>
+<ul><li>à gauche, uniquement des <b>1</b> : la partie réseau, commune à tous les hôtes du réseau ;</li>
+<li>à droite, uniquement des <b>0</b> : la partie hôte.</li></ul>
+<p>Il s'écrit en décimal pointé (<b>255.255.255.0</b>) ou en notation <b>CIDR</b> (<i>Classless Inter-Domain Routing</i>) : un « / » suivi du nombre de bits à 1 (<b>/24</b>).</p>
+<div class="tab-defil"><table><tr><th>CIDR</th><th>Masque</th><th>Binaire</th></tr><tr><td>/8</td><td>255.0.0.0</td><td>11111111.00000000.00000000.00000000</td></tr><tr><td>/16</td><td>255.255.0.0</td><td>11111111.11111111.00000000.00000000</td></tr><tr><td>/24</td><td>255.255.255.0</td><td>11111111.11111111.11111111.00000000</td></tr><tr><td>/25</td><td>255.255.255.128</td><td>…11111111.10000000</td></tr><tr><td>/26</td><td>255.255.255.192</td><td>…11111111.11000000</td></tr><tr><td>/27</td><td>255.255.255.224</td><td>…11111111.11100000</td></tr><tr><td>/28</td><td>255.255.255.240</td><td>…11111111.11110000</td></tr><tr><td>/30</td><td>255.255.255.252</td><td>…11111111.11111100</td></tr></table></div>
+<details><summary>Exercice 1 : hôte 192.168.1.17 avec un masque de 24 « 1 ». Masque en décimal et en CIDR ? Partie réseau ?</summary><div class="tp-corr"><p>Masque <b>255.255.255.0</b>, soit <b>/24</b>. On garde les 24 premiers bits de l'adresse : le réseau est <b>192.168.1.0/24</b>.</p></div></details>
+<details><summary>Exercice 2 : hôte 192.168.1.17/26. Masque en binaire et en décimal ?</summary><div class="tp-corr"><p>26 bits à 1 : <code><b style="color:var(--cobalt)">1</b><b style="color:var(--cobalt)">1</b><b style="color:var(--cobalt)">1</b><b style="color:var(--cobalt)">1</b><b style="color:var(--cobalt)">1</b><b style="color:var(--cobalt)">1</b><b style="color:var(--cobalt)">1</b><b style="color:var(--cobalt)">1</b> . <b style="color:var(--cobalt)">1</b><b style="color:var(--cobalt)">1</b><b style="color:var(--cobalt)">1</b><b style="color:var(--cobalt)">1</b><b style="color:var(--cobalt)">1</b><b style="color:var(--cobalt)">1</b><b style="color:var(--cobalt)">1</b><b style="color:var(--cobalt)">1</b> . <b style="color:var(--cobalt)">1</b><b style="color:var(--cobalt)">1</b><b style="color:var(--cobalt)">1</b><b style="color:var(--cobalt)">1</b><b style="color:var(--cobalt)">1</b><b style="color:var(--cobalt)">1</b><b style="color:var(--cobalt)">1</b><b style="color:var(--cobalt)">1</b> . <b style="color:var(--cobalt)">1</b><b style="color:var(--cobalt)">1</b>000000</code></p><p>En décimal : <b>255.255.255.192</b> (128 + 64 = 192 dans le dernier octet). Le réseau est 192.168.1.0/26 (17 est entre 0 et 63).</p></div></details>
+<p>Pour trouver l'<b>adresse réseau</b> d'un hôte, on fait un <b>ET logique</b> bit à bit entre l'adresse et le masque : les bits d'hôte passent à 0.</p>
+
+<h2>3. Adresses particulières d'un réseau</h2>
+<p>Dans le réseau <b>192.168.1.0/24</b>, toutes les machines partagent les 24 premiers bits (192.168.1.). Sur les 256 combinaisons de la partie hôte :</p>
+<div class="tab-defil"><table><tr><th>Partie hôte</th><th>Adresse</th><th>Rôle</th></tr><tr><td>Tout à <b>0</b></td><td>192.168.1.0</td><td><b>Adresse du réseau</b> : désigne le réseau entier (tables de routage, filtrage), jamais attribuée à une machine</td></tr><tr><td>De 00000001 à 11111110</td><td>192.168.1.1 → 192.168.1.254</td><td>Adresses attribuables aux hôtes</td></tr><tr><td>Tout à <b>1</b></td><td>192.168.1.255</td><td><b>Broadcast</b> : un seul paquet envoyé à cette adresse est reçu par tous les hôtes du réseau</td></tr></table></div>
+<p>Nombre d'hôtes = nombre de combinaisons − 2 adresses réservées = 2<sup>8</sup> − 2 = <b>254 hôtes</b>. De façon générale, avec h bits d'hôte : <b>2<sup>h</sup> − 2</b>.</p>
+<div class="box retenir"><b>À retenir</b><p>L'adresse réseau a sa partie hôte remplie de <b>0</b>, l'adresse de broadcast a sa partie hôte remplie de <b>1</b>.</p></div>
+
+<h2>4. Adresses publiques et privées</h2>
+<p>IPv4 offre environ 4,3 milliards d'adresses, alors qu'on comptait déjà plus de 20 milliards d'appareils connectés vers 2020. Pour s'en sortir, on distingue :</p>
+<ul><li>les adresses <b>privées</b>, utilisées à l'intérieur des LAN et invisibles depuis Internet ; chaque réseau peut réutiliser les mêmes ;</li>
+<li>l'adresse <b>publique</b>, configurée sur le routeur ou la box, qui représente tout le LAN auprès du reste du monde.</li></ul>
+<div class="tab-defil"><table><tr><th>Plage privée (RFC 1918)</th><th>Notation</th><th>Usage typique</th></tr><tr><td>10.0.0.0 → 10.255.255.255</td><td>10.0.0.0/8</td><td>Grandes entreprises</td></tr><tr><td>172.16.0.0 → 172.31.255.255</td><td>172.16.0.0/12</td><td>Entreprises moyennes</td></tr><tr><td>192.168.0.0 → 192.168.255.255</td><td>192.168.0.0/16</td><td>Maisons, petites structures</td></tr></table></div>
+<p>Le routeur traduit les adresses entre le monde privé et le monde public : c'est le <b>NAT/PAT</b> (<i>Network / Port Address Translation</i>). Pour qu'un serveur interne soit joignable depuis Internet, on ajoute une règle fixe de traduction : la <b>redirection de port</b> (port forwarding ou port mapping, vue au chapitre 5).</p>
+<p>Les adresses publiques sont gérées par l'<b>IANA</b> (<i>Internet Assigned Numbers Authority</i>), qui les délègue à des registres régionaux, puis aux FAI auprès desquels on les obtient.</p>
+<p>Autres adresses à connaître : <b>127.0.0.1</b> (boucle locale, <i>localhost</i>) et <b>169.254.x.x</b> (adresse que Windows s'attribue quand aucun serveur DHCP ne répond).</p>
+
+<h2>5. Les classes d'adresses (notion historique)</h2>
+<p>Avant CIDR, le premier octet fixait la taille du réseau. Ce découpage est obsolète, mais on en parle encore (« un réseau de classe C » pour un /24).</p>
+<div class="tab-defil"><table><tr><th>Classe</th><th>Premier octet</th><th>Début en binaire</th><th>Masque par défaut</th><th>Hôtes par réseau</th></tr><tr><td>A</td><td>1 à 126</td><td>0…</td><td>255.0.0.0 (/8)</td><td>16 777 214</td></tr><tr><td>B</td><td>128 à 191</td><td>10…</td><td>255.255.0.0 (/16)</td><td>65 534</td></tr><tr><td>C</td><td>192 à 223</td><td>110…</td><td>255.255.255.0 (/24)</td><td>254</td></tr><tr><td>D</td><td>224 à 239</td><td>1110…</td><td>–</td><td>Multicast (diffusion à un groupe)</td></tr><tr><td>E</td><td>240 à 255</td><td>1111…</td><td>–</td><td>Réservée (expérimental)</td></tr></table></div>
+<p>Le réseau 127.0.0.0/8 est réservé à la boucle locale, d'où l'absence du 127 dans la classe A.</p>
+
+<h2>6. Le découpage en sous-réseaux</h2>
+<p>Multiplier les réseaux rend la gestion lourde, gonfle les tables de routage et gaspille des adresses. À partir d'une adresse de réseau de base, l'administrateur crée donc plusieurs <b>sous-réseaux</b>, un par réseau physique (ou par service).</p>
+<h3>6.1 Découpage classique</h3>
+<p>On emprunte n bits à la partie hôte pour former l'<b>identifiant de sous-réseau</b> (Subnet ID). Selon le besoin, on part :</p>
+<ul><li>soit d'un nombre de <b>sous-réseaux</b> voulu ;</li><li>soit d'un nombre d'<b>hôtes</b> par sous-réseau.</li></ul>
+<p>Avec N bits d'hôte au départ et n bits empruntés : <b>2<sup>n</sup> sous-réseaux</b>, chacun avec <b>2<sup>N−n</sup> − 2 hôtes</b> (dans chaque sous-réseau, l'adresse tout à 0 et l'adresse tout à 1 restent réservées).</p>
+<details><summary>Exemple : découper 192.168.10.0/24 en 4 sous-réseaux</summary><div class="tp-corr"><p>4 = 2<sup>2</sup> : on emprunte <b>2 bits</b>, le préfixe devient <b>/26</b> (masque 255.255.255.192). Taille de chaque bloc : 256 / 4 = 64 adresses, soit 62 hôtes.</p><div class="tab-defil"><table><tr><th>Sous-réseau</th><th>Adresse</th><th>Plage</th><th>Broadcast</th></tr><tr><td>1</td><td>192.168.10.0/26</td><td>.1 → .62</td><td>.63</td></tr><tr><td>2</td><td>192.168.10.64/26</td><td>.65 → .126</td><td>.127</td></tr><tr><td>3</td><td>192.168.10.128/26</td><td>.129 → .190</td><td>.191</td></tr><tr><td>4</td><td>192.168.10.192/26</td><td>.193 → .254</td><td>.255</td></tr></table></div></div></details>
+<h3>6.2 Découpage « intelligent » : le VLSM</h3>
+<p><b>Le problème.</b> Un réseau /24 doit être découpé en 6 sous-réseaux : un de 100 hôtes, un de 50 et quatre de 10. En découpage classique, il faut emprunter 3 bits (2<sup>3</sup> = 8 sous-réseaux /27 de 30 hôtes) : deux sous-réseaux restent inutilisés, et celui de 100 hôtes est impossible.</p>
+<p><b>La solution.</b> Le <b>VLSM</b> (<i>Variable Length Subnet Masking</i>) utilise des masques <b>différents</b> pour chaque sous-réseau, en cascade. Méthode :</p>
+<ol><li>trier les besoins du plus grand au plus petit ;</li>
+<li>pour chacun, choisir le plus petit réseau qui suffit (plus petit h tel que 2<sup>h</sup> − 2 ≥ besoin) ;</li>
+<li>placer les sous-réseaux les uns après les autres, en commençant par le plus grand.</li></ol>
+<p>Avec 192.168.1.0/24 :</p>
+<div class="tab-defil"><table><tr><th>Sous-réseau</th><th>Besoin</th><th>Préfixe</th><th>Adresse réseau</th><th>Plage d'hôtes</th><th>Broadcast</th><th>Hôtes</th></tr><tr><td>SR1</td><td>100 hôtes</td><td>/25</td><td>192.168.1.0</td><td>.1 → .126</td><td>192.168.1.127</td><td>126</td></tr><tr><td>SR2</td><td>50 hôtes</td><td>/26</td><td>192.168.1.128</td><td>.129 → .190</td><td>192.168.1.191</td><td>62</td></tr><tr><td>SR3</td><td>10 hôtes</td><td>/28</td><td>192.168.1.192</td><td>.193 → .206</td><td>192.168.1.207</td><td>14</td></tr><tr><td>SR4</td><td>10 hôtes</td><td>/28</td><td>192.168.1.208</td><td>.209 → .222</td><td>192.168.1.223</td><td>14</td></tr><tr><td>SR5</td><td>10 hôtes</td><td>/28</td><td>192.168.1.224</td><td>.225 → .238</td><td>192.168.1.239</td><td>14</td></tr><tr><td>SR6</td><td>10 hôtes</td><td>/28</td><td>192.168.1.240</td><td>.241 → .254</td><td>192.168.1.255</td><td>14</td></tr></table></div>
+<p>On obtient exactement 6 sous-réseaux, celui de 100 hôtes est possible et les petits ne gaspillent que 4 adresses chacun.</p>
+<div class="box retenir"><b>À retenir</b><ul>
+<li>IPv4 = 32 bits, 4 octets de 0 à 255 ; IPv6 = 128 bits en hexadécimal.</li>
+<li>Masque : des 1 pour le réseau, des 0 pour l'hôte ; notation CIDR /n = nombre de 1.</li>
+<li>Adresse réseau = hôte à 0 ; broadcast = hôte à 1 ; hôtes = 2<sup>h</sup> − 2.</li>
+<li>Privées : 10/8, 172.16/12, 192.168/16. Le NAT les traduit en adresse publique.</li>
+<li>Découpage : 2<sup>n</sup> sous-réseaux de 2<sup>N−n</sup> − 2 hôtes ; VLSM = masques différents selon les besoins.</li></ul></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Le <a href="../sisr/labo-ipv4.html">labo sous-réseaux</a> génère des calculs d'adresse réseau, de broadcast, de découpage et de VLSM, corrigés pas à pas.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Combien de bits compte une adresse IPv4 ?",
+  "options": [
+   "32",
+   "64",
+   "128",
+   "48"
+  ],
+  "answer": 0,
+  "explication": "4 octets de 8 bits. IPv6 en compte 128 et une adresse MAC 48."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Écris 11000000.10101000.00001010.00000011 en décimal pointé.",
+  "answers": [
+   "192.168.10.3"
+  ],
+  "explication": "128+64 = 192 ; 128+32+8 = 168 ; 8+2 = 10 ; 2+1 = 3."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Quel est le masque décimal correspondant à /24 ?",
+  "answers": [
+   "255.255.255.0"
+  ],
+  "explication": "24 bits à 1 : trois octets à 255."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quel est le masque décimal correspondant à /26 ?",
+  "answers": [
+   "255.255.255.192"
+  ],
+  "explication": "Dernier octet 11000000 = 128 + 64 = 192."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Combien d'hôtes peut accueillir un réseau /24 ?",
+  "answers": [
+   "254"
+  ],
+  "explication": "2⁸ − 2 = 254 (on retire l'adresse réseau et le broadcast)."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quelle est l'adresse de broadcast du réseau 192.168.1.0/24 ?",
+  "answers": [
+   "192.168.1.255"
+  ],
+  "explication": "Partie hôte entièrement à 1 : dernier octet 255."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Laquelle de ces adresses est privée ?",
+  "options": [
+   "172.20.5.4",
+   "172.32.5.4",
+   "193.252.148.100",
+   "8.8.8.8"
+  ],
+  "answer": 0,
+  "explication": "La plage privée 172.16.0.0/12 va de 172.16.0.0 à 172.31.255.255."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quel mécanisme du routeur permet aux machines d'un LAN privé d'aller sur Internet ?",
+  "options": [
+   "Le NAT/PAT",
+   "Le VLAN",
+   "Le DHCP",
+   "Le broadcast"
+  ],
+  "answer": 0,
+  "explication": "La traduction d'adresses remplace l'adresse privée par l'adresse publique du routeur."
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "Une adresse IP sans masque suffit pour savoir à quel réseau elle appartient.",
+  "answer": false,
+  "explication": "Sans masque, impossible de séparer partie réseau et partie hôte."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Le réseau 172.16.0.0/16 : combien d'hôtes au maximum ?",
+  "answers": [
+   "65534",
+   "65 534"
+  ],
+  "explication": "2¹⁶ − 2 = 65 534."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "On découpe un /24 en 8 sous-réseaux de même taille. Quel est le nouveau préfixe ?",
+  "options": [
+   "/27",
+   "/26",
+   "/28",
+   "/25"
+  ],
+  "answer": 0,
+  "explication": "8 = 2³ : on emprunte 3 bits, 24 + 3 = 27."
+ },
+ {
+  "type": "saisie",
+  "niveau": "difficile",
+  "q": "En VLSM, quel préfixe choisir pour un sous-réseau de 50 hôtes ? (format /n)",
+  "answers": [
+   "/26",
+   "26"
+  ],
+  "explication": "2⁶ − 2 = 62 ≥ 50, et 2⁵ − 2 = 30 ne suffit pas : 6 bits d'hôte, donc /26."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Quelle adresse est attribuée à l'hôte 192.168.1.17/26 comme adresse réseau ?",
+  "options": [
+   "192.168.1.0",
+   "192.168.1.16",
+   "192.168.1.64",
+   "192.168.1.17"
+  ],
+  "answer": 0,
+  "explication": "Blocs de 64 avec un /26 : 17 est dans le bloc 0 → 63."
+ },
+ {
+  "type": "associer",
+  "niveau": "moyen",
+  "q": "Associe chaque classe historique à son premier octet.",
+  "paires": [
+   [
+    "Classe A",
+    "1 à 126"
+   ],
+   [
+    "Classe B",
+    "128 à 191"
+   ],
+   [
+    "Classe C",
+    "192 à 223"
+   ],
+   [
+    "Classe D",
+    "224 à 239"
+   ]
+  ],
+  "explication": "La classe D sert au multicast ; la E (240 et plus) est réservée."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quel organisme gère l'attribution des adresses IP publiques au niveau mondial ?",
+  "options": [
+   "L'IANA",
+   "La CNIL",
+   "L'ISO",
+   "Le W3C"
+  ],
+  "answer": 0,
+  "explication": "L'IANA délègue ensuite aux registres régionaux (RIPE en Europe) puis aux FAI."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

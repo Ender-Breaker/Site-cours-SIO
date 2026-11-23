@@ -11,6 +11,7 @@ Site de révision pour le BTS SIO (1re année, option SLAM). Chaque matière est
 | Algorithmique / Python | Types et opérations, plus 6 chapitres bonus (variables, affichage, conditions, boucles, listes et chaînes, fonctions) |
 | SLAM | HTML, CSS, formulaires, HTTP et URL |
 | SISR | Présentation des blocs, shell Linux, droits, archives et processus, adressage IPv4 et services réseau, WordPress / Nginx, corrigé commenté du devoir Linux A |
+| Réseau | Bloc 1 réseau (cours B1-Res, chap. 1 à 5) : systèmes et matériels réseau, modèles OSI / TCP-IP et encapsulation, adressage IPv4, routage statique (métrique, route par défaut, /32, ARP, RIP/OSPF), TCP et UDP (handshake, drapeaux, port mapping, TFTP) |
 | Bloc 1 | HTML (structure et sémantique ; tableaux, médias, accessibilité), CSS (sélecteurs et cascade ; Flexbox, Grid, responsive), PHP (variables, conditions, formulaires), SQL (SELECT ; jointures et regroupements ; LDD/LMD ; TP Pluviométrie et Table des calories) |
 | Mathématiques | Numération, divisibilité et PGCD, congruences, suites, statistiques |
 | CEJM | Agents économiques, marché, offre et demande |
@@ -30,6 +31,7 @@ Site de révision pour le BTS SIO (1re année, option SLAM). Chaque matière est
 | CSS | Bloc 1 | 13 missions vérifiées sur le rendu : sélecteurs et spécificité, modèle de boîte, Flexbox, grille, media query, sticky |
 | SQL | Bloc 1 | 26 missions sur une vraie base SQLite (sql.js) : SELECT, WHERE, agrégats, GROUP BY/HAVING, jointures, INSERT/UPDATE/DELETE, CREATE/ALTER TABLE ; requêtes vérifiées sur leur résultat |
 | Sous-réseaux | SISR | 24 missions de calcul IPv4 générées au hasard (masque, réseau, broadcast, plage, même réseau, découpage, VLSM), correction pas à pas + calculateur (`assets/labo-ipv4.js`) |
+| Réseau | Réseau | 30 missions générées au hasard en 6 leçons (équipements et couches, trame de routeur en routeur, remise directe/indirecte, lecture de tables de routage, écriture de routes, drapeaux et ports TCP/UDP, NAT et port mapping) + testeur de table de routage (`#libre`) ; épreuve `reseau_pratique`. `assets/labo-reseau.js` assemblé par un script hors dépôt à partir du moteur de `labo-ipv4.js` (champ supplémentaire `choix`) |
 | Devoir Linux A | SISR | Le devoir Linux A rejoué en 21 missions (arborescence, utilisateurs et droits, CSV avec `cut`, script de sauvegarde avec `tar`), même `employes.csv` et `projet_web` que le sujet ; épreuve `sisr-devoir_pratique`. Généré par un script hors dépôt |
 | TP SQL | Bloc 1 | Les TP Pluviométrie (9 missions) et Table des calories (17 missions) question par question, sur les tables `Pluvio` et `CALORIE` ; épreuve `bloc1-sqltp_pratique`. Chapitres corrigés `sql-tp-pluviometrie` et `sql-tp-calories`, scripts MySQL nettoyés dans `modules/bloc1/fichiers/`. Généré par un script hors dépôt |
 | La bonne terminaison | Culture générale | Conjugaison de 754 verbes à 6 temps avec diagnostic des erreurs ; 25 bonnes réponses = 1 mission ; épreuve de 20 verbes en 6 min |

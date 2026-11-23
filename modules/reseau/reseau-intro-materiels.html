@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Systèmes et matériels réseau — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+<style>
+#cours .schema { margin: var(--s3) 0; overflow-x: auto; }
+#cours .schema svg { display: block; width: 100%; height: auto; min-width: 520px; max-width: 760px; margin: 0 auto; font-family: var(--mono, monospace); }
+#cours .schema figcaption { font-size: .85rem; color: var(--discret); text-align: center; margin-top: 6px; }
+#cours .tp-corr { padding: var(--s2) var(--s3) var(--s3); }
+</style>
+</head>
+<body data-module="reseau" data-chapter="reseau-intro-materiels">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<p>Ce premier chapitre pose le décor : à quoi servent les réseaux, à quelle échelle ils existent, qui y parle (clients et serveurs) et quels équipements font circuler les données (hub, switch, routeur, box). Tout le reste du module s'appuie sur ce vocabulaire.</p>
+
+<h2>1. Les réseaux, c'est quoi ?</h2>
+<h3>1.1 Pourquoi des réseaux ?</h3>
+<p>Un réseau relie des appareils pour qu'ils échangent des données. On en croise de plusieurs familles, avec des contraintes très différentes :</p>
+<div class="tab-defil"><table><tr><th>Famille</th><th>But</th><th>Technologies et débits</th><th>Matériel d'interconnexion</th></tr><tr><td>Particuliers et entreprises</td><td>Relier les appareils des utilisateurs entre eux et à Internet</td><td>Protocoles <b>Ethernet</b> (câble) et <b>Wi-Fi</b> (radio) ; jusqu'à <b>10 Gb/s</b> en interne (1 Gb/s le plus souvent)</td><td>Switchs, routeurs, points d'accès Wi-Fi, box</td></tr><tr><td>Opérateurs mobiles</td><td>Donner accès à la voix, aux données puis à Internet</td><td>2G : quelques centaines de kb/s au mieux (EDGE ≈ 384 kb/s) · 3G : de 2 à 42 Mb/s · 4G : de 100 Mb/s à 1 Gb/s · 5G : jusqu'à 10 Gb/s (débits théoriques)</td><td>Antennes relais et infrastructure de l'opérateur</td></tr><tr><td>Véhicules</td><td>Relier les calculateurs d'une voiture, d'un avion…</td><td>Débits faibles (&lt; 10 Mb/s) mais temps de réponse (latence) très courts : bus CAN, TTP, FlexRay</td><td>Bus et contrôleurs spécialisés, temps réel</td></tr><tr><td>Militaires, spatiaux, satellites</td><td>Relier des systèmes embarqués ou des téléphones via des satellites</td><td>Débits souvent &lt; 20 Mb/s pour le grand public, bien plus pour les usages militaires</td><td>Matériel et protocoles très spécialisés, souvent secrets et chiffrés</td></tr></table></div>
+
+<h3>1.2 Les échelles de réseaux</h3>
+<div class="tab-defil"><table><tr><th>Échelle</th><th>Étendue</th><th>Caractéristiques</th></tr><tr><td><b>PAN</b> · <i>Personal Area Network</i></td><td>Quelques mètres autour d'une personne</td><td>Bluetooth entre un téléphone, une montre et des écouteurs. Le cours range aussi le <b>réseau de la maison</b> dans cette catégorie.</td></tr><tr><td><b>LAN</b> · <i>Local Area Network</i></td><td>Une maison, un bâtiment, une entreprise</td><td>Terminaux variés (clients et serveurs) en nombre connu ; Ethernet 802.3 et Wi-Fi 802.11 ; adresses IP <b>privées</b>, parfois plusieurs zones séparées en <b>VLAN</b>.</td></tr><tr><td><b>MAN</b> · <i>Metropolitan Area Network</i></td><td>Une ville, un campus</td><td>Interconnecte des LAN : universités, collectivités, grandes entreprises.</td></tr><tr><td><b>WAN</b> · <i>Wide Area Network</i></td><td>Un pays, la planète</td><td>Fibres, liaisons satellite, 4G… adresses IP <b>publiques</b> ; on ne branche pas son ordinateur directement sur un WAN. <b>Internet</b> n'est pas un WAN : c'est l'interconnexion d'une multitude de WAN.</td></tr></table></div>
+<h3>1.3 Le réseau de la maison</h3>
+<p>Au centre se trouve la <b>box</b> du fournisseur d'accès (FAI). Elle intègre à elle seule un modem, un routeur, un switch, un point d'accès Wi-Fi et un pare-feu (voir la partie 3.5). Autour d'elle :</p>
+<ul><li>des <b>terminaux</b> : ordinateurs, smartphones, tablettes, télévision, console, caméra de surveillance, enceinte et objets connectés, imprimante réseau ;</li>
+<li>des <b>périphériques</b> rattachés à un terminal : imprimante USB, vidéoprojecteur, clavier.</li></ul>
+<div class="box"><b>Terminal ou périphérique ?</b><p>Une imprimante branchée en USB sur un PC est un <b>périphérique</b> : elle dépend de ce PC. La même imprimante branchée au réseau (câble ou Wi-Fi), avec sa propre adresse IP, devient un <b>terminal</b> : tout le monde peut lui envoyer des impressions.</p></div>
+<p>Pour communiquer, chaque terminal doit posséder une <b>adresse IP</b>. À la maison, c'est le <b>serveur DHCP de la box</b> qui la distribue automatiquement.</p>
+<h3>1.4 Le réseau d'entreprise</h3>
+<p>On y retrouve des switchs et des routeurs (éléments d'interconnexion), des postes clients et des serveurs (terminaux). Le premier niveau de sécurité des échanges est assuré par le <b>pare-feu</b> (firewall), souvent intégré au routeur d'accès à Internet : il filtre ce qui entre et ce qui sort.</p>
+<div class="box retenir"><b>Deux grands types d'adresses IP</b><ul>
+<li><b>Privées</b> : utilisées à l'intérieur d'un LAN, invisibles depuis Internet, réutilisables d'un réseau à l'autre (192.168.x.x, 10.x.x.x…).</li>
+<li><b>Publiques</b> : uniques sur Internet, attribuées par l'intermédiaire d'un FAI ; elles représentent un site ou une box auprès du reste du monde.</li></ul></div>
+
+<h2>2. Les éléments terminaux : clients, serveurs, services</h2>
+<p>Un réseau existe pour relier des <b>applications</b> et des <b>utilisateurs</b>. Ceux-ci sont au bout des branches : ce sont les <b>systèmes terminaux</b>. Tout ce qui est entre eux (câbles, switchs, routeurs, liaisons opérateur) forme l'<b>interconnexion</b>.</p>
+<ul><li>Le <b>client</b> est en général manipulé par un humain : il saisit des données (clavier, souris, capteur), en restitue (écran, son, imprimante) et a une capacité de traitement limitée.</li>
+<li>Le <b>serveur</b> est un système robuste spécialisé dans le calcul ou le stockage : il <b>partage</b> des données entre plusieurs clients, fait des <b>calculs lourds</b> pour eux et leur fournit des <b>services</b> s'ils y sont autorisés.</li></ul>
+<h3>2.1 Client et serveur : physique ou logiciel ?</h3>
+<div class="box attention"><b>Attention au double sens</b><p>« Client » et « serveur » ne désignent pas la même chose selon qu'on parle du <b>matériel</b> (hardware) ou du <b>logiciel</b> (software).</p></div>
+<div class="tab-defil"><table><tr><th></th><th>Client</th><th>Serveur</th></tr><tr><td><b>Physique</b> (matériel)</td><td>Équipement aux performances modestes, utilisé directement par un humain : PC portable, smartphone, terminal de paiement. Il affiche (sortie standard, <i>stdout</i> : écran, haut-parleur) et reçoit des saisies (entrée standard, <i>stdin</i> : clavier, écran tactile, micro, lecteur de carte).</td><td>Ordinateur très puissant (processeurs, mémoire, disques) qui fait tourner des services lourds. En général, seul l'administrateur s'en sert directement. Formats : <b>tour</b>, <b>rack</b> (dans une baie), <b>lame</b> (blade, empilées dans un châssis).</td></tr><tr><td><b>Logiciel</b> (application)</td><td>Application utilisée par l'utilisateur final : navigateur web, Snapchat, client SSH. Elle peut parfois marcher hors ligne mais dépend de serveurs. En général installée sur un client physique.</td><td>Application qui rend un service (stockage, traitement) à des clients : Apache, MySQL… En général sur un serveur physique, mais rien n'empêche votre PC d'héberger un petit site web.</td></tr></table></div>
+<details><summary>Mon ordinateur personnel héberge-t-il des clients ou des serveurs logiciels ?</summary><div class="tp-corr"><p>Surtout des <b>clients</b> (navigateur, messagerie, jeux), mais il peut aussi faire tourner des <b>serveurs</b> : un serveur web de développement (XAMPP, WAMP), un partage de fichiers, un serveur de jeu.</p></div></details>
+<details><summary>Un serveur physique peut-il héberger des clients logiciels ?</summary><div class="tp-corr"><p><b>Oui.</b> Un serveur web est souvent <b>client</b> d'un serveur de base de données ; il est aussi client du service de mises à jour, de l'heure (NTP) ou d'un serveur de sauvegarde.</p></div></details>
+<h3>2.2 Le modèle requête / réponse</h3>
+<p>« Un client, ça commande ; un serveur, ça sert. »</p>
+<ul><li>Clients et serveurs échangent des <b>messages</b> (à ce niveau, on ne parle pas encore de trames ni de paquets).</li>
+<li>Le client envoie une <b>requête</b>, le serveur renvoie une <b>réponse</b> (ou un message d'erreur).</li>
+<li>Le serveur <b>écoute</b> sur un canal interne à sa machine : un <b>port</b> (80 pour HTTP, 443 pour HTTPS…).</li>
+<li>Un serveur répond à une multitude de clients presque en même temps (avec des files d'attente) sans se tromper de destinataire.</li>
+<li>Un serveur qui envoie quelque chose <b>sans qu'on le lui ait demandé</b> est suspect : panne ou piratage.</li></ul>
+<p>Les applications ne s'occupent pas de l'acheminement : elles s'appuient sur des <b>API</b> (<i>Application Programming Interface</i>, par exemple les <i>sockets</i>) fournies par le système. Le client et le serveur ont ainsi l'impression de discuter directement, de processus à processus, que l'un tourne sous Windows et l'autre sous Linux.</p>
+<h3>2.3 Les architectures client/serveur</h3>
+<div class="tab-defil"><table><tr><th>Topologie</th><th>Principe</th><th>Robustesse</th></tr><tr><td>Centralisée</td><td>Tout passe par un nœud central (un serveur)</td><td>Fragile : si le centre tombe, tout tombe</td></tr><tr><td>Décentralisée</td><td>Des nœuds régionaux reliés entre eux (ex. les serveurs DNS)</td><td>Robuste</td></tr><tr><td>Distribuée</td><td>Aucun nœud n'est indispensable</td><td>Quasi « immortelle »</td></tr></table></div>
+<ul><li><b>Pair à pair (P2P)</b> : chaque programme est tour à tour client et serveur ; aucun membre n'est indispensable. Exemples : BitTorrent, les blockchains (cryptomonnaies).</li>
+<li><b>Deux tiers</b> : le client demande une ressource que le serveur fournit à partir de ses propres données. Exemple : un site web <b>statique</b> (pages HTML toutes prêtes).</li>
+<li><b>Trois tiers</b> : un niveau de plus, chaque serveur se spécialise (souplesse, sécurité, performances) :
+<ol><li>le <b>client</b> et son interface (le navigateur) ;</li><li>le <b>serveur d'application</b> (middleware) qui fabrique la réponse ;</li><li>le <b>serveur de données</b> qui lui fournit les informations.</li></ol></li></ul>
+<details><summary>Quelle architecture pour un site web dynamique ? Avec quels logiciels ?</summary><div class="tp-corr"><p>Une architecture <b>trois tiers</b> : navigateur (Firefox, Chrome) → serveur web et langage serveur (Apache ou Nginx avec PHP, Node.js…) → base de données (MySQL, MariaDB, PostgreSQL).</p></div></details>
+<h3>2.4 Client léger, client lourd</h3>
+<ul><li><b>Client léger</b> : le serveur fait tout le travail, le client affiche des réponses « toutes faites ». Exemple : une application web dans un navigateur (webmail, ENT).</li>
+<li><b>Client lourd</b> : le traitement est partagé entre le serveur et le client, installé sur la machine. Exemples : Thunderbird, un jeu en ligne, une application mobile, un logiciel de comptabilité installé.</li></ul>
+<h3>2.5 Les principaux types de serveurs (logiciels)</h3>
+<p>Ce sont des applications : plusieurs peuvent cohabiter sur une même machine physique, ce qui fait des économies.</p>
+<div class="tab-defil"><table><tr><th>Serveur</th><th>Rôle</th><th>Exemples</th></tr><tr><td>Web</td><td>Héberger et envoyer des pages et des applications web (HTTP/HTTPS)</td><td>Apache, Nginx, Tomcat</td></tr><tr><td>Fichiers</td><td>Stocker et partager des fichiers</td><td>FTP, NFS, SMB (partages Windows)</td></tr><tr><td>Base de données</td><td>Stocker des données structurées et répondre aux requêtes SQL</td><td>MySQL, MariaDB, Oracle, SQL Server</td></tr><tr><td>DNS</td><td>Traduire un nom de domaine en adresse IP (www.exemple.fr → 93.184.216.34)</td><td>Bind, Unbound, les DNS du FAI</td></tr><tr><td>DHCP</td><td>Distribuer automatiquement la configuration IP (adresse, masque, passerelle, DNS)</td><td>Serveur de la box, isc-dhcp, Windows Server</td></tr><tr><td>Impression</td><td>Gérer les files d'attente des imprimantes partagées</td><td>lpd, CUPS</td></tr><tr><td>Temps</td><td>Donner l'heure exacte pour synchroniser les machines (NTP)</td><td>ntpd, chrony</td></tr><tr><td>Domaine</td><td>Centraliser les comptes, l'authentification et les droits (annuaire)</td><td>Active Directory, Samba AD</td></tr></table></div>
+
+<h2>3. Les systèmes d'interconnexion</h2>
+<h3>3.1 Adresses et encapsulation</h3>
+<p>Trois identifiants servent à acheminer un message :</p>
+<div class="tab-defil"><table><tr><th>Identifiant</th><th>Niveau</th><th>Ce qu'il désigne</th></tr><tr><td>Adresse <b>MAC</b></td><td>Couche 2 (liaison)</td><td>Une carte réseau physique (Ethernet, Wi-Fi). Inscrite par le fabricant, unique au monde. 48 bits, ex. 00:1A:2B:3C:4D:5E.</td></tr><tr><td>Adresse <b>IP</b></td><td>Couche 3 (réseau)</td><td>Un hôte logique, quelle que soit la machine qui l'héberge. Pas unique au monde (les adresses privées se répètent d'un réseau à l'autre).</td></tr><tr><td><b>Port</b></td><td>Couche 4 (transport)</td><td>L'application concernée, à l'intérieur de la machine de destination (80 = serveur web).</td></tr></table></div>
+<p>Un message n'est jamais envoyé « tout nu » : il est glissé dans une série d'enveloppes, c'est l'<b>encapsulation</b>.</p>
+<figure class="schema"><svg viewBox="0 0 720 170" xmlns="http://www.w3.org/2000/svg" role="img"><defs><marker id="pt" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--encre)"/></marker></defs><rect x="10" y="20" width="700" height="130" rx="6" fill="#fde7c8" stroke="var(--encre)" stroke-width="2"/><text x="360" y="85" text-anchor="middle" dominant-baseline="middle" font-size="13" fill="var(--encre)"></text><text x="22" y="40" font-size="13" font-weight="700" fill="var(--encre)">TRAME · @MAC source / @MAC destination (prochain équipement)</text><rect x="40" y="52" width="640" height="86" rx="6" fill="#dfe6ff" stroke="var(--encre)" stroke-width="2"/><text x="360" y="95" text-anchor="middle" dominant-baseline="middle" font-size="13" fill="var(--encre)"></text><text x="52" y="70" font-size="13" font-weight="700" fill="var(--encre)">PAQUET · @IP source / @IP destination (hôte final)</text><rect x="70" y="80" width="580" height="50" rx="6" fill="#e3f5e1" stroke="var(--encre)" stroke-width="2"/><text x="360" y="105" text-anchor="middle" dominant-baseline="middle" font-size="13" fill="var(--encre)"></text><text x="82" y="99" font-size="13" font-weight="700" fill="var(--encre)">SEGMENT · port source / port destination</text><rect x="420" y="88" width="220" height="34" rx="6" fill="#fff" stroke="var(--encre)" stroke-width="2"/><text x="530" y="105" text-anchor="middle" dominant-baseline="middle" font-size="12" fill="var(--encre)" font-weight="700">MESSAGE (requête HTTP…)</text></svg><figcaption>Le message est encapsulé dans un segment, lui-même dans un paquet, lui-même dans une trame.</figcaption></figure>
+<ol><li><b>Segment</b> : on ajoute une en-tête de transport (TCP) avec les <b>ports</b> source et destination.</li>
+<li><b>Paquet</b> : on ajoute une en-tête réseau (IP) avec les <b>adresses IP</b> source et de destination finale.</li>
+<li><b>Trame</b> : on ajoute une en-tête de couche basse (Ethernet, Wi-Fi…) avec l'<b>adresse MAC du prochain équipement</b> sur la route (pas forcément la destination finale !).</li></ol>
+<p>À la réception, c'est l'inverse, la <b>décapsulation</b> : la carte réseau vérifie que la trame lui est destinée (adresse MAC) et en extrait le paquet ; le système vérifie que l'adresse IP est la sienne et en extrait le segment ; il regarde le port de destination et confie le message à l'application qui écoute sur ce port.</p>
+<h3>3.2 Le hub (concentrateur)</h3>
+<p>Ancêtre du switch, il travaille au niveau <b>1 (physique)</b> : il recopie le signal reçu sur un port vers <b>tous</b> les autres ports. Il a disparu à cause de deux gros défauts :</p>
+<ul><li><b>La diffusion involontaire</b> : une trame de A vers B arrive aussi chez C, D… Trafic multiplié et confidentialité nulle.</li>
+<li><b>Les collisions</b> : si A et B émettent en même temps, le hub ne peut rien mettre en attente : les signaux se mélangent et les données sont perdues.</li></ul>
+<h3>3.3 Le switch (commutateur)</h3>
+<p>Même rôle que le hub, en plus malin : il travaille au niveau <b>2 (liaison)</b> et lit les <b>adresses MAC</b>.</p>
+<ul><li>Il tient une <b>table MAC</b> (ou table CAM) qui associe chaque port à l'adresse MAC source vue sur ce port : il <b>apprend</b> où se trouve chaque machine et n'envoie la trame que sur le bon port.</li>
+<li>Il gère les <b>VLAN</b> : on découpe un même switch en plusieurs réseaux logiques isolés, sans acheter de matériel.</li>
+<li>Il peut être <b>empilé</b> (stackable) avec d'autres switchs pour n'en former qu'un, et accepte plusieurs débits.</li>
+<li>Il n'a pas besoin d'adresse IP pour commuter : il est <b>transparent</b> pour la couche 3.</li></ul>
+<h3>3.4 Le routeur</h3>
+<p>Il travaille au niveau <b>3 (réseau)</b> et relie des <b>réseaux IP différents</b>. Il a une interface (et une adresse IP) dans chaque réseau auquel il est connecté.</p>
+<ul><li>Il choisit la route grâce à sa <b>table de routage</b>, remplie à la main (routage <b>statique</b>) ou automatiquement par dialogue entre routeurs (routage <b>dynamique</b>).</li>
+<li>Il change ce qui dépend du support : le média (fibre, Ethernet, Wi-Fi) et les <b>adresses MAC</b> de la trame à chaque tronçon.</li>
+<li>Il <b>ne modifie jamais les adresses IP</b> du paquet (sauf traduction d'adresses, NAT) : c'est la seule information qui permet au paquet d'arriver à destination.</li>
+<li>Comme il voit les adresses IP et les ports, il peut <b>filtrer</b> : il devient alors pare-feu.</li></ul>
+<h3>3.5 Le cas de la box</h3>
+<p>Une box d'opérateur est un couteau suisse :</p>
+<ul><li><b>Modem</b> : adapte les signaux entre le réseau du FAI (fibre, ADSL) et votre LAN ;</li>
+<li><b>Routeur</b> : aiguille les paquets entre le LAN et Internet (et fait la traduction d'adresses privées/publique) ;</li>
+<li><b>Switch</b> : quelques ports Ethernet pour brancher des machines (ou un autre switch) ;</li>
+<li><b>Point d'accès Wi-Fi</b> : pont entre le monde filaire et le monde radio ;</li>
+<li><b>Pare-feu</b> : protège les machines du LAN ;</li>
+<li><b>Serveurs</b> : <b>DHCP</b> (distribue les adresses IP), <b>DNS</b> (relaie la résolution des noms de domaine), <b>FTP</b> ou partage (rend accessible un disque branché sur la box), parfois authentification.</li></ul>
+<h3>3.6 Résumé : qui voit quoi ?</h3>
+<div class="tab-defil"><table><tr><th>Équipement</th><th>Adresse MAC</th><th>Adresse IP</th><th>Port</th><th>Données applicatives</th></tr><tr><td>Hub</td><td>–</td><td>–</td><td>–</td><td>–</td></tr><tr><td>Switch</td><td>✓</td><td>–</td><td>–</td><td>–</td></tr><tr><td>Routeur</td><td>✓</td><td>✓</td><td>(✓ s'il filtre)</td><td>–</td></tr><tr><td>Système terminal</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr></table></div>
+<div class="box retenir"><b>À retenir</b><ul>
+<li>Hub = couche 1, recopie partout. Switch = couche 2, adresses MAC, table MAC, VLAN. Routeur = couche 3, adresses IP, table de routage, relie des réseaux différents.</li>
+<li>Message → segment (ports) → paquet (adresses IP) → trame (adresses MAC).</li>
+<li>Les adresses IP d'un paquet ne changent pas en route ; les adresses MAC changent à chaque tronçon.</li></ul></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Reconnaître le bon équipement et la bonne couche : missions du <a href="labo-reseau.html#m=L1-1">labo réseau</a>, avec des valeurs nouvelles à chaque essai et une correction pas à pas.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel équipement recopie le signal reçu sur un port vers tous les autres ports ?",
+  "options": [
+   "Le hub",
+   "Le switch",
+   "Le routeur",
+   "Le point d'accès Wi-Fi"
+  ],
+  "answer": 0,
+  "explication": "Le hub travaille au niveau physique (couche 1) : il ne lit aucune adresse et recopie tout."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "À quel niveau du modèle OSI travaille un switch ?",
+  "options": [
+   "Niveau 1",
+   "Niveau 2",
+   "Niveau 3",
+   "Niveau 4"
+  ],
+  "answer": 1,
+  "explication": "Le switch lit les adresses MAC des trames : couche 2, liaison de données."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Quel équipement relie des réseaux IP différents ?",
+  "options": [
+   "Le routeur",
+   "Le switch",
+   "Le hub",
+   "La carte réseau"
+  ],
+  "answer": 0,
+  "explication": "Le routeur a une interface dans chaque réseau et aiguille les paquets grâce à sa table de routage."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "Un routeur modifie l'adresse IP de destination d'un paquet à chaque saut.",
+  "answer": false,
+  "explication": "Non : les adresses IP restent les mêmes (sauf traduction NAT). Ce sont les adresses MAC des trames qui changent à chaque tronçon."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Que contient la table MAC (table CAM) d'un switch ?",
+  "options": [
+   "L'association entre ses ports et les adresses MAC vues sur ces ports",
+   "La liste des réseaux IP distants",
+   "Les adresses IP des clients DHCP",
+   "Les ports TCP ouverts"
+  ],
+  "answer": 0,
+  "explication": "Le switch apprend sur quel port se trouve chaque adresse MAC source pour n'envoyer les trames que sur le bon port."
+ },
+ {
+  "type": "associer",
+  "niveau": "moyen",
+  "q": "Associe chaque enveloppe à l'identifiant qu'elle contient.",
+  "paires": [
+   [
+    "Segment",
+    "Ports"
+   ],
+   [
+    "Paquet",
+    "Adresses IP"
+   ],
+   [
+    "Trame",
+    "Adresses MAC"
+   ]
+  ],
+  "explication": "Message → segment (ports) → paquet (IP) → trame (MAC)."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Dans une trame Ethernet qui part d'un PC vers un serveur sur Internet, l'adresse MAC de destination est celle…",
+  "options": [
+   "du prochain équipement sur la route (la passerelle)",
+   "du serveur final",
+   "du switch",
+   "du serveur DNS"
+  ],
+  "answer": 0,
+  "explication": "La trame est destinée au prochain équipement de niveau 2/3 : ici la passerelle par défaut (le routeur). Seule l'adresse IP désigne le serveur final."
+ },
+ {
+  "type": "associer",
+  "niveau": "moyen",
+  "q": "Associe chaque serveur à son rôle.",
+  "paires": [
+   [
+    "DNS",
+    "Traduire un nom de domaine en adresse IP"
+   ],
+   [
+    "DHCP",
+    "Distribuer la configuration IP"
+   ],
+   [
+    "NTP",
+    "Donner l'heure exacte"
+   ],
+   [
+    "Active Directory",
+    "Centraliser comptes et authentification"
+   ]
+  ],
+  "explication": "Ce sont des services réseau classiques, souvent hébergés sur la même machine physique."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Une imprimante branchée en USB sur un PC est…",
+  "options": [
+   "un périphérique",
+   "un terminal",
+   "un routeur",
+   "un serveur DHCP"
+  ],
+  "answer": 0,
+  "explication": "Elle dépend du PC. Branchée au réseau avec sa propre adresse IP, elle deviendrait un terminal."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Un site web dynamique (navigateur, serveur PHP, base MySQL) repose sur une architecture…",
+  "options": [
+   "trois tiers",
+   "deux tiers",
+   "pair à pair",
+   "centralisée sans serveur"
+  ],
+  "answer": 0,
+  "explication": "Client, serveur d'application, serveur de données : trois niveaux."
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "Internet est un WAN.",
+  "answer": false,
+  "explication": "Internet est l'interconnexion d'une multitude de WAN, pas un WAN unique."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Pourquoi le hub provoque-t-il des collisions ?",
+  "options": [
+   "Il ne peut pas mettre en attente les trames reçues en même temps sur deux ports",
+   "Il change les adresses MAC",
+   "Il bloque le broadcast",
+   "Il utilise des adresses IP en double"
+  ],
+  "answer": 0,
+  "explication": "Deux émissions simultanées se mélangent sur le support : les données sont perdues. Le switch, lui, mémorise et commute."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Quel élément de la box distribue les adresses IP aux appareils de la maison ?",
+  "options": [
+   "Le serveur DHCP",
+   "Le modem",
+   "Le point d'accès Wi-Fi",
+   "Le serveur FTP"
+  ],
+  "answer": 0,
+  "explication": "Le DHCP attribue adresse, masque, passerelle et DNS à chaque appareil qui se connecte."
+ },
+ {
+  "type": "vf",
+  "niveau": "difficile",
+  "q": "Un serveur physique peut héberger des clients logiciels.",
+  "answer": true,
+  "explication": "Oui : un serveur web est souvent client d'une base de données, d'un serveur de temps, du service de mises à jour…"
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quel sigle désigne un réseau local (maison, entreprise) ?",
+  "answers": [
+   "LAN"
+  ],
+  "explication": "LAN : Local Area Network."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

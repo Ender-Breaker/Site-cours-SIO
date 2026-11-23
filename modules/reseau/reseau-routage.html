@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Routage IPv4 — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+<style>
+#cours .schema { margin: var(--s3) 0; overflow-x: auto; }
+#cours .schema svg { display: block; width: 100%; height: auto; min-width: 520px; max-width: 760px; margin: 0 auto; font-family: var(--mono, monospace); }
+#cours .schema figcaption { font-size: .85rem; color: var(--discret); text-align: center; margin-top: 6px; }
+#cours .tp-corr { padding: var(--s2) var(--s3) var(--s3); }
+</style>
+</head>
+<body data-module="reseau" data-chapter="reseau-routage">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<p>Un routeur relie plusieurs réseaux IP et fait passer les paquets de l'un à l'autre. Ce chapitre explique comment un paquet trouve son chemin de routeur en routeur, comment lire et écrire une <b>table de routage statique</b> (route simple, route de secours, route par défaut, route vers un hôte), puis donne un aperçu d'ARP et du routage dynamique (RIP, OSPF).</p>
+
+<h2>1. Rappels sur le routeur</h2>
+<p>Le routeur est un équipement de <b>couche 3</b> qui relie plusieurs réseaux IP. Il a une interface dans chacun d'eux : c'est simplement une machine avec plusieurs cartes réseau (un PC avec deux cartes réseau peut servir de routeur).</p>
+<p>Pour chaque paquet reçu, deux cas :</p>
+<ul><li><b>Remise directe</b> : le réseau de destination est directement connecté au routeur ; le paquet est mis dans une trame adressée à l'<b>adresse MAC du destinataire</b>.</li>
+<li><b>Remise indirecte</b> : le réseau de destination est distant ; le paquet est mis dans une trame adressée à l'<b>adresse MAC du routeur suivant</b> sur la route.</li></ul>
+<div class="box retenir"><b>Les deux règles d'or</b><ul>
+<li>Les adresses <b>IP</b> source et destination du paquet <b>ne changent jamais</b> en route (sauf traduction d'adresses, NAT).</li>
+<li>Les adresses <b>MAC</b> source et destination de la trame <b>changent à chaque tronçon</b>.</li></ul>
+<p>Le routeur ne modifie donc pas le paquet : il le transfère en le glissant dans une nouvelle trame.</p></div>
+
+<h2>2. Le principe du routage IP</h2>
+<h3>2.1 Pourquoi router ?</h3>
+<p>Il s'agit d'acheminer des paquets d'une machine A vers une machine B à travers plusieurs routeurs. Comment le paquet peut-il atteindre B ?</p>
+<ul><li>Aucun système ne connaît l'itinéraire complet : chacun connaît seulement l'adresse du <b>prochain routeur</b> (le <i>next hop</i>, ou prochain saut) qui rapproche le paquet de sa destination.</li>
+<li>Chaque routeur doit donc avoir la liste des <b>réseaux distants</b> qu'il peut joindre, avec pour chacun l'adresse du voisin directement accessible à qui confier le paquet.</li>
+<li>Si la destination n'est pas dans sa liste, il faut lui avoir déclaré une <b>route par défaut</b> (route de <b>dernier recours</b>) ; sinon, le paquet est détruit.</li></ul>
+<h3>2.2 Le paquet de A vers B, pas à pas</h3>
+<figure class="schema"><svg viewBox="0 0 720 230" xmlns="http://www.w3.org/2000/svg" role="img"><defs><marker id="pt" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--encre)"/></marker></defs><line x1="70" y1="115" x2="190" y2="115" stroke="var(--encre)" stroke-width="2"/><line x1="190" y1="115" x2="340" y2="55" stroke="var(--cobalt)" stroke-width="4"/><line x1="340" y1="55" x2="510" y2="115" stroke="var(--cobalt)" stroke-width="4"/><line x1="510" y1="115" x2="640" y2="115" stroke="var(--cobalt)" stroke-width="4"/><line x1="70" y1="115" x2="190" y2="115" stroke="var(--cobalt)" stroke-width="4"/><line x1="190" y1="115" x2="300" y2="180" stroke="var(--encre)" stroke-width="2"/><line x1="300" y1="180" x2="420" y2="180" stroke="var(--encre)" stroke-width="2"/><line x1="420" y1="180" x2="510" y2="115" stroke="var(--encre)" stroke-width="2"/><rect x="20" y="95" width="60" height="40" rx="6" fill="#e3f5e1" stroke="var(--encre)" stroke-width="2"/><text x="50" y="115" text-anchor="middle" dominant-baseline="middle" font-size="13" fill="var(--encre)" font-weight="700">A</text><rect x="630" y="95" width="60" height="40" rx="6" fill="#e3f5e1" stroke="var(--encre)" stroke-width="2"/><text x="660" y="115" text-anchor="middle" dominant-baseline="middle" font-size="13" fill="var(--encre)" font-weight="700">B</text><circle cx="190" cy="115" r="24" fill="#dfe6ff" stroke="var(--encre)" stroke-width="2"/><text x="190" y="115" text-anchor="middle" dominant-baseline="middle" font-size="13" font-weight="700" fill="var(--encre)">R1</text><circle cx="340" cy="55" r="24" fill="#dfe6ff" stroke="var(--encre)" stroke-width="2"/><text x="340" y="55" text-anchor="middle" dominant-baseline="middle" font-size="13" font-weight="700" fill="var(--encre)">R2</text><circle cx="510" cy="115" r="24" fill="#dfe6ff" stroke="var(--encre)" stroke-width="2"/><text x="510" y="115" text-anchor="middle" dominant-baseline="middle" font-size="13" font-weight="700" fill="var(--encre)">R5</text><circle cx="300" cy="180" r="24" fill="#dfe6ff" stroke="var(--encre)" stroke-width="2"/><text x="300" y="180" text-anchor="middle" dominant-baseline="middle" font-size="13" font-weight="700" fill="var(--encre)">R3</text><circle cx="420" cy="180" r="24" fill="#dfe6ff" stroke="var(--encre)" stroke-width="2"/><text x="420" y="180" text-anchor="middle" dominant-baseline="middle" font-size="13" font-weight="700" fill="var(--encre)">R4</text><text x="196" y="72" font-size="12" fill="var(--cobalt)">métrique 2</text><text x="350" y="222" font-size="12" fill="var(--encre)">métrique 3</text><text x="360" y="20" text-anchor="middle" font-size="12" fill="var(--encre)">Le paquet garde @IP source = A et @IP destination = B ; la trame change à chaque tronçon</text></svg><figcaption>R1 est la passerelle par défaut de A. Deux chemins existent vers B : via R2 (métrique 2) ou via R3 (métrique 3).</figcaption></figure>
+<ol><li><b>R1</b> reçoit une trame adressée à <b>sa</b> adresse MAC : il la décapsule et trouve un paquet destiné à une adresse IP qui n'est pas la sienne.</li>
+<li>R1 consulte sa <b>table de routage</b> et choisit le <b>prochain saut</b>. Deux choix (via R2 ou via R3) : la table retient la route via <b>R2</b>, qui a la plus petite <b>métrique</b> (2 contre 3).</li>
+<li>Le paquet est ré-encapsulé dans une trame à destination de l'<b>adresse MAC de R2</b>.</li>
+<li><b>R2</b> reçoit la trame (sa MAC), la décapsule : le réseau de destination ne lui est pas directement connecté. Sa table indique R5.</li>
+<li>Nouvelle trame, à destination de l'<b>adresse MAC de R5</b>.</li>
+<li><b>R5</b> décapsule : le réseau de B lui est directement connecté, il peut faire une <b>remise directe</b>.</li>
+<li>Nouvelle trame, à destination de l'<b>adresse MAC de B</b>.</li>
+<li><b>B</b> reçoit la trame à sa MAC, trouve un paquet à sa propre adresse IP : il le garde et décapsule les couches supérieures.</li></ol>
+
+<h2>3. Tables et déclarations de routage statique</h2>
+<p>En routage <b>statique</b>, l'administrateur remplit la table à la main. Chaque ligne associe une <b>destination</b> (réseau + masque) à une <b>passerelle</b> (le prochain saut). Dans les exemples, on se place sur R1 ; ses voisins R2 et R3 ont les adresses 2.2.2.2 et 3.3.3.3.</p>
+<h3>3.1 Route simple vers un réseau distant</h3>
+<p>Les paquets de A doivent pouvoir joindre toute machine du réseau <b>192.168.1.0/24</b> via R2. Déclaration sur R1 :</p>
+<div class="tab-defil"><table><tr><th>Destination</th><th>Masque</th><th>Passerelle</th></tr><tr><td>192.168.1.0</td><td>255.255.255.0</td><td>2.2.2.2</td></tr></table></div>
+<p>« Pour envoyer un paquet vers 192.168.1.x, pousse-le vers 2.2.2.2 », c'est-à-dire : mets-le dans une trame adressée à l'adresse MAC qui correspond à 2.2.2.2. La table de R1 contient cette seule ligne : tout paquet vers une autre destination sera <b>détruit</b>.</p>
+<p>En pratique : <code>ip route 192.168.1.0 255.255.255.0 2.2.2.2</code> sur un routeur Cisco, <code>ip route add 192.168.1.0/24 via 2.2.2.2</code> sous Linux, <code>route add 192.168.1.0 mask 255.255.255.0 2.2.2.2</code> sous Windows.</p>
+<div class="box retenir"><b>À retenir</b><p>La table de routage montre les routes <b>réellement disponibles</b> à un instant donné :</p><ul>
+<li>passerelle joignable : le paquet garde sa destination IP et part dans une trame adressée à la MAC de la passerelle ;</li>
+<li>passerelle injoignable : la route <b>disparaît</b> de la table ;</li>
+<li>destination finale en panne : la route reste dans la table (la passerelle répond toujours) ; le paquet est transmis mais n'arrivera pas plus loin.</li></ul></div>
+<h3>3.2 Route de secours : la métrique</h3>
+<p>Même destination, mais on prévoit une route secondaire via R3 si R2 tombe. On déclare deux routes avec une <b>métrique</b> (plus elle est faible, plus la route est prioritaire) :</p>
+<div class="tab-defil"><table><tr><th>Destination</th><th>Masque</th><th>Passerelle</th><th>Métrique</th></tr><tr><td>192.168.1.0</td><td>255.255.255.0</td><td>2.2.2.2</td><td>1</td></tr><tr><td>192.168.1.0</td><td>255.255.255.0</td><td>3.3.3.3</td><td>2</td></tr></table></div>
+<p>La table active ne garde qu'<b>une ligne</b>, la route prioritaire :</p>
+<div class="tab-defil"><table><tr><th>Destination</th><th>Masque</th><th>Passerelle</th><th>Métrique</th></tr><tr><td>192.168.1.0</td><td>255.255.255.0</td><td>2.2.2.2</td><td>1</td></tr></table></div>
+<p>La route via 3.3.3.3 reste en réserve et ne prend le relais que si 2.2.2.2 devient injoignable.</p>
+<div class="box retenir"><b>À retenir</b><ul>
+<li>On peut déclarer plusieurs passerelles pour une même destination, à condition de leur donner une métrique.</li>
+<li>Seule la route à la métrique la plus faible apparaît dans la table ; les autres sont en réserve.</li>
+<li>Deux routes de même métrique : les paquets empruntent l'une puis l'autre à tour de rôle (déconseillé).</li>
+<li>La métrique est indicative : elle ne compte pas forcément les routeurs traversés. Elle n'a de sens que comparée à d'autres.</li></ul></div>
+<h3>3.3 La route par défaut</h3>
+<p>On veut toujours joindre 192.168.1.0/24 (via 2.2.2.2, secours 3.3.3.3), et envoyer <b>tout le reste</b> vers 3.3.3.3, la passerelle de dernier recours. La route par défaut s'écrit avec la destination <b>0.0.0.0</b> et le masque <b>0.0.0.0</b> (0.0.0.0/0) : elle correspond à toutes les adresses.</p>
+<div class="tab-defil"><table><tr><th>Destination</th><th>Masque</th><th>Passerelle</th><th>Métrique</th></tr><tr><td>192.168.1.0</td><td>255.255.255.0</td><td>2.2.2.2</td><td>1</td></tr><tr><td>192.168.1.0</td><td>255.255.255.0</td><td>3.3.3.3</td><td>2</td></tr><tr><td>0.0.0.0</td><td>0.0.0.0</td><td>3.3.3.3</td><td>1</td></tr></table></div>
+<p>Table active :</p>
+<div class="tab-defil"><table><tr><th>Destination</th><th>Masque</th><th>Passerelle</th><th>Métrique</th></tr><tr><td>192.168.1.0</td><td>255.255.255.0</td><td>2.2.2.2</td><td>1</td></tr><tr><td>0.0.0.0</td><td>0.0.0.0</td><td>3.3.3.3</td><td>1</td></tr></table></div>
+<div class="box retenir"><b>À retenir</b><ul>
+<li>La route par défaut permet de joindre <b>n'importe quelle</b> destination.</li>
+<li>Peu importe l'ordre des déclarations : elle n'est utilisée qu'<b>en dernier recours</b>, quand aucune autre route ne convient.</li>
+<li>Paquet vers une destination connue : il suit la route précise. Sinon : passerelle par défaut.</li>
+<li>Sur un PC, la « passerelle par défaut » de la configuration IP n'est rien d'autre que cette route 0.0.0.0/0.</li></ul></div>
+<h3>3.4 Routes imbriquées et route vers un hôte</h3>
+<p>On veut joindre 192.168.1.0/24 via R2, sauf la machine <b>B (192.168.1.10)</b>, qu'on veut joindre via R3. Une route vers un seul hôte utilise le masque <b>255.255.255.255 (/32)</b> : les 32 bits de l'adresse sont significatifs.</p>
+<div class="tab-defil"><table><tr><th>Destination</th><th>Masque</th><th>Passerelle</th><th>Métrique</th></tr><tr><td>192.168.1.0</td><td>255.255.255.0</td><td>2.2.2.2</td><td>1</td></tr><tr><td>192.168.1.10</td><td>255.255.255.255</td><td>3.3.3.3</td><td>1</td></tr></table></div>
+<p>Les deux lignes restent dans la table. Un paquet vers 192.168.1.10 correspond aux deux routes (cette adresse appartient bien à 192.168.1.0/24) : le routeur choisit celle qui « colle » le mieux, la plus précise, c'est-à-dire celle au <b>masque le plus long</b> (ici /32). Un paquet vers 192.168.1.20 ne correspond qu'à la première.</p>
+<div class="box retenir"><b>À retenir : la règle du préfixe le plus long</b><ul>
+<li>Des routes imbriquées se recouvrent : l'une englobe l'autre.</li>
+<li>Le routeur choisit la route au <b>masque le plus long</b> (la plus précise) ; la route plus large reste valable si la préférée tombe.</li>
+<li>La métrique ne départage <b>pas</b> des routes imbriquées : seule la précision compte. La métrique ne sert qu'entre routes vers <b>exactement</b> la même destination.</li>
+<li>Ordre de décision : 1) préfixe le plus long, 2) à destination identique, métrique la plus faible, 3) sinon route par défaut, 4) sinon le paquet est détruit.</li></ul></div>
+
+<h2>4. ARP : de l'adresse IP à l'adresse MAC</h2>
+<p>Pour fabriquer la trame, l'émetteur doit connaître l'<b>adresse MAC</b> correspondant à l'adresse IP du prochain saut (la destination elle-même en remise directe, la passerelle sinon). C'est le rôle d'<b>ARP</b> (<i>Address Resolution Protocol</i>) :</p>
+<ol><li>la machine envoie une <b>requête ARP en broadcast</b> (MAC de destination ff:ff:ff:ff:ff:ff) : « Qui a l'adresse 192.168.1.254 ? » ;</li>
+<li>seule la machine concernée répond, directement : « C'est moi, voici mon adresse MAC » ;</li>
+<li>la réponse est gardée quelques minutes dans le <b>cache ARP</b> (commande <code>arp -a</code>).</li></ol>
+<p>ARP ne sort jamais du réseau local : un PC ne demande jamais la MAC d'un serveur distant, seulement celle de sa passerelle.</p>
+
+<h2>5. Aperçu du routage dynamique</h2>
+<p>Sur un grand réseau, écrire toutes les routes à la main devient impossible et ne s'adapte pas aux pannes. Avec le <b>routage dynamique</b>, les routeurs s'échangent automatiquement les réseaux qu'ils connaissent et recalculent les routes quand un lien tombe.</p>
+<div class="tab-defil"><table><tr><th>Protocole</th><th>Principe</th><th>Métrique</th><th>Usage</th></tr><tr><td><b>RIP</b> (Routing Information Protocol)</td><td>À vecteur de distance : chaque routeur envoie régulièrement sa table à ses voisins</td><td>Nombre de sauts (routeurs traversés), 15 au maximum</td><td>Petits réseaux, simple mais lent à converger</td></tr><tr><td><b>OSPF</b> (Open Shortest Path First)</td><td>À état de liens : chaque routeur connaît toute la carte du réseau et calcule le plus court chemin (algorithme de Dijkstra)</td><td>Coût lié au débit des liens</td><td>Réseaux d'entreprise moyens et grands, convergence rapide</td></tr></table></div>
+<div class="box retenir"><b>À retenir</b><ul>
+<li>Remise directe : trame vers la MAC du destinataire. Remise indirecte : trame vers la MAC du prochain routeur.</li>
+<li>Une ligne de table = destination + masque + passerelle (+ métrique).</li>
+<li>Route par défaut : 0.0.0.0 / 0.0.0.0. Route vers un hôte : masque 255.255.255.255 (/32).</li>
+<li>Choix : préfixe le plus long, puis métrique la plus faible, puis route par défaut, sinon paquet détruit.</li>
+<li>ARP trouve l'adresse MAC du prochain saut ; RIP et OSPF remplissent les tables automatiquement.</li></ul></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Lire une table de routage et écrire des routes : missions du <a href="labo-reseau.html#m=L3-1">labo réseau</a>, avec des valeurs nouvelles à chaque essai et une correction pas à pas.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Que contient chaque ligne d'une table de routage statique ?",
+  "options": [
+   "Destination, masque, passerelle (et métrique)",
+   "Adresse MAC et port du switch",
+   "Nom de domaine et adresse IP",
+   "Port source et port destination"
+  ],
+  "answer": 0,
+  "explication": "La passerelle est le prochain saut vers la destination."
+ },
+ {
+  "type": "vf",
+  "niveau": "facile",
+  "q": "Lors du transit à travers plusieurs routeurs, les adresses IP source et destination du paquet changent à chaque saut.",
+  "answer": false,
+  "explication": "Elles restent identiques (sauf NAT). Ce sont les adresses MAC des trames qui changent."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Comment s'écrit la route par défaut ?",
+  "options": [
+   "0.0.0.0 / 0.0.0.0",
+   "255.255.255.255 / 255.255.255.255",
+   "127.0.0.1 / 255.0.0.0",
+   "192.168.1.0 / 255.255.255.0"
+  ],
+  "answer": 0,
+  "explication": "0.0.0.0/0 correspond à toutes les destinations : elle sert en dernier recours."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Deux routes vers 192.168.1.0/24 : via 2.2.2.2 métrique 1 et via 3.3.3.3 métrique 2. Laquelle apparaît dans la table active ?",
+  "options": [
+   "Via 2.2.2.2",
+   "Via 3.3.3.3",
+   "Les deux, utilisées à tour de rôle",
+   "Aucune"
+  ],
+  "answer": 0,
+  "explication": "La métrique la plus faible gagne ; l'autre reste en réserve."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Table de R1 : 192.168.1.0/24 via 2.2.2.2 et 192.168.1.10/32 via 3.3.3.3. Un paquet vers 192.168.1.10 part vers…",
+  "options": [
+   "3.3.3.3",
+   "2.2.2.2",
+   "les deux",
+   "il est détruit"
+  ],
+  "answer": 0,
+  "explication": "Règle du préfixe le plus long : la route /32 est la plus précise."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Même table. Un paquet vers 192.168.1.20 part vers…",
+  "options": [
+   "2.2.2.2",
+   "3.3.3.3",
+   "la route par défaut",
+   "il est détruit"
+  ],
+  "answer": 0,
+  "explication": "Seule la route /24 correspond à 192.168.1.20."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "R1 n'a qu'une route : 192.168.1.0/24 via 2.2.2.2. Que devient un paquet vers 10.0.0.5 ?",
+  "options": [
+   "Il est détruit",
+   "Il part vers 2.2.2.2",
+   "Il est renvoyé à l'expéditeur avec sa réponse",
+   "Il est diffusé en broadcast"
+  ],
+  "answer": 0,
+  "explication": "Aucune route ne correspond et il n'y a pas de route par défaut."
+ },
+ {
+  "type": "saisie",
+  "niveau": "moyen",
+  "q": "Quel masque utilise une route vers un hôte unique ? (décimal pointé)",
+  "answers": [
+   "255.255.255.255"
+  ],
+  "explication": "Les 32 bits de l'adresse sont significatifs : /32."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "En remise indirecte, la trame qui transporte le paquet est adressée à…",
+  "options": [
+   "l'adresse MAC du prochain routeur",
+   "l'adresse MAC du destinataire final",
+   "l'adresse MAC de broadcast",
+   "l'adresse IP du destinataire"
+  ],
+  "answer": 0,
+  "explication": "Le paquet garde l'IP finale, mais la trame va au prochain saut."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quel protocole trouve l'adresse MAC correspondant à une adresse IP du réseau local ?",
+  "options": [
+   "ARP",
+   "DNS",
+   "DHCP",
+   "ICMP"
+  ],
+  "answer": 0,
+  "explication": "ARP envoie une requête en broadcast ; la machine concernée répond avec son adresse MAC."
+ },
+ {
+  "type": "vf",
+  "niveau": "difficile",
+  "q": "Pour départager deux routes imbriquées (/24 et /32), le routeur compare leurs métriques.",
+  "answer": false,
+  "explication": "Non : il choisit la plus précise (préfixe le plus long). La métrique ne départage que des routes vers exactement la même destination."
+ },
+ {
+  "type": "vf",
+  "niveau": "difficile",
+  "q": "Si la passerelle d'une route devient injoignable, la route disparaît de la table de routage.",
+  "answer": true,
+  "explication": "La table ne montre que les routes réellement disponibles ; une route de secours peut alors prendre le relais."
+ },
+ {
+  "type": "associer",
+  "niveau": "moyen",
+  "q": "Associe chaque protocole de routage dynamique à sa métrique.",
+  "paires": [
+   [
+    "RIP",
+    "Nombre de sauts"
+   ],
+   [
+    "OSPF",
+    "Coût lié au débit des liens"
+   ]
+  ],
+  "explication": "RIP est limité à 15 sauts ; OSPF calcule le plus court chemin sur la carte complète du réseau."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Sur un PC, la « passerelle par défaut » de la configuration IP correspond à…",
+  "options": [
+   "une route 0.0.0.0/0 vers le routeur du réseau",
+   "l'adresse du serveur DNS",
+   "l'adresse de broadcast",
+   "une route /32 vers le PC lui-même"
+  ],
+  "answer": 0,
+  "explication": "Tout ce qui n'est pas dans le réseau local part vers cette passerelle."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>

@@ -166,6 +166,36 @@ window.EF_EVAL_TEXTES = {
         { n: "garantit la cohérence (intégrité référentielle)", rx: "coheren|integrit|exist|interdit|empeche|refuse" }],
       corrige: "<p>Une clé étrangère est une colonne qui contient la <b>clé primaire d'une ligne d'une autre table</b> (ex. <code>employe.service_id</code> → <code>service.id</code>). Elle <b>relie</b> les tables, ce qui permet les jointures, et le SGBD garantit l'<b>intégrité référentielle</b> : impossible d'y mettre une valeur qui n'existe pas dans la table référencée.</p>" }
   ],
+  reseau: [
+    { q: "Explique la différence entre un hub, un switch et un routeur (niveau OSI, ce qu'ils lisent, ce qu'ils font).",
+      notions: [
+        { n: "hub : couche 1, recopie sur tous les ports", rx: "hub.{0,80}(couche 1|niveau 1|physique|tous les ports|recopi|diffus)" },
+        { n: "switch : couche 2, adresses MAC, table MAC", rx: "(switch|commutateur).{0,120}(couche 2|niveau 2|mac)" },
+        { n: "routeur : couche 3, adresses IP, relie des réseaux", rx: "routeur.{0,120}(couche 3|niveau 3|ip|reseaux differents|table de routage)" }],
+      corrige: "<p>Le <b>hub</b> (couche 1) recopie le signal sur tous ses ports : collisions et aucune confidentialité. Le <b>switch</b> (couche 2) lit les <b>adresses MAC</b> et, grâce à sa table MAC, n'envoie la trame que sur le bon port ; il gère aussi les VLAN. Le <b>routeur</b> (couche 3) lit les <b>adresses IP</b>, relie des <b>réseaux différents</b> et choisit la route avec sa <b>table de routage</b>.</p>" },
+    { q: "Décris l'encapsulation d'une requête HTTP envoyée par un PC : quelles enveloppes, dans quel ordre, avec quels identifiants ?",
+      notions: [
+        { n: "segment avec les ports (TCP)", rx: "segment|port" },
+        { n: "paquet avec les adresses IP", rx: "paquet.{0,60}ip|ip.{0,60}paquet|adresse ip" },
+        { n: "trame avec les adresses MAC", rx: "trame.{0,60}mac|mac.{0,60}trame|adresse mac" },
+        { n: "couche physique : bits / signal", rx: "physique|signal|bits|electrique" }],
+      corrige: "<p>Le message HTTP est placé dans un <b>segment TCP</b> (ports source et destination, 80 côté serveur), lui-même dans un <b>paquet IP</b> (adresses IP source et destination finale), lui-même dans une <b>trame Ethernet</b> (adresses MAC source et du prochain équipement). La couche physique transforme la trame en <b>signal</b>. À la réception, on décapsule dans l'ordre inverse.</p>" },
+    { q: "Comment un routeur choisit-il la route d'un paquet dans sa table de routage ? Parle de la métrique, du préfixe le plus long et de la route par défaut.",
+      notions: [
+        { n: "préfixe le plus long / route la plus précise", rx: "plus long|plus precis|masque le plus|32" },
+        { n: "métrique la plus faible entre routes identiques", rx: "metrique|metric" },
+        { n: "route par défaut 0.0.0.0 en dernier recours", rx: "par defaut|0\\.0\\.0\\.0|dernier recours" },
+        { n: "sinon le paquet est détruit", rx: "detruit|supprim|perdu|abandon|jete" }],
+      corrige: "<p>Le routeur garde les routes qui correspondent à l'adresse de destination et choisit la plus précise (<b>préfixe le plus long</b>, une route /32 l'emporte sur un /24). Entre plusieurs routes vers exactement la même destination, il prend la <b>métrique la plus faible</b> (les autres restent en secours). Si rien ne correspond, il utilise la <b>route par défaut</b> 0.0.0.0/0 ; sans elle, le paquet est <b>détruit</b>.</p>" },
+    { q: "Compare TCP et UDP et donne pour chacun deux exemples d'utilisation.",
+      notions: [
+        { n: "TCP orienté connexion (3-way handshake)", rx: "connexion|handshake|syn" },
+        { n: "TCP fiable : acquittements, retransmission", rx: "fiab|acquitt|ack|retransm|ordre" },
+        { n: "UDP sans connexion, rapide, sans garantie", rx: "udp.{0,120}(sans connexion|rapide|leger|pas de garantie|non fiable)" },
+        { n: "exemples TCP (web, e-mail, fichiers)", rx: "web|http|mail|ftp|ssh|fichier" },
+        { n: "exemples UDP (DNS, DHCP, voix, vidéo, jeux)", rx: "dns|dhcp|voix|video|jeu|tftp|streaming" }],
+      corrige: "<p><b>TCP</b> est orienté connexion (3-way handshake SYN, SYN-ACK, ACK) et fiable : numéros de séquence, acquittements, retransmission, remise dans l'ordre. Il sert au web, aux e-mails, aux transferts de fichiers, à SSH. <b>UDP</b> est sans connexion, léger et rapide mais sans garantie : il sert au DNS, au DHCP, à TFTP, à la voix et à la vidéo en direct, aux jeux en ligne.</p>" }
+  ],
   "cejm-appliquee": [
     { q: "Qu'est-ce qu'une donnée à caractère personnel au sens du RGPD ? Donne des exemples.",
       notions: [

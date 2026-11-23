@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b3fe0">
+  <title>Modèles en couches, encapsulation et protocoles — Étude Facile</title>
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <link rel="stylesheet" href="../../assets/style.css">
+<style>
+#cours .schema { margin: var(--s3) 0; overflow-x: auto; }
+#cours .schema svg { display: block; width: 100%; height: auto; min-width: 520px; max-width: 760px; margin: 0 auto; font-family: var(--mono, monospace); }
+#cours .schema figcaption { font-size: .85rem; color: var(--discret); text-align: center; margin-top: 6px; }
+#cours .tp-corr { padding: var(--s2) var(--s3) var(--s3); }
+</style>
+</head>
+<body data-module="reseau" data-chapter="reseau-modeles-couches">
+
+<!-- ============ COURS ============ -->
+<article id="cours">
+<p>Ce chapitre explique comment des données traversent un réseau : chaque couche ajoute son enveloppe à l'émission et la retire à la réception. On compare ensuite le modèle théorique <b>OSI</b> (7 couches) et le modèle pratique <b>TCP/IP</b> (4 couches), qu'il faut savoir faire correspondre.</p>
+
+<h2>1. Le principe de l'encapsulation</h2>
+<h3>1.1 L'analogie de la poste</h3>
+<p>Une lettre part d'un immeuble de New York vers un appartement de Brest. On distingue deux « réseaux » :</p>
+<ul><li>le réseau <b>haut niveau</b>, celui des deux correspondants, qui échangent des informations dont ils connaissent le sens : c'est une communication <b>de bout en bout</b> ;</li>
+<li>le réseau <b>bas niveau</b>, la chaîne logistique de la poste (facteurs, centres de tri, camions, avions) : des communications <b>de proche en proche</b>, d'un maillon au suivant.</li></ul>
+<p>Les correspondants ne s'occupent pas du trajet de la lettre, et les postiers ne lisent pas son contenu. C'est exactement le principe des réseaux informatiques.</p>
+<h3>1.2 Le cas d'un réseau TCP/IP</h3>
+<p>Sur votre PC, Firefox demande une page à un serveur web de Wikipédia. On distingue cette fois trois niveaux :</p>
+<div class="tab-defil"><table><tr><th>Réseau</th><th>Qui communique ?</th><th>Identifiants</th><th>Type de communication</th></tr><tr><td>Applicatif</td><td>Les deux applications (Firefox ↔ serveur web)</td><td>Ports (ex. 15223 côté client, 80 côté serveur)</td><td>De <b>processus à processus</b>, de bout en bout</td></tr><tr><td>Logique</td><td>Les deux systèmes qui hébergent les applications</td><td>Adresses IP</td><td>De <b>système à système</b>, de bout en bout</td></tr><tr><td>Physique</td><td>Cartes réseau, switchs, routeurs, box, liaisons opérateurs</td><td>Adresses MAC, puis identifiants propres à chaque média</td><td>De <b>proche en proche</b>, tronçon par tronçon</td></tr></table></div>
+<ul><li>Les applications discutent sans se soucier du trajet : ce sont les systèmes et les équipements d'interconnexion qui forment des <b>paquets</b> pour faciliter l'aiguillage.</li>
+<li>Pour aller sur Internet, il faut des identifiants <b>uniques</b> : les <b>adresses IP publiques</b> (la box traduit l'adresse privée du PC en adresse publique).</li>
+<li>Les paquets sont glissés dans des <b>trames</b> qui dépendent du média traversé (Ethernet, fibre, Wi-Fi…). Les trames changent de format en route ; les paquets, eux, gardent toujours leur forme d'origine.</li></ul>
+<h3>1.3 Encapsulation à l'émission, décapsulation à la réception</h3>
+<figure class="schema"><svg viewBox="0 0 720 230" xmlns="http://www.w3.org/2000/svg" role="img"><defs><marker id="pt" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--encre)"/></marker></defs><text x="170" y="22" text-anchor="middle" font-size="14" font-weight="700" fill="var(--encre)">Émission : on encapsule ↓</text><rect x="20" y="34" width="300" height="38" rx="6" fill="#fff" stroke="var(--encre)" stroke-width="2"/><text x="170" y="53" text-anchor="middle" dominant-baseline="middle" font-size="13" fill="var(--encre)"></text><text x="30" y="50" font-size="13" font-weight="700" fill="var(--encre)">Application</text><text x="30" y="65" font-size="11.5" fill="var(--encre)">message (HTTP)</text><rect x="20" y="80" width="300" height="38" rx="6" fill="#e3f5e1" stroke="var(--encre)" stroke-width="2"/><text x="170" y="99" text-anchor="middle" dominant-baseline="middle" font-size="13" fill="var(--encre)"></text><text x="30" y="96" font-size="13" font-weight="700" fill="var(--encre)">Transport</text><text x="30" y="111" font-size="11.5" fill="var(--encre)">segment = en-tête TCP + message</text><rect x="20" y="126" width="300" height="38" rx="6" fill="#dfe6ff" stroke="var(--encre)" stroke-width="2"/><text x="170" y="145" text-anchor="middle" dominant-baseline="middle" font-size="13" fill="var(--encre)"></text><text x="30" y="142" font-size="13" font-weight="700" fill="var(--encre)">Internet</text><text x="30" y="157" font-size="11.5" fill="var(--encre)">paquet = en-tête IP + segment</text><rect x="20" y="172" width="300" height="38" rx="6" fill="#fde7c8" stroke="var(--encre)" stroke-width="2"/><text x="170" y="191" text-anchor="middle" dominant-baseline="middle" font-size="13" fill="var(--encre)"></text><text x="30" y="188" font-size="13" font-weight="700" fill="var(--encre)">Accès réseau</text><text x="30" y="203" font-size="11.5" fill="var(--encre)">trame = en-tête Ethernet + paquet</text><line x1="335" y1="40" x2="335" y2="210" stroke="var(--cobalt)" stroke-width="2" marker-end="url(#pt)"/><text x="540" y="22" text-anchor="middle" font-size="14" font-weight="700" fill="var(--encre)">Réception : on décapsule ↑</text><rect x="390" y="34" width="300" height="38" rx="6" fill="#fff" stroke="var(--encre)" stroke-width="2"/><text x="540" y="53" text-anchor="middle" dominant-baseline="middle" font-size="13" fill="var(--encre)"></text><text x="400" y="50" font-size="13" font-weight="700" fill="var(--encre)">Application</text><text x="400" y="65" font-size="11.5" fill="var(--encre)">message (HTTP)</text><rect x="390" y="80" width="300" height="38" rx="6" fill="#e3f5e1" stroke="var(--encre)" stroke-width="2"/><text x="540" y="99" text-anchor="middle" dominant-baseline="middle" font-size="13" fill="var(--encre)"></text><text x="400" y="96" font-size="13" font-weight="700" fill="var(--encre)">Transport</text><text x="400" y="111" font-size="11.5" fill="var(--encre)">segment = en-tête TCP + message</text><rect x="390" y="126" width="300" height="38" rx="6" fill="#dfe6ff" stroke="var(--encre)" stroke-width="2"/><text x="540" y="145" text-anchor="middle" dominant-baseline="middle" font-size="13" fill="var(--encre)"></text><text x="400" y="142" font-size="13" font-weight="700" fill="var(--encre)">Internet</text><text x="400" y="157" font-size="11.5" fill="var(--encre)">paquet = en-tête IP + segment</text><rect x="390" y="172" width="300" height="38" rx="6" fill="#fde7c8" stroke="var(--encre)" stroke-width="2"/><text x="540" y="191" text-anchor="middle" dominant-baseline="middle" font-size="13" fill="var(--encre)"></text><text x="400" y="188" font-size="13" font-weight="700" fill="var(--encre)">Accès réseau</text><text x="400" y="203" font-size="11.5" fill="var(--encre)">trame = en-tête Ethernet + paquet</text><line x1="375" y1="210" x2="375" y2="40" stroke="var(--cobalt)" stroke-width="2" marker-end="url(#pt)"/></svg><figcaption>Chaque couche ajoute son en-tête à l'émission et lit puis retire la sienne à la réception.</figcaption></figure>
+<p><b>À l'émission</b> (par exemple un PC qui envoie un formulaire web) :</p>
+<ol><li>L'utilisateur saisit une donnée.</li>
+<li>L'application la met en forme (requête HTTP) : c'est le <b>message</b>, transmis à la couche inférieure.</li>
+<li>La couche <b>Transport</b> (TCP) ajoute son en-tête, avec les <b>ports</b> source et destination : on obtient le <b>segment TCP</b>.</li>
+<li>La couche <b>Réseau / Internet</b> (IP) ajoute l'en-tête IP, avec les <b>adresses IP</b> source et destination : on obtient le <b>paquet IP</b>.</li>
+<li>La couche <b>Liaison de données</b> (Ethernet) ajoute l'en-tête Ethernet, avec les <b>adresses MAC</b> source et destination : on obtient la <b>trame Ethernet</b>.</li>
+<li>La couche <b>Physique</b> transforme les 0 et les 1 de la trame en signaux (électriques sur le cuivre, lumineux sur la fibre, radio en Wi-Fi). La trame quitte la carte réseau.</li></ol>
+<p><b>À la réception</b> (par exemple le serveur web) :</p>
+<ol><li>La carte réseau reçoit le signal.</li>
+<li>Elle le décode et obtient la <b>trame</b>.</li>
+<li>La couche Liaison vérifie que l'<b>adresse MAC</b> de destination est bien la sienne, puis extrait le <b>paquet IP</b>.</li>
+<li>La couche Réseau vérifie que l'<b>adresse IP</b> de destination est bien la sienne, puis extrait le <b>segment TCP</b>.</li>
+<li>La couche Transport regarde le <b>port</b> de destination : si une application écoute sur ce port, elle lui remet le <b>message</b> (ici la requête HTTP, pour Apache).</li>
+<li>L'application traite le message et prépare sa réponse, qui fera le chemin inverse jusqu'au client.</li></ol>
+
+<h2>2. Protocoles et modèles en couches</h2>
+<h3>2.1 Définitions</h3>
+<ul><li>Un <b>protocole</b> est un standard de communication : il fixe le <b>format</b> et l'<b>enchaînement</b> des messages échangés, et ce qu'il faut faire quand on les reçoit.</li>
+<li>Ces messages s'appellent des <b>PDU</b> (<i>Protocol Data Unit</i>, unités de données de protocole).</li>
+<li>Un <b>modèle en couches</b> est un cadre qui range les protocoles du plus proche des applications (en haut) au plus proche du matériel (en bas). Chaque couche rend un service à celle du dessus et s'appuie sur celle du dessous.</li></ul>
+<p>Il existe une jungle de protocoles, mais deux modèles servent de repères :</p>
+<ul><li>le modèle <b>pratique</b>, celui des protocoles utilisés tous les jours : <b>TCP/IP</b> (aussi appelé modèle DoD, du département de la Défense américain) ;</li>
+<li>le modèle <b>théorique</b>, sur lequel on calque tous les autres : le modèle <b>OSI</b> de l'ISO, en 7 couches.</li></ul>
+<p>Des systèmes d'exploitation ont eu leurs propres protocoles (Microsoft avec NetBIOS et SMB, Apple avec AppleTalk, Novell avec IPX/SPX). Aujourd'hui, tous s'appuient sur les mêmes couches basses : <b>IP</b> et <b>TCP/UDP</b>, ce qui leur permet de communiquer entre eux. D'autres familles ont des protocoles « haut niveau » spécialisés : réseaux industriels (Modbus, Profinet), téléphonie (SIP), véhicules (CAN).</p>
+<h3>2.2 Les grandes familles de protocoles</h3>
+<div class="tab-defil"><table><tr><th>Couche TCP/IP</th><th>Rôle</th><th>Exemples</th></tr><tr><td>Application</td><td>Au plus près des logiciels : services pour les <b>utilisateurs</b> (web, fichiers, e-mails) et pour les <b>systèmes</b> (configuration, noms de domaine)</td><td>HTTP, HTTPS, FTP, SMTP, IMAP, DNS, DHCP, SSH</td></tr><tr><td>Transport</td><td>Orienter les données vers la bonne application (identifiée par un <b>port</b>), découper et réassembler, cadencer l'envoi</td><td>TCP, UDP</td></tr><tr><td>Internet</td><td>Faire communiquer des systèmes de réseau en réseau grâce aux <b>adresses IP</b> ; orchestrer le trafic entre routeurs</td><td>IPv4, IPv6, ICMP (ping), protocoles de routage</td></tr><tr><td>Accès réseau</td><td>Passer de la machine au support (cuivre, fibre, radio) avec des adresses physiques uniques, les <b>adresses MAC</b></td><td>Ethernet 802.3, Wi-Fi 802.11</td></tr></table></div>
+<h3>2.3 Correspondance OSI ↔ TCP/IP</h3>
+<p>Documentations et jargon utilisent les deux modèles indifféremment (« un switch de niveau 2 », « la couche application ») : il faut savoir passer de l'un à l'autre.</p>
+<div class="tab-defil"><table><tr><th>N°</th><th>Couche OSI</th><th>Couche TCP/IP</th><th>Bloc de données (PDU)</th><th>Identifiant dans l'en-tête</th><th>Exemples de protocoles</th></tr><tr><td>7</td><td>Application</td><td>Application</td><td>Message (données)</td><td>Propre au protocole (URL, adresse e-mail…)</td><td>HTTP, DNS, DHCP, FTP, SMTP, SSH</td></tr><tr><td>6</td><td>Présentation</td><td>Application</td><td>Message</td><td></td><td>Formats, chiffrement (TLS)</td></tr><tr><td>5</td><td>Session</td><td>Application</td><td>Message</td><td></td><td>Ouverture et fermeture de sessions</td></tr><tr><td>4</td><td>Transport</td><td>Transport</td><td>Segment (TCP) / datagramme (UDP)</td><td><b>Port</b></td><td>TCP, UDP</td></tr><tr><td>3</td><td>Réseau</td><td>Internet</td><td>Paquet</td><td><b>Adresse IP</b></td><td>IPv4, IPv6, ICMP</td></tr><tr><td>2</td><td>Liaison de données</td><td>Accès réseau</td><td>Trame</td><td><b>Adresse MAC</b></td><td>Ethernet, Wi-Fi</td></tr><tr><td>1</td><td>Physique</td><td>Accès réseau</td><td>Bits (signal)</td><td>–</td><td>Câble RJ45, fibre, ondes radio</td></tr></table></div>
+<div class="box"><b>Moyen mnémotechnique</b><p>De la couche 1 à la 7 : « <b>P</b>our <b>L</b>e <b>R</b>éseau, <b>T</b>out <b>S</b>e <b>P</b>asse <b>A</b>utomatiquement » (Physique, Liaison, Réseau, Transport, Session, Présentation, Application).</p></div>
+
+<h2>3. Les données à travers les équipements</h2>
+<h3>3.1 Ce que voit chaque équipement</h3>
+<ul><li><b>Hub</b> (couche 1) : recopie les signaux, ne perçoit ni trame ni paquet.</li>
+<li><b>Switch</b> (couche 2) : lit les adresses MAC des trames ; il est transparent pour les paquets IP.</li>
+<li><b>Routeur</b> (couche 3) : lit les adresses MAC (la trame lui est adressée), puis l'adresse IP de destination du paquet pour choisir la route ; il remet le paquet dans une <b>nouvelle trame</b>.</li></ul>
+<h3>3.2 Itinéraire d'un message à travers Internet</h3>
+<p>Suivons une requête de Firefox (port 15223) vers un serveur web (port 80) :</p>
+<ol><li><b>PC client</b> : encapsulation complète (message → segment → paquet → trame), envoi vers la passerelle.</li>
+<li><b>Switch du LAN</b> : décapsule jusqu'à la trame (couche 2), lit l'adresse MAC de destination et commute vers le port de la box.</li>
+<li><b>Box / routeur</b> : décapsule jusqu'au paquet (couche 3), consulte sa table de routage, traduit l'adresse privée en adresse publique (NAT), ré-encapsule dans une trame adaptée à la fibre.</li>
+<li><b>Routeurs des opérateurs</b> : à chaque saut, trame retirée, paquet lu (couche 3), nouvelle trame. L'adresse IP de destination ne change pas.</li>
+<li><b>Serveur web</b> : décapsulation complète jusqu'au message HTTP, remis au processus qui écoute sur le port 80.</li></ol>
+<div class="box retenir"><b>À retenir</b><ul>
+<li>Émission : on descend les couches en ajoutant des en-têtes ; réception : on les remonte en les retirant.</li>
+<li>Segment = port, paquet = adresse IP, trame = adresse MAC.</li>
+<li>OSI : 7 couches théoriques. TCP/IP : 4 couches pratiques (Application = OSI 5-6-7, Transport = 4, Internet = 3, Accès réseau = 1-2).</li>
+<li>Un switch décapsule jusqu'à la couche 2, un routeur jusqu'à la couche 3, un hôte jusqu'à la couche 7.</li></ul></div>
+<div class="box retenir"><b>Passe à la pratique</b><p>Suivre une trame de routeur en routeur : missions du <a href="labo-reseau.html#m=L2-1">labo réseau</a>, avec des valeurs nouvelles à chaque essai et une correction pas à pas.</p></div>
+</article>
+
+<!-- ============ EXERCICES ============ -->
+<script>
+window.EF_EXERCICES = [
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Combien de couches compte le modèle OSI ?",
+  "options": [
+   "7",
+   "4",
+   "5",
+   "3"
+  ],
+  "answer": 0,
+  "explication": "Physique, Liaison, Réseau, Transport, Session, Présentation, Application."
+ },
+ {
+  "type": "qcm",
+  "niveau": "facile",
+  "q": "Combien de couches compte le modèle TCP/IP ?",
+  "options": [
+   "4",
+   "7",
+   "2",
+   "5"
+  ],
+  "answer": 0,
+  "explication": "Accès réseau, Internet, Transport, Application."
+ },
+ {
+  "type": "associer",
+  "niveau": "moyen",
+  "q": "Associe chaque couche OSI à son numéro.",
+  "paires": [
+   [
+    "Physique",
+    "1"
+   ],
+   [
+    "Liaison de données",
+    "2"
+   ],
+   [
+    "Réseau",
+    "3"
+   ],
+   [
+    "Transport",
+    "4"
+   ]
+  ],
+  "explication": "Les couches 5, 6 et 7 sont Session, Présentation et Application."
+ },
+ {
+  "type": "associer",
+  "niveau": "moyen",
+  "q": "Associe chaque protocole à sa couche TCP/IP.",
+  "paires": [
+   [
+    "HTTP",
+    "Application"
+   ],
+   [
+    "TCP",
+    "Transport"
+   ],
+   [
+    "IP",
+    "Internet"
+   ],
+   [
+    "Ethernet",
+    "Accès réseau"
+   ]
+  ],
+  "explication": "Application → Transport → Internet → Accès réseau, du haut vers le bas."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Quel bloc de données manipule la couche Réseau (3) ?",
+  "options": [
+   "Le paquet",
+   "La trame",
+   "Le segment",
+   "Le bit"
+  ],
+  "answer": 0,
+  "explication": "Couche 3 = paquet IP ; couche 2 = trame ; couche 4 = segment."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "À l'émission, quelle couche ajoute les adresses IP source et destination ?",
+  "options": [
+   "La couche Réseau / Internet",
+   "La couche Transport",
+   "La couche Liaison",
+   "La couche Application"
+  ],
+  "answer": 0,
+  "explication": "L'en-tête IP est ajouté au segment pour former le paquet."
+ },
+ {
+  "type": "vf",
+  "niveau": "moyen",
+  "q": "À la réception, la couche Liaison vérifie l'adresse IP de destination.",
+  "answer": false,
+  "explication": "La couche Liaison vérifie l'adresse MAC. C'est la couche Réseau qui vérifie l'adresse IP."
+ },
+ {
+  "type": "saisie",
+  "niveau": "facile",
+  "q": "Que signifie le sigle PDU ? (en anglais)",
+  "answers": [
+   "Protocol Data Unit"
+  ],
+  "explication": "Protocol Data Unit : l'unité de données d'un protocole (trame, paquet, segment…)."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "La couche Application du modèle TCP/IP correspond à quelles couches OSI ?",
+  "options": [
+   "5, 6 et 7",
+   "4 et 5",
+   "6 et 7",
+   "7 seulement"
+  ],
+  "answer": 0,
+  "explication": "Session, Présentation et Application sont regroupées dans la couche Application de TCP/IP."
+ },
+ {
+  "type": "qcm",
+  "niveau": "moyen",
+  "q": "Dans l'analogie postale, les centres de tri et les camions représentent…",
+  "options": [
+   "les communications de proche en proche (bas niveau)",
+   "les applications",
+   "les adresses IP",
+   "le chiffrement"
+  ],
+  "answer": 0,
+  "explication": "Comme les switchs et les routeurs, ils transportent sans lire le contenu."
+ },
+ {
+  "type": "vf",
+  "niveau": "difficile",
+  "q": "Quand un paquet passe de la fibre à l'Ethernet, sa trame change mais le paquet garde sa forme.",
+  "answer": true,
+  "explication": "La trame dépend du média ; le paquet IP, lui, reste le même de bout en bout."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Jusqu'à quelle couche un switch décapsule-t-il les données pour les acheminer ?",
+  "options": [
+   "Couche 2",
+   "Couche 1",
+   "Couche 3",
+   "Couche 4"
+  ],
+  "answer": 0,
+  "explication": "Il lit l'adresse MAC de la trame (couche 2) ; il ne lit pas l'adresse IP."
+ },
+ {
+  "type": "qcm",
+  "niveau": "difficile",
+  "q": "Quel identifiant permet au système récepteur de remettre le message à la bonne application ?",
+  "options": [
+   "Le port de destination",
+   "L'adresse MAC source",
+   "L'adresse IP source",
+   "Le numéro de VLAN"
+  ],
+  "answer": 0,
+  "explication": "Le port (couche transport) désigne l'application, par exemple 80 pour un serveur web."
+ }
+];
+</script>
+<script src="../../data/modules.js"></script>
+<script src="../../assets/app.js"></script>
+<script src="../../assets/chapter.js"></script>
+</body>
+</html>
